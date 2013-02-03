@@ -26,50 +26,38 @@ void Polyhedron::poly_cube(double h, double x, double y, double z) {
 
 	facet = new Facet[6];
 
-	int index[13];
-	for (int i = 4; i < 13; ++i)
-		index[i] = -1;
+	int index[4];
+	Plane plane;
 
-	index[0] = 0;
-	index[1] = 3;
-	index[2] = 2;
-	index[3] = 1;
-	facet[0] = Facet(index, 4, Plane(Vector3d(0., 0., -1.), z - 0.5 * h));
+	index[0] = 0; index[1] = 3; index[2] = 2; index[3] = 1;
+	plane = Plane(Vector3d(0., 0., -1.), z - 0.5 * h);
+	facet[0] = Facet(0, 4, plane, index, &(*this), false);
+	
+	index[0] = 0; index[1] = 1; index[2] = 5; index[3] = 4;
+	plane = Plane(Vector3d(0., -1., 0.), y - 0.5 * h);
+	facet[0] = Facet(1, 4, plane, index, &(*this), false);
 
-	index[0] = 0;
-	index[1] = 1;
-	index[2] = 5;
-	index[3] = 4;
-	facet[1] = Facet(index, 4, Plane(Vector3d(0., -1., 0.), y - 0.5 * h));
+	index[0] = 1; index[1] = 2; index[2] = 6; index[3] = 5;
+	plane = Plane(Vector3d(1., 0., 0.), -x - 0.5 * h);
+	facet[0] = Facet(2, 4, plane, index, &(*this), false);
 
-	index[0] = 1;
-	index[1] = 2;
-	index[2] = 6;
-	index[3] = 5;
-	facet[2] = Facet(index, 4, Plane(Vector3d(1., 0., 0.), -x - 0.5 * h));
+	index[0] = 2; index[1] = 3; index[2] = 7; index[3] = 6;
+	plane = Plane(Vector3d(0., 1., 0.), -y - 0.5 * h);
+	facet[0] = Facet(3, 4, plane, index, &(*this), false);
 
-	index[0] = 2;
-	index[1] = 3;
-	index[2] = 7;
-	index[3] = 6;
-	facet[3] = Facet(index, 4, Plane(Vector3d(0., 1., 0.), -y - 0.5 * h));
+	index[0] = 0; index[1] = 4; index[2] = 7; index[3] = 3;
+	plane = Plane(Vector3d(-1., 0., 0.), -x + 0.5 * h);
+	facet[0] = Facet(4, 4, plane, index, &(*this), false);
 
-	index[0] = 0;
-	index[1] = 4;
-	index[2] = 7;
-	index[3] = 3;
-	facet[4] = Facet(index, 4, Plane(Vector3d(-1., 0., 0.), -x + 0.5 * h));
-
-	index[0] = 4;
-	index[1] = 5;
-	index[2] = 6;
-	index[3] = 7;
-	facet[5] = Facet(index, 4, Plane(Vector3d(0., 0., 1.), -z - 0.5 * h));
+	index[0] = 4; index[1] = 5; index[2] = 6; index[3] = 7;
+	plane = Plane(Vector3d(0., 0., 1.), -z - 0.5 * h);
+	facet[0] = Facet(5, 4, plane, index, &(*this), false);
 
 	numv = 8;
 	numf = 6;
 
-	//	printf("poly_cube: end\n");
+//	for(int i = 0; i < 6; ++i)
+//		facet[i].set_poly(this);
 }
 
 void Polyhedron::poly_pyramid(int n, double h, double r) {
@@ -89,9 +77,7 @@ void Polyhedron::poly_pyramid(int n, double h, double r) {
 	facet = new Facet[n + 1];
 
 	int *index;
-	index = new int[11];
-	for (int i = 3; i < 11; ++i)
-		index[i] = -1;
+	index = new int[3];
 
 	Plane plane;
 
@@ -100,20 +86,16 @@ void Polyhedron::poly_pyramid(int n, double h, double r) {
 		index[1] = i;
 		index[2] = (i + 1) % n;
 		plane = Plane(vertex[index[0]], vertex[index[1]], vertex[index[2]]);
-		facet[i] = Facet(index, 3, plane);
+		facet[i] = Facet(i, 3, plane, index, this, false);
 	}
 
-//	if(index)
-//		delete[] index;
-	index = new int[3 * n + 1];
+	index = new int[n];
 
 	for (int i = 0; i < n; ++i)
 		index[i] = n - 1 - i;
-	for (int i = n; i < 3 * n + 1; ++i)
-		index[i] = -1;
-
+	
 	plane = Plane(Vector3d(0., 0., -1.), 0.);
-	facet[n] = Facet(index, n, plane);
+	facet[n] = Facet(n, n, plane, index, this, false);
 
 	numv = numf = n + 1;
 
@@ -141,9 +123,7 @@ void Polyhedron::poly_prism(int n, double h, double r) {
 	facet = new Facet[n + 2];
 
 	int *index;
-	index = new int[13];
-	for (int i = 4; i < 13; ++i)
-		index[i] = -1;
+	index = new int[4];
 
 	Plane plane;
 
@@ -153,28 +133,22 @@ void Polyhedron::poly_prism(int n, double h, double r) {
 		index[2] = index[1] + n;
 		index[3] = index[0] + n;
 		plane = Plane(vertex[index[0]], vertex[index[1]], vertex[index[2]]);
-		facet[i] = Facet(index, 4, plane);
+		facet[i] = Facet(i, 4, plane, index, this, false);
 	}
 
-//	if(index)
-//		delete[] index;
-	index = new int[3 * n + 1];
+	index = new int[n];
 
 	for (int i = 0; i < n; ++i)
 		index[i] = n - 1 - i;
-	for (int i = n; i < 3 * n + 1; ++i)
-		index[i] = -1;
-
+	
 	plane = Plane(Vector3d(0., 0., -1.), 0.);
-	facet[n] = Facet(index, n, plane);
+	facet[n] = Facet(n, n, plane, index, this, false);
 
 	for (int i = 0; i < n; ++i)
 		index[i] = i + n;
-	for (int i = n; i < 3 * n + 1; ++i)
-		index[i] = -1;
-
+	
 	plane = Plane(Vector3d(0., 0., 1.), - h);
-	facet[n + 1] = Facet(index, n, plane);
+	facet[n + 1] = Facet(n + 1, n, plane, index, this, false);
 
 	numv = 2 * n;
 	numf = n + 2;

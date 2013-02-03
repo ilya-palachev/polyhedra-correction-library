@@ -3,48 +3,68 @@
 #include <string.h>
 #include <math.h>
 
-#include "VertexInfo.h"
+#include "Polyhedron.h"
 
-#define DEFAULT_NF 10
 
-VertexInfo::VertexInfo():
-		index(new int[2*DEFAULT_NF + 1]),
-		nf(DEFAULT_NF)
-{
+VertexInfo::VertexInfo() :
+index(NULL),
+nf(0) {
 }
 
-VertexInfo::VertexInfo(const int *index1, const int nf1):
-		index(),
-		nf(nf1)
-{
-	if(!index1)
-	{
-		fprintf(stderr, "VertexInfo::VertexInfo. Error. index1 = NULL\n");
+VertexInfo::VertexInfo(
+		const int id_orig,
+		const int nf_orig,
+		const Vector3d vector_orig,
+		const int* index_orig,
+		Polyhedron* poly_orig) :
+id(id_orig),
+nf(nf_orig),
+vector(vector_orig),
+poly(poly_orig) {
+
+	if (!index_orig) {
+		fprintf(stdout, "VertexInfo::VertexInfo. Error. index1 = NULL\n");
 	}
-	if(nf1 < 3)
-	{
-		fprintf(stderr, "VertexInfo::VertexInfo. Error. nf1 < 3\n");
+	if (nf_orig < 3) {
+		fprintf(stdout, "VertexInfo::VertexInfo. Error. nf1 < 3\n");
 	}
-	index = new int[2*nf + 1];
-	for(int i = 0; i < 2*nf + 1; ++i)
-		index[i] = index1[i];
+	index = new int[2 * nf + 1];
+	for (int i = 0; i < 2 * nf + 1; ++i)
+		index[i] = index_orig[i];
 }
 
-VertexInfo::~VertexInfo()
-{
-	if(index)
+VertexInfo::VertexInfo(
+		const int id_orig,
+		const Vector3d vector_orig,  
+		Polyhedron* poly_orig):
+id(id_orig),
+nf(0),
+vector(vector_orig),
+index(NULL),
+poly(poly_orig) {}
+
+VertexInfo::~VertexInfo() {
+	
+	if (index != NULL && nf != 0) {
 		delete[] index;
+	}
+	index = NULL;
+	nf = 0;
 }
 
-VertexInfo& VertexInfo::operator =(const VertexInfo& vertexinfo1)
-{
+VertexInfo& VertexInfo::operator =(const VertexInfo& orig) {
 	int i;
 
-	nf = vertexinfo1.nf;
-	if(index) delete[] index;
-	index = new int[2*nf + 1];
-	for(i = 0; i < 2*nf + 1; ++i)
-		index[i] = vertexinfo1.index[i];
+	this->id = orig.id;
+	this->vector = orig.vector;
+	this->poly = orig.poly;
+	this->nf = orig.nf;
 
+	if (nf > 0) {
+		if (index) delete[] index;
+		index = new int[2 * nf + 1];
+		for (i = 0; i < 2 * nf + 1; ++i)
+			index[i] = orig.index[i];
+	}
 	return *this;
 }

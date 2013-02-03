@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=Polyhedron_join_facets_1
+PROJECTNAME=Polyhedron_join_facets_2
 
 # Active Configuration
 DEFAULTCONF=Debug

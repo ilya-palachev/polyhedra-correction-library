@@ -1,100 +1,70 @@
 #include <stdio.h>
 
-
-int min_int(int a, int b)
-{
+int min_int(int a, int b) {
 	return a > b ? b : a;
 }
 
-int max_int(int a, int b)
-{
+int max_int(int a, int b) {
 	return a > b ? a : b;
 }
 
-void swap_int(int& a, int& b)
-{
+void swap_int(int& a, int& b) {
 	int tmp = a;
 	a = b;
 	b = tmp;
 }
 
-void cut_int(int* array, int len, int pos)
-{
+void cut_int(int* array, int len, int pos) {
 	int i;
-	if(len < 1 || pos < 0 || pos > len-1)
-	{
+	if (len < 1 || pos < 0 || pos > len - 1) {
 		printf("cut_int: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}
-	for(i = pos; i < len; ++i)
-		if(i < len - 1)
+	for (i = pos; i < len; ++i)
+		if (i < len - 1)
 			array[i] = array[i + 1];
 }
 
-void insert_int(int* array, int len, int pos, int val)
-{
+void insert_int(int* array, int len, int pos, int val) {
 	int i;
 
-	if(len < 0 || pos < 0 || pos > len)
-	{
+	if (len < 0 || pos < 0 || pos > len) {
 		printf("insert_int: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}
 
-	//Added 2010 - 12 - 02
-	//Динамическое выделение памяти
-	//TODO: Что делать с утечкой памяти?
-
-//	int size = sizeof(array) / sizeof(int);
-//	if(size < len)
-//	{
-//		int* array0 = new int[len];
-//		for(i = len; i > pos; --i)
-//			array0[i] = array[i - 1];
-//		array0[pos] = val;
-//		for(i = pos - 1; i >=0; --i)
-//			array0[i] = array[i];
-//		array = array0;
-//	}
-	for(i = len; i > pos; --i)
+	for (i = len; i > pos; --i)
 		array[i] = array[i - 1];
 	array[pos] = val;
 }
 
-void insert_double(double* array, int len, int pos, double val)
-{
+void insert_double(double* array, int len, int pos, double val) {
 	int i;
-	if(len < 0 || pos < 0 || pos > len)
-	{
+	if (len < 0 || pos < 0 || pos > len) {
 		printf("insert_double: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}
-	for(i = len; i > pos; --i)
+	for (i = len; i > pos; --i)
 		array[i] = array[i - 1];
 	array[pos] = val;
 }
 
-void insert_binary(int n, int* edge_list, double* a, int edge0, int edge1, double x)
-{
+void insert_binary(int n, int* edge0, int* edge1, double* scalar_mult, int v0, int v1, double sm) {
 	int first = 0; // Первый элемент в массиве
 	int last = n; // Последний элемент в массиве
 
-	while(first < last)
-	{
-		int mid = ( first + last ) / 2;
-		if(x <= a[mid])
-		{
+	while (first < last) {
+		int mid = (first + last) / 2;
+		if (sm <= scalar_mult[mid]) {
 			last = mid;
-		}
-		else
-		{
+		} else {
 			first = mid + 1;
 		}
 	}
 
-	insert_double(a, n, last, x);
-	insert_int(edge_list, 2*n, 2*last, edge0);
-	insert_int(edge_list, 2*n + 1, 2*last + 1, edge1);
+	insert_double(scalar_mult, n, last, sm);
+	insert_int(edge0, n, last, v0);
+	insert_int(edge1, n, last, v1);
 
 }
 

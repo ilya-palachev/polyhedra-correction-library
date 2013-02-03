@@ -5,6 +5,35 @@
 
 #include "Polyhedron.h"
 
+void Polyhedron::my_fprint(const char* filename) {
+
+	FILE* file;
+	file = (FILE*)fopen(filename, "w");
+	if (!file) {
+		fprintf(stdout, "Polyhedron::fprint_default_0. Error. Cannot open file %s\n",
+				  filename);
+		return;
+	}
+	this->my_fprint(file);
+	fclose(file);
+}
+
+void Polyhedron::my_fprint(FILE* file) {
+	int i;
+	fprintf(file, "Polyhedron:\n");
+	fprintf(file, "numv = %d\nnumf = %d\n", numv, numf);
+	for(i = 0; i < numv; ++i)
+		fprintf(file, "   vertex[%d] = (%lf, %lf, %lf)\n",
+				i, vertex[i].x, vertex[i].y, vertex[i].z);
+	for(i = 0; i < numf; ++i)
+		facet[i].my_fprint_all(file);
+	if(vertexinfo != NULL) {
+		for(i = 0; i < numf; ++i)
+			vertexinfo[i].my_fprint_all(file);
+	}
+}
+
+
 /////////////////////////////////////
 // Format:
 //
@@ -26,7 +55,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 	file = (FILE*)fopen(filename, "rt");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fscan_default_0. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fscan_default_0. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -34,7 +63,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 	if(fscanf(file, "%d", &i) != 1 ||
 		fscanf(file, "%d", &j) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_default_0. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_default_0. Error. Invalid file\n");
 		fclose(file);
 		return;
 	}
@@ -51,9 +80,9 @@ void Polyhedron::fscan_default_0(const char *filename)
 			(fscanf(file, "%lf", &yy) != 1) ||
 			(fscanf(file, "%lf", &zz) != 1))
 		{
-			fprintf(stderr, "Polyhedron::fscan_default_0. Error. Invalid file. v %d\n",
+			fprintf(stdout, "Polyhedron::fscan_default_0. Error. Invalid file. v %d\n",
 					  i);
-			fprintf(stderr, "xx = %lg, yy = %lg, zz = %lg\n", xx, yy, zz);
+			fprintf(stdout, "xx = %lg, yy = %lg, zz = %lg\n", xx, yy, zz);
 			fclose(file); return;
 		}
 		vertex[i].x = xx; vertex[i].y = yy; vertex[i].z = zz;
@@ -68,7 +97,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 			fscanf(file, "%lf", &d) != 1
 		)
 		{
-			fprintf(stderr, "Polyhedron::fscan_default_0. Error. Invalid file. f %d\n",
+			fprintf(stdout, "Polyhedron::fscan_default_0. Error. Invalid file. f %d\n",
 					  i);
 			fclose(file); return;
 		}
@@ -78,12 +107,12 @@ void Polyhedron::fscan_default_0(const char *filename)
 		{
 			if(fscanf(file, "%d", index + j) != 1)
 			{
-				fprintf(stderr, "Polyhedron::fscan_default_0. Error. Invalid file. f%d v%d\n",
+				fprintf(stdout, "Polyhedron::fscan_default_0. Error. Invalid file. f%d v%d\n",
 						  i, j);
 				fclose(file); return;
 			}
 		}
-		facet[i] = Facet(index, nv, plane);
+		facet[i] = Facet(i, nv, plane, index, this, false);
 		delete[] index;
 	}
 	fclose(file);
@@ -110,7 +139,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 	file = (FILE*)fopen(filename, "rt");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fscan_default_1. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fscan_default_1. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -118,7 +147,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 	if(fscanf(file, "%d", &i) != 1 ||
 		fscanf(file, "%d", &j) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_default_1. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_default_1. Error. Invalid file\n");
 		fclose(file); return;
 	}
 
@@ -134,7 +163,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 			fscanf(file, "%lf", &yy) != 1 ||
 			fscanf(file, "%lf", &zz) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_default_1. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_default_1. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		vertex[ii].x = xx; vertex[ii].y = yy; vertex[ii].z = zz;
@@ -150,7 +179,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 			fscanf(file, "%lf", &d) != 1
 		)
 		{
-			fprintf(stderr, "Polyhedron::fscan_default_1. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_default_1. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -159,11 +188,11 @@ void Polyhedron::fscan_default_1(const char *filename)
 		{
 			if(fscanf(file, "%d", index + j) != 1)
 			{
-				fprintf(stderr, "Polyhedron::fscan_default_1. Error. Invalid file\n");
+				fprintf(stdout, "Polyhedron::fscan_default_1. Error. Invalid file\n");
 				fclose(file); return;
 			}
 		}
-		facet[ii] = Facet(index, nv, plane);
+		facet[ii] = Facet(ii, nv, plane, index, this, false);
 		delete[] index;
 	}
 	fclose(file);
@@ -199,13 +228,13 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	for(i = 0; i < 4; ++i)
 		if(fscanf(file, "%s", tmp) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
 			fclose(file); return;
 		}
 
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fscan_default_1_1. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fscan_default_1_1. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -213,13 +242,13 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	if(fscanf(file, "%d", &i) != 1 ||
 		fscanf(file, "%d", &j) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
 		fclose(file); return;
 	}
 
 	if(fscanf(file, "%s", tmp) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
 		fclose(file); return;
 	}
 
@@ -235,7 +264,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 			fscanf(file, "%lf", &yy) != 1 ||
 			fscanf(file, "%lf", &zz) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		vertex[ii].x = xx; vertex[ii].y = yy; vertex[ii].z = zz;
@@ -243,7 +272,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 
 	if(fscanf(file, "%s", tmp) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
 		fclose(file); return;
 	}
 
@@ -258,7 +287,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 			fscanf(file, "%lf", &d) != 1
 		)
 		{
-			fprintf(stderr, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -267,11 +296,11 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 		{
 			if(fscanf(file, "%d", index + j) != 1)
 			{
-				fprintf(stderr, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
+				fprintf(stdout, "Polyhedron::fscan_default_1_1. Error. Invalid file\n");
 				fclose(file); return;
 			}
 		}
-		facet[ii] = Facet(index, nv, plane);
+		facet[ii] = Facet(ii, nv, plane, index, this, false);
 		delete[] index;
 	}
 	delete[] tmp;
@@ -301,7 +330,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 	file = (FILE*)fopen(filename, "rt");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fscan_my_format. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fscan_my_format. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -309,7 +338,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 	if(fscanf(file, "%d", &i) != 1 ||
 		fscanf(file, "%d", &j) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_my_format. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_my_format. Error. Invalid file\n");
 		fclose(file); return;
 	}
 
@@ -324,7 +353,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 			fscanf(file, "%lf", &yy) != 1 ||
 			fscanf(file, "%lf", &zz) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_my_format. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_my_format. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		vertex[i].x = xx; vertex[i].y = yy; vertex[i].z = zz;
@@ -339,7 +368,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 			fscanf(file, "%lf", &d) != 1
 		)
 		{
-			fprintf(stderr, "Polyhedron::fscan_my_format. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_my_format. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -348,11 +377,11 @@ void Polyhedron::fscan_my_format(const char *filename)
 		{
 			if(fscanf(file, "%d", index + j) != 1)
 			{
-				fprintf(stderr, "Polyhedron::fscan_my_format. Error. Invalid file\n");
+				fprintf(stdout, "Polyhedron::fscan_my_format. Error. Invalid file\n");
 				fclose(file); return;
 			}
 		}
-		facet[i] = Facet(index, nv, plane);
+		facet[i] = Facet(i, nv, plane, index, this, false);
 		delete[] index;
 	}
 	for(i = 0; i < numv; ++i)
@@ -360,7 +389,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 		if(fscanf(file, "%d", &nf) != 1 ||
 			nf < 3)
 		{
-			fprintf(stderr, "Polyhedron::fscan_my_format. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_my_format. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		index = new int[2*nf + 1];
@@ -368,11 +397,11 @@ void Polyhedron::fscan_my_format(const char *filename)
 		{
 			if(fscanf(file, "%d", index + j) != 1)
 			{
-				fprintf(stderr, "Polyhedron::fscan_my_format. Error. Invalid file\n");
+				fprintf(stdout, "Polyhedron::fscan_my_format. Error. Invalid file\n");
 				fclose(file); return;
 			}
 		}
-		vertexinfo[i] = VertexInfo(index, nf);
+		vertexinfo[i] = VertexInfo(i, nf, vertex[i], index, this);
 		delete[] index;
 	}
 	fclose(file);
@@ -409,7 +438,7 @@ void Polyhedron::fscan_ply(const char *filename)
 	file = (FILE*)fopen(filename, "rt");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fscan_ply. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fscan_ply. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -419,13 +448,13 @@ void Polyhedron::fscan_ply(const char *filename)
 	for(i = 0; i < 11; ++i)
 		if(fscanf(file, "%s", tmp) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 			fclose(file); return;
 		}
 
 	if(fscanf(file, "%d", &nv) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 		fclose(file); return;
 	}
 	numv = nv;
@@ -433,13 +462,13 @@ void Polyhedron::fscan_ply(const char *filename)
 	for(i = 0; i < 11; ++i)
 		if(fscanf(file, "%s", tmp) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 			fclose(file); return;
 		}
 
 	if(fscanf(file, "%d", &nv) != 1)
 	{
-		fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+		fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 		fclose(file); return;
 	}
 	numf = nv;
@@ -453,7 +482,7 @@ void Polyhedron::fscan_ply(const char *filename)
 			fscanf(file, "%lf", &yy) != 1 ||
 			fscanf(file, "%lf", &zz) != 1)
 		{
-			fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		vertex[i].x = xx; vertex[i].y = yy; vertex[i].z = zz;
@@ -463,7 +492,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		if(fscanf(file, "%d", &nv) != 1 ||
 			nv < 3)
 		{
-			fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+			fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 			fclose(file); return;
 		}
 		index = new int[3*nv + 1];
@@ -471,12 +500,12 @@ void Polyhedron::fscan_ply(const char *filename)
 		{
 			if(fscanf(file, "%d", index + j) != 1)
 			{
-				fprintf(stderr, "Polyhedron::fscan_ply. Error. Invalid file\n");
+				fprintf(stdout, "Polyhedron::fscan_ply. Error. Invalid file\n");
 				fclose(file); return;
 			}
 		}
 		plane = Plane(vertex[index[0]], vertex[index[1]], vertex[index[2]]);
-		facet[i] = Facet(index, nv, plane);
+		facet[i] = Facet(i, nv, plane, index, this, false);
 		delete[] index;
 	}
 	fclose(file);
@@ -491,7 +520,7 @@ void Polyhedron::fprint_default_0(const char *filename)
 	file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fprint_default_0. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fprint_default_0. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -502,17 +531,8 @@ void Polyhedron::fprint_default_0(const char *filename)
 		fprintf(file, "%.16lf %.16lf %.16lf\n", vertex[i].x, vertex[i].y, vertex[i].z);
 
 	for(i = 0; i < numf; ++i)
-	{
-		fprintf(file, "%d %.16lf %.16lf %.16lf %.16lf",
-				  facet[i].nv,
-				  facet[i].plane.norm.x,
-				  facet[i].plane.norm.y,
-				  facet[i].plane.norm.z,
-				  facet[i].plane.dist);
-		for(j = 0; j < facet[i].nv; ++j)
-			fprintf(file, " %d", facet[i].index[j]);
-		fprintf(file, "\n");
-	}
+		facet[i].fprint_default_0(file);
+
 	fclose(file);
 }
 
@@ -524,7 +544,7 @@ void Polyhedron::fprint_default_1(const char *filename)
 	file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fprint_default_1. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fprint_default_1. Error. Cannot open file %s\n",
 				  filename);
 		fclose(file); return;
 	}
@@ -534,18 +554,7 @@ void Polyhedron::fprint_default_1(const char *filename)
 		fprintf(file, "%d %.16lf %.16lf %.16lf\n", i, vertex[i].x, vertex[i].y, vertex[i].z);
 
 	for(i = 0; i < numf; ++i)
-	{
-		fprintf(file, "%d %d %.16lf %.16lf %.16lf %.16lf",
-				  i,
-				  facet[i].nv,
-				  facet[i].plane.norm.x,
-				  facet[i].plane.norm.y,
-				  facet[i].plane.norm.z,
-				  facet[i].plane.dist);
-		for(j = 0; j < facet[i].nv; ++j)
-			fprintf(file, " %d", facet[i].index[j]);
-		fprintf(file, "\n");
-	}
+		facet[i].fprint_default_1(file);
 	fclose(file);
 }
 
@@ -557,7 +566,7 @@ void Polyhedron::fprint_my_format(const char *filename)
 	file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fprint_my_format. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fprint_my_format. Error. Cannot open file %s\n",
 				  filename);
 		fclose(file); return;
 	}
@@ -567,25 +576,10 @@ void Polyhedron::fprint_my_format(const char *filename)
 		fprintf(file, "%.16lf %.16lf %.16lf\n", vertex[i].x, vertex[i].y, vertex[i].z);
 
 	for(i = 0; i < numf; ++i)
-	{
-		fprintf(file, "%d %.16lf %.16lf %.16lf %.16lf",
-				  facet[i].nv,
-				  facet[i].plane.norm.x,
-				  facet[i].plane.norm.y,
-				  facet[i].plane.norm.z,
-				  facet[i].plane.dist);
-		for(j = 0; j < 3*facet[i].nv + 1; ++j)
-			fprintf(file, " %d", facet[i].index[j]);
-		fprintf(file, "\n");
-	}
+		facet[i].fprint_my_format(file);
 	fprintf(file, "\n\n\n");
 	for(i = 0; i < numv; ++i)
-	{
-		fprintf(file, "%d ", vertexinfo[i].nf);
-		for(j = 0; j < 2*vertexinfo[i].nf + 1; ++j)
-			fprintf(file, " %d", vertexinfo[i].index[j]);
-		fprintf(file, "\n");
-	}
+		vertexinfo[i];
 
 	fclose(file);
 }
@@ -601,7 +595,7 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fscan_ply. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fscan_ply. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -613,7 +607,7 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 
 	numv_new = 0;
 	for(i = 0; i < numf; ++i)
-		numv_new += facet[i].nv;
+		numv_new += facet[i].get_nv();
 
 	fprintf(file, "ply\n");
 	fprintf(file, "format ascii 1.0\n");
@@ -630,23 +624,10 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	fprintf(file, "end_header\n");
 
 	for(i = 0; i < numf; ++i)
-	{
-		for(j = 0; j < facet[i].nv; ++j)
-		{
-			v_id = facet[i].index[j];
-			fprintf(file, "%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf\n",
-					  vertex[v_id].x, vertex[v_id].y, vertex[v_id].z,
-					  facet[i].plane.norm.x, facet[i].plane.norm.y, facet[i].plane.norm.z);
-		}
-	}
+		facet[i].fprint_ply_vertex(file);
 
 	for(i = 0; i < numf; ++i)
-	{
-		fprintf(file, "%d",facet[i].nv);
-		for(j = 0; j < facet[i].nv; ++j)
-			fprintf(file, " %d", facet[i].index[j]);
-		fprintf(file, "\n");
-	}
+		facet[i].fprint_ply_vertex(file);
 	fclose(file);
 }
 
@@ -671,7 +652,7 @@ void Polyhedron::fprint_ply_scale(
 	file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
-		fprintf(stderr, "Polyhedron::fprint_ply_1e16. Error. Cannot open file %s\n",
+		fprintf(stdout, "Polyhedron::fprint_ply_scale. Error. Cannot open file %s\n",
 				  filename);
 		return;
 	}
@@ -710,82 +691,7 @@ void Polyhedron::fprint_ply_scale(
 	}
 
 	for(i = 0; i < numf; ++i)
-	{
-		fprintf(file, "%d", facet[i].nv);
-		for(j = 0; j < facet[i].nv; ++j)
-			fprintf(file, " %d", facet[i].index[j]);
-		fprintf(file, " %d %d %d\n", facet[i].rgb[0], facet[i].rgb[1], facet[i].rgb[2]);
-//		fprintf(stdout, "color facet %d: %d %d %d\n", i, facet[i].rgb[0], facet[i].rgb[1], facet[i].rgb[2]);
-
-//		if(ncolored < n && i == col[ncolored])
-//		{
-//			++ncolored;
-//			fprintf(file, " %d %d %d\n", 255, 100, 100);
-//			printf("colored facet %d\n", i);
-//		}
-//		else
-//		{
-//			fprintf(file, " %d %d %d\n", 100, 100, 100);
-//		}
-	}
+		facet[i].fprint_ply_scale(file);
 	fclose(file);
 }
-
-
-//void Polyhedron::fprint_ply_1e16(const char *filename, const char *comment = NULL)
-//		//comment must have 1 word
-//{
-//	int i, j;
-//	long long int vx, vy, vz;
-//	char* comment_w;
-//	FILE* file;
-
-//	file = (FILE*)fopen(filename, "w");
-//	if(!file)
-//	{
-//		fprintf(stderr, "Polyhedron::fscan_ply. Error. Cannot open file %s\n",
-//				  filename);
-//		return;
-//	}
-
-
-//	comment_w = new char[255];
-//	if(!comment) sprintf(comment_w, "unknown");
-//	else sprintf(comment_w, comment);
-
-////	numv_new = 0;
-////	for(i = 0; i < numf; ++i)
-////		numv_new += facet[i].nv;
-
-//	fprintf(file, "ply\n");
-//	fprintf(file, "format ascii 1.0\n");
-//	fprintf(file, "comment converted from %s\n", comment_w);
-//	fprintf(file, "element vertex %d\n", numv);
-//	fprintf(file, "property float x\n");
-//	fprintf(file, "property float y\n");
-//	fprintf(file, "property float z\n");
-//	fprintf(file, "element face %d\n", numf);
-//	fprintf(file, "property list uchar uint vertex_indices\n");
-//	fprintf(file, "end_header\n");
-
-//	for(i = 0; i < numv; ++i)
-//	{
-//		vx = (long long int)1e16*vertex[i].x;
-//		vy = (long long int)1e16*vertex[i].y;
-//		vz = (long long int)1e16*vertex[i].z;
-//		fprintf(file, "%lli %lli %lli\n",
-//				  vx, vy, vz);
-//	}
-
-//	for(i = 0; i < numf; ++i)
-//	{
-//		fprintf(file, "%d",facet[i].nv);
-//		for(j = 0; j < facet[i].nv; ++j)
-//			fprintf(file, " %d", facet[i].index[j]);
-//		fprintf(file, "\n");
-//	}
-//	fclose(file);
-//}
-
-
 

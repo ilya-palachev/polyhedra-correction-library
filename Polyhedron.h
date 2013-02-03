@@ -1,28 +1,46 @@
 #ifndef POLYHEDRON_H
 #define POLYHEDRON_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
 #include "Vector3d.h"
-#include "Facet.h"
-#include "VertexInfo.h"
+
+class Polyhedron;
+class Facet;
+class VertexInfo;
+class EdgeList;
+
 
 class Polyhedron
 {
-private:
+public:
 	Vector3d* vertex;
 	Facet* facet;
 	VertexInfo* vertexinfo;
 	int numv;
 	int numf;
 
+//	FILE* log_file;
+
 public:
 
-	//polyhedron.cpp
+	//Polyhedron.cpp
 	Polyhedron();
-        Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig, Facet* facet_orig);
+	Polyhedron(
+		int numv_orig,
+		int numf_orig,
+		Vector3d* vertex_orig,
+		Facet* facet_orig);
+//		FILE* log_file_orig);
 	~Polyhedron();
-	Polyhedron& operator=(const Polyhedron& poly);
 
-	//polyhedron_io.cpp
+	//Polyhedron_io.cpp
+	void my_fprint(const char* filename);
+	void my_fprint(FILE* file);
+
 	void fscan_default_0(const char* filename);
 	void fscan_default_1(const char* filename);
 	void fscan_default_1_1(const char* filename);
@@ -34,56 +52,125 @@ public:
 	void fprint_ply(const char *filename, const char *comment);
 	void fprint_ply_scale(double scale, const char *filename, const char *comment);
 
-	//polyhedron_preprocess.cpp
+	//Polyhedron_preprocess.cpp
 	void preprocess_polyhedron();
-	void preprocess_free_facet();
-	void preprocess_facet(int id);
-	void preprocess_edge(int v0, int v1, int facet_id, int v0_id);
-	void preprocess_vertexinfo(int id);
-	int find_edge(int v0, int v1);
-	int find_vertex(int f_id, int v);
 
-	//polyhedron_join_facets.cpp
-	void join_facets(int facet_id0, int facet_id1);
-	void join_facets_cycle(
-			int* join_index,
-			int& join_nv,
-			int& len_vertex,
-			int nv,
-			int* vertex_list,
-			int* edge_list,
-			Plane plane,
-			int facet_id0,
-			int facet_id1
-			);
-	int join_facets_count_nv(int facet_id0, int facet_id1);
-	void join_facets_create_vertex_list(int facet_id0, int facet_id1, int nv,
-													int* vertex_list, int* edge_list);
-	void list_squares_method(int nv, int* vertex_list, Plane* plane);
-	int join_facets_cut_vertex_list(int nv, int* vertex_list, int* edge_list,
-												int *vertex_cut);
-
-	//polyhedron_intersetion.cpp
-	int signum(int i, Plane plane);
-	Vector3d intersection_edge(int i0, int i1, Plane plane);
-
-	int intersection_facet_create_edge_list(
-			int facet_id, Plane plane, int* edge_list);
-	void test_intersection_facet_create_edge_list(Plane plane);
-	void intersection_facet_step(
-			Plane plane,
-			int facet_id, int v0, int v1,
-			int& facet_id_new, int& v0_new, int& v1_new);
-	void intersection_facet_step_cut(
-			Plane plane,
-			int facet_id, int v0, int v1,
-			int& facet_id_new, int& v0_new, int& v1_new,
-			int new_vertex, int& len_vertex);
-
-	//polyhedron_figures.cpp
+	//Polyhedron_figures.cpp
 	void poly_cube(double h, double x, double y, double z);
 	void poly_pyramid(int n, double h, double r);
 	void poly_prism(int n, double h, double r);
+};
+
+
+class Facet
+{
+private:
+	int id;
+	int nv;
+	Plane plane;
+	int* index;
+	Polyhedron* poly;
+	char rgb[3];
+
+	bool isPreprocessed;
+
+	bool isPreparedIntersection;
+	Plane iplane;
+	int num_edges;
+	int* edge_list;
+
+public:
+	Facet();
+	Facet(
+		const int id_orig,
+		const int nv_orig,
+		const Plane plane_orig,
+		const int* index_orig,
+		Polyhedron* poly_orig,
+		const bool ifLong);
+	Facet& operator=(const Facet& facet1);
+	~Facet();
+
+	int get_id();
+	int get_nv();
+	Plane get_plane();
+	int get_index(int pos);
+	char get_rgb(int pos);
+
+	void set_poly(Polyhedron* poly_new);
+
+	void my_fprint(FILE* file);
+	void my_fprint_all(FILE* file);
+
+	void preprocess_free();
+	void preprocess();
+	void preprocess_edge(int v0, int v1, int v0_id);
+	int preprocess_search_edge(int v0, int v1); //Searches edge and returns position of v1
+									 //if success, -1 if not found.
+	int preprocess_search_vertex(int v, int& v_next);
+	
+	void get_next_facet(
+		int pos_curr,
+		int& pos_next,
+		int& fid_next,
+		int& v_curr);
+
+	void fprint_default_0(FILE* file);
+	void fprint_default_1(FILE* file);
+	void fprint_my_format(FILE* file);
+
+	void fprint_ply_vertex(FILE* file);
+	void fprint_ply_index(FILE* file);
+	void fprint_ply_scale(FILE* file);
+
+};
+
+class VertexInfo
+{
+private:
+	int id;
+	int nf;
+	Vector3d vector;
+	int* index;
+	Polyhedron* poly;
+
+public:
+	VertexInfo();
+	VertexInfo(
+			const int id_orig,
+			const int nf_orig,
+			const Vector3d vector_orig,
+			const int* index_orig,
+			Polyhedron* poly_orig);
+	VertexInfo(
+		const int id_orig,
+		const Vector3d vector_orig,
+		Polyhedron* poly_orig);
+
+	VertexInfo& operator=(const VertexInfo& orig);
+	~VertexInfo();
+
+	void preprocess();
+
+	void fprint_my_format(FILE* file);
+	void my_fprint_all(FILE* file);
+};
+
+class EdgeList {
+private:
+	int num;
+	int* edge0;
+	int* edge1;
+	double* scalar_mult;
+	Facet* facet;
+public:
+	EdgeList();
+	EdgeList(Facet* facet_orig);
+	~EdgeList();
+	EdgeList& operator=(const EdgeList& orig);
+
+	void add_edge(int v0, int v1, double sm);
+	void get_next_edge(int& v0, int& v1);
 };
 
 #endif // POLYHEDRON_H

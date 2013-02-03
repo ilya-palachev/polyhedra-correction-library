@@ -1,5 +1,5 @@
-build/Debug/GNU-Linux-x86/Facet.o: Facet.cpp Facet.h Vector3d.h
+build/Debug/GNU-Linux-x86/Facet.o: Facet.cpp Polyhedron.h Vector3d.h
 
-Facet.h:
+Polyhedron.h:
 
 Vector3d.h:
