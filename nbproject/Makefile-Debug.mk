@@ -34,10 +34,12 @@ OBJECTDIR=build/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/Facet.o \
+	${OBJECTDIR}/Facet_intersection.o \
 	${OBJECTDIR}/EdgeList.o \
 	${OBJECTDIR}/Polyhedron.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/VertexInfo_preprocess.o \
+	${OBJECTDIR}/Polyhedron_intersection.o \
 	${OBJECTDIR}/Facet_io.o \
 	${OBJECTDIR}/Polyhedron_figures.o \
 	${OBJECTDIR}/Facet_preprocess.o \
@@ -79,6 +81,11 @@ ${OBJECTDIR}/Facet.o: Facet.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Facet.o Facet.cpp
 
+${OBJECTDIR}/Facet_intersection.o: Facet_intersection.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Facet_intersection.o Facet_intersection.cpp
+
 ${OBJECTDIR}/EdgeList.o: EdgeList.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
@@ -98,6 +105,11 @@ ${OBJECTDIR}/VertexInfo_preprocess.o: VertexInfo_preprocess.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/VertexInfo_preprocess.o VertexInfo_preprocess.cpp
+
+${OBJECTDIR}/Polyhedron_intersection.o: Polyhedron_intersection.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -MMD -MP -MF $@.d -o ${OBJECTDIR}/Polyhedron_intersection.o Polyhedron_intersection.cpp
 
 ${OBJECTDIR}/Facet_io.o: Facet_io.cpp 
 	${MKDIR} -p ${OBJECTDIR}

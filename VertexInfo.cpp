@@ -28,8 +28,8 @@ poly(poly_orig) {
 	if (nf_orig < 3) {
 		fprintf(stdout, "VertexInfo::VertexInfo. Error. nf1 < 3\n");
 	}
-	index = new int[2 * nf + 1];
-	for (int i = 0; i < 2 * nf + 1; ++i)
+	index = new int[3 * nf + 1];
+	for (int i = 0; i < 3 * nf + 1; ++i)
 		index[i] = index_orig[i];
 }
 
@@ -62,8 +62,8 @@ VertexInfo& VertexInfo::operator =(const VertexInfo& orig) {
 
 	if (nf > 0) {
 		if (index) delete[] index;
-		index = new int[2 * nf + 1];
-		for (i = 0; i < 2 * nf + 1; ++i)
+		index = new int[3 * nf + 1];
+		for (i = 0; i < 3 * nf + 1; ++i)
 			index[i] = orig.index[i];
 	}
 	return *this;

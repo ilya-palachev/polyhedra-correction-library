@@ -5,7 +5,7 @@
 
 #include "Polyhedron.h"
 
-#define NOT_DEBUG
+//#define NOT_DEBUG
 
 using namespace std;
 

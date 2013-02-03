@@ -8,6 +8,8 @@
 
 #include "Vector3d.h"
 
+#define EPS_SIGNUM 1e-14
+
 class Polyhedron;
 class Facet;
 class VertexInfo;
@@ -59,6 +61,9 @@ public:
 	void poly_cube(double h, double x, double y, double z);
 	void poly_pyramid(int n, double h, double r);
 	void poly_prism(int n, double h, double r);
+
+	//Polyhedron_intersection.cpp
+	void intersection(Plane plane);
 };
 
 
@@ -72,14 +77,10 @@ private:
 	Polyhedron* poly;
 	char rgb[3];
 
-	bool isPreprocessed;
-
-	bool isPreparedIntersection;
-	Plane iplane;
-	int num_edges;
-	int* edge_list;
+	EdgeList edge_list;
 
 public:
+	//Facet.cpp
 	Facet();
 	Facet(
 		const int id_orig,
@@ -97,11 +98,15 @@ public:
 	int get_index(int pos);
 	char get_rgb(int pos);
 
+	void get_next_facet(
+		int pos_curr,
+		int& pos_next,
+		int& fid_next,
+		int& v_curr);
+
 	void set_poly(Polyhedron* poly_new);
 
-	void my_fprint(FILE* file);
-	void my_fprint_all(FILE* file);
-
+	//Facet_preprocess.cpp
 	void preprocess_free();
 	void preprocess();
 	void preprocess_edge(int v0, int v1, int v0_id);
@@ -109,11 +114,9 @@ public:
 									 //if success, -1 if not found.
 	int preprocess_search_vertex(int v, int& v_next);
 	
-	void get_next_facet(
-		int pos_curr,
-		int& pos_next,
-		int& fid_next,
-		int& v_curr);
+	//Facet_io.cpp
+	void my_fprint(FILE* file);
+	void my_fprint_all(FILE* file);
 
 	void fprint_default_0(FILE* file);
 	void fprint_default_1(FILE* file);
@@ -123,6 +126,11 @@ public:
 	void fprint_ply_index(FILE* file);
 	void fprint_ply_scale(FILE* file);
 
+	//Facet_intersecion.cpp
+	int signum(int i, Plane plane);
+
+	bool prepare_edge_list(Plane iplane);
+	void intersection();
 };
 
 class VertexInfo
@@ -161,6 +169,7 @@ private:
 	int num;
 	int* edge0;
 	int* edge1;
+	int* next_facet;
 	double* scalar_mult;
 	Facet* facet;
 public:
@@ -169,8 +178,17 @@ public:
 	~EdgeList();
 	EdgeList& operator=(const EdgeList& orig);
 
-	void add_edge(int v0, int v1, double sm);
+	void add_edge(int v0, int v1, int next_f, double sm);
 	void get_next_edge(int& v0, int& v1);
 };
+
+int signum(Vector3d point, Plane plane)
+{
+	double d = plane % point;
+	if (fabs(d) < EPS_SIGNUM)
+		return 0;
+	return d > 0 ? 1 : (d < 0 ? -1 : 0);
+}
+
 
 #endif // POLYHEDRON_H

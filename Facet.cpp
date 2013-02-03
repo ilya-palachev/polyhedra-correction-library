@@ -11,9 +11,7 @@ Facet::Facet() :
 id(-1),
 index(new int[3 * DEFAULT_NV + 1]),
 nv(DEFAULT_NV),
-plane(),
-isPreprocessed(false),
-isPreparedIntersection(false) {
+plane() {
 	rgb[0] = 100;
 	rgb[1] = 100;
 	rgb[2] = 100;
@@ -31,8 +29,7 @@ id(id_orig),
 nv(nv_orig),
 plane(plane_orig),
 poly(poly_orig),
-isPreprocessed(false),
-isPreparedIntersection(false) {
+edge_list(EdgeList(this)) {
 	rgb[0] = 100;
 	rgb[1] = 100;
 	rgb[2] = 100;
@@ -79,17 +76,8 @@ Facet& Facet::operator =(const Facet& facet1) {
 	rgb[1] = facet1.rgb[1];
 	rgb[2] = facet1.rgb[2];
 
-	this->isPreprocessed = facet1.isPreprocessed;
-	this->isPreparedIntersection = facet1.isPreparedIntersection;
-	if(facet1.isPreparedIntersection) {
-		this->iplane = facet1.iplane;
-		this->num_edges = facet1.num_edges;
-		if (edge_list)
-			delete[] edge_list;
-		edge_list = new int[3 * nv + 1];
-		for (i = 0; i < 3 * num_edges; ++i)
-			edge_list[i] = facet1.edge_list[i];
-	}
+	edge_list = facet1.edge_list;
+
 	return *this;
 }
 
@@ -130,5 +118,5 @@ void Facet::get_next_facet(
 
 	fid_next = index[pos_curr + nv + 1];
 	pos_next = index[pos_curr + 2 * nv + 1];
-	v_curr = index[pos_curr];
+	v_curr = index[pos_curr + 1];
 }

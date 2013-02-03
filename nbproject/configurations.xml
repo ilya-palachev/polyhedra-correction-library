@@ -25,6 +25,7 @@
                      projectFiles="true"
                      kind="SOURCE_LOGICAL_FOLDER">
         <itemPath>Facet.cpp</itemPath>
+        <itemPath>Facet_intersection.cpp</itemPath>
         <itemPath>Facet_io.cpp</itemPath>
         <itemPath>Facet_preprocess.cpp</itemPath>
       </logicalFolder>
@@ -34,6 +35,7 @@
                      kind="SOURCE_LOGICAL_FOLDER">
         <itemPath>Polyhedron.cpp</itemPath>
         <itemPath>Polyhedron_figures.cpp</itemPath>
+        <itemPath>Polyhedron_intersection.cpp</itemPath>
         <itemPath>Polyhedron_io.cpp</itemPath>
         <itemPath>Polyhedron_preprocess.cpp</itemPath>
       </logicalFolder>

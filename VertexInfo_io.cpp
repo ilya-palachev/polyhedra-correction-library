@@ -7,7 +7,7 @@
 
 void VertexInfo::fprint_my_format(FILE* file) {
 	fprintf(file, "%d ", nf);
-	for(int j = 0; j < 2*nf + 1; ++j)
+	for(int j = 0; j < 3*nf + 1; ++j)
 		fprintf(file, " %d", index[j]);
 	fprintf(file, "\n");
 }
@@ -19,12 +19,16 @@ void VertexInfo::my_fprint_all(FILE* file) {
 //	fprintf(file, "vector = (%.2lf, %.2lf, %.2lf)\n",
 //			vector.x, vector.y, vector.z);
 
-	fprintf(file, "facets :    ");
+	fprintf(file, "facets :          ");
 	for (i = 0; i < nf; ++i)
 		fprintf(file, "%d ", index[i]);
 
-	fprintf(file, "\npositions : ");
+	fprintf(file, "\nnext vertexes : ");
 	for (i = nf + 1; i < 2 * nf + 1; ++i)
+		fprintf(file, "%d ", index[i]);
+
+	fprintf(file, "\npositions :     ");
+	for (i = 2 * nf + 1; i < 3 * nf + 1; ++i)
 		fprintf(file, "%d ", index[i]);
 
 	if(poly == NULL)
