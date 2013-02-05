@@ -58,6 +58,8 @@ public:
 		double& xmin, double& xmax,
 		double& ymin, double& ymax,
 		double& zmin, double& zmax);
+        
+        void delete_empty_facets();
 
 	//Polyhedron_io.cpp
 	void my_fprint(const char* filename);
@@ -111,7 +113,7 @@ public:
         void join_facets_calculate_plane(int fid0, int fid1, Facet& join_facet, Plane& plane);
         void multi_join_facets_calculate_plane(int n, int* fid, Facet& join_facet, Plane& plane);
         void join_facets_build_index(int fid0, int fid1, Plane& plane, Facet& join_facet, int& nv);
-        void multi_join_facets_build_index(int n, int* fid, Plane& plane, Facet& join_facet, int& nv);
+        void multi_join_facets_build_index(int n, int* fid, Facet& join_facet, int& nv);
         void join_facets_rise(int fid0);
         void join_facets_rise_find(int fid0, int& imin);
         void join_facets_rise_find_step(int fid0, int i, double& d);
@@ -364,6 +366,8 @@ public:
         int test_structure();
         
         Vector3d& find_mass_centre();
+        
+        void test_pair_neighbours();
         
 };
 

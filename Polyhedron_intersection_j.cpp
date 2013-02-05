@@ -61,6 +61,8 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     num_edges = new int[numf];
     lenff = new int[numf];
     edge_list = new EdgeList[numf];
+    
+    delete_empty_facets();
 
     nume = 0;
     for (i = 0; i < numf; ++i) {
@@ -437,14 +439,7 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     vertex = vertex_res;
     facet = facet_res;
     
-    for (i = 0; i < numf; ++i) {
-        if (facet[i].nv < 1) {
-            printf("===Facet %d is empty...\n", i);
-            for (j = i; j < numf - 1; ++j)
-                facet[j] = facet[j + 1];
-            --numf;
-        }
-    }
+    delete_empty_facets();
     
     printf("After test there are %d facets:\n", numf);
     for (i = 0; i < numf; ++i)

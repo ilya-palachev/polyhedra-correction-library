@@ -201,6 +201,7 @@ void Facet::add(int what, int pos) {
         index[pos] = what;
     }
     this->my_fprint_all(stdout);
+    test_pair_neighbours();
     printf("}}}\n");
 }
 
@@ -221,6 +222,7 @@ void Facet::remove(int pos) {
     }
     --nv;
     this->my_fprint_all(stdout);
+    test_pair_neighbours();
     printf("}}}\n");
 }
 
@@ -255,6 +257,7 @@ void Facet::update_info() {
         poly->facet[facet].index[2 * nnv + 1 + pos] = i;
     }
     this->my_fprint_all(stdout);
+    test_pair_neighbours();
     printf("}}}\n");
 }
 
@@ -299,4 +302,17 @@ Vector3d& Facet::find_mass_centre() {
     }
     v *= c;
     return v;
+}
+
+void Facet::test_pair_neighbours() {
+    int i, j;
+    for (i = 0; i < nv; ++i) {
+        for (j = 0; j < i; ++j) {
+            if (index[nv + 1 + i] == index[nv + 1 + j]) {
+                printf("WARNING!!! test_pair_neighbours in facet %d. neighbour[%d] = %d and neighbour[%d] = %d\n\n", 
+                        id, j, index[nv + 1 + j], i, index[nv + 1 + i]);
+            }
+        }
+            
+    }
 }

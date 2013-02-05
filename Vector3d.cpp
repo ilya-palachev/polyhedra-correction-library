@@ -4,7 +4,6 @@
 
 //#include "matrix_invert.h"
 #include "Gauss_string.h"
-#include "octave-3.6.1/src/oct.h"
 
 
 Vector3d & Vector3d::norm(double d) {
@@ -109,51 +108,52 @@ Vector3d Plane::project(const Vector3d & v) const {
 //}
 
 
-// New version 2011-10-05
-bool intersection(const Plane & plane1, const Plane & plane2, const Plane & plane3, Vector3d & point) {
-    A = Matrix(3, 3);
-    A(1, 1) = plane1.norm.x;
-    A(1, 2) = plane1.norm.y;
-    A(1, 3) = plane1.norm.z;
-    A(2, 1) = plane2.norm.x;
-    A(2, 2) = plane2.norm.y;
-    A(2, 3) = plane2.norm.z;
-    A(3, 1) = plane3.norm.x;
-    A(3, 2) = plane3.norm.y;
-    A(3, 3) = plane3.norm.z;
-    B = Matrix(3, 1);
-    B(1, 1) = - plane1.dist;
-    B(2, 1) = - plane2.dist;
-    B(3, 1) = - plane3.dist;
-    B = B / A;
-    printf("%lf, %lf, %lf\n", B(1, 1), B(2, 1), B(3, 1));
-}
 //bool intersection(const Plane & plane1, const Plane & plane2, const Plane & plane3, Vector3d & point) {
-//    double *A, *b/*, *INV*/;
-//    A = new double[9];
-//    b = new double[3];
-////    INV = new double[9];
-//    A[0] = plane1.norm.x;
-//    A[1] = plane1.norm.y;
-//    A[2] = plane1.norm.z;
-//    A[3] = plane2.norm.x;
-//    A[4] = plane2.norm.y;
-//    A[5] = plane2.norm.z;
-//    A[6] = plane3.norm.x;
-//    A[7] = plane3.norm.y;
-//    A[8] = plane3.norm.z;
-//    b[0] = - plane1.dist;
-//    b[1] = - plane2.dist;
-//    b[2] = - plane3.dist;
-////    invert(A, INV, 3);
-//    Gauss_string(3, A, b);
-////    point.x = b[0] * A[0] + b[1] * A[1] + b[2] * A[2];
-////    point.y = b[0] * A[3] + b[1] * A[4] + b[2] * A[5];
-////    point.z = b[0] * A[6] + b[1] * A[7] + b[2] * A[8];
-//    point.x = b[0];
-//    point.y = b[1];
-//    point.z = b[2];
+//    A = Matrix(3, 3);
+//    A(1, 1) = plane1.norm.x;
+//    A(1, 2) = plane1.norm.y;
+//    A(1, 3) = plane1.norm.z;
+//    A(2, 1) = plane2.norm.x;
+//    A(2, 2) = plane2.norm.y;
+//    A(2, 3) = plane2.norm.z;
+//    A(3, 1) = plane3.norm.x;
+//    A(3, 2) = plane3.norm.y;
+//    A(3, 3) = plane3.norm.z;
+//    B = Matrix(3, 1);
+//    B(1, 1) = - plane1.dist;
+//    B(2, 1) = - plane2.dist;
+//    B(3, 1) = - plane3.dist;
+//    B = B / A;
+//    printf("%lf, %lf, %lf\n", B(1, 1), B(2, 1), B(3, 1));
 //}
+bool intersection(const Plane & plane1, const Plane & plane2, const Plane & plane3, Vector3d & point) {
+    double *A, *b/*, *INV*/;
+    bool ret;
+    A = new double[9];
+    b = new double[3];
+//    INV = new double[9];
+    A[0] = plane1.norm.x;
+    A[1] = plane1.norm.y;
+    A[2] = plane1.norm.z;
+    A[3] = plane2.norm.x;
+    A[4] = plane2.norm.y;
+    A[5] = plane2.norm.z;
+    A[6] = plane3.norm.x;
+    A[7] = plane3.norm.y;
+    A[8] = plane3.norm.z;
+    b[0] = - plane1.dist;
+    b[1] = - plane2.dist;
+    b[2] = - plane3.dist;
+//    invert(A, INV, 3);
+    ret = Gauss_string(3, A, b);
+//    point.x = b[0] * A[0] + b[1] * A[1] + b[2] * A[2];
+//    point.y = b[0] * A[3] + b[1] * A[4] + b[2] * A[5];
+//    point.z = b[0] * A[6] + b[1] * A[7] + b[2] * A[8];
+    point.x = b[0];
+    point.y = b[1];
+    point.z = b[2];
+    return ret;
+}
 
 // ����������� ���� ����������
 bool intersection ( const Plane & plane1, const Plane & plane2, Vector3d & dir, Vector3d & point )

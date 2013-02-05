@@ -40,6 +40,8 @@ void Facet::my_fprint_all(FILE* file) {
 //
 //	else
 //		fprintf(file, "poly->numf = %d\n", poly->numf);
+        test_pair_neighbours();
+
 }
 
 void Facet::fprint_default_0(FILE* file) {

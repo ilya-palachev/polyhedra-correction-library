@@ -88,3 +88,18 @@ void Polyhedron::get_boundary(
 			zmin = tmp;
 	}
 }
+
+void Polyhedron::delete_empty_facets() {
+    int i, j;
+    for (i = 0; i < numf; ++i) {
+        if (facet[i].nv < 3) {
+            printf("===Facet %d is empty...\n", i);
+            for (j = i; j < numf - 1; ++j) {
+                facet[j] = facet[j + 1];
+                facet[j].id = j;
+            }
+            
+            --numf;
+        }
+    }
+}

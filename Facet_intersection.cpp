@@ -99,6 +99,8 @@ int Facet::prepare_edge_list(Plane iplane) {
     Vector3d v_intrsct;
 
     EdgeList* el = &(poly->edge_list[id]);
+    
+    printf("facet[%d].prepare_edge_list \n", id);
 
     // 1. Вычисляем напр вектор пересечения грани с плоскостью
     bool if_intersect = intersection(iplane, plane, dir, point);

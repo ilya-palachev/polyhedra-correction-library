@@ -1,1 +1,0 @@
-SMX_OP_SRC = smx-sm-cs.cc smx-cs-sm.cc smx-scm-s.cc smx-s-scm.cc smx-scm-sm.cc smx-sm-scm.cc smx-m-sm.cc smx-m-scm.cc smx-cm-sm.cc smx-cm-scm.cc smx-sm-m.cc smx-scm-m.cc smx-sm-cm.cc smx-scm-cm.cc smx-bm-sbm.cc smx-sbm-bm.cc
