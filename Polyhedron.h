@@ -127,6 +127,17 @@ public:
         void deform_linear_vertices(double K);
         double deform_linear_calculate_error();
         
+        //Polyhedron_test_consections.cpp
+        int test_consections();
+        int test_inner_consections();
+        int test_inner_consections_facet(int fid, double* A, double* b);
+        int test_inner_consections_pair(
+                int fid, int id0, int id1, int id2, int id3, double* A, double* b);
+        int test_outer_consections();
+        int test_outer_consections_facet(int fid);
+        int test_outer_consections_edge(int id0, int id1);
+        int test_outer_consections_pair(int id0, int id1, int fid);
+        
         
 };
 

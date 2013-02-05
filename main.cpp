@@ -22,7 +22,16 @@ int main(int argc, char** argv) {
         
 //        Gauss_test(3);
 //        test_deform("poly-tetrahedron", 0, 3, Vector3d(0, 0, 0.1));
-        test_deform_linear("poly-small", 0, 7, Vector3d(-1e-3, 1e-3, 1e-3));
+//        test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
+        test_deform_linear("poly-small", 0, 3, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 4, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 5, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 6, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 7, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 8, Vector3d(-1e-1, 1e-1, 1e-1));
+//        test_deform_linear("poly-small", 0, 9, Vector3d(-1e-1, 1e-1, 1e-1));
         
         
 //	test_cube_cutted();
@@ -218,8 +227,10 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocess_polyhedron();
+        poly.test_consections();
         poly.deform_linear(id, delta);
-
+        poly.test_consections();
+        
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
 	curr_time = asctime(timeinfo);
