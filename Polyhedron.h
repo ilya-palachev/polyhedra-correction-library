@@ -223,7 +223,11 @@ public:
 	//Facet_intersecion.cpp
 	int signum(int i, Plane plane);
 	int prepare_edge_list(Plane iplane);
-//	void intersection();
+	bool intersection(
+		Plane iplane, 
+		FutureFacet* ff,
+		int& n_components,
+		int n_intrsct, int n_positive, int i0, int i1, int i2);
 
 	//Facet_test.cpp
 	bool test_self_intersection();
@@ -245,6 +249,9 @@ public:
 	FutureFacet(int nv_orig);
 	FutureFacet(const FutureFacet& orig);
 	FutureFacet& operator = (const FutureFacet& orig);
+
+	int get_nv();
+
 	void set_id(int val);
 
 	void add_edge(int v0, int v1, int src_f);

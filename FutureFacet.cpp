@@ -92,6 +92,10 @@ FutureFacet& FutureFacet::operator =(const FutureFacet& orig) {
 	return *this;
 }
 
+int FutureFacet::get_nv() {
+	return nv;
+}
+
 void FutureFacet::get_edge(int pos, int& v0, int& v1, int& src_f, int& id_v) {
 	if (pos < 0 || pos >= nv) {
 		v0 = v1 = src_f = id_v = -1;
