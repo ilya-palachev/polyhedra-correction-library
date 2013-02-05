@@ -96,6 +96,15 @@ public:
         void clear_unused();
         void find_and_replace_vertex(int from, int to);
         void find_and_replace_facet(int from, int to);
+        
+        /////////////////////////////////////////
+        void join_facets(int fid0, int fid1);
+        void join_facets_calculate_plane(int fid0, int fid1, Plane& plane, int& nv);
+        void join_facets_build_index(int fid0, int fid1, Plane plane, Facet& join_facet, int& nv);
+        void join_facets_rise(int fid0, int fid1);
+        void join_facets_rise_find(int fid0, int fid1, int& imin);
+        void join_facets_rise_find_step(int fid0, int fid1, int i, double& d);
+        void join_facets_rise_point(int fid0, int fid1, int imin);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -289,6 +298,8 @@ public:
 	void find_and_replace2(int from, int to);
 	int find_total(int what);
 	int find_vertex(int what);
+        
+        void add(int what, int pos);
         
 };
 

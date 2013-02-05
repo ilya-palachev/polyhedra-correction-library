@@ -80,7 +80,7 @@ Facet& Facet::operator =(const Facet& facet1) {
 
 Facet::~Facet() {
 #ifdef DEBUG1
-	fprintf(stdout, "Deleting facet[%d]\n", id);
+//	fprintf(stdout, "Deleting facet[%d]\n", id);
 #endif
 	if (index != NULL) delete[] index;
 }

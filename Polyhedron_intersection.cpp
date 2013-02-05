@@ -379,37 +379,37 @@ void Polyhedron::intersect(Plane iplane) {
         delete[] ifMultiComponent;
 }
 
-void Polyhedron::intersect_test(int facet_id0, int facet_id1) {
-    int i;
-    int nv, *vertex_list, *edge_list, *vertex_cut;
-    int n_plus, n_minus;
-
-    Plane plane;
-
-    nv = this->join_facets_count_nv(facet_id0, facet_id1);
-    if (nv <= 0)
-        return;
-
-    vertex_list = new int[nv];
-    edge_list = new int[nv];
-    vertex_cut = new int[nv]; //TODO
-    this->join_facets_create_vertex_list(facet_id0, facet_id1, nv, vertex_list, edge_list);
-    this->list_squares_method(nv, vertex_list, &plane);
-
-    n_plus = n_minus = 0;
-    for (i = 0; i < numv; ++i) {
-        switch (signum(vertex[i], plane)) {
-            case 1:
-                ++n_plus;
-                break;
-            case -1:
-                ++n_minus;
-                break;
-            default:
-                break;
-        }
-    }
-    if (n_minus > n_plus)
-        plane = -plane;
-    this->intersect(plane);
-}
+//void Polyhedron::intersect_test(int facet_id0, int facet_id1) {
+//    int i;
+//    int nv, *vertex_list, *edge_list, *vertex_cut;
+//    int n_plus, n_minus;
+//
+//    Plane plane;
+//
+//    nv = this->join_facets_count_nv(facet_id0, facet_id1);
+//    if (nv <= 0)
+//        return;
+//
+//    vertex_list = new int[nv];
+//    edge_list = new int[nv];
+//    vertex_cut = new int[nv]; //TODO
+//    this->join_facets_create_vertex_list(facet_id0, facet_id1, nv, vertex_list, edge_list);
+//    this->list_squares_method(nv, vertex_list, &plane);
+//
+//    n_plus = n_minus = 0;
+//    for (i = 0; i < numv; ++i) {
+//        switch (signum(vertex[i], plane)) {
+//            case 1:
+//                ++n_plus;
+//                break;
+//            case -1:
+//                ++n_minus;
+//                break;
+//            default:
+//                break;
+//        }
+//    }
+//    if (n_minus > n_plus)
+//        plane = -plane;
+//    this->intersect(plane);
+//}

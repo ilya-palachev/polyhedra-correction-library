@@ -135,7 +135,7 @@ void test3(const char* name, int type, int fid0, int fid1) {
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocess_polyhedron();
-	poly.join_create_first_facet(fid0, fid1);
+	poly.join_facets(fid0, fid1);
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
@@ -212,7 +212,7 @@ void test2(const char* name, int type, int fid0, int fid1) {
 
 	poly.preprocess_polyhedron();
 //	poly.intersect(Plane(Vector3d(a, b, c), d));
-	poly.intersect_test(fid0, fid1);
+//	poly.intersect_test(fid0, fid1);
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
