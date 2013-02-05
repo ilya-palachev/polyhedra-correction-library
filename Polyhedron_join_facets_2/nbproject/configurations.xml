@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="79">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>Gauss_string.h</itemPath>
+      <itemPath>Gauss_test.h</itemPath>
+      <itemPath>Polyhedron.h</itemPath>
+      <itemPath>Vector3d.h</itemPath>
+      <itemPath>array_operations.h</itemPath>
+      <itemPath>list_squares_method.h</itemPath>
+      <itemPath>matrix_invert.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+      <logicalFolder name="f4" displayName="EdgeList" projectFiles="true">
+        <itemPath>EdgeList.cpp</itemPath>
+        <itemPath>EdgeList_intersection.cpp</itemPath>
+        <itemPath>EdgeList_io.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f6" displayName="EdgeSet" projectFiles="true">
+        <itemPath>EdgeSet.cpp</itemPath>
+        <itemPath>EdgeSet_intersection.cpp</itemPath>
+        <itemPath>EdgeSet_io.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="Facet" projectFiles="true">
+        <itemPath>Facet.cpp</itemPath>
+        <itemPath>Facet_deform_linear_vertmin.cpp</itemPath>
+        <itemPath>Facet_intersection.cpp</itemPath>
+        <itemPath>Facet_io.cpp</itemPath>
+        <itemPath>Facet_join_facets.cpp</itemPath>
+        <itemPath>Facet_preprocess.cpp</itemPath>
+        <itemPath>Facet_test.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f5" displayName="FutureFacet" projectFiles="true">
+        <itemPath>FutureFacet.cpp</itemPath>
+        <itemPath>FutureFacet_intersection.cpp</itemPath>
+        <itemPath>FutureFacet_io.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="Polyhedron" projectFiles="true">
+        <itemPath>Polyhedron.cpp</itemPath>
+        <itemPath>Polyhedron_deform.cpp</itemPath>
+        <itemPath>Polyhedron_deform_linear.cpp</itemPath>
+        <itemPath>Polyhedron_deform_linear_control.cpp</itemPath>
+        <itemPath>Polyhedron_deform_linear_vertmin.cpp</itemPath>
+        <itemPath>Polyhedron_figures.cpp</itemPath>
+        <itemPath>Polyhedron_intersection.cpp</itemPath>
+        <itemPath>Polyhedron_intersection_j.cpp</itemPath>
+        <itemPath>Polyhedron_io.cpp</itemPath>
+        <itemPath>Polyhedron_join_facets.cpp</itemPath>
+        <itemPath>Polyhedron_join_points.cpp</itemPath>
+        <itemPath>Polyhedron_preprocess.cpp</itemPath>
+        <itemPath>Polyhedron_simplify.cpp</itemPath>
+        <itemPath>Polyhedron_test_consections.cpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="VertexInfo" projectFiles="true">
+        <itemPath>VertexInfo.cpp</itemPath>
+        <itemPath>VertexInfo_intersection.cpp</itemPath>
+        <itemPath>VertexInfo_io.cpp</itemPath>
+        <itemPath>VertexInfo_preprocess.cpp</itemPath>
+      </logicalFolder>
+      <itemPath>Gauss_string.cpp</itemPath>
+      <itemPath>Gauss_test.cpp</itemPath>
+      <itemPath>Vector3d.cpp</itemPath>
+      <itemPath>array_operations.cpp</itemPath>
+      <itemPath>list_squares_method.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>main.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <linkerTool>
+          <commandLine>-I octave-3.6.1</commandLine>
+        </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>GNU|GNU</compilerSet>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+        </linkerTool>
+      </compileType>
+    </conf>
+  </confs>
+</configurationDescriptor>
