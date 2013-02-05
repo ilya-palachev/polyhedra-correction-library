@@ -17,8 +17,9 @@ int Polyhedron::test_consections() {
     count = 0;
     count += test_inner_consections();
     count += test_outer_consections();
-
+#ifdef TCPRINT
     printf("Total: %d consections found\n", count);
+#endif
     return count;
 }
 
@@ -33,9 +34,10 @@ int Polyhedron::test_inner_consections() {
     for (i = 0; i < numf; ++i) {
         count += test_inner_consections_facet(i, A, b);
     }
+#ifdef TCPRINT
     if (count > 0)
         printf("\tTotal: %d inner consections found\n", count);
-
+#endif
     if (A != NULL)
         delete[] A;
     if (b != NULL)
@@ -64,8 +66,10 @@ int Polyhedron::test_inner_consections_facet(int fid, double* A, double* b) {
                     );
         }
     }
+#ifdef TCPRINT
     if (count > 0)
         printf("\t\tIn facet %d: %d inner consections found\n", fid, count);
+#endif
 //    if (count > 0)
 //        facet[fid].my_fprint(stdout);
     return count;
@@ -82,20 +86,26 @@ int Polyhedron::test_inner_consections_pair(int fid, int id0, int id1, int id2, 
 
     if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 ||
             id0 >= numv || id1 >= numv || id2 >= numv || id3 >= numv) {
+#ifdef TCPRINT        
         printf("\t\t\ttest_inner_consections_pair: Error. incorrect input\n");
+#endif
         return 0;
     }
 
     if ((id0 == id3 && id1 == id2) || (id0 == id2 && id1 == id3)) {
+#ifdef TCPRINT       
         printf("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
+#endif
         return 2;
     }
 
     if (id1 == id2) {
         if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
                 (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) < 0) {
+#ifdef TCPRINT            
             printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
                     id0, id1, id2, id3);
+#endif
             return 2;
         } else {
             return 0;
@@ -105,8 +115,10 @@ int Polyhedron::test_inner_consections_pair(int fid, int id0, int id1, int id2, 
     if (id0 == id3) {
         if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
                 (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) > 0) {
+#ifdef TCPRINT
             printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
                     id0, id1, id2, id3);
+#endif
             return 2;
         } else {
             return 0;
@@ -173,7 +185,9 @@ int Polyhedron::test_inner_consections_pair(int fid, int id0, int id1, int id2, 
 
 
     if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.) {
+#ifdef TCPRINT        
         printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id2, id1, id3);
+#endif
         return 1;
     } else
         return 0;
@@ -186,8 +200,10 @@ int Polyhedron::test_outer_consections() {
     for (i = 0; i < numf; ++i) {
         count += test_outer_consections_facet(i);
     }
+#ifdef TCPRINT   
     if (count > 0)
         printf("\tTotal: %d outer consections found\n", count);
+#endif
     return count;
 }
 
@@ -201,8 +217,10 @@ int Polyhedron::test_outer_consections_facet(int fid) {
     for (i = 0; i < nv; ++i) {
         count += test_outer_consections_edge(index[i % nv], index[(i + 1) % nv]);
     }
+#ifdef TCPRINT    
     if (count > 0)
         printf("\t\tIn facet %d: %d outer consections found\n", fid, count);
+#endif
     return count;
 }
 
@@ -215,8 +233,10 @@ int Polyhedron::test_outer_consections_edge(int id0, int id1) {
 //        printf("\tj = %d\n", j);
         count += test_outer_consections_pair(id0, id1, j);
     }
+#ifdef TCPRINT    
     if (count > 0)
         printf("\t\t\tFor edge (%d, %d): %d outer consections found\n", id0, id1, count);
+#endif
     return count;
 }
 
@@ -278,7 +298,9 @@ int Polyhedron::test_outer_consections_pair(int id0, int id1, int fid) {
     if (fabs(sum) < 2 * M_PI) {
         return 0;
     } else {
+#ifdef TCPRINT        
         printf("\t\t\t\tEdge (%d, %d) consects facet %d\n", id0, id1, fid);
+#endif
         return 1;
     }
 }

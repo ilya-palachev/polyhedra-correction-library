@@ -8,10 +8,10 @@
 
 #include "Vector3d.h"
 
-#define DEBUG
-#define DEBUG1
+//#define DEBUG
+//#define DEBUG1
 #define OUTPUT
-
+//#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
 #define EPS_SIGNUM 1e-16
 
 
@@ -46,6 +46,12 @@ public:
 		Vector3d* vertex_orig,
 		Facet* facet_orig);
 //		FILE* log_file_orig);
+	Polyhedron(
+		int numv_orig,
+		int numf_orig,
+		Vector3d* vertex_orig,
+		Facet* facet_orig,
+                VertexInfo* vertexinfo);
 	~Polyhedron();
 
 	void get_boundary(
@@ -123,9 +129,12 @@ public:
         
         //Polyhedron_deform_linear.cpp
         void deform_linear(int id, Vector3d delta);
-        void deform_linear_facets();
-        void deform_linear_vertices(double K);
+        void deform_linear_partial(int id, Vector3d delta, int num);
+        void deform_linear_facets(double* x, double* y, double* z);
+        void deform_linear_vertices(double K, double* A, double* B);
         double deform_linear_calculate_error();
+        double min_dist(int id);
+        void import_coordinates(Polyhedron& orig);
         
         //Polyhedron_test_consections.cpp
         int test_consections();
