@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
     argc = argc;
     argv = argv;
 
-    //    get_statistics_deform_linear_test("poly-small", 0);
+//        get_statistics_deform_linear_test("poly-small", 0);
 
-    //    get_statistics_deform_linear("poly-small", 0);
+//        get_statistics_deform_linear("poly-small", 0);
     //    get_statistics_deform_linear("poly-med", 0);
     //        get_statistics_deform_linear("poly-big", 0);
     //    get_statistics_deform_linear("polyhedron-2010-11-25", 2);
