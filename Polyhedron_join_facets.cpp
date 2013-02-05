@@ -8,6 +8,9 @@
 #include "Vector3d.h"
 #include "array_operations.h"
 
+#define EPS_PARALL 1e-16
+#define MAX_MIN_DIST 1e+1
+
 int Polyhedron::join_facets_count_nv(int facet_id0, int facet_id1) {
     int nv0, nv1, nv_common, *index0, *index1, i, j, nv;
 
@@ -266,82 +269,21 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     index[nv] = index[0];
     for (i = 0; i < nv; ++i) {
         k = facet[fid0].find_vertex(index[i]);
-        if (k != -1) {
+        if (k != -1 && index0[nv0 + 1 + k] != fid1) {
             index[nv + 1 + i] = index0[nv0 + 1 + k];
             index[2 * nv + 1 + i] = index0[2 * nv0 + 1 + k];
-
-        } else {
-            k = facet[fid1].find_vertex(index[i]);
-            if (k == -1) {
-                printf("Unexpected error. Cannot find vertex %d\n", index[i]);
-                return;
-            }
-            index[nv + 1 + i] = index1[nv1 + 1 + k];
-            index[2 * nv + 1 + i] = index1[2 * nv1 + 1 + k];            
+            continue;
         }
-    }
-    //1. Сколько общих вершин?
-    //    nv = nv_common = 0;
-    //    for (i = 0; i < nv0; ++i) {
-    //        if (index0[nv0 + 1 + i] == fid1)
-    //            ++nv_common;
-    //        else
-    //            ++nv;
-    //    }
-    //    for (i = 0; i < nv1; ++i) {
-    //        if (index0[nv1 + 1 + i] == fid0)
-    //            ++nv_common;
-    //        else
-    //            ++nv;
-    //    }
-    //
-    //    --nv;
-    //    index = new int[3 * nv + 1];
-    //    int fid = fid0;
-    //    for (j = 0; j < nv0; ++j) {
-    //        if (index0[j] != fid1)
-    //            break;
-    //    }
-    //    for (i = 0; i < nv; ++i) {
-    //        if (fid == fid0) {
-    //            index[i] = index0[j];
-    //            if (index0[nv0 + 1 + j] == fid1) {
-    //                fid = fid1;
-    //                for (k = 0; k < nv1; ++k)
-    //                    if (index1[k] == index0[j]) {
-    //                        index[nv + 1 + i] = index1[nv1 + 1 + k];
-    //                        index[2 * nv + 1 + i] = index1[2 * nv1 + 1 + k];
-    //                        j = k + 1;
-    //                        break;
-    //                    }
-    //            } else {
-    //                index[nv + 1 + i] = index0[nv0 + 1 + j];
-    //                index[2 * nv + 1 + i] = index0[2 * nv0 + 1 + j];
-    //                ++j;
-    //            }
-    //        } else { //fid == fid1
-    //            index[i] = index1[j];
-    //            if (index1[nv1 + 1 + j] == fid0) {
-    //                fid = fid0;
-    //                for (k = 0; k < nv0; ++k)
-    //                    if (index0[k] == index1[j]) {
-    //                        index[nv + 1 + i] = index0[nv0 + 1 + k];
-    //                        index[2 * nv + 1 + i] = index0[2 * nv0 + 1 + k];
-    //                        j = k + 1;
-    //                        break;
-    //                    }
-    //            } else {
-    //                index[nv + 1 + i] = index1[nv1 + 1 + j];
-    //                index[2 * nv + 1 + i] = index1[2 * nv1 + 1 + j];
-    //                ++j;
-    //            }
-    //        }
-    //        //                printf("index[%d] = %d, index[%d] = %d, index[%d] = %d, fid = %d\n",
-    //        //                        i, index[i], nv + 1 + i, index[nv + 1 + i],
-    //        //                        2 * nv + 1 + i, index[2 * nv + 1 + i], fid);
-    //    }
-    //    index[nv] = index[0];
+        k = facet[fid1].find_vertex(index[i]);
+        if (k != -1 && index1[nv1 + 1 + k] != fid0) {
+            index[nv + 1 + i] = index1[nv1 + 1 + k];
+            index[2 * nv + 1 + i] = index1[2 * nv1 + 1 + k];
+            continue;
+        }
+        printf("Unexpected error. Cannot find vertex %d\n", index[i]);
+        return;
 
+    }
 
     //Проверка, что нормаль построенной плокости направлена извне 
     //многогранника
@@ -353,14 +295,23 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 
     Facet first_facet;
     first_facet = Facet(-1, nv, plane, index, this, true);
-    first_facet.clear_bad_vertexes();
-
     first_facet.my_fprint_all(stdout);
+
+    first_facet.clear_bad_vertexes();
+    first_facet.my_fprint_all(stdout);
+    
     facet[fid0] = first_facet;
+    facet[fid1] = Facet();
+    preprocess_polyhedron();
 
     //Посчитаем, сколько вершин находится под плоскостью.
-    sign_vertex = new int[nv];
+    first_facet = facet[fid0];
+    nv = first_facet.nv;
+    if (index != NULL)
+        delete[] index;
     index = first_facet.index;
+    
+    sign_vertex = new int[nv];
     ndown = 0;
     for (i = 0; i < nv; ++i) {
         sign_vertex[i] = signum(vertex[index[i]], plane);
@@ -376,12 +327,18 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     Vector3d intrsct;
     Vector3d dir;
     Vector3d point;
+    Plane plane0;
+    Plane plane1;
+    Plane plane2;
 
     double min_dist, dist;
     int min_i, i_replace;
     int tmp0, tmp1, tmp2;
     int new_number;
     int v_replace;
+    
+    double plane_dist;
+    bool ifParallel;
 
     int step = 0;
     while (ndown > 0) {
@@ -417,31 +374,89 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             f_prev = index[nv + 1 + i_prev];
             f_next = index[nv + 1 + i_next];
             f_next_next = index[nv + 1 + i_next_next];
+            
+            plane0 = facet[f_prev_prev].plane;
+            plane1 = facet[f_prev].plane;
+            plane2 = facet[f_next].plane;
 
-            intersection(facet[f_prev_prev].plane,
-                    facet[f_prev].plane,
-                    facet[f_next].plane,
-                    intrsct);
-            dist = qmod(vertex[index[i]] - intrsct);
-            dist = sqrt(dist);
-            //                printf("i = %d, dist = %lf", i, dist);
+            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+                    f_prev_prev, plane0.norm.x, plane0.norm.y, plane0.norm.z,
+                    plane0.dist);
+            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+                    f_next, plane2.norm.x, plane2.norm.y, plane2.norm.z,
+                    plane2.dist);
+            printf("plane : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+                    plane.norm.x, plane.norm.y, plane.norm.z,
+                    plane.dist);
+
+            plane0.norm.norm(1.);
+            plane2.norm.norm(1.);
+            if (plane0.norm * plane2.norm < 0.)
+                plane2.norm *= -1.;
+            
+            plane_dist = qmod(plane0.norm - plane2.norm);
+            printf("dist_plane(%d, %d) = %lf\n", f_prev_prev, f_next, plane_dist);
+            
+            if (plane_dist < EPS_PARALL) {
+                ifParallel = true;
+                printf("Facets %d and %d are parallel\n", f_prev_prev, f_next);
+                dist = fabs(plane.norm * vertex[index[i]] + plane.dist);
+                printf("dist(%d, plane) = %lf\n", index[i], dist);
+                dist /= sqrt(qmod(plane.norm));
+                printf("dist(%d, plane) = %lf\n", index[i], dist);
+            } else {   
+                ifParallel = false;
+                intersection(plane0, plane1, plane2, intrsct);
+                dist = qmod(vertex[index[i]] - intrsct);
+                dist = sqrt(dist);
+                printf("dist = %lf\n", dist);
+            }
             if (min_i == -1 || dist < min_dist) {
                 min_dist = dist;
                 min_i = i;
-                i_replace = i_prev;
+                i_replace = ifParallel ? min_i : i_prev;
             }
 
-            intersection(facet[f_prev].plane,
-                    facet[f_next].plane,
-                    facet[f_next_next].plane,
-                    intrsct);
-            dist = qmod(vertex[index[i]] - intrsct);
-            dist = sqrt(dist);
-            //                printf(", dist = %lf\n", dist);
+            plane0 = facet[f_prev].plane;
+            plane1 = facet[f_next].plane;
+            plane2 = facet[f_next_next].plane;
+
+            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+                    f_prev, plane0.norm.x, plane0.norm.y, plane0.norm.z,
+                    plane0.dist);
+            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+                    f_next_next, plane2.norm.x, plane2.norm.y, plane2.norm.z,
+                    plane2.dist);
+            printf("plane : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+                    plane.norm.x, plane.norm.y, plane.norm.z,
+                    plane.dist);
+            
+            plane0.norm.norm(1.);
+            plane2.norm.norm(1.);
+            if (plane0.norm * plane2.norm < 0.)
+                plane2.norm *= -1.;
+            
+            plane_dist = qmod(plane0.norm - plane2.norm);
+            printf("dist_plane(%d, %d) = %lf\n", f_prev, f_next_next, plane_dist);
+            
+            if (plane_dist < EPS_PARALL) {
+                ifParallel = true;
+                printf("Facets %d and %d are parallel\n", f_prev, f_next_next);
+                dist = fabs(plane.norm * vertex[index[i]] + plane.dist);
+                printf("dist(%d, plane) = %lf\n", index[i], dist);
+                dist /= sqrt(qmod(plane.norm));
+                printf("dist(%d, plane) = %lf\n", index[i], dist);
+            } else {   
+                ifParallel = false;
+                intersection(plane0, plane1, plane2, intrsct);
+                dist = qmod(vertex[index[i]] - intrsct);
+                dist = sqrt(dist);
+                printf("dist = %lf\n", dist);
+            }
             if (min_i == -1 || dist < min_dist) {
                 min_dist = dist;
                 min_i = i;
-                i_replace = i_next_next;
+                i_replace = ifParallel ? min_i : i_next_next;
             }
         }
         printf("min_i = %d, min_dist = %lf, i_replace = %d\n",
@@ -449,9 +464,14 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         printf("\tMoving ");
         print_vertex(index[min_i]);
 
-        if (min_dist > 1.)
+        if (min_dist > MAX_MIN_DIST) {
             break;
-
+//            i_replace = min_i;
+//            dist = fabs(plane.norm * vertex[index[min_i]] + plane.dist);
+//            dist /= sqrt(qmod(plane.norm));
+//            min_dist = dist;
+        }
+            
 
         printf("Cycle 2.\n");
         for (i = 0; i < nv; ++i) {
@@ -502,6 +522,9 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         }
         // Отдельно рассмотрим случай выбранной вершины. Эта вершина будет
         // удалена из списка.
+        // 2011.10.01 : Исключение будет в том случае, если были параллельные 
+        // вершины и номера заменяемой (min_i) и заменяющей (i_replace) точек 
+        // совпадают...
         v_replace = index[i_replace];
         i = min_i;
         if (i == 0) {
@@ -520,15 +543,20 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         //            facet[f_prev].get_next_facet(tmp0, tmp1, fid, tmp2);
         //!2
         facet[f_prev].find_next_facet2(index[i], fid);
-
+                
+        // Та самая исключительная ситуация :
+        if (min_i == i_replace) {
+            intersection(facet[f_prev].plane, facet[f_next].plane, dir, point);
+            dir.norm(min_dist);
+            printf("\tMoving vertex %d\n", index[i]);
+            vertex[index[i]] += dir;            
+        }
         // Точка сдвигается
         //            printf("f_prev = %d, f_next = %d, fid = %d\n", f_prev, f_next, fid);
-        if (fid == f_next) {
+        else if (fid == f_next) {
             printf("\tVertex %d is replaced by %d in facet %d\n", index[i], v_replace, f_prev);
-            //!2
             facet[f_prev].find_and_replace2(index[i], v_replace);
             printf("\tVertex %d is replaced by %d in facet %d\n", index[i], v_replace, f_next);
-            //!2
             facet[f_next].find_and_replace2(index[i], v_replace);
         }// Добавляется новая точка
         else {
@@ -540,25 +568,28 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             facet[f_next].add_before_position(index[2 * nv + 1 + i_next], v_replace, f_prev);
         }
 
-        for (j = i; j < nv - 1; ++j)
-            index[2 * nv + 1 + j] = index[2 * nv + 2 + j];
-        for (j = i; j < 2 * nv - 2; ++j)
-            index[nv + 1 + j] = index[nv + 2 + j];
-        for (j = i; j < 3 * nv - 2; ++j)
-            index[j] = index[j + 1];
-        //            for (j = i; j < nv - 1; ++j)
-        //                sign_vertex[j] = sign_vertex[j + 1];
-        --nv;
+        if (min_i != i_replace) {
+            for (j = i; j < nv - 1; ++j)
+                index[2 * nv + 1 + j] = index[2 * nv + 2 + j];
+            for (j = i; j < 2 * nv - 2; ++j)
+                index[nv + 1 + j] = index[nv + 2 + j];
+            for (j = i; j < 3 * nv - 2; ++j)
+                index[j] = index[j + 1];
+            //            for (j = i; j < nv - 1; ++j)
+            //                sign_vertex[j] = sign_vertex[j + 1];
+            --nv;
+            if (i == 0)
+                index[nv] = index[0];
+        }
         ndown = 0;
         for (i = 0; i < nv; ++i) {
             sign_vertex[i] = signum(vertex[index[i]], plane);
             if (sign_vertex[i] == -1)
                 ++ndown;
         }
-        if (i == 0)
-            index[nv] = index[0];
 
     }
+    printf("\t-------- After all steps : ndown = %d\n", ndown);
 
     first_facet = Facet(fid0, nv, plane, index, this, true);
     printf("Cycle 3.\n");
@@ -566,11 +597,15 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     facet[fid0].my_fprint_all(stdout);
     facet[fid1] = Facet();
     facet[fid1].my_fprint_all(stdout);
-    this->preprocess_polyhedron();
-    //        this->intersect(plane);
+    preprocess_polyhedron();
+    //    my_fprint(stdout);
+
+    //    clear_unused();
+    intersect(-plane);
     printf("End\n");
-    if (index != NULL)
-        delete[] index;
+    //    my_fprint(stdout);
+    //    if (index != NULL)    это не нужно, т. к. index = first_facet.index
+    //        delete[] index;   и поэтому удалится деструктором...
     if (sign_vertex != NULL)
         delete[] sign_vertex;
 }
@@ -598,3 +633,88 @@ void Polyhedron::print_vertex(int i) {
     printf("vertex %d : (%lf , %lf , %lf)\n",
             i, vertex[i].x, vertex[i].y, vertex[i].z);
 }
+
+void Polyhedron::clear_unused() {
+    int i, numf_used, numv_used, nf;
+    int *index_facet, *index_vertex;
+
+    printf("\tvertex analyse\n");
+
+    index_vertex = new int[numv];
+    numv_used = 0;
+    for (i = 0; i < numv; ++i) {
+        nf = vertexinfo[i].get_nf();
+        printf("\tanalyze vertex %d, nf = %d\n", i, nf);
+        if (nf > 0) {
+            index_vertex[numv_used++] = i;
+        }
+    }
+
+    printf("index_vertex : ");
+    for (i = 0; i < numv_used; ++i)
+        printf("%d ", index_vertex[i]);
+    printf("\n");
+
+    for (i = 0; i < numv_used; ++i) {
+        if (index_vertex[i] != i) {
+            printf("\treplacing vertex %d by vertex %d\n", i, index_vertex[i]);
+            find_and_replace_vertex(index_vertex[i], i);
+            vertex[i] = vertex[index_vertex[i]];
+            vertexinfo[i] = vertexinfo[index_vertex[i]];
+        }
+    }
+    numv = numv_used;
+
+    index_facet = new int[numf];
+    numf_used = 0;
+    for (i = 0; i < numf; ++i) {
+        if (facet[i].nv > 0) {
+            index_facet[numf_used++] = i;
+        }
+    }
+
+    printf("index_facet : ");
+    for (i = 0; i < numf_used; ++i)
+        printf("%d ", index_facet[i]);
+    printf("\n");
+
+    for (i = 0; i < numf_used; ++i) {
+        if (index_facet[i] != i) {
+            printf("\treplacing facet %d by facet %d\n", i, index_facet[i]);
+            find_and_replace_facet(index_facet[i], i);
+            facet[i] = facet[index_facet[i]];
+        }
+    }
+    numf = numf_used;
+
+    //    my_fprint(stdout);
+    preprocess_polyhedron();
+
+    if (index_vertex != NULL)
+        delete[] index_vertex;
+    if (index_facet != NULL)
+        delete[] index_facet;
+}
+
+void Polyhedron::find_and_replace_vertex(int from, int to) {
+    int i;
+    for (i = 0; i < numf; ++i) {
+        facet[i].find_and_replace_vertex(from, to);
+    }
+    for (i = 0; i < numv; ++i) {
+        vertexinfo[i].find_and_replace_vertex(from, to);
+    }
+}
+
+void Polyhedron::find_and_replace_facet(int from, int to) {
+    int i;
+    for (i = 0; i < numf; ++i) {
+        facet[i].find_and_replace_facet(from, to);
+    }
+    for (i = 0; i < numv; ++i) {
+        vertexinfo[i].find_and_replace_facet(from, to);
+    }
+}
+
+
+

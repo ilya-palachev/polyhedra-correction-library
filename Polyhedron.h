@@ -8,7 +8,8 @@
 
 #include "Vector3d.h"
 
-//#define DEBUG
+#define DEBUG
+#define DEBUG1
 //#define OUTPUT
 
 #define EPS_SIGNUM 1e-16
@@ -91,6 +92,10 @@ public:
         void delete_vertex_polyhedron(int v);
         int add_vertex(Vector3d& vec);
         void print_vertex(int i);
+       
+        void clear_unused();
+        void find_and_replace_vertex(int from, int to);
+        void find_and_replace_facet(int from, int to);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -123,7 +128,11 @@ public:
 	VertexInfo& operator = (const VertexInfo& orig);
 	~VertexInfo();
 
+        int get_nf();
 	void preprocess();
+        
+        void find_and_replace_facet(int from, int to);
+        void find_and_replace_vertex(int from, int to);
 
 	void fprint_my_format(FILE* file);
 	void my_fprint_all(FILE* file);
@@ -179,11 +188,13 @@ public:
 	void null_isUsed();
 	void get_first_edge(int& v0, int& v1, int& next_f, int& next_d);
 	void get_first_edge(int& v0, int& v1);
-	void get_next_edge(int& v0, int& v1, int& next_f, int& next_d);
-	void get_next_edge(int& v0, int& v1, int& i0, int& i1, int& next_f, int& next_d);
+	void get_next_edge(Plane iplane, int& v0, int& v1, int& next_f, int& next_d);
+	void get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, int& next_f, int& next_d);
 
 	void send(EdgeSet* edge_set);
 	void send_edges(EdgeSet* edge_set);
+        
+        void set_poly(Polyhedron* poly_orig);
 
 	//EdgeList_io,cpp
 	void my_fprint(FILE* file);
@@ -261,7 +272,8 @@ public:
 		FutureFacet& ff,
 		int& n_components);
 
-	void find_and_replace(int from, int to);
+	void find_and_replace_vertex(int from, int to);
+	void find_and_replace_facet(int from, int to);
 
 	//Facet_test.cpp
 	bool test_self_intersection();

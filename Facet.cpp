@@ -82,7 +82,7 @@ Facet::~Facet() {
 #ifdef DEBUG1
 	fprintf(stdout, "Deleting facet[%d]\n", id);
 #endif
-	if (index) delete[] index;
+	if (index != NULL) delete[] index;
 }
 
 int Facet::get_id() {

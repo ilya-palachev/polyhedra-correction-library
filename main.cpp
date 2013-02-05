@@ -68,9 +68,11 @@ int main(int argc, char** argv) {
 //79 196 184
 //84 169
 
-        test3("poly-test-1", 0, 5, 6);
+//        test3("poly-test-2", 0, 5, 6);
 //	test3("polyhedron-2010-12-19", 2, 67, 112);
-//	test3("polyhedron-2010-12-19", 2, 68, 106);
+	test3("polyhedron-2010-12-19", 2, 68, 106);
+        
+        
 //	test2("polyhedron-2010-12-19", 2, 69, 188);
 //	test2("polyhedron-2010-12-19", 2, 71, 115);
 //	test2("polyhedron-2010-12-19", 2, 72, 208);

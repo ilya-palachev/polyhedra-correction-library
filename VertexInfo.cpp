@@ -68,3 +68,7 @@ VertexInfo& VertexInfo::operator =(const VertexInfo& orig) {
 	}
 	return *this;
 }
+
+int VertexInfo::get_nf() {
+    return nf;
+}
