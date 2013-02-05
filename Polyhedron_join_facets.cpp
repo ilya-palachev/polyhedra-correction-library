@@ -545,16 +545,14 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
     index = facet[fid0].index;
     plane = facet[fid0].plane;
 
-    imin = -1;
+    printf("Предварительный анализ вершин: ");
     for (i = 0; i < nv; ++i) {
-        printf("\t\t2. 1. %d ). Обработка %d-й вершины : ", i, index[i]);
+        printf("\t\t2. 1. %d ). Предварительный анализ %d-й вершины : ", i, index[i]);
         if (signum(vertex[index[i]], plane) != -1) {
             printf("выше плоскости или на плоскости\n");
             continue;
         }
-        printf("ниже плоскости");
-        //        printf("\n");
-
+//        printf("\t%d ( %d )", i, index[i]);
         //Написано 2012-03-31 для решения проблемы с треугольными соседними гранями
         fl2 = index[nv + 1 + (nv + i - 2) % nv];
         fl1 = index[nv + 1 + (nv + i - 1) % nv];
@@ -571,7 +569,7 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
             pos = index[2 * nv + 1 + i];
             pos = (pos + 1) % 3;
             tmp = index[i];
-            printf("\nВместо вершины %d  в главной грани пишем вершину %d\n", index[i], facet[fr1].index[pos]);
+            printf(" - Вместо вершины %d  в главной грани пишем вершину %d\n", index[i], facet[fr1].index[pos]);
             index[i] = facet[fr1].index[pos];
             delete_vertex_polyhedron(tmp);
             facet[fr1] = Facet();
@@ -582,13 +580,23 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
             --i;
             facet[fid0].my_fprint_all(stdout);
             facet[fr2].my_fprint_all(stdout);
-            continue;
+//            continue;
         }
         //конец написанного 2012-03-31
+        printf("\n");
+    }
+    
+    imin = -1;
+    for (i = 0; i < nv; ++i) {
+        printf("\t\t2. 1. %d ). Обработка %d-й вершины : ", i, index[i]);
+        if (signum(vertex[index[i]], plane) != -1) {
+            printf("выше плоскости или на плоскости\n");
+            continue;
+        }
+        printf("ниже плоскости");
+        //        printf("\n");
 
         join_facets_rise_find_step(fid0, i, d);
-
-
 
         if (d < 0) {
             //Если перемещение отдаляет точку от плоскости
@@ -736,11 +744,11 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
     } else {
         // Если грани не параллельны:
         intersection(pl2, pl1, pr1, v1);
-        if (signum(v1, plane) == 1) {
-            // Если точка пересечения лежит выше плоскости:
-            printf("левая точка пересечения лежит выше плоскости\n");            
-            intersection(plane, pl1, pr1, v1);
-        } else 
+//        if (signum(v1, plane) == 1) {
+//            // Если точка пересечения лежит выше плоскости:
+//            printf("левая точка пересечения лежит выше плоскости\n");            
+//            intersection(plane, pl1, pr1, v1);
+//        } else 
             ifjoin = true;
         
     }
@@ -756,11 +764,11 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
     } else {
         // Если грани не параллельны:
         intersection(pl1, pr1, pr2, v2);
-        if (signum(v2, plane) == 1) {
-            // Если точка пересечения лежит выше плоскости:
-            printf("правая точка пересечения лежит выше плоскости\n");
-            intersection(plane, pl1, pr1, v2);
-        } else 
+//        if (signum(v2, plane) == 1) {
+//            // Если точка пересечения лежит выше плоскости:
+//            printf("правая точка пересечения лежит выше плоскости\n");
+//            intersection(plane, pl1, pr1, v2);
+//        } else 
             ifjoin = true;
         
     }
