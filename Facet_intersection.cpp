@@ -83,6 +83,12 @@ int Facet::prepare_edge_list(Plane iplane) {
 
 	int i0, i1, i2;
 	double s0, s1, s2;
+
+	int i_step, i_curr, i_help;
+	int up_down, in_out;
+	int next_d, next_f;
+	int ii;
+
 	
 	int n_positive;
 
@@ -124,7 +130,7 @@ int Facet::prepare_edge_list(Plane iplane) {
 			v_intrsct = poly->vertex[index[i]];
 			scalar = dir * (v_intrsct - point);
 			min3scalar(scalar, s0, s1, s2, i, i0, i1, i2);
-			el->add_edge(index[i], index[i], scalar);
+			el->add_edge(index[i], index[i], i, i, scalar);
 			++n_intrsct;
 		}
 
@@ -135,82 +141,33 @@ int Facet::prepare_edge_list(Plane iplane) {
 			intersection(iplane, v_next - v_curr, v_curr, v_intrsct);
 			scalar = dir * (v_intrsct - point);
 			min3scalar(scalar, s0, s1, s2, i, i0, i1, i2);
-			el->add_edge(index[i], index[i_next], scalar);
+			el->add_edge(index[i], index[i_next], i, i_next, scalar);
 			++n_intrsct;
 		}
 	}
 #ifdef DEBUG
-	this->my_fprint_all(stdout);
-	fprintf(stdout, 
-			"i0 = %d, s0 = %.2lf, i1 = %d, s1 = %.2lf, i2 = %d, s2 = %.2lf\n",
-			i0, s0, i1, s1, i2, s2);
+//	this->my_fprint_all(stdout);
+//	fprintf(stdout,
+//			"i0 = %d, s0 = %.2lf, i1 = %d, s1 = %.2lf, i2 = %d, s2 = %.2lf\n",
+//			i0, s0, i1, s1, i2, s2);
 #endif
-	return n_intrsct;
-}
 
-bool Facet::intersection(
-		Plane iplane,
-		FutureFacet* ff,
-		int& n_components,
-		int n_intrsct, 
-		int n_positive,
-		int i0, int i1, int i2) {
-
-	//return true => оставить грань
-	//return false => удалить грань
-	
-	int i, i_next, i_prev;
-	int sign_curr, sign_next, sign_prev;
-
-	int i_step, i_curr, i_help;
-	int up_down, in_out;
-	int next_d, next_f;
-	int ii;
-
-	int nv_new;
-	int* index_new;
-	int i_new;
-
-	int n_in_comp;
-	int v0, v1, src_f, id_v;
-	int n_components_0 = n_components;
-
-	EdgeList* el = &(poly->edge_list[id]);
-
+	//Утверждение. n_intrsct == 0 || n_intrsct > 1 , т. к. первый цикл отбрасывает
+	//висячие вершины
 	if (n_intrsct == 0) {
-		if (n_positive != nv)
-			return false;
-		else
-			return true;
-	}
-	if (n_intrsct == 1) {
-		//Утв. i0 != -1
-		if (n_positive != nv - 1)
-			return false;
-		else {
-			el->goto_header();
-			next_d = 0;
-			next_f = poly->vertexinfo[index[i0]].
-				intersection_find_next_facet(iplane, id);
-			el->set_curr_info(next_d, next_f);
-			return true;
-		}
+		return 0;
 	}
 
 	if (n_intrsct == 2) {
 		i_step = 1;
 	} else {
-		//Утв. i0 != -1 && i1 != -1 && i2 != -1
+		//Утверждение. i0 != -1 && i1 != -1 && i2 != -1
 		i_step = sign(i0, i1, i2);
+		// Проверка, что начальным выбран задний конец ребра
+		sign_curr = signum(i0, iplane);
+		if (i_step == -1 && sign_curr != 0)
+			i0 = (i0 + 1) % nv;
 	}
-	nv_new = n_intrsct + n_positive;
-	index_new = new int[3 * nv_new + 1];
-
-	i_step = sign(i0, i1, i2);
-	// Проверка, что начальным выбран задний конец ребра
-	sign_curr = signum(i0, iplane);
-	if (i_step == -1 && sign_curr != 0)
-		i0 = (i0 + 1) % nv;
 
 	i_curr = i0;
 	i_next = (i0 + i_step + nv) % nv;
@@ -221,65 +178,17 @@ bool Facet::intersection(
 	in_out = -1;
 
 	el->goto_header();
-	i_new = 0;
-	n_in_comp = 0;
-
-	FutureFacet small(2);
 
 	for (i = 0, ii = 0; i < nv; ++i) {
 
 		sign_curr = signum(i_curr, iplane);
 		sign_next = signum(i_next, iplane);
 
-		//Утв. На первом шаге sign_curr == 0 || sign_curr * sign_next == -1
-		if (sign_curr == 1) {
-			if (i > 0) {
-				//Утв. n_in_comp > 0
-				ff->add_edge(index[i_curr], index[i_curr], id);
-				++ n_in_comp;
-			} else {
-				//Утв. n_in_comp == 0
-				small->add_edge(index[i_curr], index[i_curr], id);
-			}
-		}
-		if (sign_curr == 1 && sign_next == - 1) {
-			if (i > 0) {
-				//Утв. n_in_comp > 0
-				ff->add_edge(index[i_curr], index[i_next], id);
-				ff->add_edge(- 1, - 1, id);
-				n_in_comp = 0;
-				++ n_components;
-			} else {
-				//Утв. n_in_comp == 0
-				small->add_edge(index[i_curr], index[i_next], id);
-			}
-		}
-		if (sign_curr == - 1 && sign_next == 1) {
-			//Утв. n_in_comp == 0
-			ff->add_edge(index[i_curr], index[i_next], id);
-			++ n_in_comp;
-		}
-		if (sign_curr == 0) {
-			if (n_in_comp == 0 && sign_next == 1) {
-				if (sign_next == 1) {
-					ff->add_edge(index[i_curr], index[i_curr], id);
-					++ n_in_comp;
-				} else if (i == 0) {
-					//sign_prev == 1
-					small->add_edge(index[i_curr], index[i_curr], id);
-					++ n_in_comp;
-				}
-			} else if (n_in_comp > 1) {
-				ff->add_edge(index[i_curr], index[i_curr], id);
-				ff->add_edge(- 1, - 1, id);
-				n_in_comp = 0;
-				++n_components;
-			}
-		}
-
 		if (sign_curr == 0 || sign_curr * sign_next == -1) {
-			if (sign_next == - up_down ||
-					sign_curr == 0 && in_out == -1) {
+			if (sign_next == - up_down 
+					|| sign_curr == 0 && in_out == -1
+					|| sign_curr * sign_next == -1        // 2011-04-04
+				) {
 				in_out *= -1;
 				up_down *= -1;
 				next_d = in_out;
@@ -294,34 +203,170 @@ bool Facet::intersection(
 				next_d = 0;
 				next_f = id;
 			}
-			el->set_curr_info(next_d, next_f);
-			if (++ii < n_intrsct)
-				el->go_forward();
+//			el->set_curr_info(next_d, next_f);
+//			if (++ii < n_intrsct)
+//				el->go_forward();
+			if (sign_curr * sign_next == -1)
+				el->search_and_set_info(index[i_curr], index[i_next],
+						next_d, next_f);
+			else
+				el->search_and_set_info(index[i_curr], index[i_curr],
+						next_d, next_f);
 		}
 
 		i_curr = i_next;
 		i_next = (i_next + i_step + nv) % nv;
 	}
 
-	int v0, v1, src_f, id_v;
-	if (sign_curr == 1 && sign_next != - 1) {
-		if (small.get_nv() == 1) {
-			small.get_edge(0, v0, v1, src_f, id_v);
-			ff->add_edge(v0, v1, id);
-		} else if(small.get_nv() == 2) {
-			small.get_edge(0, v0, v1, src_f, id_v);
-			ff->add_edge(v0, v1, id);
-			small.get_edge(1, v0, v1, src_f, id_v);
-			ff->add_edge(v0, v1, id);
+	return n_intrsct;
+}
+
+bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
+
+	int i;
+	int nintrsct;
+	int i0, i1;
+	int v0_first, v1_first;
+	int v0, v1;
+	int next_f, next_d;
+	int pointer;
+	int i_curr, i_next, i_prev;
+	int sign_curr, sign_next, sign_prev;
+	int sign0, sign1;
+	int i_step;
+
+//	fprintf(stdout, "**************Пересечение грани %d*************\n", id);
+
+	EdgeList* el = &(poly->edge_list[id]);
+	FutureFacet curr_component(2 * nv);
+
+	el->null_isUsed();
+//	el->my_fprint(stdout);
+	
+	n_components = 0;
+	nintrsct = el->get_num();
+	if (nintrsct == 0) {
+		n_components = 0;
+		for (i = 0; i < nv; ++i) {
+			sign_curr = signum(i, iplane);
+			if (sign_curr != 0)
+				break;
 		}
-		ff->add_edge(- 1, - 1, id);
-			++ n_components;
+		if (sign_curr == 1) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	//debug
-	fprintf(stdout, "facet %d : index_new : ", id);
-	for (i = 0; i < i_new; ++i)
-		fprintf(stdout, "%d ", index_new[i]);
-	fprintf(stdout, "\n");
+	while (nintrsct > 0) {
+//		fprintf(stdout, "Поиск компоненты %d\n", n_components);
+		el->get_first_edge(v0, v1);
+//		fprintf(stdout, "\tПервое ребро : %d %d\n", v0, v1);
+		v0_first = v0;
+		v1_first = v1;
+		--nintrsct;
+		
+		do {
+			next_d = 1;
+			do {
+				curr_component.add_edge(v0, v1, id);
+//				fprintf(stdout, "\tДобавлено ребро : %d %d\n", v0, v1);
+				el->get_next_edge(v0, v1, i0, i1, next_f, next_d);
+//				fprintf(stdout, "\t\t За ним следует ребро : %d %d\n", v0, v1);
+				--nintrsct;
+				if (i0 != i1)
+					break;
+				i_next = (i0 + 1) % nv;
+				i_prev = (nv + i0 - 1) % nv;
+				sign_next = signum(i_next, iplane);
+				sign_prev = signum(i_prev, iplane);
+			} while(sign_prev == 0 && sign_next == 0);
+			curr_component.add_edge(v0, v1, id);
+//			fprintf(stdout, "\tДобавлено ребро : %d %d\n", v0, v1);
 
+
+			if (i0 == i1) {
+				i_next = (i0 + 1) % nv;
+				i_prev = (nv + i0 - 1) % nv;
+				sign_next = signum(i_next, iplane);
+				sign_prev = signum(i_prev, iplane);
+				//Утверждение. sign_next != 0 || sign_prev != 0
+				if (sign_next <= 0 && sign_prev <= 0) {
+					// Построение компоненты прекращается
+					v0 = v0_first;
+					v1 = v1_first;
+					curr_component.free();
+					continue;
+				}
+				//Утверждение. sign_next == 1 || sign_prev == 1
+				//Утверждение. sign_next == 1 && sign_prev == 1 не может быть
+				i_step = sign_next == 1 ? 1 : -1;
+				i_curr = (i0 + i_step + nv) % nv;
+				sign_curr = signum(i_curr, iplane);
+			} else {
+				sign0 = signum(i0, iplane);
+				sign1 = signum(i1, iplane);
+				//Утверждение. sign0 == 1 || sign1 == 1
+				if (sign0 == 1) {
+					i_curr = i0;
+					sign_curr = sign0;
+					i_step = (i1 + 1) % nv == i0 ? 1 : -1;
+				} else {
+					i_curr = i1;
+					sign_curr = sign0;
+					i_step = (i0 + 1) % nv == i1 ? 1 : -1;
+				}
+			}
+
+			do {
+				curr_component.add_edge(index[i_curr], index[i_curr], id);
+//				fprintf(stdout,
+//						"\tДобавлено ребро : %d %d\n",
+//						index[i_curr], index[i_curr]);
+				i_curr = (i_curr + i_step + nv) % nv;
+				sign_curr = signum(i_curr, iplane);
+			} while (sign_curr == 1);
+			//Утверждение. sign_curr == 0 || sign_curr == -1
+			if (sign_curr == 0)
+				v0 = v1 = index[i_curr];
+			else {
+				v0 = index[(i_curr - i_step + nv) % nv];
+				v1 = index[i_curr];
+				if (v0 > v1) {
+					int tmp = v0;
+					v0 = v1;
+					v1 = tmp;
+				}
+			}
+		} while (!(v0 == v0_first && v1 == v1_first));
+
+
+		if (curr_component.get_nv() > 0) {
+//			fprintf(stdout, "Facet %d. Component %d : \n", id, n_components);
+//			curr_component.my_fprint(stdout);
+			curr_component.add_edge(- 1, - 1, id);
+			ff += curr_component;
+			curr_component.free();
+			++n_components;
+		}
+	}
+	el->null_isUsed();
+	return false;
 }
+
+void Facet::find_and_replace(int from, int to) {
+	for (int i = 0; i < nv + 1; ++i)
+		if (index[i] == from) {
+			index[i] = to;
+//			fprintf(stdout, "Facet %d : %d replaced to %d\n", id, from, to);
+
+		}
+}
+
+
+
+
+
+
+

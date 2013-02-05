@@ -223,7 +223,13 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	FILE* file;
 
 	file = (FILE*)fopen(filename, "rt");
-
+        
+        if(!file)
+	{
+		fprintf(stdout, "Polyhedron::fscan_default_1_1. Error. Cannot open file %s\n",
+				  filename);
+		return;
+	}
 	tmp = new char[255];
 	for(i = 0; i < 4; ++i)
 		if(fscanf(file, "%s", tmp) != 1)

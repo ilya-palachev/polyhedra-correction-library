@@ -22,7 +22,7 @@ Facet::Facet(
 		const int nv_orig,
 		const Plane plane_orig,
 		const int* index_orig,
-		Polyhedron* poly_orig,
+		Polyhedron* poly_orig = NULL,
 		const bool ifLong = false) :
 
 		id(id_orig),
@@ -36,9 +36,9 @@ Facet::Facet(
 
 
 
-	if (!poly) {
-		fprintf(stdout, "Facet::Facet. Error. poly = NULL\n");
-	}
+//	if (!poly) {
+//		fprintf(stdout, "Facet::Facet. Error. poly = NULL\n");
+//	}
 	if (!index_orig) {
 		fprintf(stdout, "Facet::Facet. Error. index_orig = NULL\n");
 	}
@@ -105,10 +105,19 @@ char Facet::get_rgb(int pos) {
 	return rgb[pos];
 }
 
+void Facet::set_id(int id1) {
+	id = id1;
+}
+
 void Facet::set_poly(Polyhedron* poly_new) {
 	poly = poly_new;
 }
 
+void Facet::set_rgb(char red, char gray, char blue) {
+	rgb[0] = red;
+	rgb[1] = gray;
+	rgb[2] = blue;
+}
 
 void Facet::get_next_facet(
 		int pos_curr,

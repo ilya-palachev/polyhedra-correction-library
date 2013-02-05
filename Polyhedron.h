@@ -9,8 +9,9 @@
 #include "Vector3d.h"
 
 //#define DEBUG
+//#define OUTPUT
 
-#define EPS_SIGNUM 1e-14
+#define EPS_SIGNUM 1e-16
 
 
 class Polyhedron;
@@ -46,6 +47,11 @@ public:
 //		FILE* log_file_orig);
 	~Polyhedron();
 
+	void get_boundary(
+		double& xmin, double& xmax,
+		double& ymin, double& ymax,
+		double& zmin, double& zmax);
+
 	//Polyhedron_io.cpp
 	void my_fprint(const char* filename);
 	void my_fprint(FILE* file);
@@ -71,7 +77,16 @@ public:
 	void poly_cube_cutted();
 
 	//Polyhedron_intersection.cpp
-	void intersection(Plane iplane);
+	void intersect(Plane iplane);
+	void intersect_test(int facet_id0, int facet_id1);
+
+	//Polyhedron_join_facets.cpp
+	int join_facets_count_nv(int facet_id0, int facet_id1);
+	void join_facets_create_vertex_list(int facet_id0, int facet_id1, int nv,
+													int* vertex_list, int* edge_list);
+	void list_squares_method(int nv, int* vertex_list, Plane* plane);
+	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
+
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -122,6 +137,8 @@ private:
 
 	int* edge0;
 	int* edge1;
+	int* ind0;
+	int* ind1;
 	int* next_facet;
 	int* next_direction;
 	double* scalar_mult;
@@ -137,23 +154,32 @@ public:
 	EdgeList(const EdgeList& orig);
 	~EdgeList();
 	EdgeList& operator = (const EdgeList& orig);
+	int get_num();
 //	void set_facet(Facet* facet_orig);
-
-	//EdgeList_intersection.cpp
-	void add_edge(int v0, int v1, int next_f, int next_d, double sm);
-	void add_edge(int v0, int v1, double sm);
-	void prepare_next_direction();
-	void get_next_edge(int& v0, int& v1, int& next_f, int& next_d);
-	void get_first_edge(int& v0, int& v1);
 	void set_id_v_new(int id_v);
 	void set_isUsed(bool val);
 	void set_pointer(int val);
 
 	void goto_header();
 	void go_forward();
+
+	int get_pointer();
+	void set_isUsed();
+
+	//EdgeList_intersection.cpp
+	void add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d, double sm);
+	void add_edge(int v0, int v1, int i0, int i1, double sm);
 	void set_curr_info(int next_d, int next_f);
 
-	void send_to_edge_set(EdgeSet* edge_set);
+	void search_and_set_info(int v0, int v1, int next_d, int next_f);
+	void null_isUsed();
+	void get_first_edge(int& v0, int& v1, int& next_f, int& next_d);
+	void get_first_edge(int& v0, int& v1);
+	void get_next_edge(int& v0, int& v1, int& next_f, int& next_d);
+	void get_next_edge(int& v0, int& v1, int& i0, int& i1, int& next_f, int& next_d);
+
+	void send(EdgeSet* edge_set);
+	void send_edges(EdgeSet* edge_set);
 
 	//EdgeList_io,cpp
 	void my_fprint(FILE* file);
@@ -161,7 +187,7 @@ public:
 
 class Facet
 {
-private:
+public:
 	int id;
 	int nv;
 	Plane plane;
@@ -196,7 +222,9 @@ public:
 		int& fid_next,
 		int& v_curr);
 
+	void set_id(int id1);
 	void set_poly(Polyhedron* poly_new);
+	void set_rgb(char red, char gray, char blue);
 
 	//Facet_preprocess.cpp
 	void preprocess_free();
@@ -223,11 +251,13 @@ public:
 	//Facet_intersecion.cpp
 	int signum(int i, Plane plane);
 	int prepare_edge_list(Plane iplane);
-	bool intersection(
-		Plane iplane, 
-		FutureFacet* ff,
-		int& n_components,
-		int n_intrsct, int n_positive, int i0, int i1, int i2);
+	
+	bool intersect(
+		Plane iplane,
+		FutureFacet& ff,
+		int& n_components);
+
+	void find_and_replace(int from, int to);
 
 	//Facet_test.cpp
 	bool test_self_intersection();
@@ -249,6 +279,9 @@ public:
 	FutureFacet(int nv_orig);
 	FutureFacet(const FutureFacet& orig);
 	FutureFacet& operator = (const FutureFacet& orig);
+	FutureFacet& operator += (const FutureFacet& v);
+	void free();
+	
 
 	int get_nv();
 
@@ -261,7 +294,12 @@ public:
 	void my_fprint(FILE* file);
 	
 	//FutureFacet_intersection.cpp
-	Facet generate_facet();
+	void generate_facet(
+		Facet& facet,
+		int fid,
+		Plane& iplane,
+		int numv,
+		EdgeSet* es);
 };
 
 class EdgeSet {
@@ -314,6 +352,9 @@ public:
 		int numv,
 		EdgeList* edge_list,
 		FutureFacet* future_facet);
+
+	//EdgeSet_io.cpp
+	void my_fprint(FILE* file);
 };
 
 

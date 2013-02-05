@@ -59,7 +59,7 @@ int EdgeSet::search_edge(int v0, int v1) {
 
 	while (first < last) {
 		mid = (first + last) / 2;
-		if (v0 < edge0[mid] || ((v0 == edge0[mid]) && (v1 < edge1[mid]))) {
+		if (v0 < edge0[mid] || ((v0 == edge0[mid]) && (v1 <= edge1[mid]))) {
 			last = mid;
 		} else {
 			first = mid + 1;

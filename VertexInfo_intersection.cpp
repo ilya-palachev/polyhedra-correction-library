@@ -11,6 +11,6 @@ int VertexInfo::intersection_find_next_facet(Plane iplane, int facet_id) {
 			if (index[i] != facet_id)
 				return index[i];
 	}
-	fprintf(stdout, "VertexInfo::intersection_find_next_facet : Error.\n");
+//	fprintf(stdout, "VertexInfo::intersection_find_next_facet : Error.\n");
 	return -1;
 }

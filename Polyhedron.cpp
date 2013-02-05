@@ -56,3 +56,35 @@ int Polyhedron::signum(Vector3d point, Plane plane)
 		return 0;
 	return d > 0 ? 1 : (d < 0 ? -1 : 0);
 }
+
+void Polyhedron::get_boundary(
+		double& xmin, double& xmax,
+		double& ymin, double& ymax,
+		double& zmin, double& zmax) {
+	int i;
+	double tmp;
+
+	xmin = xmax = vertex[0].x;
+	ymin = ymax = vertex[0].y;
+	zmin = zmax = vertex[0].z;
+
+	for (i = 0; i < numv; ++i) {
+		tmp = vertex[i].x;
+		if (tmp > xmax)
+			xmax = tmp;
+		if (tmp < xmin)
+			xmin = tmp;
+
+		tmp = vertex[i].y;
+		if (tmp > ymax)
+			ymax = tmp;
+		if (tmp < ymin)
+			ymin = tmp;
+
+		tmp = vertex[i].z;
+		if (tmp > zmax)
+			zmax = tmp;
+		if (tmp < zmin)
+			zmin = tmp;
+	}
+}
