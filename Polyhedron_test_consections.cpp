@@ -13,6 +13,9 @@
 
 int Polyhedron::test_consections() {
     int count;
+#ifdef TCPRINT
+    printf("Begin test_consections...\n");
+#endif
 
     count = 0;
     count += test_inner_consections();
@@ -27,12 +30,15 @@ int Polyhedron::test_inner_consections() {
     int i, count;
 
     double *A, *b;
+    Vector3d* vertex_old;
+    
     A = new double[4];
     b = new double[2];
+    vertex_old = new Vector3d[numf];
 
     count = 0;
     for (i = 0; i < numf; ++i) {
-        count += test_inner_consections_facet(i, A, b);
+        count += test_inner_consections_facet(i, A, b, vertex_old);
     }
 #ifdef TCPRINT
     if (count > 0)
@@ -42,16 +48,35 @@ int Polyhedron::test_inner_consections() {
         delete[] A;
     if (b != NULL)
         delete[] b;
+    if (vertex_old != NULL)
+        delete[] vertex_old;
 
     return count;
 }
 
-int Polyhedron::test_inner_consections_facet(int fid, double* A, double* b) {
+int Polyhedron::test_inner_consections_facet(int fid, double* A, double* b, Vector3d* vertex_old) {
+    
     int i, j, nv, *index, count;
+    Vector3d v;
+    Plane plane;
+    //Написано для случая, когда немного нарушена плоскостность грани
+    //Перед проверкой на самопересечение все вершины грани проецируются на 
+    //плоскость наименьших квадратов (2012-03-12)
+//    printf("\tBegin test_inner_consections_facet(%d)\n", fid);
 
     nv = facet[fid].nv;
     index = facet[fid].index;
+    plane = facet[fid].plane;
+//    vertex_old = new Vector3d[nv];
 
+    for (i = 0; i < nv; ++i) {
+        v = vertex[index[i]];
+        vertex_old[i] = v;
+        vertex[index[i]] = plane.project(v);
+    }
+    
+
+            
     count = 0;
     for (i = 0; i < nv; ++i) {
         for (j = i + 1; j < nv; ++j) {
@@ -72,6 +97,9 @@ int Polyhedron::test_inner_consections_facet(int fid, double* A, double* b) {
 #endif
 //    if (count > 0)
 //        facet[fid].my_fprint(stdout);
+    for (i = 0; i < nv; ++i) {
+        vertex[index[i]] = vertex_old[i];
+    }
     return count;
 }
 
@@ -186,7 +214,7 @@ int Polyhedron::test_inner_consections_pair(int fid, int id0, int id1, int id2, 
 
     if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.) {
 #ifdef TCPRINT        
-        printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id2, id1, id3);
+        printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
 #endif
         return 1;
     } else

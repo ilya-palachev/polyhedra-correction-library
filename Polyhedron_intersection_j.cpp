@@ -1,19 +1,12 @@
 #include "Polyhedron.h"
 
-void my_fprint_Vector3d(Vector3d& v, FILE* file) {
-    fprintf(file, "(%lf, %lf, %lf)\n",
-            v.x, v.y, v.z);
-}
+//void my_fprint_Vector3d(Vector3d& v, FILE* file) {
+//    fprintf(file, "(%lf, %lf, %lf)\n",
+//            v.x, v.y, v.z);
+//}
 
-void Polyhedron::set_isUsed(int v0, int v1, bool val) {
-    int i;
-    for (i = 0; i < numf; ++i) {
-        edge_list[i].set_isUsed(v0, v1, val);
-    }
-}
-
-void Polyhedron::intersect(Plane iplane) {
-
+void Polyhedron::intersect_j(Plane iplane, int jfid) {
+    
     int i, j, k, j_begin;
     int nume;
     int res, total_edges;
@@ -52,6 +45,12 @@ void Polyhedron::intersect(Plane iplane) {
     int numv_res;
 
     Vector3d vec0, vec1, vec;
+    Vector3d MC = facet[jfid].find_mass_centre();
+    printf("MC[%d] = (%lf, %lf, %lf)\n", jfid, MC.x, MC.y, MC.z);
+    Vector3d A0, A1, n, nn;
+    double mc;
+    
+    n = facet[jfid].plane.norm;
 
     fprintf(stdout, "\n======================================================\n");
     fprintf(stdout, "Intersection the polyhedron by plane : \n");
@@ -77,32 +76,20 @@ void Polyhedron::intersect(Plane iplane) {
 
     total_edges = 0;
     for (i = 0; i < numf; ++i) {
+//        if (i == jfid)
+//            continue;
         edge_list[i] = EdgeList(i, facet[i].get_nv(), this);
         res = facet[i].prepare_edge_list(iplane);
         edge_list[i].send(&total_edge_set);
         edge_list[i].send_edges(&edge_set);
-#ifdef DEBUG
-        //		if (edge_list[i].get_num() == 2)
-        edge_list[i].my_fprint(stdout);
-        switch (edge_list[i].get_num()) {
-            case 2:
-                ++n_2;
-                break;
-            case 0:
-                ++n_0;
-                break;
-            default:
-                ++n_big;
-        }
-#endif
         num_edges[i] = res;
         edge_list[i].set_poly(this);
     }
-#ifdef DEBUG
-    fprintf(stdout, "n_2 = %d, n_0 = %d, n_big = %d", n_2, n_0, n_big);
-#endif
     total_edges = total_edge_set.get_num();
+//    total_edges += facet[jfid].nv;//2012-03-10
 
+    edge_list[jfid].my_fprint(stdout);
+    
     // 2. Нахождение компонент сечения
     FutureFacet buffer_new(nume);
 
@@ -110,9 +97,10 @@ void Polyhedron::intersect(Plane iplane) {
     num_components_new = 0;
     bool flag = true;
     while (total_edges > 0 && flag) {
+        printf("total_edges = %d\n", total_edges);
 
         for (i = 0; i < numf; ++i) {
-            if (num_edges[i] > 0)
+            if (num_edges[i] > 0 && i != jfid)
                 break;
         }
         fid_curr = i;
@@ -120,11 +108,85 @@ void Polyhedron::intersect(Plane iplane) {
             continue;
         }
         edge_list[fid_curr].get_first_edge(v0, v1);
-        fid_next = fid_curr;
         v0_first = v0;
         v1_first = v1;
+        fid_next = fid_curr;        
+        edge_list[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
+        printf("Firstly fid_curr = %d, v0_first = %d, v1_first = %d, fid_next = %d, v0 = %d, v1 = %d\n", 
+                fid_curr, v0_first, v1_first, fid_next, v0, v1);
+
+        if (v0_first == v1_first) {
+            A0 = vertex[v0_first];
+        } else {
+            if (fabs(iplane % vertex[v0_first]) > fabs(iplane % vertex[v1_first])) {
+                A0 = vertex[v1_first];
+            } else {
+                A0 = vertex[v0_first];
+            }
+        }
+        if (v0 == v1) {
+            A1 = vertex[v0];
+        } else {
+            if (fabs(iplane % vertex[v0]) > fabs(iplane % vertex[v1])) {
+                A1 = vertex[v1];
+            } else {
+                A1 = vertex[v0];
+            }
+        }
+        nn = ((A0 - MC) % (A1 - MC));
+        printf("nn = (%lf, %lf, %lf)\n", nn.x, nn.y, nn.z);
+        printf("n = (%lf, %lf, %lf)\n", n.x, n.y, n.z);
+        mc = nn * n;
+        printf("mc = %lf\n", mc);
+        if (mc  <  0) {
+            printf("Negative direction detected...\n");
+            edge_list[fid_curr].set_isUsed(v0, v1, false);
+            edge_list[fid_curr].set_isUsed(v0_first, v1_first, false);
+            v0_first = v0;
+            v1_first = v1;
+            fid_next = fid_curr;
+//            drctn = 1;
+            
+        }
+//        if (drctn == -1) {
+//            printf("Negative direction detected...\n");
+//            v0_first = v0;
+//            v1_first = v1;
+//            drctn = 1;
+//            edge_list[fid_curr].set_isUsed(v0, v1, false);
+//        }
+//
+//        v0_first = v0;
+//        v1_first = v1;
+        printf("\t\t\tv0_first = %d, v1_first = %d\n", v0_first, v1_first);
         lenff[num_components_new] = 0;
         do {
+            printf("\t\t\tfid_curr = %d, fid_next = %d, v0 = %d, v1 = %d\n", 
+                    fid_curr, fid_next, v0, v1);
+//            edge_list[fid_curr].my_fprint(stdout);
+            //Начало написанного 2012-03-10
+//            int i0, i1, nnv;
+//            if (fid_curr == jfid) {
+//                
+//                nnv = facet[jfid].nv;
+//                
+//                i0 = facet[jfid].find_vertex(v0);
+//                i1 = facet[jfid].find_vertex(v1);
+//                
+//                if (i0 == -1 && i1 == -1) {
+//                    printf("Error. Cannot find neigher %d nor %d in main facet %d\n", v0, v1, jfid);
+//                    return;
+//                }
+//                
+//                if (i0 == -1)
+//                    i0 = i1;
+//                
+//                i0 = (nnv + i0 + 1) % nnv;
+//                if (signum(vertex[facet[jfid].index[i0]], iplane) == 0) {
+//                    fid_next = jfid;
+//                }
+//            }
+            //Конец написанного 2012-03-10
             if (edge_list[fid_next].get_num() < 1) {
                 if (fid_next != fid_curr)
                     drctn = 0;
@@ -140,36 +202,24 @@ void Polyhedron::intersect(Plane iplane) {
             if (v0 != v1) {
                 edge_set.add_edge(v0, v1);
             }
-#ifdef DEBUG
-            //			if (v0 == 7352) {
-            //				scanf("%d", &i);
-            ////				facet[fid_curr].my_fprint_all(stdout);
-            ////				vertexinfo[v0].my_fprint_all(stdout);
-            //				edge_list[fid_curr].my_fprint(stdout);
-            //			}
-            //			fprintf(stdout, "v0 = %d, v1 = %d, fid = %d\n", v0, v1, fid_curr);
-#endif
             buffer_new.add_edge(v0, v1, fid);
             if (buffer_new.get_nv() >= nume) {
                 fprintf(stdout, "Error. Stack overflow  in buffer_new\n");
                 return;
             }
-
-            //            facet[fid_curr].my_fprint_all(stdout);
-            //            edge_list[fid_curr].my_fprint(stdout);
-
             v0_prev = v0;
             v1_prev = v1;
 
             edge_list[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
+            printf("drctn = %d\n", drctn);
+            
+            
             if ((v0_prev == v0 && v1_prev == v1) || (v0_prev == v1 && v1_prev == v0)) {
                 fprintf(stdout, "Endless loop!!!!!\n");
                 flag = false;
                 break;
             }
-            if (v0 == 147 && v1 == 149 && fid_next == 52) {
-                1;
-            }
+            
             if (fid_next != fid_curr)
                 --num_edges[fid_curr];
 
@@ -209,8 +259,11 @@ void Polyhedron::intersect(Plane iplane) {
     num_saved_facets = 0;
     ifSaveFacet = new bool[numf];
     for (i = 0; i < numf; ++i) {
-        printf("\tГрань %d\n", i);
         ifSaveFacet[i] = facet[i].intersect(iplane, buffer_old, num_components_local);
+        printf("\tГрань %d", i);
+        printf(" - %d компонент\n", num_components_local);
+        if (num_components_local > 1)
+            printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
         if (!ifSaveFacet[i])
             printf("Facet %d is candidate for deleting\n", i);
         if (facet[i].nv < 3)
@@ -314,6 +367,7 @@ void Polyhedron::intersect(Plane iplane) {
         if (ifSaveFacet[i]) {
             facet_res[j] = facet[i];
             facet_res[j].set_id(j);
+//            printf("Грани %d переприсвоен новый номер: %d\n", i, j);
             ++j;
         }
     }
@@ -341,11 +395,11 @@ void Polyhedron::intersect(Plane iplane) {
         vertex_new[i] = vec;
     }
 
-#ifdef OUTPUT
-    fprintf(stdout, "%d new vertexes: \n", numv_new);
-    for (i = 0; i < numv_new; ++i)
-        my_fprint_Vector3d(vertex_new[i], stdout);
-#endif
+//#ifdef OUTPUT
+//    fprintf(stdout, "%d new vertexes: \n", numv_new);
+//    for (i = 0; i < numv_new; ++i)
+//        my_fprint_Vector3d(vertex_new[i], stdout);
+//#endif
 
     numv_res = 0;
     for (i = 0; i < numv; ++i) {
@@ -409,39 +463,5 @@ void Polyhedron::intersect(Plane iplane) {
         delete[] facet_new;
     if (ifMultiComponent != NULL)
         delete[] ifMultiComponent;
-}
 
-//void Polyhedron::intersect_test(int facet_id0, int facet_id1) {
-//    int i;
-//    int nv, *vertex_list, *edge_list, *vertex_cut;
-//    int n_plus, n_minus;
-//
-//    Plane plane;
-//
-//    nv = this->join_facets_count_nv(facet_id0, facet_id1);
-//    if (nv <= 0)
-//        return;
-//
-//    vertex_list = new int[nv];
-//    edge_list = new int[nv];
-//    vertex_cut = new int[nv]; //TODO
-//    this->join_facets_create_vertex_list(facet_id0, facet_id1, nv, vertex_list, edge_list);
-//    this->list_squares_method(nv, vertex_list, &plane);
-//
-//    n_plus = n_minus = 0;
-//    for (i = 0; i < numv; ++i) {
-//        switch (signum(vertex[i], plane)) {
-//            case 1:
-//                ++n_plus;
-//                break;
-//            case -1:
-//                ++n_minus;
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-//    if (n_minus > n_plus)
-//        plane = -plane;
-//    this->intersect(plane);
-//}
+}

@@ -11,8 +11,8 @@
 //#define DEBUG
 //#define DEBUG1
 #define OUTPUT
-//#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
-#define EPS_SIGNUM 1e-16
+#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
+#define EPS_SIGNUM 1e-15
 
 
 class Polyhedron;
@@ -84,6 +84,7 @@ public:
 	void poly_cube_cutted();
 
 	//Polyhedron_intersection.cpp
+        void set_isUsed(int v0, int v1, bool val);
 	void intersect(Plane iplane);
 	void intersect_test(int facet_id0, int facet_id1);
 
@@ -105,14 +106,21 @@ public:
         
         /////////////////////////////////////////
         void join_facets(int fid0, int fid1);
-        void join_facets_calculate_plane(int fid0, int fid1, Plane& plane, int& nv);
-        void join_facets_build_index(int fid0, int fid1, Plane plane, Facet& join_facet, int& nv);
-        void join_facets_rise(int fid0, int fid1);
-        void join_facets_rise_find(int fid0, int fid1, int& imin);
-        void join_facets_rise_find_step(int fid0, int fid1, int i, double& d);
-        void join_facets_rise_point(int fid0, int fid1, int imin);
+        void multi_join_facets(int n, int* fid);
+//        void join_facets_calculate_plane(int fid0, int fid1, Plane& plane, int& nv);
+        void join_facets_calculate_plane(int fid0, int fid1, Facet& join_facet, Plane& plane);
+        void multi_join_facets_calculate_plane(int n, int* fid, Facet& join_facet, Plane& plane);
+        void join_facets_build_index(int fid0, int fid1, Plane& plane, Facet& join_facet, int& nv);
+        void multi_join_facets_build_index(int n, int* fid, Plane& plane, Facet& join_facet, int& nv);
+        void join_facets_rise(int fid0);
+        void join_facets_rise_find(int fid0, int& imin);
+        void join_facets_rise_find_step(int fid0, int i, double& d);
+        void join_facets_rise_point(int fid0, int imin);
         
         int test_structure();
+        
+        //Polyhedron_intersection_j.cpp
+        void intersect_j(Plane iplane, int jfid);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -131,19 +139,22 @@ public:
         
         //Polyhedron_deform_linear.cpp
         void deform_linear(int id, Vector3d delta);
+        void deform_linear2(int id, Vector3d delta);
         void deform_linear_partial(int id, Vector3d delta, int num);
         void deform_linear_facets(double* x, double* y, double* z);
         void deform_linear_vertices(int id, double K, double* A, double* B, double* x, double* y, double* z);
+        void deform_linear_vertices(double K, double* A, double* B);
         double deform_linear_calculate_error();
         double deform_linear_calculate_deform(double* x, double* y, double* z);
         double min_dist(int id);
         void import_coordinates(Polyhedron& orig);
 
         void deform_linear_test(int id, Vector3d delta, int mode, int& num_steps, double& norm_sum);
+        
         //Polyhedron_test_consections.cpp
         int test_consections();
         int test_inner_consections();
-        int test_inner_consections_facet(int fid, double* A, double* b);
+        int test_inner_consections_facet(int fid, double* A, double* b, Vector3d* vertex_old);
         int test_inner_consections_pair(
                 int fid, int id0, int id1, int id2, int id3, double* A, double* b);
         int test_outer_consections();
@@ -151,6 +162,9 @@ public:
         int test_outer_consections_edge(int id0, int id1);
         int test_outer_consections_pair(int id0, int id1, int fid);
         
+        //Polyhedron_simplify.cpp
+        int simplify_vertex(double eps);
+        double dist_vertex(int i, int j);
         
 };
 
@@ -231,6 +245,7 @@ public:
 
 	int get_pointer();
 	void set_isUsed();
+	void set_isUsed(int v0, int v1, bool val);
 
 	//EdgeList_intersection.cpp
 	void add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d, double sm);
@@ -347,6 +362,8 @@ public:
         void remove(int pos);
         void update_info();
         int test_structure();
+        
+        Vector3d& find_mass_centre();
         
 };
 

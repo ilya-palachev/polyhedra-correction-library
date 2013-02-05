@@ -103,6 +103,33 @@ int Facet::prepare_edge_list(Plane iplane) {
     // 1. Вычисляем напр вектор пересечения грани с плоскостью
     bool if_intersect = intersection(iplane, plane, dir, point);
     if (!if_intersect) {
+//        printf("===Facet::prepare_edge_list : cannot prepare list for facet %d because planes are parallel or equal...\n", id);
+        // Написано исключительно для программы слияния хорошо сопрягающихся граней.
+        // Здесь предполагается, что в такой грани может быть нарушена плоскостность,
+        // то есть вершины могут немного не лежать в плоскости грани.
+        // В грани могут быть только отрицательные и нулевые вершины (этого мы добиваемся
+        // в процессе поднятия вершин - см. функцию Polyhedron::join).
+        
+        printf("Facet::prepare_edge_list [%d]: special case\n", id);
+        
+        
+        for (i = 0; i < nv; ++i) {
+            i_next = (i + 1) % nv;
+            i_prev = (nv + i - 1) % nv;
+            sign_curr = signum(i, iplane);
+            sign_next = signum(i_next, iplane);
+            sign_prev = signum(i_prev, iplane);
+            printf(" %d", sign_curr);
+            
+            if (sign_curr == 0 && sign_next == -1) {
+                el->add_edge(index[i], index[i], i, i, index[nv + 1 + i], 1, (double)i);
+            } else if (sign_curr == 0 && sign_next == 0) {
+                el->add_edge(index[i], index[i], i, i, id, 1, (double)i);
+            }
+            
+        }
+        printf("\n");
+        
         return 0;
     }
 
@@ -159,6 +186,7 @@ int Facet::prepare_edge_list(Plane iplane) {
     }
 
     if (n_intrsct == 2) {
+        printf("------For facet %d i_step = 1\n", id);
         i_step = 1;
     } else {
         //Утверждение. i0 != -1 && i1 != -1 && i2 != -1
@@ -169,6 +197,60 @@ int Facet::prepare_edge_list(Plane iplane) {
             i0 = (i0 + 1) % nv;
     }
 
+    i_curr = i0;
+    i_next = (i0 + i_step + nv) % nv;
+    i_prev = (i0 - i_step + nv) % nv;
+
+    sign_prev = signum(i_prev, iplane);
+    up_down = sign_prev;
+    in_out = -1;
+
+    el->goto_header();
+    bool ifFailed = false;
+
+    for (i = 0, ii = 0; i < nv; ++i) {
+
+        sign_curr = signum(i_curr, iplane);
+        sign_next = signum(i_next, iplane);
+
+        if (sign_curr == 0 || sign_curr * sign_next == -1) {
+            if (sign_next == -up_down
+                    || sign_curr == 0 && in_out == -1
+                    || sign_curr * sign_next == -1 // 2011-04-04
+                    ) {
+                in_out *= -1;
+                up_down *= -1;
+                next_d = in_out;
+                if (sign_curr == 0)
+                    next_f = poly->vertexinfo[index[i_curr]].
+                        intersection_find_next_facet(iplane, id);
+                else {
+                    i_help = i_step == 1 ? i_curr : i_next;
+                    next_f = index[i_help + nv + 1];
+                }
+            } else {
+                printf("-----For facet %d we have critical situation...\n", id);
+                ifFailed = true;
+                break;
+//                next_d = 0;
+//                next_f = id;
+            }
+            //			el->set_curr_info(next_d, next_f);
+            //			if (++ii < n_intrsct)
+            //				el->go_forward();
+            if (sign_curr * sign_next == -1)
+                el->search_and_set_info(index[i_curr], index[i_next],
+                    next_d, next_f);
+            else
+                el->search_and_set_info(index[i_curr], index[i_curr],
+                    next_d, next_f);
+        }
+
+        i_curr = i_next;
+        i_next = (i_next + i_step + nv) % nv;
+    }
+    
+    i_step *= -1;
     i_curr = i0;
     i_next = (i0 + i_step + nv) % nv;
     i_prev = (i0 - i_step + nv) % nv;
@@ -200,12 +282,10 @@ int Facet::prepare_edge_list(Plane iplane) {
                     next_f = index[i_help + nv + 1];
                 }
             } else {
+                printf("-----For facet %d we have critical situation AGAIN!!!...\n", id);
                 next_d = 0;
                 next_f = id;
             }
-            //			el->set_curr_info(next_d, next_f);
-            //			if (++ii < n_intrsct)
-            //				el->go_forward();
             if (sign_curr * sign_next == -1)
                 el->search_and_set_info(index[i_curr], index[i_next],
                     next_d, next_f);
@@ -245,6 +325,7 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
     }
     if (fabs(err) < 1e-16) {
         return false;
+//        return true; //2012-03-10
     }
     if (id == -1)
         return false;
@@ -285,6 +366,7 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
             do {
                 curr_component.add_edge(v0, v1, id);
                 //				fprintf(stdout, "\tДобавлено ребро : %d %d\n", v0, v1);
+                next_f = id; //2012-03-10
                 el->get_next_edge(iplane, v0, v1, i0, i1, next_f, next_d);
                 //				fprintf(stdout, "\t\t За ним следует ребро : %d %d\n", v0, v1);
                 --nintrsct;

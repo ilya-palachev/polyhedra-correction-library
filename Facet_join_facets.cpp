@@ -17,7 +17,7 @@ void Facet::clear_bad_vertexes() {
     if (index[2 * nv] == index[nv + 1]) {
         poly->delete_vertex_polyhedron(index[0]);
         this->delete_vertex(index[0]);
-        this->my_fprint_all(stdout);        
+        this->my_fprint_all(stdout);
     }
 }
 
@@ -39,7 +39,7 @@ void Facet::delete_vertex(int v) {
     }
     if (found == 1) {
         printf("\tdelete_vertex(%d) in facet %d\n", v, id);
-//        this->my_fprint_all(stdout);
+        //        this->my_fprint_all(stdout);
     }
 }
 
@@ -153,23 +153,23 @@ void Facet::find_and_replace2(int from, int to) {
 }
 
 int Facet::find_total(int what) {
-   int i;
-   for (i = 0; i < 3 * nv + 1; ++i)
-       if (index[i] == what)
-           return i;
-   return -1;
+    int i;
+    for (i = 0; i < 3 * nv + 1; ++i)
+        if (index[i] == what)
+            return i;
+    return -1;
 }
 
 int Facet::find_vertex(int what) {
-   int i;
-   for (i = 0; i < nv; ++i)
-       if (index[i] == what)
-           return i;
-   return -1;    
+    int i;
+    for (i = 0; i < nv; ++i)
+        if (index[i] == what)
+            return i;
+    return -1;
 }
 
 void Facet::add(int what, int pos) {
-    
+
     int i, *index_new;
     printf("add %d at position %d in facet %d\n", what, pos, id);
     printf("{{{\n");
@@ -177,12 +177,12 @@ void Facet::add(int what, int pos) {
 
     if (pos < nv) {
         index_new = new int[3 * nv + 4];
-        
+
         for (i = 3 * nv + 3; i > 2 * (nv + 1) + 1 + pos; --i) {
             index_new[i] = index[i - 3];
         }
         index_new[2 * (nv + 1) + 1 + pos] = -1;
-        for (i = 2 * (nv + 1); i > nv + 1 + 1 + pos; --i) {
+        for (i = 2 * (nv + 1) + pos; i > nv + 1 + 1 + pos; --i) {
             index_new[i] = index[i - 2];
         }
         index_new[nv + 1 + 1 + pos] = -1;
@@ -209,7 +209,7 @@ void Facet::remove(int pos) {
     printf("remove position %d (vertex %d) in facet %d\n", pos, index[pos], id);
     printf("{{{\n");
     this->my_fprint_all(stdout);
-    
+
     for (i = pos; i < nv + pos; ++i) {
         index[i] = index[i + 1];
     }
@@ -225,29 +225,31 @@ void Facet::remove(int pos) {
 }
 
 void Facet::update_info() {
-    
+
     int i, facet, pos, nnv;
-    
+
     printf("update info in facet %d\n", id);
     printf("{{{\n");
-    this->my_fprint_all(stdout);    
-    
+    this->my_fprint_all(stdout);
+
     for (i = 0; i < nv; ++i) {
         facet = index[nv + 1 + i];
         pos = poly->facet[facet].find_vertex(index[i]);
         if (pos == -1) {
-            printf("update_info: Error. Cannot find vertex %d in facet %d\n", 
+            printf("=======update_info: Error. Cannot find vertex %d in facet %d\n",
                     index[i], facet);
-            poly->facet[facet].my_fprint_all(stdout);            
+            poly->facet[facet].my_fprint_all(stdout);
+            this->my_fprint_all(stdout);
             return;
         }
         index[2 * nv + 1] = pos;
         nnv = poly->facet[facet].nv;
         pos = (pos + nnv - 1) % nnv;
         if (poly->facet[facet].index[nnv + 1 + pos] != id) {
-            printf("update_info: Error. Wrong neighbor facet for vertex %d in facet %d\n", 
+            printf("=======update_info: Error. Wrong neighbor facet for vertex %d in facet %d\n",
                     index[i], facet);
             poly->facet[facet].my_fprint_all(stdout);
+            this->my_fprint_all(stdout);
             return;
         }
         poly->facet[facet].index[2 * nnv + 1 + pos] = i;
@@ -256,21 +258,28 @@ void Facet::update_info() {
     printf("}}}\n");
 }
 
-
 int Facet::test_structure() {
-    
+
     int i, facet, pos, nnv;
-    
+
     for (i = 0; i < nv; ++i) {
         facet = index[nv + 1 + i];
         pos = poly->facet[facet].find_vertex(index[i]);
         if (pos == -1) {
+            printf("=======test_structure: Error. Cannot find vertex %d in facet %d\n",
+                    index[i], facet);
+            poly->facet[facet].my_fprint_all(stdout);
+            this->my_fprint_all(stdout);
             return 1;
         }
         index[2 * nv + 1] = pos;
         nnv = poly->facet[facet].nv;
         pos = (pos + nnv - 1) % nnv;
         if (poly->facet[facet].index[nnv + 1 + pos] != id) {
+            printf("=======test_structure: Error. Wrong neighbor facet for vertex %d in facet %d\n",
+                    index[i], facet);            
+            poly->facet[facet].my_fprint_all(stdout);
+            this->my_fprint_all(stdout);
             return 1;
         }
         poly->facet[facet].index[2 * nnv + 1 + pos] = i;
@@ -278,4 +287,16 @@ int Facet::test_structure() {
     return 0;
 }
 
-
+Vector3d& Facet::find_mass_centre() {
+    int i;
+    double c = 1. / (double) nv;
+    Vector3d v(0., 0., 0.);
+    Vector3d a;
+    for (i = 0; i < nv; ++i) {
+        a = poly->vertex[index[i]];
+        v += a;
+        printf("facet[%d].index[%d] = (%lf, %lf, %lf)\n", id, i, a.x, a.y, a.z);
+    }
+    v *= c;
+    return v;
+}
