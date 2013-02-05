@@ -184,7 +184,7 @@ void Polyhedron::list_squares_method_weight(
 void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 
     int nv0, nv1, nv, nv_common, *index0, *index1, *index;
-    int *sign_vertex, i, j, k, ndown;
+    int *sign_vertex, i, j, k, ndown, ndown_new;
     int fid;
 
     if (fid0 == fid1) {
@@ -198,7 +198,7 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     index0 = facet[fid0].index;
     index1 = facet[fid1].index;
 
-    //0. Вычислим среднюю плоскость.
+    //I). Вычислим среднюю плоскость.
     Plane plane;
     index = new int[nv0 + nv1];
     nv = 0;
@@ -222,10 +222,13 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         }
     }
     list_squares_method(nv, index, &plane);
+    printf("I). Вычислена средняя плоскость:\n");
+    printf("\t(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n",
+            plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 
-    //1. Составим список вершин
+    //II). Составим список вершин
     nv = nv - nv_common + 2;
-    printf("nv = %d, nv_common = %d\n", nv, nv_common);
+//    printf("nv = %d, nv_common = %d\n", nv, nv_common);
     if (index != NULL)
         delete[] index;
     index = new int[3 * nv + 1];
@@ -259,13 +262,18 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         i = (i == nv0 - 1) ? 0 : i + 1;
     }
 
-    fprintf(stdout, "nv = %d, nv_common = %d\n", nv, nv_common);
-    printf("index : ");
+    printf("II). Составлен список вершин :\n");
+    printf("\tnv = %d, nv_common = %d\n", nv, nv_common);
+    printf("\tindex : ");
     for (i = 0; i < nv; ++i) {
         printf("%d ", index[i]);
     }
     printf("\n");
     
+    printf("III). Дополнительная предобработка многогранника:\n");
+
+    //III.1). Предобработка контура
+    printf("\t1). Предобработка контура\n");
     index[nv] = index[0];
     for (i = 0; i < nv; ++i) {
         k = facet[fid0].find_vertex(index[i]);
@@ -285,26 +293,34 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 
     }
 
-    //Проверка, что нормаль построенной плокости направлена извне 
+    //III.2). Проверка, что нормаль построенной плокости направлена извне 
     //многогранника
+    printf("\t2). Проверка, что нормаль построенной плокости направлена извне многогранника\n");
     if (plane.norm * facet[fid0].plane.norm < 0 &&
             plane.norm * facet[fid1].plane.norm < 0) {
         plane.norm *= -1.;
         plane.dist *= -1.;
     }
-
+    
+    //III.3). Создается грань для контура
+    printf("\t3). Создается грань для контура\n");
     Facet first_facet;
     first_facet = Facet(-1, nv, plane, index, this, true);
     first_facet.my_fprint_all(stdout);
 
+    //III.4) В ней удаляются лишние вершины
+    printf("\t4). В ней удаляются лишние вершины\n");
     first_facet.clear_bad_vertexes();
     first_facet.my_fprint_all(stdout);
     
+    //III.5) Предобработка многогранника
+    printf("\t5). Предобработка многогранника\n");
     facet[fid0] = first_facet;
     facet[fid1] = Facet();
     preprocess_polyhedron();
 
-    //Посчитаем, сколько вершин находится под плоскостью.
+    //III.6). Посчитаем, какие вершины находятся под и над плоскостью.
+    printf("\t6). Посчитаем, какие вершины находятся под и над плоскостью\n");
     first_facet = facet[fid0];
     nv = first_facet.nv;
     if (index != NULL)
@@ -320,7 +336,10 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     }
 
     for (i = 0; i < nv; ++i)
-        printf("%d\t%d\n", index[i], sign_vertex[i]);
+        printf("\t\t%d\t%d\n", index[i], sign_vertex[i]);
+    
+    //IV). Алгоритм поднятия вершин, лежащих ниже плоскости
+    printf("IV). Алгоритм поднятия вершин, лежащих ниже плоскости\n");
 
     int i_prev_prev, i_prev, i_next, i_next_next;
     int f_prev_prev, f_prev, f_next, f_next_next;
@@ -342,13 +361,17 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 
     int step = 0;
     while (ndown > 0) {
-        printf("------ step %d -------\n", step++);
-        printf("\tndown = %d\n", ndown);
-        printf("Cycle 1.\n");
+        printf("-------- Шаг %d ---------\n", step++);
+        printf("\tНиже плоскости находятся %d вершин контура\n", ndown);
+        printf("\t1.Находим, по какой вершине нужно шагать, и минимальное расстояние\n");
         min_i = -1;
         for (i = 0; i < nv; ++i) {
-            if (sign_vertex[i] == 1)
+            printf("\t\t1.%d. Обработка %d-й вершины : ", i, index[i]);
+            if (sign_vertex[i] == 1) {
+                printf("выше плоскости\n");
                 continue;
+            }
+            printf("ниже плоскости");
             if (i == 0) {
                 i_prev_prev = nv - 2;
                 i_prev = nv - 1;
@@ -374,44 +397,50 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             f_prev = index[nv + 1 + i_prev];
             f_next = index[nv + 1 + i_next];
             f_next_next = index[nv + 1 + i_next_next];
+            printf("\t\t\tЗатрагиваются грани: %d, %d, %d, %d\n", 
+                    f_prev_prev, f_prev, f_next, f_next_next);
             
             plane0 = facet[f_prev_prev].plane;
             plane1 = facet[f_prev].plane;
             plane2 = facet[f_next].plane;
 
-            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
-                    f_prev_prev, plane0.norm.x, plane0.norm.y, plane0.norm.z,
-                    plane0.dist);
-            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
-                    f_next, plane2.norm.x, plane2.norm.y, plane2.norm.z,
-                    plane2.dist);
-            printf("plane : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
-                    plane.norm.x, plane.norm.y, plane.norm.z,
-                    plane.dist);
+//            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+//                    f_prev_prev, plane0.norm.x, plane0.norm.y, plane0.norm.z,
+//                    plane0.dist);
+//            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+//                    f_next, plane2.norm.x, plane2.norm.y, plane2.norm.z,
+//                    plane2.dist);
+//            printf("plane : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+//                    plane.norm.x, plane.norm.y, plane.norm.z,
+//                    plane.dist);
 
             plane0.norm.norm(1.);
             plane2.norm.norm(1.);
-            if (plane0.norm * plane2.norm < 0.)
+            if (plane0.norm * plane2.norm < 0.) {
                 plane2.norm *= -1.;
+                plane2.dist *= -1.;
+            }
             
             plane_dist = qmod(plane0.norm - plane2.norm);
-            printf("dist_plane(%d, %d) = %lf\n", f_prev_prev, f_next, plane_dist);
+//            printf("dist_plane(%d, %d) = %lf\n", f_prev_prev, f_next, plane_dist);
             
             if (plane_dist < EPS_PARALL) {
                 ifParallel = true;
-                printf("Facets %d and %d are parallel\n", f_prev_prev, f_next);
+                printf("\t\t\tГрани %d и %d параллельны\n", f_prev_prev, f_next);
                 dist = fabs(plane.norm * vertex[index[i]] + plane.dist);
-                printf("dist(%d, plane) = %lf\n", index[i], dist);
+//                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
                 dist /= sqrt(qmod(plane.norm));
-                printf("dist(%d, plane) = %lf\n", index[i], dist);
+                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
             } else {   
                 ifParallel = false;
                 intersection(plane0, plane1, plane2, intrsct);
-                dist = qmod(vertex[index[i]] - intrsct);
-                dist = sqrt(dist);
-                printf("dist = %lf\n", dist);
+                dist = (vertex[index[i]] - intrsct)*plane.norm;
+                dist /= sqrt(qmod(plane.norm));
+//                dist = qmod(vertex[index[i]] - intrsct);
+//                dist = sqrt(dist);
+                printf("\t\t\tdist = %lf\n", dist);
             }
-            if (min_i == -1 || dist < min_dist) {
+            if ((min_i == -1 || dist < min_dist) && dist > 0.) {
                 min_dist = dist;
                 min_i = i;
                 i_replace = ifParallel ? min_i : i_prev;
@@ -421,50 +450,60 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             plane1 = facet[f_next].plane;
             plane2 = facet[f_next_next].plane;
 
-            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
-                    f_prev, plane0.norm.x, plane0.norm.y, plane0.norm.z,
-                    plane0.dist);
-            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
-                    f_next_next, plane2.norm.x, plane2.norm.y, plane2.norm.z,
-                    plane2.dist);
-            printf("plane : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
-                    plane.norm.x, plane.norm.y, plane.norm.z,
-                    plane.dist);
+//            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+//                    f_prev, plane0.norm.x, plane0.norm.y, plane0.norm.z,
+//                    plane0.dist);
+//            printf("plane_%d : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+//                    f_next_next, plane2.norm.x, plane2.norm.y, plane2.norm.z,
+//                    plane2.dist);
+//            printf("plane : (%lf)*x + (%lf)*y + (%lf)*z + (%lf) = 0\n",
+//                    plane.norm.x, plane.norm.y, plane.norm.z,
+//                    plane.dist);
             
             plane0.norm.norm(1.);
             plane2.norm.norm(1.);
-            if (plane0.norm * plane2.norm < 0.)
+            if (plane0.norm * plane2.norm < 0.) {
                 plane2.norm *= -1.;
+                plane2.dist *= -1.;
+            }
             
             plane_dist = qmod(plane0.norm - plane2.norm);
-            printf("dist_plane(%d, %d) = %lf\n", f_prev, f_next_next, plane_dist);
+//            printf("dist_plane(%d, %d) = %lf\n", f_prev, f_next_next, plane_dist);
             
             if (plane_dist < EPS_PARALL) {
                 ifParallel = true;
-                printf("Facets %d and %d are parallel\n", f_prev, f_next_next);
+                printf("\t\t\tГрани %d и %d параллельны\n", f_prev, f_next_next);
                 dist = fabs(plane.norm * vertex[index[i]] + plane.dist);
-                printf("dist(%d, plane) = %lf\n", index[i], dist);
+//                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
                 dist /= sqrt(qmod(plane.norm));
-                printf("dist(%d, plane) = %lf\n", index[i], dist);
+                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
             } else {   
                 ifParallel = false;
                 intersection(plane0, plane1, plane2, intrsct);
-                dist = qmod(vertex[index[i]] - intrsct);
-                dist = sqrt(dist);
-                printf("dist = %lf\n", dist);
+                dist = (vertex[index[i]] - intrsct)*plane.norm;
+                dist /= sqrt(qmod(plane.norm));
+//                dist = qmod(vertex[index[i]] - intrsct);
+//                dist = sqrt(dist);
+                printf("\t\t\tdist = %lf\n", dist);
             }
-            if (min_i == -1 || dist < min_dist) {
+            if ((min_i == -1 || dist < min_dist) && dist > 0.) {
                 min_dist = dist;
                 min_i = i;
                 i_replace = ifParallel ? min_i : i_next_next;
             }
         }
-        printf("min_i = %d, min_dist = %lf, i_replace = %d\n",
-                min_i, min_dist, i_replace);
-        printf("\tMoving ");
-        print_vertex(index[min_i]);
+        printf("\tИтак:");
+        printf("\t\tШагать нужно по %d вершине\n", min_i);
+        printf("\t\tНа расстояние %lf\n", min_dist);
+        printf("\t\tПричем эта вершина сольётся с вершиной %d\n", i_replace);
+//        printf("min_i = %d, min_dist = %lf, i_replace = %d\n",
+//                min_i, min_dist, i_replace);
+        printf("\t2. Подъем контура на найденное расстояние\n");
+//        printf("\tMoving ");
+//        print_vertex(index[min_i]);
 
         if (min_dist > MAX_MIN_DIST) {
+            printf("\t\tОшибка! Слишком большое расстояние\n");
             break;
 //            i_replace = min_i;
 //            dist = fabs(plane.norm * vertex[index[min_i]] + plane.dist);
@@ -473,12 +512,16 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         }
             
 
-        printf("Cycle 2.\n");
         for (i = 0; i < nv; ++i) {
-            if (sign_vertex[i] == 1)
+            printf("\t\t2.%d. Поднимается вершина %d\n", i, index[i]);
+            if (sign_vertex[i] == 1) {
+                printf("\t\t\tОна выше плоскости. Пропускаем.\n");
                 continue;
-            if (i == min_i)
+            }
+            if (i == min_i) {
+                printf("\t\t\tВершину %d обработаем отдельно. Она ключевая.\n", index[i]);
                 continue;
+            }
             if (i == 0) {
                 i_prev = nv - 1;
                 i_next = 0;
@@ -498,20 +541,20 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 
             // Точка сдвигается
             if (fid == f_next) {
-                printf("\tMoving vertex %d\n", index[i]);
+                printf("\t\t\tВершина %d просто сдвигается\n", index[i]);
                 //                    print_vertex(index[i]);
                 vertex[index[i]] += dir;
                 //                    sign_vertex[i] = signum(vertex[index[i]], plane);                    
                 //                    print_vertex(index[i]);
             }// Добавляется новая точка
             else {
-                printf("\tCreating new for vertex %d\n", index[i]);
+                printf("\t\t\tСоздаем новую точку для вершины %d\n", index[i]);
                 //                    print_vertex(index[i]);
                 point = vertex[index[i]] + dir;
                 new_number = add_vertex(point);
-                printf("\tAdding vertex %d after %d in facet %d\n", new_number, index[i], f_next);
+                printf("\t\t\tДобавляем вершину %d после %d в грани %d\n", new_number, index[i], f_next);
                 facet[f_prev].add_after_position(index[2 * nv + 1 + i_prev], new_number, f_next);
-                printf("\tAdding vertex %d before %d in facet %d\n", new_number, index[i], f_prev);
+                printf("\t\t\tДобавляем вершину %d до %d в грани %d\n", new_number, index[i], f_prev);
                 facet[f_next].add_before_position(index[2 * nv + 1 + i_next], new_number, f_prev);
                 index[i] = new_number;
                 //                    sign_vertex[i] = signum(vertex[index[i]], plane);                    
@@ -520,11 +563,12 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             //                if (i == i_replace)
             //                    v_replace = index[i];
         }
-        // Отдельно рассмотрим случай выбранной вершины. Эта вершина будет
+        // 3. Отдельно рассмотрим случай выбранной вершины. Эта вершина будет
         // удалена из списка.
         // 2011.10.01 : Исключение будет в том случае, если были параллельные 
         // вершины и номера заменяемой (min_i) и заменяющей (i_replace) точек 
         // совпадают...
+        printf("\t3. Подъем ключевой вершины %d\n", index[min_i]);
         v_replace = index[i_replace];
         i = min_i;
         if (i == 0) {
@@ -548,27 +592,33 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         if (min_i == i_replace) {
             intersection(facet[f_prev].plane, facet[f_next].plane, dir, point);
             dir.norm(min_dist);
-            printf("\tMoving vertex %d\n", index[i]);
+            printf("\t\tВершина %d просто сдвигается\n", index[i]);
             vertex[index[i]] += dir;            
         }
         // Точка сдвигается
         //            printf("f_prev = %d, f_next = %d, fid = %d\n", f_prev, f_next, fid);
         else if (fid == f_next) {
-            printf("\tVertex %d is replaced by %d in facet %d\n", index[i], v_replace, f_prev);
+            printf("\t\t Вершина %d заменяется вершиной %d в грани %d\n", 
+                    index[i], v_replace, f_prev);
             facet[f_prev].find_and_replace2(index[i], v_replace);
-            printf("\tVertex %d is replaced by %d in facet %d\n", index[i], v_replace, f_next);
+            printf("\t\t Вершина %d заменяется вершиной %d в грани %d\n", 
+                    index[i], v_replace, f_next);
             facet[f_next].find_and_replace2(index[i], v_replace);
         }// Добавляется новая точка
         else {
+            printf("\t\tДобавляется новая точка для вершины %d\n", index[i]);
             //                printf("\tVertex %d is followed by %d in facet %d and %d\n", index[i], v_replace, f_prev, f_next);
             //                printf("v_replace = %d\n", v_replace);
-            printf("\tAdding vertex %d after %d in facet %d\n", v_replace, index[i], f_next);
+            printf("\t\tДобавляем вершину %d после %d в грани %d\n", 
+                    v_replace, index[i], f_next);
             facet[f_prev].add_after_position(index[2 * nv + 1 + i_prev], v_replace, f_next);
-            printf("\tAdding vertex %d before %d in facet %d\n", v_replace, index[i], f_prev);
+            printf("\t\tДобавляем вершину %d до %d в грани %d\n", 
+                    v_replace, index[i], f_prev);
             facet[f_next].add_before_position(index[2 * nv + 1 + i_next], v_replace, f_prev);
         }
 
         if (min_i != i_replace) {
+            printf("\t\tУдаляем ключевую вершину %d\n", min_i);
             for (j = i; j < nv - 1; ++j)
                 index[2 * nv + 1 + j] = index[2 * nv + 2 + j];
             for (j = i; j < 2 * nv - 2; ++j)
@@ -581,18 +631,22 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             if (i == 0)
                 index[nv] = index[0];
         }
-        ndown = 0;
+        ndown_new = 0;
         for (i = 0; i < nv; ++i) {
             sign_vertex[i] = signum(vertex[index[i]], plane);
             if (sign_vertex[i] == -1)
-                ++ndown;
+                ++ndown_new;
         }
-
+        printf("\tЗа шаг %d было поднято %d вершин\n", step, ndown - ndown_new);
+        ndown = ndown_new;
     }
-    printf("\t-------- After all steps : ndown = %d\n", ndown);
+    printf("----- Алгоритм завершил работу. Ниже плоскости осталось %d вершин-----\n", 
+            ndown);
 
+    //V). Предобработка многогранника после поднятия
+    printf("V). Предобработка многогранника после поднятия");
     first_facet = Facet(fid0, nv, plane, index, this, true);
-    printf("Cycle 3.\n");
+//    printf("Cycle 3.\n");
     facet[fid0] = first_facet;
     facet[fid0].my_fprint_all(stdout);
     facet[fid1] = Facet();
@@ -601,8 +655,9 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     //    my_fprint(stdout);
 
     //    clear_unused();
+    printf("VI). Рассечение многогранника плоскостью\n");
     intersect(-plane);
-    printf("End\n");
+    printf("VII). Грани %d и %d объединены!\n", fid0, fid1);
     //    my_fprint(stdout);
     //    if (index != NULL)    это не нужно, т. к. index = first_facet.index
     //        delete[] index;   и поэтому удалится деструктором...
