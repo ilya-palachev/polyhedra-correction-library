@@ -350,7 +350,7 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     Plane plane1;
     Plane plane2;
 
-    double min_dist, dist;
+    double min_dist, dist, dist_to_plane;
     int min_i, i_replace;
     int tmp0, tmp1, tmp2;
     int new_number;
@@ -423,14 +423,14 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             
             plane_dist = qmod(plane0.norm - plane2.norm);
 //            printf("dist_plane(%d, %d) = %lf\n", f_prev_prev, f_next, plane_dist);
+            dist_to_plane = fabs(plane.norm * vertex[index[i]] + plane.dist);
+            dist_to_plane /= sqrt(qmod(plane.norm));
+            printf("\t\t\tdist_to_plane(%d, plane) = %lf\n", index[i], dist);
             
             if (plane_dist < EPS_PARALL) {
                 ifParallel = true;
+                dist = dist_to_plane;
                 printf("\t\t\tГрани %d и %d параллельны\n", f_prev_prev, f_next);
-                dist = fabs(plane.norm * vertex[index[i]] + plane.dist);
-//                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
-                dist /= sqrt(qmod(plane.norm));
-                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
             } else {   
                 ifParallel = false;
                 intersection(plane0, plane1, plane2, intrsct);
@@ -440,6 +440,8 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 //                dist = sqrt(dist);
                 printf("\t\t\tdist = %lf\n", dist);
             }
+            if (dist_to_plane < dist)
+                dist = dist_to_plane;
             if ((min_i == -1 || dist < min_dist) && dist > 0.) {
                 min_dist = dist;
                 min_i = i;
@@ -469,14 +471,13 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             
             plane_dist = qmod(plane0.norm - plane2.norm);
 //            printf("dist_plane(%d, %d) = %lf\n", f_prev, f_next_next, plane_dist);
-            
+            dist_to_plane = fabs(plane.norm * vertex[index[i]] + plane.dist);
+            dist_to_plane /= sqrt(qmod(plane.norm));
+            printf("\t\t\tdist_to_plane(%d, plane) = %lf\n", index[i], dist);
             if (plane_dist < EPS_PARALL) {
                 ifParallel = true;
                 printf("\t\t\tГрани %d и %d параллельны\n", f_prev, f_next_next);
-                dist = fabs(plane.norm * vertex[index[i]] + plane.dist);
-//                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
-                dist /= sqrt(qmod(plane.norm));
-                printf("\t\t\tdist(%d, plane) = %lf\n", index[i], dist);
+                dist = dist_to_plane;
             } else {   
                 ifParallel = false;
                 intersection(plane0, plane1, plane2, intrsct);
@@ -486,6 +487,8 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 //                dist = sqrt(dist);
                 printf("\t\t\tdist = %lf\n", dist);
             }
+            if (dist_to_plane < dist)
+                dist = dist_to_plane;
             if ((min_i == -1 || dist < min_dist) && dist > 0.) {
                 min_dist = dist;
                 min_i = i;
