@@ -453,6 +453,7 @@ void Polyhedron::join_facets_rise(int fid0) {
         printf("-----------------     Шаг  %d         -----------------------\n", step);
         printf("-------------------------------------------------------------\n");
         printf("ndown = %d\n", ndown);
+        fprint_ply_scale(1000., "../poly-data-out/Last.ply", "join-facets-rise");
         // 2. 1). Находим, по какой вершине нужно шагать, и минимальное расстояние
         printf("\t2. 1). Находим, по какой вершине нужно шагать, и минимальное расстояние\n");
         join_facets_rise_find(fid0, imin);
@@ -564,6 +565,7 @@ void Polyhedron::join_facets_rise_find_step(int fid0, int i, double& d) {
 
     if (qmod(pl2.norm % pr1.norm) < EPS_PARALL) {
         // Если грани параллельны: 
+        printf("(parallel)");
         intersection(plane, pl1, pr1, v1);
     } else {
         // Если грани не параллельны:
@@ -575,12 +577,15 @@ void Polyhedron::join_facets_rise_find_step(int fid0, int i, double& d) {
     }
     // Найдем проекцию перемещения точки на нормаль плоскости:
     d1 = (v1 - vertex[index[i]]) * plane.norm;
+    if(facet[fl1].nv < 4)
+        d1 = -1;
     printf("\td1 = %lf", d1);
 
     // Найдем точку пересечения второй тройки граней
 
     if (qmod(pl1.norm % pr2.norm) < EPS_PARALL) {
         // Если грани параллельны: 
+        printf("(parallel)");
         intersection(plane, pl1, pr1, v2);
     } else {
         // Если грани не параллельны:
@@ -592,6 +597,8 @@ void Polyhedron::join_facets_rise_find_step(int fid0, int i, double& d) {
     }
     // Найдем проекцию перемещения точки на нормаль плоскости:
     d2 = (v2 - vertex[index[i]]) * plane.norm;
+    if (facet[fr1].nv < 4)
+        d2 = -1;
     printf("\td2 = %lf", d2);
     printf("\n");
 

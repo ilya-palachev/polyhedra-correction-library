@@ -1,0 +1,1 @@
+SMX_OP_INC = smx-sm-cs.h smx-cs-sm.h smx-scm-s.h smx-s-scm.h smx-scm-sm.h smx-sm-scm.h smx-m-sm.h smx-m-scm.h smx-cm-sm.h smx-cm-scm.h smx-sm-m.h smx-scm-m.h smx-sm-cm.h smx-scm-cm.h smx-bm-sbm.h smx-sbm-bm.h

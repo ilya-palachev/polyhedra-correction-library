@@ -1,0 +1,188 @@
+@c Copyright (C) 1996-2012 John W. Eaton
+@c
+@c This file is part of Octave.
+@c
+@c Octave is free software; you can redistribute it and/or modify it
+@c under the terms of the GNU General Public License as published by the
+@c Free Software Foundation; either version 3 of the License, or (at
+@c your option) any later version.
+@c 
+@c Octave is distributed in the hope that it will be useful, but WITHOUT
+@c ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@c FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@c for more details.
+@c 
+@c You should have received a copy of the GNU General Public License
+@c along with Octave; see the file COPYING.  If not, see
+@c <http://www.gnu.org/licenses/>.
+
+@node Polynomial Manipulations
+@chapter Polynomial Manipulations
+
+In Octave, a polynomial is represented by its coefficients (arranged
+in descending order).  For example, a vector @var{c} of length
+@math{N+1} corresponds to the following polynomial of order
+@tex
+ $N$
+$$
+ p (x) = c_1 x^N + \ldots + c_N x + c_{N+1}.
+$$
+@end tex
+@ifnottex
+ @var{N}
+
+@example
+p(x) = @var{c}(1) x^@var{N} + @dots{} + @var{c}(@var{N}) x + @var{c}(@var{N}+1).
+@end example
+
+@end ifnottex
+
+@menu
+* Evaluating Polynomials::
+* Finding Roots::
+* Products of Polynomials::
+* Derivatives / Integrals / Transforms::
+* Polynomial Interpolation::
+* Miscellaneous Functions::
+@end menu
+
+@node Evaluating Polynomials
+@section Evaluating Polynomials
+
+The value of a polynomial represented by the vector @var{c} can be evaluated
+at the point @var{x} very easily, as the following example shows:
+
+@example
+@group
+N = length(c)-1;
+val = dot( x.^(N:-1:0), c );
+@end group
+@end example
+
+@noindent
+While the above example shows how easy it is to compute the value of a
+polynomial, it isn't the most stable algorithm.  With larger polynomials
+you should use more elegant algorithms, such as Horner's Method, which
+is exactly what the Octave function @code{polyval} does.
+
+In the case where @var{x} is a square matrix, the polynomial given by
+@var{c} is still well-defined.  As when @var{x} is a scalar the obvious
+implementation is easily expressed in Octave, but also in this case
+more elegant algorithms perform better.  The @code{polyvalm} function
+provides such an algorithm.
+
+@DOCSTRING(polyval)
+
+@DOCSTRING(polyvalm)
+
+@node Finding Roots
+@section Finding Roots
+
+Octave can find the roots of a given polynomial.  This is done by computing
+the companion matrix of the polynomial (see the @code{compan} function
+for a definition), and then finding its eigenvalues.
+
+@DOCSTRING(roots)
+
+@DOCSTRING(compan)
+
+@DOCSTRING(mpoles)
+
+@node Products of Polynomials
+@section Products of Polynomials
+
+@DOCSTRING(conv)
+
+@DOCSTRING(convn)
+
+@DOCSTRING(deconv)
+
+@DOCSTRING(conv2)
+
+@DOCSTRING(polygcd)
+
+@DOCSTRING(residue)
+
+@node Derivatives / Integrals / Transforms
+@section Derivatives / Integrals / Transforms
+
+Octave comes with functions for computing the derivative and the integral
+of a polynomial.  The functions @code{polyder} and @code{polyint}
+both return new polynomials describing the result.  As an example we'll
+compute the definite integral of @math{p(x) = x^2 + 1} from 0 to 3.
+
+@example
+@group
+c = [1, 0, 1];
+integral = polyint(c);
+area = polyval(integral, 3) - polyval(integral, 0)
+@result{} 12
+@end group
+@end example
+
+@DOCSTRING(polyder)
+
+@DOCSTRING(polyint)
+
+@DOCSTRING(polyaffine)
+
+@node Polynomial Interpolation
+@section Polynomial Interpolation
+
+Octave comes with good support for various kinds of interpolation,
+most of which are described in @ref{Interpolation}.  One simple alternative
+to the functions described in the aforementioned chapter, is to fit
+a single polynomial to some given data points.  To avoid a highly
+fluctuating polynomial, one most often wants to fit a low-order polynomial
+to data.  This usually means that it is necessary to fit the polynomial
+in a least-squares sense, which just is what the @code{polyfit} function does.
+
+@DOCSTRING(polyfit)
+
+In situations where a single polynomial isn't good enough, a solution
+is to use several polynomials pieced together.  The function @code{mkpp}
+creates a piecewise polynomial, @code{ppval} evaluates the function 
+created by @code{mkpp}, and @code{unmkpp} returns detailed information
+about the function.
+
+The following example shows how to combine two linear functions and a
+quadratic into one function.  Each of these functions is expressed
+on adjoined intervals.
+
+@example
+@group
+x = [-2, -1, 1, 2];
+p = [ 0,  1, 0;
+      1, -2, 1;
+      0, -1, 1 ];
+pp = mkpp(x, p);
+xi = linspace(-2, 2, 50);
+yi = ppval(pp, xi);
+plot(xi, yi);
+@end group
+@end example
+
+@DOCSTRING(mkpp)
+
+@DOCSTRING(unmkpp)
+
+@DOCSTRING(ppval)
+
+@DOCSTRING(ppder)
+
+@DOCSTRING(ppint)
+
+@DOCSTRING(ppjumps)
+
+@node Miscellaneous Functions
+@section Miscellaneous Functions
+
+@DOCSTRING(poly)
+
+@DOCSTRING(polyout)
+
+@DOCSTRING(polyreduce)
+
+
+
+

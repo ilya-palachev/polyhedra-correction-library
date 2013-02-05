@@ -1,0 +1,226 @@
+@c DO NOT EDIT!  Generated automatically by munge-texi.
+
+@c Copyright (C) 1996-2012 John W. Eaton
+@c
+@c This file is part of Octave.
+@c
+@c Octave is free software; you can redistribute it and/or modify it
+@c under the terms of the GNU General Public License as published by the
+@c Free Software Foundation; either version 3 of the License, or (at
+@c your option) any later version.
+@c 
+@c Octave is distributed in the hope that it will be useful, but WITHOUT
+@c ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@c FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@c for more details.
+@c 
+@c You should have received a copy of the GNU General Public License
+@c along with Octave; see the file COPYING.  If not, see
+@c <http://www.gnu.org/licenses/>.
+
+@node Sets
+@chapter Sets
+
+Octave has a limited number of functions for managing sets of data, where a
+set is defined as a collection of unique elements.  In Octave a set is
+represented as a vector of numbers.
+
+@c unique scripts/set/unique.m
+@anchor{doc-unique}
+@deftypefn  {Function File} {} unique (@var{x})
+@deftypefnx {Function File} {} unique (@var{x}, "rows")
+@deftypefnx {Function File} {} unique (@dots{}, "first")
+@deftypefnx {Function File} {} unique (@dots{}, "last")
+@deftypefnx {Function File} {[@var{y}, @var{i}, @var{j}] =} unique (@dots{})
+Return the unique elements of @var{x}, sorted in ascending order.
+If the input @var{x} is a vector then the output is also a vector with the
+same orientation (row or column) as the input.  For a matrix input the
+output is always a column vector.  @var{x} may also be a cell array of
+strings.
+
+If the optional argument @code{"rows"} is supplied, return the unique
+rows of @var{x}, sorted in ascending order.
+
+If requested, return index vectors @var{i} and @var{j} such that
+@code{x(i)==y} and @code{y(j)==x}.
+
+Additionally, if @var{i} is a requested output then one of @code{"first"} or
+@code{"last"} may be given as an input.  If @code{"last"} is specified,
+return the highest possible indices in @var{i}, otherwise, if @code{"first"}
+is specified, return the lowest.  The default is @code{"last"}.
+@seealso{@ref{doc-union,,union}, @ref{doc-intersect,,intersect}, @ref{doc-setdiff,,setdiff}, @ref{doc-setxor,,setxor}, @ref{doc-ismember,,ismember}}
+@end deftypefn
+
+
+@menu
+* Set Operations::
+@end menu
+
+@node Set Operations
+@section Set Operations
+
+Octave supports the basic set operations.  That is, Octave can compute
+the union, intersection, and difference of two sets.
+Octave also supports the @emph{Exclusive Or} set operation, and
+membership determination.  The functions for set operations all work in
+pretty much the same way.  As an example, assume that @code{x} and
+@code{y} contains two sets, then
+
+@example
+union(x, y)
+@end example
+
+@noindent
+computes the union of the two sets.
+
+@c ismember scripts/set/ismember.m
+@anchor{doc-ismember}
+@deftypefn  {Function File} {@var{tf} =} ismember (@var{A}, @var{s})
+@deftypefnx {Function File} {[@var{tf}, @var{S_idx}] =} ismember (@var{A}, @var{s})
+@deftypefnx {Function File} {[@var{tf}, @var{S_idx}] =} ismember (@var{A}, @var{s}, "rows")
+Return a logical matrix @var{tf} with the same shape as @var{A} which is
+true (1) if @code{A(i,j)} is in @var{s} and false (0) if it is not.  If a
+second output argument is requested, the index into @var{s} of each of the
+matching elements is also returned.
+
+@example
+@group
+a = [3, 10, 1];
+s = [0:9];
+[tf, s_idx] = ismember (a, s)
+     @result{} tf = [1, 0, 1]
+     @result{} s_idx = [4, 0, 2]
+@end group
+@end example
+
+The inputs, @var{A} and @var{s}, may also be cell arrays.
+
+@example
+@group
+a = @{'abc'@};
+s = @{'abc', 'def'@};
+[tf, s_idx] = ismember (a, s)
+     @result{} tf = [1, 0]
+     @result{} s_idx = [1, 0]
+@end group
+@end example
+
+With the optional third argument @code{"rows"}, and matrices
+@var{A} and @var{s} with the same number of columns, compare rows in
+@var{A} with the rows in @var{s}.
+
+@example
+@group
+a = [1:3; 5:7; 4:6];
+s = [0:2; 1:3; 2:4; 3:5; 4:6];
+[tf, s_idx] = ismember(a, s, "rows")
+     @result{} tf = logical ([1; 0; 1])
+     @result{} s_idx = [2; 0; 5];
+@end group
+@end example
+
+@seealso{@ref{doc-unique,,unique}, @ref{doc-union,,union}, @ref{doc-intersect,,intersect}, @ref{doc-setxor,,setxor}, @ref{doc-setdiff,,setdiff}}
+@end deftypefn
+
+
+@c union scripts/set/union.m
+@anchor{doc-union}
+@deftypefn  {Function File} {} union (@var{a}, @var{b})
+@deftypefnx {Function File} {} union (@var{a}, @var{b}, "rows")
+Return the set of elements that are in either of the sets @var{a} and
+@var{b}.  @var{a}, @var{b} may be cell arrays of string(s).
+For example:
+
+@example
+@group
+union ([1, 2, 4], [2, 3, 5])
+    @result{} [1, 2, 3, 4, 5]
+@end group
+@end example
+
+If the optional third input argument is the string "rows" each row of
+the matrices @var{a} and @var{b} will be considered an element of sets.
+For example:
+
+@example
+@group
+union ([1, 2; 2, 3], [1, 2; 3, 4], "rows")
+   @result{}  1   2
+       2   3
+       3   4
+@end group
+@end example
+
+@deftypefnx {Function File} {[@var{c}, @var{ia}, @var{ib}] =} union (@var{a}, @var{b})
+
+Return index vectors @var{ia} and @var{ib} such that @code{a(ia)} and
+@code{b(ib)} are disjoint sets whose union is @var{c}.
+
+@seealso{@ref{doc-intersect,,intersect}, @ref{doc-setdiff,,setdiff}, @ref{doc-unique,,unique}}
+@end deftypefn
+
+
+@c intersect scripts/set/intersect.m
+@anchor{doc-intersect}
+@deftypefn  {Function File} {} intersect (@var{a}, @var{b})
+@deftypefnx {Function File} {[@var{c}, @var{ia}, @var{ib}] =} intersect (@var{a}, @var{b})
+
+Return the elements in both @var{a} and @var{b}, sorted in ascending
+order.  If @var{a} and @var{b} are both column vectors return a column
+vector, otherwise return a row vector.
+@var{a}, @var{b} may be cell arrays of string(s).
+
+Return index vectors @var{ia} and @var{ib} such that @code{a(ia)==c} and
+@code{b(ib)==c}.
+
+@end deftypefn
+@seealso{@ref{doc-unique,,unique}, @ref{doc-union,,union}, @ref{doc-setxor,,setxor}, @ref{doc-setdiff,,setdiff}, @ref{doc-ismember,,ismember}}
+
+
+@c setdiff scripts/set/setdiff.m
+@anchor{doc-setdiff}
+@deftypefn  {Function File} {} setdiff (@var{a}, @var{b})
+@deftypefnx {Function File} {} setdiff (@var{a}, @var{b}, "rows")
+@deftypefnx {Function File} {[@var{c}, @var{i}] =} setdiff (@var{a}, @var{b})
+Return the elements in @var{a} that are not in @var{b}, sorted in
+ascending order.  If @var{a} and @var{b} are both column vectors
+return a column vector, otherwise return a row vector.
+@var{a}, @var{b} may be cell arrays of string(s).
+
+Given the optional third argument @samp{"rows"}, return the rows in
+@var{a} that are not in @var{b}, sorted in ascending order by rows.
+
+If requested, return @var{i} such that @code{c = a(i)}.
+@seealso{@ref{doc-unique,,unique}, @ref{doc-union,,union}, @ref{doc-intersect,,intersect}, @ref{doc-setxor,,setxor}, @ref{doc-ismember,,ismember}}
+@end deftypefn
+
+
+@c setxor scripts/set/setxor.m
+@anchor{doc-setxor}
+@deftypefn  {Function File} {} setxor (@var{a}, @var{b})
+@deftypefnx {Function File} {} setxor (@var{a}, @var{b}, 'rows')
+@deftypefnx {Function File} {[@var{c}, @var{ia}, @var{ib}] =} setxor (@var{a}, @var{b})
+
+Return the elements exclusive to @var{a} or @var{b}, sorted in ascending
+order.  If @var{a} and @var{b} are both column vectors return a column
+vector, otherwise return a row vector.
+@var{a}, @var{b} may be cell arrays of string(s).
+
+With three output arguments, return index vectors @var{ia} and @var{ib}
+such that @code{a(ia)} and @code{b(ib)} are disjoint sets whose union
+is @var{c}.
+
+@seealso{@ref{doc-unique,,unique}, @ref{doc-union,,union}, @ref{doc-intersect,,intersect}, @ref{doc-setdiff,,setdiff}, @ref{doc-ismember,,ismember}}
+@end deftypefn
+
+
+@c powerset scripts/set/powerset.m
+@anchor{doc-powerset}
+@deftypefn  {Function File} {} powerset (@var{a})
+@deftypefnx {Function File} {} powerset (@var{a}, "rows")
+
+Return a cell array containing all subsets of the set @var{a}.
+
+@end deftypefn
+@seealso{@ref{doc-unique,,unique}, @ref{doc-union,,union}, @ref{doc-setxor,,setxor}, @ref{doc-setdiff,,setdiff}, @ref{doc-ismember,,ismember}}
+

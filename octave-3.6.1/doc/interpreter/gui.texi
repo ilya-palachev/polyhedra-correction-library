@@ -1,0 +1,368 @@
+@c DO NOT EDIT!  Generated automatically by munge-texi.
+
+@c Copyright (C) 2012 Rik Wehbring
+@c
+@c This file is part of Octave.
+@c
+@c Octave is free software; you can redistribute it and/or modify it
+@c under the terms of the GNU General Public License as published by the
+@c Free Software Foundation; either version 3 of the License, or (at
+@c your option) any later version.
+@c 
+@c Octave is distributed in the hope that it will be useful, but WITHOUT
+@c ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+@c FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@c for more details.
+@c 
+@c You should have received a copy of the GNU General Public License
+@c along with Octave; see the file COPYING.  If not, see
+@c <http://www.gnu.org/licenses/>.
+
+@node GUI Development
+@chapter GUI Development
+
+Octave is principally a batch or command-line language.  However, it does
+offer some limited features for constructing graphical interfaces for
+interacting with users.
+
+The GUI elements available are I/O dialogs and a progress bar.  For example,
+rather than hardcoding a filename for output results a script can open a dialog
+box and allow the user to choose a file.  Similarly, if a calculation is
+expected to take a long time a script can display a progress bar.
+
+Several utility functions make it possible to store private data for use with
+a GUI which will not pollute the user's variable space.
+
+Finally, a program written in Octave might want to have long term storage of
+preferences or state variables.  This can be done with user-defined
+preferences.
+
+@menu
+* I/O Dialogs::       
+* Progress Bar::       
+* GUI Utility Functions::       
+* User-Defined Preferences::       
+@end menu
+
+@node I/O Dialogs
+@section I/O Dialogs
+
+Simple dialog menus are available for choosing directories or files.  They
+return a string variable which can then be used with any command requiring
+a file name.
+
+@c uigetdir scripts/plot/uigetdir.m
+@anchor{doc-uigetdir}
+@deftypefn  {Function File} {@var{dirname} =} uigetdir ()
+@deftypefnx {Function File} {@var{dirname} =} uigetdir (@var{init_path})
+@deftypefnx {Function File} {@var{dirname} =} uigetdir (@var{init_path}, @var{dialog_name})
+Open a GUI dialog for selecting a directory.  If @var{init_path} is not
+given the current working directory is used.  @var{dialog_name} may be
+used to customize the dialog title.
+@seealso{@ref{doc-uigetfile,,uigetfile}}
+@end deftypefn
+
+
+@c uigetfile scripts/plot/uigetfile.m
+@anchor{doc-uigetfile}
+@deftypefn  {Function File} {[@var{fname}, @var{fpath}, @var{fltidx}] =} uigetfile ()
+@deftypefnx {Function File} {[@dots{}] =} uigetfile (@var{flt})
+@deftypefnx {Function File} {[@dots{}] =} uigetfile (@var{flt}, @var{dialog_name})
+@deftypefnx {Function File} {[@dots{}] =} uigetfile (@var{flt}, @var{dialog_name}, @var{default_file})
+@deftypefnx {Function File} {[@dots{}] =} uigetfile (@dots{}, "Position", [@var{px} @var{py}])
+@deftypefnx {Function File} {[@dots{}] =} uigetfile (@dots{}, "MultiSelect", @var{mode})
+
+Open a GUI dialog for selecting a file.  It returns the filename @var{fname},
+the path to this file @var{fpath}, and the filter index @var{fltidx}.
+@var{flt} contains a (list of) file filter string(s) in one of the following
+formats:
+
+@table @asis
+@item "/path/to/filename.ext"
+If a filename is given then the file extension is extracted and used as
+filter.  In addition, the path is selected as current path and the filename
+is selected as default file.  Example: @code{uigetfile ("myfun.m")}
+
+@item A single file extension "*.ext"
+Example: @code{uigetfile ("*.ext")}
+
+@item A 2-column cell array
+containing a file extension in the first column and a brief description
+in the second column.
+Example: @code{uigetfile (@{"*.ext", "My Description";"*.xyz",
+"XYZ-Format"@})}
+
+The filter string can also contain a semicolon separated list of filter
+extensions.
+Example: @code{uigetfile (@{"*.gif;*.png;*.jpg", "Supported Picture
+Formats"@})}
+@end table
+
+@var{dialog_name} can be used to customize the dialog title.
+If @var{default_file} is given then it will be selected in the GUI dialog.
+If, in addition, a path is given it is also used as current path.
+
+The screen position of the GUI dialog can be set using the "Position" key
+and a 2-element vector containing the pixel coordinates.
+Two or more files can be selected when setting the "MultiSelect" key to "on".
+In that case @var{fname} is a cell array containing the files.
+@end deftypefn
+
+
+@c uiputfile scripts/plot/uiputfile.m
+@anchor{doc-uiputfile}
+@deftypefn  {Function File} {[@var{fname}, @var{fpath}, @var{fltidx}] =} uiputfile ()
+@deftypefnx {Function File} {[@var{fname}, @var{fpath}, @var{fltidx}] =} uiputfile (@var{flt})
+@deftypefnx {Function File} {[@var{fname}, @var{fpath}, @var{fltidx}] =} uiputfile (@var{flt}, @var{dialog_name})
+@deftypefnx {Function File} {[@var{fname}, @var{fpath}, @var{fltidx}] =} uiputfile (@var{flt}, @var{dialog_name}, @var{default_file})
+Open a GUI dialog for selecting a file.  @var{flt} contains a (list of) file
+filter string(s) in one of the following formats:
+
+@table @code
+@item "/path/to/filename.ext"
+If a filename is given the file extension is
+extracted and used as filter.
+In addition the path is selected as current path and the filename is selected
+as default file.
+Example: uiputfile("myfun.m");
+
+@item "*.ext"
+A single file extension.
+Example: uiputfile("*.ext");
+
+@item @{"*.ext","My Description"@}
+A 2-column cell array containing the file extension in the 1st column and
+a brief description in the 2nd column.
+Example: uiputfile(@{"*.ext","My Description";"*.xyz","XYZ-Format"@});
+@end table
+
+The filter string can also contain a semicolon separated list of filter
+extensions.
+Example: uiputfile(@{"*.gif;*.png;*.jpg", "Supported Picture Formats"@});
+
+@var{dialog_name} can be used to customize the dialog title.
+If @var{default_file} is given it is preselected in the GUI dialog.
+If, in addition, a path is given it is also used as current path.
+@end deftypefn
+
+
+@node Progress Bar
+@section Progress Bar
+@cindex Progress Bar
+
+@c waitbar scripts/plot/waitbar.m
+@anchor{doc-waitbar}
+@deftypefn  {Function File} {@var{h} =} waitbar (@var{frac})
+@deftypefnx {Function File} {@var{h} =} waitbar (@var{frac}, @var{msg})
+@deftypefnx {Function File} {@var{h} =} waitbar (@dots{}, "FigureProperty", "Value", @dots{})
+@deftypefnx {Function File} {} waitbar (@var{frac})
+@deftypefnx {Function File} {} waitbar (@var{frac}, @var{hwbar})
+@deftypefnx {Function File} {} waitbar (@var{frac}, @var{hwbar}, @var{msg})
+Return a handle @var{h} to a new waitbar object.  The waitbar is
+filled to fraction @var{frac} which must be in the range [0, 1].  The
+optional message @var{msg} is centered and displayed above the waitbar.
+The appearance of the waitbar figure window can be configured by passing 
+property/value pairs to the function.
+
+When called with a single input the current waitbar, if it exists, is
+updated to the new value @var{frac}.  If there are multiple outstanding
+waitbars they can be updated individually by passing the handle @var{hwbar}
+of the specific waitbar to modify.
+@end deftypefn
+
+
+@node GUI Utility Functions
+@section GUI Utility Functions
+
+These functions do not implement a GUI element but are useful when developing
+programs that do.  @strong{Warning:} The functions @code{uiwait},
+@code{uiresume}, and @code{waitfor} are only available for the FLTK tooolkit.
+
+@c guidata scripts/plot/guidata.m
+@anchor{doc-guidata}
+@deftypefn  {Function File} {@var{data} =} guidata (@var{handle})
+@deftypefnx {Function File} {} guidata (@var{handle}, @var{data})
+@end deftypefn
+
+
+@c guihandles scripts/plot/guihandles.m
+@anchor{doc-guihandles}
+@deftypefn  {Function File} {@var{hdata} =} guihandles (@var{handle})
+@deftypefnx {Function File} {@var{hdata} =} guihandles
+@end deftypefn
+
+
+@c uiwait scripts/plot/uiwait.m
+@anchor{doc-uiwait}
+@deftypefn  {Function File} {} uiwait
+@deftypefnx {Function File} {} uiwait (@var{h})
+@deftypefnx {Function File} {} uiwait (@var{h}, @var{timeout})
+Suspend program execution until the figure with handle @var{h} is
+deleted or @code{uiresume} is called.  When no figure handle is specified,
+this function uses the current figure.
+
+If the figure handle is invalid or there is no current figure, this
+functions returns immediately.
+
+When specified, @var{timeout} defines the number of seconds to wait
+for the figure deletion or the @code{uiresume} call.  The timeout value
+must be at least 1. If a smaller value is specified, a warning is issued
+and a timeout value of 1 is used instead.  If a non-integer value is
+specified, it is truncated towards 0. If @var{timeout} is not specified,
+the program execution is suspended indefinitely.
+@seealso{@ref{doc-uiresume,,uiresume}, @ref{doc-waitfor,,waitfor}}
+@end deftypefn
+
+
+@c uiresume scripts/plot/uiresume.m
+@anchor{doc-uiresume}
+@deftypefn {Function File} {} uiresume (@var{h})
+Resume program execution suspended with @code{uiwait}.  The handle @var{h}
+must be the same as the on specified in @code{uiwait}.  If the handle
+is invalid or there is no @code{uiwait} call pending for the figure
+with handle @var{h}, this function does nothing.
+@seealso{@ref{doc-uiwait,,uiwait}}
+@end deftypefn
+
+
+@c waitfor src/graphics.cc
+@anchor{doc-waitfor}
+@deftypefn  {Built-in Function} {} waitfor (@var{h})
+@deftypefnx {Built-in Function} {} waitfor (@var{h}, @var{prop})
+@deftypefnx {Built-in Function} {} waitfor (@var{h}, @var{prop}, @var{value})
+@deftypefnx {Built-in Function} {} waitfor (@dots{}, "timeout", @var{timeout})
+Suspend the execution of the current program until a condition is
+satisfied on the graphics handle @var{h}.  While the program is suspended
+graphics events are still being processed normally, allowing callbacks to
+modify the state of graphics objects.  This function is reentrant and can be
+called from a callback, while another @code{waitfor} call is pending at
+top-level.
+
+In the first form, program execution is suspended until the graphics object
+@var{h} is destroyed.  If the graphics handle is invalid, the function
+returns immediately.
+
+In the second form, execution is suspended until the graphics object is
+destroyed or the property named @var{prop} is modified.  If the graphics
+handle is invalid or the property does not exist, the function returns
+immediately.
+
+In the third form, execution is suspended until the graphics object is
+destroyed or the property named @var{prop} is set to @var{value}.  The
+function @code{isequal} is used to compare property values.  If the graphics
+handle is invalid, the property does not exist or the property is already
+set to @var{value}, the function returns immediately.
+
+An optional timeout can be specified using the property @code{timeout}.
+This timeout value is the number of seconds to wait for the condition to be
+true.  @var{timeout} must be at least 1. If a smaller value is specified, a
+warning is issued and a value of 1 is used instead.  If the timeout value is
+not an integer, it is truncated towards 0.
+
+To define a condition on a property named @code{timeout}, use the string
+@code{\timeout} instead.
+
+In all cases, typing CTRL-C stops program execution immediately.
+@seealso{@ref{doc-isequal,,isequal}}
+@end deftypefn
+
+
+@node User-Defined Preferences
+@section User-Defined Preferences
+
+@c addpref scripts/prefs/addpref.m
+@anchor{doc-addpref}
+@deftypefn {Function File} {} addpref (@var{group}, @var{pref}, @var{val})
+Add a preference @var{pref} and associated value @var{val} to the
+named preference group @var{group}.
+
+The named preference group must be a character string.
+
+The preference @var{pref} may be a character string or a cell array
+of character strings.  The corresponding value @var{val} may be any
+value, or, if @var{pref} is a cell array of strings, @var{val}
+must be a cell array of values with the same size as @var{pref}.
+@seealso{@ref{doc-setpref,,setpref}, @ref{doc-getpref,,getpref}, @ref{doc-ispref,,ispref}, @ref{doc-rmpref,,rmpref}}
+@end deftypefn
+
+
+@c getpref scripts/prefs/getpref.m
+@anchor{doc-getpref}
+@deftypefn {Function File} {} getpref (@var{group}, @var{pref}, @var{default})
+Return the preference value corresponding to the named preference
+@var{pref} in the preference group @var{group}.
+
+The named preference group must be a character string.
+
+If @var{pref} does not exist in @var{group} and @var{default} is
+specified, return @var{default}.
+
+The preference @var{pref} may be a character string or a cell array
+of character strings.  The corresponding default value @var{default}
+may be any value, or, if @var{pref} is a cell array of strings,
+@var{default} must be a cell array of values with the same size as
+@var{pref}.
+
+If neither @var{pref} nor @var{default} are specified, return a
+structure of preferences for the preference group @var{group}.
+
+If no arguments are specified, return a structure containing all
+groups of preferences and their values.
+@seealso{@ref{doc-addpref,,addpref}, @ref{doc-setpref,,setpref}, @ref{doc-ispref,,ispref}, @ref{doc-rmpref,,rmpref}}
+@end deftypefn
+
+
+@c ispref scripts/prefs/ispref.m
+@anchor{doc-ispref}
+@deftypefn {Function File} {} ispref (@var{group}, @var{pref})
+Return true if the named preference @var{pref} exists in the
+preference group @var{group}.
+
+The named preference group must be a character string.
+
+The preference @var{pref} may be a character string or a cell array
+of character strings.
+
+If @var{pref} is not specified, return true if the preference
+group @var{group} exists.
+@seealso{@ref{doc-getpref,,getpref}, @ref{doc-addpref,,addpref}, @ref{doc-setpref,,setpref}, @ref{doc-rmpref,,rmpref}}
+@end deftypefn
+
+
+@c rmpref scripts/prefs/rmpref.m
+@anchor{doc-rmpref}
+@deftypefn {Function File} {} rmpref (@var{group}, @var{pref})
+Remove the named preference @var{pref} from the preference group
+@var{group}.
+
+The named preference group must be a character string.
+
+The preference @var{pref} may be a character string or a cell array
+of character strings.
+
+If @var{pref} is not specified, remove the preference group
+@var{group}.
+
+It is an error to remove a nonexistent preference or group.
+@seealso{@ref{doc-addpref,,addpref}, @ref{doc-ispref,,ispref}, @ref{doc-setpref,,setpref}, @ref{doc-getpref,,getpref}}
+@end deftypefn
+
+
+@c setpref scripts/prefs/setpref.m
+@anchor{doc-setpref}
+@deftypefn {Function File} {} setpref (@var{group}, @var{pref}, @var{val})
+Set a preference @var{pref} to the given @var{val} in the named
+preference group @var{group}.
+
+The named preference group must be a character string.
+
+The preference @var{pref} may be a character string or a cell array
+of character strings.  The corresponding value @var{val} may be any
+value, or, if @var{pref} is a cell array of strings, @var{val}
+must be a cell array of values with the same size as @var{pref}.
+
+If the named preference or group does not exist, it is added.
+@seealso{@ref{doc-addpref,,addpref}, @ref{doc-getpref,,getpref}, @ref{doc-ispref,,ispref}, @ref{doc-rmpref,,rmpref}}
+@end deftypefn
+
+
