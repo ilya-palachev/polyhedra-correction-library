@@ -9,8 +9,8 @@
 
 Facet::Facet() :
 		id(-1),
-		index(new int[3 * DEFAULT_NV + 1]),
-		nv(DEFAULT_NV),
+		index(new int[1]),
+		nv(0),
 		plane() {
 	rgb[0] = 100;
 	rgb[1] = 100;

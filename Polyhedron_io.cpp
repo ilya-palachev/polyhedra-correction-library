@@ -71,7 +71,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 
 	numv = i;
 	numf = j;
-	vertex = new Vector3d[numv];
+	vertex = new Vector3d[2 * numf];   //MORE MEMORY!!!
 	facet = new Facet[numf];
 
 	for(i = 0; i < numv; ++i)
@@ -153,7 +153,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 
 	numv = i;
 	numf = j;
-	vertex = new Vector3d[numv];
+	vertex = new Vector3d[2 * numf];   //MORE MEMORY!!!
 	facet = new Facet[numf];
 
 	for(i = 0; i < numv; ++i)
@@ -260,7 +260,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 
 	numv = i;
 	numf = j;
-	vertex = new Vector3d[numv];
+	vertex = new Vector3d[2 * numf];   //MORE MEMORY!!!
 	facet = new Facet[numf];
 
 	for(i = 0; i < numv; ++i)
@@ -350,7 +350,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 
 	numv = i;
 	numf = j;
-	vertex = new Vector3d[numv];
+	vertex = new Vector3d[2 * numf];   //MORE MEMORY!!!
 	facet = new Facet[numf];
 
 	for(i = 0; i < numv; ++i)
@@ -479,7 +479,7 @@ void Polyhedron::fscan_ply(const char *filename)
 	}
 	numf = nv;
 
-	vertex = new Vector3d[numv];
+	vertex = new Vector3d[2 * numf];   //MORE MEMORY!!!
 	facet = new Facet[numf];
 
 	for(i = 0; i < numv; ++i)

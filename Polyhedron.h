@@ -83,10 +83,14 @@ public:
 	//Polyhedron_join_facets.cpp
 	int join_facets_count_nv(int facet_id0, int facet_id1);
 	void join_facets_create_vertex_list(int facet_id0, int facet_id1, int nv,
-													int* vertex_list, int* edge_list);
+                int* vertex_list, int* edge_list);
 	void list_squares_method(int nv, int* vertex_list, Plane* plane);
 	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
 
+        void join_create_first_facet(int fid0, int fid1);
+        void delete_vertex_polyhedron(int v);
+        int add_vertex(Vector3d& vec);
+        void print_vertex(int i);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -261,6 +265,19 @@ public:
 
 	//Facet_test.cpp
 	bool test_self_intersection();
+        
+        //Facet_join_facets.cpp
+        void clear_bad_vertexes();
+        void delete_vertex(int v);
+        void add_before_position(int pos, int v, int next_f);
+        void add_after_position(int pos, int v, int next_f);
+        
+	void find_next_facet(int v, int& fid_next);
+	void find_next_facet2(int v, int& fid_next);
+	void find_and_replace2(int from, int to);
+	int find_total(int what);
+	int find_vertex(int what);
+        
 };
 
 class FutureFacet {
