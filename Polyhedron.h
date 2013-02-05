@@ -111,6 +111,8 @@ public:
         void join_facets_rise_find(int fid0, int fid1, int& imin);
         void join_facets_rise_find_step(int fid0, int fid1, int i, double& d);
         void join_facets_rise_point(int fid0, int fid1, int imin);
+        
+        int test_structure();
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -340,6 +342,11 @@ public:
 	void find_and_replace2(int from, int to);
 	int find_total(int what);
 	int find_vertex(int what);
+        
+        void add(int what, int pos);
+        void remove(int pos);
+        void update_info();
+        int test_structure();
         
 };
 
