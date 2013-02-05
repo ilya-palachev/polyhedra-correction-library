@@ -96,7 +96,8 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     num_new_v = 0;
     num_components_new = 0;
     bool flag = true;
-    while (total_edges > 0 && flag) {
+//    while (total_edges > 0 && flag) {
+    do {
         printf("total_edges = %d\n", total_edges);
 
         for (i = 0; i < numf; ++i) {
@@ -230,7 +231,7 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
 
         } while (v0 != v0_first || v1 != v1_first);
         ++num_components_new;
-    }
+    } while (0);
     fprintf(stdout, "====   SUPER-STEP 2 ENDED  =====");
 
     //3. Расщепление компонент сечения

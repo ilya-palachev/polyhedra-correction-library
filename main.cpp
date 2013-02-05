@@ -27,8 +27,8 @@ int main(int argc, char** argv) {
     argc = argc;
     argv = argv;
 
-    int fid[3] = {0, 250, 14};
-    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
+//    int fid[3] = {0, 250, 14};
+//    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
     
 //    test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
     
@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     //        test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
-    //    test_deform_linear("poly-small", 0, 3, Vector3d(-0.1, 0.1, 0.1));
+        test_deform_linear("poly-small", 0, 3, Vector3d(-0.01, 0.01, 0.01));
     //        test_deform_linear("poly-small", 0, 4, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 5, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 6, Vector3d(-1e-1, 1e-1, 1e-1));
@@ -432,20 +432,20 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
     poly.preprocess_polyhedron();
     poly.test_consections();
 
-    printf("simpify_vertex:\n");
-    double eps = 1e-16;
-    int ndel;
-    for (int i = 0; i < 18; ++i) {
-        ndel = poly.simplify_vertex(eps);
-        printf("\t%le\t%d\n", eps, ndel);
-        eps *= 5.;
-        ndel = poly.simplify_vertex(eps);
-        printf("\t%le\t%d\n", eps, ndel);
-        eps *= 2.;
-    }
+//    printf("simpify_vertex:\n");
+//    double eps = 1e-16;
+//    int ndel;
+//    for (int i = 0; i < 18; ++i) {
+//        ndel = poly.simplify_vertex(eps);
+//        printf("\t%le\t%d\n", eps, ndel);
+//        eps *= 5.;
+//        ndel = poly.simplify_vertex(eps);
+//        printf("\t%le\t%d\n", eps, ndel);
+//        eps *= 2.;
+//    }
 
-    //    poly.deform_linear2(id, delta);
-    //    poly.test_consections();
+        poly.deform_linear(id, delta);
+        poly.test_consections();
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);

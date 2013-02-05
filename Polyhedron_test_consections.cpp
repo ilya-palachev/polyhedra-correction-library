@@ -14,14 +14,14 @@
 int Polyhedron::test_consections() {
     int count;
 #ifdef TCPRINT
-    printf("Begin test_consections...\n");
+//    printf("Begin test_consections...\n");
 #endif
 
     count = 0;
     count += test_inner_consections();
     count += test_outer_consections();
 #ifdef TCPRINT
-    printf("Total: %d consections found\n", count);
+//    printf("Total: %d consections found\n", count);
 #endif
     return count;
 }

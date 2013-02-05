@@ -11,7 +11,7 @@
 //#define DEBUG
 //#define DEBUG1
 #define OUTPUT
-#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
+//#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
 #define EPS_SIGNUM 1e-15
 
 

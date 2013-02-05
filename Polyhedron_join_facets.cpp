@@ -75,7 +75,7 @@ void Polyhedron::multi_join_facets(int n, int *fid) {
     // II ). Вычисление средней плоскости
     printf("II ). Вычисление средней плоскости\n");
     multi_join_facets_calculate_plane(n, fid, join_facet, plane);
-    join_facet.plane = plane;
+    facet[fid[0]].plane = plane;
 
     // III ). Дополнительная предобработка многогранника
     printf("III ). Дополнительная предобработка многогранника\n");
@@ -90,8 +90,8 @@ void Polyhedron::multi_join_facets(int n, int *fid) {
     preprocess_polyhedron();
 
 //     VI). Рассечение многогранника плоскостью
-    printf("VI). Рассечение многогранника плоскостью\n");
-    intersect_j(-plane, fid0);
+//    printf("VI). Рассечение многогранника плоскостью\n");
+//    intersect_j(-plane, fid0);
     
     test_consections();
 
@@ -331,6 +331,7 @@ void Polyhedron::multi_join_facets_build_index(int n, int* fid, Plane& plane, Fa
             printf("\t%d", nfind[facet[fid[i]].index[j]]);
         }
         printf("\n\n");
+        facet[fid[i]].my_fprint_all(stdout);
     }
     
     nv = 0;
@@ -349,17 +350,28 @@ void Polyhedron::multi_join_facets_build_index(int n, int* fid, Plane& plane, Fa
         printf("\n next facet %d\n", fid[i]);
         nnv = facet[fid[i]].nv;
         while(nfind[facet[fid[i]].index[j]] == 1) {
+            if (facet[fid[i]].index[j] == v_first && nv > 0) {
+                break;
+            }
             index[nv] = facet[fid[i]].index[j];
+            
             printf("%d ", index[nv]);
             ++nv;
             j = (nnv + j + 1) % nnv;
         }
-        
+        v = facet[fid[i]].index[j];
+        index[nv] = facet[fid[i]].index[j];    
+        printf("%d\n", index[nv]);
+        ++nv;
+        if (v == v_first)
+            break;
         for (i = 0; i < n; ++i) {
             j = facet[fid[i]].find_vertex(v);
+            printf("\tVertex %d was found in facet %d at position %d\n", v, fid[i], j);
             if (j != -1) {
                 nnv = facet[fid[i]].nv;
                 j = (nnv + j + 1) % nnv;
+                printf("\tnfind[%d] = %d\n", facet[fid[i]].index[j], nfind[facet[fid[i]].index[j]]);
                 if (nfind[facet[fid[i]].index[j]] == 1) {
                     break;
                 }
@@ -370,6 +382,7 @@ void Polyhedron::multi_join_facets_build_index(int n, int* fid, Plane& plane, Fa
         printf("v = %d\n", v);
     } while (v != v_first);
     printf("\n\n");
+    --nv;
     
     join_facet = Facet(fid[0], nv, plane, index, this, true);
     
@@ -377,8 +390,10 @@ void Polyhedron::multi_join_facets_build_index(int n, int* fid, Plane& plane, Fa
     for (i = 1; i < n; ++i) {
         facet[fid[i]] = Facet();
     }
+    facet[fid[0]].my_fprint_all(stdout);
 
     preprocess_polyhedron();
+    printf("------End of preprocess_polyhedron...------\n");
     index = facet[fid[0]].index;
     del = new bool[numv];
     
@@ -417,6 +432,8 @@ void Polyhedron::join_facets_rise(int fid0) {
     nv = facet[fid0].nv;
     index = facet[fid0].index;
     plane = facet[fid0].plane;
+    printf("Поднимаем до плоскости: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0\n",
+            plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 
     // 1 ). Посчитаем знаки вершин контура и количество вершин ниже грани
     sign_vertex = new int[nv];
