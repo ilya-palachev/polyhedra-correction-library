@@ -66,8 +66,8 @@ int Polyhedron::test_inner_consections_facet(int fid, double* A, double* b) {
     }
     if (count > 0)
         printf("\t\tIn facet %d: %d inner consections found\n", fid, count);
-    if (count > 0)
-        facet[fid].my_fprint(stdout);
+//    if (count > 0)
+//        facet[fid].my_fprint(stdout);
     return count;
 }
 
@@ -173,7 +173,7 @@ int Polyhedron::test_inner_consections_pair(int fid, int id0, int id1, int id2, 
 
 
     if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.) {
-        printf("\t\t\ttest_inner_consections_pair: edges (%d, %d) and (%d, %d) consect\n", id0, id2, id1, id3);
+        printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id2, id1, id3);
         return 1;
     } else
         return 0;
@@ -212,6 +212,7 @@ int Polyhedron::test_outer_consections_edge(int id0, int id1) {
 
     count = 0;
     for (j = 0; j < numf; ++j) {
+//        printf("\tj = %d\n", j);
         count += test_outer_consections_pair(id0, id1, j);
     }
     if (count > 0)
@@ -225,43 +226,59 @@ int Polyhedron::test_outer_consections_pair(int id0, int id1, int fid) {
     double AA, b, u, delta, alpha, sum;
     Vector3d A, A0, A1, normal;
 
+
+
     if (facet[fid].find_vertex(id0) >= 0 || facet[fid].find_vertex(id1) >= 0) {
+//        printf("contains.\n");
         return 0;
     }
 
     AA = facet[fid].plane.norm * (vertex[id0] - vertex[id1]);
 
     if (fabs(AA) < EPS_PARALLEL) {
+//        printf("parallel %le.\n", fabs(AA));
         return 0;
     }
 
-    b = -facet[fid].plane.norm * vertex[id1];
+    b = - facet[fid].plane.norm * vertex[id1] - facet[fid].plane.dist;
     u = b / AA;
 
     if (u > 1. || u < 0.) {
+//        printf("consection out of interval u = %lf.\n", u);
         return 0;
     }
+//    printf("\ttesting whether edge (%d, %d) consects facet %d.\n", 
+//            id0, id1, fid);
+//    printf("\t\tu = %lf\n", u);
 
     A = u * vertex[id0] + (1. - u) * vertex[id1];
+//    printf("\t\tA = (%.2lf, %.2lf, %.2lf)\n", A.x, A.y, A.z);
 
     nv = facet[fid].nv;
     index = facet[fid].index;
     normal = facet[fid].plane.norm;
     normal.norm(1.);
+//    printf("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
 
     sum = 0.;
     for (i = 0; i < nv; ++i) {
+//        if (i > 0)
+//            printf("+");
         A0 = vertex[index[i % nv]] - A;
         A1 = vertex[index[(i + 1) % nv]] - A;
         delta = (A0 % A1) * normal;
         delta /= sqrt(qmod(A0) * qmod(A1));
         alpha = asin(delta);
+//        printf(" %lf ", alpha / M_PI * 180);
         sum += alpha;
     }
+    
+//    printf(" = sum = %lf*\n", sum / M_PI * 180);
 
     if (fabs(sum) < 2 * M_PI) {
         return 0;
     } else {
+        printf("\t\t\t\tEdge (%d, %d) consects facet %d\n", id0, id1, fid);
         return 1;
     }
 }
