@@ -133,9 +133,11 @@ public:
         void deform_linear_facets(double* x, double* y, double* z);
         void deform_linear_vertices(double K, double* A, double* B);
         double deform_linear_calculate_error();
+        double deform_linear_calculate_deform(double* x, double* y, double* z);
         double min_dist(int id);
         void import_coordinates(Polyhedron& orig);
-        
+
+        void deform_linear_test(int id, Vector3d delta, int mode, int& num_steps, double& norm_sum);
         //Polyhedron_test_consections.cpp
         int test_consections();
         int test_inner_consections();
