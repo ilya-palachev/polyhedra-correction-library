@@ -27,8 +27,8 @@ int main(int argc, char** argv) {
     argc = argc;
     argv = argv;
 
-//    int fid[3] = {0, 250, 14};
-//    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
+    int fid[3] = {0, 250, 14};
+    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
     
 //    test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
     
@@ -47,7 +47,8 @@ int main(int argc, char** argv) {
     //        test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
-        test_deform_linear("poly-small", 0, 3, Vector3d(-0.1, 0.1, 0.1));
+//    double d = 0.1;
+//        test_deform_linear("poly-small", 0, 3, Vector3d(-d, d, d));
     //        test_deform_linear("poly-small", 0, 4, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 5, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 6, Vector3d(-1e-1, 1e-1, 1e-1));
@@ -198,7 +199,7 @@ void get_statistics_deform_linear(const char* name, int type) {
 
             poly.deform_linear_partial(i_vertex, delta, 10);
 
-            if (poly.test_consections() > 0) {
+            if (poly.test_consections(true) > 0) {
                 ++count;
             }
             poly.import_coordinates(poly1);
@@ -430,7 +431,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
     fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
     poly.preprocess_polyhedron();
-    poly.test_consections();
+    poly.test_consections(true);
 
 //    printf("simpify_vertex:\n");
 //    double eps = 1e-16;
@@ -444,8 +445,8 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
 //        eps *= 2.;
 //    }
 
-        poly.deform_linear(id, delta);
-        poly.test_consections();
+        poly.deform_linear2(id, delta);
+        poly.test_consections(false);
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);

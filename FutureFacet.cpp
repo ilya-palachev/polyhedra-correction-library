@@ -11,14 +11,22 @@ FutureFacet::FutureFacet() :
 {}
 
 FutureFacet::~FutureFacet() {
-	if (edge0 != NULL)
+	if (edge0 != NULL) {
 		delete[] edge0;
-	if (edge1 != NULL)
+                edge0 = NULL;
+        }
+	if (edge1 != NULL) {
 		delete[] edge1;
-	if (src_facet != NULL)
+                edge1 = NULL;
+        }
+	if (src_facet != NULL) {
 		delete[] src_facet;
-	if (id_v_new != NULL)
+                src_facet = NULL;
+        }
+	if (id_v_new != NULL) {
 		delete[] id_v_new;
+                id_v_new = NULL;
+        }
 }
 
 FutureFacet::FutureFacet(int len_orig) :

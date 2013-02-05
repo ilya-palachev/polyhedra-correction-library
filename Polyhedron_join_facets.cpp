@@ -51,7 +51,7 @@ void Polyhedron::join_facets(int fid0, int fid1) {
     printf("VI). Рассечение многогранника плоскостью\n");
     intersect_j(-plane, fid0);
 
-    test_consections();
+    test_consections(true);
 
     printf("=====================================================\n");
     printf("=========    Грани %d и %d объединены !!!   =========\n", fid0, fid1);
@@ -95,7 +95,7 @@ void Polyhedron::multi_join_facets(int n, int *fid) {
 //    printf("VI). Рассечение многогранника плоскостью\n");
 //    intersect_j(-plane, fid0);
 
-    test_consections();
+    test_consections(true);
 
 
     printf("=====================================================\n");
@@ -736,11 +736,11 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
     } else {
         // Если грани не параллельны:
         intersection(pl2, pl1, pr1, v1);
-//        if (signum(v1, plane) == 1) {
-//            // Если точка пересечения лежит выше плоскости:
-//            printf("левая точка пересечения лежит выше плоскости\n");            
-//            intersection(plane, pl1, pr1, v1);
-//        } else 
+        if (signum(v1, plane) == 1) {
+            // Если точка пересечения лежит выше плоскости:
+            printf("левая точка пересечения лежит выше плоскости\n");            
+            intersection(plane, pl1, pr1, v1);
+        } else 
             ifjoin = true;
         
     }
@@ -756,11 +756,11 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
     } else {
         // Если грани не параллельны:
         intersection(pl1, pr1, pr2, v2);
-//        if (signum(v2, plane) == 1) {
-//            // Если точка пересечения лежит выше плоскости:
-//            printf("правая точка пересечения лежит выше плоскости\n");
-//            intersection(plane, pl1, pr1, v2);
-//        } else 
+        if (signum(v2, plane) == 1) {
+            // Если точка пересечения лежит выше плоскости:
+            printf("правая точка пересечения лежит выше плоскости\n");
+            intersection(plane, pl1, pr1, v2);
+        } else 
             ifjoin = true;
         
     }

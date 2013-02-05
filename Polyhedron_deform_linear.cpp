@@ -122,7 +122,8 @@ void Polyhedron::deform_linear(int id, Vector3d delta) {
             //                    vertex[id].z = zold[id];
             //            vertex[id] = delta;
             deform_linear_facets(x, y, z);
-            test_consections();
+            test_consections(true);
+//            join_points();
             deform_linear_vertices(id, K, A, B, xold, yold, zold);
             err = deform_linear_calculate_error();
             norm = deform_linear_calculate_deform(xold, yold, zold);
@@ -137,8 +138,8 @@ void Polyhedron::deform_linear(int id, Vector3d delta) {
         } while (0);
 
         //            K += K;
-        K *= 1.005;
-//        K *= 2;
+//        K *= 1.005;
+        K *= 2;
         //            K = norm / err;
         //            if (K < 100.)
         //                K = 100;
@@ -351,8 +352,9 @@ void Polyhedron::deform_linear_facets(double* x, double* y, double* z) {
 
 double Polyhedron::deform_linear_calculate_error() {
     int i, j, nv, *index;
-    double err, a, b, c, d, x, y, z;
+    double err, a, b, c, d, x, y, z, locerr;
     err = 0.;
+    
 
     for (j = 0; j < numf; ++j) {
         nv = facet[j].nv;
@@ -361,12 +363,17 @@ double Polyhedron::deform_linear_calculate_error() {
         b = facet[j].plane.norm.y;
         c = facet[j].plane.norm.z;
         d = facet[j].plane.dist;
+        if (nv < 3)
+            continue;
+        locerr = 0.;
         for (i = 0; i < nv; ++i) {
             x = vertex[index[i]].x;
             y = vertex[index[i]].y;
             z = vertex[index[i]].z;
-            err += fabs(a * x + b * y + c * z + d);
+            locerr += fabs(a * x + b * y + c * z + d);
         }
+        err += locerr;
+        printf("error[%d] = %lf\n", j, locerr);
     }
 
     return err;
@@ -524,20 +531,36 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     //    err = deform_linear_calculate_error();
     //    K = sqrt(qmod(delta)) / err;
         err_eps = EPSILON;
+        ifPrint = false;
+        ncons_prev = test_consections(false);
         for (i = 0; i < 10; ++i) {
             do {
     
-                    printf("\\hline\n %d & %d & ", i, step);
-                    vertex[id].x = xold[id];
-                    vertex[id].y = yold[id];
-                    vertex[id].z = zold[id];
-    //            vertex[id] = delta;
+                vertex[id].x = xold[id];
+                vertex[id].y = yold[id];
+                vertex[id].z = zold[id];
+//            vertex[id] = delta;
                 deform_linear_facets(x, y, z);
+//                join_points();
                 deform_linear_vertices(K, A, B);
                 err = deform_linear_calculate_error();
                 norm = deform_linear_calculate_deform(xold, yold, zold);
-                            printf("%le & %le & %lf\\\\\n", err, norm, K);
+                
+                ncons_curr = test_consections(false);
+                if (ncons_curr != ncons_prev) {
+//                if (1) {
+                    ifPrint = true;
+                    ncons_prev = ncons_curr;
+                }
+//                if (ifPrint) {
+                if (1) {
+                    printf("\\hline\n %d & %d & ", i, step);
+                    printf("%le & %le & %lf & %d\\\\\n", err, norm, K, ncons_curr);
     //                    printf("%d\t%d\terr = %le\tnorm = %le\terr_eps = %le\tK = %lf\n", i, step++, err, norm, err_eps, K);
+                    ifPrint = false;
+                    test_consections(true);
+                    join_points(id);
+                }
                 ++step;
                 if (step > MAX_STEPS) {
                     printf("Too much steps...\n");
@@ -602,6 +625,9 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     //    fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
     //    fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
+    this->delete_empty_facets();
+//    my_fprint(stdout);
+    
     if (x != NULL) delete[] x;
     if (y != NULL) delete[] y;
     if (z != NULL) delete[] z;
@@ -636,6 +662,10 @@ void Polyhedron::deform_linear_vertices(double K, double* A, double* B) {
         Mcc = 0.;
         Mcd = 0.;
         nf = vertexinfo[i].nf;
+        if (nf == 0) {
+            printf("Vertex %d cannot be found in any facet...\n", i);
+            continue;
+        }
         index = vertexinfo[i].index;
         for (j = 0; j < nf; ++j) {
             pl = facet[index[j]].plane;
