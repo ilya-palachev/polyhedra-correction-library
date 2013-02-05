@@ -350,8 +350,14 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     Plane plane1;
     Plane plane2;
 
-    double min_dist, dist, dist_to_plane;
+    double min_dist;
+    double dist;
+    double dist_to_plane;
+    double min_coeff;
+    double coeff;
+    double coeff_to_plane;
     int min_i, i_replace;
+    
     int tmp0, tmp1, tmp2;
     int new_number;
     int v_replace;
@@ -423,27 +429,39 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             
             plane_dist = qmod(plane0.norm - plane2.norm);
 //            printf("dist_plane(%d, %d) = %lf\n", f_prev_prev, f_next, plane_dist);
-            dist_to_plane = fabs(plane.norm * vertex[index[i]] + plane.dist);
+            intersection(facet[f_prev].plane, facet[f_next].plane, plane, intrsct);
+            dist_to_plane = (vertex[index[i]] - intrsct)*plane.norm;
             dist_to_plane /= sqrt(qmod(plane.norm));
-            printf("\t\t\tdist_to_plane(%d, plane) = %lf\n", index[i], dist);
+            dist_to_plane = fabs(dist_to_plane);
+            coeff_to_plane = sqrt(qmod(intrsct - vertex[index[i]]));
+            
+//            dist_to_plane = fabs(plane.norm * vertex[index[i]] + plane.dist);
+//            dist_to_plane /= sqrt(qmod(plane.norm));
+            printf("\t\t\tdist_to_plane(%d, plane) = %lf\n", index[i], dist_to_plane);
             
             if (plane_dist < EPS_PARALL) {
                 ifParallel = true;
                 dist = dist_to_plane;
+                coeff = coeff_to_plane;
                 printf("\t\t\tГрани %d и %d параллельны\n", f_prev_prev, f_next);
             } else {   
                 ifParallel = false;
                 intersection(plane0, plane1, plane2, intrsct);
                 dist = (vertex[index[i]] - intrsct)*plane.norm;
                 dist /= sqrt(qmod(plane.norm));
+                dist = fabs(dist);
+                coeff = sqrt(qmod(intrsct - vertex[index[i]]));
 //                dist = qmod(vertex[index[i]] - intrsct);
 //                dist = sqrt(dist);
                 printf("\t\t\tdist = %lf\n", dist);
             }
-            if (dist_to_plane < dist)
+            if (dist_to_plane < dist) {
                 dist = dist_to_plane;
+                coeff = coeff_to_plane;
+            }
             if ((min_i == -1 || dist < min_dist) && dist > 0.) {
                 min_dist = dist;
+                min_coeff = coeff;
                 min_i = i;
                 i_replace = ifParallel ? min_i : i_prev;
             }
@@ -471,26 +489,32 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             
             plane_dist = qmod(plane0.norm - plane2.norm);
 //            printf("dist_plane(%d, %d) = %lf\n", f_prev, f_next_next, plane_dist);
-            dist_to_plane = fabs(plane.norm * vertex[index[i]] + plane.dist);
-            dist_to_plane /= sqrt(qmod(plane.norm));
-            printf("\t\t\tdist_to_plane(%d, plane) = %lf\n", index[i], dist);
+//            dist_to_plane = fabs(plane.norm * vertex[index[i]] + plane.dist);
+//            dist_to_plane /= sqrt(qmod(plane.norm));
+//            printf("\t\t\tdist_to_plane(%d, plane) = %lf\n", index[i], dist);
             if (plane_dist < EPS_PARALL) {
                 ifParallel = true;
                 printf("\t\t\tГрани %d и %d параллельны\n", f_prev, f_next_next);
                 dist = dist_to_plane;
+                coeff = coeff_to_plane;
             } else {   
                 ifParallel = false;
                 intersection(plane0, plane1, plane2, intrsct);
                 dist = (vertex[index[i]] - intrsct)*plane.norm;
                 dist /= sqrt(qmod(plane.norm));
+                dist = fabs(dist);
+                coeff = sqrt(qmod(intrsct - vertex[index[i]]));
 //                dist = qmod(vertex[index[i]] - intrsct);
 //                dist = sqrt(dist);
                 printf("\t\t\tdist = %lf\n", dist);
             }
-            if (dist_to_plane < dist)
+            if (dist_to_plane < dist) {
                 dist = dist_to_plane;
+                coeff = coeff_to_plane;
+            }
             if ((min_i == -1 || dist < min_dist) && dist > 0.) {
                 min_dist = dist;
+                min_coeff = coeff;
                 min_i = i;
                 i_replace = ifParallel ? min_i : i_next_next;
             }
@@ -516,14 +540,19 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             
 
         for (i = 0; i < nv; ++i) {
-            printf("\t\t2.%d. Поднимается вершина %d\n", i, index[i]);
+            printf("\t\t2.%d. Поднимается вершина %d", i, index[i]);
             if (sign_vertex[i] == 1) {
-                printf("\t\t\tОна выше плоскости. Пропускаем.\n");
+                printf("\tОна выше плоскости. Пропускаем.\n");
                 continue;
             }
             if (i == min_i) {
-                printf("\t\t\tВершину %d обработаем отдельно. Она ключевая.\n", index[i]);
+                printf("\tВершину %d обработаем отдельно. Она ключевая.\n", index[i]);
                 continue;
+            }
+            if (i != i_replace) {
+                printf("\tБУДЕМ ОБРАБАТЫВАТЬ ТОЛЬКО ЗАМЕНЯЮЩУЮ ВЕРШИНУ %d\n", index[i_replace]);
+                continue;
+                
             }
             if (i == 0) {
                 i_prev = nv - 1;
@@ -535,7 +564,7 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
             f_prev = index[nv + 1 + i_prev];
             f_next = index[nv + 1 + i_next];
             intersection(facet[f_prev].plane, facet[f_next].plane, dir, point);
-            dir.norm(min_dist);
+            dir.norm(min_coeff);
 
             // 2 случая:
             //                tmp0 = index[2 * nv + 1 + i] > 0 ? index[2 * nv + 1 + i] - 1 : facet[f_prev].nv - 1;
@@ -544,14 +573,14 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
 
             // Точка сдвигается
             if (fid == f_next) {
-                printf("\t\t\tВершина %d просто сдвигается\n", index[i]);
+                printf("\tВершина %d просто сдвигается\n", index[i]);
                 //                    print_vertex(index[i]);
                 vertex[index[i]] += dir;
                 //                    sign_vertex[i] = signum(vertex[index[i]], plane);                    
                 //                    print_vertex(index[i]);
             }// Добавляется новая точка
             else {
-                printf("\t\t\tСоздаем новую точку для вершины %d\n", index[i]);
+                printf("\tСоздаем новую точку для вершины %d\n", index[i]);
                 //                    print_vertex(index[i]);
                 point = vertex[index[i]] + dir;
                 new_number = add_vertex(point);
@@ -594,7 +623,9 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
         // Та самая исключительная ситуация :
         if (min_i == i_replace) {
             intersection(facet[f_prev].plane, facet[f_next].plane, dir, point);
-            dir.norm(min_dist);
+            dir.norm(min_coeff);
+            if (dir * plane.norm < 0)
+                dir *= -1.;
             printf("\t\tВершина %d просто сдвигается\n", index[i]);
             vertex[index[i]] += dir;            
         }
@@ -658,7 +689,7 @@ void Polyhedron::join_create_first_facet(int fid0, int fid1) {
     //    my_fprint(stdout);
 
     //    clear_unused();
-    printf("VI). Рассечение многогранника плоскостью\n");
+    printf("VI). Рассечение многогранника плоскостью - ВКЛЮЧЕНО\n");
     intersect(-plane);
     printf("VII). Грани %d и %d объединены!\n", fid0, fid1);
     //    my_fprint(stdout);

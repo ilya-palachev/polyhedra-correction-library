@@ -2,7 +2,8 @@
 #include "math.h"
 #include "Vector3d.h"
 
-#include "matrix_invert.h"
+//#include "matrix_invert.h"
+#include "Gauss_string.h"
 
 Vector3d & Vector3d::norm(double d) {
     double t = x * x + y * y + z * z;
@@ -108,10 +109,10 @@ Vector3d Plane::project(const Vector3d & v) const {
 
 // New version 2011-10-05
 bool intersection(const Plane & plane1, const Plane & plane2, const Plane & plane3, Vector3d & point) {
-    double *A, *b, *INV;
+    double *A, *b/*, *INV*/;
     A = new double[9];
     b = new double[3];
-    INV = new double[9];
+//    INV = new double[9];
     A[0] = plane1.norm.x;
     A[1] = plane1.norm.y;
     A[2] = plane1.norm.z;
@@ -124,10 +125,14 @@ bool intersection(const Plane & plane1, const Plane & plane2, const Plane & plan
     b[0] = - plane1.dist;
     b[1] = - plane2.dist;
     b[2] = - plane3.dist;
-    invert(A, INV, 3);
-    point.x = b[0] * A[0] + b[1] * A[1] + b[2] * A[2];
-    point.y = b[0] * A[3] + b[1] * A[4] + b[2] * A[5];
-    point.z = b[0] * A[6] + b[1] * A[7] + b[2] * A[8];
+//    invert(A, INV, 3);
+    Gauss_string(3, A, b);
+//    point.x = b[0] * A[0] + b[1] * A[1] + b[2] * A[2];
+//    point.y = b[0] * A[3] + b[1] * A[4] + b[2] * A[5];
+//    point.z = b[0] * A[6] + b[1] * A[7] + b[2] * A[8];
+    point.x = b[0];
+    point.y = b[1];
+    point.z = b[2];
 }
 
 // ����������� ���� ����������

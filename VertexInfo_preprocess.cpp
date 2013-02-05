@@ -45,6 +45,12 @@ void VertexInfo::preprocess() {
         fid_curr = fid_next;
         poly->facet[fid_curr].get_next_facet(
                 pos_curr, pos_next, fid_next, v_curr);
+        if (pos_next == -1 || fid_next == -1) {
+            printf("\nVertxInfo::preprocess : Error. Cannot find v%d in f%d\n",
+                    v_curr, fid_curr);
+            return;
+        }
+            
     } while (fid_next != fid_first);
 
 //    printf("\n\t\tTotal number is %d\n");

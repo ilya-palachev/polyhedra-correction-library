@@ -8,9 +8,9 @@
 
 #include "Vector3d.h"
 
-//#define DEBUG
-//#define DEBUG1
-//#define OUTPUT
+#define DEBUG
+#define DEBUG1
+#define OUTPUT
 
 #define EPS_SIGNUM 1e-16
 
