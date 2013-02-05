@@ -28,7 +28,7 @@ void Polyhedron::my_fprint(FILE* file) {
 	for(i = 0; i < numf; ++i)
 		facet[i].my_fprint_all(file);
 	if(vertexinfo != NULL) {
-		for(i = 0; i < numf; ++i)
+		for(i = 0; i < numv; ++i)
 			vertexinfo[i].my_fprint_all(file);
 	}
 }

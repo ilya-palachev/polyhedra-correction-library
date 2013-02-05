@@ -8,11 +8,10 @@
 #define DEFAULT_NV 1000
 
 Facet::Facet() :
-id(-1),
-index(new int[3 * DEFAULT_NV + 1]),
-nv(DEFAULT_NV),
-plane() {
-	edge_list.set_facet(this);
+		id(-1),
+		index(new int[3 * DEFAULT_NV + 1]),
+		nv(DEFAULT_NV),
+		plane() {
 	rgb[0] = 100;
 	rgb[1] = 100;
 	rgb[2] = 100;
@@ -26,10 +25,10 @@ Facet::Facet(
 		Polyhedron* poly_orig,
 		const bool ifLong = false) :
 
-id(id_orig),
-nv(nv_orig),
-plane(plane_orig),
-poly(poly_orig) {
+		id(id_orig),
+		nv(nv_orig),
+		plane(plane_orig),
+		poly(poly_orig) {
 
 	rgb[0] = 100;
 	rgb[1] = 100;
@@ -56,8 +55,6 @@ poly(poly_orig) {
 		for (int i = nv + 1; i < 3 * nv + 1; ++i)
 			index[i] = -1;
 	}
-	edge_list.set_facet(this);
-//	this->my_print_all();
 }
 
 Facet& Facet::operator =(const Facet& facet1) {
@@ -77,8 +74,6 @@ Facet& Facet::operator =(const Facet& facet1) {
 	rgb[0] = facet1.rgb[0];
 	rgb[1] = facet1.rgb[1];
 	rgb[2] = facet1.rgb[2];
-
-	edge_list = facet1.edge_list;
 
 	return *this;
 }

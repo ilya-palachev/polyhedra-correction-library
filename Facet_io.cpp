@@ -107,7 +107,3 @@ void Facet::fprint_ply_scale(FILE* file) {
 		fprintf(file, " %d", index[j]);
 	fprintf(file, " %d %d %d\n", rgb[0], rgb[1], rgb[2]);
 }
-
-void Facet::my_fprint_edge_list(FILE* file) {
-	edge_list.my_fprint(file);
-}

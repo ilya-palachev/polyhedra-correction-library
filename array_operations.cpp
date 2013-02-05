@@ -45,6 +45,24 @@ void insert_int(int* array, int len, int pos, int val) {
 	array[pos] = val;
 }
 
+void insert_bool(bool* array, int len, int pos, bool val) {
+	int i;
+
+	if (len < 0 || pos < 0 || pos > len) {
+		printf("insert_int: Error. pos = %d, but len = %d\n", pos, len);
+		return;
+	}
+#ifdef DEBUG1
+	fprintf(stdout,
+			"insert_bool(array, len = %d, pos = %d, val = %d)\n",
+			len, pos, val);
+#endif
+
+	for (i = len; i > pos; --i)
+		array[i] = array[i - 1];
+	array[pos] = val;
+}
+
 void insert_double(double* array, int len, int pos, double val) {
 	int i;
 	if (len < 0 || pos < 0 || pos > len) {

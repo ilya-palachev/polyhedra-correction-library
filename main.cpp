@@ -48,14 +48,13 @@ void test_edge_list() {
 #ifdef DEBUG
 	printf("preprocessing ended\n");
 #endif
-	poly.my_fprint(stdout);
+//	poly.my_fprint(stdout);
 	iplane = Plane(Vector3d(0., 0., 1), -1.);
-	for (int i = 0; i < poly.numf; ++i) {
-		poly.facet[i].prepare_edge_list(iplane);
-#ifdef DEBUG
-		poly.facet[i].my_fprint_edge_list(stdout);
-#endif
-	}
+	poly.intersection(iplane);
+	iplane = Plane(Vector3d(0., 0., 1), -2.);
+	poly.intersection(iplane);
+	iplane = Plane(Vector3d(0., 0., 1), -3.);
+	poly.intersection(iplane);
 }
 
 

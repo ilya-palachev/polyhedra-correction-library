@@ -14,6 +14,12 @@ void EdgeList::add_edge(int v0, int v1, int next_f, int next_d, double sm) {
 			sm = %lf)\n", v0, v1, next_f, next_d, sm);
 #endif
 
+	if (v0 > v1) {
+		int tmp = v0;
+		v0 = v1;
+		v1 = tmp;
+	}
+
 	int first = 0; // Первый элемент в массиве
 	int last = num; // Последний элемент в массиве
 
@@ -30,6 +36,8 @@ void EdgeList::add_edge(int v0, int v1, int next_f, int next_d, double sm) {
 	insert_int(next_facet, num, last, next_f);
 	insert_int(next_direction, num, last, next_d);
 	insert_double(scalar_mult, num, last, sm);
+	insert_int(id_v_new, num, last, -1);
+	insert_bool(isUsed, num, last, false);
 
 	++num;
 //	this->my_fprint(stdout);
@@ -47,29 +55,124 @@ void EdgeList::prepare_next_direction() {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//         Устаревшая идея
-//
-//void EdgeList::get_next_edge(int& v0, int& v1) {
-//	int i;
-//	for (i = 0; i < num; ++i)
-//		if (edge0[i] == v0 && edge1[i] == v1 || edge0[i] == v1 && edge1[i] == v0)
-//			break;
-//	if (i == num) {
-//		fprintf(stdout, "EdgeList::get_next_edge : Error. Cannot find \
-//			the edge (%d - %d) at EdgeList\n", v0, v1);
-//		v0 = v1 = -1;
-//	} else {
-//		//По какую сторону брать следующее ребро - зависит от четности его
-//		//номера в списке...
-//		if (i % 2) {
-//			v0 = edge0[i - 1];
-//			v1 = edge1[i - 1];
-//		} else {
-//			v0 = edge0[i + 1];
-//			v1 = edge1[i + 1];
-//		}
-//	}
-//}
-////////////////////////////////////////////////////////////////////////////////
+void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d) {
+	if (num < 1) {
+		v0 = v1 = -1;
+		return;
+	}
+	for (int i = 0; i < num; ++i) {
+		if (next_direction[i] != 0 && isUsed[i] == false) {
+//			set_pointer(i);
+			isUsed[i] = true;
+			v0 = edge0[i];
+			v1 = edge1[i];
+			next_f = next_facet[i];
+			next_d = next_direction[i];
+			return;
+		}
+	}
+//	set_pointer(0);
+	isUsed[0] = true;
+	v0 = edge0[0];
+	v1 = edge1[0];
+	next_f = next_facet[0];
+	next_d = -1;
+}
 
+void EdgeList::get_next_edge(int& v0, int& v1, int& next_f, int& next_d) {
+	int i, tmp, i_next;
+	if (num < 1) {
+		v0 = v1 = -1;
+		return;
+	}
+	if (v0 > v1) {
+		tmp = v0;
+		v0 = v1;
+		v1 = tmp;
+	}
+#ifdef DEBUG1
+	fprintf(stdout,
+			"EdgeList::get_next_edge %d\n",
+			id);
+	this->my_fprint(stdout);
+#endif
+	for (i = 0; i < num; ++i) {
+#ifdef DEBUG1
+	fprintf(stdout,
+			"   edge0[%d] = %d, edge1[%d] = %d\n",
+			i, edge0[i], i, edge1[i]);
+#endif
+		if (edge0[i] == v0 && edge1[i] == v1) {
+//			set_pointer(i);
+			isUsed[i] = true;
+			switch (next_direction[i]) {
+				case -1:
+					i_next = i < num - 1 ? i + 1 : 0;
+					break;
+				case 1:
+					i_next = i > 0 ? i - 1 : num - 1;
+					break;
+				case 0:
+					switch (next_d) {
+						case -1:
+							i_next = i < num - 1 ? i + 1 : 0;
+							break;
+						case 1:
+							i_next = i > 0 ? i - 1 : num - 1;
+							break;
+						default:
+							break;
+					}
+					break;
+				default:
+					break;
+			}
+			v0 = edge0[i_next];
+			v1 = edge1[i_next];
+			next_f = next_facet[i_next];
+			if (next_direction[i] != 0)
+				next_d = next_direction[i];
+			isUsed[i_next] = true;
+
+			return;
+		}
+	}
+//	set_pointer(0);
+	v0 = v1 = next_f = -1;
+	next_d = -2;
+}
+
+void EdgeList::set_id_v_new(int id_v) {
+	id_v_new[pointer] = id_v;
+}
+
+void EdgeList::set_isUsed(bool val) {
+#ifdef DEBUG
+	fprintf(stdout,
+			"EdgeList[%d].isUsed[%d] = %d\n",
+			id, pointer, val);
+#endif
+	isUsed[pointer] = val;
+}
+
+void EdgeList::set_pointer(int val) {
+	if (val < 0 || val > num - 1) {
+		fprintf(stdout,
+				"EdgeList::set_pointer : Error. num = %d, val = %d",
+				num, val);
+		return;
+	}
+#ifdef DEBUG
+	fprintf(stdout,
+			"EdgeList[%d].set_pointer(%d)\n",
+			id, val);
+#endif
+	pointer = val;
+}
+
+void EdgeList::send_to_edge_set(EdgeSet* edge_set) {
+	int i;
+	for (i = 0; i < num; ++i) {
+		edge_set->add_edge(edge0[i], edge1[i]);
+	}
+}

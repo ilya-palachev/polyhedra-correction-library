@@ -1,4 +1,5 @@
 #include "Polyhedron.h"
+#include "array_operations.h"
 
 EdgeSet::EdgeSet() :
 		len(0),
@@ -58,6 +59,7 @@ EdgeSet& EdgeSet::operator =(const EdgeSet& orig) {
 		edge0[i] = orig.edge0[i];
 		edge1[i] = orig.edge1[i];
 	}
+	return *this;
 }
 
 int EdgeSet::get_len() {
@@ -136,16 +138,16 @@ int EdgeSet::add_edge(int v0, int v1) {
 
 	while (first < last) {
 		mid = (first + last) / 2;
-		if (v0 < edge0[mid] || ((v0 == edge0[mid]) && (v1 < edge1[mid]))) {
+		if (v0 < edge0[mid] || ((v0 == edge0[mid]) && (v1 <= edge1[mid]))) {
 			last = mid;
 		} else {
 			first = mid + 1;
 		}
 	}
 
-	if (edge0[mid] == v0 && edge1[mid] == v1) {
+	if (edge0[last] == v0 && edge1[last] == v1) {
 		for (i = 0; i < num; ++i) {
-			if(ind[i] == mid)
+			if(ind[i] == last)
 				break;
 		}
 		return i;

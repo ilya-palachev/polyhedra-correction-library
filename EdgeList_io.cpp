@@ -7,10 +7,8 @@
 
 void EdgeList::my_fprint(FILE* file) {
 	int i;
-	fprintf(file, 
-			"\n\n---------- Printing EdgeList for facet[%d]. ----------\n",
-			facet->get_id());
-	fprintf(file, "num = %d\n", num);
+	fprintf(file, "\n\n---------- EdgeList %d. ----------\n", id);
+//	fprintf(file, "num = %d\n", num);
 	if (num > 0) {
 		fprintf(file, "edge0 : ");
 		for (i = 0; i < num; ++i) {
@@ -35,6 +33,16 @@ void EdgeList::my_fprint(FILE* file) {
 		fprintf(file, "scalar_mult : ");
 		for (i = 0; i < num; ++i) {
 			fprintf(file, "%lf ", this->scalar_mult[i]);
+		}
+		fprintf(file, "\n");
+		fprintf(file, "id_v_new : ");
+		for (i = 0; i < num; ++i) {
+			fprintf(file, "%d ", this->id_v_new[i]);
+		}
+		fprintf(file, "\n");
+		fprintf(file, "isUsed : ");
+		for (i = 0; i < num; ++i) {
+			fprintf(file, "%d ", this->isUsed[i]);
 		}
 		fprintf(file, "\n");
 	}

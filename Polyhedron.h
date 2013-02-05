@@ -23,12 +23,15 @@ class EdgeSet;
 class Polyhedron
 {
 public:
-	Vector3d* vertex;
-	Facet* facet;
-	VertexInfo* vertexinfo;
 	int numv;
 	int numf;
 
+	Vector3d* vertex;
+	Facet* facet;
+	VertexInfo* vertexinfo;
+	EdgeList* edge_list;
+
+	
 //	FILE* log_file;
 
 public:
@@ -98,7 +101,7 @@ public:
 		const Vector3d vector_orig,
 		Polyhedron* poly_orig);
 
-	VertexInfo& operator=(const VertexInfo& orig);
+	VertexInfo& operator = (const VertexInfo& orig);
 	~VertexInfo();
 
 	void preprocess();
@@ -111,25 +114,41 @@ public:
 
 class EdgeList {
 private:
+	int id;
+	int len;
 	int num;
+
+	int pointer;
+
 	int* edge0;
 	int* edge1;
 	int* next_facet;
 	int* next_direction;
 	double* scalar_mult;
-	Facet* facet;
+	int* id_v_new;
+	bool* isUsed;
+	
+	Polyhedron* poly;
+
 public:
 	//EdgeList.cpp
 	EdgeList();
-	EdgeList(Facet* facet_orig);
+	EdgeList(int id_orig, int len_orig, Polyhedron* poly_orig);
+	EdgeList(const EdgeList& orig);
 	~EdgeList();
-	EdgeList& operator=(const EdgeList& orig);
-	void set_facet(Facet* facet_orig);
+	EdgeList& operator = (const EdgeList& orig);
+//	void set_facet(Facet* facet_orig);
 
 	//EdgeList_intersection.cpp
 	void add_edge(int v0, int v1, int next_f, int next_d, double sm);
 	void prepare_next_direction();
-	void get_next_edge(int& v0, int& v1);
+	void get_next_edge(int& v0, int& v1, int& next_f, int& next_d);
+	void get_first_edge(int& v0, int& v1, int& next_f, int& next_d);
+	void set_id_v_new(int id_v);
+	void set_isUsed(bool val);
+	void set_pointer(int val);
+
+	void send_to_edge_set(EdgeSet* edge_set);
 
 	//EdgeList_io,cpp
 	void my_fprint(FILE* file);
@@ -157,7 +176,7 @@ public:
 		const int* index_orig,
 		Polyhedron* poly_orig,
 		const bool ifLong);
-	Facet& operator=(const Facet& facet1);
+	Facet& operator = (const Facet& facet1);
 	~Facet();
 
 	int get_id();
@@ -207,20 +226,30 @@ public:
 
 class FutureFacet {
 private:
+	int id;
 	int len;
 	int nv;
 	int* edge0;
 	int* edge1;
 	int* src_facet;
+	int* id_v_new;
 public:
+	//FutureFacet.cpp
 	FutureFacet();
 	~FutureFacet();
 	FutureFacet(int nv_orig);
 	FutureFacet(const FutureFacet& orig);
 	FutureFacet& operator = (const FutureFacet& orig);
+	void set_id(int val);
 
-	void add_edge(int v0, int v1);
-	Facet make_facet();
+	void add_edge(int v0, int v1, int src_f);
+	void get_edge(int pos, int& v0, int& v1, int& src_f, int& id_v);
+	
+	//FutureFacet_io.cpp
+	void my_fprint(FILE* file);
+	
+	//FutureFacet_intersection.cpp
+	Facet generate_facet();
 };
 
 class EdgeSet {
@@ -230,6 +259,12 @@ private:
 	int* ind;
 	int* edge0;
 	int* edge1;
+//	int* id_edge_list0;
+//	int* pos_edge_list0;
+//	int* id_edge_list1;
+//	int* pos_edge_list1;
+//	int* id_future_facet;
+//	int* pos_future_facet;
 public:
 	EdgeSet();
 	EdgeSet(int len_orig);
@@ -244,6 +279,7 @@ public:
 	int search_edge(int v0, int v1);
 	int add_edge(int v0, int v1);
 };
+
 
 
 #endif // POLYHEDRON_H

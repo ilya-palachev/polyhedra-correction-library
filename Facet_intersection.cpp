@@ -10,12 +10,15 @@ int Facet::signum(int i, Plane plane) {
 	return poly->signum(poly->vertex[index[i]], plane);
 }
 
+//#define IF_DETECT_INCIDENT_FACETS
+
 int Facet::prepare_edge_list(Plane iplane) {
 	int nintrsct;
 	int i, i_next, i_prev;
 	int sign_curr, sign_prev, sign_next;
 	double scalar;
 	int next_f;
+	int num_not_in_plane;
 
 	Vector3d dir;
 	Vector3d point;
@@ -23,18 +26,16 @@ int Facet::prepare_edge_list(Plane iplane) {
 	Vector3d v1;
 	Vector3d v_intrsct;
 
-	edge_list.set_facet(this);
-
 	//Вычисляем напр вектор пересечения грани с плоскостью
 	bool if_intersect = intersection(iplane, plane, dir, point);
 	if (!if_intersect) {
-
+#ifdef IF_DETECT_INCIDENT_FACETS
 		const Vector3d v = plane.norm % iplane.norm;
 		const double s1 = v * v;
 		const double s2 = plane.dist - iplane.dist;
 		if ( s1 + s2 * s2 < 1e-16) {
 			for (i = 0; i < nv; ++i) {
-				edge_list.add_edge(index[i], index[i], id, 0, scalar);
+				poly->edge_list[id].add_edge(index[i], index[i], id, 0, scalar);
 			}
 			return nv;
 		} else {
@@ -42,9 +43,12 @@ int Facet::prepare_edge_list(Plane iplane) {
 //					"Facet::prepare_edge_list : Error if_intersect = false\n");
 			return 0;
 		}
+#endif
+		return 0;
 	}
 
 	nintrsct = 0;
+	num_not_in_plane = 0;
 	for (i = 0; i < nv; ++i) {
 #ifdef DEBUG1
 		fprintf(stdout, "prepare_edge_list i = %d\n", i);
@@ -89,15 +93,14 @@ int Facet::prepare_edge_list(Plane iplane) {
 				// по списку вершин, которые не лежат на плоскости
 				// соседей)
 
-				edge_list.add_edge(index[i], index[i], id, 0, scalar);
+				poly->edge_list[id].add_edge(index[i], index[i], id, 0, scalar);
 				continue;
 			}
 
 
 			//Находим следующую плоскость
-			next_f = poly->
-					vertexinfo[index[i]].intersection_find_next_facet(
-					iplane, id);
+			next_f = poly->vertexinfo[index[i]].
+					intersection_find_next_facet(iplane, id);
 			if (next_f == -1) {
 				fprintf(stdout,
 						"Facet::prepare_edge_list : Error. Vertex step. \
@@ -105,7 +108,8 @@ int Facet::prepare_edge_list(Plane iplane) {
 				break;
 			}
 
-			edge_list.add_edge(index[i], index[i], next_f, 2, scalar);
+			poly->edge_list[id].
+				add_edge(index[i], index[i], next_f, 2, scalar);
 			++nintrsct;
 		}
 
@@ -116,12 +120,21 @@ int Facet::prepare_edge_list(Plane iplane) {
 			intersection(iplane, v1 - v0, v0, v_intrsct);
 			scalar = dir * (v_intrsct - point);
 			next_f = index[i + nv + 1];
-			edge_list.add_edge(index[i], index[i_next], next_f, 2, scalar);
+			poly->edge_list[id].
+				add_edge(index[i], index[i_next], next_f, 2, scalar);
 			++nintrsct;
+			++num_not_in_plane;
 		}
 	}
 //	edge_list.my_fprint(stdout);
-	edge_list.prepare_next_direction();
+	poly->edge_list[id].prepare_next_direction();
+
+//	fprintf(stdout, "num_not_in_plane = %d\n", num_not_in_plane);
+
+	if (num_not_in_plane == 0) {
+		poly->edge_list[id] = EdgeList();
+		return 0;
+	}
 	return nintrsct;
 }
 
