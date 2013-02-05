@@ -113,6 +113,13 @@ public:
         void deform(int id, Vector3d delta);
         void f(int n, double* x, double* fx, int id, int* sum);
         void derf(int n, double* x, double* A, int id, int* sum);
+        void derf2(int n, double* x, double* A, int id, int* sum, 
+                double* tmp0, double* tmp1, double* tmp2, double* tmp3);
+        
+        void deform_w(int id, Vector3d delta);
+        void f_w(int n, double* x, double* fx, int id, bool* khi, int K);
+        void derf_w(int n, double* x, double* A, int id, bool* khi, int K, 
+                double* tmp0, double* tmp1, double* tmp2, double* tmp3);
 };
 
 

@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
 	argv = argv;
         
 //        Gauss_test(3);
-        test_deform("poly-cube", 0, 7, Vector3d(-1e-10, 1e-10, 1e-10));
-        
+//        test_deform("poly-tetrahedron", 0, 3, Vector3d(0, 0, 0.1));
+        test_deform("poly-cube", 0, 7, Vector3d(-1e-2, 1e-2, 1e-2));
         
         
 //	test_cube_cutted();
@@ -141,7 +141,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta) {
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocess_polyhedron();
-        poly.deform(id, delta);
+        poly.deform_w(id, delta);
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
