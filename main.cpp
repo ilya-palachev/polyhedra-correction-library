@@ -27,10 +27,10 @@ int main(int argc, char** argv) {
     argc = argc;
     argv = argv;
 
-    int fid[3] = {0, 250, 14};
-    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
+//    int fid[3] = {0, 250, 14};
+//    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
     
-//    test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
+    test_join_facets("polyhedron-2010-11-25", 2, 0, 250);
     
     
     

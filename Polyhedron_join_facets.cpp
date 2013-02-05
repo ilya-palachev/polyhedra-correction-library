@@ -48,8 +48,8 @@ void Polyhedron::join_facets(int fid0, int fid1) {
     preprocess_polyhedron();
 
     //     VI). Рассечение многогранника плоскостью
-    printf("VI). Рассечение многогранника плоскостью\n");
-    intersect_j(-plane, fid0);
+//    printf("VI). Рассечение многогранника плоскостью\n");
+//    intersect_j(-plane, fid0);
 
     test_consections(true);
 
@@ -545,7 +545,7 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
     index = facet[fid0].index;
     plane = facet[fid0].plane;
 
-    printf("Предварительный анализ вершин: ");
+    printf("Предварительный анализ вершин: \n");
     for (i = 0; i < nv; ++i) {
         printf("\t\t2. 1. %d ). Предварительный анализ %d-й вершины : ", i, index[i]);
         if (signum(vertex[index[i]], plane) != -1) {
@@ -553,11 +553,24 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
             continue;
         }
 //        printf("\t%d ( %d )", i, index[i]);
+        
+        nv = facet[fid0].nv;
         //Написано 2012-03-31 для решения проблемы с треугольными соседними гранями
         fl2 = index[nv + 1 + (nv + i - 2) % nv];
         fl1 = index[nv + 1 + (nv + i - 1) % nv];
         fr1 = index[nv + 1 + (nv + i) % nv];
         fr2 = index[nv + 1 + (nv + i + 1) % nv];
+
+        
+        printf("\n\t\t\tКартина такая: ---%d---%d---%d---\n",
+                index[(nv + i - 1) % nv],
+                index[i],
+                index[(nv + i + 1) % nv]);
+        printf("\t\t\t                   |     |     |     \n");
+        printf("\t\t\t               %d  | %d  | %d  | %d  \n",
+                fl2, fl1, fr1, fr2);
+        
+        
         //        if (facet[fl1].nv < 4) {
         //            delete_vertex_polyhedron(index[i]);
         //            facet[fl1] = Facet();
@@ -695,16 +708,16 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
     int nv, *index;
     int fl2, fl1, fr1, fr2;
     int irep;
-    int ind_new;
+    int ind_new1, ind_new2;
     int pos, what;
 
-    double d1, d2;
+    double dl1, dr1;
 
     Plane plane;
     Plane pl2, pl1, pr1, pr2;
-    Vector3d v1, v2;
+    Vector3d vl1, vr1, vl2, vr2;
 
-    bool ifjoin;
+    bool ifJoinL, ifJoinR;// Эти константы отвечают за то, сливаются ли 2 точки или нет
     bool deg_imin_big, deg_irep_big;
     int deg_imin, deg_irep;
 
@@ -734,53 +747,61 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
     pr1 = facet[fr1].plane;
     pr2 = facet[fr2].plane;
 
-    ifjoin = false; // Эта константа отвечает за то, сливаются ли 2 точки или нет
-
     // Найдем точку пересечения первой тройки граней
 
     if (qmod(pl2.norm % pr1.norm) < EPS_PARALL) {
         // Если грани параллельны: 
-        intersection(plane, pl1, pr1, v1);
+        intersection(plane, pl1, pr1, vl1);
+        intersection(plane, pl2, pl1, vl2);
+        ifJoinL = false;
     } else {
         // Если грани не параллельны:
-        intersection(pl2, pl1, pr1, v1);
-//        if (signum(v1, plane) == 1) {
-//            // Если точка пересечения лежит выше плоскости:
-//            printf("левая точка пересечения лежит выше плоскости\n");            
-//            intersection(plane, pl1, pr1, v1);
-//        } else 
-            ifjoin = true;
+        intersection(pl2, pl1, pr1, vl1);
+        if (signum(vl1, plane) == 1) {
+            // Если точка пересечения лежит выше плоскости:
+            printf("левая точка пересечения лежит выше плоскости\n");            
+            intersection(plane, pl1, pr1, vl1);
+            intersection(plane, pl2, pl1, vl2);
+            ifJoinL = false;
+        } else {
+            ifJoinL = true;
+        }
         
     }
     // Найдем проекцию перемещения точки на нормаль плоскости:
-    d1 = (v1 - vertex[index[imin]]) * plane.norm;
-    printf("\td1 = %.16lf", d1);
+    dl1 = (vl1 - vertex[index[imin]]) * plane.norm;
+    printf("\tdl1 = %.16lf", dl1);
 
     // Найдем точку пересечения второй тройки граней
 
     if (qmod(pl1.norm % pr2.norm) < EPS_PARALL) {
         // Если грани параллельны: 
-        intersection(plane, pl1, pr1, v2);
+        intersection(plane, pl1, pr1, vr1);
+        intersection(plane, pr1, pr2, vr2);
+        ifJoinR = false;
     } else {
         // Если грани не параллельны:
-        intersection(pl1, pr1, pr2, v2);
-//        if (signum(v2, plane) == 1) {
-//            // Если точка пересечения лежит выше плоскости:
-//            printf("правая точка пересечения лежит выше плоскости\n");
-//            intersection(plane, pl1, pr1, v2);
-//        } else 
-            ifjoin = true;
+        intersection(pl1, pr1, pr2, vr1);
+        if (signum(vr1, plane) == 1) {
+            // Если точка пересечения лежит выше плоскости:
+            printf("правая точка пересечения лежит выше плоскости\n");
+            intersection(plane, pl1, pr1, vr1);
+            intersection(plane, pl1, pr1, vr2);
+            ifJoinR = false;
+        } else {
+            ifJoinR = true;
+        }
         
     }
     // Найдем проекцию перемещения точки на нормаль плоскости:
-    d2 = (v2 - vertex[index[imin]]) * plane.norm;
-    printf("\td2 = %.16lf\n", d2);
+    dr1 = (vr1 - vertex[index[imin]]) * plane.norm;
+    printf("\tdr1 = %.16lf\n", dr1);
 
-    if ((d1 <= d2 && d1 > 0) || (d1 > 0 && d2 <= 0)) {
+    if ((dl1 <= dr1 && dl1 > 0) || (dl1 > 0 && dr1 <= 0)) {
         printf("Движение определяет левый сосед вершины\n");
         // Движение определяет левый сосед вершины
-        if (ifjoin) {
-            // Если нужно объединяtellteть вершины
+        if (ifJoinL) {
+            // Если нужно объединять вершины
 
             irep = (nv + imin - 1) % nv;
             deg_imin = vertexinfo[index[imin]].get_nf();
@@ -793,11 +814,11 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
             if (deg_imin_big && deg_irep_big) {
 
                 // Создать новую вершину с номером ind_new
-                ind_new = add_vertex(v1);
+                ind_new1 = add_vertex(vl1);
 
                 // Добавить v1 в грань fl2 с информацией
 
-                what = ind_new;
+                what = ind_new1;
                 pos = index[2 * nv + 1 + (nv + irep - 1) % nv];
                 facet[fl2].add(what, pos);
 
@@ -818,7 +839,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
                 //Добавить v1 в грань fl1 с информацией
 
-                what = ind_new;
+                what = ind_new1;
                 pos = index[2 * nv + 1 + irep];
                 facet[fl1].add(what, pos);
 
@@ -840,7 +861,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
                 //Добавить v1 в грань fr1 с информацией
 
-                what = ind_new;
+                what = ind_new1;
                 pos = index[2 * nv + 1 + imin];
                 facet[fr1].add(what, pos);
 
@@ -856,7 +877,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
                 facet[fr1].index[facet[fr1].nv] = facet[fr1].index[0];
 
                 //Заменить irep в грани fid0 на ind_new
-                index[irep] = ind_new;
+                index[irep] = ind_new1;
                 index[irep + nv + 1] = fr1;
                 // Удалить вершину imin из главной грани (fid0) и исправим грань                
                 facet[fid0].remove(imin); // с информацией!!!
@@ -867,7 +888,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
                 facet[fr1].update_info();
 
             } else if (deg_imin_big && !deg_irep_big) {
-                vertex[index[irep]] = v1;
+                vertex[index[irep]] = vl1;
 
                 //Добавить v1 в грань fr1 с информацией
 
@@ -901,7 +922,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
             } else if (!deg_imin_big && deg_irep_big) {
 
-                vertex[index[imin]] = v1;
+                vertex[index[imin]] = vl1;
 
                 // Добавить v1 в грань fl2 с информацией
 
@@ -940,7 +961,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
             } else if (!deg_imin_big && !deg_irep_big) {
 
-                vertex[index[irep]] = v1;
+                vertex[index[irep]] = vl1;
 
                 //Удалить вершину imin из грани fl1
                 nnv = facet[fl1].nv;
@@ -963,12 +984,219 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
         } else {
             // Если не нужно объединять вершины
             printf("\t\tВершины объединять не нужно\n");
-            vertex[index[imin]] = v1;
+
+            irep = (nv + imin - 1) % nv;
+            deg_imin = vertexinfo[index[imin]].get_nf();
+            deg_imin_big = deg_imin > 3;
+            deg_irep = vertexinfo[index[irep]].get_nf();
+            deg_irep_big = deg_irep > 3;
+            printf("\tdeg_imin = deg(%d) = %d\n", index[imin], deg_imin);
+            printf("\tdeg_irep = deg(%d) = %d\n", index[irep], deg_irep);
+
+            if (deg_imin_big && deg_irep_big) {
+
+                // Создать новую вершину с номером N
+                ind_new1 = add_vertex(vl2);
+
+                // Создать новую вершину с номером N + 1
+                ind_new2 = add_vertex(vl1);
+
+                // Добавить vl2 в грань fl2 с информацией
+
+                what = ind_new1;
+                pos = index[2 * nv + 1 + (nv + irep - 1) % nv];
+                facet[fl2].add(what, pos);
+
+                nnv = facet[fl2].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fl2].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl2].add(what, pos);
+
+                pos = index[2 * nv + 1 + (nv + irep - 1) % nv];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fl2].index[nnv + 1 + pos] = fl1;
+
+                facet[fl2].index[facet[fl2].nv] = facet[fl2].index[0];
+
+                //Добавить vl1 в грань fl1 с информацией
+
+                what = ind_new2;
+                pos = index[2 * nv + 1 + irep];
+                facet[fl1].add(what, pos);
+
+                nnv = facet[fl1].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fl1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl1].add(what, pos);
+
+                pos = index[2 * nv + 1 + irep];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fl1].index[nnv + 1 + pos] = fr1;
+                
+                //Добавить vl2 в грань fl1 с информацией
+
+                what = ind_new1;
+                pos = index[2 * nv + 1 + irep];
+                pos = (nnv + pos + 1) % nnv;
+                facet[fl1].add(what, pos);
+
+                nnv = facet[fl1].nv;
+                what = fl2;
+                pos += nnv + 1;
+                facet[fl1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl1].add(what, pos);
+
+                facet[fl1].index[facet[fl1].nv] = facet[fl1].index[0];
+
+                //Добавить vl1 в грань fr1 с информацией
+
+                what = ind_new2;
+                pos = index[2 * nv + 1 + imin];
+                facet[fr1].add(what, pos);
+
+                nnv = facet[fr1].nv;
+                what = fl1;
+                pos += nnv + 1;
+                facet[fr1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr1].add(what, pos);
+
+                facet[fr1].index[facet[fr1].nv] = facet[fr1].index[0];
+
+                //Заменить irep в грани fid0 на vl2
+                index[irep] = ind_new1;
+                //Заменить imin в грани fid0 на vl1
+                index[imin] = ind_new2;
+                
+
+                facet[fid0].update_info();
+                facet[fl2].update_info();
+                facet[fl1].update_info();
+                facet[fr1].update_info();
+
+            } else if (deg_imin_big && !deg_irep_big) {
+                
+                // Создать новую вершину с номером N
+                ind_new1 = add_vertex(vl1);
+
+                vertex[index[irep]] = vl2;
+
+                //Добавить vl1 в грань fr1 с информацией
+
+                what = ind_new1;
+                pos = index[2 * nv + 1 + imin];
+                facet[fr1].add(what, pos);
+
+                nnv = facet[fr1].nv;
+                what = fl1;
+                pos += nnv + 1;
+                facet[fr1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr1].add(what, pos);
+
+                facet[fr1].index[facet[fr1].nv] = facet[fr1].index[0];
+
+                //Добавить vl1 в грань fl1 с информацией
+
+                what = ind_new1;
+                pos = index[2 * nv + 1 + irep];
+                facet[fl1].add(what, pos);
+
+                nnv = facet[fl1].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fl1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl1].add(what, pos);
+
+                pos = index[2 * nv + 1 + irep];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fl1].index[nnv + 1 + pos] = fr1;
+
+                //Заменить imin из главной грани fid0 на точку vl1
+                index[imin] = ind_new1;
+
+                facet[fid0].update_info();
+                facet[fl1].update_info();
+                facet[fr1].update_info();
+
+            } else if (!deg_imin_big && deg_irep_big) {
+
+                // Создать новую вершину с номером N
+                ind_new1 = add_vertex(vl2);
+
+                vertex[index[imin]] = vl1;
+
+                // Добавить vl2 в грань fl2 с информацией
+
+                what = ind_new1;
+                pos = index[2 * nv + 1 + (nv + irep - 1) % nv];
+                facet[fl2].add(what, pos);
+
+                nnv = facet[fl2].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fl2].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl2].add(what, pos);
+
+                pos = index[2 * nv + 1 + (nv + irep - 1) % nv];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fl2].index[nnv + 1 + pos] = fl1;
+
+                facet[fl2].index[facet[fl2].nv] = facet[fl2].index[0];
+
+                //Добавить vl2 в грань fl1 с информацией
+
+                what = ind_new1;
+                pos = index[2 * nv + 1 + irep];
+                facet[fl1].add(what, pos);
+
+                nnv = facet[fl1].nv;
+                what = fl2;
+                pos += nnv + 1;
+                facet[fl1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl1].add(what, pos);
+
+                //Заменить irep из главной грани fid0 на точку vl2
+                index[irep] = ind_new1;
+
+                facet[fid0].update_info();
+                facet[fl2].update_info();
+                facet[fl1].update_info();
+
+            } else if (!deg_imin_big && !deg_irep_big) {
+
+                vertex[index[irep]] = vl2;
+                vertex[index[imin]] = vl1;
+            }
         }
-    } else if ((d2 < d1 && d2 > 0) || (d2 > 0 && d1 <= 0)) {
+    } else if ((dr1 < dl1 && dr1 > 0) || (dr1 > 0 && dl1 <= 0)) {
         printf("Движение определяет правый сосед вершины\n");
         // Движение определяет правый сосед вершины
-        if (ifjoin) {
+        if (ifJoinR) {
             // Если нужно объединять вершины
 
             irep = (nv + imin + 1) % nv;
@@ -982,10 +1210,10 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
             if (deg_imin_big && deg_irep_big) {
 
                 // Создать новую вершину с номером ind_new
-                ind_new = add_vertex(v2);
+                ind_new1 = add_vertex(vr1);
 
                 // Добавить вершину v2 в грань fl1 после imin и исправить грань
-                what = ind_new;
+                what = ind_new1;
                 pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
                 facet[fl1].add(what, pos);
 
@@ -1003,7 +1231,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
                 facet[fl1].index[nnv + 1 + pos] = fr1;
 
                 // Добавить вершину v2 в грань fr1 до imin и исправить грань
-                what = ind_new;
+                what = ind_new1;
                 pos = index[2 * nv + 1 + imin];
                 facet[fr1].add(what, pos);
 
@@ -1021,7 +1249,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
                 facet[fr1].index[nnv + 1 + pos] = fr2;
 
                 //Добавить вершину v2 в грань fr2 до irep и исправить грань
-                what = ind_new;
+                what = ind_new1;
                 pos = index[2 * nv + 1 + irep];
                 facet[fr2].add(what, pos);
 
@@ -1035,7 +1263,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
                 facet[fr2].add(what, pos);
 
                 //Удалить imin из главной грани fid0 и заменить irep на v2; и исправить грань
-                index[irep] = ind_new;
+                index[irep] = ind_new1;
                 facet[fid0].remove(imin);
 
                 facet[fid0].update_info();
@@ -1045,9 +1273,10 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
             } else if (deg_imin_big && !deg_irep_big) {
 
-                vertex[index[irep]] = v2;
+                vertex[index[irep]] = vr1;
 
                 //Добавить вершину irep в грань fl1 после imin и исправить грань
+                
                 what = index[irep];
                 pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
                 facet[fl1].add(what, pos);
@@ -1063,7 +1292,10 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
                 pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
                 pos = (nnv + pos - 1) % nnv;
+                printf("In facet %d neighbour[%d] = %d -> %d\n", 
+                        fl1, pos, facet[fl1].index[nnv + 1 + pos], fr1);
                 facet[fl1].index[nnv + 1 + pos] = fr1;
+                facet[fl1].my_fprint_all(stdout);
 
                 // Исправить грань fr1
                 nnv = facet[fr1].nv;
@@ -1079,7 +1311,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
             } else if (!deg_imin_big && deg_irep_big) {
 
-                vertex[index[imin]] = v2;
+                vertex[index[imin]] = vr1;
 
                 //Добавить вершину v2 в грань fr2 до irep и исправить грань
                 what = index[imin];
@@ -1110,7 +1342,7 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
 
             } else if (!deg_imin_big && !deg_irep_big) {
 
-                vertex[index[irep]] = v2;
+                vertex[index[irep]] = vr1;
 
                 //Заменить вершину imin из грани fl1 на вершину irep и исправить грань
                 nnv = facet[fl1].nv;
@@ -1135,10 +1367,205 @@ void Polyhedron::join_facets_rise_point(int fid0, int imin) {
         } else {
             // Если не нужно объединять вершины
             printf("\t\tВершины объединять не нужно\n");
-            vertex[index[imin]] = v2;
+
+            irep = (nv + imin + 1) % nv;
+            deg_imin = vertexinfo[index[imin]].get_nf();
+            deg_imin_big = deg_imin > 3;
+            deg_irep = vertexinfo[index[irep]].get_nf();
+            deg_irep_big = deg_irep > 3;
+            printf("\tdeg_imin = deg(%d) = %d\n", index[imin], deg_imin);
+            printf("\tdeg_irep = deg(%d) = %d\n", index[irep], deg_irep);
+
+            if (deg_imin_big && deg_irep_big) {
+
+                // Создать новую вершину с номером N
+                ind_new1 = add_vertex(vr1);
+
+                // Создать новую вершину с номером N + 1
+                ind_new2 = add_vertex(vr2);
+
+                // Добавить вершину vr1 в грань fl1 после imin и исправить грань
+                
+                what = ind_new1;
+                pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
+                facet[fl1].add(what, pos);
+
+                nnv = facet[fl1].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fl1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl1].add(what, pos);
+
+                pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
+                pos = (nnv + pos - 1) % nv;
+                facet[fl1].index[nnv + 1 + pos] = fr1;
+
+                // Добавить вершину vr2 в грань fr1 до imin и исправить грань
+                
+                what = ind_new2;
+                pos = index[2 * nv + 1 + imin];
+                facet[fr1].add(what, pos);
+
+                nnv = facet[fr1].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fr1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr1].add(what, pos);
+
+                pos = index[2 * nv + 1 + imin];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fr1].index[nnv + 1 + pos] = fr2;
+
+                // Добавить вершину vr1 в грань fr1 до imin и исправить грань
+                
+                what = ind_new1;
+                pos = index[2 * nv + 1 + imin];
+                pos = (nnv + pos + 1) % nnv;
+                facet[fr1].add(what, pos);
+
+                nnv = facet[fr1].nv;
+                what = fl1;
+                pos += nnv + 1;
+                facet[fr1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr1].add(what, pos);
+
+                //Добавить вершину vr2 в грань fr2 до irep и исправить грань
+
+                what = ind_new2;
+                pos = index[2 * nv + 1 + irep];
+                facet[fr2].add(what, pos);
+
+                nnv = facet[fr2].nv;
+                what = fr1;
+                pos += nnv + 1;
+                facet[fr2].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr2].add(what, pos);
+
+                //Заменить irep в грани fid0 на vl2
+                index[imin] = ind_new1;
+                //Заменить imin в грани fid0 на vl1
+                index[irep] = ind_new2;
+
+                facet[fid0].update_info();
+                facet[fl1].update_info();
+                facet[fr1].update_info();
+                facet[fr2].update_info();
+
+            } else if (deg_imin_big && !deg_irep_big) {
+
+                // Создать новую вершину с номером N
+                ind_new1 = add_vertex(vr1);
+
+                vertex[index[irep]] = vr2;
+
+                //Добавить вершину vr1 в грань fl1 после imin и исправить грань
+                
+                what = ind_new1;
+                pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
+                facet[fl1].add(what, pos);
+                
+                nnv = facet[fl1].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fl1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fl1].add(what, pos);
+
+                pos = index[2 * nv + 1 + (nv + imin - 1) % nv];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fl1].index[nnv + 1 + pos] = fr1;
+
+                // Добавить вершину vr1 в грань fr1 после irep и исправить грань
+                
+                what = ind_new1;
+                pos = index[2 * nv + 1 + imin];
+                facet[fr1].add(what, pos);
+
+                nnv = facet[fr1].nv;
+                what = fl1;
+                pos += nnv + 1;
+                facet[fr1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr1].add(what, pos);
+
+                // Заменить точку imin в грани fid0 на точку vr1
+                index[imin] = ind_new1;
+
+                facet[fid0].update_info();
+                facet[fl1].update_info();
+                facet[fr1].update_info();
+
+            } else if (!deg_imin_big && deg_irep_big) {
+
+                // Создать новую вершину с номером N
+                ind_new1 = add_vertex(vr2);
+                
+                vertex[index[imin]] = vr1;
+
+                // Добавить вершину vr2 в грань fr1 после irep и исправить грань
+                
+                what = ind_new1;
+                pos = index[2 * nv + 1 + imin];
+                facet[fr1].add(what, pos);
+
+                nnv = facet[fr1].nv;
+                what = fid0;
+                pos += nnv + 1;
+                facet[fr1].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr1].add(what, pos);
+                
+                pos = index[2 * nv + 1 + imin];
+                pos = (nnv + pos - 1) % nnv;
+                facet[fr1].index[nnv + 1 + pos] = fr2;
+
+                //Добавить вершину vr2 в грань fr2 до irep и исправить грань
+                
+                what = ind_new1;
+                pos = index[2 * nv + 1 + irep];
+                facet[fr2].add(what, pos);
+
+                nnv = facet[fr2].nv;
+                what = fr1;
+                pos += nnv + 1;
+                facet[fr2].add(what, pos);
+
+                what = -1;
+                pos += nnv;
+                facet[fr2].add(what, pos);
+
+
+                // Заменить точку irep в грани fid0 на точку vr2
+                index[irep] = ind_new1;
+
+                facet[fid0].update_info();
+                facet[fr2].update_info();
+
+            } else if (!deg_imin_big && !deg_irep_big) {
+
+                vertex[index[irep]] = vr2;
+                vertex[index[imin]] = vr1;
+            }
         }
     }
-
 }
 
 
