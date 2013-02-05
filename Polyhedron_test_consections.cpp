@@ -86,7 +86,7 @@ int Polyhedron::test_inner_consections_facet(bool ifPrint, int fid, double* A, d
     count = 0;
     for (i = 0; i < nv; ++i) {
         for (j = i + 1; j < nv; ++j) {
-            count += test_inner_consections_pair(ifPrint, 
+            count += test_inner_consections_pair2(ifPrint, 
                     fid,
                     index[i % nv],
                     index[(i + 1) % nv],
@@ -227,6 +227,114 @@ int Polyhedron::test_inner_consections_pair(bool ifPrint, int fid, int id0, int 
         return 1;
     } else
         return 0;
+}
+
+int Polyhedron::test_inner_consections_pair2(bool ifPrint, int fid, int id0, int id1, int id2, int id3,
+        double* A, double* b) {
+
+    // fid - identificator of the facet
+    // (id0, id1) - first edge
+    // (id2, id3) - second edge
+    double nx, ny, nz;
+    double x0, x1, x2, x3, y0, y1, y2, y3, z0, z1, z2, z3;
+
+    if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 ||
+            id0 >= numv || id1 >= numv || id2 >= numv || id3 >= numv) {
+        if (ifPrint) {
+            printf("\t\t\ttest_inner_consections_pair: Error. incorrect input\n");
+        }
+        return 0;
+    }
+
+    if ((id0 == id3 && id1 == id2) || (id0 == id2 && id1 == id3)) {
+        if (ifPrint) {
+            printf("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
+        }
+        return 2;
+    }
+
+    if (id1 == id2) {
+        if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
+                (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) < 0) {
+            if (ifPrint) {
+                printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
+                        id0, id1, id2, id3);
+            }
+            return 2;
+        } else {
+            return 0;
+        }
+    }
+
+    if (id0 == id3) {
+        if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
+                (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) > 0) {
+            if (ifPrint) {
+                printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
+                        id0, id1, id2, id3);
+            }
+            return 2;
+        } else {
+            return 0;
+        }
+    }
+
+    if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL) {
+        return 0;
+    }
+    
+    Vector3d n, n0, n1;
+    Plane plane, plane0, plane1;
+    double d0, d1;
+    
+    plane = facet[fid].plane;
+    // Normal of facet #fid
+    n = plane.norm;
+    
+    // Calculate normal of plane pi_{0}:
+    n0 = n % (vertex[id1] - vertex[id0]);
+    
+    // Calculate free coefficient of plane pi_{0}:
+    d0 = - vertex[id0] * n0;
+    
+    // Calculate plane pi_{0}:
+    plane0 = Plane(n0, d0);
+    
+    // Calculate normal of plane pi_{1}:
+    n1 = n % (vertex[id3] - vertex[id2]);
+    
+    // Calculate free coefficient of plane pi_{1}:
+    d1 = - vertex[id2] * n1;
+    
+    // Calculate plane pi_{1}:
+    plane1 = Plane(n1, d1);
+    
+    if (signum(vertex[id0], plane1) * signum(vertex[id1], plane1) == -1 &&
+            signum(vertex[id2], plane0) * signum(vertex[id3], plane0) == -1) {
+        if (ifPrint) {
+            printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
+        }
+        return 1;
+    } else {
+        return 0;
+    }
+//    if (signum(vertex[id0], plane1) != signum(vertex[id1], plane1) &&
+//            signum(vertex[id2], plane0) != signum(vertex[id3], plane0)) {
+//        if (ifPrint) {
+//            printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
+//        }
+//        return 1;
+//    } else {
+//        return 0;
+//    }
+
+//    if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.) {
+//        if (ifPrint) {
+//            printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
+//        }
+//        return 1;
+//    } else
+//        return 0;
 }
 
 int Polyhedron::test_outer_consections(bool ifPrint) {

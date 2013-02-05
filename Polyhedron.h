@@ -273,7 +273,7 @@ public:
     
     //////////////////////////////////////////////////////
     //  FUNCTION-MEMBERS for deforming  (LINEAR) one point of the polyhedron : 
-    //  (Warning: not tested)
+    //  
     //  Location : Polyhedron_deform_linear.cpp
     //////////////////////////////////////////////////////
 
@@ -293,7 +293,7 @@ public:
     void deform_linear_vertices(int id, double K, double* A, double* B, double* x, double* y, double* z);
     
     // Calculate better vertices (local) : 
-    void deform_linear_vertices(double K, double* A, double* B);
+    void deform_linear_vertices(int id, double K, double* A, double* B);
     
     // Calculate the error of the laying of the vertices in the planes : 
     double deform_linear_calculate_error();
@@ -310,6 +310,95 @@ public:
     // This function just can call some versions (by number "mode") of the function deform_linear : 
     void deform_linear_test(int id, Vector3d delta, int mode, int& num_steps, double& norm_sum);
 
+    //////////////////////////////////////////////////////
+    //  FUNCTION-MEMBERS for deforming  (LINEAR) one point of the polyhedron : 
+    //  These functions helps the previos algorithm (in Polyhedron_deform_linear.cpp)
+    //  to change location of points without creating inner consections.
+    //  Location : Polyhedron_deform_linear_control.cpp
+    //////////////////////////////////////////////////////
+    
+    // Deform vertex[I] to the new position v_new. There deformation is controled
+    // whether there are any consections in facets after it. If there are, v_new
+    // is changed by the decreasing the length of the deformation, i. e. (v_new - vertex[I])
+    // so that there will not be any consections after it.
+    void deform_linear_vertex_control(int I, Vector3d& v_new, Vector3d* vertex_old);
+    
+    // Calculate better vertices (global) with control of not-creating of consections : 
+    void deform_linear_vertices_control(int id, double K, double* A, double* B, double* x, double* y, double* z, Vector3d* vertex_old);
+    
+    // Deform by minimizing global variations : 
+    void deform_linear_control(int id, Vector3d delta);
+ 
+    // Calculate better vertices (local) with control of not-creating of consections : 
+    void deform_linear_vertices_control(int id, double K, double* A, double* B, Vector3d* vertex_old);
+ 
+    // Deform by minimizing local variations : 
+    void deform_linear2_control(int id, Vector3d delta);
+    
+    //////////////////////////////////////////////////////
+    //  FUNCTION-MEMBERS for deforming  (LINEAR) one point of the polyhedron : 
+    //  These functions helps the previos algorithm (in Polyhedron_deform_linear.cpp)
+    //  to change location of points without creating inner consections.
+    //  It is reached by using of method of polyhedra region of allowed deformations
+    //  of point.
+    //  Location : Polyhedron_deform_linear_vertmin.cpp
+    //////////////////////////////////////////////////////
+
+    // Calculate planes which determine the polyhedra region of allowed 
+    // deformations of point :
+    void calculate_allowed_region(int id, int& n, Plane* plane);
+    
+    // Calculate the functionsl which is minimized in this method :
+    double calculate_functional(int id, double K, Vector3d vnew);
+    
+    // Change the position of one point in purpose to minimize the functional.
+    // Method of the polyhedra region of allowed deformations is used :
+    void deform_linear_vertex_vertmin(int id, double K, double* A, double* B, Plane* plane);
+
+    // Calculate the case when all lambdas = 0 :
+    bool calculate_point_case0(int id, double K, double* matrix, double* row, Vector3d& vnew,
+    double Maa, double Mab, double Mac, 
+    double Mad, double Mbb, double Mbc, 
+    double Mbd, double Mcc, double Mcd);
+    
+    // Calculate the case when one and only one lambda is not null :
+    bool calculate_point_case1(int id, double K, double* matrix, double* row, Vector3d& vnew, 
+    Plane plane, double& lambda,
+    double Maa, double Mab, double Mac, 
+    double Mad, double Mbb, double Mbc, 
+    double Mbd, double Mcc, double Mcd);
+    
+    // Calculate the case when two and only two lambdas are not null :
+    bool calculate_point_case2(int id, double K, double* matrix, double* row, Vector3d& vnew, 
+    Plane plane0, Plane plane1, double& lambda0, double& lambda1,
+    double Maa, double Mab, double Mac, 
+    double Mad, double Mbb, double Mbc, 
+    double Mbd, double Mcc, double Mcd);
+    
+    // Calculate the case when three and only three lambdas are not null :
+    bool calculate_point_case3(int id, double K, double* matrix, double* row, Vector3d& vnew, 
+    Plane plane0, Plane plane1, Plane plane2, 
+    double& lambda0, double& lambda1, double& lambda2,
+    double Maa, double Mab, double Mac, 
+    double Mad, double Mbb, double Mbc, 
+    double Mbd, double Mcc, double Mcd);
+    
+
+    // Calculate better vertices (global) with control of not-creating of consections : 
+    // Method of the polyhedra region of allowed deformations is used :
+    void deform_linear_vertices_vermin(int id, double K, double* A, double* B, double* x, double* y, double* z);
+    
+    // Deform by minimizing global variations : 
+    // Method of the polyhedra region of allowed deformations is used :
+    void deform_linear_vertmin(int id, Vector3d delta);
+ 
+    // Calculate better vertices (local) with control of not-creating of consections : 
+    // Method of the polyhedra region of allowed deformations is used :
+    void deform_linear_vertices_vertmin(int id, double K, double* A, double* B);
+ 
+    // Deform by minimizing local variations : 
+    // Method of the polyhedra region of allowed deformations is used :
+    void deform_linear2_vertmin(int id, Vector3d delta);
     
     //////////////////////////////////////////////////////////////////////
     //    FUNCTION-MEMBERS which test if there is any inner or outer consections in 
@@ -328,6 +417,10 @@ public:
     
     // Test if the 2 edges consect : 
     int test_inner_consections_pair(bool ifPrint,
+            int fid, int id0, int id1, int id2, int id3, double* A, double* b);
+    
+    // Test if the 2 edges consect (another method, as in deform_linear_vertex_control): 
+    int test_inner_consections_pair2(bool ifPrint,
             int fid, int id0, int id1, int id2, int id3, double* A, double* b);
     
     // Test outer consections (i.e. edge consects another facet) : 
@@ -576,6 +669,15 @@ public:
     Vector3d& find_mass_centre();
 
     void test_pair_neighbours();
+    
+    /////////////////////////////////////////////
+    // FUNCTION-MEMBERS for deformation by method of polyhedra regions:
+    // Location : Facet_deform_linear_vertmin.cpp
+    /////////////////////////////////////////////
+    
+    // Determine if there is convexness (1) or non-convexness (-1) or
+    // collinearity (0) in point is in the contour of facet:
+    int convexness_point(int i);
 
 };
 

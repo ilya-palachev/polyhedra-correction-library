@@ -44,10 +44,10 @@ int main(int argc, char** argv) {
     //1, 12, 251
 
     // Массив номеров граней
-    int fid[4] = {3, 13, 248, 252};
-    
-    
-    test_multi_join_facets("polyhedron-2010-11-25", 2, 4, fid);
+//    int fid[4] = {3, 13, 248, 252};
+//    
+//    
+//    test_multi_join_facets("polyhedron-2010-11-25", 2, 4, fid);
 
 //    int fid[2] = {37, 249};
 //    test_multi_join_facets("polyhedron-2010-11-25", 2, 2, fid);
@@ -92,8 +92,8 @@ int main(int argc, char** argv) {
     //        test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
-//    double d = 0.1;
-//        test_deform_linear("poly-small", 0, 3, Vector3d(-d, d, d));
+    double d = 0.05;
+        test_deform_linear("poly-small", 0, 3, Vector3d(-d, d, d));
     //        test_deform_linear("poly-small", 0, 4, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 5, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 6, Vector3d(-1e-1, 1e-1, 1e-1));
@@ -490,8 +490,8 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
 //        eps *= 2.;
 //    }
 
-        poly.deform_linear2(id, delta);
-        poly.test_consections(false);
+        poly.deform_linear2_control(id, delta);
+        poly.test_consections(true);
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);
