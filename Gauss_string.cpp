@@ -16,8 +16,8 @@ int Gauss_string(int n, double* A, double* b) {
         imain = Gauss_find_main_element(n, A, step);
         //1.2. Если все элементы нулевые, то решений нет :
         if (imain == -1) {
-            printf("Gauss_string : Error. At step %d cannot find main elemnt. det = 0\n");
-            return -1;
+            printf("Gauss_string : Error. At step %d cannot find main elemnt. det = 0\n", step);
+            return 0;
         }
         //1.3. Переставляем строки
         Gauss_I_swap(n, A, b, step, imain);
@@ -32,6 +32,7 @@ int Gauss_string(int n, double* A, double* b) {
             b[i] -= A[i * n + step] * b[step];
         }
     }
+    return 1;
 }
 
 int Gauss_find_main_element(int n, double* A, int coloumn) {

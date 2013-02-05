@@ -38,7 +38,7 @@ numf(numf_orig)
 }
 
 Polyhedron::~Polyhedron() {
-//	fprintf(stdout, "Deleting polyhedron...\n");
+	fprintf(stdout, "Deleting polyhedron...\n");
 	if (vertex)
 		delete[] vertex;
 	if (facet)

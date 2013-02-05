@@ -608,8 +608,8 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 
 
 	comment_w = new char[255];
-	if(!comment) sprintf(comment_w, (const char*)"unknown");
-	else sprintf(comment_w, (const char*)comment);
+	if(!comment) sprintf(comment_w, "unknown");
+	else sprintf(comment_w, comment);
 
 	numv_new = 0;
 	for(i = 0; i < numf; ++i)

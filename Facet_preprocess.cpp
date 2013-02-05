@@ -35,7 +35,8 @@ void Facet::preprocess() {
 
 void Facet::preprocess_edge(int v0, int v1, int v0_id) {
     int i, pos;
-
+    
+    pos = -1;
     for (i = 0; i < poly->numf; ++i) {
         if (i == id)
             continue;
@@ -45,6 +46,9 @@ void Facet::preprocess_edge(int v0, int v1, int v0_id) {
             index[v0_id + 2 * nv + 1] = pos;
             break;
         }
+    }
+    if (pos == -1) {
+        printf("preprocess_edge : Error. Edge (%d %d) cannot be found anywhere\n", v0, v1);
     }
 }
 

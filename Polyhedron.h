@@ -108,13 +108,18 @@ public:
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
+        
+        //Polyhedron_deform.cpp
+        void deform(int id, Vector3d delta);
+        void f(int n, double* x, double* fx, int id, int* sum);
+        void derf(int n, double* x, double* A, int id, int* sum);
 };
 
 
 
 class VertexInfo
 {
-private:
+public:
 	int id;
 	int nf;
 	Vector3d vector;
@@ -298,8 +303,6 @@ public:
 	void find_and_replace2(int from, int to);
 	int find_total(int what);
 	int find_vertex(int what);
-        
-        void add(int what, int pos);
         
 };
 
