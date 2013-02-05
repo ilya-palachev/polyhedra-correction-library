@@ -11,6 +11,7 @@ int Facet::signum(int i, Plane plane) {
 }
 
 //#define IF_DETECT_INCIDENT_FACETS
+#define IF_NOT_PREPARE_HANGING_FACETS
 
 int Facet::prepare_edge_list(Plane iplane) {
 	int nintrsct;
@@ -18,7 +19,9 @@ int Facet::prepare_edge_list(Plane iplane) {
 	int sign_curr, sign_prev, sign_next;
 	double scalar;
 	int next_f;
-	int num_not_in_plane;
+	int num_null;
+	int num_positive;
+	int num_negative;
 
 	Vector3d dir;
 	Vector3d point;
@@ -48,7 +51,7 @@ int Facet::prepare_edge_list(Plane iplane) {
 	}
 
 	nintrsct = 0;
-	num_not_in_plane = 0;
+	num_null = num_positive = num_negative = 0;
 	for (i = 0; i < nv; ++i) {
 #ifdef DEBUG1
 		fprintf(stdout, "prepare_edge_list i = %d\n", i);
@@ -60,6 +63,20 @@ int Facet::prepare_edge_list(Plane iplane) {
 		sign_curr = signum(i, iplane);
 		sign_next = signum(i_next, iplane);
 		sign_prev = signum(i_prev, iplane);
+
+		switch (sign_curr) {
+			case 0 :
+				++num_null;
+				break;
+			case 1 :
+				++num_positive;
+				break;
+			case -1 :
+				++num_negative;
+				break;
+			default :
+				break;
+		}
 
 		//Если вершина лежит на плоскости
 		if (sign_curr == 0) {
@@ -123,7 +140,6 @@ int Facet::prepare_edge_list(Plane iplane) {
 			poly->edge_list[id].
 				add_edge(index[i], index[i_next], next_f, 2, scalar);
 			++nintrsct;
-			++num_not_in_plane;
 		}
 	}
 //	edge_list.my_fprint(stdout);
@@ -131,10 +147,12 @@ int Facet::prepare_edge_list(Plane iplane) {
 
 //	fprintf(stdout, "num_not_in_plane = %d\n", num_not_in_plane);
 
-	if (num_not_in_plane == 0) {
+#ifdef IF_NOT_PREPARE_HANGING_FACETS
+	if (num_positive + num_null == nv || num_negative + num_null == nv) {
 		poly->edge_list[id] = EdgeList();
 		return 0;
 	}
+#endif
 	return nintrsct;
 }
 

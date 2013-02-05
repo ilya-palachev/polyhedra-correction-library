@@ -42,7 +42,7 @@ void Polyhedron::intersection(Plane iplane) {
 		edge_list[i] = EdgeList(i, facet[i].get_nv(), this);
 		res = facet[i].prepare_edge_list(iplane);
 		edge_list[i].send_to_edge_set(&total_edge_set);
-//		edge_list[i].my_fprint(stdout);
+		edge_list[i].my_fprint(stdout);
 		num_edges[i] = res;
 //		total_edges += res;
 	}
