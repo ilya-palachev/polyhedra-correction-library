@@ -42,7 +42,7 @@ void Polyhedron::intersection(Plane iplane) {
 		edge_list[i] = EdgeList(i, facet[i].get_nv(), this);
 		res = facet[i].prepare_edge_list(iplane);
 		edge_list[i].send_to_edge_set(&total_edge_set);
-		edge_list[i].my_fprint(stdout);
+//		edge_list[i].my_fprint(stdout);
 		num_edges[i] = res;
 //		total_edges += res;
 	}
@@ -85,7 +85,8 @@ void Polyhedron::intersection(Plane iplane) {
 		if (fid_curr == numf) {
 			continue;
 		}
-		edge_list[fid_curr].get_first_edge(v0, v1, fid_next, drctn);
+		edge_list[fid_curr].get_first_edge(v0, v1);
+		fid_next = fid_curr;
 //		edge_list[fid_curr].set_isUsed(true);
 		v0_first = v0;
 		v1_first = v1;
@@ -143,12 +144,12 @@ void Polyhedron::intersection(Plane iplane) {
 			future_facet[i].add_edge(v0, v1, fid);
 		}
 	}
-#ifdef DEBUG
+//#ifdef DEBUG
 	fprintf(stdout, "%d components detected : \n", num_components);
 	for (i = 0; i < num_components; ++i) {
 		future_facet[i].my_fprint(stdout);
 	}
-#endif
+//#endif
 
 	if (num_edges != NULL)
 		delete[] num_edges;

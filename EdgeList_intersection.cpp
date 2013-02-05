@@ -7,8 +7,6 @@
 #include "array_operations.h"
 
 void EdgeList::add_edge(int v0, int v1, int next_f, int next_d, double sm) {
-	//insert_binary(num, edge0, edge1, scalar_mult, v0, v1, sm);
-
 #ifdef DEBUG1
 	fprintf(stdout, "add_edge(v0 = %d, v1 = %d, next_f = %d, next_d = %d, \
 			sm = %lf)\n", v0, v1, next_f, next_d, sm);
@@ -55,7 +53,8 @@ void EdgeList::prepare_next_direction() {
 	}
 }
 
-void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d) {
+void EdgeList::get_first_edge(int& v0, int& v1) {
+//	int i_next;
 	if (num < 1) {
 		v0 = v1 = -1;
 		return;
@@ -64,10 +63,18 @@ void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d) {
 		if (next_direction[i] != 0 && isUsed[i] == false) {
 //			set_pointer(i);
 			isUsed[i] = true;
+//			switch (next_direction[i]) {
+//				case 1:
+//					i_next = i < num - 1 ? i + 1 : 0;
+//					break;
+//				case -1:
+//					i_next = i > 0 ? i - 1 : num - 1;
+//					break;
+//				default:
+//					break;
+//			}
 			v0 = edge0[i];
 			v1 = edge1[i];
-			next_f = next_facet[i];
-			next_d = next_direction[i];
 			return;
 		}
 	}
@@ -75,8 +82,9 @@ void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d) {
 	isUsed[0] = true;
 	v0 = edge0[0];
 	v1 = edge1[0];
-	next_f = next_facet[0];
-	next_d = -1;
+//	next_f = next_facet[1];
+//	next_d = next_direction[0];
+	//Утв. next_d == 1
 }
 
 void EdgeList::get_next_edge(int& v0, int& v1, int& next_f, int& next_d) {
@@ -106,18 +114,18 @@ void EdgeList::get_next_edge(int& v0, int& v1, int& next_f, int& next_d) {
 //			set_pointer(i);
 			isUsed[i] = true;
 			switch (next_direction[i]) {
-				case -1:
+				case 1:
 					i_next = i < num - 1 ? i + 1 : 0;
 					break;
-				case 1:
+				case -1:
 					i_next = i > 0 ? i - 1 : num - 1;
 					break;
 				case 0:
 					switch (next_d) {
-						case -1:
+						case 1:
 							i_next = i < num - 1 ? i + 1 : 0;
 							break;
-						case 1:
+						case -1:
 							i_next = i > 0 ? i - 1 : num - 1;
 							break;
 						default:
@@ -175,4 +183,21 @@ void EdgeList::send_to_edge_set(EdgeSet* edge_set) {
 	for (i = 0; i < num; ++i) {
 		edge_set->add_edge(edge0[i], edge1[i]);
 	}
+}
+
+void EdgeList::goto_header() {
+	set_pointer(0);
+}
+
+void EdgeList::go_forward() {
+	set_pointer(pointer + 1);
+}
+
+void EdgeList::set_curr_info(int next_d, int next_f) {
+	next_direction[pointer] = next_d;
+	next_facet[pointer] = next_f;
+}
+
+void EdgeList::add_edge(int v0, int v1, double sm) {
+	add_edge(v0, v1, -1, -2, sm);
 }

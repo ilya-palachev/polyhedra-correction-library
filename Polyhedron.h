@@ -8,7 +8,7 @@
 
 #include "Vector3d.h"
 
-#define DEBUG
+//#define DEBUG
 
 #define EPS_SIGNUM 1e-14
 
@@ -141,12 +141,17 @@ public:
 
 	//EdgeList_intersection.cpp
 	void add_edge(int v0, int v1, int next_f, int next_d, double sm);
+	void add_edge(int v0, int v1, double sm);
 	void prepare_next_direction();
 	void get_next_edge(int& v0, int& v1, int& next_f, int& next_d);
-	void get_first_edge(int& v0, int& v1, int& next_f, int& next_d);
+	void get_first_edge(int& v0, int& v1);
 	void set_id_v_new(int id_v);
 	void set_isUsed(bool val);
 	void set_pointer(int val);
+
+	void goto_header();
+	void go_forward();
+	void set_curr_info(int next_d, int next_f);
 
 	void send_to_edge_set(EdgeSet* edge_set);
 
