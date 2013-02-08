@@ -8,6 +8,7 @@ int Polyhedron::corpol_test(int ncont)
     Edge* edges;
     
     make_cube(1.);
+    preprocess_polyhedron();
     
     int numeMax = 0;
     for (int i = 0; i < numf; ++i)
@@ -19,14 +20,7 @@ int Polyhedron::corpol_test(int ncont)
     edges = new Edge [numeMax];
 
     preprocess_edges(nume, numeMax, edges);
-#ifndef NDEBUG
-    printf("------------\n After preprocess_edges in corpol_test\n");
-    for (int i = 0; i < nume; ++i)
-    {
-        edges[i].my_fprint(stdout);
-    }
-    printf("------------\n End of print edges in corpol_test\n");
-#endif
+
     corpol_test_create_contours(nume, edges, ncont, contours);
     
 #ifndef NDEBUG
@@ -43,7 +37,7 @@ int Polyhedron::corpol_test(int ncont)
         delete[] edges;
         edges = NULL;
     }
-    
+    return 0;
 }
 
 int Polyhedron::corpol_test_create_contours(
@@ -70,7 +64,7 @@ int Polyhedron::corpol_test_create_contours(
             Plane pi1 = facet[edges[iedge].f1].plane;
             double sign0 = pi0.norm * nu + pi0.dist;
             double sign1 = pi1.norm * nu + pi1.dist;
-            if (sign0 * sign1 <= 0)
+            if (sign0 * sign1 < 0)
             {
                 buf[ne] = iedge;
                 ++ne;
@@ -104,7 +98,7 @@ int Polyhedron::corpol_test_create_contours(
             {
                 curV0 = edges[buf[i]].v0;
                 curV1 = edges[buf[i]].v1;
-                if (curV0 != curV && curV1 != curV || buf[i] == curEdge)
+                if ( ( curV0 != curV && curV1 != curV ) || buf[i] == curEdge)
                 {
                     continue;
                 }
@@ -180,34 +174,49 @@ int Polyhedron::corpol_test_create_contours(
         contours[i].my_fprint(stdout);
     }
 #endif
-
+    return 0;
 }
 
 void Polyhedron::make_cube(double a)
 {
+#ifndef NDEBUG
+    printf("I'm going to clear polyhedon!!!\n");
+#endif //NDEBUG
     if (vertex != NULL)
     {
         delete[] vertex;
         vertex = NULL;
     }
-    
+#ifndef NDEBUG
+    printf("vertex deleted !!\n");
+#endif //NDEBUG
     if (facet != NULL)
     {
         delete[] facet;
         facet = NULL;
     }
-    
+#ifndef NDEBUG
+    printf("facet deleted !!\n");
+#endif //NDEBUG
     if (vertexinfo != NULL)
     {
         delete[] vertexinfo;
         vertexinfo = NULL;
     }
-    
+#ifndef NDEBUG
+    printf("vertexinfo deleted !!\n");
+#endif //NDEBUG
     if (edge_list != NULL)
     {
         delete[] edge_list;
         edge_list = NULL;
     }
+#ifndef NDEBUG
+    printf("edge_list deleted !!\n");
+#endif //NDEBUG
+#ifndef NDEBUG
+    printf("Polyhedon has been cleared before recreating as a cube...\n");
+#endif //NDEBUG
         
     numf = 6;
     numv = 8;
@@ -265,4 +274,16 @@ void Polyhedron::make_cube(double a)
     facet[5].index[2] = 5;
     facet[5].index[3] = 4;
     facet[5].plane = Plane(Vector3d(0., -1., 0.), -a);
+
+//    for (int i = 0; i < numf; ++i)
+//    {
+//    	int nv = facet[i].nv;
+//    	int* index = facet[i].index;
+//    	index[nv] = index[0];
+//    	facet[i].id = i;
+//    }
+
+#ifndef NDEBUG
+    printf("Polyhedron has been recreateda as a cube.\n");
+#endif //NDEBUG
 }

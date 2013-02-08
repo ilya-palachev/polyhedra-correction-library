@@ -14,7 +14,7 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     int dim = numf * 5;
     
     int nume;
-    Edge* edges;
+    Edge* edges = NULL;
     
     corpol_preprocess(nume, edges, N, contours);
     
@@ -43,6 +43,7 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
         error = corpol_calculate_functional(nume, edges, N, contours, 
                 prevPlanes);
     }
+    return 0;
 }
 
 double Polyhedron::corpol_calculate_functional(int nume, 
@@ -107,6 +108,7 @@ double Polyhedron::corpol_calculate_functional(int nume,
             sum += summand0 + summand1;
         }
     }
+    return sum;
 }
 
 int Polyhedron::corpol_iteration(int nume, Edge* edges, int N, 
@@ -168,7 +170,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
             int i_bk_an = i_ak_an + 5 * numf;
             int i_ck_an = i_ak_an + 2 * 5 * numf;
             int i_dk_an = i_ak_an + 3 * 5 * numf;
-            int i_lk_an = i_ak_an + 4 * 5 * numf;
+            __attribute__((unused)) int i_lk_an = i_ak_an + 4 * 5 * numf;
             
             Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
             

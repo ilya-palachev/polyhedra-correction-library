@@ -9,6 +9,7 @@ Polyhedron::Polyhedron() :
 vertex(NULL),
 facet(NULL),
 vertexinfo(NULL),
+edge_list(NULL),
 numv(0),
 numf(0) {
 //log_file(stderr) {

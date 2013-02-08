@@ -183,7 +183,7 @@ public:
         inline void preed_add(int& nume, int numeMax, Edge* edges, 
                 int v0, int v1, int f0, int f1);
         
-        inline int preed_find(int nume, Edge* edges, int v0, int v1);
+        int preed_find(int nume, Edge* edges, int v0, int v1);
 
         int corpol_prep_build_lists_of_visible_edges(int nume, Edge* edges, 
                 int N, SContour* contours);

@@ -19,6 +19,8 @@ int Polyhedron::corpol_preprocess(
     preprocess_edges(nume, numeMax, edges);
     corpol_prep_build_lists_of_visible_edges(nume, edges, N, contours);
     corpol_prep_map_between_edges_and_contours(nume, edges, N, contours);
+
+    return 0;
 }
 
 int Polyhedron::preprocess_edges(int& nume, int numeMax, Edge* edges)
@@ -97,6 +99,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         delete[] buf;
         buf = NULL;
     }
+    return 0;
 }
 
 int Polyhedron::corpol_prep_map_between_edges_and_contours(
@@ -142,13 +145,14 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
             edges[i].contourDirection[j] = direction;
         }
     }
+    return 0;
 }
 
 void Polyhedron::preed_add(int& nume, int numeMax, Edge* edges, 
         int v0, int v1, int f0, int f1)
 {
 #ifndef NDEBUG
-    printf("Trying to add edge (%d, %d) \n", v0, v1);
+    printf("\n\n----------------\nTrying to add edge (%d, %d) \n", v0, v1);
     
     for (int i = 0; i < nume; ++i)
         printf("\tedges[%d] = (%d, %d)\n", i, edges[i].v0, edges[i].v1);
@@ -182,6 +186,9 @@ void Polyhedron::preed_add(int& nume, int numeMax, Edge* edges,
     if (edges[retvalfind].v0 == v0 && 
         edges[retvalfind].v1 == v1)
     {
+#ifndef NDEBUG
+    printf("Edge (%d, %d) already presents at position %d ! \n", v0, v1, retvalfind);
+#endif
         return;
     }
     
@@ -201,7 +208,7 @@ void Polyhedron::preed_add(int& nume, int numeMax, Edge* edges,
     ++nume;
 }
 
-inline int Polyhedron::preed_find(int nume, Edge* edges, int v0, int v1)
+int Polyhedron::preed_find(int nume, Edge* edges, int v0, int v1)
 {
 #ifndef NDEBUG
     printf("Trying to find edge (%d, %d) \n", v0, v1);

@@ -24,10 +24,9 @@ void test_join_facets(const char* name, int type, int fid0, int fid1);
 void test_multi_join_facets(const char* name, int type, int n, int *fid);
 
 int main(int argc, char** argv) {
-    argc = argc;
-    argv = argv;
 
     Polyhedron poly;
+    printf("Polyhedron has been created...\n");
     poly.corpol_test(100);
     
 //    int fid[3] = {0, 250, 14};
