@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  4 MAY 2012 18:06
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  4 JUL 2012 22:14
 entering extended mode
  %&-line parsing enabled.
 **project_report.tex
@@ -718,13 +718,12 @@ File: img/pic-step-1.jpg Graphic file (type jpg)
 File: img/pic-step-2.jpg Graphic file (type jpg)
 
 <use img/pic-step-2.jpg> [11 <./img/pic-step-1.jpg>]
-<img/pic-step-3.jpg, id=76, 546.54187pt x 233.37187pt>
-File: img/pic-step-3.jpg Graphic file (type jpg)
+<img/pic-step-3-1.jpg, id=76, 537.50812pt x 233.37187pt>
+File: img/pic-step-3-1.jpg Graphic file (type jpg)
 
-<use img/pic-step-3.jpg> [12 <./img/pic-step-2.jpg> <./img/pic-step-3.jpg>]
+<use img/pic-step-3-1.jpg> [12 <./img/pic-step-2.jpg> <./img/pic-step-3-1.jpg>]
 LaTeX Font Info:    Try loading font information for T2A+cmtt on input line 573
 .
-
 (/usr/share/texmf-texlive/tex/latex/cyrillic/t2acmtt.fd
 File: t2acmtt.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
 ) [13] [14] [15]
@@ -924,7 +923,7 @@ File: img/region.jpg Graphic file (type jpg)
 (./project_report.aux) ) 
 Here is how much of TeX's memory you used:
  3671 strings out of 494818
- 46261 string characters out of 1178666
+ 46271 string characters out of 1178666
  116382 words of memory out of 3000000
  6744 multiletter control sequences out of 15000+50000
  15964 words of font info for 42 fonts, out of 3000000 for 9000
@@ -950,7 +949,7 @@ lic/amsfonts/latxfont/lcircle1.pfb></usr/share/texmf-texlive/fonts/type1/public
 /amsfonts/latxfont/line10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
 onts/latxfont/linew10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
 /symbols/msbm10.pfb>
-Output written on project_report.pdf (76 pages, 2113169 bytes).
+Output written on project_report.pdf (76 pages, 2111960 bytes).
 PDF statistics:
  851 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
