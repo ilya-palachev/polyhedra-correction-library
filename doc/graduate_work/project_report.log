@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  17 APR 2012 13:56
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  17 APR 2012 15:38
 entering extended mode
  %&-line parsing enabled.
 **project_report.tex
@@ -665,13 +665,7 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 3.
 
 (/usr/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
-)
-Overfull \hbox (0.12318pt too wide) in paragraph at lines 23--23
- [][] []\T2A/cmr/m/n/12 TODO: “е-сти-ро-ва-ние на дру-гих при-ме-рах + слу-чай 
-трех-четырех 
- []
-
-[1])
+) [1])
 \tf@toc=\write3
 \openout3 = `project_report.toc'.
 
@@ -745,230 +739,228 @@ LaTeX Font Info:    Try loading font information for T2A+cmtt on input line 527
 (/usr/share/texmf-texlive/tex/latex/cyrillic/t2acmtt.fd
 File: t2acmtt.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
 ) [12 <./img/pic-step-3.jpg>] [13] [14] [15] [16] [17] [18]
-<bugs/Plane-wrong.png, id=104, 807.015pt x 395.22656pt>
-File: bugs/Plane-wrong.png Graphic file (type png)
-
-<use bugs/Plane-wrong.png>
-<bugs/Plane-wrong-2.png, id=105, 807.7678pt x 393.72093pt>
-File: bugs/Plane-wrong-2.png Graphic file (type png)
-
-<use bugs/Plane-wrong-2.png>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[19 <./bugs/Plane-wrong.png (PNG copy)>]
-<img/contour-3.jpg, id=109, 365.11406pt x 575.14874pt>
-File: img/contour-3.jpg Graphic file (type jpg)
- <use img/contour-3.jpg>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Overfull \hbox (4.80963pt too wide) in paragraph at lines 899--899
+Overfull \hbox (4.80963pt too wide) in paragraph at lines 854--854
 []\T2A/cmr/bx/n/14.4 –ассечение мо-ди-фи-ци-ро-ван-но-го мно-го-гран-ни-ка плос
 -ко-стью 
  []
 
-[20 <./bugs/Plane-wrong-2.png (PNG copy)>] [21 <./img/contour-3.jpg>]
-<polyhedron-2010-11-25/37-249.png, id=116, 542.025pt x 389.20406pt>
-File: polyhedron-2010-11-25/37-249.png Graphic file (type png)
+[19] <polyhedron-2010-11-25/join1.jpeg, id=107, 794.2172pt x 384.6872pt>
+File: polyhedron-2010-11-25/join1.jpeg Graphic file (type jpg)
 
-<use polyhedron-2010-11-25/37-249.png>
-<polyhedron-2010-11-25/2-253.png, id=118, 542.77782pt x 391.4625pt>
-File: polyhedron-2010-11-25/2-253.png Graphic file (type png)
+<use polyhedron-2010-11-25/join1.jpeg>
+<polyhedron-2010-11-25/join2.jpeg, id=108, 797.22844pt x 386.19281pt>
+File: polyhedron-2010-11-25/join2.jpeg Graphic file (type jpg)
 
-<use polyhedron-2010-11-25/2-253.png>
+<use polyhedron-2010-11-25/join2.jpeg>
+<polyhedron-2010-11-25/join3.jpeg, id=109, 797.22844pt x 386.19281pt>
+File: polyhedron-2010-11-25/join3.jpeg Graphic file (type jpg)
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+<use polyhedron-2010-11-25/join3.jpeg>
+<polyhedron-2010-11-25/join4.jpeg, id=110, 796.47563pt x 386.19281pt>
+File: polyhedron-2010-11-25/join4.jpeg Graphic file (type jpg)
 
-<polyhedron-2010-11-25/13-248.png, id=120, 542.77782pt x 390.70969pt>
-File: polyhedron-2010-11-25/13-248.png Graphic file (type png)
+<use polyhedron-2010-11-25/join4.jpeg>
+<polyhedron-2010-11-25/join5.jpeg, id=111, 797.22844pt x 386.94562pt>
+File: polyhedron-2010-11-25/join5.jpeg Graphic file (type jpg)
 
-<use polyhedron-2010-11-25/13-248.png>
+<use polyhedron-2010-11-25/join5.jpeg>
+<polyhedron-2010-11-25/join6.jpeg, id=112, 795.72281pt x 386.19281pt>
+File: polyhedron-2010-11-25/join6.jpeg Graphic file (type jpg)
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+<use polyhedron-2010-11-25/join6.jpeg>
+<polyhedron-2010-11-25/join7.jpeg, id=113, 797.98125pt x 386.94562pt>
+File: polyhedron-2010-11-25/join7.jpeg Graphic file (type jpg)
 
-[22 <./polyhedron-2010-11-25/37-249.png (PNG copy)>]
+<use polyhedron-2010-11-25/join7.jpeg>
+<polyhedron-2010-11-25/join8.jpeg, id=114, 793.46437pt x 385.44pt>
+File: polyhedron-2010-11-25/join8.jpeg Graphic file (type jpg)
 
-LaTeX Warning: Text page 23 contains only floats.
+<use polyhedron-2010-11-25/join8.jpeg>
+<polyhedron-2010-11-25/join9.jpeg, id=115, 793.46437pt x 385.44pt>
+File: polyhedron-2010-11-25/join9.jpeg Graphic file (type jpg)
 
+<use polyhedron-2010-11-25/join9.jpeg>
+<polyhedron-2010-11-25/join10.jpeg, id=116, 794.2172pt x 386.19281pt>
+File: polyhedron-2010-11-25/join10.jpeg Graphic file (type jpg)
 
-Overfull \vbox (1.70518pt too high) has occurred while \output is active []
+<use polyhedron-2010-11-25/join10.jpeg>
+<polyhedron-2010-11-25/join11.jpeg, id=117, 795.72281pt x 385.44pt>
+File: polyhedron-2010-11-25/join11.jpeg Graphic file (type jpg)
 
+<use polyhedron-2010-11-25/join11.jpeg>
+<polyhedron-2010-11-25/join12.jpeg, id=118, 796.47563pt x 386.94562pt>
+File: polyhedron-2010-11-25/join12.jpeg Graphic file (type jpg)
 
-[23 <./polyhedron-2010-11-25/2-253.png (PNG copy)> <./polyhedron-2010-11-25/13-
-248.png (PNG copy)>] [24] [25] [26] [27] [28] [29] [30] [31] [32]
-<cube-cutted/cube-cutted-1.png, id=163, 797.22844pt x 386.19281pt>
+<use polyhedron-2010-11-25/join12.jpeg> [20] [21 <./polyhedron-2010-11-25/join1
+.jpeg> <./polyhedron-2010-11-25/join2.jpeg>] [22 <./polyhedron-2010-11-25/join3
+.jpeg> <./polyhedron-2010-11-25/join4.jpeg>] [23 <./polyhedron-2010-11-25/join5
+.jpeg> <./polyhedron-2010-11-25/join6.jpeg>] [24 <./polyhedron-2010-11-25/join7
+.jpeg> <./polyhedron-2010-11-25/join8.jpeg>] [25 <./polyhedron-2010-11-25/join9
+.jpeg> <./polyhedron-2010-11-25/join10.jpeg>] [26 <./polyhedron-2010-11-25/join
+11.jpeg> <./polyhedron-2010-11-25/join12.jpeg>] [27] [28] [29] [30] [31]
+[32] [33] [34] [35]
+<cube-cutted/cube-cutted-1.png, id=172, 797.22844pt x 386.19281pt>
 File: cube-cutted/cube-cutted-1.png Graphic file (type png)
 
 <use cube-cutted/cube-cutted-1.png>
-<cube-cutted/cube-cutted-2.png, id=164, 797.22844pt x 386.19281pt>
+<cube-cutted/cube-cutted-2.png, id=173, 797.22844pt x 386.19281pt>
 File: cube-cutted/cube-cutted-2.png Graphic file (type png)
 
 <use cube-cutted/cube-cutted-2.png>
-<cube-cutted/cube-cutted-3.png, id=165, 793.46437pt x 386.19281pt>
+<cube-cutted/cube-cutted-3.png, id=174, 793.46437pt x 386.19281pt>
 File: cube-cutted/cube-cutted-3.png Graphic file (type png)
 
-<use cube-cutted/cube-cutted-3.png> [33 <./cube-cutted/cube-cutted-1.png (PNG c
-opy)> <./cube-cutted/cube-cutted-2.png (PNG copy)>] [34 <./cube-cutted/cube-cut
-ted-3.png (PNG copy)>] <poly-big/3.png, id=172, 963.6pt x 602.25pt>
+<use cube-cutted/cube-cutted-3.png> [36 <./cube-cutted/cube-cutted-1.png (PNG c
+opy)> <./cube-cutted/cube-cutted-2.png (PNG copy)>] [37 <./cube-cutted/cube-cut
+ted-3.png (PNG copy)>] <poly-big/3.png, id=182, 963.6pt x 602.25pt>
 File: poly-big/3.png Graphic file (type png)
 
-<use poly-big/3.png> <poly-big/31.png, id=174, 963.6pt x 602.25pt>
+<use poly-big/3.png> <poly-big/31.png, id=184, 963.6pt x 602.25pt>
 File: poly-big/31.png Graphic file (type png)
 
-<use poly-big/31.png>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<poly-big/33.png, id=176, 963.6pt x 602.25pt>
+<use poly-big/31.png> <poly-big/33.png, id=186, 963.6pt x 602.25pt>
 File: poly-big/33.png Graphic file (type png)
- <use poly-big/33.png>
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<poly-big/34.png, id=178, 963.6pt x 602.25pt>
+<use poly-big/33.png> <poly-big/34.png, id=188, 963.6pt x 602.25pt>
 File: poly-big/34.png Graphic file (type png)
- <use poly-big/34.png>
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<poly-big/35.png, id=180, 963.6pt x 602.25pt>
+<use poly-big/34.png> <poly-big/35.png, id=190, 963.6pt x 602.25pt>
 File: poly-big/35.png Graphic file (type png)
- <use poly-big/35.png>
-<poly-big/3components.png, id=182, 963.6pt x 602.25pt>
+
+<use poly-big/35.png> <poly-big/3components.png, id=192, 963.6pt x 602.25pt>
 File: poly-big/3components.png Graphic file (type png)
 
-<use poly-big/3components.png> [35 <./poly-big/3.png (PNG copy)>]
-Overfull \hbox (4.09148pt too wide) in paragraph at lines 1638--1638
+<use poly-big/3components.png> [38] [39 <./poly-big/3.png (PNG copy)> <./poly-b
+ig/31.png (PNG copy)>] [40 <./poly-big/33.png (PNG copy)> <./poly-big/34.png (P
+NG copy)>] [41 <./poly-big/35.png (PNG copy)> <./poly-big/3components.png (PNG 
+copy)>]
+Overfull \hbox (4.09148pt too wide) in paragraph at lines 1647--1647
 []\T2A/cmr/bx/n/14.4 ћодификаци€ ал-го-рит-ма дл€ за-да-чи сли-€-ни€ смеж-ных г
 ра-
  []
 
-[36 <./poly-big/31.png (PNG copy)> <./poly-big/33.png (PNG copy)>] [37 <./poly-
-big/34.png (PNG copy)> <./poly-big/35.png (PNG copy)>] [38 <./poly-big/3compone
-nts.png (PNG copy)>] [39]
-Overfull \hbox (9.22968pt too wide) in paragraph at lines 1668--1668
+[42]
+Overfull \hbox (9.22968pt too wide) in paragraph at lines 1677--1677
 []\T2A/cmr/bx/n/17.28 ѕодвижка вер-ши-ны и даль-ней-ша€ пе-ре-строй-ка мно-
  []
 
-[40] [41] [42] [43] [44] [45] [46] [47]
-Underfull \hbox (badness 10000) in paragraph at lines 2171--2171
+[43] [44] [45] [46] [47] [48] [49] [50]
+Underfull \hbox (badness 10000) in paragraph at lines 2180--2180
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2171--2171
+Underfull \hbox (badness 10000) in paragraph at lines 2180--2180
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 1303) in paragraph at lines 2213--2213
+Underfull \hbox (badness 1303) in paragraph at lines 2222--2222
 []$\OML/cmm/m/it/12 S[]$\T2A/cmr/m/n/12 , по-греш-но-сти по-па-да-
  []
 
-[48] [49]
-Underfull \hbox (badness 10000) in paragraph at lines 2310--2310
+[51] [52]
+Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2310--2310
+Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2343--2343
+Underfull \hbox (badness 10000) in paragraph at lines 2352--2352
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2343--2343
+Underfull \hbox (badness 10000) in paragraph at lines 2352--2352
 []\T2A/cmr/m/n/12 цикл
  []
 
-[50] [51]
-Overfull \hbox (6.13187pt too wide) in paragraph at lines 2515--2515
+[53] [54]
+Overfull \hbox (6.13187pt too wide) in paragraph at lines 2524--2524
 []\T2A/cmr/m/n/12 Ќомер
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2515--2515
+Underfull \hbox (badness 10000) in paragraph at lines 2524--2524
 []$\OML/cmm/m/it/12 S[]$\T2A/cmr/m/n/12 , по-греш-но-
  []
 
 
-Underfull \hbox (badness 4647) in paragraph at lines 2515--2515
+Underfull \hbox (badness 4647) in paragraph at lines 2524--2524
 \T2A/cmr/m/n/12 сти по-па-да-ний
  []
 
 
-Underfull \hbox (badness 6078) in paragraph at lines 2516--2517
+Underfull \hbox (badness 6078) in paragraph at lines 2525--2526
 []\T2A/cmr/m/n/12 „исло са-мо-пе-
  []
 
-[52] <img/consections-1.jpeg, id=247, 566.115pt x 395.22656pt>
+[55] <img/consections-1.jpeg, id=257, 566.115pt x 395.22656pt>
 File: img/consections-1.jpeg Graphic file (type jpg)
 
 <use img/consections-1.jpeg>
-<img/consections-2.jpeg, id=249, 567.62062pt x 394.47375pt>
+<img/consections-2.jpeg, id=259, 567.62062pt x 394.47375pt>
 File: img/consections-2.jpeg Graphic file (type jpg)
 
 <use img/consections-2.jpeg>
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<img/consections-3.jpeg, id=251, 565.36218pt x 391.4625pt>
+<img/consections-3.jpeg, id=261, 565.36218pt x 391.4625pt>
 File: img/consections-3.jpeg Graphic file (type jpg)
 
 <use img/consections-3.jpeg>
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<img/consections-4.jpeg, id=253, 565.36218pt x 392.21532pt>
+<img/consections-4.jpeg, id=263, 565.36218pt x 392.21532pt>
 File: img/consections-4.jpeg Graphic file (type jpg)
 
 <use img/consections-4.jpeg>
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<img/consections-5.jpeg, id=255, 568.37344pt x 394.47375pt>
+<img/consections-5.jpeg, id=265, 568.37344pt x 394.47375pt>
 File: img/consections-5.jpeg Graphic file (type jpg)
 
 <use img/consections-5.jpeg>
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[53 <./img/consections-1.jpeg>]
+[56 <./img/consections-1.jpeg>]
 Overfull \vbox (44.34885pt too high) has occurred while \output is active []
 
 
-[54 <./img/consections-2.jpeg> <./img/consections-3.jpeg>] [55 <./img/consectio
+[57 <./img/consections-2.jpeg> <./img/consections-3.jpeg>] [58 <./img/consectio
 ns-4.jpeg> <./img/consections-5.jpeg>]
-Underfull \hbox (badness 1365) in paragraph at lines 2613--2615
+Underfull \hbox (badness 1365) in paragraph at lines 2622--2624
 []\T2A/cmr/m/n/12 OctoNus Software Ltd, ƒо-ку-мен-та-ци€ про-грам-мы Helium Rou
 gh and Pacor
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2617--2619
+Underfull \hbox (badness 10000) in paragraph at lines 2626--2628
 []\T2A/cmr/m/n/12 OctoNus Software Ltd, Helium Polish - system
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2617--2619
+Underfull \hbox (badness 10000) in paragraph at lines 2626--2628
 \T2A/cmr/m/n/12 for scanning of diamonds, до-ку-мен-та-ци€, стр. 42
  []
 
-[56] (./project_report.aux) ) 
+[59] (./project_report.aux) ) 
 Here is how much of TeX's memory you used:
- 3580 strings out of 494818
- 43940 string characters out of 1178666
- 116147 words of memory out of 3000000
- 6663 multiletter control sequences out of 15000+50000
+ 3615 strings out of 494818
+ 45039 string characters out of 1178666
+ 116207 words of memory out of 3000000
+ 6693 multiletter control sequences out of 15000+50000
  15964 words of font info for 42 fonts, out of 3000000 for 9000
  212 hyphenation exceptions out of 8191
- 27i,10n,24p,4061b,299s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,10n,24p,4061b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
  </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a
 /latt1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/lati1200.600
 pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1200.600pk> </home/il
@@ -988,9 +980,9 @@ e/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type
 1/public/amsfonts/latxfont/lcircle1.pfb></usr/share/texmf-texlive/fonts/type1/p
 ublic/amsfonts/latxfont/line10.pfb></usr/share/texmf-texlive/fonts/type1/public
 /amsfonts/latxfont/linew10.pfb>
-Output written on project_report.pdf (57 pages, 1993923 bytes).
+Output written on project_report.pdf (60 pages, 2802079 bytes).
 PDF statistics:
- 711 PDF objects out of 1000 (max. 8388607)
+ 718 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 273 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 285 words of extra memory for PDF output out of 10000 (max. 10000000)
 

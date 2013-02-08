@@ -821,36 +821,9 @@ $\pi$. В этом случае не нужно объединять эти то
 \end{flushleft}
 
 \begin{flushleft}
- \textit{Доказательство.} ???
-\end{flushleft}
-
-\begin{flushleft}
- Здесь возникли затруднения. Возникает вопрос: как поступать с точкой, если продолжение ее по ребру возможно выше плоскости?
-В приведенном выше алгоритме этот вопрос решается так: вместо $v1 = f_{-2} \cap f_{-1} \cap f_{+1}$ полагаем
-$\pi \cap f_{-1} \cap f_{+1}$, то есть продолжаем ребро не максимально, но до пересечения с плоскостью.
-Дело в том, что здесь может возникнуть нарушение плоскостности в грани $f_{-2}$, так как полученная в результате пересечения
-плоскостей $\pi$, $f_{-1}$ и $f_{+1}$ точка не обязана лежать в этой плоскости. Так произошло вот в таком примере 
-(см. рис.~\ref{plane-wrong}): 
-\end{flushleft}
-
-\begin{flushleft}
-  \begin{figure}[h]
-    \includegraphics[width=13cm]{bugs/Plane-wrong.png}
-    \caption{На некотором шаге в грань 168 добавляется точка 275, которая не лежит в плоскости этой грани}\label{plane-wrong}
-  \end{figure}
-\end{flushleft}
-
-\begin{flushleft}
- Если же разрешать точке двигаться сколь угодно далеко в своем движении выше плоскости, то возникает проблема другого рода:
-точка может уйти так далеко, что в одной из содержащих е граней могут возникнуть самопересечения (см. рис.~\ref{plane-wrong-2})
-\end{flushleft}
-
-
-\begin{flushleft}
-  \begin{figure}[h]
-    \includegraphics[width=13cm]{bugs/Plane-wrong-2.png}
-    \caption{Возникает самопересечение}\label{plane-wrong-2}
-  \end{figure}
+ \textit{Доказательство.} Все эти три факта можно очевидным образом проверить по тексту алгоритма:
+если в грань добавляется точка, то только лежащая в этой грани, а самопересечения не могут возникнуть
+и выпуклость не может нарушиться, так как точка новая точка всегда лежит еще и в соседней грани.
 \end{flushleft}
 
 \begin{flushleft}
@@ -859,26 +832,8 @@ $\pi \cap f_{-1} \cap f_{+1}$, то есть продолжаем ребро н�
 \end{flushleft}
 
 \begin{flushleft}
- \textit{Доказательство.} ???
-\end{flushleft}
-
-\begin{flushleft}
- Это утверждение тоже оказалось неверным. Если все грани, которые являются соседними для главной, являются треугольниками,
-то поднимать придется точку, лежащую в треугольнике. Но тогда придется удалять одну точку из треугольника, что сделает его
-гранью, состоящей из 2 точек.
-\end{flushleft}
-
-
-\begin{flushleft}
- Проблему удалось решить при помощи следующей модификации алгоритма: удаляем треугольники, соседствующие с главной гранью, 
-а точку треугольника, не лежащую в главной грани, добавляем в главную грань (см. рис.~\ref{contour-3})
-\end{flushleft}
-
-\begin{flushleft}
-  \begin{figure}[h]
-    \includegraphics[width=10cm]{img/contour-3.jpg}
-    \caption{Ликвидация треугольника}\label{contour-3}
-  \end{figure}
+ \textit{Доказательство.} В принципе поднять можно любую точку контура (см. алгоритм), значит найдется
+ и такая, для которой расстояние минимально.
 \end{flushleft}
 
 \begin{flushleft}
@@ -908,31 +863,85 @@ $\pi \cap f_{-1} \cap f_{+1}$, то есть продолжаем ребро н�
 \newpage
 \subsection{Тестирование алгоритма}
 \begin{flushleft}
- Данный алгоритм был протестирован на нескольких 3D-моделях реальных камней. Далее перечислены 
+ Данный алгоритм был протестирован на 3D-моделях реальных камней. Далее перечислены 
 достигнутые результаты.
 \end{flushleft}
 
 \subsubsection{Тестирование на многограннике polyhedron-2010-11-25}
 \begin{flushleft}
-  \begin{figure}[h]
-    \includegraphics[clip, width=13cm]{polyhedron-2010-11-25/37-249.png}
-    \caption{Слияние граней 37 и 249}\label{poly1-1}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join1.jpeg}
+    \caption{Слияние граней 37 и 249}\label{join1}
   \end{figure}
 \end{flushleft}
 \begin{flushleft}
-  \begin{figure}[h]
-    \includegraphics[clip, width=13cm]{polyhedron-2010-11-25/2-253.png}
-    \caption{Слияние граней 2 и 253}\label{poly1-2}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join2.jpeg}
+    \caption{Слияние граней 0 и 250}\label{join2}
   \end{figure}
 \end{flushleft}
 \begin{flushleft}
-  \begin{figure}[h]
-    \includegraphics[clip, width=13cm]{polyhedron-2010-11-25/13-248.png}
-    \caption{Слияние граней 13 и 248}\label{poly1-3}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join3.jpeg}
+    \caption{Слияние граней 0 и 14}\label{join3}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join4.jpeg}
+    \caption{Слияние граней 2 и 253}\label{join4}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join5.jpeg}
+    \caption{Слияние граней 3, 13, 248 и 252}\label{join5}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join6.jpeg}
+    \caption{Слияние граней 3 и 13}\label{join6}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join7.jpeg}
+    \caption{Слияние граней 3 и 252}\label{join7}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join8.jpeg}
+    \caption{Слияние граней 13 и 248}\label{join8}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join9.jpeg}
+    \caption{Слияние граней 1, 12 и 251}\label{join9}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join10.jpeg}
+    \caption{Слияние граней 1 и 12}\label{join10}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join11.jpeg}
+    \caption{Слияние граней 1 и 251}\label{join11}
+  \end{figure}
+\end{flushleft}
+\begin{flushleft}
+  \begin{figure}[p]
+    \includegraphics[width=15cm]{polyhedron-2010-11-25/join12.jpeg}
+    \caption{Слияние граней 12 и 251}\label{join12}
   \end{figure}
 \end{flushleft}
 
-\subsubsection{TODO: Тестирование на других примерах + случай трех-четырех граней}
+%\subsubsection{TODO: Тестирование на других примерах + случай трех-четырех граней}
 
 
 
@@ -1589,21 +1598,21 @@ $\pi \cap f_{-1} \cap f_{+1}$, то есть продолжаем ребро н�
 		При тестировании возникают случаи, когда сечение имеет 2 или 3 компоненты
 	\end{flushleft}
 	\begin{flushleft}
-		\begin{figure}[h]
+		\begin{figure}[p]
 		    \includegraphics[trim = 220 65 10 140, clip, width=15cm]{poly-big/3.png}
 		    \caption{Сечение многогранника poly-big плоскостью $x = -3$.}
 		    \label{poly-big-1}
 		\end{figure}
 	\end{flushleft}
 	\begin{flushleft}
-		\begin{figure}[h]
+		\begin{figure}[p]
 		    \includegraphics[trim = 220 65 10 140, clip, width=15cm]{poly-big/31.png}
 		    \caption{Сечение многогранника poly-big плоскостью $x = -3.1$.}
 		    \label{poly-big-2}
 		\end{figure}
 	\end{flushleft}
 	\begin{flushleft}
-		\begin{figure}[h]
+		\begin{figure}[p]
 		    \includegraphics[trim = 220 65 10 140, clip, width=15cm]{poly-big/33.png}
 		    \caption{Сечение многогранника poly-big плоскостью $x = -3.3$.}
 		    \label{poly-big-3}
@@ -1611,14 +1620,14 @@ $\pi \cap f_{-1} \cap f_{+1}$, то есть продолжаем ребро н�
 
 	\end{flushleft}
 	\begin{flushleft}
-		\begin{figure}[h]
+		\begin{figure}[p]
 		    \includegraphics[trim = 220 65 10 140, clip, width=15cm]{poly-big/34.png}
 		    \caption{Сечение многогранника poly-big плоскостью $x = -3.4$.}
 		    \label{poly-big-4}
 		\end{figure}
 	\end{flushleft}
 	\begin{flushleft}
-		\begin{figure}
+		\begin{figure}[p]
 		    \includegraphics[trim = 220 65 10 140, clip, width=15cm]{poly-big/35.png}
 		    \caption{Сечение многогранника poly-big плоскостью $x = -3.5$.}
 		    \label{poly-big-5}
@@ -1626,7 +1635,7 @@ $\pi \cap f_{-1} \cap f_{+1}$, то есть продолжаем ребро н�
 
 	\end{flushleft}
 	\begin{flushleft}
-		\begin{figure}
+		\begin{figure}[p]
 		    \includegraphics[trim = 350 65 10 140, clip, width=15cm]{poly-big/3components.png}
 		    \caption{Сечение многогранника poly-big особой плоскостью, при котором образуется 3 компоненты в 
 		    сечении.}
