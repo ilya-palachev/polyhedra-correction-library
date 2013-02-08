@@ -32,13 +32,13 @@ int Polyhedron::preprocess_edges(int& nume, int numeMax, Edge* edges)
         int * index = facet[i].index;
         for (int j = 0; j < nv; ++j)
         {
-            preed_add(nume, // Number of alredy added edges to the list
+            preed_add(nume, // Number of already added edges to the list
                     numeMax, // Number of edges which we are going add finally
                     edges, // Array of edges
                     index[j], // First vertex
                     index[j + 1], // Second vertex
                     i, // Current facet id
-                    index[nv + 1 + i]); // Id of its neighbour
+                    index[nv + 1 + j]); // Id of its neighbour
         }
     }
 #ifndef NDEBUG

@@ -60,11 +60,23 @@ int Polyhedron::corpol_test_create_contours(
         
         for (int iedge = 0; iedge < nume; ++iedge)
         {
+#ifndef NDEBUG
+        	printf("%s : processing edge # %d\n", __func__, iedge);
+        	edges[iedge].my_fprint(stdout);
+#endif
             Plane pi0 = facet[edges[iedge].f0].plane;
             Plane pi1 = facet[edges[iedge].f1].plane;
-            double sign0 = pi0.norm * nu + pi0.dist;
-            double sign1 = pi1.norm * nu + pi1.dist;
-            if (sign0 * sign1 < 0)
+            double sign0 = pi0.norm * nu;
+            double sign1 = pi1.norm * nu;
+#ifndef NDEBUG
+            printf ("pi0: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", pi0.norm.x, pi0.norm.y, pi0.norm.z, pi0.dist);
+            printf ("pi1: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", pi1.norm.x, pi1.norm.y, pi1.norm.z, pi1.dist);
+            printf ("prj: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", planeOfProjection.norm.x,
+            		planeOfProjection.norm.y, planeOfProjection.norm.z, planeOfProjection.dist);
+            printf("sign0 = %lf\n", sign0);
+            printf("sign1 = %lf\n", sign1);
+#endif
+            if (sign0 * sign1 <= 0)
             {
                 buf[ne] = iedge;
                 ++ne;
@@ -235,15 +247,15 @@ void Polyhedron::make_cube(double a)
     
     for (int i = 0; i < numf; ++i)
     {
-        facet[i].nv = 4;
-        facet[i].index = new int [4];
+        int nv = facet[i].nv = 4;
+        facet[i].index = new int [3 * nv + 1];
     }
     
     facet[0].index[0] = 0;
     facet[0].index[1] = 3;
     facet[0].index[2] = 2;
     facet[0].index[3] = 1;
-    facet[0].plane = Plane(Vector3d(0., 0., -1.), a);
+    facet[0].plane = Plane(Vector3d(0., 0., -1.), -a);
     
     facet[1].index[0] = 4;
     facet[1].index[1] = 5;
@@ -275,15 +287,12 @@ void Polyhedron::make_cube(double a)
     facet[5].index[3] = 4;
     facet[5].plane = Plane(Vector3d(0., -1., 0.), -a);
 
-//    for (int i = 0; i < numf; ++i)
-//    {
-//    	int nv = facet[i].nv;
-//    	int* index = facet[i].index;
-//    	index[nv] = index[0];
-//    	facet[i].id = i;
-//    }
+    for (int i = 0; i < numf; ++i)
+    {
+    	facet[i].poly = this;
+    }
 
 #ifndef NDEBUG
-    printf("Polyhedron has been recreateda as a cube.\n");
+    printf("Polyhedron has been recreated as a cube.\n");
 #endif //NDEBUG
 }
