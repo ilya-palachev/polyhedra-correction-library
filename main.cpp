@@ -8,74 +8,32 @@
 //#define NOT_DEBUG
 
 using namespace std;
-//void test_cube_cutted();
-//void test_figures();
-//void test(const char* name, int type, double a, double b, double c, double d);
-//void test2(const char* name, int type, int fid0, int fid1);
-//void test3(const char* name, int type, int fid0, int fid1);
+void test_cube_cutted();
+void test_figures();
+void test(const char* name, int type, double a, double b, double c, double d);
+void test2(const char* name, int type, int fid0, int fid1);
+void test3(const char* name, int type, int fid0, int fid1);
 
 
-// Подвижка точки (нелинейная) - ТЕСТ
 void test_deform(const char* name, int type, int id, Vector3d delta);
-
-// Подвижка точки (линейная) - ТЕСТ
 void test_deform_linear(const char* name, int type, int id, Vector3d delta);
-
-// Сбор статистики о "выворачивании" с дроблением шага - ТЕСТ
 void get_statistics_deform_linear(const char* name, int type);
-
-// Сбор статистики о "выворачивании" (обычный) - ТЕСТ
 void get_statistics_deform_linear_test(const char* name, int type);
 
-// Объединение двух плоскостей - ТЕСТ
 void test_join_facets(const char* name, int type, int fid0, int fid1);
-
-// Объединение произвольного числа плоскостей - ТЕСТ
 void test_multi_join_facets(const char* name, int type, int n, int *fid);
 
 int main(int argc, char** argv) {
     argc = argc;
     argv = argv;
 
-    //37, 249
-    //0, 250, 14
-    //2, 253
-    //3, 13, 252, 248
-    //1, 12, 251
-
-    // Массив номеров граней
-//    int fid[4] = {3, 13, 248, 252};
-//    
-//    
-//    test_multi_join_facets("polyhedron-2010-11-25", 2, 4, fid);
-
-//    int fid[2] = {37, 249};
-//    test_multi_join_facets("polyhedron-2010-11-25", 2, 2, fid);
-
+    Polyhedron poly;
+    poly.corpol_test(100);
+    
 //    int fid[3] = {0, 250, 14};
 //    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
-
-//    int fid[2] = {2, 253};
-//    test_multi_join_facets("polyhedron-2010-11-25", 2, 2, fid);
-
-
-//    int fid[3] = {1, 12, 251};
-//    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
-
-//    test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
-//    test_join_facets("polyhedron-2010-11-25", 2, 0, 250);
-//    test_join_facets("polyhedron-2010-11-25", 2, 0, 14);
-//    test_join_facets("polyhedron-2010-11-25", 2, 2, 253);
-//    test_join_facets("polyhedron-2010-11-25", 2, 3, 13);
-//    test_join_facets("polyhedron-2010-11-25", 2, 3, 252);
-//    test_join_facets("polyhedron-2010-11-25", 2, 13, 248);
-//    test_join_facets("polyhedron-2010-11-25", 2, 13, 252);
-//    test_join_facets("polyhedron-2010-11-25", 2, 1, 12);
-//    test_join_facets("polyhedron-2010-11-25", 2, 1, 251);
-//    test_join_facets("polyhedron-2010-11-25", 2, 12, 251);
     
-
-    //    test_join_facets("polyhedron-2010-11-25", 2, 12, 251);
+//    test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
     
     
     
@@ -92,8 +50,8 @@ int main(int argc, char** argv) {
     //        test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
-    double d = 0.05;
-        test_deform_linear("poly-small", 0, 3, Vector3d(-d, d, d));
+//    double d = 0.1;
+//        test_deform_linear("poly-small", 0, 3, Vector3d(-d, d, d));
     //        test_deform_linear("poly-small", 0, 4, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 5, Vector3d(-1e-1, 1e-1, 1e-1));
     //        test_deform_linear("poly-small", 0, 6, Vector3d(-1e-1, 1e-1, 1e-1));
@@ -130,7 +88,7 @@ int main(int argc, char** argv) {
     //3, 13, 252, 248
     //1, 12, 251
 
-    //  test2("polyhedron-2010-11-25", 2, 37, 249);
+    //    	test2("polyhedron-2010-11-25", 2, 37, 249);
     //	test2("polyhedron-2010-11-25", 2, 0, 250);
     //	test2("polyhedron-2010-11-25", 2, 0, 14);
     //	test2("polyhedron-2010-11-25", 2, 2, 253);
@@ -490,8 +448,8 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
 //        eps *= 2.;
 //    }
 
-        poly.deform_linear2_control(id, delta);
-        poly.test_consections(true);
+        poly.deform_linear2(id, delta);
+        poly.test_consections(false);
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);

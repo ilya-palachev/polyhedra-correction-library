@@ -17,9 +17,9 @@ void Facet::preprocess_free() {
     for (int i = nv + 1; i < 3 * nv + 1; ++i)
         index[i] = -1;
     index[nv] = index[0];
-    rgb[0] = 255;
-    rgb[1] = 255;
-    rgb[2] = 255;
+    rgb[0] = 100;
+    rgb[1] = 100;
+    rgb[2] = 100;
 }
 
 void Facet::preprocess() {

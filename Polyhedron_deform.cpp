@@ -4,10 +4,6 @@
 #include <math.h>
 
 #include "Polyhedron.h"
-#include "list_squares_method.h"
-#include "Vector3d.h"
-#include "array_operations.h"
-#include "Gauss_string.h"
 
 #define eps 1.
 #define EPSILON 1e-11

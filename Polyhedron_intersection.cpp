@@ -289,7 +289,7 @@ void Polyhedron::intersect(Plane iplane) {
             facet_new[i + num_components_new].set_rgb(0, 255, 0);
             fprintf(stdout, "Multi-component: %d\n", i);
         } else
-            facet_new[i + num_components_new].set_rgb(0, 255, 0);
+            facet_new[i + num_components_new].set_rgb(100, 0, 0);
     }
 
 #ifdef OUTPUT

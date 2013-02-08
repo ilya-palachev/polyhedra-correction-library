@@ -4,10 +4,6 @@
 #include <math.h>
 
 #include "Polyhedron.h"
-#include "list_squares_method.h"
-#include "Vector3d.h"
-#include "array_operations.h"
-#include "Gauss_string.h"
 
 #define EPS_PARALLEL 1e-15
 

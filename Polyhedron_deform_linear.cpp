@@ -4,10 +4,6 @@
 #include <math.h>
 
 #include "Polyhedron.h"
-#include "list_squares_method.h"
-#include "Vector3d.h"
-#include "array_operations.h"
-#include "Gauss_string.h"
 
 #define EPSILON 1e-7
 //#define DEFORM_SCALE //Этот макрос определяет, каким методом производить деформацию:
@@ -373,7 +369,7 @@ double Polyhedron::deform_linear_calculate_error() {
             locerr += fabs(a * x + b * y + c * z + d);
         }
         err += locerr;
-//        printf("error[%d] = %lf\n", j, locerr);
+        printf("error[%d] = %lf\n", j, locerr);
     }
 
     return err;
@@ -542,7 +538,7 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
 //            vertex[id] = delta;
                 deform_linear_facets(x, y, z);
 //                join_points();
-                deform_linear_vertices(id, K, A, B);
+                deform_linear_vertices(K, A, B);
                 err = deform_linear_calculate_error();
                 norm = deform_linear_calculate_deform(xold, yold, zold);
                 
@@ -559,7 +555,7 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     //                    printf("%d\t%d\terr = %le\tnorm = %le\terr_eps = %le\tK = %lf\n", i, step++, err, norm, err_eps, K);
                     ifPrint = false;
                     test_consections(true);
-//                    join_points(id);
+                    join_points(id);
                 }
                 ++step;
                 if (step > MAX_STEPS) {
@@ -597,7 +593,7 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
             ncons_prev = ncons_curr;
         }
         
-        deform_linear_vertices(id, K, A, B);
+        deform_linear_vertices(K, A, B);
         err = deform_linear_calculate_error();
         norm = deform_linear_calculate_deform(xold, yold, zold);
 //        if (step % 100 == 0 || step >= 2059) {
@@ -639,7 +635,7 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
 
 }
 
-void Polyhedron::deform_linear_vertices(int id, double K, double* A, double* B) {
+void Polyhedron::deform_linear_vertices(double K, double* A, double* B) {
     int i, j, nf, *index;
     double a, b, c, d;
     double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
@@ -652,9 +648,6 @@ void Polyhedron::deform_linear_vertices(int id, double K, double* A, double* B) 
 
     norm = 0.;
     for (i = 0; i < numv; ++i) {
-        if (i == id) {
-            continue;
-        }
         Maa = 0.;
         Mab = 0.;
         Mac = 0.;
@@ -713,5 +706,3 @@ void Polyhedron::deform_linear_vertices(int id, double K, double* A, double* B) 
 //    if (A != NULL) delete[] A;
 //    if (B != NULL) delete[] B;
 }
-
-

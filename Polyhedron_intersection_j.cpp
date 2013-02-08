@@ -63,7 +63,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     edge_list = new EdgeList[numf];
     
     delete_empty_facets();
-    preprocess_polyhedron();
 
     nume = 0;
     for (i = 0; i < numf; ++i) {
@@ -83,7 +82,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
 //            continue;
         edge_list[i] = EdgeList(i, facet[i].get_nv(), this);
         res = facet[i].prepare_edge_list(iplane);
-        edge_list[i].my_fprint(stdout);
         edge_list[i].send(&total_edge_set);
         edge_list[i].send_edges(&edge_set);
         num_edges[i] = res;
@@ -215,10 +213,7 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
             v0_prev = v0;
             v1_prev = v1;
 
-            edge_list[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn, fid_curr == jfid);
-            if (v0 == 208) {
-                1;
-            }
+            edge_list[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
             printf("drctn = %d\n", drctn);
             
             
@@ -267,8 +262,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     num_saved_facets = 0;
     ifSaveFacet = new bool[numf];
     for (i = 0; i < numf; ++i) {
-        if (i == jfid)
-            continue;
         ifSaveFacet[i] = facet[i].intersect(iplane, buffer_old, num_components_local);
         printf("\tГрань %d", i);
         printf(" - %d компонент\n", num_components_local);
@@ -352,7 +345,7 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
             facet_new[i + num_components_new].set_rgb(0, 255, 0);
             fprintf(stdout, "Multi-component: %d\n", i);
         } else
-            facet_new[i + num_components_new].set_rgb(0, 255, 0);
+            facet_new[i + num_components_new].set_rgb(100, 0, 0);
     }
 
 #ifdef OUTPUT

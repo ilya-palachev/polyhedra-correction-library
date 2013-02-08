@@ -4,7 +4,6 @@
 #include <math.h>
 
 #include "Polyhedron.h"
-#include "Vector3d.h"
 
 int Facet::signum(int i, Plane plane) {
     return poly->signum(poly->vertex[index[i]], plane);

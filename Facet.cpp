@@ -12,9 +12,9 @@ Facet::Facet() :
 		index(new int[1]),
 		nv(0),
 		plane() {
-	rgb[0] = 255;
-	rgb[1] = 255;
-	rgb[2] = 255;
+	rgb[0] = 100;
+	rgb[1] = 100;
+	rgb[2] = 100;
 }
 
 Facet::Facet(
@@ -30,9 +30,9 @@ Facet::Facet(
 		plane(plane_orig),
 		poly(poly_orig) {
 
-	rgb[0] = 255;
-	rgb[1] = 255;
-	rgb[2] = 255;
+	rgb[0] = 100;
+	rgb[1] = 100;
+	rgb[2] = 100;
 
 
 
