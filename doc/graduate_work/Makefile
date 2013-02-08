@@ -1,4 +1,4 @@
-NAME = project_report-2
+NAME = project_report
 
 $(NAME).pdf: $(NAME).tex 
 	pdflatex $(NAME).tex

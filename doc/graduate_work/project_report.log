@@ -1,8 +1,8 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  23 MAR 2012 14:27
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  28 MAR 2012 11:42
 entering extended mode
  %&-line parsing enabled.
-**project_report-2.tex
-(./project_report-2.tex
+**project_report.tex
+(./project_report.tex
 LaTeX2e <2009/09/24>
 Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
 yphenation, bulgarian, ukrainian, russian, loaded.
@@ -558,12 +558,12 @@ File: pdftex.def 2010/03/12 v0.04p Graphics/color for pdfTeX
 \Gin@req@height=\dimen113
 \Gin@req@width=\dimen114
 )
-(./project_report-2.aux
+(./project_report.aux
 LaTeX Font Info:    Try loading font information for T2A+cmr on input line 3.
  (/usr/share/texmf-texlive/tex/latex/cyrillic/t2acmr.fd
 File: t2acmr.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
 ))
-\openout1 = `project_report-2.aux'.
+\openout1 = `project_report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 22.
 LaTeX Font Info:    ... okay on input line 22.
@@ -579,7 +579,8 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 22.
 LaTeX Font Info:    ... okay on input line 22.
 LaTeX Font Info:    Checking defaults for T2A/cmr/m/n on input line 22.
 LaTeX Font Info:    ... okay on input line 22.
- (/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
+
+(/usr/share/texmf-texlive/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count101
 \scratchdimen=\dimen115
@@ -602,23 +603,17 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 24.
 File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 ) [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./project_report-2.toc
-Overfull \hbox (9.25784pt too wide) in paragraph at lines 11--11
- [][] []\T2A/cmr/m/n/12 Построение урав-не-ния но-вой плос-ко-сти ме-то-дом наи
--мень-ших квад- 
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./project_report.toc
+Overfull \hbox (0.12318pt too wide) in paragraph at lines 21--21
+ [][] []\T2A/cmr/m/n/12 TODO: Те-сти-ро-ва-ние на дру-гих при-ме-рах + слу-чай 
+трех-четырех 
  []
 
-
-Overfull \hbox (9.25784pt too wide) in paragraph at lines 12--12
- [][] []\T2A/cmr/m/n/12 Построение урав-не-ния но-вой плос-ко-сти ме-то-дом наи
--мень-ших квад- 
- []
-
-)
+[1])
 \tf@toc=\write3
-\openout3 = `project_report-2.toc'.
+\openout3 = `project_report.toc'.
 
- [1]
+ [2]
 Underfull \hbox (badness 10000) in paragraph at lines 80--80
 []\T2A/cmr/m/n/12 Время ска-
  []
@@ -638,52 +633,179 @@ Underfull \hbox (badness 3701) in paragraph at lines 80--81
 []\T2A/cmr/m/n/12 Полное вре-
  []
 
-[2] <img/contour-1.jpg, id=19, 507.39563pt x 303.38344pt>
+<img/contour-1.jpg, id=17, 507.39563pt x 303.38344pt>
 File: img/contour-1.jpg Graphic file (type jpg)
+ <use img/contour-1.jpg>
 
-<use img/contour-1.jpg> <img/contour-2.jpg, id=21, 505.89pt x 295.1025pt>
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<img/contour-2.jpg, id=19, 505.89pt x 295.1025pt>
 File: img/contour-2.jpg Graphic file (type jpg)
+ <use img/contour-2.jpg>
 
-<use img/contour-2.jpg> [3 <./img/contour-1.jpg> <./img/contour-2.jpg>]
-<img/cube.jpeg, id=28, 346.29375pt x 324.46219pt>
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[3] [4 <./img/contour-1.jpg> <./img/contour-2.jpg>]
+<img/cube.jpeg, id=31, 346.29375pt x 324.46219pt>
 File: img/cube.jpeg Graphic file (type jpg)
  <use img/cube.jpeg>
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[4] [5 <./img/cube.jpeg>] [6] [7]
-<img/2-1.png, id=50, 571.38469pt x 392.96812pt>
-File: img/2-1.png Graphic file (type png)
- <use img/2-1.png>
-Overfull \hbox (9.13878pt too wide) in paragraph at lines 362--379
-[] \T2A/cmr/m/n/12 При ре-
+[5] [6 <./img/cube.jpeg>]
+<img/poly-join-1.jpeg, id=42, 555.57562pt x 383.93437pt>
+File: img/poly-join-1.jpeg Graphic file (type jpg)
+
+<use img/poly-join-1.jpeg>
+<img/poly-join-2.jpeg, id=44, 557.08125pt x 384.6872pt>
+File: img/poly-join-2.jpeg Graphic file (type jpg)
+
+<use img/poly-join-2.jpeg>
+<img/poly-join-4.jpeg, id=46, 555.57562pt x 380.17032pt>
+File: img/poly-join-4.jpeg Graphic file (type jpg)
+
+<use img/poly-join-4.jpeg> [7] [8 <./img/poly-join-1.jpeg> <./img/poly-join-2.j
+peg> <./img/poly-join-4.jpeg>] [9] [10]
+<img/pic-step-1.jpg, id=70, 462.22687pt x 239.39438pt>
+File: img/pic-step-1.jpg Graphic file (type jpg)
+
+<use img/pic-step-1.jpg>
+<img/pic-step-2.jpg, id=72, 544.28343pt x 236.38312pt>
+File: img/pic-step-2.jpg Graphic file (type jpg)
+
+<use img/pic-step-2.jpg> [11 <./img/pic-step-1.jpg> <./img/pic-step-2.jpg>]
+<img/pic-step-3.jpg, id=79, 546.54187pt x 233.37187pt>
+File: img/pic-step-3.jpg Graphic file (type jpg)
+
+<use img/pic-step-3.jpg>
+LaTeX Font Info:    Try loading font information for T2A+cmtt on input line 483
+.
+
+(/usr/share/texmf-texlive/tex/latex/cyrillic/t2acmtt.fd
+File: t2acmtt.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
+) [12 <./img/pic-step-3.jpg>] [13]
+Overfull \hbox (4.80963pt too wide) in paragraph at lines 583--583
+[]\T2A/cmr/bx/n/14.4 Рассечение мо-ди-фи-ци-ро-ван-но-го мно-го-гран-ни-ка плос
+-ко-стью 
  []
 
-[8] [9 <./img/2-1.png (PNG copy)>] [10] (./project_report-2.aux) ) 
+[14] <polyhedron-2010-11-25/37-249.png, id=94, 542.025pt x 389.20406pt>
+File: polyhedron-2010-11-25/37-249.png Graphic file (type png)
+
+<use polyhedron-2010-11-25/37-249.png>
+<polyhedron-2010-11-25/2-253.png, id=96, 542.77782pt x 391.4625pt>
+File: polyhedron-2010-11-25/2-253.png Graphic file (type png)
+
+<use polyhedron-2010-11-25/2-253.png>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<polyhedron-2010-11-25/13-248.png, id=98, 542.77782pt x 390.70969pt>
+File: polyhedron-2010-11-25/13-248.png Graphic file (type png)
+
+<use polyhedron-2010-11-25/13-248.png>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[15 <./polyhedron-2010-11-25/37-249.png (PNG copy)>]
+
+LaTeX Warning: Text page 16 contains only floats.
+
+
+Overfull \vbox (1.70518pt too high) has occurred while \output is active []
+
+
+[16 <./polyhedron-2010-11-25/2-253.png (PNG copy)> <./polyhedron-2010-11-25/13-
+248.png (PNG copy)>] [17] [18] [19] [20] [21] [22] [23] [24]
+<cube-cutted/1.png, id=138, 963.6pt x 602.25pt>
+File: cube-cutted/1.png Graphic file (type png)
+ <use cube-cutted/1.png>
+[25] <cube-cutted/2.png, id=143, 963.6pt x 602.25pt>
+File: cube-cutted/2.png Graphic file (type png)
+ <use cube-cutted/2.png>
+<cube-cutted/3.png, id=145, 963.6pt x 602.25pt>
+File: cube-cutted/3.png Graphic file (type png)
+ <use cube-cutted/3.png>
+[26 <./cube-cutted/1.png (PNG copy)> <./cube-cutted/2.png (PNG copy)>]
+<poly-big/3.png, id=152, 963.6pt x 602.25pt>
+File: poly-big/3.png Graphic file (type png)
+ <use poly-big/3.png>
+<poly-big/31.png, id=154, 963.6pt x 602.25pt>
+File: poly-big/31.png Graphic file (type png)
+ <use poly-big/31.png> [27 <./cube-cutted/3.png (PNG copy)> <./poly-big/3.png (
+PNG copy)>]
+<poly-big/33.png, id=161, 963.6pt x 602.25pt>
+File: poly-big/33.png Graphic file (type png)
+ <use poly-big/33.png>
+<poly-big/34.png, id=163, 963.6pt x 602.25pt>
+File: poly-big/34.png Graphic file (type png)
+ <use poly-big/34.png> [28 <./poly-big/31.png (PNG copy)> <./poly-big/33.png (P
+NG copy)>]
+<poly-big/35.png, id=170, 963.6pt x 602.25pt>
+File: poly-big/35.png Graphic file (type png)
+ <use poly-big/35.png>
+<poly-big/3components.png, id=172, 963.6pt x 602.25pt>
+File: poly-big/3components.png Graphic file (type png)
+
+<use poly-big/3components.png> [29 <./poly-big/34.png (PNG copy)> <./poly-big/3
+5.png (PNG copy)>]
+Overfull \hbox (3.28664pt too wide) in paragraph at lines 1285--1285
+[]\T2A/cmr/bx/n/14.4 TODO: Мо-ди-фи-ка-ция ал-го-рит-ма для за-да-чи сли-я-ния 
+смеж-
+ []
+
+
+Overfull \hbox (9.22968pt too wide) in paragraph at lines 1288--1288
+[]\T2A/cmr/bx/n/17.28 Подвижка вер-ши-ны и даль-ней-шая пе-ре-строй-ка мно-
+ []
+
+[30 <./poly-big/3components.png (PNG copy)>] [31] [32] [33] [34] [35] [36]
+[37] [38]
+Underfull \hbox (badness 10000) in paragraph at lines 1788--1788
+[]\T2A/cmr/m/n/12 цикл
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1788--1788
+[]\T2A/cmr/m/n/12 цикл
+ []
+
+
+Underfull \hbox (badness 1303) in paragraph at lines 1831--1831
+[]$\OML/cmm/m/it/12 S[]$\T2A/cmr/m/n/12 , по-греш-но-сти по-па-да-
+ []
+
+[39] [40] [41] [42] (./project_report.aux) ) 
 Here is how much of TeX's memory you used:
- 3025 strings out of 494818
- 34017 string characters out of 1178666
- 103387 words of memory out of 3000000
- 6150 multiletter control sequences out of 15000+50000
- 18168 words of font info for 52 fonts, out of 3000000 for 9000
+ 3147 strings out of 494818
+ 36729 string characters out of 1178666
+ 107468 words of memory out of 3000000
+ 6248 multiletter control sequences out of 15000+50000
+ 19348 words of font info for 54 fonts, out of 3000000 for 9000
  212 hyphenation exceptions out of 8191
- 27i,8n,24p,1266b,273s stack positions out of 5000i,500n,10000p,200000b,50000s
- </home/iliya
-/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1440.600pk> </home/iliya/.texmf-var/f
-onts/pk/ljfour/lh/lh-t2a/larm1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfou
-r/lh/lh-t2a/labx1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/l
-abx1728.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/larm1440.600pk
-> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/larm2074.600pk></usr/share/
-texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-texli
-ve/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-texlive/fonts/ty
-pe1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/type1/public/a
-msfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/c
-mr12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb></us
-r/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
-mf-texlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on project_report-2.pdf (11 pages, 251636 bytes).
+ 27i,10n,24p,894b,275s stack positions out of 5000i,500n,10000p,200000b,50000s
+ </home/iliya/.texmf-var/fonts/pk/l
+jfour/lh/lh-t2a/latt1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t
+2a/lati1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1440.6
+00pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/larm1200.600pk> </home/
+iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1200.600pk> </home/iliya/.texmf-
+var/fonts/pk/ljfour/lh/lh-t2a/labx1728.600pk> </home/iliya/.texmf-var/fonts/pk/
+ljfour/lh/lh-t2a/larm1440.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-
+t2a/larm2074.600pk></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cme
+x10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi12.pfb></u
+sr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/tex
+mf-texlive/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/f
+onts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/type1/p
+ublic/amsfonts/cm/cmr6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfont
+s/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.p
+fb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/sha
+re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-tex
+live/fonts/type1/public/amsfonts/latxfont/lcircle1.pfb></usr/share/texmf-texliv
+e/fonts/type1/public/amsfonts/latxfont/line10.pfb></usr/share/texmf-texlive/fon
+ts/type1/public/amsfonts/latxfont/linew10.pfb>
+Output written on project_report.pdf (43 pages, 2266931 bytes).
 PDF statistics:
- 371 PDF objects out of 1000 (max. 8388607)
+ 634 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 45 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 232 words of extra memory for PDF output out of 10000 (max. 10000000)
 
