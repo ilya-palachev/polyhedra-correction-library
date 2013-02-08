@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  17 APR 2012 15:38
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.3.19)  4 MAY 2012 18:06
 entering extended mode
  %&-line parsing enabled.
 **project_report.tex
@@ -670,22 +670,22 @@ File: umsb.fd 2009/06/22 v3.00 AMS symbols B
 \openout3 = `project_report.toc'.
 
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 121--121
+Underfull \hbox (badness 10000) in paragraph at lines 125--125
 []\T2A/cmr/m/n/12 Время ска-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 121--121
+Underfull \hbox (badness 10000) in paragraph at lines 125--125
 \T2A/cmr/m/n/12 ни-ро-ва-ния,
  []
 
 
-Underfull \hbox (badness 2269) in paragraph at lines 121--121
+Underfull \hbox (badness 2269) in paragraph at lines 125--125
 []\T2A/cmr/m/n/12 Время сбор-
  []
 
 
-Underfull \hbox (badness 3701) in paragraph at lines 121--122
+Underfull \hbox (badness 3701) in paragraph at lines 125--127
 []\T2A/cmr/m/n/12 Полное вре-
  []
 
@@ -695,11 +695,8 @@ File: img/contour-1.jpg Graphic file (type jpg)
 <use img/contour-1.jpg> <img/contour-2.jpg, id=22, 505.89pt x 295.1025pt>
 File: img/contour-2.jpg Graphic file (type jpg)
 
-<use img/contour-2.jpg>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[4 <./img/contour-1.jpg>] [5 <./img/contour-2.jpg>] [6]
+<use img/contour-2.jpg> [4 <./img/contour-1.jpg>] [5 <./img/contour-2.jpg>]
+[6]
 <polyhedron-2010-11-25/example-37-249.png, id=42, 557.83406pt x 386.19281pt>
 File: polyhedron-2010-11-25/example-37-249.png Graphic file (type png)
 
@@ -708,281 +705,254 @@ File: polyhedron-2010-11-25/example-37-249.png Graphic file (type png)
 File: polyhedron-2010-11-25/example-0-14-250.png Graphic file (type png)
 
 <use polyhedron-2010-11-25/example-0-14-250.png>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
 <polyhedron-2010-11-25/example-3-13-248-252.png, id=46, 557.08125pt x 385.44pt>
 File: polyhedron-2010-11-25/example-3-13-248-252.png Graphic file (type png)
-<use polyhedron-2010-11-25/example-3-13-248-252.png>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[7 <./polyhedron-2010-11-25/example-37-249.png (PNG copy)>] [8 <./polyhedron-20
-10-11-25/example-0-14-250.png (PNG copy)> <./polyhedron-2010-11-25/example-3-13
--248-252.png (PNG copy)>] [9] [10]
-<img/pic-step-1.jpg, id=67, 462.22687pt x 239.39438pt>
+<use polyhedron-2010-11-25/example-3-13-248-252.png> [7] [8 <./polyhedron-2010-
+11-25/example-37-249.png (PNG copy)> <./polyhedron-2010-11-25/example-0-14-250.
+png (PNG copy)>] [9 <./polyhedron-2010-11-25/example-3-13-248-252.png (PNG copy
+)>] [10] <img/pic-step-1.jpg, id=66, 462.22687pt x 239.39438pt>
 File: img/pic-step-1.jpg Graphic file (type jpg)
 
 <use img/pic-step-1.jpg>
-<img/pic-step-2.jpg, id=69, 544.28343pt x 236.38312pt>
+<img/pic-step-2.jpg, id=68, 544.28343pt x 236.38312pt>
 File: img/pic-step-2.jpg Graphic file (type jpg)
 
-<use img/pic-step-2.jpg> [11 <./img/pic-step-1.jpg> <./img/pic-step-2.jpg>]
+<use img/pic-step-2.jpg> [11 <./img/pic-step-1.jpg>]
 <img/pic-step-3.jpg, id=76, 546.54187pt x 233.37187pt>
 File: img/pic-step-3.jpg Graphic file (type jpg)
 
-<use img/pic-step-3.jpg>
-LaTeX Font Info:    Try loading font information for T2A+cmtt on input line 527
+<use img/pic-step-3.jpg> [12 <./img/pic-step-2.jpg> <./img/pic-step-3.jpg>]
+LaTeX Font Info:    Try loading font information for T2A+cmtt on input line 573
 .
 
 (/usr/share/texmf-texlive/tex/latex/cyrillic/t2acmtt.fd
 File: t2acmtt.fd 2001/08/11 v1.0a Computer Modern Cyrillic font definitions
-) [12 <./img/pic-step-3.jpg>] [13] [14] [15] [16] [17] [18]
-Overfull \hbox (4.80963pt too wide) in paragraph at lines 854--854
-[]\T2A/cmr/bx/n/14.4 Рассечение мо-ди-фи-ци-ро-ван-но-го мно-го-гран-ни-ка плос
--ко-стью 
- []
-
-[19] <polyhedron-2010-11-25/join1.jpeg, id=107, 794.2172pt x 384.6872pt>
+) [13] [14] [15]
+[16] [17] [18] [19] [20]
+<polyhedron-2010-11-25/join1.jpeg, id=110, 794.2172pt x 384.6872pt>
 File: polyhedron-2010-11-25/join1.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join1.jpeg>
-<polyhedron-2010-11-25/join2.jpeg, id=108, 797.22844pt x 386.19281pt>
+<polyhedron-2010-11-25/join2.jpeg, id=111, 797.22844pt x 386.19281pt>
 File: polyhedron-2010-11-25/join2.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join2.jpeg>
-<polyhedron-2010-11-25/join3.jpeg, id=109, 797.22844pt x 386.19281pt>
+<polyhedron-2010-11-25/join3.jpeg, id=112, 797.22844pt x 386.19281pt>
 File: polyhedron-2010-11-25/join3.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join3.jpeg>
-<polyhedron-2010-11-25/join4.jpeg, id=110, 796.47563pt x 386.19281pt>
+<polyhedron-2010-11-25/join4.jpeg, id=113, 796.47563pt x 386.19281pt>
 File: polyhedron-2010-11-25/join4.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join4.jpeg>
-<polyhedron-2010-11-25/join5.jpeg, id=111, 797.22844pt x 386.94562pt>
+<polyhedron-2010-11-25/join5.jpeg, id=114, 797.22844pt x 386.94562pt>
 File: polyhedron-2010-11-25/join5.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join5.jpeg>
-<polyhedron-2010-11-25/join6.jpeg, id=112, 795.72281pt x 386.19281pt>
+<polyhedron-2010-11-25/join6.jpeg, id=115, 795.72281pt x 386.19281pt>
 File: polyhedron-2010-11-25/join6.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join6.jpeg>
-<polyhedron-2010-11-25/join7.jpeg, id=113, 797.98125pt x 386.94562pt>
+<polyhedron-2010-11-25/join7.jpeg, id=116, 797.98125pt x 386.94562pt>
 File: polyhedron-2010-11-25/join7.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join7.jpeg>
-<polyhedron-2010-11-25/join8.jpeg, id=114, 793.46437pt x 385.44pt>
+<polyhedron-2010-11-25/join8.jpeg, id=117, 793.46437pt x 385.44pt>
 File: polyhedron-2010-11-25/join8.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join8.jpeg>
-<polyhedron-2010-11-25/join9.jpeg, id=115, 793.46437pt x 385.44pt>
+<polyhedron-2010-11-25/join9.jpeg, id=118, 793.46437pt x 385.44pt>
 File: polyhedron-2010-11-25/join9.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join9.jpeg>
-<polyhedron-2010-11-25/join10.jpeg, id=116, 794.2172pt x 386.19281pt>
+<polyhedron-2010-11-25/join10.jpeg, id=119, 794.2172pt x 386.19281pt>
 File: polyhedron-2010-11-25/join10.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join10.jpeg>
-<polyhedron-2010-11-25/join11.jpeg, id=117, 795.72281pt x 385.44pt>
+<polyhedron-2010-11-25/join11.jpeg, id=120, 795.72281pt x 385.44pt>
 File: polyhedron-2010-11-25/join11.jpeg Graphic file (type jpg)
 
 <use polyhedron-2010-11-25/join11.jpeg>
-<polyhedron-2010-11-25/join12.jpeg, id=118, 796.47563pt x 386.94562pt>
+<polyhedron-2010-11-25/join12.jpeg, id=121, 796.47563pt x 386.94562pt>
 File: polyhedron-2010-11-25/join12.jpeg Graphic file (type jpg)
 
-<use polyhedron-2010-11-25/join12.jpeg> [20] [21 <./polyhedron-2010-11-25/join1
-.jpeg> <./polyhedron-2010-11-25/join2.jpeg>] [22 <./polyhedron-2010-11-25/join3
-.jpeg> <./polyhedron-2010-11-25/join4.jpeg>] [23 <./polyhedron-2010-11-25/join5
-.jpeg> <./polyhedron-2010-11-25/join6.jpeg>] [24 <./polyhedron-2010-11-25/join7
-.jpeg> <./polyhedron-2010-11-25/join8.jpeg>] [25 <./polyhedron-2010-11-25/join9
-.jpeg> <./polyhedron-2010-11-25/join10.jpeg>] [26 <./polyhedron-2010-11-25/join
-11.jpeg> <./polyhedron-2010-11-25/join12.jpeg>] [27] [28] [29] [30] [31]
-[32] [33] [34] [35]
-<cube-cutted/cube-cutted-1.png, id=172, 797.22844pt x 386.19281pt>
+<use polyhedron-2010-11-25/join12.jpeg> [21] [22 <./polyhedron-2010-11-25/join1
+.jpeg> <./polyhedron-2010-11-25/join2.jpeg>] [23 <./polyhedron-2010-11-25/join3
+.jpeg> <./polyhedron-2010-11-25/join4.jpeg>] [24 <./polyhedron-2010-11-25/join5
+.jpeg> <./polyhedron-2010-11-25/join6.jpeg>] [25 <./polyhedron-2010-11-25/join7
+.jpeg> <./polyhedron-2010-11-25/join8.jpeg>] [26 <./polyhedron-2010-11-25/join9
+.jpeg> <./polyhedron-2010-11-25/join10.jpeg>] [27 <./polyhedron-2010-11-25/join
+11.jpeg> <./polyhedron-2010-11-25/join12.jpeg>] [28] [29] [30] [31] [32]
+[33] [34] [35] [36] [37]
+<cube-cutted/cube-cutted-1.png, id=180, 797.22844pt x 386.19281pt>
 File: cube-cutted/cube-cutted-1.png Graphic file (type png)
 
 <use cube-cutted/cube-cutted-1.png>
-<cube-cutted/cube-cutted-2.png, id=173, 797.22844pt x 386.19281pt>
+<cube-cutted/cube-cutted-2.png, id=181, 797.22844pt x 386.19281pt>
 File: cube-cutted/cube-cutted-2.png Graphic file (type png)
 
 <use cube-cutted/cube-cutted-2.png>
-<cube-cutted/cube-cutted-3.png, id=174, 793.46437pt x 386.19281pt>
+<cube-cutted/cube-cutted-3.png, id=182, 793.46437pt x 386.19281pt>
 File: cube-cutted/cube-cutted-3.png Graphic file (type png)
 
-<use cube-cutted/cube-cutted-3.png> [36 <./cube-cutted/cube-cutted-1.png (PNG c
-opy)> <./cube-cutted/cube-cutted-2.png (PNG copy)>] [37 <./cube-cutted/cube-cut
-ted-3.png (PNG copy)>] <poly-big/3.png, id=182, 963.6pt x 602.25pt>
-File: poly-big/3.png Graphic file (type png)
+<use cube-cutted/cube-cutted-3.png> [38 <./cube-cutted/cube-cutted-1.png (PNG c
+opy)> <./cube-cutted/cube-cutted-2.png (PNG copy)>] [39 <./cube-cutted/cube-cut
+ted-3.png (PNG copy)>]
+<poly-big/intersect0.jpeg, id=189, 343.2825pt x 365.11406pt>
+File: poly-big/intersect0.jpeg Graphic file (type jpg)
 
-<use poly-big/3.png> <poly-big/31.png, id=184, 963.6pt x 602.25pt>
-File: poly-big/31.png Graphic file (type png)
+<use poly-big/intersect0.jpeg>
+<poly-big/intersect1.jpeg, id=190, 352.31625pt x 368.87813pt>
+File: poly-big/intersect1.jpeg Graphic file (type jpg)
 
-<use poly-big/31.png> <poly-big/33.png, id=186, 963.6pt x 602.25pt>
-File: poly-big/33.png Graphic file (type png)
+<use poly-big/intersect1.jpeg>
+<poly-big/intersect2.jpeg, id=191, 341.02406pt x 364.36125pt>
+File: poly-big/intersect2.jpeg Graphic file (type jpg)
 
-<use poly-big/33.png> <poly-big/34.png, id=188, 963.6pt x 602.25pt>
-File: poly-big/34.png Graphic file (type png)
+<use poly-big/intersect2.jpeg>
+<poly-big/intersect3.jpeg, id=192, 344.03531pt x 368.1253pt>
+File: poly-big/intersect3.jpeg Graphic file (type jpg)
 
-<use poly-big/34.png> <poly-big/35.png, id=190, 963.6pt x 602.25pt>
-File: poly-big/35.png Graphic file (type png)
+<use poly-big/intersect3.jpeg>
+<poly-big/intersect4.jpeg, id=193, 337.26pt x 362.10281pt>
+File: poly-big/intersect4.jpeg Graphic file (type jpg)
 
-<use poly-big/35.png> <poly-big/3components.png, id=192, 963.6pt x 602.25pt>
-File: poly-big/3components.png Graphic file (type png)
+<use poly-big/intersect4.jpeg> [40 <./poly-big/intersect0.jpeg>] [41 <./poly-bi
+g/intersect1.jpeg>] [42 <./poly-big/intersect2.jpeg>] [43 <./poly-big/intersect
+3.jpeg>] [44 <./poly-big/intersect4.jpeg>] [45]
+<img/alarm-device.jpeg, id=213, 369.63094pt x 562.35094pt>
+File: img/alarm-device.jpeg Graphic file (type jpg)
 
-<use poly-big/3components.png> [38] [39 <./poly-big/3.png (PNG copy)> <./poly-b
-ig/31.png (PNG copy)>] [40 <./poly-big/33.png (PNG copy)> <./poly-big/34.png (P
-NG copy)>] [41 <./poly-big/35.png (PNG copy)> <./poly-big/3components.png (PNG 
-copy)>]
-Overfull \hbox (4.09148pt too wide) in paragraph at lines 1647--1647
-[]\T2A/cmr/bx/n/14.4 Модификация ал-го-рит-ма для за-да-чи сли-я-ния смеж-ных г
-ра-
- []
+<use img/alarm-device.jpeg>
+<img/impossible.jpeg, id=214, 298.86656pt x 94.85437pt>
+File: img/impossible.jpeg Graphic file (type jpg)
 
-[42]
-Overfull \hbox (9.22968pt too wide) in paragraph at lines 1677--1677
-[]\T2A/cmr/bx/n/17.28 Подвижка вер-ши-ны и даль-ней-шая пе-ре-строй-ка мно-
- []
+<use img/impossible.jpeg> [46] [47 <./img/alarm-device.jpeg> <./img/impossible.
+jpeg>] [48]
+<img/ros-thomas-tetrahedron.jpeg, id=225, 676.77844pt x 350.81062pt>
+File: img/ros-thomas-tetrahedron.jpeg Graphic file (type jpg)
 
-[43] [44] [45] [46] [47] [48] [49] [50]
-Underfull \hbox (badness 10000) in paragraph at lines 2180--2180
+<use img/ros-thomas-tetrahedron.jpeg> [49 <./img/ros-thomas-tetrahedron.jpeg>]
+[50] <img/ros-thomas-two-corrections.jpeg, id=232, 283.0575pt x 147.55125pt>
+File: img/ros-thomas-two-corrections.jpeg Graphic file (type jpg)
+
+<use img/ros-thomas-two-corrections.jpeg> [51 <./img/ros-thomas-two-corrections
+.jpeg>] <img/ros-thomas-5.jpeg, id=236, 356.83313pt x 213.79875pt>
+File: img/ros-thomas-5.jpeg Graphic file (type jpg)
+
+<use img/ros-thomas-5.jpeg> [52] [53 <./img/ros-thomas-5.jpeg>] [54] [55]
+[56] [57] [58] [59] [60] [61]
+Underfull \hbox (badness 10000) in paragraph at lines 2597--2597
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2180--2180
+Underfull \hbox (badness 10000) in paragraph at lines 2597--2597
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 1303) in paragraph at lines 2222--2222
+Underfull \hbox (badness 1303) in paragraph at lines 2639--2639
 []$\OML/cmm/m/it/12 S[]$\T2A/cmr/m/n/12 , по-греш-но-сти по-па-да-
  []
 
-[51] [52]
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+[62] [63]
+Underfull \hbox (badness 10000) in paragraph at lines 2736--2736
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+Underfull \hbox (badness 10000) in paragraph at lines 2736--2736
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2352--2352
+Underfull \hbox (badness 10000) in paragraph at lines 2769--2769
 []\T2A/cmr/m/n/12 цикл
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2352--2352
+Underfull \hbox (badness 10000) in paragraph at lines 2769--2769
 []\T2A/cmr/m/n/12 цикл
  []
 
-[53] [54]
-Overfull \hbox (6.13187pt too wide) in paragraph at lines 2524--2524
+[64] [65]
+Overfull \hbox (6.13187pt too wide) in paragraph at lines 2941--2941
 []\T2A/cmr/m/n/12 Номер
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2524--2524
+Underfull \hbox (badness 10000) in paragraph at lines 2941--2941
 []$\OML/cmm/m/it/12 S[]$\T2A/cmr/m/n/12 , по-греш-но-
  []
 
 
-Underfull \hbox (badness 4647) in paragraph at lines 2524--2524
+Underfull \hbox (badness 4647) in paragraph at lines 2941--2941
 \T2A/cmr/m/n/12 сти по-па-да-ний
  []
 
 
-Underfull \hbox (badness 6078) in paragraph at lines 2525--2526
+Underfull \hbox (badness 6078) in paragraph at lines 2942--2943
 []\T2A/cmr/m/n/12 Число са-мо-пе-
  []
 
-[55] <img/consections-1.jpeg, id=257, 566.115pt x 395.22656pt>
+[66] <img/consections-1.jpeg, id=285, 566.115pt x 395.22656pt>
 File: img/consections-1.jpeg Graphic file (type jpg)
 
 <use img/consections-1.jpeg>
-<img/consections-2.jpeg, id=259, 567.62062pt x 394.47375pt>
+<img/consections-2.jpeg, id=287, 567.62062pt x 394.47375pt>
 File: img/consections-2.jpeg Graphic file (type jpg)
 
 <use img/consections-2.jpeg>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<img/consections-3.jpeg, id=261, 565.36218pt x 391.4625pt>
+<img/consections-3.jpeg, id=289, 565.36218pt x 391.4625pt>
 File: img/consections-3.jpeg Graphic file (type jpg)
 
 <use img/consections-3.jpeg>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<img/consections-4.jpeg, id=263, 565.36218pt x 392.21532pt>
+<img/consections-4.jpeg, id=291, 565.36218pt x 392.21532pt>
 File: img/consections-4.jpeg Graphic file (type jpg)
 
 <use img/consections-4.jpeg>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<img/consections-5.jpeg, id=265, 568.37344pt x 394.47375pt>
+<img/consections-5.jpeg, id=293, 568.37344pt x 394.47375pt>
 File: img/consections-5.jpeg Graphic file (type jpg)
 
-<use img/consections-5.jpeg>
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[56 <./img/consections-1.jpeg>]
-Overfull \vbox (44.34885pt too high) has occurred while \output is active []
-
-
-[57 <./img/consections-2.jpeg> <./img/consections-3.jpeg>] [58 <./img/consectio
-ns-4.jpeg> <./img/consections-5.jpeg>]
-Underfull \hbox (badness 1365) in paragraph at lines 2622--2624
-[]\T2A/cmr/m/n/12 OctoNus Software Ltd, До-ку-мен-та-ция про-грам-мы Helium Rou
-gh and Pacor
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2626--2628
-[]\T2A/cmr/m/n/12 OctoNus Software Ltd, Helium Polish - system
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2626--2628
-\T2A/cmr/m/n/12 for scanning of diamonds, до-ку-мен-та-ция, стр. 42
- []
-
-[59] (./project_report.aux) ) 
+<use img/consections-5.jpeg> [67] [68 <./img/consections-1.jpeg> <./img/consect
+ions-2.jpeg>] [69 <./img/consections-3.jpeg> <./img/consections-4.jpeg>]
+<img/region.jpg, id=308, 277.78781pt x 390.70969pt>
+File: img/region.jpg Graphic file (type jpg)
+ <use img/region.jpg>
+[70] [71 <./img/consections-5.jpeg> <./img/region.jpg>] [72] [73] [74] [75]
+(./project_report.aux) ) 
 Here is how much of TeX's memory you used:
- 3615 strings out of 494818
- 45039 string characters out of 1178666
- 116207 words of memory out of 3000000
- 6693 multiletter control sequences out of 15000+50000
+ 3671 strings out of 494818
+ 46261 string characters out of 1178666
+ 116382 words of memory out of 3000000
+ 6744 multiletter control sequences out of 15000+50000
  15964 words of font info for 42 fonts, out of 3000000 for 9000
  212 hyphenation exceptions out of 8191
- 27i,10n,24p,4061b,297s stack positions out of 5000i,500n,10000p,200000b,50000s
- </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a
-/latt1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/lati1200.600
-pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1200.600pk> </home/il
-iya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1728.600pk> </home/iliya/.texmf-va
-r/fonts/pk/ljfour/lh/lh-t2a/labx1440.600pk> </home/iliya/.texmf-var/fonts/pk/lj
-four/lh/lh-t2a/larm1440.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2
-a/labx2074.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/larm1200.60
-0pk></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/s
-hare/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-
-texlive/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/font
-s/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/publ
-ic/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/
-cm/cmr6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb><
-/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/
-texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texliv
-e/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type
-1/public/amsfonts/latxfont/lcircle1.pfb></usr/share/texmf-texlive/fonts/type1/p
-ublic/amsfonts/latxfont/line10.pfb></usr/share/texmf-texlive/fonts/type1/public
-/amsfonts/latxfont/linew10.pfb>
-Output written on project_report.pdf (60 pages, 2802079 bytes).
+ 27i,10n,24p,4061b,278s stack positions out of 5000i,500n,10000p,200000b,50000s
+ </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/latt
+1200.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/lati1200.600pk> <
+/home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1200.600pk> </home/iliya/.
+texmf-var/fonts/pk/ljfour/lh/lh-t2a/labx1728.600pk> </home/iliya/.texmf-var/fon
+ts/pk/ljfour/lh/lh-t2a/larm1440.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/
+lh/lh-t2a/labx2074.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/lab
+x1440.600pk> </home/iliya/.texmf-var/fonts/pk/ljfour/lh/lh-t2a/larm1200.600pk><
+/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/
+texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-texli
+ve/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-texlive/fonts/typ
+e1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-texlive/fonts/type1/public/am
+sfonts/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cm
+r6.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/
+share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf
+-texlive/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-texlive/fon
+ts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/pub
+lic/amsfonts/latxfont/lcircle1.pfb></usr/share/texmf-texlive/fonts/type1/public
+/amsfonts/latxfont/line10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
+onts/latxfont/linew10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
+/symbols/msbm10.pfb>
+Output written on project_report.pdf (76 pages, 2113169 bytes).
 PDF statistics:
- 718 PDF objects out of 1000 (max. 8388607)
+ 851 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 285 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 274 words of extra memory for PDF output out of 10000 (max. 10000000)
 
