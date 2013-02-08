@@ -510,45 +510,51 @@ $A_{i + 1}$ - следующая перед точкой $A_{i}$ в контур
 \begin{flushleft}
   \begin{figure}[h]
     \includegraphics[clip, width=13cm]{img/pic-step-3.jpg}
-    \caption{Перемещения точки $A_{i}$}\label{pic-step-3}
+    \caption{Перемещения точки $A_{i}$. TODO: $v_{-1}, v_{+1}$.}\label{pic-step-3}
   \end{figure}
 \end{flushleft}
 \begin{flushleft}
-  В таком случае мы заменим $A_{i}$ на $v_{2}$, а точку $A_{i + 1}$ вовсе выкинем из многогранника, а во
-всех позициях, где она фигурировала, запишем точку $A_{i} = v{2}$. Таким образом в контуре уменьшится
+  В таком случае мы заменим $A_{i}$ на $v_{+1}$, а точку $A_{i + 1}$ вовсе выкинем из многогранника, а во
+всех позициях, где она фигурировала, запишем точку $A_{i} = v{+1}$. Таким образом в контуре уменьшится
 количество точек на 1.
 \end{flushleft}
 \begin{flushleft}
  Теперь мы можем описать процесс вычисления перемещения точки. Через $n$ обозначим номаль к главной грани,
-то есть грани построенного контура\\
+то есть грани построенного контура.
+\end{flushleft}
+\begin{flushleft}
 НАЙТИ\_ПЕРЕМЕЩЕНИЕ\_ТОЧКИ $A_{i}$\\
 \verb"{"\\
-\quadЕсли ($f_{-2} \parallel f_{+1}$)\\
-\quad\quad$v1 = \pi \cap f_{-1} \cap f_{+1}$\\
-\quadИначе\\
+\quad Если ($\pi_{-2} \parallel \pi_{+1}$)\\
 \quad\verb"{"\\
-\quad\quad$v1 = f_{-2} \cap f_{-1} \cap f_{+1}$\\
-\quad\quadЕсли ($\pi(v_{1}) > 0$)\\
-\quad\quad\verb"{"\\
-\quad\quad\quad$v_{1} = \pi \cap f_{-1} \cap f_{+1}$\\
-\quad\quad\verb"}"\\
-\quad\verb"}"\\
-\quad$d_{1} = (v_{1} - A_{i}, n)$\\
-
-\quadЕсли ($f_{-1} \parallel f_{+2}$)\\
-\quad\quad$v2 = \pi \cap f_{-1} \cap f_{+1}$\\
-\quadИначе\\
+\quad\quad $v_{-1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\verb"}" \\
+\quad Иначе \\
 \quad\verb"{"\\
-\quad\quad$v2 = f_{-1} \cap f_{+1} \cap f_{+2}$\\
-\quad\quadЕсли ($\pi(v_{2}) > 0$)\\
-\quad\quad\verb"{"\\
-\quad\quad\quad$v_{1} = \pi \cap f_{-1} \cap f_{+1}$\\
-\quad\quad\verb"}"\\
-\quad\verb"}"\\
-\quad$d_{2} = (v_{2} - A_{i}, n)$\\
+\quad\quad $v_{-1} = \pi_{-2} \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad Если ($\pi(v_{-1}) > 0$)\\
+\quad\quad \verb"{"\\
+\quad\quad\quad $v_{-1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad\verb"}" \\
+\quad\verb"}" \\
+\quad $d_{-1} = (v_{-1} - A_{i}, n)$\\
 
-\quad$d = min\{d_{1}, d_{2}\}$\\
-\quadВЕРНУТЬ $d$\\
+\quad Если ($\pi_{-1} \parallel \pi_{+2}$)\\
+\quad \verb"{" \\
+\quad\quad $v_{+1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad \verb"}"\\
+\quad Иначе \\
+\quad \verb"{" \\
+\quad\quad $v_{+1} = \pi_{-1} \cap \pi_{+1} \cap \pi_{+2}$\\
+\quad\quad Если ($\pi(v_{+1}) > 0$)\\
+\quad\quad \verb"{"\\
+\quad\quad\quad $v_{+1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad \verb"}"\\
+\quad \verb"}"\\
+\quad $d_{+1} = (v_{+1} - A_{i}, n)$\\
+
+\quad $d = min\{d_{-1}, d_{+1}\}$\\
+\quad ВЕРНУТЬ $d$\\
 \verb"}"\\
 \end{flushleft}
 \begin{flushleft}
@@ -565,8 +571,8 @@ $A_{i + 1}$ - следующая перед точкой $A_{i}$ в контур
 \subsubsection{Перемещение точки}
 \begin{flushleft}
  Итак, точка, которую нужно перемещать, найдена. Опишем процесс перемещения. Во-первых, повторяется 
-вычисление перемещений $d_{1}$ и $d_{2}$. Для определенности будем считать, что $d_{1} < d_{2}$, то
-есть движение определяет левый сосед вершины.
+вычисление перемещений $d_{-1}$ и $d_{+1}$. В зависимости от знака этих величин и того, какая из них 
+меньше, движение определяет либо левый, либо правый сосед вершины. Алгоритм распадается на два эти случая.
 \end{flushleft}
 \begin{flushleft}
   Принципиальным здесь является следующее замечание. Если $\pi_{-2} \parallel \pi_{+1}$ или плоскости
@@ -576,48 +582,225 @@ $\pi$. В этом случае не нужно объединять эти то
 топологическую структуру многограника как есть.
 \end{flushleft}
 \begin{flushleft}
-  Содержательную часть алгоритма составляет случай, когда точки $A_{i -1 }$ и $A_{i}$ сливаются ниже 
-плоскости $\pi$. Его мы и опишем.
+  Далее приведем текст алгоритма:
 \end{flushleft}
 \begin{flushleft}
  ПОДНЯТЬ\_ВЕРШИНУ $A_{i}$\\
 \verb"{"\\
-\quad\ldots\\
-
-\quadЕсли (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad//Сначала найдем те же величины, что и в функции нахождения перемещения точки, дополнительно определяя
+переменные $ifJoin_{-1}$ и $ifJoin_{+1}$, которые показывают, происходит ли или нет слияние вершин (см. далее).\\
+\quad Если ($\pi_{-2} \parallel \pi_{+1}$)\\
 \quad\verb"{"\\
-\quad\quadСоздать новую вершину с номером $N$\\
-\quad\quad$vertex[N] = v_{1}$\\
-\quad\quadДобавить точку $v_{1}$ в грань $f_{-2}$ после точки $A_{i - 1}$\\
-\quad\quadДобавить точку $v_{1}$ в грань $f_{-1}$ после точки $A_{i}$\\
-\quad\quadДобавить точку $v_{1}$ в грань $f_{+1}$ до точки $A_{i}$\\
-\quad\quadУдалить точку $A_{i}$ из грани $f$\\
-\quad\quadЗаменить точку $A_{i - 1}$ на точку $v_{1}$ в грани $f$\\
-\quad\verb"}"\\
-
-\quadИначе - Если (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad $v_{-1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad $v_{-2} = \pi \cap \pi_{-2} \cap \pi_{-1}$\\
+\quad\quad $ifJoin_{-1} = FALSE$\\
+\quad\verb"}" \\
+\quad Иначе \\
 \quad\verb"{"\\
-\quad\quad$A_{i - 1} := v_{1}$\\
-\quad\quadДобавить точку $A_{i - 1}$ в грань $f_{+1}$ до точки $A_{i}$\\
-\quad\quadУдалить точку $A_{i}$ из грани $f$\\
-\quad\verb"}"\\
+\quad\quad $v_{-1} = \pi_{-2} \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad $ifJoin_{-1} = TRUE$\\
+\quad\quad Если ($\pi(v_{-1}) > 0$)\\
+\quad\quad \verb"{"\\
+\quad\quad\quad $v_{-1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad\quad $v_{-2} = \pi \cap \pi_{-2} \cap \pi_{-1}$\\
+\quad\quad\quad $ifJoin_{-1} = FALSE$\\
+\quad\quad\verb"}" \\
+\quad\verb"}" \\
+\quad $d_{-1} = (v_{-1} - A_{i}, n)$\\
 
-\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad Если ($\pi_{-1} \parallel \pi_{+2}$)\\
+\quad \verb"{" \\
+\quad\quad $v_{+1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad $v_{+2} = \pi \cap \pi_{+1} \cap \pi_{+2}$\\
+\quad\quad $ifJoin_{+1} = FALSE$\\
+\quad \verb"}"\\
+\quad Иначе \\
+\quad \verb"{" \\
+\quad\quad $v_{+1} = \pi_{-1} \cap \pi_{+1} \cap \pi_{+2}$\\
+\quad\quad $ifJoin_{+1} = TRUE$\\
+\quad\quad Если ($\pi(v_{+1}) > 0$)\\
+\quad\quad \verb"{"\\
+\quad\quad\quad $v_{+1} = \pi \cap \pi_{-1} \cap \pi_{+1}$\\
+\quad\quad\quad $v_{+2} = \pi \cap \pi_{+1} \cap \pi_{+2}$\\
+\quad\quad\quad $ifJoin_{+1} = FALSE$\\
+\quad\quad \verb"}"\\
+\quad \verb"}"\\
+\quad $d_{+1} = (v_{+1} - A_{i}, n)$\\
+
+\quadЕсли (($d_{-1} \le d_{+1}$ и $d_{-1} > 0$) или ($d_{-1} > 0$ и $d_{+1} \le 0$))\\
 \quad\verb"{"\\
-\quad\quad$A_{i} := v_{1}$\\
-\quad\quadДобавить точку $A_{i}$ в грань $f_{-2}$ после точки $A_{i - 1}$\\
-\quad\quadУдалить точку $A_{i - 1}$ из грани $f$\\
-\quad\verb"}"\\
+\quad\quad//Движение определяет левый сосед вершины\\
+\quad\quadЕсли($ifJoin_{-1}$)\\
+\quad\quad\verb"{"\\
+\quad\quad\quad//Происходит слияние вершин\\
 
-\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quadЕсли (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quad$vertex[N] = v_{-1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{-2}$ после точки $A_{i - 1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{+1}$ до точки $A_{i}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f$\\
+\quad\quad\quad\quadЗаменить точку $A_{i - 1}$ в грани $f$ на точку $v_{-1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i - 1} := v_{-1}$\\
+\quad\quad\quad\quadДобавить точку $A_{i - 1}$ в грань $f_{+1}$ до точки $A_{i}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i} := v_{-1}$\\
+\quad\quad\quad\quadДобавить точку $A_{i}$ в грань $f_{-2}$ после точки $A_{i - 1}$\\
+\quad\quad\quad\quadУдалить точку $A_{i - 1}$ из грани $f$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i - 1} := v_{-1}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f_{-1}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i}$ в грани $f_{+1}$ на точку $A_{i - 1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\verb"}"\\
+\quad\quadИначе\\
+\quad\quad\verb"{"\\
+\quad\quad\quad//Не происходит слияние вершин\\
+
+\quad\quad\quadЕсли (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N + 1$\\
+\quad\quad\quad\quad$vertex[N] = v_{-2}$\\
+\quad\quad\quad\quad$vertex[N + 1] = v_{-1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-2}$ в грань $f_{-2}$ после точки $A_{i - 1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{-2}$ в грань $f_{-1}$ после точки $v_{-1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{+1}$ до точки $A_{i}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i - 1}$ в грани $f$ на точку $v_{-2}$ \\
+\quad\quad\quad\quadЗаменить точку $A_{i}$ в грани $f$ на точку $v_{-1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quad$vertex[N] = v_{-1}$\\
+\quad\quad\quad\quad$A_{i - 1} := v_{-2}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{-1}$ в грань $f_{+1}$ до точки $A_{i}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i}$ в грани $f$ на точку $v_{-1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quad$vertex[N] = v_{-2}$\\
+\quad\quad\quad\quad$A_{i} := v_{-1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-2}$ в грань $f_{-2}$ после точки $A_{i - 1}$\\
+\quad\quad\quad\quadДобавить точку $v_{-2}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i - 1}$ в грани $f$ на точку $v_{-2}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i - 1} := v_{-2}$\\
+\quad\quad\quad\quad$A_{i} := v_{-1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\verb"}"\\
+\quad\verb"}"\\
+\quadИначе\\
 \quad\verb"{"\\
-\quad\quad$A_{i - 1} := v_{1}$\\
-\quad\quadУдалить точку $A_{i}$ из грани $f$\\
-\quad\quadУдалить точку $A_{i}$ из грани $f_{-1}$\\
-\quad\quadЗаменить точку $A_{i}$ на точку $A_{i - 1}$ в грани $f_{+1}$\\
-\quad\verb"}"\\
+\quad\quad//Движение определяет правый сосед вершины\\
+\quad\quadЕсли($ifJoin_{+1}$)\\
+\quad\quad\verb"{"\\
+\quad\quad\quad//Происходит слияние вершин\\
 
-\quad\ldots\\
+\quad\quad\quadЕсли (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quad$vertex[N] = v_{+1}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{+1}$ до точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{+2}$ до точки $A_{i + 1}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f$\\
+\quad\quad\quad\quadЗаменить точку $A_{i + 1}$ в грани $f$ на точку $A_{i + 1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i + 1} := v_{+1}$\\
+\quad\quad\quad\quadДобавить точку $A_{i + 1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i} := v_{+1}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{+2}$ до точки $A_{i + 1}$\\
+\quad\quad\quad\quadУдалить точку $A_{i + 1}$ из грани $f$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i + 1} := v_{+1}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i}$ в грани $f_{-1}$ на точку $A_{i + 1}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f_{+1}$\\
+\quad\quad\quad\quadУдалить точку $A_{i}$ из грани $f$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\verb"}"\\
+\quad\quadИначе\\
+\quad\quad\verb"{"\\
+\quad\quad\quad//Не происходит слияние вершин\\
+
+\quad\quad\quadЕсли (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N + 1$\\
+\quad\quad\quad\quad$vertex[N] = v_{+1}$\\
+\quad\quad\quad\quad$vertex[N + 1] = v_{+2}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{+2}$ в грань $f_{+1}$ после точки $A_{i + 1}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{+1}$ после точки $v_{+2}$\\
+\quad\quad\quad\quadДобавить точку $v_{+2}$ в грань $f_{+2}$ до точки $A_{i + 1}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i}$ в грани $f$ на точку $v_{+1}$ \\
+\quad\quad\quad\quadЗаменить точку $A_{i + 1}$ в грани $f$ на точку $v_{+2}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) > 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quad$vertex[N] = v_{+1}$\\
+\quad\quad\quad\quad$A_{i + 1} := v_{+2}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{-1}$ после точки $A_{i}$\\
+\quad\quad\quad\quadДобавить точку $v_{+1}$ в грань $f_{+1}$ после точки $A_{i + 1}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i}$ в грани $f$ на точку $v_{+1}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) > 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quadСоздать новую вершину с номером $N$\\
+\quad\quad\quad\quad$vertex[N] = v_{+2}$\\
+\quad\quad\quad\quad$A_{i} := v_{+1}$\\
+\quad\quad\quad\quadДобавить точку $v_{+2}$ в грань $f_{+1}$ после точки $A_{i + 1}$\\
+\quad\quad\quad\quadДобавить точку $v_{+2}$ в грань $f_{+2}$ до точки $A_{i + 1}$\\
+\quad\quad\quad\quadЗаменить точку $A_{i + 1}$ в грани $f$ на точку $v_{+2}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\quadИначе - Если (СТЕПЕНЬ($A_{i}$) = 3 и СТЕПЕНЬ($A_{i - 1}$) = 3)\\
+\quad\quad\quad\verb"{"\\
+\quad\quad\quad\quad$A_{i} := v_{+1}$\\
+\quad\quad\quad\quad$A_{i + 1} := v_{+2}$\\
+\quad\quad\quad\verb"}"\\
+
+\quad\quad\verb"}"\\
+\quad\verb"}"\\
 \verb"}"\\
 
 \end{flushleft}
@@ -625,7 +808,7 @@ $\pi$. В этом случае не нужно объединять эти то
 \subsection{Утверждение о завершении алгоритма достраивания многогранника}
 
 \begin{flushleft}
- Какой смысл есть в том, что на каждом шаге данного алгоритма происходит поднятие именно той точки,
+ \quadКакой смысл есть в том, что на каждом шаге данного алгоритма происходит поднятие именно той точки,
 перемещение которой минимально? Нельзя ли просто по очереди поднимать вершины контура? Данное решение
 было обусловлено прежде всего тем, чтобы исключить возможность образования самопересечений, которые,
 как показала практика, могут образовываться при поднятии тех точек, у которых перемещение не минимально.
@@ -2105,14 +2288,17 @@ $$
 
 \begin{flushleft}
 $K = 100$\\
-$\varepsilon = 10^{-7}$\\
-Цикл. Делать 10 раз:\\
+$\varepsilon = $погрешности попадания вершин в плоскости\\
+%$\varepsilon = 10^{-7}$\\
+%Цикл. Делать 10 раз:\\
+Пока ($\varepsilon > 10^{-10}$)\\
 \verb"{"\\
 \quadВычислить новые плоскости методом наименьших квадратов\\
 \quadВычислить координаты вершин, минимизирующих функционал со штрафом, равным $K$\\
-\quadВычислить погрешность попадания вершин в плоскости\\
+%\quadВычислить погрешность попадания вершин в плоскости\\
 \quadУвеличиваем $K$ в 2 раза\\
-\quadУменьшаем $\varepsilon$ в 2 раза\\
+\quad$\varepsilon = $погрешности попадания вершин в плоскости\\
+%\quadУменьшаем $\varepsilon$ в 2 раза\\
 \verb"}"\\
 \end{flushleft}
 
