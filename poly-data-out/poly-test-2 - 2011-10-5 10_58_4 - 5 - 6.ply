@@ -1,0 +1,27 @@
+ply
+format ascii 1.0
+comment converted from made-by-Polyhedron_join_facets_2
+element vertex 8
+property float x
+property float y
+property float z
+element face 6
+property list uchar uint vertex_indices
+property uchar red
+property uchar green
+property uchar blue
+end_header
+2000 -2000 -2000
+-2000 -2000 -2000
+-2000 2000 -2000
+2000 2000 -2000
+2000 -2000 2333
+-2000 -2000 2333
+-2000 2000 2333
+2000 2000 2333
+4 0 1 2 3 100 100 100
+4 4 5 6 7 -1 0 0
+4 4 5 1 0 100 0 0
+4 7 4 0 3 100 0 0
+4 6 7 3 2 100 0 0
+4 5 6 2 1 100 0 0
