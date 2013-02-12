@@ -95,6 +95,86 @@ int Polyhedron::corpol_test_create_contours(
         }
         printf("\n");
 #endif
+        ///////////////////////////////////////////////////////////////
+        // Some facets can be orthogonal to the plane of projection. //
+        // In this case we must eliminate all invisible edges        //
+        // from the buffer.                                          //
+        ///////////////////////////////////////////////////////////////
+
+        for (int ifacet = 0; ifacet < numf; ++ifacet)
+        {
+        	Plane plane = facet[ifacet].plane;
+        	if (fabs(plane.norm * nu) >= EPS_COLLINEARITY)
+        	{
+        		// We are processing only facets which are orthogonal
+        		// to the plane of projection
+        		continue;
+        	}
+
+        	int nv = facet[ifacet].nv;
+        	int* index = facet[ifacet].index;
+
+        	// 1. Find the closest vertex to the plane projection.
+        	int ivertexMax = -1;
+        	double scalarMax = 0.;
+        	for (int ivertex = 0; ivertex < nv; ++ivertex)
+        	{
+        		int v0 = index[ivertex];
+
+        		double scalar = nu * vertex[v0];
+        		if (ivertexMax == -1 || scalarMax < scalar)
+        		{
+        			ivertexMax = ivertex;
+        			scalarMax = scalar;
+        		}
+        	}
+
+        	int v0Max = index[scalarMax];
+        	int v1Max = index[scalarMax + 1];
+        	Vector3d vector0Max = planeOfProjection.project(vertex[v0Max]);
+        	Vector3d vector1Max = planeOfProjection.project(vertex[v1Max]);
+        	Vector3d mainEdge = vector1Max - vector0Max;
+
+        	// 2. Go around the facet, beginning from the closest vertex.
+        	for (int ivertex = 0; ivertex < nv; ++ivertex)
+        	{
+        		int v0 = index[ivertex];
+        		int v1 = index[ivertex + 1];
+        		Vector3d curEdge = vertex[v1] - vertex[v0];
+
+        		// 3. In case of non-positive scalar product
+        		// -- eliminate the edge from the buffer
+        		if (curEdge * mainEdge <= 0)
+        		{
+        			int v0elim = v0;
+        			int v1elim = v1;
+        			int iedgeFound = -1;
+        			for (int i = 0; i < ne; ++i)
+        			{
+        				v0 = edges[buf[i]].v0;
+        				v1 = edges[buf[i]].v1;
+        				if ( (v0 == v0elim && v1 == v1elim) ||
+        						(v0 == v1elim && v1 == v0elim) )
+        				{
+        					iedgeFound = i;
+        					break;
+        				}
+        			}
+
+        			if (iedgeFound == -1)
+        			{
+        				printf("%s: iedgeFound not found\n", __func__);
+        				return -1;
+        			}
+
+        			for (int i = iedgeFound; i < ne - 1; ++i)
+        			{
+        				buf[i] = buf[i - 1];
+        			}
+        			--ne;
+        		}
+        	}
+        }
         
         int curEdge = buf[0];
         int firstEdge = curEdge;
@@ -118,7 +198,7 @@ int Polyhedron::corpol_test_create_contours(
                 else
                 {
                     curEdge = buf[i];
-                    buf2[iedge] = curEdge;
+                    buf2[iedge++] = curEdge;
                     
                     if (curV0 == curV)
                     {
@@ -140,15 +220,15 @@ int Polyhedron::corpol_test_create_contours(
                         edges[curEdge].v0, edges[curEdge].v1);
                 break;
             }
-            ++iedge;
             
         } while (curEdge != firstEdge);
         
+
 #ifndef NDEBUG
-        printf("\t Printing buf :");
-        for (int i = 0; i < ne; ++i)
+        printf("\t Printing buf2 :");
+        for (int i = 0; i < iedge; ++i)
         {
-            int curEdge = buf[i];
+            int curEdge = buf2[i];
             int curV0 = edges[curEdge].v0;
             int curV1 = edges[curEdge].v1;
             printf ("%d(%d, %d) ", curEdge, curV0, curV1);
