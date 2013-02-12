@@ -59,7 +59,6 @@ void Gauss_test(int n) {
 
 inline double f(int n, int i, int j)
 {
-	n=n;
 //Variant 1
 //	if(i>j)
 //		return n-i;

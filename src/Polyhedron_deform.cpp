@@ -282,7 +282,6 @@ void Polyhedron::f(int n, double* X, double* fx, int id, int* sum) {
     Plane plane;
     
     k = 0;
-    n = n;
     
 //    printf("test : ");
 //    for (i = 0; i < numf; ++i) {

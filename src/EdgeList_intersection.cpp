@@ -185,8 +185,6 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
                     incr = -1;
                 else if (id1 == id0 - 1 || (id0 == 0 && id1 == nv - 1))
                     incr = 1;
-                id0 = id0;
-                v0 = v0;
                 id1 = (id0 + incr + nv) % nv;
                 v1 = poly->facet[next_f].index[id1];
             } else if (sign0 <= 0 && sign1 <= 0 && (next_d == -1 || next_d == 1)) {
@@ -197,8 +195,6 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
                     id1 = (id0 + incr + nv) % nv;
                     v1 = poly->facet[next_f].index[id1];
                 } else {
-                    id0 = id0;
-                    v0 = v0;
                     id1 = (id0 + incr + nv) % nv;
                     v1 = poly->facet[next_f].index[id1];
                 }
@@ -215,7 +211,6 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
                 poly->facet[next_f].find_next_facet(incr == 1 ? v0 : v1, next_f);
                 next_d = 0;
             } else {
-                next_f = next_f;
                 next_d = incr;
             }
 

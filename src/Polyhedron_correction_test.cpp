@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Polyhedron.h"
 
 int Polyhedron::corpol_test(int ncont) 

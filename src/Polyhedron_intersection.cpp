@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "Polyhedron.h"
 
 void my_fprint_Vector3d(Vector3d& v, FILE* file) {
@@ -128,8 +129,6 @@ void Polyhedron::intersect(Plane iplane) {
             if (edge_list[fid_next].get_num() < 1) {
                 if (fid_next != fid_curr)
                     drctn = 0;
-                else
-                    drctn = drctn;
             }
 
 
