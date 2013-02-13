@@ -46,6 +46,7 @@ int Polyhedron::corpol_test_create_contours(
         int ncont, SContour* contours) 
 {
     int* buf = new int[nume];
+    int* buf1 = new int[nume];
     int* buf2 = new int[nume];
     
     for (int icont = 0; icont < ncont; ++icont)
@@ -61,22 +62,22 @@ int Polyhedron::corpol_test_create_contours(
         
         for (int iedge = 0; iedge < nume; ++iedge)
         {
-#ifndef NDEBUG
-        	printf("%s : processing edge # %d\n", __func__, iedge);
-        	edges[iedge].my_fprint(stdout);
-#endif
+//#ifndef NDEBUG
+//        	printf("%s : processing edge # %d\n", __func__, iedge);
+//        	edges[iedge].my_fprint(stdout);
+//#endif
             Plane pi0 = facet[edges[iedge].f0].plane;
             Plane pi1 = facet[edges[iedge].f1].plane;
             double sign0 = pi0.norm * nu;
             double sign1 = pi1.norm * nu;
-#ifndef NDEBUG
-            printf ("pi0: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", pi0.norm.x, pi0.norm.y, pi0.norm.z, pi0.dist);
-            printf ("pi1: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", pi1.norm.x, pi1.norm.y, pi1.norm.z, pi1.dist);
-            printf ("prj: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", planeOfProjection.norm.x,
-            		planeOfProjection.norm.y, planeOfProjection.norm.z, planeOfProjection.dist);
-            printf("sign0 = %lf\n", sign0);
-            printf("sign1 = %lf\n", sign1);
-#endif
+//#ifndef NDEBUG
+//            printf ("pi0: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", pi0.norm.x, pi0.norm.y, pi0.norm.z, pi0.dist);
+//            printf ("pi1: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", pi1.norm.x, pi1.norm.y, pi1.norm.z, pi1.dist);
+//            printf ("prj: (%lf) x  +  (%lf) y  +  (%lf) z  +  (%lf)  =  0\n", planeOfProjection.norm.x,
+//            		planeOfProjection.norm.y, planeOfProjection.norm.z, planeOfProjection.dist);
+//            printf("sign0 = %lf\n", sign0);
+//            printf("sign1 = %lf\n", sign1);
+//#endif
             if (sign0 * sign1 <= 0)
             {
                 buf[ne] = iedge;
@@ -95,8 +96,130 @@ int Polyhedron::corpol_test_create_contours(
         }
         printf("\n");
 #endif
+        ///////////////////////////////////////////////////////////////
+        // Some facets can be orthogonal to the plane of projection. //
+        // In this case we must eliminate all invisible edges        //
+        // from the buffer.                                          //
+        ///////////////////////////////////////////////////////////////
+
+        bool* ifEdgeIsVisible = new bool[ne];
+        for (int i = 0; i < ne; ++i)
+        {
+        	ifEdgeIsVisible[i] = true;
+        }
+
+        for (int ifacet = 0; ifacet < numf; ++ifacet)
+        {
+        	Plane plane = facet[ifacet].plane;
+        	if (fabs(plane.norm * nu) >= EPS_COLLINEARITY)
+        	{
+        		// We are processing only facets which are orthogonal
+        		// to the plane of projection
+        		continue;
+        	}
+#ifndef NDEBUG
+        	printf("Facet %d is orthogonal to the plane of projection.\n", ifacet);
+#endif
+
+        	int nv = facet[ifacet].nv;
+        	int* index = facet[ifacet].index;
+
+        	// 1. Find the closest vertex to the plane projection.
+        	int ivertexMax = -1;
+        	double scalarMax = 0.;
+        	for (int ivertex = 0; ivertex < nv; ++ivertex)
+        	{
+        		int v0 = index[ivertex];
+
+        		double scalar = nu * vertex[v0];
+        		if (ivertexMax == -1 || scalarMax < scalar)
+        		{
+        			ivertexMax = ivertex;
+        			scalarMax = scalar;
+        		}
+        	}
+
+        	int v0Max = index[ivertexMax];
+        	int v1Max = index[ivertexMax + 1];
+        	Vector3d vector0Max = planeOfProjection.project(vertex[v0Max]);
+        	Vector3d vector1Max = planeOfProjection.project(vertex[v1Max]);
+        	Vector3d mainEdge = vector1Max - vector0Max;
+
+        	// 2. Go around the facet, beginning from the closest vertex.
+        	for (int ivertex = 0; ivertex < nv; ++ivertex)
+        	{
+        		int v0 = index[ivertex];
+        		int v1 = index[ivertex + 1];
+        		Vector3d curEdge = vertex[v1] - vertex[v0];
+
+        		// 3. In case of non-positive scalar product
+        		// -- eliminate the edge from the buffer
+        		if (curEdge * mainEdge <= 0)
+        		{
+#ifndef NDEBUG
+        			printf("Edge %d (%d, %d) is invisible from the direction of projection.\n",
+        					ivertex, v0, v1);
+#endif
+
+        			int v0elim = v0;
+        			int v1elim = v1;
+        			int iedgeFound = -1;
+        			for (int i = 0; i < ne; ++i)
+        			{
+        				v0 = edges[buf[i]].v0;
+        				v1 = edges[buf[i]].v1;
+        				if ( (v0 == v0elim && v1 == v1elim) ||
+        						(v0 == v1elim && v1 == v0elim) )
+        				{
+        					iedgeFound = i;
+        					break;
+        				}
+        			}
+
+        			if (iedgeFound == -1)
+        			{
+        				printf("%s: iedgeFound not found\n", __func__);
+        				return -1;
+        			}
+
+        			ifEdgeIsVisible[iedgeFound] = false;
+//        			for (int i = iedgeFound; i < ne - 1; ++i)
+//        			{
+//        				buf[i] = buf[i - 1];
+//        			}
+//        			--ne;
+        		}
+        	}
+        }
         
-        int curEdge = buf[0];
+        // 4. Delete all edges marked as invisible from the buffer
+        // (that means that they are not copied to the buf1 from buf)
+        int newNE = 0;
+        for (int i  = 0; i < ne; ++i)
+        {
+        	if (ifEdgeIsVisible[i])
+        	{
+        		buf1[newNE++] = buf[i];
+        	}
+        }
+        ne = newNE;
+
+#ifndef NDEBUG
+        printf("\t Printing buf1 :");
+        for (int i = 0; i < ne; ++i)
+        {
+            int curEdge = buf1[i];
+            int curV0 = edges[curEdge].v0;
+            int curV1 = edges[curEdge].v1;
+            printf ("%d(%d, %d) ", curEdge, curV0, curV1);
+        }
+        printf("\n");
+#endif
+        ///////////////////////////////////////////////////////////////////
+        //  Go and find all contours among found edges ////////////////////
+        ///////////////////////////////////////////////////////////////////
+
+        int curEdge = buf1[0];
         int firstEdge = curEdge;
         int curV0 = edges[curEdge].v0;
         int curV1 = edges[curEdge].v1;
@@ -109,16 +232,16 @@ int Polyhedron::corpol_test_create_contours(
             bool iffound = false;
             for (int i = 0; i < ne; ++i)
             {
-                curV0 = edges[buf[i]].v0;
-                curV1 = edges[buf[i]].v1;
-                if ( ( curV0 != curV && curV1 != curV ) || buf[i] == curEdge)
+                curV0 = edges[buf1[i]].v0;
+                curV1 = edges[buf1[i]].v1;
+                if ( ( curV0 != curV && curV1 != curV ) || buf1[i] == curEdge)
                 {
                     continue;
                 }
                 else
                 {
-                    curEdge = buf[i];
-                    buf2[iedge] = curEdge;
+                    curEdge = buf1[i];
+                    buf2[iedge++] = curEdge;
                     
                     if (curV0 == curV)
                     {
@@ -140,15 +263,17 @@ int Polyhedron::corpol_test_create_contours(
                         edges[curEdge].v0, edges[curEdge].v1);
                 break;
             }
-            ++iedge;
             
         } while (curEdge != firstEdge);
         
+        // To avoid adding the first edge to the end of buf2 once more:
+        --iedge;
+
 #ifndef NDEBUG
-        printf("\t Printing buf :");
-        for (int i = 0; i < ne; ++i)
+        printf("\t Printing buf2 :");
+        for (int i = 0; i < iedge; ++i)
         {
-            int curEdge = buf[i];
+            int curEdge = buf2[i];
             int curV0 = edges[curEdge].v0;
             int curV1 = edges[curEdge].v1;
             printf ("%d(%d, %d) ", curEdge, curV0, curV1);
@@ -181,13 +306,31 @@ int Polyhedron::corpol_test_create_contours(
         }
     }
     
-#ifndef NDEBUG
-    for (int i = 0; i < nume; ++i)
-    {
-        contours[i].my_fprint(stdout);
-    }
-#endif
+//#ifndef NDEBUG
+//    for (int i = 0; i < nume; ++i)
+//    {
+//        contours[i].my_fprint(stdout);
+//    }
+//#endif
     return 0;
+
+    if (buf != NULL)
+    {
+    	delete[] buf;
+    	buf = NULL;
+    }
+
+    if (buf1 != NULL)
+    {
+    	delete[] buf1;
+    	buf1 = NULL;
+    }
+
+    if (buf2 != NULL)
+    {
+    	delete[] buf2;
+    	buf2 = NULL;
+    }
 }
 
 void Polyhedron::make_cube(double a)
