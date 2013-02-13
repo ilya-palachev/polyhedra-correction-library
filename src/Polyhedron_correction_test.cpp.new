@@ -102,6 +102,7 @@ int Polyhedron::corpol_test_create_contours(
         // from the buffer.                                          //
         ///////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
         bool* ifEdgeIsVisible = new bool[ne];
         for (int i = 0; i < ne; ++i)
         {
@@ -188,6 +189,79 @@ int Polyhedron::corpol_test_create_contours(
 //        				buf[i] = buf[i - 1];
 //        			}
 //        			--ne;
+=======
+        for (int ifacet = 0; ifacet < numf; ++ifacet)
+        {
+        	Plane plane = facet[ifacet].plane;
+        	if (fabs(plane.norm * nu) >= EPS_COLLINEARITY)
+        	{
+        		// We are processing only facets which are orthogonal
+        		// to the plane of projection
+        		continue;
+        	}
+
+        	int nv = facet[ifacet].nv;
+        	int* index = facet[ifacet].index;
+
+        	// 1. Find the closest vertex to the plane projection.
+        	int ivertexMax = -1;
+        	double scalarMax = 0.;
+        	for (int ivertex = 0; ivertex < nv; ++ivertex)
+        	{
+        		int v0 = index[ivertex];
+
+        		double scalar = nu * vertex[v0];
+        		if (ivertexMax == -1 || scalarMax < scalar)
+        		{
+        			ivertexMax = ivertex;
+        			scalarMax = scalar;
+        		}
+        	}
+
+        	int v0Max = index[scalarMax];
+        	int v1Max = index[scalarMax + 1];
+        	Vector3d vector0Max = planeOfProjection.project(vertex[v0Max]);
+        	Vector3d vector1Max = planeOfProjection.project(vertex[v1Max]);
+        	Vector3d mainEdge = vector1Max - vector0Max;
+
+        	// 2. Go around the facet, beginning from the closest vertex.
+        	for (int ivertex = 0; ivertex < nv; ++ivertex)
+        	{
+        		int v0 = index[ivertex];
+        		int v1 = index[ivertex + 1];
+        		Vector3d curEdge = vertex[v1] - vertex[v0];
+
+        		// 3. In case of non-positive scalar product
+        		// -- eliminate the edge from the buffer
+        		if (curEdge * mainEdge <= 0)
+        		{
+        			int v0elim = v0;
+        			int v1elim = v1;
+        			int iedgeFound = -1;
+        			for (int i = 0; i < ne; ++i)
+        			{
+        				v0 = edges[buf[i]].v0;
+        				v1 = edges[buf[i]].v1;
+        				if ( (v0 == v0elim && v1 == v1elim) ||
+        						(v0 == v1elim && v1 == v0elim) )
+        				{
+        					iedgeFound = i;
+        					break;
+        				}
+        			}
+
+        			if (iedgeFound == -1)
+        			{
+        				printf("%s: iedgeFound not found\n", __func__);
+        				return -1;
+        			}
+
+        			for (int i = iedgeFound; i < ne - 1; ++i)
+        			{
+        				buf[i] = buf[i - 1];
+        			}
+        			--ne;
+>>>>>>> branch 'master' of https://ilya_palachev@bitbucket.org/ilya_palachev/polyhedra-correction-library.git
         		}
         	}
         }
@@ -240,7 +314,11 @@ int Polyhedron::corpol_test_create_contours(
                 }
                 else
                 {
+<<<<<<< HEAD
                     curEdge = buf1[i];
+=======
+                    curEdge = buf[i];
+>>>>>>> branch 'master' of https://ilya_palachev@bitbucket.org/ilya_palachev/polyhedra-correction-library.git
                     buf2[iedge++] = curEdge;
                     
                     if (curV0 == curV)
@@ -266,8 +344,11 @@ int Polyhedron::corpol_test_create_contours(
             
         } while (curEdge != firstEdge);
         
+<<<<<<< HEAD
         // To avoid adding the first edge to the end of buf2 once more:
         --iedge;
+=======
+>>>>>>> branch 'master' of https://ilya_palachev@bitbucket.org/ilya_palachev/polyhedra-correction-library.git
 
 #ifndef NDEBUG
         printf("\t Printing buf2 :");
