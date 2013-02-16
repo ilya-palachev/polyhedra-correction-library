@@ -176,7 +176,7 @@ public:
                 double* rightPart, double* solution);
         
         // Polyhedron_correction_preprocess.cpp
-        int corpol_preprocess(int& nume, Edge* edges, int N, 
+        int corpol_preprocess(int& nume, Edge* &edges, int N,
                 SContour* contours);
         
         int preprocess_edges(int& nume, int numeMax, Edge* edges);

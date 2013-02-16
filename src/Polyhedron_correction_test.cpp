@@ -2,7 +2,6 @@
 #include "Polyhedron.h"
 #include <ctime>
 
-#define NDEBUG
 
 int Polyhedron::corpol_test(int ncont, double maxMoveDelta)
 {

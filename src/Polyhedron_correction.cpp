@@ -26,13 +26,20 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     
     Plane * prevPlanes = new Plane [numf];
     
+    DBGPRINT("%s: memory allocation done\n", __func__);
+
     for (int i = 0; i < numf; ++i)
     {
         prevPlanes[i] = facet[i].plane;
     }
+    DBGPRINT("%s: memory initialization done\n", __func__);
+
     double error = corpol_calculate_functional(nume, edges, N, contours, 
             prevPlanes);
     
+    DBGPRINT("%s: first functional calculation done. error = %lf\n",
+    		__func__, error);
+
     int numIterations = 0;
 
     while (error > eps_max_error)
@@ -58,10 +65,12 @@ double Polyhedron::corpol_calculate_functional(int nume,
         Edge* edges, int N, SContour* contours, 
         Plane* prevPlanes)
 {
+//	DBG_START;
     double sum = 0;
     
     for (int i = 0; i < nume; ++i)
     {
+//    	DBGPRINT("%s: processing edge #%d\n", __func__, i);
         int nc = edges[i].numc;
         int * cnums = edges[i].contourNums;
         int * cnearestSide = edges[i].contourNearestSide;
@@ -74,6 +83,7 @@ double Polyhedron::corpol_calculate_functional(int nume,
         
         for (int j = 0; j < nc; ++j)
         {
+//        	DBGPRINT("\t%s: processing contour #%d\n", __func__, j);
             int curContour = cnums[j];
             int curNearestSide = cnearestSide[j];
             SideOfContour * sides = contours[curContour].sides;
@@ -116,6 +126,7 @@ double Polyhedron::corpol_calculate_functional(int nume,
             sum += summand0 + summand1;
         }
     }
+//    DBG_END;
     return sum;
 }
 

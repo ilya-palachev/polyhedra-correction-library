@@ -4,12 +4,11 @@
 
 int Polyhedron::corpol_preprocess(
         int& nume, 
-        Edge* edges, 
+        Edge* &edges,
         int N, 
         SContour* contours)
 {
-	DBGPRINT("Start %s\n", __func__);
-
+	DBG_START;
     // + TODO: provide right orientation of facets
     int numeMax = 0;
     for (int i = 0; i < numf; ++i)
@@ -24,9 +23,8 @@ int Polyhedron::corpol_preprocess(
     corpol_prep_build_lists_of_visible_edges(nume, edges, N, contours);
     corpol_prep_map_between_edges_and_contours(nume, edges, N, contours);
 
+    DBG_END;
     return 0;
-	DBGPRINT("End %s\n", __func__);
-
 }
 
 int Polyhedron::preprocess_edges(int& nume, int numeMax, Edge* edges)
