@@ -11,11 +11,13 @@ const double eps_max_error = 1e-6;
 
 int Polyhedron::correct_polyhedron(int N, SContour* contours)
 {
+	DBGPRINT("Start %s\n", __func__);
+
     int dim = numf * 5;
     
     int nume;
     Edge* edges = NULL;
-    
+
     corpol_preprocess(nume, edges, N, contours);
     
     double * matrix = new double [dim * dim];
@@ -31,9 +33,12 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     double error = corpol_calculate_functional(nume, edges, N, contours, 
             prevPlanes);
     
+    int numIterations = 0;
+
     while (error > eps_max_error)
     {
-        corpol_iteration(nume, edges, N, contours, prevPlanes, matrix, 
+    	DBGPRINT("%s: Iteration %d\n", __func__, numIterations);
+    	corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
                 rightPart, solution);
         
         for (int i = 0; i < numf; ++i)
@@ -42,7 +47,10 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
         }
         error = corpol_calculate_functional(nume, edges, N, contours, 
                 prevPlanes);
+    	++numIterations;
     }
+
+    DBGPRINT("End %s\n", __func__);
     return 0;
 }
 
