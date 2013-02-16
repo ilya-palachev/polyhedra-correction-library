@@ -294,7 +294,11 @@ int Polyhedron::corpol_test_create_contours(
         contours[icont].plane = planeOfProjection;
         contours[icont].poly = this;
         SideOfContour* sides = contours[icont].sides;
+<<<<<<< HEAD
         printf("test5");
+=======
+        printf("test4");
+>>>>>>> cb4157011855a7f5f184f26d9b564b3b7e48d451
         for (int i = 0; i < ne; ++i)
         {
             Vector3d A1 = vertex[edges[buf2[i]].v0];
