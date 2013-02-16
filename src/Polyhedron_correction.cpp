@@ -11,7 +11,7 @@ const double eps_max_error = 1e-6;
 
 int Polyhedron::correct_polyhedron(int N, SContour* contours)
 {
-	DBGPRINT("Start %s\n", __func__);
+	DBG_START;
 
     int dim = numf * 5;
     
@@ -50,7 +50,7 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     	++numIterations;
     }
 
-    DBGPRINT("End %s\n", __func__);
+    DBG_END;
     return 0;
 }
 

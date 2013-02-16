@@ -31,6 +31,7 @@ int Polyhedron::corpol_preprocess(
 
 int Polyhedron::preprocess_edges(int& nume, int numeMax, Edge* edges)
 {
+	DBG_START;
     nume = 0;
     for (int i = 0; i < numf; ++i)
     {
@@ -54,7 +55,7 @@ int Polyhedron::preprocess_edges(int& nume, int numeMax, Edge* edges)
     }
 #endif
 
-    
+    DBG_END;
     return 0;
 }
 
@@ -64,6 +65,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         int N, 
         SContour* contours)
 {
+	DBG_START;
     Plane pi0, pi1;
     double sign0, sign1;
     Vector3d nu;
@@ -105,6 +107,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         delete[] buf;
         buf = NULL;
     }
+    DBG_END;
     return 0;
 }
 

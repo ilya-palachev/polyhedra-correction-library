@@ -19,7 +19,7 @@
 #include "Vector3d.h"
 #include "array_operations.h"
 #include "Gauss_string.h"
-#include "DebugPrint.h"
+
 
 #ifndef POLYHEDRON_H
 #define POLYHEDRON_H
@@ -30,7 +30,7 @@
 //#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
 #define EPS_SIGNUM 1e-15
 #define EPS_COLLINEARITY 1e-16
-
+#include "DebugPrint.h"
 
 
 class Polyhedron;

@@ -6,6 +6,7 @@
 
 int Polyhedron::corpol_test(int ncont, double maxMoveDelta)
 {
+	DBG_START;
     SContour* contours = new SContour [ncont];
     
     int nume;
@@ -45,7 +46,8 @@ int Polyhedron::corpol_test(int ncont, double maxMoveDelta)
         delete[] edges;
         edges = NULL;
     }
-    printf("End of function %s\n", __func__);
+
+    DBG_END;
     return 0;
 }
 
