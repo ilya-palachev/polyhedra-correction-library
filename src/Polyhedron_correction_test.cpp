@@ -1,7 +1,10 @@
 #include <math.h>
 #include "Polyhedron.h"
+#include <ctime>
 
-int Polyhedron::corpol_test(int ncont) 
+#define NDEBUG
+
+int Polyhedron::corpol_test(int ncont, double maxMoveDelta)
 {
     SContour* contours = new SContour [ncont];
     
@@ -33,11 +36,16 @@ int Polyhedron::corpol_test(int ncont)
     printf("------------\n End of print contours in corpol_test\n");
 #endif
     
+    corpol_test_slight_random_move(maxMoveDelta);
+
+    correct_polyhedron(ncont, contours);
+
     if (edges != NULL)
     {
         delete[] edges;
         edges = NULL;
     }
+    printf("End of function %s\n", __func__);
     return 0;
 }
 
@@ -316,7 +324,7 @@ int Polyhedron::corpol_test_create_contours(
 //        contours[i].my_fprint(stdout);
 //    }
 //#endif
-    return 0;
+
 
     if (buf != NULL)
     {
@@ -335,6 +343,7 @@ int Polyhedron::corpol_test_create_contours(
     	delete[] buf2;
     	buf2 = NULL;
     }
+    return 0;
 }
 
 void Polyhedron::make_cube(double a)
@@ -444,3 +453,44 @@ void Polyhedron::make_cube(double a)
     printf("Polyhedron has been recreated as a cube.\n");
 #endif //NDEBUG
 }
+
+static double gen_random_double(double maxDelta)
+{
+	srand((unsigned)time(0));
+	int randomInteger = rand();
+	double randomDouble = randomInteger;
+	const double halfRandMax = RAND_MAX * 0.5;
+	randomDouble -= halfRandMax;
+	randomDouble /= halfRandMax;
+
+	randomDouble *= maxDelta;
+
+	return randomDouble;
+}
+
+
+void Polyhedron::corpol_test_slight_random_move(double maxDelta)
+{
+
+	for (int ifacet = 0; ifacet < numf; ++ifacet)
+	{
+		Plane& plane = facet[ifacet].plane;
+		plane.norm.x += gen_random_double(maxDelta);
+		plane.norm.y += gen_random_double(maxDelta);
+		plane.norm.z += gen_random_double(maxDelta);
+		plane.dist += gen_random_double(maxDelta);
+		double newNorm = sqrt(qmod(plane.norm));
+		plane.norm.norm(1.);
+		plane.dist /= newNorm;
+	}
+
+	for (int ivertex = 0; ivertex < numv; ++ivertex)
+	{
+		Vector3d& vector = vertex[ivertex];
+		vector.x += gen_random_double(maxDelta);
+		vector.y += gen_random_double(maxDelta);
+		vector.z += gen_random_double(maxDelta);
+	}
+}
+
+

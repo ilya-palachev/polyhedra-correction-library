@@ -1,5 +1,7 @@
 #include "Polyhedron.h"
 
+#define NDEBUG
+
 int Polyhedron::corpol_preprocess(
         int& nume, 
         Edge* edges, 

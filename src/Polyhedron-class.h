@@ -192,11 +192,13 @@ public:
 
         // Polyhedron_correction_test.cpp
         
-        int corpol_test(int ncont);
+        int corpol_test(int ncont, double maxMoveDelta);
         
         int corpol_test_create_contours(int nume, Edge* edges, int ncont, 
                 SContour* contours);
         
+        void corpol_test_slight_random_move(double maxDelta);
+
         void make_cube(double a);
         
 };
