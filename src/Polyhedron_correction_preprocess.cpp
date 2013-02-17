@@ -75,9 +75,15 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
     
     for (int iedge = 0; iedge < nume; ++iedge)
     {
+
         nVisibleOnCont = 0;
         int v0 = edges[iedge].v0;
         int v1 = edges[iedge].v1;
+
+        DBGPRINT("Processing edge %d (%d, %d)\n", iedge, v0, v1);
+
+        int f0 = edges[iedge].f0;
+        int f1 = edges[iedge].f1;
         pi0 = facet[edges[iedge].f0].plane;
         pi1 = facet[edges[iedge].f1].plane;
         for (int icont = 0; icont < ncont; ++icont)
@@ -94,6 +100,13 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
             }
         }
         
+        DBGPRINT("nVisibleOnCont = %d, buf:", nVisibleOnCont);
+        for (int icont = 0; icont < nVisibleOnCont; ++icont)
+        {
+        	DBGPRINT2("%d, ", buf[icont]);
+        }
+        DBGPRINT("");
+
         ///////////////////////////////////////////////////////////////
         // Some planes of projection can be orthogonal to facet.     //
         // In this case we must eliminate all planes of projection   //
@@ -132,7 +145,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         	{
         		// When only the first facet is orthogonal to the plane of projection
         		ifVisibleOnCont[icont] = corpol_collinear_visibility(v0, v1,
-        				planeOfProjection, edges[iCurrCont].f0);
+        				planeOfProjection, f0);
         		continue;
         	}
 
@@ -140,7 +153,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         	{
         		// When only the second facet is orthogonal to the plane of projection
         		ifVisibleOnCont[icont] = corpol_collinear_visibility(v0, v1,
-        				planeOfProjection, edges[iCurrCont].f1);
+        				planeOfProjection, f1);
         		continue;
         	}
         }
@@ -158,6 +171,11 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         }
         nVisibleOnCont = newNVisibleOnCont;
 
+        DBGPRINT("buf1:");
+        for (int icont = 0; icont < nVisibleOnCont; ++icont)
+        {
+        	printf("%d, ", buf1[icont]);
+        }
 
         edges[iedge].numc = nVisibleOnCont;
 
