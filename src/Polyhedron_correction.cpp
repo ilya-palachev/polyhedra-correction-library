@@ -26,25 +26,24 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     
     Plane * prevPlanes = new Plane [numf];
     
-    DBGPRINT("memory allocation done %lf\n", 0.);
+    DBGPRINT("memory allocation done");
 
     for (int i = 0; i < numf; ++i)
     {
         prevPlanes[i] = facet[i].plane;
     }
-    DBGPRINT("%s: memory initialization done\n", __func__);
+    DBGPRINT("memory initialization done");
 
     double error = corpol_calculate_functional(nume, edges, N, contours, 
             prevPlanes);
     
-    DBGPRINT("%s: first functional calculation done. error = %lf\n",
-    		__func__, error);
+    DBGPRINT("first functional calculation done. error = %lf", error);
 
     int numIterations = 0;
 
     while (error > eps_max_error)
     {
-    	DBGPRINT("%s: Iteration %d\n", __func__, numIterations);
+    	DBGPRINT("Iteration %d\n", numIterations);
     	corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
                 rightPart, solution);
         
@@ -54,6 +53,7 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
         }
         error = corpol_calculate_functional(nume, edges, N, contours, 
                 prevPlanes);
+        DBGPRINT("error = %lf", error);
     	++numIterations;
     }
 
