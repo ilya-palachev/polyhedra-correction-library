@@ -263,13 +263,13 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
         SContour* contours)
 {
     // NOTE: Testing needed.
-    for (int i = 0; i < nume; ++i)
+    for (int iedge = 0; iedge < nume; ++iedge)
     {
-        int nc = edges[i].numc;
-        int * cnums = edges[i].contourNums;
-        Vector3d A0 = vertex[edges[i].v0];
-        Vector3d A1 = vertex[edges[i].v1];
-        for (int j = 0; j < nc; ++j)
+        int ncont = edges[iedge].numc;
+        int * cnums = edges[iedge].contourNums;
+        Vector3d A0 = vertex[edges[iedge].v0];
+        Vector3d A1 = vertex[edges[iedge].v1];
+        for (int j = 0; j < ncont; ++j)
         {
             int ns = contours[cnums[j]].ns;
             SideOfContour * sides = contours[cnums[j]].sides;
@@ -295,8 +295,8 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
                     direction = false;
                 }
             }
-            edges[i].contourNearestSide[j] = idmin;
-            edges[i].contourDirection[j] = direction;
+            edges[iedge].contourNearestSide[j] = idmin;
+            edges[iedge].contourDirection[j] = direction;
         }
     }
     return 0;
