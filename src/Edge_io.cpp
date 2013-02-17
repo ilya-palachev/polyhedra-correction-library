@@ -2,7 +2,7 @@
 
 void Edge::my_fprint(FILE* file)
 {
- 
+#ifndef NDEBUG
     fprintf(file, "Printing content of edge #%d", id);
     fprintf(file, "\tid = %d (id of the edge)\n", id);
     fprintf(file, "\tv0 = %d (first vertex)\n", v0);
@@ -23,4 +23,5 @@ void Edge::my_fprint(FILE* file)
                 contourNearestSide[i],
                 contourDirection[i]);
     }
+#endif
 }

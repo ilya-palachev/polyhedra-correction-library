@@ -60,7 +60,7 @@ int Polyhedron::preprocess_edges(int& nume, int numeMax, Edge* edges)
 int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         int nume, 
         Edge* edges, 
-        int N, 
+        int ncont, 
         SContour* contours)
 {
 	DBG_START;
@@ -68,36 +68,40 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
     double sign0, sign1;
     Vector3d nu;
     
-    int * buf = new int[N];
+    int * buf = new int[ncont];
     
-    int nc;
+    int nVisibleCont;
     
     for (int iedge = 0; iedge < nume; ++iedge)
     {
-        nc = 0;
+        nVisibleCont = 0;
         pi0 = facet[edges[iedge].f0].plane;
         pi1 = facet[edges[iedge].f1].plane;
-        for (int icont = 0; icont < N; ++icont)
+        for (int icont = 0; icont < ncont; ++icont)
         {
             nu = contours[icont].plane.norm;
             sign0 = pi0.norm * nu + pi0.dist;
             sign1 = pi1.norm * nu + pi1.dist;
             if (sign0 * sign1 <= 0)
             {
-                buf[nc] = icont;
-                ++nc;
+                buf[nVisibleCont] = icont;
+                ++nVisibleCont;
+                DBGPRINT("Edge %d (%d, %d) is visible from contour %d",
+                		iedge, edges[iedge].v0, edges[iedge].v1, icont);
             }
         }
-        edges[iedge].numc = nc;
+        edges[iedge].numc = nVisibleCont;
         
-        edges[iedge].contourNums = new int[nc];
-        for (int j = 0; j < nc; ++j)
+        edges[iedge].contourNums = new int[nVisibleCont];
+        for (int j = 0; j < nVisibleCont; ++j)
         {
             edges[iedge].contourNums[j] = buf[j];
         }
         
-        edges[iedge].contourNearestSide = new int[nc];
-        edges[iedge].contourDirection = new bool[nc];
+        edges[iedge].contourNearestSide = new int[nVisibleCont];
+        edges[iedge].contourDirection = new bool[nVisibleCont];
+
+        edges[iedge].my_fprint(stdout);
     }
     
     if (buf != NULL)
