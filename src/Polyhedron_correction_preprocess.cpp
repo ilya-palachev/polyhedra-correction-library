@@ -1,6 +1,6 @@
 #include "Polyhedron.h"
 
-#define NDEBUG
+//#define NDEBUG
 
 int Polyhedron::corpol_preprocess(
         int& nume, 
@@ -72,32 +72,32 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
     
     int nc;
     
-    for (int i = 0; i < nume; ++i)
+    for (int iedge = 0; iedge < nume; ++iedge)
     {
         nc = 0;
-        pi0 = facet[edges[i].f0].plane;
-        pi1 = facet[edges[i].f1].plane;
-        for (int j = 0; j < N; ++j)
+        pi0 = facet[edges[iedge].f0].plane;
+        pi1 = facet[edges[iedge].f1].plane;
+        for (int icont = 0; icont < N; ++icont)
         {
-            nu = contours[j].plane.norm;
+            nu = contours[icont].plane.norm;
             sign0 = pi0.norm * nu + pi0.dist;
             sign1 = pi1.norm * nu + pi1.dist;
             if (sign0 * sign1 <= 0)
             {
-                buf[nc] = j;
+                buf[nc] = icont;
                 ++nc;
             }
         }
-        edges[i].numc = nc;
+        edges[iedge].numc = nc;
         
-        edges[i].contourNums = new int[nc];
+        edges[iedge].contourNums = new int[nc];
         for (int j = 0; j < nc; ++j)
         {
-            edges[i].contourNums[j] = buf[j];
+            edges[iedge].contourNums[j] = buf[j];
         }
         
-        edges[i].contourNearestSide = new int[nc];
-        edges[i].contourDirection = new bool[nc];
+        edges[iedge].contourNearestSide = new int[nc];
+        edges[iedge].contourDirection = new bool[nc];
     }
     
     if (buf != NULL)

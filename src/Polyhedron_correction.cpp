@@ -20,42 +20,42 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
 
     corpol_preprocess(nume, edges, N, contours);
     
-    double * matrix = new double [dim * dim];
-    double * rightPart = new double [dim];
-    double * solution = new double [dim];
-    
-    Plane * prevPlanes = new Plane [numf];
-    
-    DBGPRINT("memory allocation done");
-
-    for (int i = 0; i < numf; ++i)
-    {
-        prevPlanes[i] = facet[i].plane;
-    }
-    DBGPRINT("memory initialization done");
-
-    double error = corpol_calculate_functional(nume, edges, N, contours, 
-            prevPlanes);
-    
-    DBGPRINT("first functional calculation done. error = %lf", error);
-
-    int numIterations = 0;
-
-    while (error > eps_max_error)
-    {
-    	DBGPRINT("Iteration %d\n", numIterations);
-    	corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
-                rightPart, solution);
-        
-        for (int i = 0; i < numf; ++i)
-        {
-            prevPlanes[i] = facet[i].plane;
-        }
-        error = corpol_calculate_functional(nume, edges, N, contours, 
-                prevPlanes);
-        DBGPRINT("error = %lf", error);
-    	++numIterations;
-    }
+//    double * matrix = new double [dim * dim];
+//    double * rightPart = new double [dim];
+//    double * solution = new double [dim];
+//
+//    Plane * prevPlanes = new Plane [numf];
+//
+//    DBGPRINT("memory allocation done");
+//
+//    for (int i = 0; i < numf; ++i)
+//    {
+//        prevPlanes[i] = facet[i].plane;
+//    }
+//    DBGPRINT("memory initialization done");
+//
+//    double error = corpol_calculate_functional(nume, edges, N, contours,
+//            prevPlanes);
+//
+//    DBGPRINT("first functional calculation done. error = %lf", error);
+//
+//    int numIterations = 0;
+//
+//    while (error > eps_max_error)
+//    {
+//    	DBGPRINT("Iteration %d\n", numIterations);
+//    	corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
+//                rightPart, solution);
+//
+//        for (int i = 0; i < numf; ++i)
+//        {
+//            prevPlanes[i] = facet[i].plane;
+//        }
+//        error = corpol_calculate_functional(nume, edges, N, contours,
+//                prevPlanes);
+//        DBGPRINT("error = %lf", error);
+//    	++numIterations;
+//    }
 
     DBG_END;
     return 0;
