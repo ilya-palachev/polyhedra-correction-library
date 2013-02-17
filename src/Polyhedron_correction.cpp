@@ -26,7 +26,7 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     
     Plane * prevPlanes = new Plane [numf];
     
-    DBGPRINT("%s: memory allocation done\n", __func__);
+    DBGPRINT("memory allocation done %lf\n", 0.);
 
     for (int i = 0; i < numf; ++i)
     {
