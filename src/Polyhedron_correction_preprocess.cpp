@@ -298,6 +298,8 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
             edges[iedge].contourNearestSide[j] = idmin;
             edges[iedge].contourDirection[j] = direction;
         }
+
+        edges[iedge].my_fprint(stdout);
     }
     return 0;
 }

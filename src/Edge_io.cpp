@@ -17,7 +17,7 @@ void Edge::my_fprint(FILE* file)
     fprintf(file, "\ti\t|\tid of contour\t|\tnearest side\t|\tdirection\n");
     for (int i = 0; i < numc; ++i)
     {
-        fprintf(file, "\t%d\t|\t%d\t|\t%d\t|\t%d\n", 
+        fprintf(file, "\t%d\t|\t%d\t\t|\t%d\t\t|\t%d\n",
                 i,
                 contourNums[i],
                 contourNearestSide[i],
