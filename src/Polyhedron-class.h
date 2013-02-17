@@ -189,6 +189,8 @@ public:
                 int N, SContour* contours);
         int corpol_prep_map_between_edges_and_contours(int nume, Edge* edges, 
                 int N, SContour* contours);
+        bool corpol_collinear_visibility(int v0, int v1,
+				Plane planeOfProjection, int ifacet);
 
         // Polyhedron_correction_test.cpp
         

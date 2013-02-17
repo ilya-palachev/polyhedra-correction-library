@@ -36,7 +36,7 @@ int Polyhedron::corpol_test(int ncont, double maxMoveDelta)
     printf("------------\n End of print contours in corpol_test\n");
 #endif
     
-    corpol_test_slight_random_move(maxMoveDelta);
+//    corpol_test_slight_random_move(maxMoveDelta);
 
     correct_polyhedron(ncont, contours);
 
@@ -133,7 +133,7 @@ int Polyhedron::corpol_test_create_contours(
         	int nv = facet[ifacet].nv;
         	int* index = facet[ifacet].index;
 
-        	// 1. Find the closest vertex to the plane projection.
+        	// 1. Find the closest vertex to the plane of projection.
         	int ivertexMax = -1;
         	double scalarMax = 0.;
         	for (int ivertex = 0; ivertex < nv; ++ivertex)
