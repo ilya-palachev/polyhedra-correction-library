@@ -262,6 +262,7 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
         int N, 
         SContour* contours)
 {
+	DBG_START;
     // NOTE: Testing needed.
     for (int iedge = 0; iedge < nume; ++iedge)
     {
@@ -269,38 +270,39 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
         int * cnums = edges[iedge].contourNums;
         Vector3d A0 = vertex[edges[iedge].v0];
         Vector3d A1 = vertex[edges[iedge].v1];
-        for (int j = 0; j < ncont; ++j)
+        for (int icont = 0; icont < ncont; ++icont)
         {
-            int ns = contours[cnums[j]].ns;
-            SideOfContour * sides = contours[cnums[j]].sides;
-            int idmin = -1;
-            double min = 0.;
+            int ns = contours[cnums[icont]].ns;
+            SideOfContour * sides = contours[cnums[icont]].sides;
+            int isideMin = -1;
+            double minDist = 0.;
             bool direction = true;
-            for (int k = 0; k < ns; ++k)
+            for (int iside = 0; iside < ns; ++iside)
             {
-                Vector3d B0 = sides[k].A1;
-                Vector3d B1 = sides[k].A2;
+                Vector3d B0 = sides[iside].A1;
+                Vector3d B1 = sides[iside].A2;
                 double dist0 = qmod(A0 - B0) + qmod(A1 - B1);
                 double dist1 = qmod(A0 - B1) + qmod(A1 - B0);
-                if (dist0 < min || idmin == -1)
+                if (dist0 < minDist || isideMin == -1)
                 {
-                    min = dist0;
-                    idmin = k;
+                    minDist = dist0;
+                    isideMin = iside;
                     direction = true;
                 }
-                if (dist1 < min)
+                if (dist1 < minDist)
                 {
-                    min = dist1;
-                    idmin = k;
+                    minDist = dist1;
+                    isideMin = iside;
                     direction = false;
                 }
             }
-            edges[iedge].contourNearestSide[j] = idmin;
-            edges[iedge].contourDirection[j] = direction;
+            edges[iedge].contourNearestSide[icont] = isideMin;
+            edges[iedge].contourDirection[icont] = direction;
         }
 
         edges[iedge].my_fprint(stdout);
     }
+    DBG_END;
     return 0;
 }
 
