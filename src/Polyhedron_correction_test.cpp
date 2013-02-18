@@ -297,7 +297,8 @@ int Polyhedron::corpol_test_create_contours(
                     "edges has been added to the contour...\n", iedge, ne);
             return -1;
         }
-        
+
+        contours[icont].id = icont; // To make output more understandable
         contours[icont].sides = new SideOfContour[ne];
         contours[icont].ns = ne;
         contours[icont].plane = planeOfProjection;

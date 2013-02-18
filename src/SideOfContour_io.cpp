@@ -2,9 +2,10 @@
 
 void SideOfContour::my_fprint(FILE* file)
 {
+#ifndef NDEBUG
     fprintf(file, "Printing content of side of contour\n");
-    fprintf(file, "confidence = %lf (number from 0 to 1)\n");
-    fprintf(file, "edge type = %d (that means the folowing:\n");
+    fprintf(file, "confidence = %lf (number from 0 to 1)\n", confidence);
+    fprintf(file, "edge type = %d (that means the following:\n", type);
     fprintf(file, "// Unknown / not calculated\n"
     "EEdgeRegular     = 0 -- Regular edges, regular confidence\n"
     "EEdgeDummy       = 1 -- Dummy edge, not existing in reality\n" 
@@ -17,10 +18,13 @@ void SideOfContour::my_fprint(FILE* file)
     
     fprintf(file, "A1 = (%lf, %lf, %lf)\n", A1.x, A1.y, A1.z);
     fprintf(file, "A2 = (%lf, %lf, %lf)\n", A2.x, A2.y, A2.z);
+#endif
 }
 
 void SideOfContour::my_fprint_short(FILE* file)
 {
-    fprintf(file, "%lf\t%d\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\n",
+#ifndef NDEBUG
+    fprintf(file, "%lf\t%d\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\n",
             confidence, type, A1.x, A1.y, A1.z, A2.x, A2.y, A2.z);
+#endif
 }

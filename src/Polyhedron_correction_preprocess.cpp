@@ -306,7 +306,7 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
             edges[iedge].contourNearestSide[icont] = isideMin;
             edges[iedge].contourDirection[icont] = direction;
 
-            DBGPRINT("\tThe nearest is side #%d = \n(%lf, %lf, %lf)-(%lf, %lf, %lf)", isideMin,
+            DBGPRINT("\tThe nearest is side #%d = \n(%lf, %lf, %lf)-(%lf, %lf, %lf)",
             		isideMin, sides[isideMin].A1.x, sides[isideMin].A1.y, sides[isideMin].A1.z,
             		sides[isideMin].A2.x, sides[isideMin].A2.y, sides[isideMin].A2.z);
         }
