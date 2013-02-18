@@ -266,12 +266,19 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
     // NOTE: Testing needed.
     for (int iedge = 0; iedge < nume; ++iedge)
     {
-        int ncont = edges[iedge].numc;
+    	int v0 = edges[iedge].v0;
+    	int v1 = edges[iedge].v1;
+    	DBGPRINT("Processing edge #%d (%d, %d)", iedge, v0, v1);
+
+    	int ncont = edges[iedge].numc;
         int * cnums = edges[iedge].contourNums;
-        Vector3d A0 = vertex[edges[iedge].v0];
-        Vector3d A1 = vertex[edges[iedge].v1];
+        Vector3d A0 = vertex[v0];
+        Vector3d A1 = vertex[v1];
         for (int icont = 0; icont < ncont; ++icont)
         {
+        	DBGPRINT("\tFind nearest on contour #%d", cnums[icont]);
+        	contours[cnums[icont]].my_fprint(stdout);
+
             int ns = contours[cnums[icont]].ns;
             SideOfContour * sides = contours[cnums[icont]].sides;
             int isideMin = -1;
@@ -298,10 +305,15 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
             }
             edges[iedge].contourNearestSide[icont] = isideMin;
             edges[iedge].contourDirection[icont] = direction;
+
+            DBGPRINT("\tThe nearest is side #%d = \n(%lf, %lf, %lf)-(%lf, %lf, %lf)", isideMin,
+            		isideMin, sides[isideMin].A1.x, sides[isideMin].A1.y, sides[isideMin].A1.z,
+            		sides[isideMin].A2.x, sides[isideMin].A2.y, sides[isideMin].A2.z);
         }
 
         edges[iedge].my_fprint(stdout);
     }
+
     DBG_END;
     return 0;
 }

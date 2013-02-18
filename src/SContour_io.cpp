@@ -2,6 +2,7 @@
 
 void SContour::my_fprint(FILE* file)
 {
+#ifndef NDEBUG
     fprintf(file, "Printing content of shade contour #%d\n", id);
     fprintf(file, "id = %d (id of the contour)\n", id);
     fprintf(file, "ns = %d (number of sides)\n", ns);
@@ -14,4 +15,5 @@ void SContour::my_fprint(FILE* file)
     {
         sides[i].my_fprint_short(file);
     }
+#endif
 }

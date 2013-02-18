@@ -3,7 +3,7 @@
 
 #include "Polyhedron.h"
 
-#define WHERESTR  "[file %s, function %s, line %d]: "
+#define WHERESTR  "[%s: function %s: %d]: "
 #define WHEREARG  __FILE__, __func__, __LINE__
 #define DBGPRINT2(...)       fprintf(stderr, __VA_ARGS__)
 
