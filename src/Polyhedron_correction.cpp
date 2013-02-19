@@ -65,7 +65,7 @@ double Polyhedron::corpol_calculate_functional(int nume,
         Edge* edges, int N, SContour* contours, 
         Plane* prevPlanes)
 {
-//	DBG_START;
+	DBG_START;
     double sum = 0;
     
     for (int i = 0; i < nume; ++i)
@@ -126,7 +126,7 @@ double Polyhedron::corpol_calculate_functional(int nume,
             sum += summand0 + summand1;
         }
     }
-//    DBG_END;
+    DBG_END;
     return sum;
 }
 
@@ -134,6 +134,7 @@ int Polyhedron::corpol_iteration(int nume, Edge* edges, int N,
         SContour* contours, Plane* prevPlanes, double* matrix, 
         double* rightPart, double* solution)
 {
+	DBG_START;
     corpol_calculate_matrix(nume, edges, N, contours, prevPlanes, matrix,
             rightPart, solution);
     int ret = Gauss_string(5 * numf, matrix, rightPart);
@@ -142,7 +143,7 @@ int Polyhedron::corpol_iteration(int nume, Edge* edges, int N,
     {
         solution[i] = rightPart[i];
     }
-    
+    DBG_END;
     return ret;
 }
 
@@ -150,6 +151,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
         SContour* contours, Plane* prevPlanes, double* matrix, 
         double* rightPart, double* solution)
 {
+	DBG_START;
     for (int i = 0; i < (5 * numf) * (5 * numf); ++i)
     {
         matrix[i] = 0.;
@@ -282,5 +284,6 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
             }
         }
     }
+    DBG_END;
 }
 

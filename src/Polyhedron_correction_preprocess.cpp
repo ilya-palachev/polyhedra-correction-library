@@ -324,6 +324,8 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
     return 0;
 }
 
+#define NDEBUG
+
 void Polyhedron::preed_add(int& nume, int numeMax, Edge* edges, 
         int v0, int v1, int f0, int f1)
 {
@@ -426,3 +428,5 @@ int Polyhedron::preed_find(int nume, Edge* edges, int v0, int v1)
 #endif
     return last;
 }
+
+#undef NDEBUG
