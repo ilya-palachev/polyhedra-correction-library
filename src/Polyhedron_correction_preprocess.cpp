@@ -113,6 +113,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         // on which the edge is invisible...                         //
         ///////////////////////////////////////////////////////////////
 
+        DBGPRINT("Start of elimination.");
         bool* ifVisibleOnCont = new bool[nVisibleOnCont];
         for (int i = 0; i < nVisibleOnCont; ++i)
         {
@@ -122,6 +123,8 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         for (int icont = 0; icont < nVisibleOnCont; ++icont)
         {
         	int iCurrCont = buf[icont];
+        	DBGPRINT("\tProcessing contour #%d (it is number %d in the buffer)", iCurrCont, icont);
+
         	Plane planeOfProjection = contours[iCurrCont].plane;
 
         	bool ifOrthogonalTo1stFacet = fabs(pi0.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
@@ -130,13 +133,15 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet)
         	{
         		// Regular case. Nothing is orthogonal.
-        		ifVisibleOnCont[icont] = false;
+        		DBGPRINT("\t\tRegular case. Nothing is orthogonal.");
+        		ifVisibleOnCont[icont] = true;
         		continue;
         	}
 
         	if (ifOrthogonalTo1stFacet && ifOrthogonalTo2ndFacet)
         	{
         		// When the edge is orthogonal to the plane of projection
+        		DBGPRINT("\t\tThe edge is orthogonal to the plane of projection");
         		ifVisibleOnCont[icont] = false;
         		continue;
         	}
@@ -144,6 +149,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         	if (ifOrthogonalTo1stFacet)
         	{
         		// When only the first facet is orthogonal to the plane of projection
+        		DBGPRINT("\t\tOnly the first facet is orthogonal to the plane of projection");
         		ifVisibleOnCont[icont] = corpol_collinear_visibility(v0, v1,
         				planeOfProjection, f0);
         		continue;
@@ -152,6 +158,7 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         	if (ifOrthogonalTo2ndFacet)
         	{
         		// When only the second facet is orthogonal to the plane of projection
+        		DBGPRINT("\t\tOnly the second facet is orthogonal to the plane of projection");
         		ifVisibleOnCont[icont] = corpol_collinear_visibility(v0, v1,
         				planeOfProjection, f1);
         		continue;
