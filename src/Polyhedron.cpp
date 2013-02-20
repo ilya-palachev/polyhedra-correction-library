@@ -6,12 +6,13 @@
 #include "Polyhedron.h"
 
 Polyhedron::Polyhedron() :
+numv(0),
+numf(0),
 vertex(NULL),
 facet(NULL),
 vertexinfo(NULL),
-edge_list(NULL),
-numv(0),
-numf(0) {
+edge_list(NULL)
+{
 //log_file(stderr) {
 	fprintf(stdout, "Creating empty polyhedron...\n");
 }
@@ -23,13 +24,16 @@ Polyhedron::Polyhedron(
 		Facet* facet_orig) :
 //		FILE* log_file_orig = stderr) :
 numv(numv_orig),
-numf(numf_orig)
+numf(numf_orig),
+vertex(new Vector3d[numv]),
+facet(new Facet[numf]),
+vertexinfo(NULL),
+edge_list(NULL)
 //log_file(log_file_orig)
 {
 	fprintf(stdout, "Creating polyhedron by coping...\n");
 
-	vertex = new Vector3d[numv];
-	facet = new Facet[numf];
+
 
 	for (int i = 0; i < numv; ++i)
 		vertex[i] = vertex_orig[i];

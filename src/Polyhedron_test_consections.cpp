@@ -240,7 +240,7 @@ int Polyhedron::test_outer_consections(bool ifPrint) {
 }
 
 int Polyhedron::test_outer_consections_facet(bool ifPrint, int fid) {
-    int i, j, nv, *index, count;
+    int i, nv, *index, count;
 
     nv = facet[fid].nv;
     index = facet[fid].index;

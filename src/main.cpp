@@ -8,11 +8,11 @@
 //#define NOT_DEBUG
 
 using namespace std;
-void test_cube_cutted();
-void test_figures();
-void test(const char* name, int type, double a, double b, double c, double d);
-void test2(const char* name, int type, int fid0, int fid1);
-void test3(const char* name, int type, int fid0, int fid1);
+//void test_cube_cutted();
+//void test_figures();
+//void test(const char* name, int type, double a, double b, double c, double d);
+//void test2(const char* name, int type, int fid0, int fid1);
+//void test3(const char* name, int type, int fid0, int fid1);
 
 
 void test_deform(const char* name, int type, int id, Vector3d delta);
@@ -239,8 +239,8 @@ void get_statistics_deform_linear(const char* name, int type) {
 
 void get_statistics_deform_linear_test(const char* name, int type) {
 
-    int i_len, i_vertex, numv, i;
-    double dist, norm, a, b, c, d, part, norm0;
+    int i_vertex, numv, i;
+    double dist, norm, a, b, c, d;
     Vector3d delta;
 
     int num_steps0, num_steps1;
@@ -313,7 +313,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta) {
     double xmin, xmax, ymin, ymax, zmin, zmax;
     Polyhedron poly;
 
-    char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+    char *file_name_in, *file_name_out0, *file_name_out;
 
     fprintf(stdout, "******************************************************\n");
     fprintf(stdout, "********************   Deformation    ****************\n");
@@ -361,7 +361,6 @@ void test_deform(const char* name, int type, int id, Vector3d delta) {
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);
-    curr_time = asctime(timeinfo);
 
     sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
             name,
@@ -389,7 +388,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
     double xmin, xmax, ymin, ymax, zmin, zmax;
     Polyhedron poly;
 
-    char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+    char *file_name_in, *file_name_out0, *file_name_out;
 
     fprintf(stdout, "******************************************************\n");
     fprintf(stdout, "********************   Deform linear    ****************\n");
@@ -452,7 +451,6 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta) {
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);
-    curr_time = asctime(timeinfo);
 
     sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
             name,
@@ -481,7 +479,7 @@ void test_join_facets(const char* name, int type, int fid0, int fid1) {
     Plane iplane;
     Polyhedron poly;
 
-    char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+    char *file_name_in, *file_name_out0, *file_name_out;
 
     fprintf(stdout, "******************************************************\n");
     fprintf(stdout, "********************   %d       %d    ****************\n",
@@ -528,7 +526,6 @@ void test_join_facets(const char* name, int type, int fid0, int fid1) {
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);
-    curr_time = asctime(timeinfo);
 
     sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d - %d.ply",
             name,
@@ -558,7 +555,7 @@ void test_multi_join_facets(const char* name, int type, int n, int *fid) {
     Plane iplane;
     Polyhedron poly;
 
-    char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+    char *file_name_in, *file_name_out0, *file_name_out;
 
     fprintf(stdout, "******************************************************\n");
     fprintf(stdout, "********************");
@@ -610,7 +607,6 @@ void test_multi_join_facets(const char* name, int type, int n, int *fid) {
 
     time_t seconds = time(NULL);
     tm* timeinfo = localtime(&seconds);
-    curr_time = asctime(timeinfo);
 
     sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d - %d.ply",
             name,

@@ -57,7 +57,7 @@ int Polyhedron::join_points_inner(int id) {
 
 int Polyhedron::join_points_inner_facet(int id, int fid, double* A, double* b, Vector3d* vertex_old) {
     
-    int i, j, nv, *index, count;
+    int i, nv, *index, count;
     Vector3d v;
     Plane plane;
     //Написано для случая, когда немного нарушена плоскостность грани

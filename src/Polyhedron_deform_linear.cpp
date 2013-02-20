@@ -483,10 +483,7 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     double *xold, *yold, *zold;
     double norm;
     int ncons_curr, ncons_prev;
-    bool ifPrint;
     
-    char* fname;
-    fname = new char[255];
 
     //    int i, nf, *index;
     //    double dist;
@@ -527,7 +524,6 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     //    err = deform_linear_calculate_error();
     //    K = sqrt(qmod(delta)) / err;
         err_eps = EPSILON;
-        ifPrint = false;
         ncons_prev = test_consections(false);
         for (i = 0; i < 10; ++i) {
             do {
@@ -544,19 +540,14 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
                 
                 ncons_curr = test_consections(false);
                 if (ncons_curr != ncons_prev) {
-//                if (1) {
-                    ifPrint = true;
                     ncons_prev = ncons_curr;
                 }
-//                if (ifPrint) {
-                if (1) {
-                    printf("\\hline\n %d & %d & ", i, step);
-                    printf("%le & %le & %lf & %d\\\\\n", err, norm, K, ncons_curr);
-    //                    printf("%d\t%d\terr = %le\tnorm = %le\terr_eps = %le\tK = %lf\n", i, step++, err, norm, err_eps, K);
-                    ifPrint = false;
-                    test_consections(true);
-                    join_points(id);
-                }
+
+				printf("\\hline\n %d & %d & ", i, step);
+				printf("%le & %le & %lf & %d\\\\\n", err, norm, K, ncons_curr);
+				test_consections(true);
+				join_points(id);
+
                 ++step;
                 if (step > MAX_STEPS) {
                     printf("Too much steps...\n");
@@ -572,6 +563,9 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
 
 #endif
 #ifdef DEFORM_SCALE
+	char* fname;
+	fname = new char[255];
+
     step = 0;
     err = deform_linear_calculate_error();
     K = sqrt(qmod(delta)) / err;

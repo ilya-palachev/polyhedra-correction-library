@@ -26,7 +26,7 @@ class Vector3d
 public :
     double x, y, z;
 
-    Vector3d () {}
+    Vector3d () : x ( 0 ), y ( 0 ), z ( 0 ) {}
     Vector3d ( double a, double b, double c ) : x ( a ), y ( b ), z ( c ) {}
 
     Vector3d operator - () const
@@ -174,7 +174,7 @@ public:
     Vector3d norm;
     double   dist;
 
-    Plane () {}
+    Plane () : dist ( 0 ) {}
     Plane ( const Vector3d &, const Vector3d &, const Vector3d & );
     Plane ( const Vector3d & v, const double & d ) : norm ( v ),
                                                      dist ( d ) {}

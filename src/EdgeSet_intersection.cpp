@@ -45,7 +45,6 @@ void EdgeSet::get_edge(
 int EdgeSet::search_edge(int v0, int v1) {
 
     int tmp, first, last, mid;
-    int i;
 
     if (v0 > v1) {
         tmp = v0;
@@ -81,7 +80,6 @@ void EdgeSet::add_edge(
         int pos_ff) {
 
     int tmp, first, last, mid;
-    int i;
 
     if (num >= len) {
         fprintf(stdout, "EdgeSet::add_edge : Error. Overflow.\n");

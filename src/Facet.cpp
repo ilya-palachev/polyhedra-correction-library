@@ -9,9 +9,11 @@
 
 Facet::Facet() :
 		id(-1),
-		index(new int[1]),
 		nv(0),
-		plane() {
+		plane(),
+		index(new int[1]),
+		poly(NULL)
+{
 	rgb[0] = 100;
 	rgb[1] = 100;
 	rgb[2] = 100;

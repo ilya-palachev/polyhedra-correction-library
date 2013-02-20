@@ -531,7 +531,7 @@ void Polyhedron::join_facets_rise(int fid0) {
 void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
     int i;
     int nv, *index;
-    int fl2, fl1, fr1, fr2;
+    int fr1, fr2;
 
     double d, dmin;
     int pos, tmp;
@@ -551,8 +551,6 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin) {
         }
 //        printf("\t%d ( %d )", i, index[i]);
         //Написано 2012-03-31 для решения проблемы с треугольными соседними гранями
-        fl2 = index[nv + 1 + (nv + i - 2) % nv];
-        fl1 = index[nv + 1 + (nv + i - 1) % nv];
         fr1 = index[nv + 1 + (nv + i) % nv];
         fr2 = index[nv + 1 + (nv + i + 1) % nv];
         //        if (facet[fl1].nv < 4) {

@@ -520,10 +520,7 @@ void Polyhedron::fscan_ply(const char *filename)
 
 void Polyhedron::fprint_default_0(const char *filename)
 {
-	int i, j;
-
-	FILE* file;
-	file = (FILE*)fopen(filename, "w");
+	FILE* file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
 		fprintf(stdout, "Polyhedron::fprint_default_0. Error. Cannot open file %s\n",
@@ -533,10 +530,10 @@ void Polyhedron::fprint_default_0(const char *filename)
 
 
 	fprintf(file, "%d %d\n", numv, numf);
-	for(i = 0; i < numv; ++i)
+	for(int i = 0; i < numv; ++i)
 		fprintf(file, "%.16lf %.16lf %.16lf\n", vertex[i].x, vertex[i].y, vertex[i].z);
 
-	for(i = 0; i < numf; ++i)
+	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_default_0(file);
 
 	fclose(file);
@@ -544,10 +541,7 @@ void Polyhedron::fprint_default_0(const char *filename)
 
 void Polyhedron::fprint_default_1(const char *filename)
 {
-	int i, j;
-
-	FILE* file;
-	file = (FILE*)fopen(filename, "w");
+	FILE* file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
 		fprintf(stdout, "Polyhedron::fprint_default_1. Error. Cannot open file %s\n",
@@ -556,20 +550,17 @@ void Polyhedron::fprint_default_1(const char *filename)
 	}
 
 	fprintf(file, "%d %d\n", numv, numf);
-	for(i = 0; i < numv; ++i)
+	for(int i = 0; i < numv; ++i)
 		fprintf(file, "%d %.16lf %.16lf %.16lf\n", i, vertex[i].x, vertex[i].y, vertex[i].z);
 
-	for(i = 0; i < numf; ++i)
+	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_default_1(file);
 	fclose(file);
 }
 
 void Polyhedron::fprint_my_format(const char *filename)
 {
-	int i, j;
-
-	FILE* file;
-	file = (FILE*)fopen(filename, "w");
+	FILE* file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
 		fprintf(stdout, "Polyhedron::fprint_my_format. Error. Cannot open file %s\n",
@@ -578,14 +569,14 @@ void Polyhedron::fprint_my_format(const char *filename)
 	}
 
 	fprintf(file, "%d %d\n", numv, numf);
-	for(i = 0; i < numv; ++i)
+	for(int i = 0; i < numv; ++i)
 		fprintf(file, "%.16lf %.16lf %.16lf\n", vertex[i].x, vertex[i].y, vertex[i].z);
 
-	for(i = 0; i < numf; ++i)
+	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_my_format(file);
 	fprintf(file, "\n\n\n");
-	for(i = 0; i < numv; ++i)
-		vertexinfo[i];
+	for(int i = 0; i < numv; ++i)
+		vertexinfo[i].fprint_my_format(file);
 
 	fclose(file);
 }
@@ -594,11 +585,9 @@ void Polyhedron::fprint_my_format(const char *filename)
 void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 		//comment must have 1 word
 {
-	int i, j, numv_new, v_id;
 	char* comment_w;
-	FILE* file;
 
-	file = (FILE*)fopen(filename, "w");
+	FILE* file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
 		fprintf(stdout, "Polyhedron::fscan_ply. Error. Cannot open file %s\n",
@@ -611,10 +600,10 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	if(!comment) 
             sprintf(comment_w, "unknown");
 	else 
-            sprintf(comment_w, comment);
+            sprintf(comment_w, "%s", comment);
 
-	numv_new = 0;
-	for(i = 0; i < numf; ++i)
+	int numv_new = 0;
+	for(int i = 0; i < numf; ++i)
 		numv_new += facet[i].get_nv();
 
 	fprintf(file, "ply\n");
@@ -631,10 +620,10 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	fprintf(file, "property list uchar uint vertex_indices\n");
 	fprintf(file, "end_header\n");
 
-	for(i = 0; i < numf; ++i)
+	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_ply_vertex(file);
 
-	for(i = 0; i < numf; ++i)
+	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_ply_vertex(file);
 	fclose(file);
 }
@@ -650,14 +639,12 @@ void Polyhedron::fprint_ply_scale(
 //				const int* col)
 		//comment must have 1 word
 {
-	int i, j;
 	long long int vx, vy, vz;
 	char* comment_w;
-	FILE* file;
 
 //	int ncolored = 0;
 
-	file = (FILE*)fopen(filename, "w");
+	FILE* file = (FILE*)fopen(filename, "w");
 	if(!file)
 	{
 		fprintf(stdout, "Polyhedron::fprint_ply_scale. Error. Cannot open file %s\n",
@@ -668,7 +655,7 @@ void Polyhedron::fprint_ply_scale(
 
 	comment_w = new char[255];
 	if(!comment) sprintf(comment_w, "unknown");
-	else sprintf(comment_w, comment);
+	else sprintf(comment_w, "%s", comment);
 
 
 //	numv_new = 0;
@@ -689,7 +676,7 @@ void Polyhedron::fprint_ply_scale(
 	fprintf(file, "property uchar blue\n");
 	fprintf(file, "end_header\n");
 
-	for(i = 0; i < numv; ++i)
+	for(int i = 0; i < numv; ++i)
 	{
 		vx = (long long int)scale*vertex[i].x;
 		vy = (long long int)scale*vertex[i].y;
@@ -698,7 +685,7 @@ void Polyhedron::fprint_ply_scale(
 				  vx, vy, vz);
 	}
 
-	for(i = 0; i < numf; ++i)
+	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_ply_scale(file);
 	fclose(file);
 }

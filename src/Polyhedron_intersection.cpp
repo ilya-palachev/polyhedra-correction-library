@@ -22,7 +22,6 @@ void Polyhedron::intersect(Plane iplane) {
     int* lenff;
     int num_components_new;
     int id_v_new;
-    int num_new_v;
     int v0;
     int v1;
     int fid, fid_curr, fid_next;
@@ -32,12 +31,6 @@ void Polyhedron::intersect(Plane iplane) {
 
     int v0_prev;
     int v1_prev;
-    int id0;
-    int id1;
-    int sign0;
-    int sign1;
-    int incr;
-    int nv;
 
     int num_components_local;
     int num_components_old;
@@ -74,7 +67,6 @@ void Polyhedron::intersect(Plane iplane) {
     EdgeSet total_edge_set(nume);
 
     // 1. Подготовка списков ребер
-    int n_0 = 0, n_2 = 0, n_big = 0;
 
     total_edges = 0;
     for (i = 0; i < numf; ++i) {
@@ -107,7 +99,6 @@ void Polyhedron::intersect(Plane iplane) {
     // 2. Нахождение компонент сечения
     FutureFacet buffer_new(nume);
 
-    num_new_v = 0;
     num_components_new = 0;
     bool flag = true;
     while (total_edges > 0 && flag) {
@@ -165,9 +156,6 @@ void Polyhedron::intersect(Plane iplane) {
                 fprintf(stdout, "Endless loop!!!!!\n");
                 flag = false;
                 break;
-            }
-            if (v0 == 147 && v1 == 149 && fid_next == 52) {
-                1;
             }
             if (fid_next != fid_curr)
                 --num_edges[fid_curr];

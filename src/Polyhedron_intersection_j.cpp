@@ -15,7 +15,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     int* lenff;
     int num_components_new;
     int id_v_new;
-    int num_new_v;
     int v0;
     int v1;
     int fid, fid_curr, fid_next;
@@ -25,12 +24,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
 
     int v0_prev;
     int v1_prev;
-    int id0;
-    int id1;
-    int sign0;
-    int sign1;
-    int incr;
-    int nv;
 
     int num_components_local;
     int num_components_old;
@@ -75,7 +68,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     EdgeSet total_edge_set(nume);
 
     // 1. Подготовка списков ребер
-    int n_0 = 0, n_2 = 0, n_big = 0;
 
     total_edges = 0;
     for (i = 0; i < numf; ++i) {
@@ -96,10 +88,7 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
     // 2. Нахождение компонент сечения
     FutureFacet buffer_new(nume);
 
-    num_new_v = 0;
     num_components_new = 0;
-    bool flag = true;
-//    while (total_edges > 0 && flag) {
     do {
         printf("total_edges = %d\n", total_edges);
 
@@ -218,7 +207,6 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
             
             if ((v0_prev == v0 && v1_prev == v1) || (v0_prev == v1 && v1_prev == v0)) {
                 fprintf(stdout, "Endless loop!!!!!\n");
-                flag = false;
                 break;
             }
             

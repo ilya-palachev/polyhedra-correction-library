@@ -743,7 +743,7 @@ void Polyhedron::deform_w(int id, Vector3d delta) {
 
 
 void Polyhedron::f_w(int n, double* X, double* fx, int id, bool* khi, int K) {
-    int i, j, k;
+    int i, j;
     double sx, sy, sz;
     double sa, sb, sc, sd;
     double aj, bj, cj, dj;

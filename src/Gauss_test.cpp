@@ -11,7 +11,6 @@ void mult_matrix_vector(int n, double* A, double* x, double* y);
 
 
 void Gauss_test(int n) {
-    int i;
     double *x, *b, *b0, *A, err1, err2;
     
     printf("Gauss_test:\n");
@@ -60,11 +59,11 @@ void Gauss_test(int n) {
 inline double f(int n, int i, int j)
 {
 //Variant 1
-//	if(i>j)
-//		return n-i;
-//	else
-//		return n-j;
-//
+	if(i>j)
+		return n-i;
+	else
+		return n-j;
+
 
 //Variant 2
 //	if(i>j)

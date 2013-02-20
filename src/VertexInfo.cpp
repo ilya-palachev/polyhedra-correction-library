@@ -7,8 +7,11 @@
 
 
 VertexInfo::VertexInfo() :
+id(-1),
+nf(0),
 index(NULL),
-nf(0) {
+poly(NULL)
+{
 }
 
 VertexInfo::VertexInfo(

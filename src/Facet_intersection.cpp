@@ -86,9 +86,6 @@ int Facet::prepare_edge_list(Plane iplane) {
     int i_step, i_curr, i_help;
     int up_down, in_out;
     int next_d, next_f;
-    int ii;
-
-
     int n_positive;
 
     Vector3d dir;
@@ -207,17 +204,16 @@ int Facet::prepare_edge_list(Plane iplane) {
     in_out = -1;
 
     el->goto_header();
-    bool ifFailed = false;
 
-    for (i = 0, ii = 0; i < nv; ++i) {
+    for (i = 0; i < nv; ++i) {
 
         sign_curr = signum(i_curr, iplane);
         sign_next = signum(i_next, iplane);
 
         if (sign_curr == 0 || sign_curr * sign_next == -1) {
             if (sign_next == -up_down
-                    || sign_curr == 0 && in_out == -1
-                    || sign_curr * sign_next == -1 // 2011-04-04
+                    || (sign_curr == 0 && in_out == -1)
+                    || (sign_curr * sign_next == -1) // 2011-04-04
                     ) {
                 in_out *= -1;
                 up_down *= -1;
@@ -231,14 +227,8 @@ int Facet::prepare_edge_list(Plane iplane) {
                 }
             } else {
                 printf("-----For facet %d we have critical situation...\n", id);
-                ifFailed = true;
                 break;
-//                next_d = 0;
-//                next_f = id;
             }
-            //			el->set_curr_info(next_d, next_f);
-            //			if (++ii < n_intrsct)
-            //				el->go_forward();
             if (sign_curr * sign_next == -1)
                 el->search_and_set_info(index[i_curr], index[i_next],
                     next_d, next_f);
@@ -262,15 +252,15 @@ int Facet::prepare_edge_list(Plane iplane) {
 
     el->goto_header();
 
-    for (i = 0, ii = 0; i < nv; ++i) {
+    for (i = 0; i < nv; ++i) {
 
         sign_curr = signum(i_curr, iplane);
         sign_next = signum(i_next, iplane);
 
         if (sign_curr == 0 || sign_curr * sign_next == -1) {
             if (sign_next == -up_down
-                    || sign_curr == 0 && in_out == -1
-                    || sign_curr * sign_next == -1 // 2011-04-04
+                    || (sign_curr == 0 && in_out == -1)
+                    || (sign_curr * sign_next == -1) // 2011-04-04
                     ) {
                 in_out *= -1;
                 up_down *= -1;
@@ -310,10 +300,9 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
     int v0_first, v1_first;
     int v0, v1;
     int next_f, next_d;
-    int pointer;
     int i_curr, i_next, i_prev;
     int sign_curr, sign_next, sign_prev;
-    int sign0, sign1;
+    int sign0;
     int i_step;
 
     	fprintf(stdout, "**************Пересечение грани %d*************\n", id);
@@ -402,7 +391,6 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
                 sign_curr = signum(i_curr, iplane);
             } else {
                 sign0 = signum(i0, iplane);
-                sign1 = signum(i1, iplane);
                 //Утверждение. sign0 == 1 || sign1 == 1
                 if (sign0 == 1) {
                     i_curr = i0;

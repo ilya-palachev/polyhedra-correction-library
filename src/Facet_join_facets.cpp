@@ -293,15 +293,15 @@ int Facet::test_structure() {
 Vector3d& Facet::find_mass_centre() {
     int i;
     double c = 1. / (double) nv;
-    Vector3d v(0., 0., 0.);
+    Vector3d* v = new Vector3d(0., 0., 0.);
     Vector3d a;
     for (i = 0; i < nv; ++i) {
         a = poly->vertex[index[i]];
-        v += a;
+        *v += a;
         printf("facet[%d].index[%d] = (%lf, %lf, %lf)\n", id, i, a.x, a.y, a.z);
     }
-    v *= c;
-    return v;
+    *v *= c;
+    return *v;
 }
 
 void Facet::test_pair_neighbours() {
