@@ -59,7 +59,8 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
 
     int numIterations = 0;
 
-    while (error > eps_max_error)
+//    while (error > eps_max_error)
+    do
     {
     	DBGPRINT("Iteration %d\n", numIterations);
 
@@ -77,7 +78,7 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     	{
     		break;
     	}
-    }
+    } while (error > eps_max_error);
 
 
     fclose(fout);
@@ -185,6 +186,15 @@ int Polyhedron::corpol_iteration(int nume, Edge* edges, int N,
     {
         solution[i] = rightPart[i];
     }
+
+    for (int ifacet = 0; ifacet < numf; ++ifacet)
+    {
+    	facet[ifacet].plane.norm.x = solution[5 * ifacet];
+    	facet[ifacet].plane.norm.y = solution[5 * ifacet + 1];
+    	facet[ifacet].plane.norm.z = solution[5 * ifacet + 2];
+    	facet[ifacet].plane.dist = solution[5 * ifacet + 3];
+    }
+
     DBG_END;
     return ret;
 }
