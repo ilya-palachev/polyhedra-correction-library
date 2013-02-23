@@ -9,9 +9,27 @@
 
 const double eps_max_error = 1e-6;
 
+void print_matrix2(FILE* file, int nrow, int ncol, double* a)
+{
+	fprintf(file, "=========begin=of=matrix=================\n");
+	for (int irow = 0; irow < nrow; ++irow)
+	{
+		for (int icol = 0; icol < ncol; ++icol)
+		{
+			fprintf(file, "%lf\t", a[ncol * irow + icol]);
+		}
+		fprintf(file, "\n");
+	}
+	fprintf(file, "=========end=of=matrix===================\n");
+}
+
+static FILE* fout;
+
 int Polyhedron::correct_polyhedron(int N, SContour* contours)
 {
 	DBG_START;
+
+	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
     int dim = numf * 5;
     
@@ -44,9 +62,9 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     while (error > eps_max_error)
     {
     	DBGPRINT("Iteration %d\n", numIterations);
-    	corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
-                rightPart, solution);
 
+    	int ret = corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
+                rightPart, solution);
         for (int i = 0; i < numf; ++i)
         {
             prevPlanes[i] = facet[i].plane;
@@ -55,8 +73,30 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
                 prevPlanes);
         DBGPRINT("error = %lf", error);
     	++numIterations;
+    	if (ret != true)
+    	{
+    		break;
+    	}
     }
 
+
+    fclose(fout);
+
+    if (matrix != NULL)
+    {
+    	delete[] matrix;
+    	matrix = NULL;
+    }
+    if (rightPart != NULL)
+    {
+    	delete[] rightPart;
+    	rightPart = NULL;
+    }
+    if (solution != NULL)
+    {
+    	delete[] solution;
+    	solution = NULL;
+    }
     DBG_END;
     return 0;
 }
@@ -137,9 +177,11 @@ int Polyhedron::corpol_iteration(int nume, Edge* edges, int N,
 	DBG_START;
     corpol_calculate_matrix(nume, edges, N, contours, prevPlanes, matrix,
             rightPart, solution);
-    int ret = Gauss_string(5 * numf, matrix, rightPart);
+    int dim = 5 * numf;
+    print_matrix2(fout, dim, dim, matrix);
+    int ret = Gauss_string(dim, matrix, rightPart);
     
-    for (int i = 0; i < 5 * numf; ++i)
+    for (int i = 0; i < dim; ++i)
     {
         solution[i] = rightPart[i];
     }
@@ -175,12 +217,16 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
         int i_dk_ak = i_ak_ak + 3 * 5 * numf;
         int i_lk_ak = i_ak_ak + 4 * 5 * numf;
         
-        matrix[i_lk_ak] = prevPlanes[iplane].norm.x;
-        matrix[i_lk_ak + 1] = prevPlanes[iplane].norm.y;
-        matrix[i_lk_ak + 2] = prevPlanes[iplane].norm.z;
+        matrix[i_lk_ak] = planePrevThis.norm.x;
+        matrix[i_lk_ak + 1] = planePrevThis.norm.y;
+        matrix[i_lk_ak + 2] = planePrevThis.norm.z;
         matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0;
         rightPart[5 * iplane + 4] = 1.;
         
+        matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
+        matrix[i_bk_ak + 4] = 0.5 * planePrevThis.norm.y;
+        matrix[i_ck_ak + 4] = 0.5 * planePrevThis.norm.z;
+
         for (int iedge = 0; iedge < nv; ++iedge)
         {
             int v0 = index[iedge];
