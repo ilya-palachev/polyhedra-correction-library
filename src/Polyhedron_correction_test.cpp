@@ -60,13 +60,12 @@ int Polyhedron::corpol_test_create_contours(
     
     for (int icont = 0; icont < ncont; ++icont)
     {
-#ifndef NDEBUG
-        printf("corpol_test_create_contours : Creating contour #%d\n", icont);
-#endif
-        double angle = 2 * M_PI * (icont + 0.001) / ncont;
+        double angle = 2 * M_PI * (icont) / ncont;
         Vector3d nu = Vector3d(cos(angle), sin(angle), 0);
         Plane planeOfProjection = Plane(nu, 0);
-        
+        DBGPRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n",
+                		icont, nu.x, nu.y, nu.z);
+
         int ne = 0;
         
         for (int iedge = 0; iedge < nume; ++iedge)
