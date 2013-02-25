@@ -52,6 +52,11 @@ Edge::Edge(const Edge& orig)  :
         contourNearestSide(NULL),
         contourDirection(NULL) {
     
+	if (numc < 1)
+	{
+		return;
+	}
+
     contourNums = new int [numc];
     
     for (int i = 0; i < numc; ++i) {

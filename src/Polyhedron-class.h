@@ -189,19 +189,27 @@ public:
                 int N, SContour* contours);
         int corpol_prep_map_between_edges_and_contours(int nume, Edge* edges, 
                 int N, SContour* contours);
+        bool corpol_edgeIsVisibleOnPlane(
+        		Edge& edge,
+        		Plane planeOfProjection);
         bool corpol_collinear_visibility(int v0, int v1,
 				Plane planeOfProjection, int ifacet);
 
         // Polyhedron_correction_test.cpp
         
-        int corpol_test(int ncont, double maxMoveDelta);
+        int corpolTest(int ncont, double maxMoveDelta);
         
-        int corpol_test_create_contours(int nume, Edge* edges, int ncont, 
+        SContour& corpolTest_createOneContour(
+        		int numEdges, Edge* edges,
+        		int icont, Plane planeOfProjection,
+        		bool* bufferBool, int* bufferInt0, int* bufferInt1);
+
+        int corpolTest_createAllContours(int numEdges, Edge* edges, int numContours,
                 SContour* contours);
         
-        void corpol_test_slight_random_move(double maxDelta);
+        void corpolTest_slightRandomMove(double maxDelta);
 
-        void make_cube(double a);
+        void makeCube(double a);
         
 };
 

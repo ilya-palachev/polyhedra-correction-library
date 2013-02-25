@@ -64,12 +64,9 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         SContour* contours)
 {
 	DBG_START;
-    Plane pi0, pi1;
-    double sign0, sign1;
-    Vector3d nu;
     
-    int * buf = new int[ncont];
-    int * buf1 = new int[ncont];
+    bool* ifVisibleOnCont = new bool[ncont];
+
     
     int nVisibleOnCont;
     
@@ -77,119 +74,28 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
     {
 
         nVisibleOnCont = 0;
-        int v0 = edges[iedge].v0;
-        int v1 = edges[iedge].v1;
 
-        DBGPRINT("Processing edge %d (%d, %d)\n", iedge, v0, v1);
+        DBGPRINT("Processing edge %d (%d, %d)\n", iedge, edges[iedge].v0, edges[iedge].v1);
 
-        int f0 = edges[iedge].f0;
-        int f1 = edges[iedge].f1;
-        pi0 = facet[edges[iedge].f0].plane;
-        pi1 = facet[edges[iedge].f1].plane;
         for (int icont = 0; icont < ncont; ++icont)
         {
-            nu = contours[icont].plane.norm;
-            sign0 = pi0.norm * nu;
-            sign1 = pi1.norm * nu;
-            if (sign0 * sign1 <= 0)
-            {
-                buf[nVisibleOnCont] = icont;
-                ++nVisibleOnCont;
-//                DBGPRINT("Edge %d (%d, %d) is visible from contour %d",
-//                		iedge, v0, v1, icont);
-            }
-        }
-        
-        DBGPRINT("nVisibleOnCont = %d, buf:", nVisibleOnCont);
-        for (int icont = 0; icont < nVisibleOnCont; ++icont)
-        {
-        	DBGPRINT2("%d, ", buf[icont]);
-        }
-        DBGPRINT("");
-
-        ///////////////////////////////////////////////////////////////
-        // Some planes of projection can be orthogonal to facet.     //
-        // In this case we must eliminate all planes of projection   //
-        // on which the edge is invisible...                         //
-        ///////////////////////////////////////////////////////////////
-
-        DBGPRINT("Start of elimination.");
-        bool* ifVisibleOnCont = new bool[nVisibleOnCont];
-        for (int i = 0; i < nVisibleOnCont; ++i)
-        {
-        	ifVisibleOnCont[i] = true;
-        }
-
-        for (int icont = 0; icont < nVisibleOnCont; ++icont)
-        {
-        	int iCurrCont = buf[icont];
-        	DBGPRINT("\tProcessing contour #%d (it is number %d in the buffer)", iCurrCont, icont);
-
-        	Plane planeOfProjection = contours[iCurrCont].plane;
-
-        	bool ifOrthogonalTo1stFacet = fabs(pi0.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
-        	bool ifOrthogonalTo2ndFacet = fabs(pi1.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
-
-        	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet)
-        	{
-        		// Regular case. Nothing is orthogonal.
-        		DBGPRINT("\t\tRegular case. Nothing is orthogonal.");
-        		ifVisibleOnCont[icont] = true;
-        		continue;
-        	}
-
-        	if (ifOrthogonalTo1stFacet && ifOrthogonalTo2ndFacet)
-        	{
-        		// When the edge is orthogonal to the plane of projection
-        		DBGPRINT("\t\tThe edge is orthogonal to the plane of projection");
-        		ifVisibleOnCont[icont] = false;
-        		continue;
-        	}
-
-        	if (ifOrthogonalTo1stFacet)
-        	{
-        		// When only the first facet is orthogonal to the plane of projection
-        		DBGPRINT("\t\tOnly the first facet is orthogonal to the plane of projection");
-        		ifVisibleOnCont[icont] = corpol_collinear_visibility(v0, v1,
-        				planeOfProjection, f0);
-        		continue;
-        	}
-
-        	if (ifOrthogonalTo2ndFacet)
-        	{
-        		// When only the second facet is orthogonal to the plane of projection
-        		DBGPRINT("\t\tOnly the second facet is orthogonal to the plane of projection");
-        		ifVisibleOnCont[icont] = corpol_collinear_visibility(v0, v1,
-        				planeOfProjection, f1);
-        		continue;
-        	}
-        }
-
-
-        // 4. Delete all edges marked as invisible from the buffer
-        // (that means that they are not copied to the buf1 from buf)
-        int newNVisibleOnCont = 0;
-        for (int i  = 0; i < nVisibleOnCont; ++i)
-        {
-        	if (ifVisibleOnCont[i])
-        	{
-        		buf1[newNVisibleOnCont++] = buf[i];
-        	}
-        }
-        nVisibleOnCont = newNVisibleOnCont;
-
-        DBGPRINT("buf1:");
-        for (int icont = 0; icont < nVisibleOnCont; ++icont)
-        {
-        	printf("%d, ", buf1[icont]);
+        	Plane planeOfProjection = contours[icont].plane;
+        	bool ifVisibleOnCurrCont = corpol_edgeIsVisibleOnPlane(edges[iedge], planeOfProjection);
+        	ifVisibleOnCont[icont] = ifVisibleOnCurrCont;
+        	nVisibleOnCont += ifVisibleOnCurrCont;
         }
 
         edges[iedge].numc = nVisibleOnCont;
 
         edges[iedge].contourNums = new int[nVisibleOnCont];
-        for (int j = 0; j < nVisibleOnCont; ++j)
+
+        int icontVisible = 0;
+        for (int icont = 0; icont < ncont; ++icont)
         {
-            edges[iedge].contourNums[j] = buf1[j];
+        	if (ifVisibleOnCont[icont])
+        	{
+        		edges[iedge].contourNums[icontVisible++] = icont;
+        	}
         }
         
         edges[iedge].contourNearestSide = new int[nVisibleOnCont];
@@ -198,18 +104,75 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
         edges[iedge].my_fprint(stdout);
     }
     
-    if (buf != NULL)
+    if (ifVisibleOnCont != NULL)
     {
-        delete[] buf;
-        buf = NULL;
+    	delete[] ifVisibleOnCont;
+    	ifVisibleOnCont = NULL;
     }
-    if (buf1 != NULL)
-    {
-        delete[] buf1;
-        buf1 = NULL;
-    }
+
     DBG_END;
     return 0;
+}
+
+bool Polyhedron::corpol_edgeIsVisibleOnPlane(
+		Edge& edge,
+		Plane planeOfProjection)
+{
+	DBG_START;
+	int v0 = edge.v0;
+	int v1 = edge.v1;
+	int f0 = edge.f0;
+	int f1 = edge.f1;
+	Plane pi0 = facet[f0].plane;
+	Plane pi1 = facet[f1].plane;
+    Vector3d nu = planeOfProjection.norm;
+    double sign0 = pi0.norm * nu;
+    double sign1 = pi1.norm * nu;
+    if (sign0 * sign1 > EPS_COLLINEARITY)
+    {
+    	DBGPRINT("Edge is invisible: it's covered by facets, sign0 = %le, sign1 = %le"
+    			"sign0 * sign1 = %le",
+    			sign0, sign1, sign0 * sign1);
+    	DBG_END;
+    	return false;
+    }
+
+	bool ifOrthogonalTo1stFacet = fabs(pi0.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
+	bool ifOrthogonalTo2ndFacet = fabs(pi1.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
+
+	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet)
+	{
+		// Regular case. Nothing is orthogonal.
+		DBGPRINT("\t\tRegular case. Nothing is orthogonal.");
+		DBG_END;
+		return true;
+	}
+
+	else if (ifOrthogonalTo1stFacet && ifOrthogonalTo2ndFacet)
+	{
+		// When the edge is orthogonal to the plane of projection
+		DBGPRINT("\t\tThe edge is orthogonal to the plane of projection");
+		DBG_END;
+		return false;
+	}
+
+	else if (ifOrthogonalTo1stFacet)
+	{
+		// When only the first facet is orthogonal to the plane of projection
+		DBGPRINT("\t\tOnly the first facet is orthogonal to the plane of projection");
+		DBG_END;
+		return corpol_collinear_visibility(v0, v1,
+				planeOfProjection, f0);
+	}
+
+	else // ifOrthogonalTo2ndFacet
+	{
+		// When only the second facet is orthogonal to the plane of projection
+		DBGPRINT("\t\tOnly the second facet is orthogonal to the plane of projection");
+		DBG_END;
+		return corpol_collinear_visibility(v0, v1,
+				planeOfProjection, f1);
+	}
 }
 
 bool Polyhedron::corpol_collinear_visibility(
@@ -218,6 +181,7 @@ bool Polyhedron::corpol_collinear_visibility(
 		Plane planeOfProjection,
 		int ifacet)
 {
+	DBG_START;
 	int nv = facet[ifacet].nv;
 	int* index = facet[ifacet].index;
 	Vector3d nu = planeOfProjection.norm;
@@ -243,6 +207,21 @@ bool Polyhedron::corpol_collinear_visibility(
 	Vector3d vector1Max = planeOfProjection.project(vertex[v1Max]);
 	Vector3d mainEdge = vector1Max - vector0Max;
 
+	// 1.1. If mainEdge is orthogonal to the plane of projection,
+	// then we take its another edge which includes vertex iverteMax
+
+	if (qmod(mainEdge % nu) < EPS_COLLINEARITY)
+	{
+		DBGPRINT("mainEdge (%d, %d) is orthogonal to the plane of projection, "
+				"so we are taking another edge including ivertexMax (%d)",
+				v0Max, v1Max, ivertexMax);
+		v0Max = index[(ivertexMax - 1 + nv) % nv];
+		v1Max = index[ivertexMax];
+		vector0Max = planeOfProjection.project(vertex[v0Max]);
+		vector1Max = planeOfProjection.project(vertex[v1Max]);
+		mainEdge = vector1Max - vector0Max;
+	}
+
 	// 2. Go around the facet, beginning from the closest vertex.
 	for (int ivertex = 0; ivertex < nv; ++ivertex)
 	{
@@ -255,11 +234,15 @@ bool Polyhedron::corpol_collinear_visibility(
 		{
 			// 3. In case of non-positive scalar product
 			// -- eliminate the edge from the buffer
+			DBGPRINT("main edge = (%d, %d) ; proc edge = (%d, %d)",
+					v0Max, v1Max, v0, v1);
+			DBG_END;
 			return curEdge * mainEdge > 0;
 		}
 	}
 	DBGPRINT("Error. Edge (%d, %d) cannot be found in facet %d",
 			v0processed, v1processed, ifacet);
+	DBG_END;
 	return false;
 }
 
