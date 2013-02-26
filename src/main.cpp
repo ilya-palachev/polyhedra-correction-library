@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 
     Polyhedron poly;
     printf("Polyhedron has been created...\n");
-    poly.corpolTest(4, 0);
+    poly.corpolTest(4, 1e-3);
     
 //    int fid[3] = {0, 250, 14};
 //    test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
