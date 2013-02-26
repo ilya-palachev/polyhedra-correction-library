@@ -125,20 +125,20 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 	int f1 = edge.f1;
 	Plane pi0 = facet[f0].plane;
 	Plane pi1 = facet[f1].plane;
-    Vector3d nu = planeOfProjection.norm;
-    double sign0 = pi0.norm * nu;
-    double sign1 = pi1.norm * nu;
-    if (sign0 * sign1 > EPS_COLLINEARITY)
+    double sign0 = pi0.norm * planeOfProjection.norm;
+    double sign1 = pi1.norm * planeOfProjection.norm;
+
+    if ( (sign0 > EPS_COLLINEARITY && sign1 > EPS_COLLINEARITY) ||
+    		(sign0 < EPS_COLLINEARITY && sign1 < EPS_COLLINEARITY) )
     {
-    	DBGPRINT("Edge is invisible: it's covered by facets, sign0 = %le, sign1 = %le"
-    			"sign0 * sign1 = %le",
-    			sign0, sign1, sign0 * sign1);
+    	DBGPRINT("Edge is invisible: it's covered by facets, sign0 = %le, sign1 = %le",
+    			sign0, sign1);
     	DBG_END;
     	return false;
     }
 
-	bool ifOrthogonalTo1stFacet = fabs(pi0.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
-	bool ifOrthogonalTo2ndFacet = fabs(pi1.norm * planeOfProjection.norm) < EPS_COLLINEARITY;
+	bool ifOrthogonalTo1stFacet = fabs(sign0) < EPS_COLLINEARITY;
+	bool ifOrthogonalTo2ndFacet = fabs(sign1) < EPS_COLLINEARITY;
 
 	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet)
 	{

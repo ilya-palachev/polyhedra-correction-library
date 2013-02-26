@@ -29,7 +29,7 @@
 #define OUTPUT
 //#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
 #define EPS_SIGNUM 1e-15
-#define EPS_COLLINEARITY 1e-16
+#define EPS_COLLINEARITY 1e-14
 #include "DebugPrint.h"
 
 
