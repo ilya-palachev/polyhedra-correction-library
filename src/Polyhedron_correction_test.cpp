@@ -36,7 +36,7 @@ int Polyhedron::corpolTest(int numContours, double maxMoveDelta)
     printf("------------\n End of print contours in corpol_test\n");
 #endif
     
-//    corpol_test_slight_random_move(maxMoveDelta);
+    corpolTest_slightRandomMove(maxMoveDelta);
 
     correct_polyhedron(numContours, contours);
 
