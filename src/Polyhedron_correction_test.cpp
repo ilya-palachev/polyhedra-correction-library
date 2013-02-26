@@ -3,33 +3,33 @@
 #include <ctime>
 
 
-int Polyhedron::corpolTest(int ncont, double maxMoveDelta)
+int Polyhedron::corpolTest(int numContours, double maxMoveDelta)
 {
 	DBG_START;
-    SContour* contours = new SContour [ncont];
+    SContour* contours = new SContour [numContours];
     
-    int nume;
+    int numEdges;
     Edge* edges;
     
     makeCube(1.);
     preprocess_polyhedron();
     
-    int numeMax = 0;
+    int numEdgesMax = 0;
     for (int i = 0; i < numf; ++i)
     {
-        numeMax += facet[i].nv;
+        numEdgesMax += facet[i].nv;
     }
-    numeMax = numeMax / 2;
+    numEdgesMax = numEdgesMax / 2;
     
-    edges = new Edge [numeMax];
+    edges = new Edge [numEdgesMax];
 
-    preprocess_edges(nume, numeMax, edges);
+    preprocess_edges(numEdges, numEdgesMax, edges);
 
-    corpolTest_createAllContours(nume, edges, ncont, contours);
+    corpolTest_createAllContours(numEdges, edges, numContours, contours);
     
 #ifndef NDEBUG
     printf("------------\n Begin of print contours in corpol_test\n");
-    for (int i = 0; i < nume; ++i)
+    for (int i = 0; i < numContours; ++i)
     {
         contours[i].my_fprint(stdout);
     }
@@ -38,7 +38,7 @@ int Polyhedron::corpolTest(int ncont, double maxMoveDelta)
     
 //    corpol_test_slight_random_move(maxMoveDelta);
 
-    correct_polyhedron(ncont, contours);
+    correct_polyhedron(numContours, contours);
 
     if (edges != NULL)
     {
@@ -210,7 +210,7 @@ int Polyhedron::corpolTest_createAllContours(
 
 
 
-void Polyhedron::makeCube(double a)
+void Polyhedron::makeCube(double halfSideLength)
 {
 #ifndef NDEBUG
     printf("I'm going to clear polyhedon!!!\n");
@@ -248,7 +248,7 @@ void Polyhedron::makeCube(double a)
     printf("edge_list deleted !!\n");
 #endif //NDEBUG
 #ifndef NDEBUG
-    printf("Polyhedon has been cleared before recreating as a cube...\n");
+    printf("Polyhedron has been cleared before recreating as a cube...\n");
 #endif //NDEBUG
         
     numf = 6;
@@ -257,14 +257,14 @@ void Polyhedron::makeCube(double a)
     vertex = new Vector3d [numv];
     facet = new Facet [numf];
     
-    vertex[0] = Vector3d(-a, -a, -a);
-    vertex[1] = Vector3d( a, -a, -a);
-    vertex[2] = Vector3d( a,  a, -a);
-    vertex[3] = Vector3d(-a,  a, -a);
-    vertex[4] = Vector3d(-a, -a,  a);
-    vertex[5] = Vector3d( a, -a,  a);
-    vertex[6] = Vector3d( a,  a,  a);
-    vertex[7] = Vector3d(-a,  a,  a);
+    vertex[0] = Vector3d(-halfSideLength, -halfSideLength, -halfSideLength);
+    vertex[1] = Vector3d( halfSideLength, -halfSideLength, -halfSideLength);
+    vertex[2] = Vector3d( halfSideLength,  halfSideLength, -halfSideLength);
+    vertex[3] = Vector3d(-halfSideLength,  halfSideLength, -halfSideLength);
+    vertex[4] = Vector3d(-halfSideLength, -halfSideLength,  halfSideLength);
+    vertex[5] = Vector3d( halfSideLength, -halfSideLength,  halfSideLength);
+    vertex[6] = Vector3d( halfSideLength,  halfSideLength,  halfSideLength);
+    vertex[7] = Vector3d(-halfSideLength,  halfSideLength,  halfSideLength);
     
     for (int i = 0; i < numf; ++i)
     {
@@ -276,37 +276,37 @@ void Polyhedron::makeCube(double a)
     facet[0].index[1] = 3;
     facet[0].index[2] = 2;
     facet[0].index[3] = 1;
-    facet[0].plane = Plane(Vector3d(0., 0., -1.), -a);
+    facet[0].plane = Plane(Vector3d(0., 0., -1.), -halfSideLength);
     
     facet[1].index[0] = 4;
     facet[1].index[1] = 5;
     facet[1].index[2] = 6;
     facet[1].index[3] = 7;
-    facet[1].plane = Plane(Vector3d(0., 0., 1.), -a);
+    facet[1].plane = Plane(Vector3d(0., 0., 1.), -halfSideLength);
     
     facet[2].index[0] = 1;
     facet[2].index[1] = 2;
     facet[2].index[2] = 6;
     facet[2].index[3] = 5;
-    facet[2].plane = Plane(Vector3d(1., 0., 0.), -a);   
+    facet[2].plane = Plane(Vector3d(1., 0., 0.), -halfSideLength);
     
     facet[3].index[0] = 2;
     facet[3].index[1] = 3;
     facet[3].index[2] = 7;
     facet[3].index[3] = 6;
-    facet[3].plane = Plane(Vector3d(0., 1., 0.), -a);
+    facet[3].plane = Plane(Vector3d(0., 1., 0.), -halfSideLength);
     
     facet[4].index[0] = 0;
     facet[4].index[1] = 4;
     facet[4].index[2] = 7;
     facet[4].index[3] = 3;
-    facet[4].plane = Plane(Vector3d(-1., 0., 0.), -a);
+    facet[4].plane = Plane(Vector3d(-1., 0., 0.), -halfSideLength);
     
     facet[5].index[0] = 0;
     facet[5].index[1] = 1;
     facet[5].index[2] = 5;
     facet[5].index[3] = 4;
-    facet[5].plane = Plane(Vector3d(0., -1., 0.), -a);
+    facet[5].plane = Plane(Vector3d(0., -1., 0.), -halfSideLength);
 
     for (int i = 0; i < numf; ++i)
     {
@@ -314,7 +314,7 @@ void Polyhedron::makeCube(double a)
     }
 
 #ifndef NDEBUG
-    printf("Polyhedron has been recreated as a cube.\n");
+    printf("Polyhedron has been recreated as halfSideLength cube.\n");
 #endif //NDEBUG
 }
 
