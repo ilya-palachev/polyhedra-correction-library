@@ -55,12 +55,11 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     double error = corpol_calculate_functional(nume, edges, N, contours,
             prevPlanes);
 
-    DBGPRINT("first functional calculation done. error = %lf", error);
+    DBGPRINT("first functional calculation done. error = %le", error);
 
     int numIterations = 0;
 
-//    while (error > eps_max_error)
-    do
+    while (error > eps_max_error)
     {
     	DBGPRINT("Iteration %d\n", numIterations);
 
@@ -72,13 +71,13 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
         }
         error = corpol_calculate_functional(nume, edges, N, contours,
                 prevPlanes);
-        DBGPRINT("error = %lf", error);
+        DBGPRINT("error = %le", error);
     	++numIterations;
     	if (ret != true)
     	{
     		break;
     	}
-    } while (error > eps_max_error);
+    }
 
 
     fclose(fout);
