@@ -8,6 +8,7 @@
 #include "Polyhedron.h"
 
 const double EPS_MAX_ERROR = 1e-6;
+const double EPS_FOR_PRINT = 1e-15;
 
 void print_matrix2(FILE* file, int nrow, int ncol, double* a)
 {
@@ -16,16 +17,32 @@ void print_matrix2(FILE* file, int nrow, int ncol, double* a)
 	{
 		for (int icol = 0; icol < ncol; ++icol)
 		{
-			fprintf(file, "%lf\t", a[ncol * irow + icol]);
+			double valuePrinted = a[ncol * irow + icol];
+			if (fabs(valuePrinted) < EPS_FOR_PRINT)
+			{
+				fprintf(file, "\t |\t");
+			}
+			else
+			{
+				fprintf(file, "%lf |\t", valuePrinted);
+			}
 		}
 		fprintf(file, "\n");
+		if (irow % 5 == 4)
+		{
+			for (int icol = 0; icol < ncol; ++icol)
+			{
+				fprintf(file, "----------------");
+			}
+			fprintf(file, "\n");
+		}
 	}
 	fprintf(file, "=========end=of=matrix===================\n");
 }
 
 static FILE* fout;
 
-int Polyhedron::correct_polyhedron(int N, SContour* contours)
+int Polyhedron::correct_polyhedron(int numContours, SContour* contours)
 {
 	DBG_START;
 
@@ -33,10 +50,10 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
 
     int dim = numf * 5;
     
-    int nume;
+    int numEdges;
     Edge* edges = NULL;
 
-    corpol_preprocess(nume, edges, N, contours);
+    corpol_preprocess(numEdges, edges, numContours, contours);
     
     double * matrix = new double [dim * dim];
     double * rightPart = new double [dim];
@@ -52,8 +69,11 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     }
     DBGPRINT("memory initialization done");
 
-    double error = corpol_calculate_functional(nume, edges, N, contours,
+    double error = corpol_calculate_functional(numEdges, edges, numContours, contours,
             prevPlanes);
+    corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes, matrix,
+            rightPart, solution);
+    print_matrix2(fout, dim, dim, matrix);
 
     DBGPRINT("first functional calculation done. error = %le", error);
 
@@ -69,13 +89,13 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
     	this->my_fprint(fileName);
     	delete[] fileName;
 
-    	int ret = corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
+    	int ret = corpol_iteration(numEdges, edges, numContours, contours, prevPlanes, matrix,
                 rightPart, solution);
         for (int i = 0; i < numf; ++i)
         {
             prevPlanes[i] = facet[i].plane;
         }
-        error = corpol_calculate_functional(nume, edges, N, contours,
+        error = corpol_calculate_functional(numEdges, edges, numContours, contours,
                 prevPlanes);
         DBGPRINT("error = %le", error);
     	++numIterations;
@@ -176,12 +196,12 @@ double Polyhedron::corpol_calculate_functional(int nume,
     return sum;
 }
 
-int Polyhedron::corpol_iteration(int nume, Edge* edges, int N, 
+int Polyhedron::corpol_iteration(int numEdges, Edge* edges, int numContours, 
         SContour* contours, Plane* prevPlanes, double* matrix, 
         double* rightPart, double* solution)
 {
 	DBG_START;
-    corpol_calculate_matrix(nume, edges, N, contours, prevPlanes, matrix,
+    corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes, matrix,
             rightPart, solution);
     int dim = 5 * numf;
     print_matrix2(fout, dim, dim, matrix);
