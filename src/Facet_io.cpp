@@ -16,9 +16,11 @@ void Facet::my_fprint(FILE* file) {
 void Facet::my_fprint_all(FILE* file) {
 	int i;
 	fprintf(file, "\n------------ Facet %d: ------------\n", id);
-	fprintf(file, "id = %d\nnv = %d\n", id, nv);
-//	fprintf(file, "plane : (%.2lf) * x + (%.2lf) * y + (%.2lf) * z + (%.2lf) = 0.)\n",
-//			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	fprintf(file, "id = %d\n nv = %d\n", id, nv);
+	fprintf(file, "a = %lf, b = %lf, c = %lf, d = %lf\n",
+			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	fprintf(file, "plane : (%.2lf) * x + (%.2lf) * y + (%.2lf) * z + (%.2lf) = 0.)\n",
+			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	
 	fprintf(file, "index :       ");
 	for (i = 0; i < nv; ++i)

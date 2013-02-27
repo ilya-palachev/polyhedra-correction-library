@@ -266,10 +266,12 @@ void Polyhedron::makeCube(double halfSideLength)
     vertex[6] = Vector3d( halfSideLength,  halfSideLength,  halfSideLength);
     vertex[7] = Vector3d(-halfSideLength,  halfSideLength,  halfSideLength);
     
-    for (int i = 0; i < numf; ++i)
+    for (int ifacet = 0; ifacet < numf; ++ifacet)
     {
-        int nv = facet[i].nv = 4;
-        facet[i].index = new int [3 * nv + 1];
+        int nv = facet[ifacet].nv = 4;
+        facet[ifacet].index = new int [3 * nv + 1];
+        facet[ifacet].id = ifacet;
+        facet[ifacet].poly = this;
     }
     
     facet[0].index[0] = 0;

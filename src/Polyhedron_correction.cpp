@@ -7,7 +7,7 @@
 
 #include "Polyhedron.h"
 
-const double eps_max_error = 1e-6;
+const double EPS_MAX_ERROR = 1e-6;
 
 void print_matrix2(FILE* file, int nrow, int ncol, double* a)
 {
@@ -59,9 +59,15 @@ int Polyhedron::correct_polyhedron(int N, SContour* contours)
 
     int numIterations = 0;
 
-    while (error > eps_max_error)
+    while (error > EPS_MAX_ERROR)
     {
     	DBGPRINT("Iteration %d\n", numIterations);
+
+    	char* fileName = new char[255];
+    	sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt", numIterations);
+
+    	this->my_fprint(fileName);
+    	delete[] fileName;
 
     	int ret = corpol_iteration(nume, edges, N, contours, prevPlanes, matrix,
                 rightPart, solution);
