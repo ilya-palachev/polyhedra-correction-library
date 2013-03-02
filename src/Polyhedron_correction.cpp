@@ -252,9 +252,9 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
         int i_dk_ak = i_ak_ak + 3 * 5 * numf;
         int i_lk_ak = i_ak_ak + 4 * 5 * numf;
         
-        matrix[i_lk_ak] = planePrevThis.norm.x;
-        matrix[i_lk_ak + 1] = planePrevThis.norm.y;
-        matrix[i_lk_ak + 2] = planePrevThis.norm.z;
+        matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
+        matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
+        matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
         matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0;
         rightPart[5 * iplane + 4] = 1.;
         
