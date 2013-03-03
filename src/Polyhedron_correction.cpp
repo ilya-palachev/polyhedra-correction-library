@@ -303,10 +303,6 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
                         planeOfProjection.norm /
                         ((planePrevThis.norm - planePrevNeighbour.norm) *
                         planeOfProjection.norm);
-                if (iplane > iplaneNeighbour)
-                {
-                	gamma_ij = 1 - gamma_ij;
-                }
                 DBGPRINT("\t\t iplane = %d, edgeid = %d, curContour = %d; gamma_ij = %lf",
                 		iplane, edgeid, curContour, gamma_ij);
                 
