@@ -241,6 +241,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
     
     for (int iplane = 0; iplane < numf; ++iplane)
     {
+    	DBGPRINT("Processing facet # %d", iplane);
         int nv = facet[iplane].nv;
         int * index = facet[iplane].index;
         
@@ -266,6 +267,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
         {
             int v0 = index[iedge];
             int v1 = index[iedge + 1];
+            DBGPRINT("\t Processing edge (%d, %d)\n", v0, v1);
             int iplaneNeighbour = index[nv + 1 + iedge];
 
             int i_ak_an = 5 * numf * 5 * iplane + 5 * iplaneNeighbour;
@@ -277,6 +279,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
             Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
             
             int edgeid = preed_find(nume, edges, v0, v1);
+            DBGPRINT("\t It is edge # %d in the list", edgeid);
             
             if (edgeid == -1)
             {
@@ -290,6 +293,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
             
             for (int icont = 0; icont < nc; ++icont)
             {
+            	DBGPRINT("\t\t Processing contour # %d", icont);
                 int curContour = cnums[icont];
                 int curNearestSide = cnearest[icont];
                 SideOfContour * sides = contours[curContour].sides;
@@ -299,6 +303,12 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
                         planeOfProjection.norm /
                         ((planePrevThis.norm - planePrevNeighbour.norm) *
                         planeOfProjection.norm);
+                if (iplane > iplaneNeighbour)
+                {
+                	gamma_ij = 1 - gamma_ij;
+                }
+                DBGPRINT("\t\t iplane = %d, edgeid = %d, curContour = %d; gamma_ij = %lf",
+                		iplane, edgeid, curContour, gamma_ij);
                 
                 Vector3d A_ij1 = sides[curNearestSide].A1;
                 Vector3d A_ij2 = sides[curNearestSide].A2;
@@ -309,6 +319,8 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
                 double x1 = A_ij2.x;
                 double y1 = A_ij2.y;
                 double z1 = A_ij2.z;
+                DBGPRINT("\t\t A_ij1 = (%lf, %lf, %lf)", x0, y1, z1);
+                DBGPRINT("\t\t A_ij2 = (%lf, %lf, %lf)", x1, y1, z1);
                 
                 double xx = x0 * x0 + x1 * x1;
                 double xy = x0 * y0 + x1 * y1;
@@ -341,7 +353,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
                 matrix[i_dk_ak] += gamma1 * x;
                 matrix[i_dk_ak + 1] += gamma1 * y;
                 matrix[i_dk_ak + 2] += gamma1 * z;
-                matrix[i_dk_ak + 3] += gamma1;
+                matrix[i_dk_ak + 3] += gamma1 * 2;
                 
                 matrix[i_ak_an] += gamma2 * xx;
                 matrix[i_ak_an + 1] += gamma2 * xy;
@@ -361,7 +373,7 @@ void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N,
                 matrix[i_dk_an] += gamma2 * x;
                 matrix[i_dk_an + 1] += gamma2 * y;
                 matrix[i_dk_an + 2] += gamma2 * z;
-                matrix[i_dk_an + 3] += gamma2;
+                matrix[i_dk_an + 3] += gamma2 * 2;
             }
         }
     }
