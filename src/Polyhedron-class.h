@@ -207,7 +207,9 @@ public:
 	int corpolTest_createAllContours(int numEdges, Edge* edges, int numContours,
 			SContour* contours);
 
-	void corpolTest_slightRandomMove(double maxDelta);
+	void corpolTest_slightRandomMove(double maxMoveDelta);
+	inline void corpolTest_slightRandomMoveFacet(double maxMoveDelta, int ifacet);
+	inline void corpolTest_slightRandomMoveVertex(double maxMoveDelta, int ivertex);
 
 	void makeCube(double a);
         

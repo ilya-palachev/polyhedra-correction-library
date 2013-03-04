@@ -36,7 +36,9 @@ int Polyhedron::corpolTest(int numContours, double maxMoveDelta)
     printf("------------\n End of print contours in corpol_test\n");
 #endif
     
-    corpolTest_slightRandomMove(maxMoveDelta);
+//    corpolTest_slightRandomMove(maxMoveDelta);
+//    corpolTest_slightRandomMoveVertex(maxMoveDelta, 0);
+    corpolTest_slightRandomMoveFacet(maxMoveDelta, 0);
 
     correct_polyhedron(numContours, contours);
 
@@ -340,23 +342,31 @@ void Polyhedron::corpolTest_slightRandomMove(double maxDelta)
 
 	for (int ifacet = 0; ifacet < numf; ++ifacet)
 	{
-		Plane& plane = facet[ifacet].plane;
-		plane.norm.x += genRandomDouble(maxDelta);
-		plane.norm.y += genRandomDouble(maxDelta);
-		plane.norm.z += genRandomDouble(maxDelta);
-		plane.dist += genRandomDouble(maxDelta);
-		double newNorm = sqrt(qmod(plane.norm));
-		plane.norm.norm(1.);
-		plane.dist /= newNorm;
+		corpolTest_slightRandomMoveFacet(maxDelta, ifacet);
 	}
 
 	for (int ivertex = 0; ivertex < numv; ++ivertex)
 	{
-		Vector3d& vector = vertex[ivertex];
-		vector.x += genRandomDouble(maxDelta);
-		vector.y += genRandomDouble(maxDelta);
-		vector.z += genRandomDouble(maxDelta);
+		corpolTest_slightRandomMoveVertex(maxDelta, ivertex);
 	}
 }
 
+inline void Polyhedron::corpolTest_slightRandomMoveFacet(double maxMoveDelta, int ifacet)
+{
+	Plane& plane = facet[ifacet].plane;
+	plane.norm.x += genRandomDouble(maxMoveDelta);
+	plane.norm.y += genRandomDouble(maxMoveDelta);
+	plane.norm.z += genRandomDouble(maxMoveDelta);
+	plane.dist += genRandomDouble(maxMoveDelta);
+	double newNorm = sqrt(qmod(plane.norm));
+	plane.norm.norm(1.);
+	plane.dist /= newNorm;
+}
 
+inline void Polyhedron::corpolTest_slightRandomMoveVertex(double maxMoveDelta, int ivertex)
+{
+	Vector3d& vector = vertex[ivertex];
+	vector.x += genRandomDouble(maxMoveDelta);
+	vector.y += genRandomDouble(maxMoveDelta);
+	vector.z += genRandomDouble(maxMoveDelta);
+}
