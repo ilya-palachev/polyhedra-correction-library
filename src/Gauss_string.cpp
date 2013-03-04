@@ -1,4 +1,5 @@
 #include "Gauss_string.h"
+#include "DebugPrint.h"
 
 int Gauss_find_main_element(int n, double* A, int coloumn);
 void Gauss_I_swap(int n, double* A, double* b, int p, int q);
@@ -47,6 +48,7 @@ int Gauss_find_main_element(int n, double* A, int coloumn) {
             norm = tmp;
         }
     }
+    DBGPRINT("Pivot = %le in column %d", norm, coloumn);
     return imain;
 }
 

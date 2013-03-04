@@ -38,7 +38,7 @@ int Polyhedron::corpolTest(int numContours, double maxMoveDelta)
     
 //    corpolTest_slightRandomMove(maxMoveDelta);
 //    corpolTest_slightRandomMoveVertex(maxMoveDelta, 0);
-    corpolTest_slightRandomMoveFacet(maxMoveDelta, 0);
+//    corpolTest_slightRandomMoveFacet(maxMoveDelta, 0);
 
     correct_polyhedron(numContours, contours);
 
@@ -181,7 +181,7 @@ int Polyhedron::corpolTest_createAllContours(
     for (int icont = 0; icont < numContours; ++icont)
     {
     	double angle = 2 * M_PI * (icont) / numContours;
-    	Vector3d nu = Vector3d(cos(angle), sin(angle), 0);
+    	Vector3d nu = Vector3d(0, cos(angle), sin(angle));
     	Plane planeOfProjection = Plane(nu, 0);
 
     	contours[icont] = corpolTest_createOneContour(numEdges,
