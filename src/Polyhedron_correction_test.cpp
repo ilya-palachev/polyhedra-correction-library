@@ -181,7 +181,7 @@ int Polyhedron::corpolTest_createAllContours(
     for (int icont = 0; icont < numContours; ++icont)
     {
     	double angle = 2 * M_PI * (icont) / numContours;
-    	Vector3d nu = Vector3d(0, cos(angle), sin(angle));
+    	Vector3d nu = Vector3d(cos(angle), sin(angle), 0);
     	Plane planeOfProjection = Plane(nu, 0);
 
     	contours[icont] = corpolTest_createOneContour(numEdges,
