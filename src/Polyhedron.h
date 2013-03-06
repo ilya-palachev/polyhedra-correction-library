@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <lapacke.h>
 
 #include "Polyhedron-class.h"
 #include "VertexInfo.h"

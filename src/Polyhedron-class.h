@@ -170,7 +170,8 @@ public:
 			SContour* contours, Plane* prevPlanes);
 	int corpol_iteration(int nume, Edge* edges, int N, SContour* contours,
 			Plane* prevPlanes, double* matrix, double* rightPart,
-			double* solution);
+			double* solution, double* matrixFactorized,
+			int* indexPivot);
 	void corpol_calculate_matrix(int nume, Edge* edges, int N,
 			SContour* contours, Plane* prevPlanes, double* matrix,
 			double* rightPart, double* solution);

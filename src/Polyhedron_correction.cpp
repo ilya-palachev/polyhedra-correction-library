@@ -6,6 +6,7 @@
  */
 
 #include "Polyhedron.h"
+#include <dlfcn.h>
 
 const double EPS_MAX_ERROR = 1e-6;
 const double EPS_FOR_PRINT = 1e-15;
@@ -56,8 +57,10 @@ int Polyhedron::correct_polyhedron(int numContours, SContour* contours)
     corpol_preprocess(numEdges, edges, numContours, contours);
     
     double * matrix = new double [dim * dim];
+    double * matrixFactorized = new double [dim * dim];
     double * rightPart = new double [dim];
     double * solution = new double [dim];
+    int * indexPivot = new int[dim];
 
     Plane * prevPlanes = new Plane [numf];
 
@@ -84,19 +87,21 @@ int Polyhedron::correct_polyhedron(int numContours, SContour* contours)
     	DBGPRINT("Iteration %d\n", numIterations);
 
     	char* fileName = new char[255];
-    	sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt", numIterations);
+    	sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
+    			numIterations);
 
     	this->my_fprint(fileName);
     	delete[] fileName;
 
-    	int ret = corpol_iteration(numEdges, edges, numContours, contours, prevPlanes, matrix,
-                rightPart, solution);
+    	int ret = corpol_iteration(numEdges, edges, numContours, contours,
+    			prevPlanes, matrix, rightPart, solution, matrixFactorized,
+    			indexPivot);
         for (int i = 0; i < numf; ++i)
         {
             prevPlanes[i] = facet[i].plane;
         }
-        error = corpol_calculate_functional(numEdges, edges, numContours, contours,
-                prevPlanes);
+        error = corpol_calculate_functional(numEdges, edges, numContours,
+        		contours, prevPlanes);
         DBGPRINT("error = %le", error);
     	++numIterations;
     	if (ret != true)
@@ -112,6 +117,11 @@ int Polyhedron::correct_polyhedron(int numContours, SContour* contours)
     {
     	delete[] matrix;
     	matrix = NULL;
+    }
+    if (matrixFactorized != NULL)
+    {
+    	delete[] matrixFactorized;
+    	matrixFactorized = NULL;
     }
     if (rightPart != NULL)
     {
@@ -198,19 +208,64 @@ double Polyhedron::corpol_calculate_functional(int nume,
 
 int Polyhedron::corpol_iteration(int numEdges, Edge* edges, int numContours, 
         SContour* contours, Plane* prevPlanes, double* matrix, 
-        double* rightPart, double* solution)
+        double* rightPart, double* solution, double* matrixFactorized,
+		int* indexPivot)
 {
 	DBG_START;
-    corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes, matrix,
-            rightPart, solution);
+    corpol_calculate_matrix(numEdges, edges, numContours, contours,
+    		prevPlanes, matrix, rightPart, solution);
     int dim = 5 * numf;
     print_matrix2(fout, dim, dim, matrix);
-    int ret = Gauss_string(dim, matrix, rightPart);
+//    int ret = Gauss_string(dim, matrix, rightPart);
+    lapack_int dimLapack = dim;
+    lapack_int nrhs = 1;
+    lapack_int lda = dim;
+    lapack_int ldaf = dim;
+    lapack_int ldb = 1;
+    lapack_int ldx = 1;
+    lapack_int info;
+    double reciprocalToConditionalNumber;
+    double forwardErrorBound;
+    double relativeBackwardError;
+
+    info = LAPACKE_dsysvx(LAPACK_ROW_MAJOR, 'N', 'U', dimLapack, nrhs, matrix,
+    		lda, matrixFactorized, ldaf, indexPivot, rightPart, ldb, solution,
+    		ldx, &reciprocalToConditionalNumber, &forwardErrorBound,
+    		&relativeBackwardError);
     
-    for (int i = 0; i < dim; ++i)
-    {
-        solution[i] = rightPart[i];
-    }
+	if (info == 0)
+	{
+		DBGPRINT("LAPACKE_dsysvx: successful exit");
+	}
+	else if (info < 0)
+	{
+		DBGPRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value",
+				-info);
+	}
+	else if (info <= dim)
+	{
+		DBGPRINT("LAPACKE_dsysvx: D(%d,%d) is exactly zero.  "
+				"The factorization"
+				"has been completed but the factor D is exactly"
+				"singular, so the solution and error bounds could"
+				"not be computed. RCOND = 0 is returned.",
+				info, info);
+	}
+	else if (info == dim + 1)
+	{
+		DBGPRINT("LAPACKE_dsysvx: D is non-singular, but RCOND is "
+				"less than machine"
+				"precision, meaning that the matrix is singular"
+				"to working precision.  Nevertheless, the"
+				"solution and error bounds are computed because"
+				"there are a number of situations where the"
+				"computed solution can be more accurate than the"
+				"value of RCOND would suggest.");
+	}
+	else
+	{
+		DBGPRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
+	}
 
     for (int ifacet = 0; ifacet < numf; ++ifacet)
     {
@@ -221,7 +276,7 @@ int Polyhedron::corpol_iteration(int numEdges, Edge* edges, int numContours,
     }
 
     DBG_END;
-    return ret;
+    return info;
 }
 
 void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N, 

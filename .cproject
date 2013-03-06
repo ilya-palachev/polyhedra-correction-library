@@ -34,6 +34,9 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.570928320" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.266160302" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
+								<option id="gnu.cpp.link.option.libs.513426247" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="lapacke"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.33949086" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -97,6 +100,15 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="polyhedron.cdt.managedbuild.target.gnu.exe.498436584" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/polyhedron2"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/polyhedron2"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.1231968391;cdt.managedbuild.config.gnu.exe.debug.1231968391.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.334454546;cdt.managedbuild.tool.gnu.cpp.compiler.input.1589316403">
@@ -105,12 +117,11 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.1231968391;cdt.managedbuild.config.gnu.exe.debug.1231968391.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.577082111;cdt.managedbuild.tool.gnu.c.compiler.input.484972041">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1089395565;cdt.managedbuild.config.gnu.exe.release.1089395565.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.522885564;cdt.managedbuild.tool.gnu.c.compiler.input.2086985186">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1089395565;cdt.managedbuild.config.gnu.exe.release.1089395565.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1912377876;cdt.managedbuild.tool.gnu.cpp.compiler.input.1923604609">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.1089395565;cdt.managedbuild.config.gnu.exe.release.1089395565.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.522885564;cdt.managedbuild.tool.gnu.c.compiler.input.2086985186">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 </cproject>
