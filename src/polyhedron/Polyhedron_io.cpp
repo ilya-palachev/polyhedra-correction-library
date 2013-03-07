@@ -23,7 +23,7 @@ void Polyhedron::my_fprint(FILE* file) {
 	fprintf(file, "Polyhedron:\n");
 	fprintf(file, "numv = %d\nnumf = %d\n", numv, numf);
 	for(i = 0; i < numv; ++i)
-		fprintf(file, "   vertex[%d] = (%lf, %lf, %lf)\n",
+		fprintf(file, "   vertex[%d] = (%f, %f, %f)\n",
 				i, vertex[i].x, vertex[i].y, vertex[i].z);
 	for(i = 0; i < numf; ++i)
 		facet[i].my_fprint_all(file);
@@ -82,7 +82,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 		{
 			fprintf(stdout, "Polyhedron::fscan_default_0. Error. Invalid file. v %d\n",
 					  i);
-			fprintf(stdout, "xx = %lg, yy = %lg, zz = %lg\n", xx, yy, zz);
+			fprintf(stdout, "xx = %f, yy = %f, zz = %f\n", xx, yy, zz);
 			fclose(file); return;
 		}
 		vertex[i].x = xx; vertex[i].y = yy; vertex[i].z = zz;
@@ -531,7 +531,7 @@ void Polyhedron::fprint_default_0(const char *filename)
 
 	fprintf(file, "%d %d\n", numv, numf);
 	for(int i = 0; i < numv; ++i)
-		fprintf(file, "%.16lf %.16lf %.16lf\n", vertex[i].x, vertex[i].y, vertex[i].z);
+		fprintf(file, "%.8f %.8f %.8f\n", vertex[i].x, vertex[i].y, vertex[i].z);
 
 	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_default_0(file);
@@ -551,7 +551,7 @@ void Polyhedron::fprint_default_1(const char *filename)
 
 	fprintf(file, "%d %d\n", numv, numf);
 	for(int i = 0; i < numv; ++i)
-		fprintf(file, "%d %.16lf %.16lf %.16lf\n", i, vertex[i].x, vertex[i].y, vertex[i].z);
+		fprintf(file, "%d %.8f %.8f %.8f\n", i, vertex[i].x, vertex[i].y, vertex[i].z);
 
 	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_default_1(file);
@@ -570,7 +570,7 @@ void Polyhedron::fprint_my_format(const char *filename)
 
 	fprintf(file, "%d %d\n", numv, numf);
 	for(int i = 0; i < numv; ++i)
-		fprintf(file, "%.16lf %.16lf %.16lf\n", vertex[i].x, vertex[i].y, vertex[i].z);
+		fprintf(file, "%.8f %.8f %.8f\n", vertex[i].x, vertex[i].y, vertex[i].z);
 
 	for(int i = 0; i < numf; ++i)
 		facet[i].fprint_my_format(file);
@@ -639,7 +639,7 @@ void Polyhedron::fprint_ply_scale(
 //				const int* col)
 		//comment must have 1 word
 {
-	long long int vx, vy, vz;
+	long int vx, vy, vz;
 	char* comment_w;
 
 //	int ncolored = 0;
@@ -678,10 +678,10 @@ void Polyhedron::fprint_ply_scale(
 
 	for(int i = 0; i < numv; ++i)
 	{
-		vx = (long long int)scale*vertex[i].x;
-		vy = (long long int)scale*vertex[i].y;
-		vz = (long long int)scale*vertex[i].z;
-		fprintf(file, "%lli %lli %lli\n",
+		vx = (long int)scale*vertex[i].x;
+		vy = (long int)scale*vertex[i].y;
+		vz = (long int)scale*vertex[i].z;
+		fprintf(file, "%ld %ld %ldb\n",
 				  vx, vy, vz);
 	}
 

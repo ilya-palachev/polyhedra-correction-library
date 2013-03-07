@@ -21,7 +21,7 @@ enum EEdgeType {
     EEdgeCavern      = 3,     // Low confidence because of cavern in the stone
     EEdgeMaxPointErr = 4,        // The edge erroneously is lower than other edges, 
                                 // which define a vertex (e.g. in the culet)
-    EEdgeGlare       = 5,      // Low confidence because of photo glare
+    EEdgeGlare       = 5      // Low confidence because of photo glare
 };
 
 class SideOfContour {

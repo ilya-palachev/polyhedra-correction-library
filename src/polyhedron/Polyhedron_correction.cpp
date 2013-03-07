@@ -78,7 +78,7 @@ int Polyhedron::correct_polyhedron(int numContours, SContour* contours)
             rightPart, solution);
     print_matrix2(fout, dim, dim, matrix);
 
-    DBGPRINT("first functional calculation done. error = %le", error);
+    DBGPRINT("first functional calculation done. error = %e", error);
 
     int numIterations = 0;
 
