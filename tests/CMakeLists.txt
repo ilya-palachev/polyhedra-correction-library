@@ -1,14 +1,10 @@
-set(SOURCES_globalCorrectionTest globalCorrectionCube.cpp)
-add_executable(globalCorrectionTest ${SOURCES_globalCorrectionTest})
-target_link_libraries(globalCorrectionTest polyhedronCorrection)
+set(SOURCES_globalCorrectionCube globalCorrectionCube.cpp)
+add_executable(globalCorrectionCube ${SOURCES_globalCorrectionCube})
+target_link_libraries(globalCorrectionCube polyhedronCorrection)
 
 set(SOURCES_gaussStringTest gaussStringTest.cpp)
 add_executable(gaussStringTest ${SOURCES_gaussStringTest})
 target_link_libraries(gaussStringTest polyhedronCorrection gaussString)
-
-set(SOURCES_globalCorrectionCube globalCorrectionCube.cpp)
-add_executable(globalCorrectionCube ${SOURCES_globalCorrectionCube})
-target_link_libraries(globalCorrectionCube polyhedronCorrection)
 
 set(SOURCES_intersectCubeCutted intersectCubeCutted.cpp)
 add_executable(intersectCubeCutted ${SOURCES_intersectCubeCutted})
