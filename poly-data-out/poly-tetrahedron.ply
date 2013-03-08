@@ -11,10 +11,10 @@ property uchar red
 property uchar green
 property uchar blue
 end_header
-0 0 0
-1000 0 0
-0 1000 0
-0 0 1000
+0 0 0b
+1000 0 0b
+0 1000 0b
+0 0 1000b
 3 1 0 2 100 100 100
 3 0 1 3 100 100 100
 3 1 2 3 100 100 100

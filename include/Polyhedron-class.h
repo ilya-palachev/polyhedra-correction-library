@@ -79,7 +79,6 @@ public:
 	void intersect_test(int facet_id0, int facet_id1);
 
 	//Polyhedron_join_facets.cpp
-	int join_facets_count_nv(int facet_id0, int facet_id1);
 	void join_facets_create_vertex_list(int facet_id0, int facet_id1, int nv,
                 int* vertex_list, int* edge_list);
 	void list_squares_method(int nv, int* vertex_list, Plane* plane);

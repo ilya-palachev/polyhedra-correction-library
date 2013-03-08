@@ -1,2 +1,4 @@
 *.o
 polyhedron2
+BuildPolyhedron
+/Debug

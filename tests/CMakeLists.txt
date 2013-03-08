@@ -1,0 +1,43 @@
+set(SOURCES_globalCorrectionTest globalCorrectionCube.cpp)
+add_executable(globalCorrectionTest ${SOURCES_globalCorrectionTest})
+target_link_libraries(globalCorrectionTest polyhedronCorrection)
+
+set(SOURCES_gaussStringTest gaussStringTest.cpp)
+add_executable(gaussStringTest ${SOURCES_gaussStringTest})
+target_link_libraries(gaussStringTest polyhedronCorrection gaussString)
+
+set(SOURCES_globalCorrectionCube globalCorrectionCube.cpp)
+add_executable(globalCorrectionCube ${SOURCES_globalCorrectionCube})
+target_link_libraries(globalCorrectionCube polyhedronCorrection)
+
+set(SOURCES_intersectCubeCutted intersectCubeCutted.cpp)
+add_executable(intersectCubeCutted ${SOURCES_intersectCubeCutted})
+target_link_libraries(intersectCubeCutted polyhedronCorrection)
+
+set(SOURCES_intersectPolyhedron intersectPolyhedron.cpp)
+add_executable(intersectPolyhedron ${SOURCES_intersectPolyhedron})
+target_link_libraries(intersectPolyhedron polyhedronCorrection)
+
+set(SOURCES_joinFacets joinFacets.cpp)
+add_executable(joinFacets ${SOURCES_joinFacets})
+target_link_libraries(joinFacets polyhedronCorrection)
+
+set(SOURCES_joinFacetsMultiple joinFacetsMultiple.cpp)
+add_executable(joinFacetsMultiple ${SOURCES_joinFacetsMultiple})
+target_link_libraries(joinFacetsMultiple polyhedronCorrection)
+
+set(SOURCES_moveVertexGetStatistics moveVertexGetStatistics.cpp)
+add_executable(moveVertexGetStatistics ${SOURCES_moveVertexGetStatistics})
+target_link_libraries(moveVertexGetStatistics polyhedronCorrection)
+
+set(SOURCES_moveVertexLinear2 moveVertexLinear2.cpp)
+add_executable(moveVertexLinear2 ${SOURCES_moveVertexLinear2})
+target_link_libraries(moveVertexLinear2 polyhedronCorrection)
+
+set(SOURCES_moveVertexW moveVertexW.cpp)
+add_executable(moveVertexW ${SOURCES_moveVertexW})
+target_link_libraries(moveVertexW polyhedronCorrection)
+
+set(SOURCES_printTemplatePolyhedrons printTemplatePolyhedrons.cpp)
+add_executable(printTemplatePolyhedrons ${SOURCES_printTemplatePolyhedrons})
+target_link_libraries(printTemplatePolyhedrons polyhedronCorrection)
