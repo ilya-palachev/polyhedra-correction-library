@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 		printUsage();
 		return 2;
 	}
-	if ( sscanf(argv[1], "%lf", &maxMoveDelta) != 1)
+	if ( sscanf(argv[2], "%lf", &maxMoveDelta) != 1)
 	{
 		printUsage();
 		return 3;

@@ -38,7 +38,7 @@ int Polyhedron::corpolTest(int numContours, double maxMoveDelta)
     
 //    corpolTest_slightRandomMove(maxMoveDelta);
 //    corpolTest_slightRandomMoveVertex(maxMoveDelta, 0);
-//    corpolTest_slightRandomMoveFacet(maxMoveDelta, 0);
+    corpolTest_slightRandomMoveFacet(maxMoveDelta, 0);
 
     correct_polyhedron(numContours, contours);
 
