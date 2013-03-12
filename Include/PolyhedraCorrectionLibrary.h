@@ -13,6 +13,8 @@
 #include "Edge.h"
 #include "SContour.h"
 #include "SideOfContour.h"
+#include "EdgeContourAssociation.h"
+#include "EdgeContourAssociationList.h"
 
 
 #include "Vector3d.h"

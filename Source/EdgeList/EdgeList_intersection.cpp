@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 #include "PolyhedraCorrectionLibrary.h"
-#include "array_operations.h"
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm) {
     add_edge(v0, v1, i0, i1, -1, -2, sm);

@@ -8,6 +8,8 @@
 #ifndef EDGECONTOURASSOCIATION_H_
 #define EDGECONTOURASSOCIATION_H_
 
+#include "PolyhedraCorrectionLibrary.h"
+
 class EdgeContourAssociation {
 public:
 	EdgeContourAssociation();

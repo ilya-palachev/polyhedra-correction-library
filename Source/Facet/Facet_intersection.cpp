@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 #include "PolyhedraCorrectionLibrary.h"
 
 int Facet::signum(int i, Plane plane) {
