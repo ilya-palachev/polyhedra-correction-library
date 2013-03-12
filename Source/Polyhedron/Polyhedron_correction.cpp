@@ -5,7 +5,7 @@
  * Created on 19 Ноябрь 2012 г., 07:39
  */
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 #include <dlfcn.h>
 
 const double EPS_MAX_ERROR = 1e-6;

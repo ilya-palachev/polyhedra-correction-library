@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 #define DEFAULT_NV 1000
 

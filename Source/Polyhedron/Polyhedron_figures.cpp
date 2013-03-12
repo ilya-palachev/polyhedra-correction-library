@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 void Polyhedron::poly_cube(double h, double x, double y, double z) {
 	if (!vertex)

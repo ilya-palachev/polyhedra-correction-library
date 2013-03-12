@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 void EdgeList::my_fprint(FILE* file) {
 	int i;

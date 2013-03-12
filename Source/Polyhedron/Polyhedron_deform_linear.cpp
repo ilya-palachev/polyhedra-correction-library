@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 #define EPSILON 1e-7
 //#define DEFORM_SCALE //Этот макрос определяет, каким методом производить деформацию:

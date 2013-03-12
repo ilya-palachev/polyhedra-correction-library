@@ -5,7 +5,7 @@
  * Created on 13 Ноябрь 2012 г., 9:50
  */
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 SContour::SContour() :
         id(-1),

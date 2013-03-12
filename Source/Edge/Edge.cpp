@@ -5,7 +5,7 @@
  * Created on 19 Ноябрь 2012 г., 8:17
  */
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 #include "Edge.h"
 
 Edge::Edge() :

@@ -5,7 +5,7 @@
  * Created on 13 Ноябрь 2012 г., 10:01
  */
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 SideOfContour::SideOfContour() :
         confidence(0),

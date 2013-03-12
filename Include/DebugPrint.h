@@ -1,7 +1,7 @@
 #ifndef DEBUGPRINT_H
 #define DEBUGPRINT_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 #define WHERESTR  "[%s: %s: %d]: "
 #define WHEREARG  __FILE__, __func__, __LINE__

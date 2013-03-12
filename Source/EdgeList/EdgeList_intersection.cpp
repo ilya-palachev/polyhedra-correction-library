@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 #include "array_operations.h"
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm) {

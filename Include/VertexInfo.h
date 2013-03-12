@@ -9,7 +9,7 @@
 #ifndef VERTEXINFO_H
 #define	VERTEXINFO_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 #include "Vector3d.h"
 
 class VertexInfo

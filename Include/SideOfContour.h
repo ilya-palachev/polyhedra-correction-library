@@ -8,7 +8,7 @@
 #ifndef SIDEOFCONTOUR_H
 #define	SIDEOFCONTOUR_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 // Following "enum" is inherited from Octonus:
 

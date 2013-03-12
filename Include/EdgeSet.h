@@ -8,7 +8,7 @@
 #ifndef EDGESET_H
 #define	EDGESET_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 class EdgeSet {
 private:

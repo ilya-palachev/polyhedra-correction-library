@@ -8,7 +8,7 @@
 #ifndef FUTUREFACET_H
 #define	FUTUREFACET_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 class FutureFacet {
 private:

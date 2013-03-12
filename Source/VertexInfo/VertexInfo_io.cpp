@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 void VertexInfo::fprint_my_format(FILE* file) {
 	fprintf(file, "%d ", nf);

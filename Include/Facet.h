@@ -7,7 +7,7 @@
 
 #ifndef FACET_H
 #define	FACET_H
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 class Facet
 {

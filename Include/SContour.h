@@ -8,7 +8,7 @@
 #ifndef SCONTOUR_H
 #define	SCONTOUR_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 class SContour {
 public:

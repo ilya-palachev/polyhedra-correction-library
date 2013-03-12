@@ -1,4 +1,4 @@
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 void Edge::my_fprint(FILE* file)
 {

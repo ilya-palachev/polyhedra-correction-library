@@ -1,4 +1,4 @@
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 int Polyhedron::simplify_vertex(double eps) {
     

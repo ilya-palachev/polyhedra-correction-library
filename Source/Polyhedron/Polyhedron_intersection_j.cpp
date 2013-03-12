@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 //void my_fprint_Vector3d(Vector3d& v, FILE* file) {
 //    fprintf(file, "(%lf, %lf, %lf)\n",

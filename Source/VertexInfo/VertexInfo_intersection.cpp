@@ -1,4 +1,4 @@
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 int VertexInfo::intersection_find_next_facet(Plane iplane, int facet_id) {
 	int i, sgn_prev, sgn_curr;

@@ -8,7 +8,7 @@
 #ifndef EDGE_H
 #define	EDGE_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 class Edge {
 public:

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 #define EPS_PARALL 1e-16
 #define MAX_MIN_DIST 1e+1

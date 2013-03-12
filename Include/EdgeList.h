@@ -8,7 +8,7 @@
 #ifndef EDGELIST_H
 #define	EDGELIST_H
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 class EdgeList {
 private:

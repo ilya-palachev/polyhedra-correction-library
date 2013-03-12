@@ -1,4 +1,4 @@
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 EdgeSet::EdgeSet() :
 		len(0),

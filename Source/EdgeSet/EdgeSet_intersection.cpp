@@ -1,4 +1,4 @@
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 #include "array_operations.h"
 
 void EdgeSet::get_edge(int id, int& v0, int& v1) {

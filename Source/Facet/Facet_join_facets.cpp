@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 void Facet::clear_bad_vertexes() {
     for (int i = 0; i < nv - 1; ++i) {

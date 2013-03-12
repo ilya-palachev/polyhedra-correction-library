@@ -1,4 +1,4 @@
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 bool Facet::test_self_intersection() {
 	int i, j;
