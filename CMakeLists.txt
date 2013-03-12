@@ -1,72 +1,72 @@
 cmake_minimum_required (VERSION 2.8)
-project (polyhedron-correction)
+project (Polyhedron-correction)
 
 set (SOURCE_arrayOperations
-./external/array-operations/src/array_operations.cpp
+./External/ArrayOperations/src/array_operations.cpp
 )
 
 set (SOURCE_gaussString
-./external/gauss-string/src/Gauss_string.cpp
-./external/gauss-string/src/Gauss_test.cpp
+./External/GaussString/src/Gauss_string.cpp
+./External/GaussString/src/Gauss_test.cpp
 )
 
 set (SOURCE_lsm
-./external/lsm/src/list_squares_method.cpp
+./External/LSM/src/list_squares_method.cpp
 )
 
 set (SOURCE_vector3d
-./external/vector3d/src/Vector3d.cpp
+./External/Vector3d/src/Vector3d.cpp
 )
 
 set (SOURCE_polyhedronCorrection
-./src/edge/Edge_io.cpp
-./src/edge/Edge.cpp
-./src/edge-set/EdgeSet_io.cpp
-./src/edge-set/EdgeSet_intersection.cpp
-./src/edge-set/EdgeSet.cpp
-./src/future-facet/FutureFacet_intersection.cpp
-./src/future-facet/FutureFacet_io.cpp
-./src/future-facet/FutureFacet.cpp
-./src/polyhedron/Polyhedron_deform.cpp
-./src/polyhedron/Polyhedron.cpp
-./src/polyhedron/Polyhedron_intersection.cpp
-./src/polyhedron/Polyhedron_correction_test.cpp
-./src/polyhedron/Polyhedron_simplify.cpp
-./src/polyhedron/Polyhedron_join_points.cpp
-./src/polyhedron/Polyhedron_deform_linear.cpp
-./src/polyhedron/Polyhedron_intersection_j.cpp
-./src/polyhedron/Polyhedron_preprocess.cpp
-./src/polyhedron/Polyhedron_correction.cpp
-./src/polyhedron/Polyhedron_figures.cpp
-./src/polyhedron/Polyhedron_join_facets.cpp
-./src/polyhedron/Polyhedron_correction_preprocess.cpp
-./src/polyhedron/Polyhedron_test_consections.cpp
-./src/polyhedron/Polyhedron_io.cpp
-./src/scontour/SContour.cpp
-./src/scontour/SContour_io.cpp
-./src/edge-list/EdgeList.cpp
-./src/edge-list/EdgeList_intersection.cpp
-./src/edge-list/EdgeList_io.cpp
-./src/vertexinfo/VertexInfo_intersection.cpp
-./src/vertexinfo/VertexInfo_preprocess.cpp
-./src/vertexinfo/VertexInfo_io.cpp
-./src/vertexinfo/VertexInfo.cpp
-./src/facet/Facet_io.cpp
-./src/facet/Facet_join_facets.cpp
-./src/facet/Facet_intersection.cpp
-./src/facet/Facet_test.cpp
-./src/facet/Facet.cpp
-./src/facet/Facet_preprocess.cpp
-./src/side-of-contour/SideOfContour_io.cpp
-./src/side-of-contour/SideOfContour.cpp
+./Source/Edge/Edge_io.cpp
+./Source/Edge/Edge.cpp
+./Source/EdgeSet/EdgeSet_io.cpp
+./Source/EdgeSet/EdgeSet_intersection.cpp
+./Source/EdgeSet/EdgeSet.cpp
+./Source/FutureFacet/FutureFacet_intersection.cpp
+./Source/FutureFacet/FutureFacet_io.cpp
+./Source/FutureFacet/FutureFacet.cpp
+./Source/Polyhedron/Polyhedron_deform.cpp
+./Source/Polyhedron/Polyhedron.cpp
+./Source/Polyhedron/Polyhedron_intersection.cpp
+./Source/Polyhedron/Polyhedron_correction_test.cpp
+./Source/Polyhedron/Polyhedron_simplify.cpp
+./Source/Polyhedron/Polyhedron_join_points.cpp
+./Source/Polyhedron/Polyhedron_deform_linear.cpp
+./Source/Polyhedron/Polyhedron_intersection_j.cpp
+./Source/Polyhedron/Polyhedron_preprocess.cpp
+./Source/Polyhedron/Polyhedron_correction.cpp
+./Source/Polyhedron/Polyhedron_figures.cpp
+./Source/Polyhedron/Polyhedron_join_facets.cpp
+./Source/Polyhedron/Polyhedron_correction_preprocess.cpp
+./Source/Polyhedron/Polyhedron_test_consections.cpp
+./Source/Polyhedron/Polyhedron_io.cpp
+./Source/SContour/SContour.cpp
+./Source/SContour/SContour_io.cpp
+./Source/EdgeList/EdgeList.cpp
+./Source/EdgeList/EdgeList_intersection.cpp
+./Source/EdgeList/EdgeList_io.cpp
+./Source/VertexInfo/VertexInfo_intersection.cpp
+./Source/VertexInfo/VertexInfo_preprocess.cpp
+./Source/VertexInfo/VertexInfo_io.cpp
+./Source/VertexInfo/VertexInfo.cpp
+./Source/Facet/Facet_io.cpp
+./Source/Facet/Facet_join_facets.cpp
+./Source/Facet/Facet_intersection.cpp
+./Source/Facet/Facet_test.cpp
+./Source/Facet/Facet.cpp
+./Source/Facet/Facet_preprocess.cpp
+./Source/SideOfContour/SideOfContour_io.cpp
+./Source/SideOfContour/SideOfContour.cpp
 )
 
 include_directories( 
-${CMAKE_SOURCE_DIR}/include/ 
-${CMAKE_SOURCE_DIR}/external/array-operations/include/ 
-${CMAKE_SOURCE_DIR}/external/gauss-string/include/ 
-${CMAKE_SOURCE_DIR}/external/lsm/include/
-${CMAKE_SOURCE_DIR}/external/vector3d/include/)
+${CMAKE_SOURCE_DIR}/Include/ 
+${CMAKE_SOURCE_DIR}/External/ArrayOperations/include/ 
+${CMAKE_SOURCE_DIR}/External/GaussString/include/ 
+${CMAKE_SOURCE_DIR}/External/LSM/include/
+${CMAKE_SOURCE_DIR}/External/Vector3d/include/)
 
 
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
@@ -80,9 +80,8 @@ lapacke
 arrayOperations 
 gaussString 
 lsm 
-vector3d 
-polyhedronCorrection
+vector3d
 )
 
-add_subdirectory(tests)
+add_subdirectory(Tests)
 
