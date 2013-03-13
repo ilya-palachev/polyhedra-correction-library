@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <lapacke.h>
+#include <list>
 
 #include "Polyhedron.h"
 #include "VertexInfo.h"
@@ -14,15 +15,12 @@
 #include "SContour.h"
 #include "SideOfContour.h"
 #include "EdgeContourAssociation.h"
-#include "EdgeContourAssociationList.h"
-
 
 #include "Vector3d.h"
 #include "list_squares_method.h"
 #include "Vector3d.h"
 #include "array_operations.h"
 #include "Gauss_string.h"
-
 
 #ifndef POLYHEDRON_H
 #define POLYHEDRON_H
@@ -34,7 +32,6 @@
 #define EPS_SIGNUM 1e-15
 #define EPS_COLLINEARITY 1e-14
 #include "DebugPrint.h"
-
 
 class Polyhedron;
 class Facet;

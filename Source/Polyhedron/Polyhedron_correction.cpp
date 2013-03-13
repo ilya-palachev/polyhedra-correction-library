@@ -11,28 +11,24 @@
 const double EPS_MAX_ERROR = 1e-6;
 const double EPS_FOR_PRINT = 1e-15;
 
-void print_matrix2(FILE* file, int nrow, int ncol, double* a)
-{
+void print_matrix2(
+		FILE* file,
+		int nrow,
+		int ncol,
+		double* a) {
 	fprintf(file, "=========begin=of=matrix=================\n");
-	for (int irow = 0; irow < nrow; ++irow)
-	{
-		for (int icol = 0; icol < ncol; ++icol)
-		{
+	for (int irow = 0; irow < nrow; ++irow) {
+		for (int icol = 0; icol < ncol; ++icol) {
 			double valuePrinted = a[ncol * irow + icol];
-			if (fabs(valuePrinted) < EPS_FOR_PRINT)
-			{
+			if (fabs(valuePrinted) < EPS_FOR_PRINT) {
 				fprintf(file, "\t |\t");
-			}
-			else
-			{
+			} else {
 				fprintf(file, "%lf |\t", valuePrinted);
 			}
 		}
 		fprintf(file, "\n");
-		if (irow % 5 == 4)
-		{
-			for (int icol = 0; icol < ncol; ++icol)
-			{
+		if (irow % 5 == 4) {
+			for (int icol = 0; icol < ncol; ++icol) {
 				fprintf(file, "----------------");
 			}
 			fprintf(file, "\n");
@@ -43,391 +39,354 @@ void print_matrix2(FILE* file, int nrow, int ncol, double* a)
 
 static FILE* fout;
 
-int Polyhedron::correct_polyhedron(int numContours, SContour* contours)
-{
-	DBG_START;
+int Polyhedron::correct_polyhedron(
+		int numContours,
+		SContour* contours) {
+	DBG_START
+	;
 
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
-    int dim = numf * 5;
-    
-    int numEdges;
-    Edge* edges = NULL;
+	int dim = numf * 5;
 
-    corpol_preprocess(numEdges, edges, numContours, contours);
-    
-    double * matrix = new double [dim * dim];
-    double * matrixFactorized = new double [dim * dim];
-    double * rightPart = new double [dim];
-    double * solution = new double [dim];
-    int * indexPivot = new int[dim];
+	int numEdges;
+	Edge* edges = NULL;
 
-    Plane * prevPlanes = new Plane [numf];
+	corpol_preprocess(numEdges, edges, numContours, contours);
 
-    DBGPRINT("memory allocation done");
+	double * matrix = new double[dim * dim];
+	double * matrixFactorized = new double[dim * dim];
+	double * rightPart = new double[dim];
+	double * solution = new double[dim];
+	int * indexPivot = new int[dim];
 
-    for (int i = 0; i < numf; ++i)
-    {
-        prevPlanes[i] = facet[i].plane;
-    }
-    DBGPRINT("memory initialization done");
+	Plane * prevPlanes = new Plane[numf];
 
-    double error = corpol_calculate_functional(numEdges, edges, numContours, contours,
-            prevPlanes);
-    corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes, matrix,
-            rightPart, solution);
-    print_matrix2(fout, dim, dim, matrix);
+	DBGPRINT("memory allocation done");
 
-    DBGPRINT("first functional calculation done. error = %e", error);
+	for (int i = 0; i < numf; ++i) {
+		prevPlanes[i] = facet[i].plane;
+	}
+	DBGPRINT("memory initialization done");
 
-    int numIterations = 0;
+	double error = corpol_calculate_functional(numEdges, edges, numContours,
+			contours, prevPlanes);
+	corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes,
+			matrix, rightPart, solution);
+	print_matrix2(fout, dim, dim, matrix);
 
-    while (error > EPS_MAX_ERROR)
-    {
-    	DBGPRINT("Iteration %d\n", numIterations);
+	DBGPRINT("first functional calculation done. error = %e", error);
 
-    	char* fileName = new char[255];
-    	sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
-    			numIterations);
+	int numIterations = 0;
 
-    	this->my_fprint(fileName);
-    	delete[] fileName;
+	while (error > EPS_MAX_ERROR) {
+		DBGPRINT("Iteration %d\n", numIterations);
 
-    	int ret = corpol_iteration(numEdges, edges, numContours, contours,
-    			prevPlanes, matrix, rightPart, solution, matrixFactorized,
-    			indexPivot);
-        for (int i = 0; i < numf; ++i)
-        {
-            prevPlanes[i] = facet[i].plane;
-        }
-        error = corpol_calculate_functional(numEdges, edges, numContours,
-        		contours, prevPlanes);
-        DBGPRINT("error = %le", error);
-    	++numIterations;
-    	if (ret != true)
-    	{
-    		break;
-    	}
-    }
+		char* fileName = new char[255];
+		sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
+				numIterations);
 
+		this->my_fprint(fileName);
+		delete[] fileName;
 
-    fclose(fout);
+		int ret = corpol_iteration(numEdges, edges, numContours, contours,
+				prevPlanes, matrix, rightPart, solution, matrixFactorized, indexPivot);
+		for (int i = 0; i < numf; ++i) {
+			prevPlanes[i] = facet[i].plane;
+		}
+		error = corpol_calculate_functional(numEdges, edges, numContours, contours,
+				prevPlanes);
+		DBGPRINT("error = %le", error);
+		++numIterations;
+		if (ret != true) {
+			break;
+		}
+	}
 
-    if (matrix != NULL)
-    {
-    	delete[] matrix;
-    	matrix = NULL;
-    }
-    if (matrixFactorized != NULL)
-    {
-    	delete[] matrixFactorized;
-    	matrixFactorized = NULL;
-    }
-    if (rightPart != NULL)
-    {
-    	delete[] rightPart;
-    	rightPart = NULL;
-    }
-    if (solution != NULL)
-    {
-    	delete[] solution;
-    	solution = NULL;
-    }
-    DBG_END;
-    return 0;
+	fclose(fout);
+
+	if (matrix != NULL) {
+		delete[] matrix;
+		matrix = NULL;
+	}
+	if (matrixFactorized != NULL) {
+		delete[] matrixFactorized;
+		matrixFactorized = NULL;
+	}
+	if (rightPart != NULL) {
+		delete[] rightPart;
+		rightPart = NULL;
+	}
+	if (solution != NULL) {
+		delete[] solution;
+		solution = NULL;
+	}
+	DBG_END
+	;
+	return 0;
 }
 
-double Polyhedron::corpol_calculate_functional(int nume, 
-        Edge* edges, int N, SContour* contours, 
-        Plane* prevPlanes)
-{
-	DBG_START;
-    double sum = 0;
-    
-    for (int i = 0; i < nume; ++i)
-    {
+double Polyhedron::corpol_calculate_functional(
+		int nume,
+		Edge* edges,
+		int N,
+		SContour* contours,
+		Plane* prevPlanes) {
+	DBG_START
+	;
+	double sum = 0;
+
+	for (int i = 0; i < nume; ++i) {
 //    	DBGPRINT("%s: processing edge #%d\n", __func__, i);
-        int nc = edges[i].numc;
-        int * cnums = edges[i].contourNums;
-        int * cnearestSide = edges[i].contourNearestSide;
-        int f0 = edges[i].f0;
-        int f1 = edges[i].f1;
-        Plane plane0 = facet[f0].plane;
-        Plane plane1 = facet[f1].plane;
-        Plane planePrev0 = prevPlanes[f0];
-        Plane planePrev1 = prevPlanes[f1];
-        
-        for (int j = 0; j < nc; ++j)
-        {
+		int f0 = edges[i].f0;
+		int f1 = edges[i].f1;
+		Plane plane0 = facet[f0].plane;
+		Plane plane1 = facet[f1].plane;
+		Plane planePrev0 = prevPlanes[f0];
+		Plane planePrev1 = prevPlanes[f1];
+
+		for (list<EdgeContourAssociation>::iterator itCont =
+				edges[i].assocList.begin(); itCont != edges[i].assocList.end();
+				++itCont) {
 //        	DBGPRINT("\t%s: processing contour #%d\n", __func__, j);
-            int curContour = cnums[j];
-            int curNearestSide = cnearestSide[j];
-            SideOfContour * sides = contours[curContour].sides;
-            Plane planeOfProjection = contours[curContour].plane;
-            
-            double gamma_ij = - planePrev1.norm * planeOfProjection.norm / 
-                ((planePrev0.norm - planePrev1.norm) * planeOfProjection.norm);
-            
-            double a_ij = gamma_ij * plane0.norm.x + 
-                (1 - gamma_ij) * plane1.norm.x;
-            
-            double b_ij = gamma_ij * plane0.norm.y +
-                (1 - gamma_ij) * plane1.norm.y;
-            
-            double c_ij = gamma_ij * plane0.norm.z +
-                (1 - gamma_ij) * plane1.norm.z;
-            
-            double d_ij = gamma_ij * plane0.dist +
-                (1 - gamma_ij) * plane1.dist;
-            
-            Vector3d A_ij0 = sides[curNearestSide].A1;
-            Vector3d A_ij1 = sides[curNearestSide].A2;
-            
-            double summand0 = 
-                a_ij * A_ij0.x + 
-                b_ij * A_ij0.y + 
-                c_ij * A_ij0.z +
-                d_ij;
-            
-            summand0 *= summand0;
-            
-            double summand1 = 
-                a_ij * A_ij1.x +
-                b_ij * A_ij1.y +
-                c_ij * A_ij1.z +
-                d_ij;
-            
-            summand1 *= summand1;
-            
-            sum += summand0 + summand1;
-        }
-    }
-    DBG_END;
-    return sum;
+			int curContour = itCont->indContour;
+			int curNearestSide = itCont->indNearestSide;
+			SideOfContour * sides = contours[curContour].sides;
+			Plane planeOfProjection = contours[curContour].plane;
+
+			double gamma_ij = -planePrev1.norm * planeOfProjection.norm
+					/ ((planePrev0.norm - planePrev1.norm) * planeOfProjection.norm);
+
+			double a_ij = gamma_ij * plane0.norm.x + (1 - gamma_ij) * plane1.norm.x;
+
+			double b_ij = gamma_ij * plane0.norm.y + (1 - gamma_ij) * plane1.norm.y;
+
+			double c_ij = gamma_ij * plane0.norm.z + (1 - gamma_ij) * plane1.norm.z;
+
+			double d_ij = gamma_ij * plane0.dist + (1 - gamma_ij) * plane1.dist;
+
+			Vector3d A_ij0 = sides[curNearestSide].A1;
+			Vector3d A_ij1 = sides[curNearestSide].A2;
+
+			double summand0 = a_ij * A_ij0.x + b_ij * A_ij0.y + c_ij * A_ij0.z + d_ij;
+
+			summand0 *= summand0;
+
+			double summand1 = a_ij * A_ij1.x + b_ij * A_ij1.y + c_ij * A_ij1.z + d_ij;
+
+			summand1 *= summand1;
+
+			sum += summand0 + summand1;
+		}
+	}
+	DBG_END
+	;
+	return sum;
 }
 
-int Polyhedron::corpol_iteration(int numEdges, Edge* edges, int numContours, 
-        SContour* contours, Plane* prevPlanes, double* matrix, 
-        double* rightPart, double* solution, double* matrixFactorized,
-		int* indexPivot)
-{
-	DBG_START;
-    corpol_calculate_matrix(numEdges, edges, numContours, contours,
-    		prevPlanes, matrix, rightPart, solution);
-    int dim = 5 * numf;
-    print_matrix2(fout, dim, dim, matrix);
+int Polyhedron::corpol_iteration(
+		int numEdges,
+		Edge* edges,
+		int numContours,
+		SContour* contours,
+		Plane* prevPlanes,
+		double* matrix,
+		double* rightPart,
+		double* solution,
+		double* matrixFactorized,
+		int* indexPivot) {
+	DBG_START
+	;
+	corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes,
+			matrix, rightPart, solution);
+	int dim = 5 * numf;
+	print_matrix2(fout, dim, dim, matrix);
 //    int ret = Gauss_string(dim, matrix, rightPart);
-    lapack_int dimLapack = dim;
-    lapack_int nrhs = 1;
-    lapack_int lda = dim;
-    lapack_int ldaf = dim;
-    lapack_int ldb = 1;
-    lapack_int ldx = 1;
-    lapack_int info;
-    double reciprocalToConditionalNumber;
-    double forwardErrorBound;
-    double relativeBackwardError;
+	lapack_int dimLapack = dim;
+	lapack_int nrhs = 1;
+	lapack_int lda = dim;
+	lapack_int ldaf = dim;
+	lapack_int ldb = 1;
+	lapack_int ldx = 1;
+	lapack_int info;
+	double reciprocalToConditionalNumber;
+	double forwardErrorBound;
+	double relativeBackwardError;
 
-    info = LAPACKE_dsysvx(LAPACK_ROW_MAJOR, 'N', 'U', dimLapack, nrhs, matrix,
-    		lda, matrixFactorized, ldaf, indexPivot, rightPart, ldb, solution,
-    		ldx, &reciprocalToConditionalNumber, &forwardErrorBound,
-    		&relativeBackwardError);
-    
-	if (info == 0)
-	{
+	info = LAPACKE_dsysvx(LAPACK_ROW_MAJOR, 'N', 'U', dimLapack, nrhs, matrix,
+			lda, matrixFactorized, ldaf, indexPivot, rightPart, ldb, solution, ldx,
+			&reciprocalToConditionalNumber, &forwardErrorBound,
+			&relativeBackwardError);
+
+	if (info == 0) {
 		DBGPRINT("LAPACKE_dsysvx: successful exit");
-	}
-	else if (info < 0)
-	{
-		DBGPRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value",
-				-info);
-	}
-	else if (info <= dim)
-	{
-		DBGPRINT("LAPACKE_dsysvx: D(%d,%d) is exactly zero.  "
-				"The factorization"
-				"has been completed but the factor D is exactly"
-				"singular, so the solution and error bounds could"
-				"not be computed. RCOND = 0 is returned.",
+	} else if (info < 0) {
+		DBGPRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value", -info);
+	} else if (info <= dim) {
+		DBGPRINT(
+				"LAPACKE_dsysvx: D(%d,%d) is exactly zero.  " "The factorization" "has been completed but the factor D is exactly" "singular, so the solution and error bounds could" "not be computed. RCOND = 0 is returned.",
 				info, info);
-	}
-	else if (info == dim + 1)
-	{
-		DBGPRINT("LAPACKE_dsysvx: D is non-singular, but RCOND is "
-				"less than machine"
-				"precision, meaning that the matrix is singular"
-				"to working precision.  Nevertheless, the"
-				"solution and error bounds are computed because"
-				"there are a number of situations where the"
-				"computed solution can be more accurate than the"
-				"value of RCOND would suggest.");
-	}
-	else
-	{
+	} else if (info == dim + 1) {
+		DBGPRINT(
+				"LAPACKE_dsysvx: D is non-singular, but RCOND is " "less than machine" "precision, meaning that the matrix is singular" "to working precision.  Nevertheless, the" "solution and error bounds are computed because" "there are a number of situations where the" "computed solution can be more accurate than the" "value of RCOND would suggest.");
+	} else {
 		DBGPRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
 	}
 
-    for (int ifacet = 0; ifacet < numf; ++ifacet)
-    {
-    	facet[ifacet].plane.norm.x = solution[5 * ifacet];
-    	facet[ifacet].plane.norm.y = solution[5 * ifacet + 1];
-    	facet[ifacet].plane.norm.z = solution[5 * ifacet + 2];
-    	facet[ifacet].plane.dist = solution[5 * ifacet + 3];
-    }
+	for (int ifacet = 0; ifacet < numf; ++ifacet) {
+		facet[ifacet].plane.norm.x = solution[5 * ifacet];
+		facet[ifacet].plane.norm.y = solution[5 * ifacet + 1];
+		facet[ifacet].plane.norm.z = solution[5 * ifacet + 2];
+		facet[ifacet].plane.dist = solution[5 * ifacet + 3];
+	}
 
-    DBG_END;
-    return info;
+	DBG_END
+	;
+	return info;
 }
 
-void Polyhedron::corpol_calculate_matrix(int nume, Edge* edges, int N, 
-        SContour* contours, Plane* prevPlanes, double* matrix, 
-        double* rightPart, double* solution)
-{
-	DBG_START;
-    for (int i = 0; i < (5 * numf) * (5 * numf); ++i)
-    {
-        matrix[i] = 0.;
-    }
-    
-    for (int i = 0; i < 5 * numf; ++i)
-    {
-        rightPart[i] = 0.;
-    }
-    
-    for (int iplane = 0; iplane < numf; ++iplane)
-    {
-//    	DBGPRINT("Processing facet # %d", iplane);
-        int nv = facet[iplane].nv;
-        int * index = facet[iplane].index;
-        
-        Plane planePrevThis = prevPlanes[iplane];
+void Polyhedron::corpol_calculate_matrix(
+		int nume,
+		Edge* edges,
+		int N,
+		SContour* contours,
+		Plane* prevPlanes,
+		double* matrix,
+		double* rightPart,
+		double* solution) {
+	DBG_START
+	;
+	for (int i = 0; i < (5 * numf) * (5 * numf); ++i) {
+		matrix[i] = 0.;
+	}
 
-        int i_ak_ak = 5 * numf * 5 * iplane + 5 * iplane;
-        int i_bk_ak = i_ak_ak + 5 * numf;
-        int i_ck_ak = i_ak_ak + 2 * 5 * numf;
-        int i_dk_ak = i_ak_ak + 3 * 5 * numf;
-        int i_lk_ak = i_ak_ak + 4 * 5 * numf;
-        
-        matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
-        matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
-        matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
-        matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0;
-        rightPart[5 * iplane + 4] = 1.;
-        
-        matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
-        matrix[i_bk_ak + 4] = 0.5 * planePrevThis.norm.y;
-        matrix[i_ck_ak + 4] = 0.5 * planePrevThis.norm.z;
+	for (int i = 0; i < 5 * numf; ++i) {
+		rightPart[i] = 0.;
+	}
 
-        for (int iedge = 0; iedge < nv; ++iedge)
-        {
-            int v0 = index[iedge];
-            int v1 = index[iedge + 1];
-//            DBGPRINT("\t Processing edge (%d, %d)\n", v0, v1);
-            int iplaneNeighbour = index[nv + 1 + iedge];
+	for (int iplane = 0; iplane < numf; ++iplane) {
+		int nv = facet[iplane].nv;
+		int * index = facet[iplane].index;
 
-            int i_ak_an = 5 * numf * 5 * iplane + 5 * iplaneNeighbour;
-            int i_bk_an = i_ak_an + 5 * numf;
-            int i_ck_an = i_ak_an + 2 * 5 * numf;
-            int i_dk_an = i_ak_an + 3 * 5 * numf;
-            __attribute__((unused)) int i_lk_an = i_ak_an + 4 * 5 * numf;
-            
-            Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
-            
-            int edgeid = preed_find(nume, edges, v0, v1);
-//            DBGPRINT("\t It is edge # %d in the list", edgeid);
-            
-            if (edgeid == -1)
-            {
-                printf ("Error! edge (%d, %d) cannot be found\n", v0, v1);
-                return;
-            }
-            
-            int nc = edges[edgeid].numc;
-            int * cnums = edges[edgeid].contourNums;
-            int * cnearest = edges[edgeid].contourNearestSide;
-            
-            for (int icont = 0; icont < nc; ++icont)
-            {
-//            	DBGPRINT("\t\t Processing contour # %d", icont);
-                int curContour = cnums[icont];
-                int curNearestSide = cnearest[icont];
-                SideOfContour * sides = contours[curContour].sides;
-                Plane planeOfProjection = contours[curContour].plane;
-                
-                double gamma_ij = - planePrevNeighbour.norm * 
-                        planeOfProjection.norm /
-                        ((planePrevThis.norm - planePrevNeighbour.norm) *
-                        planeOfProjection.norm);
-//                DBGPRINT("\t\t iplane = %d, edgeid = %d, curContour = %d; gamma_ij = %lf",
-//                		iplane, edgeid, curContour, gamma_ij);
-                
-                Vector3d A_ij1 = sides[curNearestSide].A1;
-                Vector3d A_ij2 = sides[curNearestSide].A2;
-                
-                double x0 = A_ij1.x;
-                double y0 = A_ij1.y;
-                double z0 = A_ij1.z;
-                double x1 = A_ij2.x;
-                double y1 = A_ij2.y;
-                double z1 = A_ij2.z;
+		Plane planePrevThis = prevPlanes[iplane];
+
+		int i_ak_ak = 5 * numf * 5 * iplane + 5 * iplane;
+		int i_bk_ak = i_ak_ak + 5 * numf;
+		int i_ck_ak = i_ak_ak + 2 * 5 * numf;
+		int i_dk_ak = i_ak_ak + 3 * 5 * numf;
+		int i_lk_ak = i_ak_ak + 4 * 5 * numf;
+
+		matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
+		matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
+		matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
+		matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0;
+		rightPart[5 * iplane + 4] = 1.;
+
+		matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
+		matrix[i_bk_ak + 4] = 0.5 * planePrevThis.norm.y;
+		matrix[i_ck_ak + 4] = 0.5 * planePrevThis.norm.z;
+
+		for (int iedge = 0; iedge < nv; ++iedge) {
+			int v0 = index[iedge];
+			int v1 = index[iedge + 1];
+			int iplaneNeighbour = index[nv + 1 + iedge];
+
+			int i_ak_an = 5 * numf * 5 * iplane + 5 * iplaneNeighbour;
+			int i_bk_an = i_ak_an + 5 * numf;
+			int i_ck_an = i_ak_an + 2 * 5 * numf;
+			int i_dk_an = i_ak_an + 3 * 5 * numf;
+			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * 5 * numf;
+
+			Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
+
+			int edgeid = preed_find(nume, edges, v0, v1);
+
+			if (edgeid == -1) {
+				printf("Error! edge (%d, %d) cannot be found\n", v0, v1);
+				return;
+			}
+
+			for (list<EdgeContourAssociation>::iterator itCont =
+					edges[iedge].assocList.begin();
+					itCont != edges[iedge].assocList.end(); ++itCont) {
+
+				int curContour = itCont->indContour;
+				int curNearestSide = itCont->indNearestSide;
+				SideOfContour * sides = contours[curContour].sides;
+				Plane planeOfProjection = contours[curContour].plane;
+
+				double gamma_ij = -planePrevNeighbour.norm * planeOfProjection.norm
+						/ ((planePrevThis.norm - planePrevNeighbour.norm)
+								* planeOfProjection.norm);
+
+				Vector3d A_ij1 = sides[curNearestSide].A1;
+				Vector3d A_ij2 = sides[curNearestSide].A2;
+
+				double x0 = A_ij1.x;
+				double y0 = A_ij1.y;
+				double z0 = A_ij1.z;
+				double x1 = A_ij2.x;
+				double y1 = A_ij2.y;
+				double z1 = A_ij2.z;
 //                DBGPRINT("\t\t A_ij1 = (%lf, %lf, %lf)", x0, y1, z1);
 //                DBGPRINT("\t\t A_ij2 = (%lf, %lf, %lf)", x1, y1, z1);
-                
-                double xx = x0 * x0 + x1 * x1;
-                double xy = x0 * y0 + x1 * y1;
-                double xz = x0 * z0 + x1 * z1;
-                double x = x0 + x1;
-                double yy = y0 * y0 + y1 * y1;
-                double yz = y0 * z0 + y1 * z1;
-                double y = y0 + y1;
-                double zz = z0 * z0 + z1 * z1;
-                double z = z0 + z1;
-                
-                double gamma1 = gamma_ij * gamma_ij;
-                double gamma2 = gamma_ij * (1 - gamma_ij);
-                
-                matrix[i_ak_ak] += gamma1 * xx;
-                matrix[i_ak_ak + 1] += gamma1 * xy;
-                matrix[i_ak_ak + 2] += gamma1 * xz;
-                matrix[i_ak_ak + 3] += gamma1 * x;
-                
-                matrix[i_bk_ak] += gamma1 * xy;
-                matrix[i_bk_ak + 1] += gamma1 * yy;
-                matrix[i_bk_ak + 2] += gamma1 * yz;
-                matrix[i_bk_ak + 3] += gamma1 * y;
-                
-                matrix[i_ck_ak] += gamma1 * xz;
-                matrix[i_ck_ak + 1] += gamma1 * yz;
-                matrix[i_ck_ak + 2] += gamma1 * zz;
-                matrix[i_ck_ak + 3] += gamma1 * z;
-                
-                matrix[i_dk_ak] += gamma1 * x;
-                matrix[i_dk_ak + 1] += gamma1 * y;
-                matrix[i_dk_ak + 2] += gamma1 * z;
-                matrix[i_dk_ak + 3] += gamma1 * 2;
-                
-                matrix[i_ak_an] += gamma2 * xx;
-                matrix[i_ak_an + 1] += gamma2 * xy;
-                matrix[i_ak_an + 2] += gamma2 * xz;
-                matrix[i_ak_an + 3] += gamma2 * x;
-                
-                matrix[i_bk_an] += gamma2 * xy;
-                matrix[i_bk_an + 1] += gamma2 * yy;
-                matrix[i_bk_an + 2] += gamma2 * xz;
-                matrix[i_bk_an + 3] += gamma2 * y;
-                
-                matrix[i_ck_an] += gamma2 * xz;
-                matrix[i_ck_an + 1] += gamma2 * yz;
-                matrix[i_ck_an + 2] += gamma2 * zz;
-                matrix[i_ck_an + 3] += gamma2 * z;
-                
-                matrix[i_dk_an] += gamma2 * x;
-                matrix[i_dk_an + 1] += gamma2 * y;
-                matrix[i_dk_an + 2] += gamma2 * z;
-                matrix[i_dk_an + 3] += gamma2 * 2;
-            }
-        }
-    }
-    DBG_END;
+
+				double xx = x0 * x0 + x1 * x1;
+				double xy = x0 * y0 + x1 * y1;
+				double xz = x0 * z0 + x1 * z1;
+				double x = x0 + x1;
+				double yy = y0 * y0 + y1 * y1;
+				double yz = y0 * z0 + y1 * z1;
+				double y = y0 + y1;
+				double zz = z0 * z0 + z1 * z1;
+				double z = z0 + z1;
+
+				double gamma1 = gamma_ij * gamma_ij;
+				double gamma2 = gamma_ij * (1 - gamma_ij);
+
+				matrix[i_ak_ak] += gamma1 * xx;
+				matrix[i_ak_ak + 1] += gamma1 * xy;
+				matrix[i_ak_ak + 2] += gamma1 * xz;
+				matrix[i_ak_ak + 3] += gamma1 * x;
+
+				matrix[i_bk_ak] += gamma1 * xy;
+				matrix[i_bk_ak + 1] += gamma1 * yy;
+				matrix[i_bk_ak + 2] += gamma1 * yz;
+				matrix[i_bk_ak + 3] += gamma1 * y;
+
+				matrix[i_ck_ak] += gamma1 * xz;
+				matrix[i_ck_ak + 1] += gamma1 * yz;
+				matrix[i_ck_ak + 2] += gamma1 * zz;
+				matrix[i_ck_ak + 3] += gamma1 * z;
+
+				matrix[i_dk_ak] += gamma1 * x;
+				matrix[i_dk_ak + 1] += gamma1 * y;
+				matrix[i_dk_ak + 2] += gamma1 * z;
+				matrix[i_dk_ak + 3] += gamma1 * 2;
+
+				matrix[i_ak_an] += gamma2 * xx;
+				matrix[i_ak_an + 1] += gamma2 * xy;
+				matrix[i_ak_an + 2] += gamma2 * xz;
+				matrix[i_ak_an + 3] += gamma2 * x;
+
+				matrix[i_bk_an] += gamma2 * xy;
+				matrix[i_bk_an + 1] += gamma2 * yy;
+				matrix[i_bk_an + 2] += gamma2 * xz;
+				matrix[i_bk_an + 3] += gamma2 * y;
+
+				matrix[i_ck_an] += gamma2 * xz;
+				matrix[i_ck_an + 1] += gamma2 * yz;
+				matrix[i_ck_an + 2] += gamma2 * zz;
+				matrix[i_ck_an + 3] += gamma2 * z;
+
+				matrix[i_dk_an] += gamma2 * x;
+				matrix[i_dk_an + 1] += gamma2 * y;
+				matrix[i_dk_an + 2] += gamma2 * z;
+				matrix[i_dk_an + 3] += gamma2 * 2;
+			}
+		}
+	}
+	DBG_END
+	;
 }
 

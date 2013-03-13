@@ -21,6 +21,7 @@ set (SOURCE_vector3d
 set (SOURCE_polyhedronCorrection
 ./Source/Edge/Edge_io.cpp
 ./Source/Edge/Edge.cpp
+./Source/EdgeContourAssociation/EdgeContourAssociation.cpp
 ./Source/EdgeSet/EdgeSet_io.cpp
 ./Source/EdgeSet/EdgeSet_intersection.cpp
 ./Source/EdgeSet/EdgeSet.cpp

@@ -5,14 +5,37 @@
  *      Author: iliya
  */
 
-#include "EdgeContourAssociation.h"
+#include "PolyhedraCorrectionLibrary.h"
 
-EdgeContourAssociation::EdgeContourAssociation() {
-	// TODO Auto-generated constructor stub
+EdgeContourAssociation::EdgeContourAssociation() :
+				indContour(-1),
+				indNearestSide(-1),
+				ifProperDirection(false) {
+}
 
+EdgeContourAssociation::EdgeContourAssociation(
+		int indContour_orig,
+		int indNearestSide_orig,
+		bool ifProperDirection_orig) :
+				indContour(indContour_orig),
+				indNearestSide(indNearestSide_orig),
+				ifProperDirection(ifProperDirection_orig) {
+}
+
+EdgeContourAssociation::EdgeContourAssociation(
+		int indContour_orig) :
+				indContour(indContour_orig),
+				indNearestSide(-1),
+				ifProperDirection(false) {
+}
+
+EdgeContourAssociation::EdgeContourAssociation(
+		const EdgeContourAssociation& orig) :
+				indContour(orig.indContour),
+				indNearestSide(orig.indNearestSide),
+				ifProperDirection(orig.ifProperDirection) {
 }
 
 EdgeContourAssociation::~EdgeContourAssociation() {
-	// TODO Auto-generated destructor stub
 }
 
