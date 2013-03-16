@@ -15,12 +15,14 @@ public:
 	int indContour;
 	int indNearestSide;
 	bool ifProperDirection;
+	double weight;
 
 	EdgeContourAssociation();
 	EdgeContourAssociation(
 			int indContour_orig,
 			int indNearestSide_orig,
-			bool ifProperDirection_orig);
+			bool ifProperDirection_orig,
+			double weight_orig);
 	EdgeContourAssociation(
 			int indContour_orig);
 	EdgeContourAssociation(
