@@ -44,7 +44,7 @@ int Polyhedron::preprocess_edges(
 					index[j], // First vertex
 					index[j + 1], // Second vertex
 					i, // Current facet id
-					index[nv + 1 + j]); // Id of its neighbour
+					index[nv + 1 + j]); // Id of its neighbor
 		}
 	}
 #ifndef NDEBUG
@@ -105,8 +105,6 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 		DBGPRINT(
 				"Edge is invisible: it's covered by facets, sign0 = %le, sign1 = %le",
 				sign0, sign1);
-		DBG_END
-		;
 		return false;
 	}
 
@@ -116,16 +114,12 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet) {
 		// Regular case. Nothing is orthogonal.
 		DBGPRINT("\t\tRegular case. Nothing is orthogonal.");
-		DBG_END
-		;
 		return true;
 	}
 
 	else if (ifOrthogonalTo1stFacet && ifOrthogonalTo2ndFacet) {
 		// When the edge is orthogonal to the plane of projection
 		DBGPRINT("\t\tThe edge is orthogonal to the plane of projection");
-		DBG_END
-		;
 		return false;
 	}
 
@@ -133,8 +127,6 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 		// When only the first facet is orthogonal to the plane of projection
 		DBGPRINT(
 				"\t\tOnly the first facet is orthogonal to the plane of projection");
-		DBG_END
-		;
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f0);
 	}
 
@@ -143,8 +135,6 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 		// When only the second facet is orthogonal to the plane of projection
 		DBGPRINT(
 				"\t\tOnly the second facet is orthogonal to the plane of projection");
-		DBG_END
-		;
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f1);
 	}
 }
