@@ -2,75 +2,134 @@
 
 //#define NDEBUG
 
-int Polyhedron::corpol_preprocess(
-		int& nume,
-		Edge* &edges,
-		int N,
-		SContour* contours) {
+void Polyhedron::corpol_preprocess() {
 	DBG_START
 	;
-	// + TODO: provide right orientation of facets
-	int numeMax = 0;
-	for (int i = 0; i < numf; ++i) {
-		numeMax += facet[i].nv;
-	}
-	numeMax = numeMax / 2;
-
-	edges = new Edge[numeMax];
-
-	preprocess_edges(nume, numeMax, edges);
-	corpol_prep_build_lists_of_visible_edges(nume, edges, N, contours);
-	corpol_prep_map_between_edges_and_contours(nume, edges, N, contours);
-
+	preprocess_edges();
+	corpol_prep_build_lists_of_visible_edges();
+	corpol_prep_map_between_edges_and_contours();
 	DBG_END
 	;
-	return 0;
 }
 
-int Polyhedron::preprocess_edges(
-		int& nume,
-		int numeMax,
-		Edge* edges) {
+void Polyhedron::preprocess_edges() {
 	DBG_START
 	;
-	nume = 0;
-	for (int i = 0; i < numf; ++i) {
-		int nv = facet[i].nv;
-		int * index = facet[i].index;
+	int numEdgesMax = numEdges = 0;
+	for (int i = 0; i < numFacets; ++i) {
+		numEdgesMax += facets[numFacets].numVertices;
+	}
+	numEdgesMax /= 2;
+	for (int i = 0; i < numFacets; ++i) {
+		int nv = facets[i].numVertices;
+		int * index = facets[i].indVertices;
 		for (int j = 0; j < nv; ++j) {
-			preed_add(nume, // Number of already added edges to the list
-					numeMax, // Number of edges which we are going add finally
-					edges, // Array of edges
-					index[j], // First vertex
-					index[j + 1], // Second vertex
-					i, // Current facet id
+			preed_add(numEdgesMax, // Number of edges which we are going add finally
+					index[j], // First vertices
+					index[j + 1], // Second vertices
+					i, // Current facets id
 					index[nv + 1 + j]); // Id of its neighbor
 		}
 	}
 #ifndef NDEBUG
-	for (int i = 0; i < nume; ++i) {
+	for (int i = 0; i < numEdges; ++i) {
 		edges[i].my_fprint(stdout);
 	}
 #endif
 
 	DBG_END
 	;
-	return 0;
 }
 
-int Polyhedron::corpol_prep_build_lists_of_visible_edges(
-		int nume,
-		Edge* edges,
-		int ncont,
-		SContour* contours) {
-	DBG_START;
+void Polyhedron::corpol_prepMap() {
+	DBG_START
+	;
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
+		corpol_prepMapFacet(iFacet);
+	}
+	DBG_END
+	;
+}
 
-	for (int iedge = 0; iedge < nume; ++iedge) {
+void Polyhedron::corpol_prepMapFacet(
+		int iFacet) {
+	DBG_START
+	;
+	int numVertex = facets[iFacet].numVertices;
+	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
+		corpol_prepMapFacetEdge(iVertex, iFacet);
+	}
+	DBG_END
+	;
+}
+
+double distVertexEdge(
+		// this routine calculates distance
+		Vector3d A,  				// from this vector
+		Vector3d A1, 				// to the edge [A1, A2]
+		Vector3d A2) {
+	double matrix[] = { A2.y - A1.y, A2.x - A1.x, 0, 0, A2.z - A1.z, A2.y - A1.y,
+			A2.x - A1.x, A2.y - A1.y, A2.z - A1.z };
+	double rightHandSide[] = { A1.x * (A2.y - A1.y) + A1.y * (A2.x - A1.x), A1.y
+			* (A2.z - A1.z) + A1.z * (A2.y - A1.y), A.x * (A2.x - A1.x)
+			+ A.y * (A2.y - A1.y) + A.z * (A2.z - A1.z) };
+	double matrixFactorized[9];
+	int indexPivot[3];
+	char formOfEqulibration;
+	double rowScaleFactors[3];
+	double columnScaleFactors[3];
+	double solution[3];
+	double reciprocalConditionNumber;
+	double forwardErrorBound;
+	double backwardErrorRelative;
+	double rpivot[9]; // ??? Don't know what it is
+
+	lapack_int info = LAPACKE_dgesvx(LAPACK_ROW_MAJOR, 'E', 'N', 3, 1, matrix, 3,
+			matrixFactorized, 3, indexPivot, &formOfEqulibration, rowScaleFactors,
+			columnScaleFactors, rightHandSide, 3, solution, 3,
+			&reciprocalConditionNumber, &forwardErrorBound, &backwardErrorRelative,
+			rpivot);
+
+	if (info != 0) {
+		if (info < 0) {
+			DBGPRINT("LAPACKE_dgesvx: the %d-th argument " "had an illegal value",
+					-info);
+		} else if (info <= 3) {
+			DBGPRINT(
+					"LAPACKE_dgesvx: U(%d, %d) is exactly zero.  " "The factorization has" "been completed, but the factor U is exactly" "singular, so the solution and error bounds" "could not be computed.",
+					info, info);
+		} else if (info == 4) {
+			DBGPRINT(
+					"LAPACKE_dgesvx: U is non-singular, " "but RCOND is less than machine" "precision, meaning that the matrix is singular" "to working precision.  Nevertheless, the" "solution and error bounds are computed because" "there are a number of situations where the" "computed solution can be more accurate than the" "value of RCOND would suggest.");
+		} else {
+			DBGPRINT("LAPACKE_dgesvx: FATAL. Unknown output value");
+		}
+	}
+	Vector3d* Aproj = new Vector3d(rightHandSide[0], rightHandSide[1],
+			rightHandSide[2]);
+	return sqrt(qmod(A - *Aproj));
+}
+
+void Polyhedron::corpol_prepMapFacetEdge(
+		int iVertex,
+		int iFacet) {
+	DBG_START
+	;
+
+	DBG_END
+	;
+}
+
+int Polyhedron::corpol_prep_build_lists_of_visible_edges() {
+	DBG_START
+	;
+
+	for (int iedge = 0; iedge < numEdges; ++iedge) {
 
 		DBGPRINT("Processing edge %d (%d, %d)\n", iedge, edges[iedge].v0,
 				edges[iedge].v1);
 
-		for (int icont = 0; icont < ncont; ++icont) {
+		for (int icont = 0; icont < numContours; ++icont) {
 			Plane planeOfProjection = contours[icont].plane;
 			bool ifVisibleOnCurrCont = corpol_edgeIsVisibleOnPlane(edges[iedge],
 					planeOfProjection);
@@ -82,7 +141,8 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges(
 		edges[iedge].my_fprint(stdout);
 	}
 
-	DBG_END;
+	DBG_END
+	;
 	return 0;
 }
 
@@ -95,8 +155,8 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 	int v1 = edge.v1;
 	int f0 = edge.f0;
 	int f1 = edge.f1;
-	Plane pi0 = facet[f0].plane;
-	Plane pi1 = facet[f1].plane;
+	Plane pi0 = facets[f0].plane;
+	Plane pi1 = facets[f1].plane;
 	double sign0 = pi0.norm * planeOfProjection.norm;
 	double sign1 = pi1.norm * planeOfProjection.norm;
 
@@ -124,7 +184,7 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 	}
 
 	else if (ifOrthogonalTo1stFacet) {
-		// When only the first facet is orthogonal to the plane of projection
+		// When only the first facets is orthogonal to the plane of projection
 		DBGPRINT(
 				"\t\tOnly the first facet is orthogonal to the plane of projection");
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f0);
@@ -132,9 +192,9 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 
 	else // ifOrthogonalTo2ndFacet
 	{
-		// When only the second facet is orthogonal to the plane of projection
+		// When only the second facets is orthogonal to the plane of projection
 		DBGPRINT(
-				"\t\tOnly the second facet is orthogonal to the plane of projection");
+				"\t\tOnly the second facets is orthogonal to the plane of projection");
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f1);
 	}
 }
@@ -146,17 +206,17 @@ bool Polyhedron::corpol_collinear_visibility(
 		int ifacet) {
 	DBG_START
 	;
-	int nv = facet[ifacet].nv;
-	int* index = facet[ifacet].index;
+	int nv = facets[ifacet].numVertices;
+	int* index = facets[ifacet].indVertices;
 	Vector3d nu = planeOfProjection.norm;
 
-	// 1. Find the closest vertex to the plane of projection.
+// 1. Find the closest vertices to the plane of projection.
 	int ivertexMax = -1;
 	double scalarMax = 0.;
 	for (int ivertex = 0; ivertex < nv; ++ivertex) {
 		int v0 = index[ivertex];
 
-		double scalar = nu * vertex[v0];
+		double scalar = nu * vertices[v0];
 		if (ivertexMax == -1 || scalarMax < scalar) {
 			ivertexMax = ivertex;
 			scalarMax = scalar;
@@ -165,12 +225,12 @@ bool Polyhedron::corpol_collinear_visibility(
 
 	int v0Max = index[ivertexMax];
 	int v1Max = index[ivertexMax + 1];
-	Vector3d vector0Max = planeOfProjection.project(vertex[v0Max]);
-	Vector3d vector1Max = planeOfProjection.project(vertex[v1Max]);
+	Vector3d vector0Max = planeOfProjection.project(vertices[v0Max]);
+	Vector3d vector1Max = planeOfProjection.project(vertices[v1Max]);
 	Vector3d mainEdge = vector1Max - vector0Max;
 
-	// 1.1. If mainEdge is orthogonal to the plane of projection,
-	// then we take its another edge which includes vertex iverteMax
+// 1.1. If mainEdge is orthogonal to the plane of projection,
+// then we take its another edge which includes vertex iverteMax
 
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY) {
 		DBGPRINT(
@@ -178,16 +238,16 @@ bool Polyhedron::corpol_collinear_visibility(
 				v0Max, v1Max, ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
 		v1Max = index[ivertexMax];
-		vector0Max = planeOfProjection.project(vertex[v0Max]);
-		vector1Max = planeOfProjection.project(vertex[v1Max]);
+		vector0Max = planeOfProjection.project(vertices[v0Max]);
+		vector1Max = planeOfProjection.project(vertices[v1Max]);
 		mainEdge = vector1Max - vector0Max;
 	}
 
-	// 2. Go around the facet, beginning from the closest vertex.
+// 2. Go around the facets, beginning from the closest vertices.
 	for (int ivertex = 0; ivertex < nv; ++ivertex) {
 		int v0 = index[ivertex];
 		int v1 = index[ivertex + 1];
-		Vector3d curEdge = vertex[v1] - vertex[v0];
+		Vector3d curEdge = vertices[v1] - vertices[v0];
 
 		if ((v0 == v0processed && v1 == v1processed)
 				|| (v0 == v1processed && v1 == v0processed)) {
@@ -200,34 +260,28 @@ bool Polyhedron::corpol_collinear_visibility(
 			return curEdge * mainEdge > 0;
 		}
 	}
-	DBGPRINT("Error. Edge (%d, %d) cannot be found in facet %d", v0processed,
+	DBGPRINT("Error. Edge (%d, %d) cannot be found in facets %d", v0processed,
 			v1processed, ifacet);
 	DBG_END
 	;
 	return false;
 }
 
-int Polyhedron::corpol_prep_map_between_edges_and_contours(
-		int nume,
-		Edge* edges,
-		int N,
-		SContour* contours) {
+int Polyhedron::corpol_prep_map_between_edges_and_contours() {
 	DBG_START
 	;
-	// NOTE: Testing needed.
-	for (int iedge = 0; iedge < nume; ++iedge) {
+// NOTE: Testing needed.
+	for (int iedge = 0; iedge < numEdges; ++iedge) {
 		int v0 = edges[iedge].v0;
 		int v1 = edges[iedge].v1;
 		DBGPRINT("Processing edge #%d (%d, %d)", iedge, v0, v1);
 
 		int ncont = edges[iedge].assocList.size();
-		Vector3d A0 = vertex[v0];
-		Vector3d A1 = vertex[v1];
+		Vector3d A0 = vertices[v0];
+		Vector3d A1 = vertices[v1];
 		for (list<EdgeContourAssociation>::iterator itCont =
-				edges[iedge].assocList.begin();
-				itCont != edges[iedge].assocList.end();
-				++itCont)
-		{
+				edges[iedge].assocList.begin(); itCont != edges[iedge].assocList.end();
+				++itCont) {
 			DBGPRINT("\tFind nearest on contour #%d", itCont->indContour);
 			contours[itCont->indContour].my_fprint(stdout);
 
@@ -262,16 +316,15 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours(
 		edges[iedge].my_fprint(stdout);
 	}
 
-	DBG_END;
+	DBG_END
+	;
 	return 0;
 }
 
 #define NDEBUG
 
 void Polyhedron::preed_add(
-		int& nume,
 		int numeMax,
-		Edge* edges,
 		int v0,
 		int v1,
 		int f0,
@@ -279,10 +332,10 @@ void Polyhedron::preed_add(
 #ifndef NDEBUG
 	printf("\n\n----------------\nTrying to add edge (%d, %d) \n", v0, v1);
 
-	for (int i = 0; i < nume; ++i)
+	for (int i = 0; i < numEdges; ++i)
 	printf("\tedges[%d] = (%d, %d)\n", i, edges[i].v0, edges[i].v1);
 #endif 
-	if (nume >= numeMax) {
+	if (numEdges >= numeMax) {
 #ifndef NDEBUG
 		printf("Warning. List is overflow\n");
 #endif
@@ -301,7 +354,7 @@ void Polyhedron::preed_add(
 		f1 = tmp;
 	}
 
-	int retvalfind = preed_find(nume, edges, v0, v1);
+	int retvalfind = preed_find(v0, v1);
 #ifndef NDEBUG
 	printf("retvalfind = %d\n", retvalfind);
 #endif
@@ -312,8 +365,8 @@ void Polyhedron::preed_add(
 		return;
 	}
 
-	// If not, add current edge to array of edges :
-	for (int i = nume; i > retvalfind; --i) {
+// If not, add current edge to array of edges :
+	for (int i = numEdges; i > retvalfind; --i) {
 		edges[i] = edges[i - 1];
 	}
 #ifndef NDEBUG
@@ -323,13 +376,11 @@ void Polyhedron::preed_add(
 	edges[retvalfind].v1 = v1;
 	edges[retvalfind].f0 = f0;
 	edges[retvalfind].f1 = f1;
-	edges[retvalfind].id = nume;
-	++nume;
+	edges[retvalfind].id = numEdges;
+	++numEdges;
 }
 
 int Polyhedron::preed_find(
-		int nume,
-		Edge* edges,
 		int v0,
 		int v1) {
 #ifndef NDEBUG
@@ -342,10 +393,10 @@ int Polyhedron::preed_find(
 		v1 = tmp;
 	}
 
-	// Binary search :
+// Binary search :
 	int first = 0; // Первый элемент в массиве
 
-	int last = nume; // Последний элемент в массиве
+	int last = numEdges; // Последний элемент в массиве
 
 #ifndef NDEBUG
 	printf("\tfirst = %d, last = %d \n", first, last);

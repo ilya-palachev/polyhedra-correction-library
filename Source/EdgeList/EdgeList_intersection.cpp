@@ -143,7 +143,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
     int incr;
     int nv;
     Plane plane;
-    plane = poly->facet[next_f].plane;
+    plane = poly->facets[next_f].plane;
 
     double err;
     err = qmod(plane.norm - iplane.norm) + (plane.dist - iplane.dist) * (plane.dist - iplane.dist);
@@ -154,17 +154,17 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
     if (num < 1 && fabs(err) <= 0.0000000000000001) {
         fprintf(stdout, "\t\t --- SPECIAL FACET ---\n\n");
 
-        sign0 = poly->signum(poly->vertex[v0], iplane);
-        sign1 = poly->signum(poly->vertex[v1], iplane);
+        sign0 = poly->signum(poly->vertices[v0], iplane);
+        sign1 = poly->signum(poly->vertices[v1], iplane);
         if (1) {
-            id0 = poly->facet[next_f].find_vertex(v0);
-            id1 = poly->facet[next_f].find_vertex(v1);
+            id0 = poly->facets[next_f].find_vertex(v0);
+            id1 = poly->facets[next_f].find_vertex(v1);
             if (id0 == -1 || id1 == -1) {
                 fprintf(stdout, "\tError: cannot find vertexes %d (%d) and %d (%d) facet %d.\n",
                         v0, id0, v1, id1, next_f);
                 return;
             }
-            nv = poly->facet[next_f].nv;
+            nv = poly->facets[next_f].numVertices;
             if (sign0 >= 0 && sign1 <= 0) {
                 if (id1 == id0 + 1 || (id1 == 0 && id0 == nv - 1))
                     incr = 1;
@@ -173,24 +173,24 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
                 id0 = id1;
                 v0 = v1;
                 id1 = (id0 + incr + nv) % nv;
-                v1 = poly->facet[next_f].index[id1];
+                v1 = poly->facets[next_f].indVertices[id1];
             } else if (sign0 <= 0 && sign1 >= 0) {
                 if (id1 == id0 + 1 || (id1 == 0 && id0 == nv - 1))
                     incr = -1;
                 else if (id1 == id0 - 1 || (id0 == 0 && id1 == nv - 1))
                     incr = 1;
                 id1 = (id0 + incr + nv) % nv;
-                v1 = poly->facet[next_f].index[id1];
+                v1 = poly->facets[next_f].indVertices[id1];
             } else if (sign0 <= 0 && sign1 <= 0 && (next_d == -1 || next_d == 1)) {
                 incr = next_d;
                 if ((id1 - id0 + nv) % nv == next_d) {
                     id0 = id1;
                     v0 = v1;
                     id1 = (id0 + incr + nv) % nv;
-                    v1 = poly->facet[next_f].index[id1];
+                    v1 = poly->facets[next_f].indVertices[id1];
                 } else {
                     id1 = (id0 + incr + nv) % nv;
-                    v1 = poly->facet[next_f].index[id1];
+                    v1 = poly->facets[next_f].indVertices[id1];
                 }
             } else {
                 fprintf(stdout, "Error. Cannot define the direction. sign(%d) = %d, sign(%d) = %d, drctn = %d\n",
@@ -198,11 +198,11 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1, i
                 return;
             }
 
-            sign0 = poly->signum(poly->vertex[v0], iplane);
-            sign1 = poly->signum(poly->vertex[v1], iplane);
+            sign0 = poly->signum(poly->vertices[v0], iplane);
+            sign1 = poly->signum(poly->vertices[v1], iplane);
             if (sign1 == 1) {
                 //next_f = :
-                poly->facet[next_f].find_next_facet(incr == 1 ? v0 : v1, next_f);
+                poly->facets[next_f].find_next_facet(incr == 1 ? v0 : v1, next_f);
                 next_d = 0;
             } else {
                 next_d = incr;

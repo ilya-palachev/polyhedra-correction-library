@@ -13,13 +13,13 @@ class Facet
 {
 public:
 	int id;
-	int nv;
+	int numVertices;
 	Plane plane;
-	int* index;
-	Polyhedron* poly;
+	int* indVertices;
+	Polyhedron* parentPolyhedron;
 	char rgb[3];
 
-	EdgeList edge_list;
+	EdgeList edgeList;
 
 public:
 	//Facet.cpp

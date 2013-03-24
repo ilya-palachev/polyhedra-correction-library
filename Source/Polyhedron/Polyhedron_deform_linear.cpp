@@ -14,10 +14,10 @@ double Polyhedron::min_dist(int id) {
     int i, nf, *index;
     double dist, min_dist;
 
-    nf = vertexinfo[id].nf;
-    index = vertexinfo[id].index;
+    nf = vertexInfos[id].numFacets;
+    index = vertexInfos[id].indFacets;
     for (i = 0; i < nf; ++i) {
-        dist = qmod(vertex[id] - vertex[index[nf + 1 + i]]);
+        dist = qmod(vertices[id] - vertices[index[nf + 1 + i]]);
         dist = sqrt(dist);
         if (i == 0 || dist < min_dist)
             min_dist = dist;
@@ -68,12 +68,12 @@ void Polyhedron::deform_linear(int id, Vector3d delta) {
     //    }
     //    //    scanf("%lf", &dist);
 
-    x = new double[numv]; //Вспомогательный массив для вычисления в deform_linear_facets
-    y = new double[numv]; //Вспомогательный массив для вычисления в deform_linear_facets
-    z = new double[numv]; //Вспомогательный массив для вычисления в deform_linear_facets
-    xold = new double[numv]; //Чтобы хранить начальные значения
-    yold = new double[numv]; //Чтобы хранить начальные значения
-    zold = new double[numv]; //Чтобы хранить начальные значения
+    x = new double[numVertices]; //Вспомогательный массив для вычисления в deform_linear_facets
+    y = new double[numVertices]; //Вспомогательный массив для вычисления в deform_linear_facets
+    z = new double[numVertices]; //Вспомогательный массив для вычисления в deform_linear_facets
+    xold = new double[numVertices]; //Чтобы хранить начальные значения
+    yold = new double[numVertices]; //Чтобы хранить начальные значения
+    zold = new double[numVertices]; //Чтобы хранить начальные значения
     A = new double[9]; //Вспомогательный массив для вычисления в deform_linear_vertices
     B = new double[3]; //Вспомогательный массив для вычисления в deform_linear_vertices
 
@@ -91,15 +91,15 @@ void Polyhedron::deform_linear(int id, Vector3d delta) {
     //    }
 
     //    delta += vertex[id]; //Сохраняем положение деформированной точки
-    vertex[id] += delta;
+    vertices[id] += delta;
 
     //    printf("vertex[%d] = (%lf, %lf, %lf)\n", 
     //        id, vertex[id].x, vertex[id].y, vertex[id].z);
 
-    for (i = 0; i < numv; ++i) {
-        xold[i] = vertex[i].x;
-        yold[i] = vertex[i].y;
-        zold[i] = vertex[i].z;
+    for (i = 0; i < numVertices; ++i) {
+        xold[i] = vertices[i].x;
+        yold[i] = vertices[i].y;
+        zold[i] = vertices[i].z;
     }
 
 
@@ -203,24 +203,24 @@ void Polyhedron::deform_linear_test(int id, Vector3d delta, int mode, int& num_s
     double norm;
 
 
-    x = new double[numv];
-    y = new double[numv];
-    z = new double[numv];
-    xold = new double[numv];
-    yold = new double[numv];
-    zold = new double[numv];
+    x = new double[numVertices];
+    y = new double[numVertices];
+    z = new double[numVertices];
+    xold = new double[numVertices];
+    yold = new double[numVertices];
+    zold = new double[numVertices];
     A = new double[9];
     B = new double[3];
 
-    vertex[id] += delta;
+    vertices[id] += delta;
 
     printf("vertex[%d] = (%lf, %lf, %lf)\n",
-            id, vertex[id].x, vertex[id].y, vertex[id].z);
+            id, vertices[id].x, vertices[id].y, vertices[id].z);
 
-    for (i = 0; i < numv; ++i) {
-        xold[i] = vertex[i].x;
-        yold[i] = vertex[i].y;
-        zold[i] = vertex[i].z;
+    for (i = 0; i < numVertices; ++i) {
+        xold[i] = vertices[i].x;
+        yold[i] = vertices[i].y;
+        zold[i] = vertices[i].z;
     }
 
     switch (mode) {
@@ -292,7 +292,7 @@ void Polyhedron::deform_linear_test(int id, Vector3d delta, int mode, int& num_s
     }
 
     printf("vertex[%d] = (%lf, %lf, %lf)\n",
-            id, vertex[id].x, vertex[id].y, vertex[id].z);
+            id, vertices[id].x, vertices[id].y, vertices[id].z);
 
     if (x != NULL) delete[] x;
     if (y != NULL) delete[] y;
@@ -316,29 +316,29 @@ void Polyhedron::deform_linear_facets(double* x, double* y, double* z) {
     //    y = new double[numv];
     //    z = new double[numv];
 
-    for (j = 0; j < numf; ++j) {
-        nv = facet[j].nv;
-        index = facet[j].index;
+    for (j = 0; j < numFacets; ++j) {
+        nv = facets[j].numVertices;
+        index = facets[j].indVertices;
         for (i = 0; i < nv; ++i) {
-            x[i] = vertex[index[i]].x;
-            y[i] = vertex[index[i]].y;
-            z[i] = vertex[index[i]].z;
+            x[i] = vertices[index[i]].x;
+            y[i] = vertices[index[i]].y;
+            z[i] = vertices[index[i]].z;
         }
         aprox(nv, x, y, z, a, b, c, d);
-        a0 = facet[j].plane.norm.x;
-        b0 = facet[j].plane.norm.y;
-        c0 = facet[j].plane.norm.z;
-        d0 = facet[j].plane.dist;
+        a0 = facets[j].plane.norm.x;
+        b0 = facets[j].plane.norm.y;
+        c0 = facets[j].plane.norm.z;
+        d0 = facets[j].plane.dist;
         lambda = a * a0 + b * b0 + c * c0 + d * d0; // Чтобы минимизировать разницу норм плоскостей
         lambda /= a * a + b * b + c * c + d * d;
         a *= lambda;
         b *= lambda;
         c *= lambda;
         d *= lambda;
-        facet[j].plane.norm.x = a;
-        facet[j].plane.norm.y = b;
-        facet[j].plane.norm.z = c;
-        facet[j].plane.dist = d;
+        facets[j].plane.norm.x = a;
+        facets[j].plane.norm.y = b;
+        facets[j].plane.norm.z = c;
+        facets[j].plane.dist = d;
     }
 
     //    if (x != NULL) delete[] x;
@@ -352,20 +352,20 @@ double Polyhedron::deform_linear_calculate_error() {
     err = 0.;
     
 
-    for (j = 0; j < numf; ++j) {
-        nv = facet[j].nv;
-        index = facet[j].index;
-        a = facet[j].plane.norm.x;
-        b = facet[j].plane.norm.y;
-        c = facet[j].plane.norm.z;
-        d = facet[j].plane.dist;
+    for (j = 0; j < numFacets; ++j) {
+        nv = facets[j].numVertices;
+        index = facets[j].indVertices;
+        a = facets[j].plane.norm.x;
+        b = facets[j].plane.norm.y;
+        c = facets[j].plane.norm.z;
+        d = facets[j].plane.dist;
         if (nv < 3)
             continue;
         locerr = 0.;
         for (i = 0; i < nv; ++i) {
-            x = vertex[index[i]].x;
-            y = vertex[index[i]].y;
-            z = vertex[index[i]].z;
+            x = vertices[index[i]].x;
+            y = vertices[index[i]].y;
+            z = vertices[index[i]].z;
             locerr += fabs(a * x + b * y + c * z + d);
         }
         err += locerr;
@@ -379,10 +379,10 @@ double Polyhedron::deform_linear_calculate_deform(double* x, double* y, double* 
     int i;
     double deform, xx, yy, zz;
     deform = 0.;
-    for (i = 0; i < numv; ++i) {
-        xx = vertex[i].x;
-        yy = vertex[i].y;
-        zz = vertex[i].z;
+    for (i = 0; i < numVertices; ++i) {
+        xx = vertices[i].x;
+        yy = vertices[i].y;
+        zz = vertices[i].z;
         deform += (xx - x[i]) * (xx - x[i]);
         deform += (yy - y[i]) * (yy - y[i]);
         deform += (zz - z[i]) * (zz - z[i]);
@@ -404,7 +404,7 @@ void Polyhedron::deform_linear_vertices(
     //    B = new double[3];
 
     //    norm = 0.;
-    for (i = 0; i < numv; ++i) {
+    for (i = 0; i < numVertices; ++i) {
         if (i == id)
             continue;
         Maa = 0.;
@@ -416,10 +416,10 @@ void Polyhedron::deform_linear_vertices(
         Mbd = 0.;
         Mcc = 0.;
         Mcd = 0.;
-        nf = vertexinfo[i].nf;
-        index = vertexinfo[i].index;
+        nf = vertexInfos[i].numFacets;
+        index = vertexInfos[i].indFacets;
         for (j = 0; j < nf; ++j) {
-            pl = facet[index[j]].plane;
+            pl = facets[index[j]].plane;
             a = pl.norm.x;
             b = pl.norm.y;
             c = pl.norm.z;
@@ -450,9 +450,9 @@ void Polyhedron::deform_linear_vertices(
         //        norm += (B[0] - vertex[i].x) * (B[0] - vertex[i].x);
         //        norm += (B[1] - vertex[i].y) * (B[1] - vertex[i].y);
         //        norm += (B[2] - vertex[i].z) * (B[2] - vertex[i].z);
-        vertex[i].x = B[0];
-        vertex[i].y = B[1];
-        vertex[i].z = B[2];
+        vertices[i].x = B[0];
+        vertices[i].y = B[1];
+        vertices[i].z = B[2];
 
     }
 
@@ -464,11 +464,11 @@ void Polyhedron::deform_linear_vertices(
 
 void Polyhedron::import_coordinates(Polyhedron& orig) {
     int i;
-    for (i = 0; i < numv; ++i) {
-        vertex[i] = orig.vertex[i];
+    for (i = 0; i < numVertices; ++i) {
+        vertices[i] = orig.vertices[i];
     }
-    for (i = 0; i < numf; ++i) {
-        facet[i].plane = orig.facet[i].plane;
+    for (i = 0; i < numFacets; ++i) {
+        facets[i].plane = orig.facets[i].plane;
     }
 }
 
@@ -499,22 +499,22 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     //    }
     //    //    scanf("%lf", &dist);
 
-    x = new double[numv];
-    y = new double[numv];
-    z = new double[numv];
-    xold = new double[numv];
-    yold = new double[numv];
-    zold = new double[numv];
+    x = new double[numVertices];
+    y = new double[numVertices];
+    z = new double[numVertices];
+    xold = new double[numVertices];
+    yold = new double[numVertices];
+    zold = new double[numVertices];
     A = new double[9];
     B = new double[3];
 
     //    delta += vertex[id]; //Сохраняем положение деформированной точки
-    vertex[id] += delta;
+    vertices[id] += delta;
 
-    for (i = 0; i < numv; ++i) {
-        xold[i] = vertex[i].x;
-        yold[i] = vertex[i].y;
-        zold[i] = vertex[i].z;
+    for (i = 0; i < numVertices; ++i) {
+        xold[i] = vertices[i].x;
+        yold[i] = vertices[i].y;
+        zold[i] = vertices[i].z;
     }
 
 
@@ -528,9 +528,9 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
         for (i = 0; i < 10; ++i) {
             do {
     
-                vertex[id].x = xold[id];
-                vertex[id].y = yold[id];
-                vertex[id].z = zold[id];
+                vertices[id].x = xold[id];
+                vertices[id].y = yold[id];
+                vertices[id].z = zold[id];
 //            vertex[id] = delta;
                 deform_linear_facets(x, y, z);
 //                join_points();
@@ -575,9 +575,9 @@ void Polyhedron::deform_linear2(int id, Vector3d delta) {
     
     //    K = 1. / err;
     do {
-        vertex[id].x = xold[id];
-        vertex[id].y = yold[id];
-        vertex[id].z = zold[id];
+        vertices[id].x = xold[id];
+        vertices[id].y = yold[id];
+        vertices[id].z = zold[id];
         deform_linear_facets(x, y, z);
         
         ncons_curr = test_consections();
@@ -641,7 +641,7 @@ void Polyhedron::deform_linear_vertices(double K, double* A, double* B) {
 //    B = new double[3];
 
     norm = 0.;
-    for (i = 0; i < numv; ++i) {
+    for (i = 0; i < numVertices; ++i) {
         Maa = 0.;
         Mab = 0.;
         Mac = 0.;
@@ -651,14 +651,14 @@ void Polyhedron::deform_linear_vertices(double K, double* A, double* B) {
         Mbd = 0.;
         Mcc = 0.;
         Mcd = 0.;
-        nf = vertexinfo[i].nf;
+        nf = vertexInfos[i].numFacets;
         if (nf == 0) {
             printf("Vertex %d cannot be found in any facet...\n", i);
             continue;
         }
-        index = vertexinfo[i].index;
+        index = vertexInfos[i].indFacets;
         for (j = 0; j < nf; ++j) {
-            pl = facet[index[j]].plane;
+            pl = facets[index[j]].plane;
             a = pl.norm.x;
             b = pl.norm.y;
             c = pl.norm.z;
@@ -682,16 +682,16 @@ void Polyhedron::deform_linear_vertices(double K, double* A, double* B) {
         A[6] = A[2];
         A[7] = A[5];
         A[8] = 1. + K * Mcc;
-        B[0] = -K * Mad + vertex[i].x;
-        B[1] = -K * Mbd + vertex[i].y;
-        B[2] = -K * Mcd + vertex[i].z;
+        B[0] = -K * Mad + vertices[i].x;
+        B[1] = -K * Mbd + vertices[i].y;
+        B[2] = -K * Mcd + vertices[i].z;
         Gauss_string(3, A, B);
-        norm += (B[0] - vertex[i].x) * (B[0] - vertex[i].x);
-        norm += (B[1] - vertex[i].y) * (B[1] - vertex[i].y);
-        norm += (B[2] - vertex[i].z) * (B[2] - vertex[i].z);
-        vertex[i].x = B[0];
-        vertex[i].y = B[1];
-        vertex[i].z = B[2];
+        norm += (B[0] - vertices[i].x) * (B[0] - vertices[i].x);
+        norm += (B[1] - vertices[i].y) * (B[1] - vertices[i].y);
+        norm += (B[2] - vertices[i].z) * (B[2] - vertices[i].z);
+        vertices[i].x = B[0];
+        vertices[i].y = B[1];
+        vertices[i].z = B[2];
 
     }
 

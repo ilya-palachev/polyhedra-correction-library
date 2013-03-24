@@ -16,10 +16,10 @@ class VertexInfo
 {
 public:
 	int id;
-	int nf;
+	int numFacets;
 	Vector3d vector;
-	int* index;
-	Polyhedron* poly;
+	int* indFacets;
+	Polyhedron* parentPolyhedron;
 
 public:
 	VertexInfo();

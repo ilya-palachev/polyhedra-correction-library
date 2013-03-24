@@ -4,10 +4,10 @@
 
 Facet::Facet() :
 		id(-1),
-		nv(0),
+		numVertices(0),
 		plane(),
-		index(new int[1]),
-		poly(NULL)
+		indVertices(new int[1]),
+		parentPolyhedron(NULL)
 {
 	rgb[0] = 100;
 	rgb[1] = 100;
@@ -23,9 +23,9 @@ Facet::Facet(
 		const bool ifLong = false) :
 
 		id(id_orig),
-		nv(nv_orig),
+		numVertices(nv_orig),
 		plane(plane_orig),
-		poly(poly_orig) {
+		parentPolyhedron(poly_orig) {
 
 	rgb[0] = 100;
 	rgb[1] = 100;
@@ -42,15 +42,15 @@ Facet::Facet(
 	if (nv_orig < 3) {
 		fprintf(stdout, "Facet::Facet. Error. nv_orig < 3\n");
 	}
-	index = new int[3 * nv + 1];
+	indVertices = new int[3 * numVertices + 1];
 	if (ifLong) {
-		for (int i = 0; i < 3 * nv + 1; ++i)
-			index[i] = index_orig[i];
+		for (int i = 0; i < 3 * numVertices + 1; ++i)
+			indVertices[i] = index_orig[i];
 	} else {
-		for (int i = 0; i < nv + 1; ++i)
-			index[i] = index_orig[i];
-		for (int i = nv + 1; i < 3 * nv + 1; ++i)
-			index[i] = -1;
+		for (int i = 0; i < numVertices + 1; ++i)
+			indVertices[i] = index_orig[i];
+		for (int i = numVertices + 1; i < 3 * numVertices + 1; ++i)
+			indVertices[i] = -1;
 	}
 }
 
@@ -58,15 +58,15 @@ Facet& Facet::operator =(const Facet& facet1) {
 	int i;
 
 	id = facet1.id;
-	nv = facet1.nv;
+	numVertices = facet1.numVertices;
 	plane = facet1.plane;
 
-	if (index) delete[] index;
-	index = new int[3 * nv + 1];
-	for (i = 0; i < 3 * nv + 1; ++i)
-		index[i] = facet1.index[i];
+	if (indVertices) delete[] indVertices;
+	indVertices = new int[3 * numVertices + 1];
+	for (i = 0; i < 3 * numVertices + 1; ++i)
+		indVertices[i] = facet1.indVertices[i];
 
-	poly = facet1.poly;
+	parentPolyhedron = facet1.parentPolyhedron;
 
 	rgb[0] = facet1.rgb[0];
 	rgb[1] = facet1.rgb[1];
@@ -79,7 +79,7 @@ Facet::~Facet() {
 #ifdef DEBUG1
 	fprintf(stdout, "Deleting facet[%d]\n", id);
 #endif
-	if (index != NULL) delete[] index;
+	if (indVertices != NULL) delete[] indVertices;
 }
 
 int Facet::get_id() {
@@ -87,7 +87,7 @@ int Facet::get_id() {
 }
 
 int Facet::get_nv() {
-	return nv;
+	return numVertices;
 }
 
 Plane Facet::get_plane() {
@@ -95,7 +95,7 @@ Plane Facet::get_plane() {
 }
 
 int Facet::get_index(int pos) {
-	return index[pos];
+	return indVertices[pos];
 }
 
 char Facet::get_rgb(int pos) {
@@ -107,7 +107,7 @@ void Facet::set_id(int id1) {
 }
 
 void Facet::set_poly(Polyhedron* poly_new) {
-	poly = poly_new;
+	parentPolyhedron = poly_new;
 }
 
 void Facet::set_rgb(char red, char gray, char blue) {
@@ -122,7 +122,7 @@ void Facet::get_next_facet(
 		int& fid_next,
 		int& v_curr) {
 
-	fid_next = index[pos_curr + nv + 1];
-	pos_next = index[pos_curr + 2 * nv + 1];
-	v_curr = index[pos_curr + 1];
+	fid_next = indVertices[pos_curr + numVertices + 1];
+	pos_next = indVertices[pos_curr + 2 * numVertices + 1];
+	v_curr = indVertices[pos_curr + 1];
 }

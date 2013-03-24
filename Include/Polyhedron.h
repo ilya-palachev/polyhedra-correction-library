@@ -1,10 +1,3 @@
-/* 
- * File:   Polyhedron-class.h
- * Author: ilya
- *
- * Created on 12 Ноябрь 2012 г., 11:31
- */
-
 #ifndef POLYHEDRON_CLASS_H
 #define	POLYHEDRON_CLASS_H
 #include "PolyhedraCorrectionLibrary.h"
@@ -12,15 +5,19 @@
 
 class Polyhedron {
 public:
-	int numv;
-	int numf;
+	int numVertices;
+	int numFacets;
 
-	Vector3d* vertex;
-	Facet* facet;
-	VertexInfo* vertexinfo;
-	EdgeList* edge_list;
+	Vector3d* vertices;
+	Facet* facets;
+	VertexInfo* vertexInfos;
+	EdgeList* edgeLists;
 
-//	FILE* log_file;
+	int numEdges;
+	Edge* edges;
+
+	int numContours;
+	SContour* contours;
 
 public:
 
@@ -31,7 +28,6 @@ public:
 			int numf_orig,
 			Vector3d* vertex_orig,
 			Facet* facet_orig);
-//		FILE* log_file_orig);
 	Polyhedron(
 			int numv_orig,
 			int numf_orig,
@@ -355,21 +351,11 @@ public:
 			int j);
 
 	//Poyhedron_correction.cpp
-	int correct_polyhedron(
-			int N,
-			SContour* contours);
+	int correct_polyhedron();
 
 	double corpol_calculate_functional(
-			int nume,
-			Edge* edges,
-			int N,
-			SContour* contours,
 			Plane* prevPlanes);
 	int corpol_iteration(
-			int nume,
-			Edge* edges,
-			int N,
-			SContour* contours,
 			Plane* prevPlanes,
 			double* matrix,
 			double* rightPart,
@@ -377,51 +363,37 @@ public:
 			double* matrixFactorized,
 			int* indexPivot);
 	void corpol_calculate_matrix(
-			int nume,
-			Edge* edges,
-			int N,
-			SContour* contours,
 			Plane* prevPlanes,
 			double* matrix,
 			double* rightPart,
 			double* solution);
 
 	// Polyhedron_correction_preprocess.cpp
-	int corpol_preprocess(
-			int& nume,
-			Edge* &edges,
-			int N,
-			SContour* contours);
+	void corpol_preprocess();
 
-	int preprocess_edges(
-			int& nume,
-			int numeMax,
-			Edge* edges);
+	void preprocess_edges();
 	inline void preed_add(
-			int& nume,
 			int numeMax,
-			Edge* edges,
 			int v0,
 			int v1,
 			int f0,
 			int f1);
 
 	int preed_find(
-			int nume,
-			Edge* edges,
 			int v0,
 			int v1);
 
-	int corpol_prep_build_lists_of_visible_edges(
-			int nume,
-			Edge* edges,
-			int N,
-			SContour* contours);
-	int corpol_prep_map_between_edges_and_contours(
-			int nume,
-			Edge* edges,
-			int N,
-			SContour* contours);
+	void corpol_prepMap();
+
+	void corpol_prepMapFacet(
+			int iFacet);
+
+	void corpol_prepMapFacetEdge(
+			int iVertex,
+			int iFacet);
+
+	int corpol_prep_build_lists_of_visible_edges();
+	int corpol_prep_map_between_edges_and_contours();
 	bool corpol_edgeIsVisibleOnPlane(
 			Edge& edge,
 			Plane planeOfProjection);
@@ -438,19 +410,13 @@ public:
 			double maxMoveDelta);
 
 	SContour& corpolTest_createOneContour(
-			int numEdges,
-			Edge* edges,
 			int icont,
 			Plane planeOfProjection,
 			bool* bufferBool,
 			int* bufferInt0,
 			int* bufferInt1);
 
-	int corpolTest_createAllContours(
-			int numEdges,
-			Edge* edges,
-			int numContours,
-			SContour* contours);
+	int corpolTest_createAllContours();
 
 	void corpolTest_slightRandomMove(
 			double maxMoveDelta);

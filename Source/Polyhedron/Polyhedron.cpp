@@ -6,14 +6,16 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 Polyhedron::Polyhedron() :
-numv(0),
-numf(0),
-vertex(NULL),
-facet(NULL),
-vertexinfo(NULL),
-edge_list(NULL)
-{
-//log_file(stderr) {
+				numVertices(0),
+				numFacets(0),
+				vertices(NULL),
+				facets(NULL),
+				vertexInfos(NULL),
+				edgeLists(NULL),
+				numEdges(0),
+				edges(NULL),
+				numContours(0),
+				contours(NULL) {
 	fprintf(stdout, "Creating empty polyhedron...\n");
 }
 
@@ -22,71 +24,81 @@ Polyhedron::Polyhedron(
 		int numf_orig,
 		Vector3d* vertex_orig,
 		Facet* facet_orig) :
-//		FILE* log_file_orig = stderr) :
-numv(numv_orig),
-numf(numf_orig),
-vertex(new Vector3d[numv]),
-facet(new Facet[numf]),
-vertexinfo(NULL),
-edge_list(NULL)
-//log_file(log_file_orig)
-{
+				numVertices(numv_orig),
+				numFacets(numf_orig),
+				vertices(new Vector3d[numVertices]),
+				facets(new Facet[numFacets]),
+				vertexInfos(NULL),
+				edgeLists(NULL),
+				numEdges(0),
+				edges(NULL),
+				numContours(0),
+				contours(NULL) {
 	fprintf(stdout, "Creating polyhedron by coping...\n");
 
-
-
-	for (int i = 0; i < numv; ++i)
-		vertex[i] = vertex_orig[i];
-	for (int i = 0; i < numf; ++i)
-		facet[i] = facet_orig[i];
+	for (int i = 0; i < numVertices; ++i)
+		vertices[i] = vertex_orig[i];
+	for (int i = 0; i < numFacets; ++i)
+		facets[i] = facet_orig[i];
 
 }
 
 Polyhedron::~Polyhedron() {
 //	fprintf(stdout, "Deleting polyhedron...\n");
-	if (vertex)
-		delete[] vertex;
-	if (facet)
-		delete[] facet;
-	if (vertexinfo)
-		delete[] vertexinfo;
-//	if (log_file != stderr)
-//		fclose(log_file);
+	if (vertices)
+		delete[] vertices;
+	if (facets)
+		delete[] facets;
+	if (vertexInfos)
+		delete[] vertexInfos;
+	if (edgeLists)
+		delete[] edgeLists;
+	if (edges)
+		delete[] edges;
+	if (contours)
+		delete[] contours;
+
 }
 
-int Polyhedron::signum(Vector3d point, Plane plane)
-{
+int Polyhedron::signum(
+		Vector3d point,
+		Plane plane) {
 	double d = plane % point;
 	if (fabs(d) < EPS_SIGNUM)
 		return 0;
-	return d > 0 ? 1 : (d < 0 ? -1 : 0);
+	return d > 0 ?
+			1 : (d < 0 ?
+					-1 : 0);
 }
 
 void Polyhedron::get_boundary(
-		double& xmin, double& xmax,
-		double& ymin, double& ymax,
-		double& zmin, double& zmax) {
+		double& xmin,
+		double& xmax,
+		double& ymin,
+		double& ymax,
+		double& zmin,
+		double& zmax) {
 	int i;
 	double tmp;
 
-	xmin = xmax = vertex[0].x;
-	ymin = ymax = vertex[0].y;
-	zmin = zmax = vertex[0].z;
+	xmin = xmax = vertices[0].x;
+	ymin = ymax = vertices[0].y;
+	zmin = zmax = vertices[0].z;
 
-	for (i = 0; i < numv; ++i) {
-		tmp = vertex[i].x;
+	for (i = 0; i < numVertices; ++i) {
+		tmp = vertices[i].x;
 		if (tmp > xmax)
 			xmax = tmp;
 		if (tmp < xmin)
 			xmin = tmp;
 
-		tmp = vertex[i].y;
+		tmp = vertices[i].y;
 		if (tmp > ymax)
 			ymax = tmp;
 		if (tmp < ymin)
 			ymin = tmp;
 
-		tmp = vertex[i].z;
+		tmp = vertices[i].z;
 		if (tmp > zmax)
 			zmax = tmp;
 		if (tmp < zmin)
@@ -95,16 +107,16 @@ void Polyhedron::get_boundary(
 }
 
 void Polyhedron::delete_empty_facets() {
-    int i, j;
-    for (i = 0; i < numf; ++i) {
-        if (facet[i].nv < 3) {
-            printf("===Facet %d is empty...\n", i);
-            for (j = i; j < numf - 1; ++j) {
-                facet[j] = facet[j + 1];
-                facet[j].id = j;
-            }
-            
-            --numf;
-        }
-    }
+	int i, j;
+	for (i = 0; i < numFacets; ++i) {
+		if (facets[i].numVertices < 3) {
+			printf("===Facet %d is empty...\n", i);
+			for (j = i; j < numFacets - 1; ++j) {
+				facets[j] = facets[j + 1];
+				facets[j].id = j;
+			}
+
+			--numFacets;
+		}
+	}
 }

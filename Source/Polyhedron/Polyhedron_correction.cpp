@@ -39,20 +39,18 @@ void print_matrix2(
 
 static FILE* fout;
 
-int Polyhedron::correct_polyhedron(
-		int numContours,
-		SContour* contours) {
+int Polyhedron::correct_polyhedron() {
 	DBG_START
 	;
 
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
-	int dim = numf * 5;
+	int dim = numFacets * 5;
 
 	int numEdges;
 	Edge* edges = NULL;
 
-	corpol_preprocess(numEdges, edges, numContours, contours);
+	corpol_preprocess();
 
 	double * matrix = new double[dim * dim];
 	double * matrixFactorized = new double[dim * dim];
@@ -60,19 +58,17 @@ int Polyhedron::correct_polyhedron(
 	double * solution = new double[dim];
 	int * indexPivot = new int[dim];
 
-	Plane * prevPlanes = new Plane[numf];
+	Plane * prevPlanes = new Plane[numFacets];
 
 	DBGPRINT("memory allocation done");
 
-	for (int i = 0; i < numf; ++i) {
-		prevPlanes[i] = facet[i].plane;
+	for (int i = 0; i < numFacets; ++i) {
+		prevPlanes[i] = facets[i].plane;
 	}
 	DBGPRINT("memory initialization done");
 
-	double error = corpol_calculate_functional(numEdges, edges, numContours,
-			contours, prevPlanes);
-	corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes,
-			matrix, rightPart, solution);
+	double error = corpol_calculate_functional(prevPlanes);
+	corpol_calculate_matrix(prevPlanes, matrix, rightPart, solution);
 	print_matrix2(fout, dim, dim, matrix);
 
 	DBGPRINT("first functional calculation done. error = %e", error);
@@ -89,13 +85,12 @@ int Polyhedron::correct_polyhedron(
 		this->my_fprint(fileName);
 		delete[] fileName;
 
-		int ret = corpol_iteration(numEdges, edges, numContours, contours,
-				prevPlanes, matrix, rightPart, solution, matrixFactorized, indexPivot);
-		for (int i = 0; i < numf; ++i) {
-			prevPlanes[i] = facet[i].plane;
+		int ret = corpol_iteration(prevPlanes, matrix, rightPart, solution,
+				matrixFactorized, indexPivot);
+		for (int i = 0; i < numFacets; ++i) {
+			prevPlanes[i] = facets[i].plane;
 		}
-		error = corpol_calculate_functional(numEdges, edges, numContours, contours,
-				prevPlanes);
+		error = corpol_calculate_functional(prevPlanes);
 		DBGPRINT("error = %le", error);
 		++numIterations;
 		if (ret != true) {
@@ -127,21 +122,17 @@ int Polyhedron::correct_polyhedron(
 }
 
 double Polyhedron::corpol_calculate_functional(
-		int nume,
-		Edge* edges,
-		int N,
-		SContour* contours,
 		Plane* prevPlanes) {
 	DBG_START
 	;
 	double sum = 0;
 
-	for (int i = 0; i < nume; ++i) {
+	for (int i = 0; i < numEdges; ++i) {
 //    	DBGPRINT("%s: processing edge #%d\n", __func__, i);
 		int f0 = edges[i].f0;
 		int f1 = edges[i].f1;
-		Plane plane0 = facet[f0].plane;
-		Plane plane1 = facet[f1].plane;
+		Plane plane0 = facets[f0].plane;
+		Plane plane1 = facets[f1].plane;
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
@@ -185,10 +176,6 @@ double Polyhedron::corpol_calculate_functional(
 }
 
 int Polyhedron::corpol_iteration(
-		int numEdges,
-		Edge* edges,
-		int numContours,
-		SContour* contours,
 		Plane* prevPlanes,
 		double* matrix,
 		double* rightPart,
@@ -197,9 +184,9 @@ int Polyhedron::corpol_iteration(
 		int* indexPivot) {
 	DBG_START
 	;
-	corpol_calculate_matrix(numEdges, edges, numContours, contours, prevPlanes,
+	corpol_calculate_matrix(prevPlanes,
 			matrix, rightPart, solution);
-	int dim = 5 * numf;
+	int dim = 5 * numFacets;
 	print_matrix2(fout, dim, dim, matrix);
 //    int ret = Gauss_string(dim, matrix, rightPart);
 	lapack_int dimLapack = dim;
@@ -233,11 +220,11 @@ int Polyhedron::corpol_iteration(
 		DBGPRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
 	}
 
-	for (int ifacet = 0; ifacet < numf; ++ifacet) {
-		facet[ifacet].plane.norm.x = solution[5 * ifacet];
-		facet[ifacet].plane.norm.y = solution[5 * ifacet + 1];
-		facet[ifacet].plane.norm.z = solution[5 * ifacet + 2];
-		facet[ifacet].plane.dist = solution[5 * ifacet + 3];
+	for (int ifacet = 0; ifacet < numFacets; ++ifacet) {
+		facets[ifacet].plane.norm.x = solution[5 * ifacet];
+		facets[ifacet].plane.norm.y = solution[5 * ifacet + 1];
+		facets[ifacet].plane.norm.z = solution[5 * ifacet + 2];
+		facets[ifacet].plane.dist = solution[5 * ifacet + 3];
 	}
 
 	DBG_END
@@ -246,35 +233,31 @@ int Polyhedron::corpol_iteration(
 }
 
 void Polyhedron::corpol_calculate_matrix(
-		int nume,
-		Edge* edges,
-		int N,
-		SContour* contours,
 		Plane* prevPlanes,
 		double* matrix,
 		double* rightPart,
 		double* solution) {
 	DBG_START
 	;
-	for (int i = 0; i < (5 * numf) * (5 * numf); ++i) {
+	for (int i = 0; i < (5 * numFacets) * (5 * numFacets); ++i) {
 		matrix[i] = 0.;
 	}
 
-	for (int i = 0; i < 5 * numf; ++i) {
+	for (int i = 0; i < 5 * numFacets; ++i) {
 		rightPart[i] = 0.;
 	}
 
-	for (int iplane = 0; iplane < numf; ++iplane) {
-		int nv = facet[iplane].nv;
-		int * index = facet[iplane].index;
+	for (int iplane = 0; iplane < numFacets; ++iplane) {
+		int nv = facets[iplane].numVertices;
+		int * index = facets[iplane].indVertices;
 
 		Plane planePrevThis = prevPlanes[iplane];
 
-		int i_ak_ak = 5 * numf * 5 * iplane + 5 * iplane;
-		int i_bk_ak = i_ak_ak + 5 * numf;
-		int i_ck_ak = i_ak_ak + 2 * 5 * numf;
-		int i_dk_ak = i_ak_ak + 3 * 5 * numf;
-		int i_lk_ak = i_ak_ak + 4 * 5 * numf;
+		int i_ak_ak = 5 * numFacets * 5 * iplane + 5 * iplane;
+		int i_bk_ak = i_ak_ak + 5 * numFacets;
+		int i_ck_ak = i_ak_ak + 2 * 5 * numFacets;
+		int i_dk_ak = i_ak_ak + 3 * 5 * numFacets;
+		int i_lk_ak = i_ak_ak + 4 * 5 * numFacets;
 
 		matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
 		matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
@@ -291,15 +274,15 @@ void Polyhedron::corpol_calculate_matrix(
 			int v1 = index[iedge + 1];
 			int iplaneNeighbour = index[nv + 1 + iedge];
 
-			int i_ak_an = 5 * numf * 5 * iplane + 5 * iplaneNeighbour;
-			int i_bk_an = i_ak_an + 5 * numf;
-			int i_ck_an = i_ak_an + 2 * 5 * numf;
-			int i_dk_an = i_ak_an + 3 * 5 * numf;
-			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * 5 * numf;
+			int i_ak_an = 5 * numFacets * 5 * iplane + 5 * iplaneNeighbour;
+			int i_bk_an = i_ak_an + 5 * numFacets;
+			int i_ck_an = i_ak_an + 2 * 5 * numFacets;
+			int i_dk_an = i_ak_an + 3 * 5 * numFacets;
+			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * 5 * numFacets;
 
 			Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
 
-			int edgeid = preed_find(nume, edges, v0, v1);
+			int edgeid = preed_find(v0, v1);
 
 			if (edgeid == -1) {
 				printf("Error! edge (%d, %d) cannot be found\n", v0, v1);

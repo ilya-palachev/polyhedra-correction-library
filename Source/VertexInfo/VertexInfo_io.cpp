@@ -5,14 +5,16 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-void VertexInfo::fprint_my_format(FILE* file) {
-	fprintf(file, "%d ", nf);
-	for(int j = 0; j < 3*nf + 1; ++j)
-		fprintf(file, " %d", index[j]);
+void VertexInfo::fprint_my_format(
+		FILE* file) {
+	fprintf(file, "%d ", numFacets);
+	for (int j = 0; j < 3 * numFacets + 1; ++j)
+		fprintf(file, " %d", indFacets[j]);
 	fprintf(file, "\n");
 }
 
-void VertexInfo::my_fprint_all(FILE* file) {
+void VertexInfo::my_fprint_all(
+		FILE* file) {
 	int i;
 	fprintf(file, "\n------------ VertexInfo %d: ------------\n", id);
 //	fprintf(file, "id = %d\nnf = %d\n", id, nf);
@@ -20,17 +22,17 @@ void VertexInfo::my_fprint_all(FILE* file) {
 //			vector.x, vector.y, vector.z);
 
 	fprintf(file, "facets :          ");
-	for (i = 0; i < nf; ++i)
-		fprintf(file, "%d ", index[i]);
+	for (i = 0; i < numFacets; ++i)
+		fprintf(file, "%d ", indFacets[i]);
 
 	fprintf(file, "\nnext vertexes : ");
-	for (i = nf + 1; i < 2 * nf + 1; ++i)
-		fprintf(file, "%d ", index[i]);
+	for (i = numFacets + 1; i < 2 * numFacets + 1; ++i)
+		fprintf(file, "%d ", indFacets[i]);
 
 	fprintf(file, "\npositions :     ");
-	for (i = 2 * nf + 1; i < 3 * nf + 1; ++i)
-		fprintf(file, "%d ", index[i]);
+	for (i = 2 * numFacets + 1; i < 3 * numFacets + 1; ++i)
+		fprintf(file, "%d ", indFacets[i]);
 
-	if(poly == NULL)
+	if (parentPolyhedron == NULL)
 		fprintf(file, "Warning! poly == NULL !\n");
 }

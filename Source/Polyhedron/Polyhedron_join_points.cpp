@@ -35,10 +35,10 @@ int Polyhedron::join_points_inner(int id) {
     
     A = new double[4];
     b = new double[2];
-    vertex_old = new Vector3d[numf];
+    vertex_old = new Vector3d[numFacets];
 
     count = 0;
-    for (i = 0; i < numf; ++i) {
+    for (i = 0; i < numFacets; ++i) {
         count += join_points_inner_facet(id, i, A, b, vertex_old);
     }
 #ifdef TCPRINT
@@ -65,15 +65,15 @@ int Polyhedron::join_points_inner_facet(int id, int fid, double* A, double* b, V
     //плоскость наименьших квадратов (2012-03-12)
 //    printf("\tBegin join_points_inner_facet(%d)\n", fid);
 
-    nv = facet[fid].nv;
-    index = facet[fid].index;
-    plane = facet[fid].plane;
+    nv = facets[fid].numVertices;
+    index = facets[fid].indVertices;
+    plane = facets[fid].plane;
 //    vertex_old = new Vector3d[nv];
 
     for (i = 0; i < nv; ++i) {
-        v = vertex[index[i]];
+        v = vertices[index[i]];
         vertex_old[i] = v;
-        vertex[index[i]] = plane.project(v);
+        vertices[index[i]] = plane.project(v);
     }
     
 
@@ -98,7 +98,7 @@ int Polyhedron::join_points_inner_facet(int id, int fid, double* A, double* b, V
 //    if (count > 0)
 //        facet[fid].my_fprint(stdout);
     for (i = 0; i < nv; ++i) {
-        vertex[index[i]] = vertex_old[i];
+        vertices[index[i]] = vertex_old[i];
     }
     return count;
 }
@@ -116,7 +116,7 @@ int Polyhedron::join_points_inner_pair(int id, int fid, int id0, int id1, int id
     int pos1, pos2;
 
     if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 ||
-            id0 >= numv || id1 >= numv || id2 >= numv || id3 >= numv) {
+            id0 >= numVertices || id1 >= numVertices || id2 >= numVertices || id3 >= numVertices) {
 #ifdef TCPRINT        
         printf("\t\t\tjoin_points_inner_pair: Error. incorrect input\n");
 #endif
@@ -131,8 +131,8 @@ int Polyhedron::join_points_inner_pair(int id, int fid, int id0, int id1, int id
     }
 
     if (id1 == id2) {
-        if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
-                (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) < 0) {
+        if (qmod((vertices[id1] - vertices[id0]) % (vertices[id3] - vertices[id2])) < EPS_PARALLEL &&
+                (vertices[id1] - vertices[id0]) * (vertices[id3] - vertices[id2]) < 0) {
 #ifdef TCPRINT            
             printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
                     id0, id1, id2, id3);
@@ -144,8 +144,8 @@ int Polyhedron::join_points_inner_pair(int id, int fid, int id0, int id1, int id
     }
 
     if (id0 == id3) {
-        if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
-                (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) > 0) {
+        if (qmod((vertices[id1] - vertices[id0]) % (vertices[id3] - vertices[id2])) < EPS_PARALLEL &&
+                (vertices[id1] - vertices[id0]) * (vertices[id3] - vertices[id2]) > 0) {
 #ifdef TCPRINT
             printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
                     id0, id1, id2, id3);
@@ -156,32 +156,32 @@ int Polyhedron::join_points_inner_pair(int id, int fid, int id0, int id1, int id
         }
     }
 
-    if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL) {
+    if (qmod((vertices[id1] - vertices[id0]) % (vertices[id3] - vertices[id2])) < EPS_PARALLEL) {
         return 0;
     }
 
-    nx = facet[fid].plane.norm.x;
-    ny = facet[fid].plane.norm.y;
-    nz = facet[fid].plane.norm.z;
+    nx = facets[fid].plane.norm.x;
+    ny = facets[fid].plane.norm.y;
+    nz = facets[fid].plane.norm.z;
     nx = fabs(nx);
     ny = fabs(ny);
     nz = fabs(nz);
 
-    x0 = vertex[id0].x;
-    y0 = vertex[id0].y;
-    z0 = vertex[id0].z;
+    x0 = vertices[id0].x;
+    y0 = vertices[id0].y;
+    z0 = vertices[id0].z;
 
-    x1 = vertex[id1].x;
-    y1 = vertex[id1].y;
-    z1 = vertex[id1].z;
+    x1 = vertices[id1].x;
+    y1 = vertices[id1].y;
+    z1 = vertices[id1].z;
 
-    x2 = vertex[id2].x;
-    y2 = vertex[id2].y;
-    z2 = vertex[id2].z;
+    x2 = vertices[id2].x;
+    y2 = vertices[id2].y;
+    z2 = vertices[id2].z;
 
-    x3 = vertex[id3].x;
-    y3 = vertex[id3].y;
-    z3 = vertex[id3].z;
+    x3 = vertices[id3].x;
+    y3 = vertices[id3].y;
+    z3 = vertices[id3].z;
     
     if (nz >= nx && nz >= ny) {
         A[0] = x1 - x0;
@@ -220,23 +220,23 @@ int Polyhedron::join_points_inner_pair(int id, int fid, int id0, int id1, int id
         printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
 #endif
         //В этом случае будем объединять вершины...
-        double dist = sqrt(qmod(vertex[id1] - vertex[id2]));
+        double dist = sqrt(qmod(vertices[id1] - vertices[id2]));
         printf("Принято решение сливать вершины %d и %d, расстояние между которыми равно %lf\n", id1, id2, dist);
         if (id2 == id) {
             swap(id1, id2);
         }
-        for (i = 0; i < numf; ++i) {
-            pos1 = facet[i].find_vertex(id1);
-            pos2 = facet[i].find_vertex(id2);
+        for (i = 0; i < numFacets; ++i) {
+            pos1 = facets[i].find_vertex(id1);
+            pos2 = facets[i].find_vertex(id2);
             if (pos1 != -1 && pos2 != -1) {
                 printf("\tОбе вершины найдены в грани %d. Из нее удаляется вершина %d\n", i, id2);
-                facet[i].my_fprint(stdout);
-                facet[i].delete_vertex(id2);
+                facets[i].my_fprint(stdout);
+                facets[i].delete_vertex(id2);
             } else if (pos1 != -1) {
                 printf("\tВершина %d найдена в грани %d. Оставляем грань без изменения\n", id1, i);
             } else if (pos2 != -1) {
                 printf("\tВершина %d найдена в грани %d. Заменим здесь вершину %d на вершину %d\n", id2, i, id2, id1);
-                facet[i].index[pos2] = id1;
+                facets[i].indVertices[pos2] = id1;
             }
         }
         printf("Слияние завершено\n");

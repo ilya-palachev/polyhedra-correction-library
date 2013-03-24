@@ -32,10 +32,10 @@ int Polyhedron::test_inner_consections(bool ifPrint) {
 
     A = new double[4];
     b = new double[2];
-    vertex_old = new Vector3d[numf];
+    vertex_old = new Vector3d[numFacets];
 
     count = 0;
-    for (i = 0; i < numf; ++i) {
+    for (i = 0; i < numFacets; ++i) {
         count += test_inner_consections_facet(ifPrint, i, A, b, vertex_old);
     }
     if (ifPrint) {
@@ -62,9 +62,9 @@ int Polyhedron::test_inner_consections_facet(bool ifPrint, int fid, double* A, d
     //плоскость наименьших квадратов (2012-03-12)
     //    printf("\tBegin test_inner_consections_facet(%d)\n", fid);
 
-    nv = facet[fid].nv;
-    index = facet[fid].index;
-    plane = facet[fid].plane;
+    nv = facets[fid].numVertices;
+    index = facets[fid].indVertices;
+    plane = facets[fid].plane;
     //    vertex_old = new Vector3d[nv];
     
     if (nv < 4) {
@@ -72,9 +72,9 @@ int Polyhedron::test_inner_consections_facet(bool ifPrint, int fid, double* A, d
     }
 
     for (i = 0; i < nv; ++i) {
-        v = vertex[index[i]];
+        v = vertices[index[i]];
         vertex_old[i] = v;
-        vertex[index[i]] = plane.project(v);
+        vertices[index[i]] = plane.project(v);
     }
 
 
@@ -96,13 +96,13 @@ int Polyhedron::test_inner_consections_facet(bool ifPrint, int fid, double* A, d
     if (ifPrint) {
         if (count > 0) {
             printf("\t\tIn facet %d: %d inner consections found\n", fid, count);
-            facet[fid].my_fprint(stdout);
+            facets[fid].my_fprint(stdout);
         }
     }
     //    if (count > 0)
     //        facet[fid].my_fprint(stdout);
     for (i = 0; i < nv; ++i) {
-        vertex[index[i]] = vertex_old[i];
+        vertices[index[i]] = vertex_old[i];
     }
     return count;
 }
@@ -117,7 +117,7 @@ int Polyhedron::test_inner_consections_pair(bool ifPrint, int fid, int id0, int 
     double x0, x1, x2, x3, y0, y1, y2, y3, z0, z1, z2, z3;
 
     if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 ||
-            id0 >= numv || id1 >= numv || id2 >= numv || id3 >= numv) {
+            id0 >= numVertices || id1 >= numVertices || id2 >= numVertices || id3 >= numVertices) {
         if (ifPrint) {
             printf("\t\t\ttest_inner_consections_pair: Error. incorrect input\n");
         }
@@ -132,8 +132,8 @@ int Polyhedron::test_inner_consections_pair(bool ifPrint, int fid, int id0, int 
     }
 
     if (id1 == id2) {
-        if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
-                (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) < 0) {
+        if (qmod((vertices[id1] - vertices[id0]) % (vertices[id3] - vertices[id2])) < EPS_PARALLEL &&
+                (vertices[id1] - vertices[id0]) * (vertices[id3] - vertices[id2]) < 0) {
             if (ifPrint) {
                 printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
                         id0, id1, id2, id3);
@@ -145,8 +145,8 @@ int Polyhedron::test_inner_consections_pair(bool ifPrint, int fid, int id0, int 
     }
 
     if (id0 == id3) {
-        if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL &&
-                (vertex[id1] - vertex[id0]) * (vertex[id3] - vertex[id2]) > 0) {
+        if (qmod((vertices[id1] - vertices[id0]) % (vertices[id3] - vertices[id2])) < EPS_PARALLEL &&
+                (vertices[id1] - vertices[id0]) * (vertices[id3] - vertices[id2]) > 0) {
             if (ifPrint) {
                 printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
                         id0, id1, id2, id3);
@@ -157,32 +157,32 @@ int Polyhedron::test_inner_consections_pair(bool ifPrint, int fid, int id0, int 
         }
     }
 
-    if (qmod((vertex[id1] - vertex[id0]) % (vertex[id3] - vertex[id2])) < EPS_PARALLEL) {
+    if (qmod((vertices[id1] - vertices[id0]) % (vertices[id3] - vertices[id2])) < EPS_PARALLEL) {
         return 0;
     }
 
-    nx = facet[fid].plane.norm.x;
-    ny = facet[fid].plane.norm.y;
-    nz = facet[fid].plane.norm.z;
+    nx = facets[fid].plane.norm.x;
+    ny = facets[fid].plane.norm.y;
+    nz = facets[fid].plane.norm.z;
     nx = fabs(nx);
     ny = fabs(ny);
     nz = fabs(nz);
 
-    x0 = vertex[id0].x;
-    y0 = vertex[id0].y;
-    z0 = vertex[id0].z;
+    x0 = vertices[id0].x;
+    y0 = vertices[id0].y;
+    z0 = vertices[id0].z;
 
-    x1 = vertex[id1].x;
-    y1 = vertex[id1].y;
-    z1 = vertex[id1].z;
+    x1 = vertices[id1].x;
+    y1 = vertices[id1].y;
+    z1 = vertices[id1].z;
 
-    x2 = vertex[id2].x;
-    y2 = vertex[id2].y;
-    z2 = vertex[id2].z;
+    x2 = vertices[id2].x;
+    y2 = vertices[id2].y;
+    z2 = vertices[id2].z;
 
-    x3 = vertex[id3].x;
-    y3 = vertex[id3].y;
-    z3 = vertex[id3].z;
+    x3 = vertices[id3].x;
+    y3 = vertices[id3].y;
+    z3 = vertices[id3].z;
 
     if (nz >= nx && nz >= ny) {
         A[0] = x1 - x0;
@@ -229,7 +229,7 @@ int Polyhedron::test_outer_consections(bool ifPrint) {
     int i, count;
 
     count = 0;
-    for (i = 0; i < numf; ++i) {
+    for (i = 0; i < numFacets; ++i) {
         count += test_outer_consections_facet(ifPrint, i);
     }
     if (ifPrint) {
@@ -242,8 +242,8 @@ int Polyhedron::test_outer_consections(bool ifPrint) {
 int Polyhedron::test_outer_consections_facet(bool ifPrint, int fid) {
     int i, nv, *index, count;
 
-    nv = facet[fid].nv;
-    index = facet[fid].index;
+    nv = facets[fid].numVertices;
+    index = facets[fid].indVertices;
 
     count = 0;
     for (i = 0; i < nv; ++i) {
@@ -261,7 +261,7 @@ int Polyhedron::test_outer_consections_edge(bool ifPrint, int id0, int id1) {
     int j, count;
 
     count = 0;
-    for (j = 0; j < numf; ++j) {
+    for (j = 0; j < numFacets; ++j) {
         //        printf("\tj = %d\n", j);
         count += test_outer_consections_pair(ifPrint, id0, id1, j);
     }
@@ -280,19 +280,19 @@ int Polyhedron::test_outer_consections_pair(bool ifPrint, int id0, int id1, int 
 
 
 
-    if (facet[fid].find_vertex(id0) >= 0 || facet[fid].find_vertex(id1) >= 0) {
+    if (facets[fid].find_vertex(id0) >= 0 || facets[fid].find_vertex(id1) >= 0) {
         //        printf("contains.\n");
         return 0;
     }
 
-    AA = facet[fid].plane.norm * (vertex[id0] - vertex[id1]);
+    AA = facets[fid].plane.norm * (vertices[id0] - vertices[id1]);
 
     if (fabs(AA) < EPS_PARALLEL) {
         //        printf("parallel %le.\n", fabs(AA));
         return 0;
     }
 
-    b = -facet[fid].plane.norm * vertex[id1] - facet[fid].plane.dist;
+    b = -facets[fid].plane.norm * vertices[id1] - facets[fid].plane.dist;
     u = b / AA;
 
     if (u > 1. || u < 0.) {
@@ -303,12 +303,12 @@ int Polyhedron::test_outer_consections_pair(bool ifPrint, int id0, int id1, int 
     //            id0, id1, fid);
     //    printf("\t\tu = %lf\n", u);
 
-    A = u * vertex[id0] + (1. - u) * vertex[id1];
+    A = u * vertices[id0] + (1. - u) * vertices[id1];
     //    printf("\t\tA = (%.2lf, %.2lf, %.2lf)\n", A.x, A.y, A.z);
 
-    nv = facet[fid].nv;
-    index = facet[fid].index;
-    normal = facet[fid].plane.norm;
+    nv = facets[fid].numVertices;
+    index = facets[fid].indVertices;
+    normal = facets[fid].plane.norm;
     normal.norm(1.);
     //    printf("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
 
@@ -316,8 +316,8 @@ int Polyhedron::test_outer_consections_pair(bool ifPrint, int id0, int id1, int 
     for (i = 0; i < nv; ++i) {
         //        if (i > 0)
         //            printf("+");
-        A0 = vertex[index[i % nv]] - A;
-        A1 = vertex[index[(i + 1) % nv]] - A;
+        A0 = vertices[index[i % nv]] - A;
+        A1 = vertices[index[(i + 1) % nv]] - A;
         delta = (A0 % A1) * normal;
         delta /= sqrt(qmod(A0) * qmod(A1));
         alpha = asin(delta);

@@ -59,7 +59,7 @@ void get_statistics_deform_linear(const char* name, int type) {
     poly.preprocess_polyhedron();
     poly1.preprocess_polyhedron();
     //    printf("Preprocessing ended...\n");
-    numv = poly.numv;
+    numv = poly.numVertices;
 
     printf("NAME: %s\\", name);
     printf("\\hline\n\tnorm0 &\tpart\\\\\n");
@@ -167,7 +167,7 @@ void get_statistics_deform_linear_test(const char* name, int type) {
     poly.preprocess_polyhedron();
     poly1.preprocess_polyhedron();
     //    printf("Preprocessing ended...\n");
-    numv = poly.numv;
+    numv = poly.numVertices;
 
     for (i = 0; i < num_rand; ++i) {
         i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);

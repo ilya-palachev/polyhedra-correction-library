@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 int Facet::signum(int i, Plane plane) {
-    return poly->signum(poly->vertex[index[i]], plane);
+    return parentPolyhedron->signum(parentPolyhedron->vertices[indVertices[i]], plane);
 }
 
 //#define IF_DETECT_INCIDENT_FACETS
@@ -89,7 +89,7 @@ int Facet::prepare_edge_list(Plane iplane) {
     Vector3d v_next;
     Vector3d v_intrsct;
 
-    EdgeList* el = &(poly->edge_list[id]);
+    EdgeList* el = &(parentPolyhedron->edgeLists[id]);
     
     printf("facet[%d].prepare_edge_list \n", id);
 
@@ -106,18 +106,18 @@ int Facet::prepare_edge_list(Plane iplane) {
         printf("Facet::prepare_edge_list [%d]: special case\n", id);
         
         
-        for (i = 0; i < nv; ++i) {
-            i_next = (i + 1) % nv;
-            i_prev = (nv + i - 1) % nv;
+        for (i = 0; i < numVertices; ++i) {
+            i_next = (i + 1) % numVertices;
+            i_prev = (numVertices + i - 1) % numVertices;
             sign_curr = signum(i, iplane);
             sign_next = signum(i_next, iplane);
             sign_prev = signum(i_prev, iplane);
             printf(" %d", sign_curr);
             
             if (sign_curr == 0 && sign_next == -1) {
-                el->add_edge(index[i], index[i], i, i, index[nv + 1 + i], 1, (double)i);
+                el->add_edge(indVertices[i], indVertices[i], i, i, indVertices[numVertices + 1 + i], 1, (double)i);
             } else if (sign_curr == 0 && sign_next == 0) {
-                el->add_edge(index[i], index[i], i, i, id, 1, (double)i);
+                el->add_edge(indVertices[i], indVertices[i], i, i, id, 1, (double)i);
             }
             
         }
@@ -131,10 +131,10 @@ int Facet::prepare_edge_list(Plane iplane) {
     n_intrsct = 0;
     n_positive = 0;
     i0 = i1 = i2 = -1;
-    for (i = 0; i < nv; ++i) {
+    for (i = 0; i < numVertices; ++i) {
 
-        i_next = (i + 1) % nv;
-        i_prev = (nv + i - 1) % nv;
+        i_next = (i + 1) % numVertices;
+        i_prev = (numVertices + i - 1) % numVertices;
         sign_curr = signum(i, iplane);
         sign_next = signum(i_next, iplane);
         sign_prev = signum(i_prev, iplane);
@@ -147,21 +147,21 @@ int Facet::prepare_edge_list(Plane iplane) {
             if (sign_prev * sign_next == 1)
                 continue;
 
-            v_intrsct = poly->vertex[index[i]];
+            v_intrsct = parentPolyhedron->vertices[indVertices[i]];
             scalar = dir * (v_intrsct - point);
             min3scalar(scalar, s0, s1, s2, i, i0, i1, i2);
-            el->add_edge(index[i], index[i], i, i, scalar);
+            el->add_edge(indVertices[i], indVertices[i], i, i, scalar);
             ++n_intrsct;
         }
 
         //Если ребро пересекает плоскость
         if (sign_curr * sign_next == -1) {
-            v_curr = poly->vertex[index[i]];
-            v_next = poly->vertex[index[i_next]];
+            v_curr = parentPolyhedron->vertices[indVertices[i]];
+            v_next = parentPolyhedron->vertices[indVertices[i_next]];
             intersection(iplane, v_next - v_curr, v_curr, v_intrsct);
             scalar = dir * (v_intrsct - point);
             min3scalar(scalar, s0, s1, s2, i, i0, i1, i2);
-            el->add_edge(index[i], index[i_next], i, i_next, scalar);
+            el->add_edge(indVertices[i], indVertices[i_next], i, i_next, scalar);
             ++n_intrsct;
         }
     }
@@ -187,12 +187,12 @@ int Facet::prepare_edge_list(Plane iplane) {
         // Проверка, что начальным выбран задний конец ребра
         sign_curr = signum(i0, iplane);
         if (i_step == -1 && sign_curr != 0)
-            i0 = (i0 + 1) % nv;
+            i0 = (i0 + 1) % numVertices;
     }
 
     i_curr = i0;
-    i_next = (i0 + i_step + nv) % nv;
-    i_prev = (i0 - i_step + nv) % nv;
+    i_next = (i0 + i_step + numVertices) % numVertices;
+    i_prev = (i0 - i_step + numVertices) % numVertices;
 
     sign_prev = signum(i_prev, iplane);
     up_down = sign_prev;
@@ -200,7 +200,7 @@ int Facet::prepare_edge_list(Plane iplane) {
 
     el->goto_header();
 
-    for (i = 0; i < nv; ++i) {
+    for (i = 0; i < numVertices; ++i) {
 
         sign_curr = signum(i_curr, iplane);
         sign_next = signum(i_next, iplane);
@@ -214,32 +214,32 @@ int Facet::prepare_edge_list(Plane iplane) {
                 up_down *= -1;
                 next_d = in_out;
                 if (sign_curr == 0)
-                    next_f = poly->vertexinfo[index[i_curr]].
+                    next_f = parentPolyhedron->vertexInfos[indVertices[i_curr]].
                         intersection_find_next_facet(iplane, id);
                 else {
                     i_help = i_step == 1 ? i_curr : i_next;
-                    next_f = index[i_help + nv + 1];
+                    next_f = indVertices[i_help + numVertices + 1];
                 }
             } else {
                 printf("-----For facet %d we have critical situation...\n", id);
                 break;
             }
             if (sign_curr * sign_next == -1)
-                el->search_and_set_info(index[i_curr], index[i_next],
+                el->search_and_set_info(indVertices[i_curr], indVertices[i_next],
                     next_d, next_f);
             else
-                el->search_and_set_info(index[i_curr], index[i_curr],
+                el->search_and_set_info(indVertices[i_curr], indVertices[i_curr],
                     next_d, next_f);
         }
 
         i_curr = i_next;
-        i_next = (i_next + i_step + nv) % nv;
+        i_next = (i_next + i_step + numVertices) % numVertices;
     }
     
     i_step *= -1;
     i_curr = i0;
-    i_next = (i0 + i_step + nv) % nv;
-    i_prev = (i0 - i_step + nv) % nv;
+    i_next = (i0 + i_step + numVertices) % numVertices;
+    i_prev = (i0 - i_step + numVertices) % numVertices;
 
     sign_prev = signum(i_prev, iplane);
     up_down = sign_prev;
@@ -247,7 +247,7 @@ int Facet::prepare_edge_list(Plane iplane) {
 
     el->goto_header();
 
-    for (i = 0; i < nv; ++i) {
+    for (i = 0; i < numVertices; ++i) {
 
         sign_curr = signum(i_curr, iplane);
         sign_next = signum(i_next, iplane);
@@ -261,11 +261,11 @@ int Facet::prepare_edge_list(Plane iplane) {
                 up_down *= -1;
                 next_d = in_out;
                 if (sign_curr == 0)
-                    next_f = poly->vertexinfo[index[i_curr]].
+                    next_f = parentPolyhedron->vertexInfos[indVertices[i_curr]].
                         intersection_find_next_facet(iplane, id);
                 else {
                     i_help = i_step == 1 ? i_curr : i_next;
-                    next_f = index[i_help + nv + 1];
+                    next_f = indVertices[i_help + numVertices + 1];
                 }
             } else {
                 printf("-----For facet %d we have critical situation AGAIN!!!...\n", id);
@@ -273,15 +273,15 @@ int Facet::prepare_edge_list(Plane iplane) {
                 next_f = id;
             }
             if (sign_curr * sign_next == -1)
-                el->search_and_set_info(index[i_curr], index[i_next],
+                el->search_and_set_info(indVertices[i_curr], indVertices[i_next],
                     next_d, next_f);
             else
-                el->search_and_set_info(index[i_curr], index[i_curr],
+                el->search_and_set_info(indVertices[i_curr], indVertices[i_curr],
                     next_d, next_f);
         }
 
         i_curr = i_next;
-        i_next = (i_next + i_step + nv) % nv;
+        i_next = (i_next + i_step + numVertices) % numVertices;
     }
 
     return n_intrsct;
@@ -316,8 +316,8 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
         return false;
 
 
-    EdgeList* el = &(poly->edge_list[id]);
-    FutureFacet curr_component(2 * nv);
+    EdgeList* el = &(parentPolyhedron->edgeLists[id]);
+    FutureFacet curr_component(2 * numVertices);
 
     el->null_isUsed();
     //	el->my_fprint(stdout);
@@ -326,7 +326,7 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
     nintrsct = el->get_num();
     if (nintrsct == 0) {
         n_components = 0;
-        for (i = 0; i < nv; ++i) {
+        for (i = 0; i < numVertices; ++i) {
             sign_curr = signum(i, iplane);
             if (sign_curr != 0)
                 break;
@@ -357,8 +357,8 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
                 --nintrsct;
                 if (i0 != i1)
                     break;
-                i_next = (i0 + 1) % nv;
-                i_prev = (nv + i0 - 1) % nv;
+                i_next = (i0 + 1) % numVertices;
+                i_prev = (numVertices + i0 - 1) % numVertices;
                 sign_next = signum(i_next, iplane);
                 sign_prev = signum(i_prev, iplane);
             } while (sign_prev == 0 && sign_next == 0);
@@ -367,8 +367,8 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
 
 
             if (i0 == i1) {
-                i_next = (i0 + 1) % nv;
-                i_prev = (nv + i0 - 1) % nv;
+                i_next = (i0 + 1) % numVertices;
+                i_prev = (numVertices + i0 - 1) % numVertices;
                 sign_next = signum(i_next, iplane);
                 sign_prev = signum(i_prev, iplane);
                 //Утверждение. sign_next != 0 || sign_prev != 0
@@ -382,7 +382,7 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
                 //Утверждение. sign_next == 1 || sign_prev == 1
                 //Утверждение. sign_next == 1 && sign_prev == 1 не может быть
                 i_step = sign_next == 1 ? 1 : -1;
-                i_curr = (i0 + i_step + nv) % nv;
+                i_curr = (i0 + i_step + numVertices) % numVertices;
                 sign_curr = signum(i_curr, iplane);
             } else {
                 sign0 = signum(i0, iplane);
@@ -390,28 +390,28 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
                 if (sign0 == 1) {
                     i_curr = i0;
                     sign_curr = sign0;
-                    i_step = (i1 + 1) % nv == i0 ? 1 : -1;
+                    i_step = (i1 + 1) % numVertices == i0 ? 1 : -1;
                 } else {
                     i_curr = i1;
                     sign_curr = sign0;
-                    i_step = (i0 + 1) % nv == i1 ? 1 : -1;
+                    i_step = (i0 + 1) % numVertices == i1 ? 1 : -1;
                 }
             }
 
             do {
-                curr_component.add_edge(index[i_curr], index[i_curr], id);
+                curr_component.add_edge(indVertices[i_curr], indVertices[i_curr], id);
                 //				fprintf(stdout,
                 //						"\tДобавлено ребро : %d %d\n",
                 //						index[i_curr], index[i_curr]);
-                i_curr = (i_curr + i_step + nv) % nv;
+                i_curr = (i_curr + i_step + numVertices) % numVertices;
                 sign_curr = signum(i_curr, iplane);
             } while (sign_curr == 1);
             //Утверждение. sign_curr == 0 || sign_curr == -1
             if (sign_curr == 0)
-                v0 = v1 = index[i_curr];
+                v0 = v1 = indVertices[i_curr];
             else {
-                v0 = index[(i_curr - i_step + nv) % nv];
-                v1 = index[i_curr];
+                v0 = indVertices[(i_curr - i_step + numVertices) % numVertices];
+                v1 = indVertices[i_curr];
                 if (v0 > v1) {
                     int tmp = v0;
                     v0 = v1;
@@ -435,16 +435,16 @@ bool Facet::intersect(Plane iplane, FutureFacet& ff, int& n_components) {
 }
 
 void Facet::find_and_replace_vertex(int from, int to) {
-    for (int i = 0; i < nv + 1; ++i)
-        if (index[i] == from) {
-            index[i] = to;
+    for (int i = 0; i < numVertices + 1; ++i)
+        if (indVertices[i] == from) {
+            indVertices[i] = to;
         }
 }
 
 void Facet::find_and_replace_facet(int from, int to) {
-    for (int i = nv + 1; i < 2 * nv + 1; ++i)
-        if (index[i] == from) {
-            index[i] = to;
+    for (int i = numVertices + 1; i < 2 * numVertices + 1; ++i)
+        if (indVertices[i] == from) {
+            indVertices[i] = to;
         }
 }
 
