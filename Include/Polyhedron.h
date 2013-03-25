@@ -383,14 +383,24 @@ public:
 			int v0,
 			int v1);
 
-	void corpol_prepMap();
+	void corpol_prepFindAssociations();
 
-	void corpol_prepMapFacet(
+	void corpol_prepFindAssiciations_withContour(
+			int iContour);
+
+	void corpol_prepFindAssociations_withContour_forFacet(
+			int iContour,
 			int iFacet);
 
-	void corpol_prepMapFacetEdge(
-			int iVertex,
+	double corpol_weightForAssociation(
+			int iContour,
 			int iFacet);
+
+	void corpol_prepFindAssociations_withContour_forFacetEdge(
+			int iContour,
+			int iFacet,
+			int iVertex1,
+			int iVertex2);
 
 	int corpol_prep_build_lists_of_visible_edges();
 	int corpol_prep_map_between_edges_and_contours();

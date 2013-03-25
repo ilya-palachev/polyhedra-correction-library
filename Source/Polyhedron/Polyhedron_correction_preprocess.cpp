@@ -3,18 +3,15 @@
 //#define NDEBUG
 
 void Polyhedron::corpol_preprocess() {
-	DBG_START
-	;
+	DBG_START;
 	preprocess_edges();
 	corpol_prep_build_lists_of_visible_edges();
 	corpol_prep_map_between_edges_and_contours();
-	DBG_END
-	;
+	DBG_END;
 }
 
 void Polyhedron::preprocess_edges() {
-	DBG_START
-	;
+	DBG_START;
 	int numEdgesMax = numEdges = 0;
 	for (int i = 0; i < numFacets; ++i) {
 		numEdgesMax += facets[numFacets].numVertices;
@@ -37,30 +34,36 @@ void Polyhedron::preprocess_edges() {
 	}
 #endif
 
-	DBG_END
-	;
+	DBG_END;
 }
 
-void Polyhedron::corpol_prepMap() {
-	DBG_START
-	;
+void Polyhedron::corpol_prepFindAssociations() {
+	DBG_START;
+	for (int iContour = 0; iContour < numFacets; ++iContour) {
+		corpol_prepFindAssiciations_withContour(iContour);
+	}
+	DBG_END;
+}
+
+void Polyhedron::corpol_prepFindAssiciations_withContour(
+		int iContour) {
+	DBG_START;
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
-		corpol_prepMapFacet(iFacet);
+		corpol_prepFindAssociations_withContour_forFacet(iContour, iFacet);
 	}
-	DBG_END
-	;
+	DBG_END;
 }
 
-void Polyhedron::corpol_prepMapFacet(
-		int iFacet) {
-	DBG_START
-	;
+void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
+		int iContour, int iFacet) {
+	DBG_START;
 	int numVertex = facets[iFacet].numVertices;
+	int* indVertices = facets[iFacet].indVertices;
 	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
-		corpol_prepMapFacetEdge(iVertex, iFacet);
+		corpol_prepFindAssociations_withContour_forFacetEdge(iContour, iFacet,
+				indVertices[iVertex], indVertices[iVertex  + 1]);
 	}
-	DBG_END
-	;
+	DBG_END;
 }
 
 double distVertexEdge(
@@ -92,15 +95,27 @@ double distVertexEdge(
 
 	if (info != 0) {
 		if (info < 0) {
-			DBGPRINT("LAPACKE_dgesvx: the %d-th argument " "had an illegal value",
+			DBGPRINT("LAPACKE_dgesvx: the %d-th argument "
+					"had an illegal value",
 					-info);
 		} else if (info <= 3) {
 			DBGPRINT(
-					"LAPACKE_dgesvx: U(%d, %d) is exactly zero.  " "The factorization has" "been completed, but the factor U is exactly" "singular, so the solution and error bounds" "could not be computed.",
+					"LAPACKE_dgesvx: U(%d, %d) is exactly zero.  "
+					"The factorization has"
+					"been completed, but the factor U is exactly"
+					"singular, so the solution and error bounds"
+					"could not be computed.",
 					info, info);
 		} else if (info == 4) {
 			DBGPRINT(
-					"LAPACKE_dgesvx: U is non-singular, " "but RCOND is less than machine" "precision, meaning that the matrix is singular" "to working precision.  Nevertheless, the" "solution and error bounds are computed because" "there are a number of situations where the" "computed solution can be more accurate than the" "value of RCOND would suggest.");
+					"LAPACKE_dgesvx: U is non-singular, "
+					"but RCOND is less than machine"
+					"precision, meaning that the matrix is singular"
+					"to working precision.  Nevertheless, the"
+					"solution and error bounds are computed because"
+					"there are a number of situations where the"
+					"computed solution can be more accurate than the"
+					"value of RCOND would suggest.");
 		} else {
 			DBGPRINT("LAPACKE_dgesvx: FATAL. Unknown output value");
 		}
@@ -110,19 +125,56 @@ double distVertexEdge(
 	return sqrt(qmod(A - *Aproj));
 }
 
-void Polyhedron::corpol_prepMapFacetEdge(
-		int iVertex,
-		int iFacet) {
-	DBG_START
-	;
+double weightForAssociations(double x) {
+	return x * x;
+}
 
-	DBG_END
-	;
+double Polyhedron::corpol_weightForAssociation(
+		int iFacet,
+		int iContour) {
+	Vector3d normalToFacet = facets[iFacet].plane.norm;
+	Vector3d directionOfProjection = contours[iContour].plane.norm;
+	normalToFacet.norm(1.);
+	directionOfProjection.norm(1.);
+	return weightForAssociations(normalToFacet * directionOfProjection);
+}
+
+void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
+		int iContour,
+		int iFacet,
+		int iVertex1,
+		int iVertex2) {
+	DBG_START;
+	SideOfContour* sides = contours[iContour].sides;
+	int numSides = contours[iContour].ns;
+	int iSideDistMin;
+	double distMin;
+	for (int iSide = 0; iSide < numSides; ++iSide) {
+		Vector3d v0 = sides[iSide].A1;
+		Vector3d v1 = sides[iSide].A2;
+		double distCurr1 = distVertexEdge(vertices[iVertex1], v0, v1);
+		double distCurr2 = distVertexEdge(vertices[iVertex2], v0, v1);
+		double distCurr = distCurr1 + distCurr2;
+		if (iSide == 0 || distMin > distCurr) {
+			iSideDistMin = iSide;
+		}
+	}
+	Vector3d side = sides[iSideDistMin].A2 - sides[iSideDistMin].A1;
+	Vector3d edge = vertices[iVertex2] - vertices[iVertex1];
+	bool ifDirectionIsProper = edge * side > 0;
+
+	double weight = corpol_weightForAssociation(iContour, iFacet);
+
+	int indEdge = preed_find(iVertex1, iVertex2);
+
+	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
+			iContour, iSideDistMin, ifDirectionIsProper, weight);
+	edges[indEdge].assocList.push_back(*assocForCurrentEdge);
+	DBG_END;
 }
 
 int Polyhedron::corpol_prep_build_lists_of_visible_edges() {
-	DBG_START
-	;
+	DBG_START	;
 
 	for (int iedge = 0; iedge < numEdges; ++iedge) {
 
@@ -141,16 +193,14 @@ int Polyhedron::corpol_prep_build_lists_of_visible_edges() {
 		edges[iedge].my_fprint(stdout);
 	}
 
-	DBG_END
-	;
+	DBG_END;
 	return 0;
 }
 
 bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 		Edge& edge,
 		Plane planeOfProjection) {
-	DBG_START
-	;
+	DBG_START;
 	int v0 = edge.v0;
 	int v1 = edge.v1;
 	int f0 = edge.f0;
@@ -204,8 +254,7 @@ bool Polyhedron::corpol_collinear_visibility(
 		int v1processed,
 		Plane planeOfProjection,
 		int ifacet) {
-	DBG_START
-	;
+	DBG_START;
 	int nv = facets[ifacet].numVertices;
 	int* index = facets[ifacet].indVertices;
 	Vector3d nu = planeOfProjection.norm;
@@ -234,7 +283,8 @@ bool Polyhedron::corpol_collinear_visibility(
 
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY) {
 		DBGPRINT(
-				"mainEdge (%d, %d) is orthogonal to the plane of projection, " "so we are taking another edge including ivertexMax (%d)",
+				"mainEdge (%d, %d) is orthogonal to the plane of projection, "
+"so we are taking another edge including ivertexMax (%d)",
 				v0Max, v1Max, ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
 		v1Max = index[ivertexMax];
@@ -255,21 +305,17 @@ bool Polyhedron::corpol_collinear_visibility(
 			// -- eliminate the edge from the buffer
 			DBGPRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max, v1Max, v0,
 					v1);
-			DBG_END
-			;
 			return curEdge * mainEdge > 0;
 		}
 	}
 	DBGPRINT("Error. Edge (%d, %d) cannot be found in facets %d", v0processed,
 			v1processed, ifacet);
-	DBG_END
-	;
+	DBG_END;
 	return false;
 }
 
 int Polyhedron::corpol_prep_map_between_edges_and_contours() {
-	DBG_START
-	;
+	DBG_START;
 // NOTE: Testing needed.
 	for (int iedge = 0; iedge < numEdges; ++iedge) {
 		int v0 = edges[iedge].v0;
@@ -316,8 +362,7 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours() {
 		edges[iedge].my_fprint(stdout);
 	}
 
-	DBG_END
-	;
+	DBG_END;
 	return 0;
 }
 
