@@ -5,18 +5,18 @@
 void Polyhedron::corpol_preprocess() {
 	DBG_START;
 	preprocess_edges();
-	corpol_prep_build_lists_of_visible_edges();
-	corpol_prep_map_between_edges_and_contours();
+	corpol_prepFindAssociations();
 	DBG_END;
 }
 
 void Polyhedron::preprocess_edges() {
 	DBG_START;
 	int numEdgesMax = numEdges = 0;
-	for (int i = 0; i < numFacets; ++i) {
-		numEdgesMax += facets[numFacets].numVertices;
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
+		numEdgesMax += facets[iFacet].numVertices;
 	}
 	numEdgesMax /= 2;
+	DBGPRINT("numEdgesMax = %d", numEdgesMax);
 	for (int i = 0; i < numFacets; ++i) {
 		int nv = facets[i].numVertices;
 		int * index = facets[i].indVertices;
@@ -60,13 +60,14 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
 	int numVertex = facets[iFacet].numVertices;
 	int* indVertices = facets[iFacet].indVertices;
 	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
+		int iEdge = preed_find(indVertices[iVertex], indVertices[iVertex  + 1]);
 		corpol_prepFindAssociations_withContour_forFacetEdge(iContour, iFacet,
-				indVertices[iVertex], indVertices[iVertex  + 1]);
+				iEdge);
 	}
 	DBG_END;
 }
 
-double distVertexEdge(
+static double distVertexEdge(
 		// this routine calculates distance
 		Vector3d A,  				// from this vector
 		Vector3d A1, 				// to the edge [A1, A2]
@@ -125,7 +126,7 @@ double distVertexEdge(
 	return sqrt(qmod(A - *Aproj));
 }
 
-double weightForAssociations(double x) {
+static double weightForAssociations(double x) {
 	return x * x;
 }
 
@@ -139,12 +140,45 @@ double Polyhedron::corpol_weightForAssociation(
 	return weightForAssociations(normalToFacet * directionOfProjection);
 }
 
+double Polyhedron::corpol_visibilityForAssociation(
+		int iContour,
+		int iEdge) {
+	int f0 = edges[iEdge].f0;
+	int f1 = edges[iEdge].f1;
+	Vector3d norm0 = facets[f0].plane.norm;
+	norm0.norm(1.);
+	Vector3d norm1 = facets[f1].plane.norm;
+	norm1.norm(1.);
+	Vector3d directionOfProjection = contours[iContour].plane.norm;
+	directionOfProjection.norm(1.);
+	double x = norm0 * directionOfProjection;
+	double y = norm1 * directionOfProjection;
+	if (x + y >= 0)
+	{
+		if (x - y >= 0)
+			return x;
+		else
+			return -x;
+	}
+	else
+	{
+		if (x - y >= 0)
+			return y;
+		else
+			return -y;
+	}
+}
+
 void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 		int iContour,
 		int iFacet,
-		int iVertex1,
-		int iVertex2) {
+		int iEdge) {
 	DBG_START;
+	if (corpol_visibilityForAssociation(iContour, iEdge) <
+			-EPSILON_EDGE_CONTOUR_VISIBILITY)
+		return;
+	int iVertex1 = edges[iEdge].v0;
+	int iVertex2 = edges[iEdge].v1;
 	SideOfContour* sides = contours[iContour].sides;
 	int numSides = contours[iContour].ns;
 	int iSideDistMin;
@@ -165,11 +199,9 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 
 	double weight = corpol_weightForAssociation(iContour, iFacet);
 
-	int indEdge = preed_find(iVertex1, iVertex2);
-
 	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
 			iContour, iSideDistMin, ifDirectionIsProper, weight);
-	edges[indEdge].assocList.push_back(*assocForCurrentEdge);
+	edges[iEdge].assocList.push_back(*assocForCurrentEdge);
 	DBG_END;
 }
 
@@ -369,7 +401,7 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours() {
 #define NDEBUG
 
 void Polyhedron::preed_add(
-		int numeMax,
+		int numEdgesMax,
 		int v0,
 		int v1,
 		int f0,
@@ -380,7 +412,7 @@ void Polyhedron::preed_add(
 	for (int i = 0; i < numEdges; ++i)
 	printf("\tedges[%d] = (%d, %d)\n", i, edges[i].v0, edges[i].v1);
 #endif 
-	if (numEdges >= numeMax) {
+	if (numEdges >= numEdgesMax) {
 #ifndef NDEBUG
 		printf("Warning. List is overflow\n");
 #endif

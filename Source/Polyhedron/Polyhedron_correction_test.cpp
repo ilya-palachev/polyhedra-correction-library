@@ -3,14 +3,12 @@
 #include <ctime>
 
 int Polyhedron::corpolTest(
-		int numContours,
+		int numContours_input,
 		double maxMoveDelta) {
 	DBG_START
 	;
-	SContour* contours = new SContour[numContours];
-
-	int numEdges;
-	Edge* edges;
+	numContours = numContours_input;
+	contours = new SContour[numContours];
 
 	makeCube(1.);
 	preprocess_polyhedron();
@@ -21,6 +19,8 @@ int Polyhedron::corpolTest(
 	}
 	numEdgesMax = numEdgesMax / 2;
 
+	numEdges = numEdgesMax;
+	DBGPRINT("numEdges = %d", numEdges);
 	edges = new Edge[numEdgesMax];
 
 	preprocess_edges();
@@ -67,6 +67,7 @@ SContour& Polyhedron::corpolTest_createOneContour(
 
 	DBGPRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n", idOfContour,
 			nu.x, nu.y, nu.z);
+	DBGPRINT("numEdges = %d", numEdges);
 
 	int numVisibleEdges = 0;
 	bool ifVisibleCurrEdge;

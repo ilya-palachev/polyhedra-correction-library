@@ -3,6 +3,8 @@
 #include "PolyhedraCorrectionLibrary.h"
 #include "SContour.h"
 
+const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-3;
+
 class Polyhedron {
 public:
 	int numVertices;
@@ -396,11 +398,14 @@ public:
 			int iContour,
 			int iFacet);
 
+	double corpol_visibilityForAssociation(
+			int iContour,
+			int iEdge);
+
 	void corpol_prepFindAssociations_withContour_forFacetEdge(
 			int iContour,
 			int iFacet,
-			int iVertex1,
-			int iVertex2);
+			int iEdge);
 
 	int corpol_prep_build_lists_of_visible_edges();
 	int corpol_prep_map_between_edges_and_contours();
