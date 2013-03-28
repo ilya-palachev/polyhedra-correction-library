@@ -2,6 +2,12 @@
 
 //#define NDEBUG
 
+void print_matrix2(
+		FILE* file,
+		int nrow,
+		int ncol,
+		double* a);
+
 void Polyhedron::corpol_preprocess() {
 	DBG_START;
 	preprocess_edges();
@@ -72,58 +78,12 @@ static double distVertexEdge(
 		Vector3d A,  				// from this vector
 		Vector3d A1, 				// to the edge [A1, A2]
 		Vector3d A2) {
-	double matrix[] = { A2.y - A1.y, A2.x - A1.x, 0, 0, A2.z - A1.z, A2.y - A1.y,
-			A2.x - A1.x, A2.y - A1.y, A2.z - A1.z };
-	double rightHandSide[] = { A1.x * (A2.y - A1.y) + A1.y * (A2.x - A1.x), A1.y
-			* (A2.z - A1.z) + A1.z * (A2.y - A1.y), A.x * (A2.x - A1.x)
-			+ A.y * (A2.y - A1.y) + A.z * (A2.z - A1.z) };
-	double matrixFactorized[9];
-	int indexPivot[3];
-	char formOfEqulibration;
-	double rowScaleFactors[3];
-	double columnScaleFactors[3];
-	double solution[3];
-	double reciprocalConditionNumber;
-	double forwardErrorBound;
-	double backwardErrorRelative;
-	double rpivot[9]; // ??? Don't know what it is
-
-	lapack_int info = LAPACKE_dgesvx(LAPACK_ROW_MAJOR, 'E', 'N', 3, 1, matrix, 3,
-			matrixFactorized, 3, indexPivot, &formOfEqulibration, rowScaleFactors,
-			columnScaleFactors, rightHandSide, 3, solution, 3,
-			&reciprocalConditionNumber, &forwardErrorBound, &backwardErrorRelative,
-			rpivot);
-
-	if (info != 0) {
-		if (info < 0) {
-			DBGPRINT("LAPACKE_dgesvx: the %d-th argument "
-					"had an illegal value",
-					-info);
-		} else if (info <= 3) {
-			DBGPRINT(
-					"LAPACKE_dgesvx: U(%d, %d) is exactly zero.  "
-					"The factorization has"
-					"been completed, but the factor U is exactly"
-					"singular, so the solution and error bounds"
-					"could not be computed.",
-					info, info);
-		} else if (info == 4) {
-			DBGPRINT(
-					"LAPACKE_dgesvx: U is non-singular, "
-					"but RCOND is less than machine"
-					"precision, meaning that the matrix is singular"
-					"to working precision.  Nevertheless, the"
-					"solution and error bounds are computed because"
-					"there are a number of situations where the"
-					"computed solution can be more accurate than the"
-					"value of RCOND would suggest.");
-		} else {
-			DBGPRINT("LAPACKE_dgesvx: FATAL. Unknown output value");
-		}
-	}
-	Vector3d* Aproj = new Vector3d(rightHandSide[0], rightHandSide[1],
-			rightHandSide[2]);
-	return sqrt(qmod(A - *Aproj));
+	double aa = qmod(A1 - A);
+	double bb = qmod(A2 - A);
+	double cc = qmod(A1 - A2);
+	double aabbcc = cc - aa - bb;
+	double sqr = (4. * aa * bb - aabbcc * aabbcc) / (4. * cc);
+	return sqrt(sqr);
 }
 
 static double weightForAssociations(double x) {
@@ -177,24 +137,31 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	if (corpol_visibilityForAssociation(iContour, iEdge) <
 			-EPSILON_EDGE_CONTOUR_VISIBILITY)
 		return;
-	int iVertex1 = edges[iEdge].v0;
-	int iVertex2 = edges[iEdge].v1;
+	int iVertex0 = edges[iEdge].v0;
+	int iVertex1 = edges[iEdge].v1;
 	SideOfContour* sides = contours[iContour].sides;
 	int numSides = contours[iContour].ns;
 	int iSideDistMin;
 	double distMin;
+
+	DBGPRINT("We are processing the following contour:");
+	contours[iContour].my_fprint(stdout);
+
 	for (int iSide = 0; iSide < numSides; ++iSide) {
+		DBGPRINT("processing contour # %d, facet # %d, edge # %d (%d, %d), "
+				"side of contour # %d",
+				iContour, iFacet, iEdge, iVertex0, iVertex1, iSide);
 		Vector3d v0 = sides[iSide].A1;
 		Vector3d v1 = sides[iSide].A2;
-		double distCurr1 = distVertexEdge(vertices[iVertex1], v0, v1);
-		double distCurr2 = distVertexEdge(vertices[iVertex2], v0, v1);
+		double distCurr1 = distVertexEdge(vertices[iVertex0], v0, v1);
+		double distCurr2 = distVertexEdge(vertices[iVertex1], v0, v1);
 		double distCurr = distCurr1 + distCurr2;
 		if (iSide == 0 || distMin > distCurr) {
 			iSideDistMin = iSide;
 		}
 	}
 	Vector3d side = sides[iSideDistMin].A2 - sides[iSideDistMin].A1;
-	Vector3d edge = vertices[iVertex2] - vertices[iVertex1];
+	Vector3d edge = vertices[iVertex1] - vertices[iVertex0];
 	bool ifDirectionIsProper = edge * side > 0;
 
 	double weight = corpol_weightForAssociation(iContour, iFacet);
