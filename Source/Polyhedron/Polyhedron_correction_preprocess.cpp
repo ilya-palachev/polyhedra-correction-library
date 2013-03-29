@@ -139,20 +139,23 @@ double Polyhedron::corpol_visibilityForAssociation(
 	Vector3d directionOfProjection = contours[iContour].plane.norm;
 	directionOfProjection.norm(1.);
 	double x = norm0 * directionOfProjection;
+	DBGPRINT("x = %lf", x);
 	double y = norm1 * directionOfProjection;
-	if (x + y >= 0)
-	{
-		if (x - y >= 0)
-			return x;
-		else
+	DBGPRINT("y = %lf", y);
+	double sum = y + x;
+	double sub = y - x;
+	if (sum >= 0) {
+		if (sub >= 0) {
 			return -x;
-	}
-	else
-	{
-		if (x - y >= 0)
-			return y;
-		else
+		} else {
 			return -y;
+		}
+	} else {
+		if (sub >= 0) {
+			return y;
+		} else {
+			return x;
+		}
 	}
 }
 
@@ -161,13 +164,16 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 		int iFacet,
 		int iEdge) {
 	DBG_START;
-	if (corpol_visibilityForAssociation(iContour, iEdge) <
-			-EPSILON_EDGE_CONTOUR_VISIBILITY) {
-		DBGPRINT("processing contour # %d, facet # %d, edge # %d",
-				iContour, iFacet, iEdge);
-		DBGPRINT("Edge is invisible on this contour!");
+	DBGPRINT("processing contour # %d, facet # %d, edge # %d",
+			iContour, iFacet, iEdge);
+
+	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
+	if ( visibilityNumber < -EPSILON_EDGE_CONTOUR_VISIBILITY) {
+		DBGPRINT("Edge is invisible on this contour (visibility %lf)!",
+				visibilityNumber);
 		return;
 	}
+
 	// Check whether this association has been already added to the list
 	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
 	list<EdgeContourAssociation>::iterator lastCont =
