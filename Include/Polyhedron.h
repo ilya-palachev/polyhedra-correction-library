@@ -5,6 +5,7 @@
 const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-3;
 const double EPS_SIGNUM = 1e-15;
 const double EPS_COLLINEARITY = 1e-14;
+const double EPS_SAME_POINTS = 1e-16;
 
 class Polyhedron {
 public:

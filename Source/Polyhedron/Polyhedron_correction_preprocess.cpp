@@ -171,7 +171,19 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	double distMin;
 
 	DBGPRINT("We are processing the following contour:");
-	contours[iContour].my_fprint(stdout);
+	//contours[iContour].my_fprint(stdout);
+
+	Vector3d v0 = vertices[iVertex0];
+	Vector3d v1 = vertices[iVertex1];
+	Plane planeOfProjection = contours[iContour].plane;
+	Vector3d v0_projected = planeOfProjection.project(v0);
+	Vector3d v1_projected = planeOfProjection.project(v1);
+	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
+		DBGPRINT("Edge # %d (%d, %d) is reduced into point when projecting"
+				"on the plane of projection of contour # %d",
+				iEdge, iVertex0, iVertex1, iContour);
+		return;
+	}
 
 	for (int iSide = 0; iSide < numSides; ++iSide) {
 		DBGPRINT("processing contour # %d, facet # %d, edge # %d (%d, %d), "
@@ -199,7 +211,7 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 			edges[iEdge].assocList.end();
 	--lastCont;
 	int iContourLastInList = lastCont->indContour;
-	edges[iEdge].my_fprint(stdout);
+//	edges[iEdge].my_fprint(stdout);
 	DBGPRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
 			iContourLastInList, numAlreadyPushedAssocs);
 	if ( numAlreadyPushedAssocs == 0 || iContourLastInList != iContour) {
