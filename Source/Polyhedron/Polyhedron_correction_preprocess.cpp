@@ -48,6 +48,11 @@ void Polyhedron::corpol_prepFindAssociations() {
 	for (int iContour = 0; iContour < numFacets; ++iContour) {
 		corpol_prepFindAssiciations_withContour(iContour);
 	}
+
+	/* Print found associations : */
+	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
+		edges[iEdge].my_fprint(stdout);
+	}
 	DBG_END;
 }
 
@@ -98,8 +103,8 @@ static double distVertexEdge(
 		} else if (scalarProd < 0) {
 			Aproj += step;
 		}
-
 	} while (1);
+
 	return sqrt (qmod (A - Aproj));
 }
 
