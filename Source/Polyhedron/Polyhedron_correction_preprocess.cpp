@@ -163,6 +163,20 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 		DBGPRINT("Edge is invisible on this contour!");
 		return;
 	}
+	// Check whether this association has been already added to the list
+	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
+	list<EdgeContourAssociation>::iterator lastCont =
+			edges[iEdge].assocList.end();
+	--lastCont;
+	int iContourLastInList = lastCont->indContour;
+	DBGPRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
+			iContourLastInList, numAlreadyPushedAssocs);
+	if (numAlreadyPushedAssocs != 0 && iContourLastInList == iContour) {
+		DBGPRINT("Edge %d already has association with contour # %d",
+				iEdge, iContour);
+		return;
+	}
+
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	SideOfContour* sides = contours[iContour].sides;
@@ -205,25 +219,13 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 
 	double weight = corpol_weightForAssociation(iContour, iFacet);
 
-	// Check whether this association has been already added to the list
-	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
-	list<EdgeContourAssociation>::iterator lastCont =
-			edges[iEdge].assocList.end();
-	--lastCont;
-	int iContourLastInList = lastCont->indContour;
-//	edges[iEdge].my_fprint(stdout);
-	DBGPRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
-			iContourLastInList, numAlreadyPushedAssocs);
-	if ( numAlreadyPushedAssocs == 0 || iContourLastInList != iContour) {
-
-		DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour,
-				iEdge);
-		// Create new association
-		EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
-				iContour, iSideDistMin, ifDirectionIsProper, weight);
-		// Push it to the list
-		edges[iEdge].assocList.push_back(*assocForCurrentEdge);
-	}
+	DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour,
+			iEdge);
+	// Create new association
+	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
+			iContour, iSideDistMin, ifDirectionIsProper, weight);
+	// Push it to the list
+	edges[iEdge].assocList.push_back(*assocForCurrentEdge);
 	DBG_END;
 }
 
