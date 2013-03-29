@@ -138,6 +138,7 @@ double Polyhedron::corpol_calculate_functional(
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
+		int iAssoc = 0;
 		for (list<EdgeContourAssociation>::iterator itCont =
 				edges[iEdge].assocList.begin(); itCont != edges[iEdge].assocList.end();
 				++itCont) {
@@ -146,6 +147,7 @@ double Polyhedron::corpol_calculate_functional(
 			int curNearestSide = itCont->indNearestSide;
 			SideOfContour * sides = contours[curContour].sides;
 			Plane planeOfProjection = contours[curContour].plane;
+			double weight = itCont->weight;
 
 			double gamma_ij = -planePrev1.norm * planeOfProjection.norm
 					/ ((planePrev0.norm - planePrev1.norm) * planeOfProjection.norm);
@@ -164,10 +166,17 @@ double Polyhedron::corpol_calculate_functional(
 			double summand0 = a_ij * A_ij0.x + b_ij * A_ij0.y + c_ij * A_ij0.z + d_ij;
 
 			summand0 *= summand0;
+			summand0 *= weight;
 
 			double summand1 = a_ij * A_ij1.x + b_ij * A_ij1.y + c_ij * A_ij1.z + d_ij;
 
 			summand1 *= summand1;
+			summand1 *= weight;
+
+			DBGPRINT("For edge %d association %d : summand0 = %lf, summand1 = %lf",
+					iEdge, iAssoc++, summand0, summand1);
+			ASSERT(summand0 < 1.);
+			ASSERT(summand1 < 1.);
 
 			sum += summand0 + summand1;
 		}
@@ -297,6 +306,7 @@ void Polyhedron::corpol_calculate_matrix(
 
 				int curContour = itCont->indContour;
 				int curNearestSide = itCont->indNearestSide;
+				double weight = itCont->weight;
 				SideOfContour * sides = contours[curContour].sides;
 				Plane planeOfProjection = contours[curContour].plane;
 
@@ -332,8 +342,8 @@ void Polyhedron::corpol_calculate_matrix(
 				double zz = z0 * z0 + z1 * z1;
 				double z = z0 + z1;
 
-				double gamma1 = gamma_ij * gamma_ij;
-				double gamma2 = gamma_ij * (1 - gamma_ij);
+				double gamma1 = gamma_ij * gamma_ij * weight;
+				double gamma2 = gamma_ij * (1 - gamma_ij) * weight;
 
 				matrix[i_ak_ak] += gamma1 * xx;
 				matrix[i_ak_ak + 1] += gamma1 * xy;
