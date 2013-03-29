@@ -129,17 +129,17 @@ double Polyhedron::corpol_calculate_functional(
 	;
 	double sum = 0;
 
-	for (int i = 0; i < numEdges; ++i) {
+	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
 //    	DBGPRINT("%s: processing edge #%d\n", __func__, i);
-		int f0 = edges[i].f0;
-		int f1 = edges[i].f1;
+		int f0 = edges[iEdge].f0;
+		int f1 = edges[iEdge].f1;
 		Plane plane0 = facets[f0].plane;
 		Plane plane1 = facets[f1].plane;
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
 		for (list<EdgeContourAssociation>::iterator itCont =
-				edges[i].assocList.begin(); itCont != edges[i].assocList.end();
+				edges[iEdge].assocList.begin(); itCont != edges[iEdge].assocList.end();
 				++itCont) {
 //        	DBGPRINT("\t%s: processing contour #%d\n", __func__, j);
 			int curContour = itCont->indContour;
