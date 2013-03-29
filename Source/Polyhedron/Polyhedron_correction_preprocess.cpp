@@ -45,7 +45,7 @@ void Polyhedron::preprocess_edges() {
 
 void Polyhedron::corpol_prepFindAssociations() {
 	DBG_START;
-	for (int iContour = 0; iContour < numFacets; ++iContour) {
+	for (int iContour = 0; iContour < numContours; ++iContour) {
 		corpol_prepFindAssiciations_withContour(iContour);
 	}
 
@@ -157,8 +157,12 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 		int iEdge) {
 	DBG_START;
 	if (corpol_visibilityForAssociation(iContour, iEdge) <
-			-EPSILON_EDGE_CONTOUR_VISIBILITY)
+			-EPSILON_EDGE_CONTOUR_VISIBILITY) {
+		DBGPRINT("processing contour # %d, facet # %d, edge # %d",
+				iContour, iFacet, iEdge);
+		DBGPRINT("Edge is invisible on this contour!");
 		return;
+	}
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	SideOfContour* sides = contours[iContour].sides;
