@@ -78,12 +78,29 @@ static double distVertexEdge(
 		Vector3d A,  				// from this vector
 		Vector3d A1, 				// to the edge [A1, A2]
 		Vector3d A2) {
-	double aa = qmod(A1 - A);
-	double bb = qmod(A2 - A);
-	double cc = qmod(A1 - A2);
-	double aabbcc = cc - aa - bb;
-	double sqr = (4. * aa * bb - aabbcc * aabbcc) / (4. * cc);
-	return sqrt(sqr);
+
+	Vector3d edge = A2 - A1;
+	while ( (A1 - A) * edge > 0 && (A2 - A) * edge > 0 ) {
+		A += edge;
+	}
+	while ( (A1 - A) * edge < 0 && (A2 - A) * edge < 0 ) {
+		A -= edge;
+	}
+	Vector3d step = edge * 0.5;
+	Vector3d Aproj = A1 + step;
+	do {
+		step *= 0.5;
+		double scalarProd = (Aproj - A) * edge;
+		if (scalarProd < EPS_COLLINEARITY && scalarProd > - EPS_COLLINEARITY) {
+			break;
+		} else if (scalarProd > 0) {
+			Aproj -= step;
+		} else if (scalarProd < 0) {
+			Aproj += step;
+		}
+
+	} while (1);
+	return sqrt (qmod (A - Aproj));
 }
 
 static double weightForAssociations(double x) {
