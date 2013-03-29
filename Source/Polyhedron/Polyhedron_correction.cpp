@@ -95,7 +95,7 @@ int Polyhedron::correct_polyhedron() {
 		error = corpol_calculate_functional(prevPlanes);
 		DBGPRINT("error = %le", error);
 		++numIterations;
-		if (ret != true) {
+		if (ret != 0) {
 			break;
 		}
 	}
