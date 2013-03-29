@@ -24,16 +24,21 @@ void Polyhedron::preprocess_edges() {
 	numEdgesMax /= 2;
 	DBGPRINT("numEdgesMax = %d", numEdgesMax);
 	for (int i = 0; i < numFacets; ++i) {
-		int nv = facets[i].numVertices;
+		int numVerticesInFacet = facets[i].numVertices;
 		int * index = facets[i].indVertices;
-		for (int j = 0; j < nv; ++j) {
+		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex) {
 			preed_add(numEdgesMax, // Number of edges which we are going add finally
-					index[j], // First vertices
-					index[j + 1], // Second vertices
+					index[iVertex], // First vertices
+					index[iVertex + 1], // Second vertices
 					i, // Current facets id
-					index[nv + 1 + j]); // Id of its neighbor
+					index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
 		}
 	}
+
+	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
+		edges[iEdge].id = iEdge;
+	}
+
 #ifndef NDEBUG
 	for (int i = 0; i < numEdges; ++i) {
 		edges[i].my_fprint(stdout);
