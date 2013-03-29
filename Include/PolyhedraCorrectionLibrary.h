@@ -22,16 +22,10 @@
 #include "array_operations.h"
 #include "Gauss_string.h"
 
+#include "DebugPrint.h"
+
 #ifndef POLYHEDRON_H
 #define POLYHEDRON_H
-
-//#define DEBUG
-//#define DEBUG1
-#define OUTPUT
-//#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
-#define EPS_SIGNUM 1e-15
-#define EPS_COLLINEARITY 1e-14
-#include "DebugPrint.h"
 
 class Polyhedron;
 class Facet;

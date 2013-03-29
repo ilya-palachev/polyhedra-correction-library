@@ -3,6 +3,11 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
+//#define DEBUG
+//#define DEBUG1
+#define OUTPUT
+//#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
+
 #define WHERESTR  "[%s: %s: %d]: "
 #define WHEREARG  __FILE__, __func__, __LINE__
 #define DBGPRINT2(...)       fprintf(stderr, __VA_ARGS__)

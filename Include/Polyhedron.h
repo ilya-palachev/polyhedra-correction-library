@@ -1,9 +1,10 @@
 #ifndef POLYHEDRON_CLASS_H
 #define	POLYHEDRON_CLASS_H
 #include "PolyhedraCorrectionLibrary.h"
-#include "SContour.h"
 
 const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-3;
+const double EPS_SIGNUM = 1e-15;
+const double EPS_COLLINEARITY = 1e-14;
 
 class Polyhedron {
 public:
