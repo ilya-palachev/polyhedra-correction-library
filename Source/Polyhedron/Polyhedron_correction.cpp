@@ -17,6 +17,8 @@ void print_matrix2(
 		int ncol,
 		double* a) {
 	fprintf(file, "=========begin=of=matrix=================\n");
+	fprintf(file, "number of rows: %d\n", nrow);
+	fprintf(file, "number of columns: %d\n", ncol);
 	for (int irow = 0; irow < nrow; ++irow) {
 		for (int icol = 0; icol < ncol; ++icol) {
 			double valuePrinted = a[ncol * irow + icol];
@@ -290,17 +292,22 @@ void Polyhedron::corpol_calculate_matrix(
 			}
 
 			for (list<EdgeContourAssociation>::iterator itCont =
-					edges[iedge].assocList.begin();
-					itCont != edges[iedge].assocList.end(); ++itCont) {
+					edges[edgeid].assocList.begin();
+					itCont != edges[edgeid].assocList.end(); ++itCont) {
 
 				int curContour = itCont->indContour;
 				int curNearestSide = itCont->indNearestSide;
 				SideOfContour * sides = contours[curContour].sides;
 				Plane planeOfProjection = contours[curContour].plane;
 
-				double gamma_ij = -planePrevNeighbour.norm * planeOfProjection.norm
-						/ ((planePrevThis.norm - planePrevNeighbour.norm)
-								* planeOfProjection.norm);
+				double enumerator = -planePrevNeighbour.norm * planeOfProjection.norm;
+				double denominator = ((planePrevThis.norm - planePrevNeighbour.norm)
+						* planeOfProjection.norm);
+
+				ASSERT(fabs(denominator) > 1e-16);
+
+				double gamma_ij = enumerator / denominator;
+				ASSERT(!isnan(gamma_ij));
 
 				Vector3d A_ij1 = sides[curNearestSide].A1;
 				Vector3d A_ij2 = sides[curNearestSide].A2;
@@ -311,6 +318,7 @@ void Polyhedron::corpol_calculate_matrix(
 				double x1 = A_ij2.x;
 				double y1 = A_ij2.y;
 				double z1 = A_ij2.z;
+
 //                DBGPRINT("\t\t A_ij1 = (%lf, %lf, %lf)", x0, y1, z1);
 //                DBGPRINT("\t\t A_ij2 = (%lf, %lf, %lf)", x1, y1, z1);
 
