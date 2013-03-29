@@ -4,6 +4,7 @@
 #include <math.h>
 #include <lapacke.h>
 #include <list>
+#include <assert.h>
 
 #include "Polyhedron.h"
 #include "VertexInfo.h"
@@ -23,6 +24,7 @@
 #include "Gauss_string.h"
 
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 
 #ifndef POLYHEDRON_H
 #define POLYHEDRON_H
