@@ -193,9 +193,25 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 
 	double weight = corpol_weightForAssociation(iContour, iFacet);
 
-	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
-			iContour, iSideDistMin, ifDirectionIsProper, weight);
-	edges[iEdge].assocList.push_back(*assocForCurrentEdge);
+	// Check whether this association has been already added to the list
+	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
+	list<EdgeContourAssociation>::iterator lastCont =
+			edges[iEdge].assocList.end();
+	--lastCont;
+	int iContourLastInList = lastCont->indContour;
+	edges[iEdge].my_fprint(stdout);
+	DBGPRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
+			iContourLastInList, numAlreadyPushedAssocs);
+	if ( numAlreadyPushedAssocs == 0 || iContourLastInList != iContour) {
+
+		DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour,
+				iEdge);
+		// Create new association
+		EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
+				iContour, iSideDistMin, ifDirectionIsProper, weight);
+		// Push it to the list
+		edges[iEdge].assocList.push_back(*assocForCurrentEdge);
+	}
 	DBG_END;
 }
 
@@ -310,7 +326,7 @@ bool Polyhedron::corpol_collinear_visibility(
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY) {
 		DBGPRINT(
 				"mainEdge (%d, %d) is orthogonal to the plane of projection, "
-"so we are taking another edge including ivertexMax (%d)",
+				"so we are taking another edge including ivertexMax (%d)",
 				v0Max, v1Max, ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
 		v1Max = index[ivertexMax];
