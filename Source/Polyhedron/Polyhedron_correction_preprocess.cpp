@@ -180,6 +180,7 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 		double distCurr = distCurr1 + distCurr2;
 		if (iSide == 0 || distMin > distCurr) {
 			iSideDistMin = iSide;
+			distMin = distCurr;
 		}
 	}
 	Vector3d side = sides[iSideDistMin].A2 - sides[iSideDistMin].A1;
