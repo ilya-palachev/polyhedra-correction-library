@@ -90,6 +90,12 @@ int Polyhedron::correct_polyhedron() {
 		int ret = corpol_iteration(prevPlanes, matrix, rightPart, solution,
 				matrixFactorized, indexPivot);
 		for (int i = 0; i < numFacets; ++i) {
+			DBGPRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)",
+					i,
+					prevPlanes[i].norm.x, prevPlanes[i].norm.y, prevPlanes[i].norm.z,
+					prevPlanes[i].dist, facets[i].plane.norm.x,
+					facets[i].plane.norm.y, facets[i].plane.norm.z,
+					facets[i].plane.dist);
 			prevPlanes[i] = facets[i].plane;
 		}
 		error = corpol_calculate_functional(prevPlanes);
