@@ -38,7 +38,7 @@ EdgeContourAssociation::EdgeContourAssociation(
 				indContour(orig.indContour),
 				indNearestSide(orig.indNearestSide),
 				ifProperDirection(orig.ifProperDirection),
-				weight(0.) {
+				weight(orig.weight) {
 }
 
 EdgeContourAssociation::~EdgeContourAssociation() {
