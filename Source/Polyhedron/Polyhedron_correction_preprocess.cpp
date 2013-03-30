@@ -90,11 +90,11 @@ static double distVertexEdge(
 		Vector3d A2) {
 
 	Vector3d edge = A2 - A1;
-	while ( (A1 - A) * edge > 0 && (A2 - A) * edge > 0 ) {
-		A += edge;
+	if ( (A1 - A) * edge > 0 && (A2 - A) * edge > 0 ) {
+		return sqrt(qmod(A1 - A));
 	}
-	while ( (A1 - A) * edge < 0 && (A2 - A) * edge < 0 ) {
-		A -= edge;
+	if ( (A1 - A) * edge < 0 && (A2 - A) * edge < 0 ) {
+		return sqrt(qmod(A2 - A));
 	}
 	Vector3d step = edge * 0.5;
 	Vector3d Aproj = A1 + step;
