@@ -173,8 +173,6 @@ double Polyhedron::corpol_calculate_functional(
 			summand1 *= summand1;
 			summand1 *= weight;
 
-			DBGPRINT("For edge %d association %d : summand0 = %lf, summand1 = %lf",
-					iEdge, iAssoc++, summand0, summand1);
 			ASSERT(summand0 < 1.);
 			ASSERT(summand1 < 1.);
 
