@@ -7,6 +7,10 @@ const double EPS_SIGNUM = 1e-15;
 const double EPS_COLLINEARITY = 1e-14;
 const double EPS_SAME_POINTS = 1e-16;
 
+const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = - RAND_MAX;
+const double DEFAULT_DERIVATIVE_STEP = 1e-8;
+const double DEFAULT_DERIVATIVE_STEP_RECIPROCAL = 1e+8;
+
 class Polyhedron {
 public:
 	int numVertices;
@@ -359,6 +363,7 @@ public:
 
 	double corpol_calculate_functional(
 			Plane* prevPlanes);
+
 	int corpol_iteration(
 			Plane* prevPlanes,
 			double* matrix,
@@ -366,11 +371,21 @@ public:
 			double* solution,
 			double* matrixFactorized,
 			int* indexPivot);
+
 	void corpol_calculate_matrix(
 			Plane* prevPlanes,
 			double* matrix,
 			double* rightPart,
 			double* solution);
+
+	// Polyhedron_correction_derivativeTest.cpp
+	double corpol_calculate_functional_derivative(
+			Plane* prevPlanes,
+			int iVariable);
+
+	void corpol_calculate_matrix_derivative(
+			double* matrix,
+			Plane* prevPlane)
 
 	// Polyhedron_correction_preprocess.cpp
 	void corpol_preprocess();
