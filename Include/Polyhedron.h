@@ -376,14 +376,14 @@ public:
 	void corpol_preprocess();
 
 	void preprocess_edges();
-	inline void preed_add(
+	inline void preprocess_edges_add(
 			int numeMax,
 			int v0,
 			int v1,
 			int f0,
 			int f1);
 
-	int preed_find(
+	int preprocess_edges_find(
 			int v0,
 			int v1);
 

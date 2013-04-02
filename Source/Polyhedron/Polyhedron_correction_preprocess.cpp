@@ -27,7 +27,7 @@ void Polyhedron::preprocess_edges() {
 		int numVerticesInFacet = facets[i].numVertices;
 		int * index = facets[i].indVertices;
 		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex) {
-			preed_add(numEdgesMax, // Number of edges which we are going add finally
+			preprocess_edges_add(numEdgesMax, // Number of edges which we are going add finally
 					index[iVertex], // First vertices
 					index[iVertex + 1], // Second vertices
 					i, // Current facets id
@@ -76,7 +76,7 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
 	int numVertex = facets[iFacet].numVertices;
 	int* indVertices = facets[iFacet].indVertices;
 	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
-		int iEdge = preed_find(indVertices[iVertex], indVertices[iVertex  + 1]);
+		int iEdge = preprocess_edges_find(indVertices[iVertex], indVertices[iVertex  + 1]);
 		corpol_prepFindAssociations_withContour_forFacetEdge(iContour, iFacet,
 				iEdge);
 	}
@@ -435,7 +435,7 @@ int Polyhedron::corpol_prep_map_between_edges_and_contours() {
 
 #define NDEBUG
 
-void Polyhedron::preed_add(
+void Polyhedron::preprocess_edges_add(
 		int numEdgesMax,
 		int v0,
 		int v1,
@@ -466,7 +466,7 @@ void Polyhedron::preed_add(
 		f1 = tmp;
 	}
 
-	int retvalfind = preed_find(v0, v1);
+	int retvalfind = preprocess_edges_find(v0, v1);
 #ifndef NDEBUG
 	printf("retvalfind = %d\n", retvalfind);
 #endif
@@ -492,7 +492,7 @@ void Polyhedron::preed_add(
 	++numEdges;
 }
 
-int Polyhedron::preed_find(
+int Polyhedron::preprocess_edges_find(
 		int v0,
 		int v1) {
 #ifndef NDEBUG
