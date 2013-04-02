@@ -155,15 +155,19 @@ double Polyhedron::corpol_calculate_functional(
 			Plane planeOfProjection = contours[curContour].plane;
 			double weight = itCont->weight;
 
-			double gamma_ij = -planePrev1.norm * planeOfProjection.norm
-					/ ((planePrev0.norm - planePrev1.norm) * planeOfProjection.norm);
+
+			double enumerator =  -planePrev1.norm * planeOfProjection.norm;
+			double denominator = (planePrev0.norm - planePrev1.norm) *
+					planeOfProjection.norm;
+			DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
+					iEdge, edges[iEdge].v0, edges[iEdge].v1, itCont->indContour, enumerator, denominator);
+
+			ASSERT(fabs(denominator) > 1e-10);
+			double gamma_ij = enumerator / denominator;
 
 			double a_ij = gamma_ij * plane0.norm.x + (1 - gamma_ij) * plane1.norm.x;
-
 			double b_ij = gamma_ij * plane0.norm.y + (1 - gamma_ij) * plane1.norm.y;
-
 			double c_ij = gamma_ij * plane0.norm.z + (1 - gamma_ij) * plane1.norm.z;
-
 			double d_ij = gamma_ij * plane0.dist + (1 - gamma_ij) * plane1.dist;
 
 			Vector3d A_ij0 = sides[curNearestSide].A1;
@@ -297,7 +301,7 @@ void Polyhedron::corpol_calculate_matrix(
 
 			Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
 
-			int edgeid = preed_find(v0, v1);
+			int edgeid = preprocess_edges_find(v0, v1);
 
 			if (edgeid == -1) {
 				printf("Error! edge (%d, %d) cannot be found\n", v0, v1);
@@ -317,8 +321,9 @@ void Polyhedron::corpol_calculate_matrix(
 				double enumerator = -planePrevNeighbour.norm * planeOfProjection.norm;
 				double denominator = ((planePrevThis.norm - planePrevNeighbour.norm)
 						* planeOfProjection.norm);
-
-				ASSERT(fabs(denominator) > 1e-16);
+				DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
+						iedge, v0, v1, itCont->indContour, enumerator, denominator);
+				ASSERT(fabs(denominator) > 1e-10);
 
 				double gamma_ij = enumerator / denominator;
 				ASSERT(!isnan(gamma_ij));
