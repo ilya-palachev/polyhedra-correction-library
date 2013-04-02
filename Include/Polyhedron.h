@@ -385,7 +385,7 @@ public:
 
 	void corpol_calculate_matrix_derivative(
 			double* matrix,
-			Plane* prevPlane)
+			Plane* prevPlane);
 
 	// Polyhedron_correction_preprocess.cpp
 	void corpol_preprocess();
