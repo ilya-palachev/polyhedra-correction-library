@@ -159,10 +159,10 @@ double Polyhedron::corpol_calculate_functional(
 			double enumerator =  -planePrev1.norm * planeOfProjection.norm;
 			double denominator = (planePrev0.norm - planePrev1.norm) *
 					planeOfProjection.norm;
-			DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
-					iEdge, edges[iEdge].v0, edges[iEdge].v1, itCont->indContour, enumerator, denominator);
+//			DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
+//					iEdge, edges[iEdge].v0, edges[iEdge].v1, itCont->indContour, enumerator, denominator);
 
-			ASSERT(fabs(denominator) > 1e-10);
+//			ASSERT(fabs(denominator) > 1e-10);
 			double gamma_ij = enumerator / denominator;
 
 			double a_ij = gamma_ij * plane0.norm.x + (1 - gamma_ij) * plane1.norm.x;
@@ -207,7 +207,46 @@ int Polyhedron::corpol_iteration(
 			matrix, rightPart, solution);
 	int dim = 5 * numFacets;
 	print_matrix2(fout, dim, dim, matrix);
-//    int ret = Gauss_string(dim, matrix, rightPart);
+
+#ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
+	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable) {
+		double valueFromDerTest = corpol_calculate_functional_derivative(
+				prevPlanes, iVariable);
+		double valueFromMatrix = 0.;
+		int iFacet = iVariable / 4;
+		int iCoefficient = iVariable % 4;
+		for (int jVariable = 0; jVariable < 4 * numFacets; ++jVariable) {
+			int jFacet = jVariable / 4;
+			int jCoefficient = jVariable % 4;
+			double elementOfMatrix = matrix[(5 * iFacet + iCoefficient) *
+			                                5 * numFacets +
+						                          5 * jFacet + jCoefficient];
+			double currentCoefficient;
+			switch(jCoefficient) {
+			case 0:
+				currentCoefficient = facets[jFacet].plane.norm.x;
+				break;
+			case 1:
+				currentCoefficient = facets[jFacet].plane.norm.y;
+				break;
+			case 2:
+				currentCoefficient = facets[jFacet].plane.norm.z;
+				break;
+			case 3:
+				currentCoefficient = facets[jFacet].plane.dist;
+				break;
+			}
+			valueFromMatrix += elementOfMatrix * currentCoefficient;
+		}
+		DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
+				valueFromDerTest, valueFromMatrix);
+		if (fabs(valueFromDerTest - valueFromMatrix) >
+		EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING) {
+			DBGPRINT("!!! Warning values are strongly different");
+		}
+	}
+#endif
+
 	lapack_int dimLapack = dim;
 	lapack_int nrhs = 1;
 	lapack_int lda = dim;
@@ -321,9 +360,9 @@ void Polyhedron::corpol_calculate_matrix(
 				double enumerator = -planePrevNeighbour.norm * planeOfProjection.norm;
 				double denominator = ((planePrevThis.norm - planePrevNeighbour.norm)
 						* planeOfProjection.norm);
-				DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
-						iedge, v0, v1, itCont->indContour, enumerator, denominator);
-				ASSERT(fabs(denominator) > 1e-10);
+//				DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
+//						iedge, v0, v1, itCont->indContour, enumerator, denominator);
+//				ASSERT(fabs(denominator) > 1e-10);
 
 				double gamma_ij = enumerator / denominator;
 				ASSERT(!isnan(gamma_ij));

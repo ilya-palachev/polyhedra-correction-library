@@ -7,6 +7,7 @@
 //#define DEBUG1
 #define OUTPUT
 //#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
+#define GLOBAL_CORRECTION_DERIVATIVE_TESTING
 
 #define WHERESTR  "[%s: %d]: "
 #define WHEREARG  __func__, __LINE__

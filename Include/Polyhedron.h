@@ -8,8 +8,10 @@ const double EPS_COLLINEARITY = 1e-14;
 const double EPS_SAME_POINTS = 1e-16;
 
 const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = - RAND_MAX;
+
 const double DEFAULT_DERIVATIVE_STEP = 1e-8;
 const double DEFAULT_DERIVATIVE_STEP_RECIPROCAL = 1e+8;
+const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING = 1e-3;
 
 class Polyhedron {
 public:
