@@ -210,7 +210,7 @@ int Polyhedron::corpol_iteration(
 
 #ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
 	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable) {
-		double valueFromDerTest = corpol_calculate_functional_derivative(
+		double valueFromDerTest = corpol_calculate_functional_derivative_1(
 				prevPlanes, iVariable);
 		double valueFromMatrix = 0.;
 		int iFacet = iVariable / 4;
