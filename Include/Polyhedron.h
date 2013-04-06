@@ -393,7 +393,7 @@ public:
 			Plane* prevPlanes,
 			int iVariable);
 
-	double corpol_derivativeTest_1_calculateValFromMatrix(
+	double corpol_derivativeTest_calculateValFromMatrix_1(
 			int iVariable,
 			double* matrix);
 

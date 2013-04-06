@@ -6,7 +6,7 @@ void Polyhedron::corpol_derivativeTest_1(
 	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable) {
 		double valueFromDerTest = corpol_calculate_functional_derivative_1(
 				prevPlanes, iVariable);
-		double valueFromMatrix = corpol_derivativeTest_1_calculateValFromMatrix(
+		double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_1(
 				iVariable, matrix);
 
 		DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
@@ -35,7 +35,7 @@ void Polyhedron::corpol_derivativeTest_1(
 	}
 }
 
-double Polyhedron::corpol_derivativeTest_1_calculateValFromMatrix(
+double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_1(
 		int iVariable,
 		double* matrix) {
 	double valueFromMatrix = 0.;
