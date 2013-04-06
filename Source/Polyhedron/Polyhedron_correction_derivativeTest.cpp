@@ -239,7 +239,14 @@ double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_2(
 		int iVariable,
 		int jVariable,
 		double* matrix) {
+	int iFacet = iVariable / 4;
+	int iCoefficient = iVariable % 4;
+
+	int jFacet = jVariable / 4;
+	int jCoefficient = jVariable % 4;
+
 	int dim = 5 * numFacets;
-	return matrix[dim * iVariable + jVariable];
+
+	return matrix[dim * (5 * iFacet + iCoefficient) + 5 * jFacet + jCoefficient];
 }
 
