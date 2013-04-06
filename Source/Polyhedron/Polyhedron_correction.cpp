@@ -384,7 +384,7 @@ void Polyhedron::corpol_calculate_matrix(
 
 				matrix[i_bk_an] += gamma2 * xy;
 				matrix[i_bk_an + 1] += gamma2 * yy;
-				matrix[i_bk_an + 2] += gamma2 * xz;
+				matrix[i_bk_an + 2] += gamma2 * yz;
 				matrix[i_bk_an + 3] += gamma2 * y;
 
 				matrix[i_ck_an] += gamma2 * xz;
