@@ -7,11 +7,14 @@ const double EPS_SIGNUM = 1e-15;
 const double EPS_COLLINEARITY = 1e-14;
 const double EPS_SAME_POINTS = 1e-16;
 
-const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = - RAND_MAX;
+const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
 
 const double DEFAULT_DERIVATIVE_STEP = 1e-8;
 const double DEFAULT_DERIVATIVE_STEP_RECIPROCAL = 1e+8;
-const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING = 1e-3;
+const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE = 1e-3;
+const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.1;
+
+const double EPSILON_FOR_DIVISION = 1e-16;
 
 class Polyhedron {
 public:
@@ -381,14 +384,23 @@ public:
 			double* solution);
 
 	// Polyhedron_correction_derivativeTest.cpp
+
+	void corpol_derivativeTest_1(
+			Plane* prevPlanes,
+			double* matrix);
+
 	double corpol_calculate_functional_derivative_1(
 			Plane* prevPlanes,
 			int iVariable);
 
+	double corpol_derivativeTest_1_calculateValFromMatrix(
+			int iVariable,
+			double* matrix);
+
 	double corpol_calculate_functional_derivative_2(
-				Plane* prevPlanes,
-				int iVariable,
-				int jVariable);
+			Plane* prevPlanes,
+			int iVariable,
+			int jVariable);
 
 	void corpol_calculate_matrix_derivative(
 			double* matrix,

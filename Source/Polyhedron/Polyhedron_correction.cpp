@@ -209,42 +209,11 @@ int Polyhedron::corpol_iteration(
 	print_matrix2(fout, dim, dim, matrix);
 
 #ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
-	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable) {
-		double valueFromDerTest = corpol_calculate_functional_derivative_1(
-				prevPlanes, iVariable);
-		double valueFromMatrix = 0.;
-		int iFacet = iVariable / 4;
-		int iCoefficient = iVariable % 4;
-		for (int jVariable = 0; jVariable < 4 * numFacets; ++jVariable) {
-			int jFacet = jVariable / 4;
-			int jCoefficient = jVariable % 4;
-			double elementOfMatrix = matrix[(5 * iFacet + iCoefficient) *
-			                                5 * numFacets +
-						                          5 * jFacet + jCoefficient];
-			double currentCoefficient;
-			switch(jCoefficient) {
-			case 0:
-				currentCoefficient = facets[jFacet].plane.norm.x;
-				break;
-			case 1:
-				currentCoefficient = facets[jFacet].plane.norm.y;
-				break;
-			case 2:
-				currentCoefficient = facets[jFacet].plane.norm.z;
-				break;
-			case 3:
-				currentCoefficient = facets[jFacet].plane.dist;
-				break;
-			}
-			valueFromMatrix += elementOfMatrix * currentCoefficient;
-		}
-		DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
-				valueFromDerTest, valueFromMatrix);
-		if (fabs(valueFromDerTest - valueFromMatrix) >
-		EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING) {
-			DBGPRINT("!!! Warning values are strongly different");
-		}
-	}
+	// Test the calculated matrix by the method of
+	// numerical calculation of first derivatives
+	// of the functional
+
+	corpol_derivativeTest_1(prevPlanes, matrix);
 #endif
 
 	lapack_int dimLapack = dim;
