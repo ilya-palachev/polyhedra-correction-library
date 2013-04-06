@@ -199,16 +199,16 @@ double Polyhedron::corpol_calculate_functional_derivative_2(
 	double* changedValueJ;
 	switch (jCoefficient) {
 	case 0:
-		changedValueJ = &(facets[iFacet].plane.norm.x);
+		changedValueJ = &(facets[jFacet].plane.norm.x);
 		break;
 	case 1:
-		changedValueJ = &(facets[iFacet].plane.norm.y);
+		changedValueJ = &(facets[jFacet].plane.norm.y);
 		break;
 	case 2:
-		changedValueJ = &(facets[iFacet].plane.norm.z);
+		changedValueJ = &(facets[jFacet].plane.norm.z);
 		break;
 	case 3:
-		changedValueJ = &(facets[iFacet].plane.dist);
+		changedValueJ = &(facets[jFacet].plane.dist);
 		break;
 	}
 	double changedValuePrevI = *changedValueI;
