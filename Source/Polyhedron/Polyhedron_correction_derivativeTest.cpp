@@ -16,7 +16,7 @@ void Polyhedron::corpol_derivativeTest_1(
 		double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_1(
 				iVariable, matrix);
 
-		DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
+		DBGPRINT("value from derivative test: %le, value from matrix: %le",
 				valueFromDerTest, valueFromMatrix);
 
 		int iFacet = iVariable / 4;
@@ -24,7 +24,7 @@ void Polyhedron::corpol_derivativeTest_1(
 
 		double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
 		if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE) {
-			ERROR_PRINT("!!! Too big absolute error: %lf", errorAbsolute);
+			ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
 			ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet, iCoefficient);
 		}
 
@@ -131,7 +131,7 @@ void Polyhedron::corpol_derivativeTest_2(
 			int jFacet = jVariable / 4;
 			int jCoefficient = jVariable % 4;
 
-			DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
+			DBGPRINT("value from derivative test: %le, value from matrix: %le",
 					valueFromDerTest, valueFromMatrix);
 			DBGPRINT(
 					" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
@@ -139,7 +139,7 @@ void Polyhedron::corpol_derivativeTest_2(
 
 			double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
 			if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE) {
-				ERROR_PRINT("!!! Too big absolute error: %lf", errorAbsolute);
+				ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
 				ERROR_PRINT(
 						" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
 						iFacet, iCoefficient, jFacet, jCoefficient);
@@ -174,69 +174,105 @@ double Polyhedron::corpol_calculate_functional_derivative_2(
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
-	int iFacet = iVariable / 4;
-	int iCoefficient = iVariable % 4;
+	if (iVariable != jVariable) {
+		int iFacet = iVariable / 4;
+		int iCoefficient = iVariable % 4;
 
-	int jFacet = jVariable / 4;
-	int jCoefficient = jVariable % 4;
+		int jFacet = jVariable / 4;
+		int jCoefficient = jVariable % 4;
 
-	double* changedValueI;
-	switch (iCoefficient) {
-	case 0:
-		changedValueI = &(facets[iFacet].plane.norm.x);
-		break;
-	case 1:
-		changedValueI = &(facets[iFacet].plane.norm.y);
-		break;
-	case 2:
-		changedValueI = &(facets[iFacet].plane.norm.z);
-		break;
-	case 3:
-		changedValueI = &(facets[iFacet].plane.dist);
-		break;
+		double* changedValueI;
+		switch (iCoefficient) {
+		case 0:
+			changedValueI = &(facets[iFacet].plane.norm.x);
+			break;
+		case 1:
+			changedValueI = &(facets[iFacet].plane.norm.y);
+			break;
+		case 2:
+			changedValueI = &(facets[iFacet].plane.norm.z);
+			break;
+		case 3:
+			changedValueI = &(facets[iFacet].plane.dist);
+			break;
+		}
+
+		double* changedValueJ;
+		switch (jCoefficient) {
+		case 0:
+			changedValueJ = &(facets[jFacet].plane.norm.x);
+			break;
+		case 1:
+			changedValueJ = &(facets[jFacet].plane.norm.y);
+			break;
+		case 2:
+			changedValueJ = &(facets[jFacet].plane.norm.z);
+			break;
+		case 3:
+			changedValueJ = &(facets[jFacet].plane.dist);
+			break;
+		}
+		double changedValuePrevI = *changedValueI;
+		double changedValuePrevJ = *changedValueJ;
+
+		*changedValueI = changedValuePrevI + DEFAULT_DERIVATIVE_STEP;
+		*changedValueJ = changedValuePrevJ + DEFAULT_DERIVATIVE_STEP;
+		double funcValueRightUp = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		*changedValueI = changedValuePrevI - DEFAULT_DERIVATIVE_STEP;
+		*changedValueJ = changedValuePrevJ + DEFAULT_DERIVATIVE_STEP;
+		double funcValueLeftUp = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		*changedValueI = changedValuePrevI + DEFAULT_DERIVATIVE_STEP;
+		*changedValueJ = changedValuePrevJ - DEFAULT_DERIVATIVE_STEP;
+		double funcValueRightDown = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		*changedValueI = changedValuePrevI - DEFAULT_DERIVATIVE_STEP;
+		*changedValueJ = changedValuePrevJ - DEFAULT_DERIVATIVE_STEP;
+		double funcValueLeftDown = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		*changedValueI = changedValuePrevI;
+		*changedValueJ = changedValuePrevJ;
+
+		return 0.25 * DEFAULT_DERIVATIVE_STEP_RECIPROCAL
+				* DEFAULT_DERIVATIVE_STEP_RECIPROCAL
+				* (funcValueRightUp - funcValueLeftUp - funcValueRightDown
+						+ funcValueLeftDown);
+	} else {
+		// iVariable == jVariable
+		int iFacet = iVariable / 4;
+		int iCoefficient = iVariable % 4;
+
+		double* changedValue;
+		switch (iCoefficient) {
+		case 0:
+			changedValue = &(facets[iFacet].plane.norm.x);
+			break;
+		case 1:
+			changedValue = &(facets[iFacet].plane.norm.y);
+			break;
+		case 2:
+			changedValue = &(facets[iFacet].plane.norm.z);
+			break;
+		case 3:
+			changedValue = &(facets[iFacet].plane.dist);
+			break;
+		}
+		double changedValuePrev = *changedValue;
+
+		*changedValue = changedValuePrev + DEFAULT_DERIVATIVE_STEP;
+		double funcValueRight = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		*changedValue = changedValuePrev - DEFAULT_DERIVATIVE_STEP;
+		double funcValueLeft = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		*changedValue = changedValuePrev;
+		double funcValueCenter = 0.5 * corpol_calculate_functional(prevPlanes);
+
+		return DEFAULT_DERIVATIVE_STEP_RECIPROCAL
+				* DEFAULT_DERIVATIVE_STEP_RECIPROCAL
+				* (funcValueRight - 2. * funcValueCenter + funcValueLeft);
 	}
-
-	double* changedValueJ;
-	switch (jCoefficient) {
-	case 0:
-		changedValueJ = &(facets[jFacet].plane.norm.x);
-		break;
-	case 1:
-		changedValueJ = &(facets[jFacet].plane.norm.y);
-		break;
-	case 2:
-		changedValueJ = &(facets[jFacet].plane.norm.z);
-		break;
-	case 3:
-		changedValueJ = &(facets[jFacet].plane.dist);
-		break;
-	}
-	double changedValuePrevI = *changedValueI;
-	double changedValuePrevJ = *changedValueJ;
-
-	*changedValueI = changedValuePrevI + DEFAULT_DERIVATIVE_STEP;
-	*changedValueJ = changedValuePrevJ + DEFAULT_DERIVATIVE_STEP;
-	double funcValueRightUp = 0.5 * corpol_calculate_functional(prevPlanes);
-
-	*changedValueI = changedValuePrevI - DEFAULT_DERIVATIVE_STEP;
-	*changedValueJ = changedValuePrevJ + DEFAULT_DERIVATIVE_STEP;
-	double funcValueLeftUp = 0.5 * corpol_calculate_functional(prevPlanes);
-
-	*changedValueI = changedValuePrevI + DEFAULT_DERIVATIVE_STEP;
-	*changedValueJ = changedValuePrevJ - DEFAULT_DERIVATIVE_STEP;
-	double funcValueRightDown = 0.5 * corpol_calculate_functional(prevPlanes);
-
-	*changedValueI = changedValuePrevI - DEFAULT_DERIVATIVE_STEP;
-	*changedValueJ = changedValuePrevJ - DEFAULT_DERIVATIVE_STEP;
-	double funcValueLeftDown = 0.5 * corpol_calculate_functional(prevPlanes);
-
-	*changedValueI = changedValuePrevI;
-	*changedValueJ = changedValuePrevJ;
-
-	return 0.25 * DEFAULT_DERIVATIVE_STEP_RECIPROCAL
-			* DEFAULT_DERIVATIVE_STEP_RECIPROCAL
-			* (funcValueRightUp - funcValueLeftUp - funcValueRightDown
-					+ funcValueLeftDown);
 }
 
 double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_2(
