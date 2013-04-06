@@ -22,16 +22,16 @@ void Polyhedron::corpol_derivativeTest_1(
 		int iFacet = iVariable / 4;
 		int iCoefficient = iVariable % 4;
 
-		double absValue = fabs(valueFromDerTest);
-		if (absValue <= EPSILON_FOR_DIVISION)
-			// In this case we cannot compare values
-			continue;
-
 		double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
 		if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE) {
 			ERROR_PRINT("!!! Too big absolute error: %lf", errorAbsolute);
 			ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet, iCoefficient);
 		}
+
+		double absValue = fabs(valueFromDerTest);
+		if (absValue <= EPSILON_FOR_DIVISION)
+			// In this case we cannot compare values
+			continue;
 
 		double errorRelative = errorAbsolute / absValue;
 		if (errorRelative > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE) {
@@ -125,32 +125,36 @@ void Polyhedron::corpol_derivativeTest_2(
 					prevPlanes, iVariable, jVariable);
 			double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_2(
 					iVariable, jVariable, matrix);
-			DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
-					valueFromDerTest, valueFromMatrix);
 
 			int iFacet = iVariable / 4;
 			int iCoefficient = iVariable % 4;
 			int jFacet = jVariable / 4;
 			int jCoefficient = jVariable % 4;
 
+			DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
+					valueFromDerTest, valueFromMatrix);
+			DBGPRINT(
+					" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
+					iFacet, iCoefficient, jFacet, jCoefficient);
+
+			double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
+			if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE) {
+				ERROR_PRINT("!!! Too big absolute error: %lf", errorAbsolute);
+				ERROR_PRINT(
+						" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
+						iFacet, iCoefficient, jFacet, jCoefficient);
+			}
+
 			double absValue = fabs(valueFromDerTest);
 			if (absValue <= EPSILON_FOR_DIVISION)
 				// In this case we cannot compare values
 				continue;
 
-			double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
-			if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE) {
-				ERROR_PRINT("!!! Too big absolute error: %lf", errorAbsolute);
-				ERROR_PRINT(" iFacet = %d, iCoefficient = %d, "
-						"jFacet = %d, jCoefficient = %d",
-						iFacet, iCoefficient, jFacet, jCoefficient);
-			}
-
 			double errorRelative = errorAbsolute / absValue;
 			if (errorRelative > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE) {
 				ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
-				ERROR_PRINT(" iFacet = %d, iCoefficient = %d, "
-						"jFacet = %d, jCoefficient = %d",
+				ERROR_PRINT(
+						" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
 						iFacet, iCoefficient, jFacet, jCoefficient);
 			}
 		}
