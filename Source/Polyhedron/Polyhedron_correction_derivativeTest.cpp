@@ -1,5 +1,12 @@
 #include "PolyhedraCorrectionLibrary.h"
 
+void Polyhedron::corpol_derivativeTest_all(
+		Plane* prevPlanes,
+		double* matrix) {
+	corpol_derivativeTest_1(prevPlanes, matrix);
+	corpol_derivativeTest_2(prevPlanes, matrix);
+}
+
 void Polyhedron::corpol_derivativeTest_1(
 		Plane* prevPlanes,
 		double* matrix) {
@@ -13,7 +20,7 @@ void Polyhedron::corpol_derivativeTest_1(
 				valueFromDerTest, valueFromMatrix);
 
 		int iFacet = iVariable / 4;
-			int iCoefficient = iVariable % 4;
+		int iCoefficient = iVariable % 4;
 
 		double absValue = fabs(valueFromDerTest);
 		if (absValue <= EPSILON_FOR_DIVISION)
@@ -107,6 +114,43 @@ double Polyhedron::corpol_calculate_functional_derivative_1(
 
 }
 
+void Polyhedron::corpol_derivativeTest_2(
+		Plane* prevPlanes,
+		double* matrix) {
+	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable) {
+
+		for (int jVariable = 0; jVariable < 4 * numFacets; ++jVariable) {
+
+			double valueFromDerTest = corpol_calculate_functional_derivative_2(
+					prevPlanes, iVariable, jVariable);
+			double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_2(
+					iVariable, jVariable, matrix);
+			DBGPRINT("value from derivative test: %lf, value from matrix: %lf",
+					valueFromDerTest, valueFromMatrix);
+
+			int iFacet = iVariable / 4;
+			int iCoefficient = iVariable % 4;
+
+			double absValue = fabs(valueFromDerTest);
+			if (absValue <= EPSILON_FOR_DIVISION)
+				// In this case we cannot compare values
+				continue;
+
+			double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
+			if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE) {
+				ERROR_PRINT("!!! Too big absolute error: %lf", errorAbsolute);
+				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet, iCoefficient);
+			}
+
+			double errorRelative = errorAbsolute / absValue;
+			if (errorRelative > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE) {
+				ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
+				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet, iCoefficient);
+			}
+		}
+	}
+}
+
 double Polyhedron::corpol_calculate_functional_derivative_2(
 		Plane* prevPlanes,
 		int iVariable,
@@ -183,5 +227,13 @@ double Polyhedron::corpol_calculate_functional_derivative_2(
 			* DEFAULT_DERIVATIVE_STEP_RECIPROCAL
 			* (funcValueRightUp - funcValueLeftUp - funcValueRightDown
 					+ funcValueLeftDown);
-
 }
+
+double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_2(
+		int iVariable,
+		int jVariable,
+		double* matrix) {
+	int dim = 5 * numFacets;
+	return matrix[dim * iVariable + jVariable];
+}
+

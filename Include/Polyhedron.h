@@ -385,6 +385,10 @@ public:
 
 	// Polyhedron_correction_derivativeTest.cpp
 
+	void corpol_derivativeTest_all(
+			Plane* prevPlanes,
+			double* matrix);
+
 	void corpol_derivativeTest_1(
 			Plane* prevPlanes,
 			double* matrix);
@@ -397,14 +401,19 @@ public:
 			int iVariable,
 			double* matrix);
 
+	void corpol_derivativeTest_2(
+			Plane* prevPlanes,
+			double* matrix);
+
 	double corpol_calculate_functional_derivative_2(
 			Plane* prevPlanes,
 			int iVariable,
 			int jVariable);
 
-	void corpol_calculate_matrix_derivative(
-			double* matrix,
-			Plane* prevPlane);
+	double corpol_derivativeTest_calculateValFromMatrix_2(
+			int iVariable,
+			int jVariable,
+			double* matrix);
 
 	// Polyhedron_correction_preprocess.cpp
 	void corpol_preprocess();

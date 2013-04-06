@@ -131,8 +131,6 @@ int Polyhedron::correct_polyhedron() {
 
 double Polyhedron::corpol_calculate_functional(
 		Plane* prevPlanes) {
-	DBG_START
-	;
 	double sum = 0;
 
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
@@ -189,8 +187,6 @@ double Polyhedron::corpol_calculate_functional(
 			sum += summand0 + summand1;
 		}
 	}
-	DBG_END
-	;
 	return sum;
 }
 
@@ -212,8 +208,7 @@ int Polyhedron::corpol_iteration(
 	// Test the calculated matrix by the method of
 	// numerical calculation of first derivatives
 	// of the functional
-
-	corpol_derivativeTest_1(prevPlanes, matrix);
+	corpol_derivativeTest_all(prevPlanes, matrix);
 #endif
 
 	lapack_int dimLapack = dim;
