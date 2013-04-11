@@ -4,6 +4,7 @@
 
 int Polyhedron::corpolTest(
 		int numContours_input,
+		int indFacetMoved,
 		double maxMoveDelta) {
 	DBG_START;
 	numContours = numContours_input;

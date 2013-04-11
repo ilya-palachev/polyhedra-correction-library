@@ -103,14 +103,14 @@ public:
 			double zCenter);
 
 	void makePyramid(
-			int n,
-			double h,
-			double r);
+			int numVerticesBase,
+			double height,
+			double radius);
 
 	void makePrism(
-			int n,
-			double h,
-			double r);
+			int numVerticesBase,
+			double height,
+			double radius);
 
 	void makeCubeCutted();
 
@@ -472,7 +472,8 @@ public:
 	// Polyhedron_correction_test.cpp
 
 	int corpolTest(
-			int ncont,
+			int numContours_input,
+			int indFacetMoved,
 			double maxMoveDelta);
 
 	SContour& corpolTest_createOneContour(

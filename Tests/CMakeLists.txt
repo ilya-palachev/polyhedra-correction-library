@@ -1,6 +1,6 @@
-set(SOURCES_globalCorrectionCube globalCorrectionCube.cpp)
-add_executable(globalCorrectionCube ${SOURCES_globalCorrectionCube})
-target_link_libraries(globalCorrectionCube polyhedronCorrection)
+set(SOURCES_globalCorrection globalCorrection.cpp)
+add_executable(globalCorrection ${SOURCES_globalCorrection})
+target_link_libraries(globalCorrection polyhedronCorrection)
 
 set(SOURCES_gaussStringTest gaussStringTest.cpp)
 add_executable(gaussStringTest ${SOURCES_gaussStringTest})
