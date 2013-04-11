@@ -1,42 +1,44 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeSet::EdgeSet() :
-		len(0),
-		num(0),
-		edge0(NULL),
-		edge1(NULL),
-		id_edge_list0(NULL),
-		pos_edge_list0(NULL),
-		id_edge_list1(NULL),
-		pos_edge_list1(NULL),
-		id_future_facet(NULL),
-		pos_future_facet(NULL)
-{}
+				len(0),
+				num(0),
+				edge0(NULL),
+				edge1(NULL),
+				id_edge_list0(NULL),
+				pos_edge_list0(NULL),
+				id_edge_list1(NULL),
+				pos_edge_list1(NULL),
+				id_future_facet(NULL),
+				pos_future_facet(NULL) {
+}
 
-EdgeSet::EdgeSet(int len_orig) :
-		len(len_orig),
-		num(0),
-		edge0(new int[len]),
-		edge1(new int[len]),
-		id_edge_list0(new int[len]),
-		pos_edge_list0(new int[len]),
-		id_edge_list1(new int[len]),
-		pos_edge_list1(new int[len]),
-		id_future_facet(new int[len]),
-		pos_future_facet(new int[len])
-{}
+EdgeSet::EdgeSet(
+		int len_orig) :
+				len(len_orig),
+				num(0),
+				edge0(new int[len]),
+				edge1(new int[len]),
+				id_edge_list0(new int[len]),
+				pos_edge_list0(new int[len]),
+				id_edge_list1(new int[len]),
+				pos_edge_list1(new int[len]),
+				id_future_facet(new int[len]),
+				pos_future_facet(new int[len]) {
+}
 
-EdgeSet::EdgeSet(const EdgeSet& orig) :
-		len(orig.len),
-		num(orig.num),
-		edge0(new int[len]),
-		edge1(new int[len]),
-		id_edge_list0(new int[len]),
-		pos_edge_list0(new int[len]),
-		id_edge_list1(new int[len]),
-		pos_edge_list1(new int[len]),
-		id_future_facet(new int[len]),
-		pos_future_facet(new int[len]) {
+EdgeSet::EdgeSet(
+		const EdgeSet& orig) :
+				len(orig.len),
+				num(orig.num),
+				edge0(new int[len]),
+				edge1(new int[len]),
+				id_edge_list0(new int[len]),
+				pos_edge_list0(new int[len]),
+				id_edge_list1(new int[len]),
+				pos_edge_list1(new int[len]),
+				id_future_facet(new int[len]),
+				pos_future_facet(new int[len]) {
 	for (int i; i < num; ++i) {
 		edge0[i] = orig.edge0[i];
 		edge1[i] = orig.edge1[i];
@@ -68,7 +70,8 @@ EdgeSet::~EdgeSet() {
 		delete[] pos_future_facet;
 }
 
-EdgeSet& EdgeSet::operator =(const EdgeSet& orig) {
+EdgeSet& EdgeSet::operator =(
+		const EdgeSet& orig) {
 	len = orig.len;
 	num = orig.num;
 

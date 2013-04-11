@@ -1,6 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void EdgeSet::my_fprint(FILE* file) {
+void EdgeSet::my_fprint(
+		FILE* file) {
 	int i;
 	fprintf(file, "---------- EdgeSet (%d). ----------\n", num);
 	if (num > 0) {
@@ -12,7 +13,7 @@ void EdgeSet::my_fprint(FILE* file) {
 		for (i = 0; i < num; ++i)
 			fprintf(file, "%d ", edge1[i]);
 		fprintf(file, "\n");
-		
+
 	}
 }
 

@@ -11,9 +11,9 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 #ifndef NDEBUG
-	#define ASSERT(x) assert(x)
+#define ASSERT(x) assert(x)
 #else
-	#define ASSERT(x)
+#define ASSERT(x)
 #endif
 
 #endif /* DEBUGASSERT_H_ */

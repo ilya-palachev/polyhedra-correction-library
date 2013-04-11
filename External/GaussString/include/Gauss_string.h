@@ -9,11 +9,12 @@
 #include <math.h>
 
 #ifndef GAUSS_STRING_H
-int Gauss_string(int n, double* A, double* b);
+int Gauss_string(
+		int n,
+		double* A,
+		double* b);
 
 #define	GAUSS_STRING_H
-
-
 
 #endif	/* GAUSS_STRING_H */
 

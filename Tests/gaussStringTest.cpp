@@ -6,9 +6,9 @@
 #include "Polyhedron.h"
 #include "Gauss_test.h"
 
-int main(int argc, char** argv) {
+int main(
+		int argc,
+		char** argv) {
 	Gauss_test(3);
 }
-
-
 

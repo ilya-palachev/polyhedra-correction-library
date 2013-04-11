@@ -5,9 +5,17 @@
 
 #include "Polyhedron.h"
 
-void test(const char* name, int type, double a, double b, double c, double d);
+void test(
+		const char* name,
+		int type,
+		double a,
+		double b,
+		double c,
+		double d);
 
-int main(int argc, char** argv) {
+int main(
+		int argc,
+		char** argv) {
 	test("poly-small", 0, 0., 0., 1., 3.);
 	test("poly-med", 0, 0., 0., 1., 1.);
 
@@ -30,7 +38,13 @@ int main(int argc, char** argv) {
 	test("poly-big", 0, a, b, c, d);
 }
 
-void test(const char* name, int type, double a, double b, double c, double d) {
+void test(
+		const char* name,
+		int type,
+		double a,
+		double b,
+		double c,
+		double d) {
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Plane iplane;
 	Polyhedron poly;

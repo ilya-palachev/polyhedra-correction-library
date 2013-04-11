@@ -1,7 +1,8 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void FutureFacet::my_fprint(FILE* file) {
-		int i;
+void FutureFacet::my_fprint(
+		FILE* file) {
+	int i;
 	fprintf(file, "\n\n---------- FutureFacet %d. ----------\n", id);
 	if (nv > 0) {
 		fprintf(file, "edge0 : ");

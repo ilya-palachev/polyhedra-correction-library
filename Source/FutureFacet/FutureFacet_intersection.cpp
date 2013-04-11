@@ -5,7 +5,7 @@ void FutureFacet::generate_facet(
 		int fid,
 		Plane& iplane,
 		int numv,
-		EdgeSet* es){
+		EdgeSet* es) {
 	int i, v0, v1, res_id;
 	int *index;
 

@@ -34,7 +34,4 @@
 #		define DBG_END
 #endif
 
-
-
 #endif //DEBUGPRINT_H
-

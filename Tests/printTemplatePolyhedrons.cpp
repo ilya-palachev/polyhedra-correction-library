@@ -7,7 +7,9 @@
 
 void test_figures();
 
-int main(int argc, char** argv) {
+int main(
+		int argc,
+		char** argv) {
 	test_figures();
 }
 
