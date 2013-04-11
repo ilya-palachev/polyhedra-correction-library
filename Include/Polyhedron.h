@@ -93,20 +93,26 @@ public:
 	void preprocess_polyhedron();
 
 	//Polyhedron_figures.cpp
-	void poly_cube(
-			double h,
-			double x,
-			double y,
-			double z);
-	void poly_pyramid(
+
+	void deleteContent();
+
+	void makeCube(
+			double height,
+			double xCenter,
+			double yCenter,
+			double zCenter);
+
+	void makePyramid(
 			int n,
 			double h,
 			double r);
-	void poly_prism(
+
+	void makePrism(
 			int n,
 			double h,
 			double r);
-	void poly_cube_cutted();
+
+	void makeCubeCutted();
 
 	//Polyhedron_intersection.cpp
 	void set_isUsed(
@@ -486,9 +492,6 @@ public:
 	inline void corpolTest_slightRandomMoveVertex(
 			double maxMoveDelta,
 			int ivertex);
-
-	void makeCube(
-			double a);
 
 };
 

@@ -27,7 +27,7 @@ void test_figures() {
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
-	poly.poly_pyramid(10, 3., 1.);
+	poly.makePyramid(10, 3., 1.);
 
 #ifdef NOT_DEBUG
 	poly.fprint_ply_scale(1e3, file_name, "created-by-polyhedron");
@@ -48,7 +48,7 @@ void test_figures() {
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
-	poly.poly_prism(10, 3., 1.);
+	poly.makePrism(10, 3., 1.);
 #ifdef NOT_DEBUG
 	poly.fprint_ply_scale(1e3, file_name, "created-by-polyhedron");
 #endif

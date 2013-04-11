@@ -10,7 +10,7 @@ int Polyhedron::corpolTest(
 	numContours = numContours_input;
 	contours = new SContour[numContours];
 
-	makeCube(1.);
+	makeCube(1., 0., 0., 0.);
 	preprocess_polyhedron();
 
 	int numEdgesMax = 0;
@@ -196,109 +196,6 @@ int Polyhedron::corpolTest_createAllContours() {
 	DBG_END
 	;
 	return 0;
-}
-
-void Polyhedron::makeCube(
-		double halfSideLength) {
-#ifndef NDEBUG
-	printf("I'm going to clear polyhedon!!!\n");
-#endif //NDEBUG
-	if (vertices != NULL) {
-		delete[] vertices;
-		vertices = NULL;
-	}
-#ifndef NDEBUG
-	printf("vertex deleted !!\n");
-#endif //NDEBUG
-	if (facets != NULL) {
-		delete[] facets;
-		facets = NULL;
-	}
-#ifndef NDEBUG
-	printf("facet deleted !!\n");
-#endif //NDEBUG
-	if (vertexInfos != NULL) {
-		delete[] vertexInfos;
-		vertexInfos = NULL;
-	}
-#ifndef NDEBUG
-	printf("vertexinfo deleted !!\n");
-#endif //NDEBUG
-	if (edgeLists != NULL) {
-		delete[] edgeLists;
-		edgeLists = NULL;
-	}
-#ifndef NDEBUG
-	printf("edge_list deleted !!\n");
-#endif //NDEBUG
-#ifndef NDEBUG
-	printf("Polyhedron has been cleared before recreating as a cube...\n");
-#endif //NDEBUG
-	numFacets = 6;
-	numVertices = 8;
-
-	vertices = new Vector3d[numVertices];
-	facets = new Facet[numFacets];
-
-	vertices[0] = Vector3d(-halfSideLength, -halfSideLength, -halfSideLength);
-	vertices[1] = Vector3d(halfSideLength, -halfSideLength, -halfSideLength);
-	vertices[2] = Vector3d(halfSideLength, halfSideLength, -halfSideLength);
-	vertices[3] = Vector3d(-halfSideLength, halfSideLength, -halfSideLength);
-	vertices[4] = Vector3d(-halfSideLength, -halfSideLength, halfSideLength);
-	vertices[5] = Vector3d(halfSideLength, -halfSideLength, halfSideLength);
-	vertices[6] = Vector3d(halfSideLength, halfSideLength, halfSideLength);
-	vertices[7] = Vector3d(-halfSideLength, halfSideLength, halfSideLength);
-
-	for (int ifacet = 0; ifacet < numFacets; ++ifacet) {
-		int nv = facets[ifacet].numVertices = 4;
-		facets[ifacet].indVertices = new int[3 * nv + 1];
-		facets[ifacet].id = ifacet;
-		facets[ifacet].parentPolyhedron = this;
-	}
-
-	facets[0].indVertices[0] = 0;
-	facets[0].indVertices[1] = 3;
-	facets[0].indVertices[2] = 2;
-	facets[0].indVertices[3] = 1;
-	facets[0].plane = Plane(Vector3d(0., 0., -1.), -halfSideLength);
-
-	facets[1].indVertices[0] = 4;
-	facets[1].indVertices[1] = 5;
-	facets[1].indVertices[2] = 6;
-	facets[1].indVertices[3] = 7;
-	facets[1].plane = Plane(Vector3d(0., 0., 1.), -halfSideLength);
-
-	facets[2].indVertices[0] = 1;
-	facets[2].indVertices[1] = 2;
-	facets[2].indVertices[2] = 6;
-	facets[2].indVertices[3] = 5;
-	facets[2].plane = Plane(Vector3d(1., 0., 0.), -halfSideLength);
-
-	facets[3].indVertices[0] = 2;
-	facets[3].indVertices[1] = 3;
-	facets[3].indVertices[2] = 7;
-	facets[3].indVertices[3] = 6;
-	facets[3].plane = Plane(Vector3d(0., 1., 0.), -halfSideLength);
-
-	facets[4].indVertices[0] = 0;
-	facets[4].indVertices[1] = 4;
-	facets[4].indVertices[2] = 7;
-	facets[4].indVertices[3] = 3;
-	facets[4].plane = Plane(Vector3d(-1., 0., 0.), -halfSideLength);
-
-	facets[5].indVertices[0] = 0;
-	facets[5].indVertices[1] = 1;
-	facets[5].indVertices[2] = 5;
-	facets[5].indVertices[3] = 4;
-	facets[5].plane = Plane(Vector3d(0., -1., 0.), -halfSideLength);
-
-	for (int i = 0; i < numFacets; ++i) {
-		facets[i].parentPolyhedron = this;
-	}
-
-#ifndef NDEBUG
-	printf("Polyhedron has been recreated as halfSideLength cube.\n");
-#endif //NDEBUG
 }
 
 static double genRandomDouble(

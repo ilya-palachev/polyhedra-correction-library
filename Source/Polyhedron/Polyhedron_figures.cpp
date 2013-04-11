@@ -1,169 +1,212 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::poly_cube(double h, double x, double y, double z) {
-	if (!vertices)
+void Polyhedron::deleteContent() {
+	DBG_START;
+	if (vertices != NULL) {
 		delete[] vertices;
-	if (!facets)
+		vertices = NULL;
+	}
+	if (facets != NULL) {
 		delete[] facets;
-	if (!vertexInfos)
+		facets = NULL;
+	}
+	if (vertexInfos != NULL) {
 		delete[] vertexInfos;
-
-	vertices = new Vector3d[8];
-
-	vertices[0] = Vector3d(x - 0.5 * h, y - 0.5 * h, z - 0.5 * h);
-	vertices[1] = Vector3d(x + 0.5 * h, y - 0.5 * h, z - 0.5 * h);
-	vertices[2] = Vector3d(x + 0.5 * h, y + 0.5 * h, z - 0.5 * h);
-	vertices[3] = Vector3d(x - 0.5 * h, y + 0.5 * h, z - 0.5 * h);
-	vertices[4] = Vector3d(x - 0.5 * h, y - 0.5 * h, z + 0.5 * h);
-	vertices[5] = Vector3d(x + 0.5 * h, y - 0.5 * h, z + 0.5 * h);
-	vertices[6] = Vector3d(x + 0.5 * h, y + 0.5 * h, z + 0.5 * h);
-	vertices[7] = Vector3d(x - 0.5 * h, y + 0.5 * h, z + 0.5 * h);
-
-	facets = new Facet[6];
-
-	int index[4];
-	Plane plane;
-
-	index[0] = 0; index[1] = 3; index[2] = 2; index[3] = 1;
-	plane = Plane(Vector3d(0., 0., -1.), z - 0.5 * h);
-	facets[0] = Facet(0, 4, plane, index, &(*this), false);
-	
-	index[0] = 0; index[1] = 1; index[2] = 5; index[3] = 4;
-	plane = Plane(Vector3d(0., -1., 0.), y - 0.5 * h);
-	facets[0] = Facet(1, 4, plane, index, &(*this), false);
-
-	index[0] = 1; index[1] = 2; index[2] = 6; index[3] = 5;
-	plane = Plane(Vector3d(1., 0., 0.), -x - 0.5 * h);
-	facets[0] = Facet(2, 4, plane, index, &(*this), false);
-
-	index[0] = 2; index[1] = 3; index[2] = 7; index[3] = 6;
-	plane = Plane(Vector3d(0., 1., 0.), -y - 0.5 * h);
-	facets[0] = Facet(3, 4, plane, index, &(*this), false);
-
-	index[0] = 0; index[1] = 4; index[2] = 7; index[3] = 3;
-	plane = Plane(Vector3d(-1., 0., 0.), -x + 0.5 * h);
-	facets[0] = Facet(4, 4, plane, index, &(*this), false);
-
-	index[0] = 4; index[1] = 5; index[2] = 6; index[3] = 7;
-	plane = Plane(Vector3d(0., 0., 1.), -z - 0.5 * h);
-	facets[0] = Facet(5, 4, plane, index, &(*this), false);
-
-	numVertices = 8;
-	numFacets = 6;
-
-//	for(int i = 0; i < 6; ++i)
-//		facet[i].set_poly(this);
+		vertexInfos = NULL;
+	}
+	if (edgeLists != NULL) {
+		delete[] edgeLists;
+		edgeLists = NULL;
+	}
+	DBG_END;
 }
 
-void Polyhedron::poly_pyramid(int n, double h, double r) {
-	if (vertices)
-		delete[] vertices;
-	if (facets)
-		delete[] facets;
-	if (vertexInfos)
-		delete[] vertexInfos;
+void Polyhedron::makeCube(
+		double height,
+		double xCenter,
+		double yCenter,
+		double zCenter) {
+	DBG_START;
+	deleteContent();
 
-	vertices = new Vector3d[n + 1];
+	numFacets = 6;
+	numVertices = 8;
 
-	for (int i = 0; i < n; ++i)
-		vertices[i] = Vector3d(cos(2 * M_PI * i / n), sin(2 * M_PI * i / n), 0.);
-	vertices[n] = Vector3d(0., 0., h);
+	vertices = new Vector3d[numVertices];
+	facets = new Facet[numFacets];
 
-	facets = new Facet[n + 1];
+	double halfHeight = height;
+
+	vertices[0] = Vector3d(xCenter - halfHeight, yCenter - halfHeight,
+			zCenter - halfHeight);
+	vertices[1] = Vector3d(xCenter + halfHeight, yCenter - halfHeight,
+			zCenter - halfHeight);
+	vertices[2] = Vector3d(xCenter + halfHeight, yCenter + halfHeight,
+			zCenter - halfHeight);
+	vertices[3] = Vector3d(xCenter - halfHeight, yCenter + halfHeight,
+			zCenter - halfHeight);
+	vertices[4] = Vector3d(xCenter - halfHeight, yCenter - halfHeight,
+			zCenter + halfHeight);
+	vertices[5] = Vector3d(xCenter + halfHeight, yCenter - halfHeight,
+			zCenter + halfHeight);
+	vertices[6] = Vector3d(xCenter + halfHeight, yCenter + halfHeight,
+			zCenter + halfHeight);
+	vertices[7] = Vector3d(xCenter - halfHeight, yCenter + halfHeight,
+			zCenter + halfHeight);
+
+	for (int ifacet = 0; ifacet < numFacets; ++ifacet) {
+		int nv = facets[ifacet].numVertices = 4;
+		facets[ifacet].indVertices = new int[3 * nv + 1];
+		facets[ifacet].id = ifacet;
+		facets[ifacet].parentPolyhedron = this;
+	}
+
+	facets[0].indVertices[0] = 0;
+	facets[0].indVertices[1] = 3;
+	facets[0].indVertices[2] = 2;
+	facets[0].indVertices[3] = 1;
+	facets[0].plane = Plane(Vector3d(0., 0., -1.), zCenter - halfHeight);
+
+	facets[1].indVertices[0] = 4;
+	facets[1].indVertices[1] = 5;
+	facets[1].indVertices[2] = 6;
+	facets[1].indVertices[3] = 7;
+	facets[1].plane = Plane(Vector3d(0., 0., 1.), -zCenter - halfHeight);
+
+	facets[2].indVertices[0] = 1;
+	facets[2].indVertices[1] = 2;
+	facets[2].indVertices[2] = 6;
+	facets[2].indVertices[3] = 5;
+	facets[2].plane = Plane(Vector3d(1., 0., 0.), -xCenter - halfHeight);
+
+	facets[3].indVertices[0] = 2;
+	facets[3].indVertices[1] = 3;
+	facets[3].indVertices[2] = 7;
+	facets[3].indVertices[3] = 6;
+	facets[3].plane = Plane(Vector3d(0., 1., 0.), -yCenter - halfHeight);
+
+	facets[4].indVertices[0] = 0;
+	facets[4].indVertices[1] = 4;
+	facets[4].indVertices[2] = 7;
+	facets[4].indVertices[3] = 3;
+	facets[4].plane = Plane(Vector3d(-1., 0., 0.), xCenter - halfHeight);
+
+	facets[5].indVertices[0] = 0;
+	facets[5].indVertices[1] = 1;
+	facets[5].indVertices[2] = 5;
+	facets[5].indVertices[3] = 4;
+	facets[5].plane = Plane(Vector3d(0., -1., 0.), yCenter - halfHeight);
+
+	for (int i = 0; i < numFacets; ++i) {
+		facets[i].parentPolyhedron = this;
+	}
+	DBG_END;
+}
+
+void Polyhedron::makePyramid(
+		int numVerticesBase,
+		double height,
+		double radius) {
+	DBG_START;
+	deleteContent();
+
+	numVertices = numFacets = numVerticesBase + 1;
+
+	vertices = new Vector3d[numVerticesBase + 1];
+
+	for (int iVertex = 0; iVertex < numVerticesBase; ++iVertex)
+		vertices[iVertex] = Vector3d(cos(2 * M_PI * iVertex / numVerticesBase),
+				sin(2 * M_PI * iVertex / numVerticesBase), 0.);
+	vertices[numVerticesBase] = Vector3d(0., 0., height);
+
+	facets = new Facet[numVerticesBase + 1];
 
 	int *index;
 	index = new int[3];
 
-	Plane plane;
-
-	for (int i = 0; i < n; ++i) {
-		index[0] = n;
+	for (int i = 0; i < numVerticesBase; ++i) {
+		index[0] = numVerticesBase;
 		index[1] = i;
-		index[2] = (i + 1) % n;
-		plane = Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
+		index[2] = (i + 1) % numVerticesBase;
+		Plane plane = Plane(vertices[index[0]], vertices[index[1]],
+				vertices[index[2]]);
 		facets[i] = Facet(i, 3, plane, index, this, false);
 	}
 
-	index = new int[n];
+	index = new int[numVerticesBase];
 
-	for (int i = 0; i < n; ++i)
-		index[i] = n - 1 - i;
-	
-	plane = Plane(Vector3d(0., 0., -1.), 0.);
-	facets[n] = Facet(n, n, plane, index, this, false);
+	for (int i = 0; i < numVerticesBase; ++i)
+		index[i] = numVerticesBase - 1 - i;
 
-	numVertices = numFacets = n + 1;
+	Plane plane = Plane(Vector3d(0., 0., -1.), 0.);
+	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
+			index, this, false);
 
-	if(index)
+	if (index)
 		delete[] index;
+	DBG_END;
 }
 
-void Polyhedron::poly_prism(int n, double h, double r) {
-	if (vertices)
-		delete[] vertices;
-	if (facets)
-		delete[] facets;
-	if (vertexInfos)
-		delete[] vertexInfos;
+void Polyhedron::makePrism(
+		int numVerticesBase,
+		double height,
+		double radius) {
+	DBG_START;
+	deleteContent();
 
-	vertices = new Vector3d[2 * n];
+	vertices = new Vector3d[2 * numVerticesBase];
 
-	for (int i = 0; i < n; ++i)
-		vertices[i] =
-				Vector3d(cos(2 * M_PI * i / n), sin(2 * M_PI * i / n), 0.);
-	for (int i = 0; i < n; ++i)
-		vertices[n + i] =
-				Vector3d(cos(2 * M_PI * i / n), sin(2 * M_PI * i / n), h);
+	for (int i = 0; i < numVerticesBase; ++i)
+		vertices[i] = Vector3d(cos(2 * M_PI * i / numVerticesBase),
+				sin(2 * M_PI * i / numVerticesBase), 0.);
+	for (int i = 0; i < numVerticesBase; ++i)
+		vertices[numVerticesBase + i] = Vector3d(
+				cos(2 * M_PI * i / numVerticesBase),
+				sin(2 * M_PI * i / numVerticesBase), height);
 
-	facets = new Facet[n + 2];
+	facets = new Facet[numVerticesBase + 2];
 
 	int *index;
 	index = new int[4];
 
 	Plane plane;
 
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < numVerticesBase; ++i) {
 		index[0] = i;
-		index[1] = (i + 1) % n;
-		index[2] = index[1] + n;
-		index[3] = index[0] + n;
+		index[1] = (i + 1) % numVerticesBase;
+		index[2] = index[1] + numVerticesBase;
+		index[3] = index[0] + numVerticesBase;
 		plane = Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
 		facets[i] = Facet(i, 4, plane, index, this, false);
 	}
 
-	index = new int[n];
+	index = new int[numVerticesBase];
 
-	for (int i = 0; i < n; ++i)
-		index[i] = n - 1 - i;
-	
+	for (int i = 0; i < numVerticesBase; ++i)
+		index[i] = numVerticesBase - 1 - i;
+
 	plane = Plane(Vector3d(0., 0., -1.), 0.);
-	facets[n] = Facet(n, n, plane, index, this, false);
+	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
+			index, this, false);
 
-	for (int i = 0; i < n; ++i)
-		index[i] = i + n;
-	
-	plane = Plane(Vector3d(0., 0., 1.), - h);
-	facets[n + 1] = Facet(n + 1, n, plane, index, this, false);
+	for (int i = 0; i < numVerticesBase; ++i)
+		index[i] = i + numVerticesBase;
 
-	numVertices = 2 * n;
-	numFacets = n + 2;
+	plane = Plane(Vector3d(0., 0., 1.), -height);
+	facets[numVerticesBase + 1] = Facet(numVerticesBase + 1, numVerticesBase,
+			plane, index, this, false);
 
-	if(index)
+	numVertices = 2 * numVerticesBase;
+	numFacets = numVerticesBase + 2;
+
+	if (index)
 		delete[] index;
+	DBG_END;
 }
 
-void Polyhedron::poly_cube_cutted() {
-	if (!vertices)
-		delete[] vertices;
-	if (!facets)
-		delete[] facets;
-	if (!vertexInfos)
-		delete[] vertexInfos;
+void Polyhedron::makeCubeCutted() {
+	DBG_START;
+	deleteContent();
 
 	vertices = new Vector3d[16];
 
@@ -267,9 +310,7 @@ void Polyhedron::poly_cube_cutted() {
 	plane = Plane(Vector3d(0., -1., 0.), 2.);
 	facets[9] = Facet(9, 4, plane, index, this, false);
 
-
-
-
 	numVertices = 16;
 	numFacets = 10;
+	DBG_END;
 }
