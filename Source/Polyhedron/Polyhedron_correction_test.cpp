@@ -9,7 +9,6 @@ int Polyhedron::corpolTest(
 	numContours = numContours_input;
 	contours = new SContour[numContours];
 
-	makeCube(1., 0., 0., 0.);
 	preprocess_polyhedron();
 
 	int numEdgesMax = 0;

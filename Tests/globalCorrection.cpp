@@ -31,6 +31,7 @@ int main(
 		return 3;
 	}
 	Polyhedron poly;
+	makeCube(1., 0., 0., 0.);
 	poly.corpolTest(numContours, maxMoveDelta);
 	return 0;
 }
