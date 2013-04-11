@@ -1,6 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void EdgeList::my_fprint(FILE* file) {
+void EdgeList::my_fprint(
+		FILE* file) {
 	int i;
 	fprintf(file, "\n\n---------- EdgeList %d. ----------\n", id);
 //	fprintf(file, "num = %d\n", num);

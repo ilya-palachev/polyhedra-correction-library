@@ -1,36 +1,41 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeList::EdgeList() :
-		id(-1),
-		len(0),
-		num(0),
-		pointer(0),
-		edge0(NULL),
-		edge1(NULL),
-		ind0(NULL),
-		ind1(NULL),
-		next_facet(NULL),
-		next_direction(NULL),
-		scalar_mult(NULL),
-		id_v_new(NULL),
-		isUsed(NULL),
-		poly(NULL) {}
+				id(-1),
+				len(0),
+				num(0),
+				pointer(0),
+				edge0(NULL),
+				edge1(NULL),
+				ind0(NULL),
+				ind1(NULL),
+				next_facet(NULL),
+				next_direction(NULL),
+				scalar_mult(NULL),
+				id_v_new(NULL),
+				isUsed(NULL),
+				poly(NULL) {
+}
 
-EdgeList::EdgeList(int id_orig, int len_orig, Polyhedron* poly_orig) :
-		id(id_orig),
-		len(len_orig),
-		num(0),
-		pointer(0),
-		edge0(new int[len]),
-		edge1(new int[len]),
-		ind0(new int[len]),
-		ind1(new int[len]),
-		next_facet(new int[len]),
-		next_direction(new int[len]),
-		scalar_mult(new double[len]),
-		id_v_new(new int[len]),
-		isUsed(new bool[len]),
-		poly(poly_orig) {}
+EdgeList::EdgeList(
+		int id_orig,
+		int len_orig,
+		Polyhedron* poly_orig) :
+				id(id_orig),
+				len(len_orig),
+				num(0),
+				pointer(0),
+				edge0(new int[len]),
+				edge1(new int[len]),
+				ind0(new int[len]),
+				ind1(new int[len]),
+				next_facet(new int[len]),
+				next_direction(new int[len]),
+				scalar_mult(new double[len]),
+				id_v_new(new int[len]),
+				isUsed(new bool[len]),
+				poly(poly_orig) {
+}
 
 EdgeList::~EdgeList() {
 	if (edge0 != NULL)
@@ -53,7 +58,8 @@ EdgeList::~EdgeList() {
 		delete[] isUsed;
 }
 
-EdgeList& EdgeList::operator = (const EdgeList& orig) {
+EdgeList& EdgeList::operator =(
+		const EdgeList& orig) {
 	int i;
 
 	id = orig.id;
@@ -62,17 +68,17 @@ EdgeList& EdgeList::operator = (const EdgeList& orig) {
 	pointer = orig.pointer;
 
 	if (edge0 != NULL)
-		delete [] edge0;
+		delete[] edge0;
 	if (edge1 != NULL)
-		delete [] edge1;
+		delete[] edge1;
 	if (ind0 != NULL)
-		delete [] edge0;
+		delete[] edge0;
 	if (ind1 != NULL)
-		delete [] edge1;
+		delete[] edge1;
 	if (next_facet != NULL)
-		delete [] next_facet;
+		delete[] next_facet;
 	if (next_direction != NULL)
-		delete [] next_direction;
+		delete[] next_direction;
 	if (scalar_mult != NULL)
 		delete[] scalar_mult;
 	if (id_v_new != NULL)
@@ -108,11 +114,13 @@ int EdgeList::get_num() {
 	return num;
 }
 
-void EdgeList::set_id_v_new(int id_v) {
+void EdgeList::set_id_v_new(
+		int id_v) {
 	id_v_new[pointer] = id_v;
 }
 
-void EdgeList::set_isUsed(bool val) {
+void EdgeList::set_isUsed(
+		bool val) {
 #ifdef DEBUG
 //	fprintf(stdout,
 //			"EdgeList[%d].isUsed[%d] = %d\n",
@@ -121,11 +129,11 @@ void EdgeList::set_isUsed(bool val) {
 	isUsed[pointer] = val;
 }
 
-void EdgeList::set_pointer(int val) {
+void EdgeList::set_pointer(
+		int val) {
 	if (val < 0 || val > num - 1) {
-		fprintf(stdout,
-				"EdgeList::set_pointer : Error. num = %d, val = %d",
-				num, val);
+		fprintf(stdout, "EdgeList::set_pointer : Error. num = %d, val = %d", num,
+				val);
 		return;
 	}
 #ifdef DEBUG

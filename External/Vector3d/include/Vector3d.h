@@ -15,7 +15,6 @@
 #define _nequal(a,b)  ((a)!=(b))
 
 #endif // GCC
-
 class Vector3d {
 public:
 	double x, y, z;

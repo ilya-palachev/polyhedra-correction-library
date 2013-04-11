@@ -42,8 +42,7 @@ void print_matrix2(
 static FILE* fout;
 
 int Polyhedron::correct_polyhedron() {
-	DBG_START
-	;
+	DBG_START;
 
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
@@ -90,12 +89,10 @@ int Polyhedron::correct_polyhedron() {
 		int ret = corpol_iteration(prevPlanes, matrix, rightPart, solution,
 				matrixFactorized, indexPivot);
 		for (int i = 0; i < numFacets; ++i) {
-			DBGPRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)",
-					i,
+			DBGPRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)", i,
 					prevPlanes[i].norm.x, prevPlanes[i].norm.y, prevPlanes[i].norm.z,
-					prevPlanes[i].dist, facets[i].plane.norm.x,
-					facets[i].plane.norm.y, facets[i].plane.norm.z,
-					facets[i].plane.dist);
+					prevPlanes[i].dist, facets[i].plane.norm.x, facets[i].plane.norm.y,
+					facets[i].plane.norm.z, facets[i].plane.dist);
 			prevPlanes[i] = facets[i].plane;
 		}
 		error = corpol_calculate_functional(prevPlanes);
@@ -124,8 +121,7 @@ int Polyhedron::correct_polyhedron() {
 		delete[] solution;
 		solution = NULL;
 	}
-	DBG_END
-	;
+	DBG_END;
 	return 0;
 }
 
@@ -153,10 +149,9 @@ double Polyhedron::corpol_calculate_functional(
 			Plane planeOfProjection = contours[curContour].plane;
 			double weight = itCont->weight;
 
-
-			double enumerator =  -planePrev1.norm * planeOfProjection.norm;
-			double denominator = (planePrev0.norm - planePrev1.norm) *
-					planeOfProjection.norm;
+			double enumerator = -planePrev1.norm * planeOfProjection.norm;
+			double denominator = (planePrev0.norm - planePrev1.norm)
+					* planeOfProjection.norm;
 //			DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
 //					iEdge, edges[iEdge].v0, edges[iEdge].v1, itCont->indContour, enumerator, denominator);
 
@@ -197,10 +192,8 @@ int Polyhedron::corpol_iteration(
 		double* solution,
 		double* matrixFactorized,
 		int* indexPivot) {
-	DBG_START
-	;
-	corpol_calculate_matrix(prevPlanes,
-			matrix, rightPart, solution);
+	DBG_START;
+	corpol_calculate_matrix(prevPlanes, matrix, rightPart, solution);
 	int dim = 5 * numFacets;
 	print_matrix2(fout, dim, dim, matrix);
 
@@ -249,8 +242,7 @@ int Polyhedron::corpol_iteration(
 		facets[ifacet].plane.dist = solution[5 * ifacet + 3];
 	}
 
-	DBG_END
-	;
+	DBG_END;
 	return info;
 }
 
@@ -259,8 +251,7 @@ void Polyhedron::corpol_calculate_matrix(
 		double* matrix,
 		double* rightPart,
 		double* solution) {
-	DBG_START
-	;
+	DBG_START;
 	for (int i = 0; i < (5 * numFacets) * (5 * numFacets); ++i) {
 		matrix[i] = 0.;
 	}
@@ -399,7 +390,6 @@ void Polyhedron::corpol_calculate_matrix(
 			}
 		}
 	}
-	DBG_END
-	;
+	DBG_END;
 }
 

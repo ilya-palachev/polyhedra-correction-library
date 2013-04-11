@@ -16,7 +16,8 @@ void Edge::my_fprint(
 	fprintf(file, "\tnumc = %d (number of contours, from which this"
 			"edge is visible)\n", assocList.size());
 	fprintf(file, "\tThese are that contours:\n");
-	fprintf(file, "\ti\t|\tid of contour\t|\tnearest side\t|\tdirection\t|\tweight\n");
+	fprintf(file,
+			"\ti\t|\tid of contour\t|\tnearest side\t|\tdirection\t|\tweight\n");
 
 	int i = 0;
 	for (list<EdgeContourAssociation>::iterator iter = assocList.begin();

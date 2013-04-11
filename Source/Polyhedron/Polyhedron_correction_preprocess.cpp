@@ -71,12 +71,14 @@ void Polyhedron::corpol_prepFindAssiciations_withContour(
 }
 
 void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
-		int iContour, int iFacet) {
+		int iContour,
+		int iFacet) {
 	DBG_START;
 	int numVertex = facets[iFacet].numVertices;
 	int* indVertices = facets[iFacet].indVertices;
 	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
-		int iEdge = preprocess_edges_find(indVertices[iVertex], indVertices[iVertex  + 1]);
+		int iEdge = preprocess_edges_find(indVertices[iVertex],
+				indVertices[iVertex + 1]);
 		corpol_prepFindAssociations_withContour_forFacetEdge(iContour, iFacet,
 				iEdge);
 	}
@@ -90,10 +92,10 @@ static double distVertexEdge(
 		Vector3d A2) {
 
 	Vector3d edge = A2 - A1;
-	if ( (A1 - A) * edge > 0 && (A2 - A) * edge > 0 ) {
+	if ((A1 - A) * edge > 0 && (A2 - A) * edge > 0) {
 		return sqrt(qmod(A1 - A));
 	}
-	if ( (A1 - A) * edge < 0 && (A2 - A) * edge < 0 ) {
+	if ((A1 - A) * edge < 0 && (A2 - A) * edge < 0) {
 		return sqrt(qmod(A2 - A));
 	}
 	Vector3d step = edge * 0.5;
@@ -101,7 +103,7 @@ static double distVertexEdge(
 	do {
 		step *= 0.5;
 		double scalarProd = (Aproj - A) * edge;
-		if (scalarProd < EPS_COLLINEARITY && scalarProd > - EPS_COLLINEARITY) {
+		if (scalarProd < EPS_COLLINEARITY && scalarProd > -EPS_COLLINEARITY) {
 			break;
 		} else if (scalarProd > 0) {
 			Aproj -= step;
@@ -110,10 +112,11 @@ static double distVertexEdge(
 		}
 	} while (1);
 
-	return sqrt (qmod (A - Aproj));
+	return sqrt(qmod(A - Aproj));
 }
 
-static double weightForAssociations(double x) {
+static double weightForAssociations(
+		double x) {
 	return x * x;
 }
 
@@ -164,11 +167,11 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 		int iFacet,
 		int iEdge) {
 	DBG_START;
-	DBGPRINT("processing contour # %d, facet # %d, edge # %d",
-			iContour, iFacet, iEdge);
+	DBGPRINT("processing contour # %d, facet # %d, edge # %d", iContour, iFacet,
+			iEdge);
 
 	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
-	if ( visibilityNumber < -EPSILON_EDGE_CONTOUR_VISIBILITY) {
+	if (visibilityNumber < -EPSILON_EDGE_CONTOUR_VISIBILITY) {
 		DBGPRINT("Edge is invisible on this contour (visibility %lf)!",
 				visibilityNumber);
 		return;
@@ -183,8 +186,8 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	DBGPRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
 			iContourLastInList, numAlreadyPushedAssocs);
 	if (numAlreadyPushedAssocs != 0 && iContourLastInList == iContour) {
-		DBGPRINT("Edge %d already has association with contour # %d",
-				iEdge, iContour);
+		DBGPRINT("Edge %d already has association with contour # %d", iEdge,
+				iContour);
 		return;
 	}
 
@@ -204,15 +207,15 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	Vector3d v0_projected = planeOfProjection.project(v0);
 	Vector3d v1_projected = planeOfProjection.project(v1);
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
-		DBGPRINT("Edge # %d (%d, %d) is reduced into point when projecting"
-				"on the plane of projection of contour # %d",
+		DBGPRINT(
+				"Edge # %d (%d, %d) is reduced into point when projecting" "on the plane of projection of contour # %d",
 				iEdge, iVertex0, iVertex1, iContour);
 		return;
 	}
 
 	for (int iSide = 0; iSide < numSides; ++iSide) {
-		DBGPRINT("processing contour # %d, facet # %d, edge # %d (%d, %d), "
-				"side of contour # %d",
+		DBGPRINT(
+				"processing contour # %d, facet # %d, edge # %d (%d, %d), " "side of contour # %d",
 				iContour, iFacet, iEdge, iVertex0, iVertex1, iSide);
 		Vector3d v0 = sides[iSide].A1;
 		Vector3d v1 = sides[iSide].A2;
@@ -230,8 +233,7 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 
 	double weight = corpol_weightForAssociation(iContour, iFacet);
 
-	DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour,
-			iEdge);
+	DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour, iEdge);
 	// Create new association
 	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
 			iContour, iSideDistMin, ifDirectionIsProper, weight);
@@ -241,7 +243,7 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 }
 
 int Polyhedron::corpol_prep_build_lists_of_visible_edges() {
-	DBG_START	;
+	DBG_START;
 
 	for (int iedge = 0; iedge < numEdges; ++iedge) {
 
@@ -350,8 +352,7 @@ bool Polyhedron::corpol_collinear_visibility(
 
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY) {
 		DBGPRINT(
-				"mainEdge (%d, %d) is orthogonal to the plane of projection, "
-				"so we are taking another edge including ivertexMax (%d)",
+				"mainEdge (%d, %d) is orthogonal to the plane of projection, " "so we are taking another edge including ivertexMax (%d)",
 				v0Max, v1Max, ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
 		v1Max = index[ivertexMax];

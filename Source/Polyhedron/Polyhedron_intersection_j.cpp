@@ -6,141 +6,144 @@
 //            v.x, v.y, v.z);
 //}
 
-void Polyhedron::intersect_j(Plane iplane, int jfid) {
-    
-    int i, j, k, j_begin;
-    int nume;
-    int res, total_edges;
-    int* num_edges;
-    int* lenff;
-    int num_components_new;
-    int id_v_new;
-    int v0;
-    int v1;
-    int fid, fid_curr, fid_next;
-    int drctn;
-    int v0_first;
-    int v1_first;
+void Polyhedron::intersect_j(
+		Plane iplane,
+		int jfid) {
 
-    int v0_prev;
-    int v1_prev;
+	int i, j, k, j_begin;
+	int nume;
+	int res, total_edges;
+	int* num_edges;
+	int* lenff;
+	int num_components_new;
+	int id_v_new;
+	int v0;
+	int v1;
+	int fid, fid_curr, fid_next;
+	int drctn;
+	int v0_first;
+	int v1_first;
 
-    int num_components_local;
-    int num_components_old;
-    int len_comp;
+	int v0_prev;
+	int v1_prev;
 
-    int num_saved_facets;
-    bool* ifSaveFacet;
+	int num_components_local;
+	int num_components_old;
+	int len_comp;
 
-    int numf_new;
-    int numf_res;
+	int num_saved_facets;
+	bool* ifSaveFacet;
 
-    int numv_new;
-    int numv_res;
+	int numf_new;
+	int numf_res;
 
-    Vector3d vec0, vec1, vec;
-    Vector3d MC = facets[jfid].find_mass_centre();
-    printf("MC[%d] = (%lf, %lf, %lf)\n", jfid, MC.x, MC.y, MC.z);
-    Vector3d A0, A1, n, nn;
-    double mc;
-    
-    n = facets[jfid].plane.norm;
+	int numv_new;
+	int numv_res;
 
-    fprintf(stdout, "\n======================================================\n");
-    fprintf(stdout, "Intersection the polyhedron by plane : \n");
-    fprintf(stdout,
-            "(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n",
-            iplane.norm.x, iplane.norm.y, iplane.norm.z, iplane.dist);
+	Vector3d vec0, vec1, vec;
+	Vector3d MC = facets[jfid].find_mass_centre();
+	printf("MC[%d] = (%lf, %lf, %lf)\n", jfid, MC.x, MC.y, MC.z);
+	Vector3d A0, A1, n, nn;
+	double mc;
 
-    num_edges = new int[numFacets];
-    lenff = new int[numFacets];
-    edgeLists = new EdgeList[numFacets];
-    
-    delete_empty_facets();
+	n = facets[jfid].plane.norm;
 
-    nume = 0;
-    for (i = 0; i < numFacets; ++i) {
-        nume += facets[i].get_nv();
-    }
-    FutureFacet buffer_old(nume);
-    nume /= 2;
-    EdgeSet edge_set(nume);
-    EdgeSet total_edge_set(nume);
+	fprintf(stdout, "\n======================================================\n");
+	fprintf(stdout, "Intersection the polyhedron by plane : \n");
+	fprintf(stdout, "(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n",
+			iplane.norm.x, iplane.norm.y, iplane.norm.z, iplane.dist);
 
-    // 1. Подготовка списков ребер
+	num_edges = new int[numFacets];
+	lenff = new int[numFacets];
+	edgeLists = new EdgeList[numFacets];
 
-    total_edges = 0;
-    for (i = 0; i < numFacets; ++i) {
+	delete_empty_facets();
+
+	nume = 0;
+	for (i = 0; i < numFacets; ++i) {
+		nume += facets[i].get_nv();
+	}
+	FutureFacet buffer_old(nume);
+	nume /= 2;
+	EdgeSet edge_set(nume);
+	EdgeSet total_edge_set(nume);
+
+	// 1. Подготовка списков ребер
+
+	total_edges = 0;
+	for (i = 0; i < numFacets; ++i) {
 //        if (i == jfid)
 //            continue;
-        edgeLists[i] = EdgeList(i, facets[i].get_nv(), this);
-        res = facets[i].prepare_edge_list(iplane);
-        edgeLists[i].send(&total_edge_set);
-        edgeLists[i].send_edges(&edge_set);
-        num_edges[i] = res;
-        edgeLists[i].set_poly(this);
-    }
-    total_edges = total_edge_set.get_num();
+		edgeLists[i] = EdgeList(i, facets[i].get_nv(), this);
+		res = facets[i].prepare_edge_list(iplane);
+		edgeLists[i].send(&total_edge_set);
+		edgeLists[i].send_edges(&edge_set);
+		num_edges[i] = res;
+		edgeLists[i].set_poly(this);
+	}
+	total_edges = total_edge_set.get_num();
 //    total_edges += facet[jfid].nv;//2012-03-10
 
-    edgeLists[jfid].my_fprint(stdout);
-    
-    // 2. Нахождение компонент сечения
-    FutureFacet buffer_new(nume);
+	edgeLists[jfid].my_fprint(stdout);
 
-    num_components_new = 0;
-    do {
-        printf("total_edges = %d\n", total_edges);
+	// 2. Нахождение компонент сечения
+	FutureFacet buffer_new(nume);
 
-        for (i = 0; i < numFacets; ++i) {
-            if (num_edges[i] > 0 && i != jfid)
-                break;
-        }
-        fid_curr = i;
-        if (fid_curr == numFacets) {
-            continue;
-        }
-        edgeLists[fid_curr].get_first_edge(v0, v1);
-        v0_first = v0;
-        v1_first = v1;
-        fid_next = fid_curr;        
-        edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
-        printf("Firstly fid_curr = %d, v0_first = %d, v1_first = %d, fid_next = %d, v0 = %d, v1 = %d\n", 
-                fid_curr, v0_first, v1_first, fid_next, v0, v1);
+	num_components_new = 0;
+	do {
+		printf("total_edges = %d\n", total_edges);
 
-        if (v0_first == v1_first) {
-            A0 = vertices[v0_first];
-        } else {
-            if (fabs(iplane % vertices[v0_first]) > fabs(iplane % vertices[v1_first])) {
-                A0 = vertices[v1_first];
-            } else {
-                A0 = vertices[v0_first];
-            }
-        }
-        if (v0 == v1) {
-            A1 = vertices[v0];
-        } else {
-            if (fabs(iplane % vertices[v0]) > fabs(iplane % vertices[v1])) {
-                A1 = vertices[v1];
-            } else {
-                A1 = vertices[v0];
-            }
-        }
-        nn = ((A0 - MC) % (A1 - MC));
-        printf("nn = (%lf, %lf, %lf)\n", nn.x, nn.y, nn.z);
-        printf("n = (%lf, %lf, %lf)\n", n.x, n.y, n.z);
-        mc = nn * n;
-        printf("mc = %lf\n", mc);
-        if (mc  <  0) {
-            printf("Negative direction detected...\n");
-            edgeLists[fid_curr].set_isUsed(v0, v1, false);
-            edgeLists[fid_curr].set_isUsed(v0_first, v1_first, false);
-            v0_first = v0;
-            v1_first = v1;
-            fid_next = fid_curr;
+		for (i = 0; i < numFacets; ++i) {
+			if (num_edges[i] > 0 && i != jfid)
+				break;
+		}
+		fid_curr = i;
+		if (fid_curr == numFacets) {
+			continue;
+		}
+		edgeLists[fid_curr].get_first_edge(v0, v1);
+		v0_first = v0;
+		v1_first = v1;
+		fid_next = fid_curr;
+		edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
+		printf(
+				"Firstly fid_curr = %d, v0_first = %d, v1_first = %d, fid_next = %d, v0 = %d, v1 = %d\n",
+				fid_curr, v0_first, v1_first, fid_next, v0, v1);
+
+		if (v0_first == v1_first) {
+			A0 = vertices[v0_first];
+		} else {
+			if (fabs(iplane % vertices[v0_first])
+					> fabs(iplane % vertices[v1_first])) {
+				A0 = vertices[v1_first];
+			} else {
+				A0 = vertices[v0_first];
+			}
+		}
+		if (v0 == v1) {
+			A1 = vertices[v0];
+		} else {
+			if (fabs(iplane % vertices[v0]) > fabs(iplane % vertices[v1])) {
+				A1 = vertices[v1];
+			} else {
+				A1 = vertices[v0];
+			}
+		}
+		nn = ((A0 - MC) % (A1 - MC));
+		printf("nn = (%lf, %lf, %lf)\n", nn.x, nn.y, nn.z);
+		printf("n = (%lf, %lf, %lf)\n", n.x, n.y, n.z);
+		mc = nn * n;
+		printf("mc = %lf\n", mc);
+		if (mc < 0) {
+			printf("Negative direction detected...\n");
+			edgeLists[fid_curr].set_isUsed(v0, v1, false);
+			edgeLists[fid_curr].set_isUsed(v0_first, v1_first, false);
+			v0_first = v0;
+			v1_first = v1;
+			fid_next = fid_curr;
 //            drctn = 1;
-            
-        }
+
+		}
 //        if (drctn == -1) {
 //            printf("Negative direction detected...\n");
 //            v0_first = v0;
@@ -151,13 +154,13 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
 //
 //        v0_first = v0;
 //        v1_first = v1;
-        printf("\t\t\tv0_first = %d, v1_first = %d\n", v0_first, v1_first);
-        lenff[num_components_new] = 0;
-        do {
-            printf("\t\t\tfid_curr = %d, fid_next = %d, v0 = %d, v1 = %d\n", 
-                    fid_curr, fid_next, v0, v1);
+		printf("\t\t\tv0_first = %d, v1_first = %d\n", v0_first, v1_first);
+		lenff[num_components_new] = 0;
+		do {
+			printf("\t\t\tfid_curr = %d, fid_next = %d, v0 = %d, v1 = %d\n", fid_curr,
+					fid_next, v0, v1);
 //            edge_list[fid_curr].my_fprint(stdout);
-            //Начало написанного 2012-03-10
+			//Начало написанного 2012-03-10
 //            int i0, i1, nnv;
 //            if (fid_curr == jfid) {
 //                
@@ -179,211 +182,205 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
 //                    fid_next = jfid;
 //                }
 //            }
-            //Конец написанного 2012-03-10
-            if (edgeLists[fid_next].get_num() < 1) {
-                if (fid_next != fid_curr)
-                    drctn = 0;
-            }
+			//Конец написанного 2012-03-10
+			if (edgeLists[fid_next].get_num() < 1) {
+				if (fid_next != fid_curr)
+					drctn = 0;
+			}
 
+			fid_curr = fid_next;
+			--total_edges;
+			--num_edges[fid_curr];
+			++lenff[num_components_new];
+			if (v0 != v1) {
+				edge_set.add_edge(v0, v1);
+			}
+			buffer_new.add_edge(v0, v1, fid);
+			if (buffer_new.get_nv() >= nume) {
+				fprintf(stdout, "Error. Stack overflow  in buffer_new\n");
+				return;
+			}
+			v0_prev = v0;
+			v1_prev = v1;
 
-            fid_curr = fid_next;
-            --total_edges;
-            --num_edges[fid_curr];
-            ++lenff[num_components_new];
-            if (v0 != v1) {
-                edge_set.add_edge(v0, v1);
-            }
-            buffer_new.add_edge(v0, v1, fid);
-            if (buffer_new.get_nv() >= nume) {
-                fprintf(stdout, "Error. Stack overflow  in buffer_new\n");
-                return;
-            }
-            v0_prev = v0;
-            v1_prev = v1;
+			edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
+			printf("drctn = %d\n", drctn);
 
-            edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
-            printf("drctn = %d\n", drctn);
-            
-            
-            if ((v0_prev == v0 && v1_prev == v1) || (v0_prev == v1 && v1_prev == v0)) {
-                fprintf(stdout, "Endless loop!!!!!\n");
-                break;
-            }
-            
-            if (fid_next != fid_curr)
-                --num_edges[fid_curr];
+			if ((v0_prev == v0 && v1_prev == v1)
+					|| (v0_prev == v1 && v1_prev == v0)) {
+				fprintf(stdout, "Endless loop!!!!!\n");
+				break;
+			}
 
-            if (v0 == -1 || v1 == -1) {
-                fprintf(stdout, "Warning. v0 = %d, v1 = %d\n", v0, v1);
-                return;
-            }
+			if (fid_next != fid_curr)
+				--num_edges[fid_curr];
 
-        } while (v0 != v0_first || v1 != v1_first);
-        ++num_components_new;
-    } while (0);
-    fprintf(stdout, "====   SUPER-STEP 2 ENDED  =====");
+			if (v0 == -1 || v1 == -1) {
+				fprintf(stdout, "Warning. v0 = %d, v1 = %d\n", v0, v1);
+				return;
+			}
 
-    //3. Расщепление компонент сечения
-    FutureFacet* future_facet_new;
-    future_facet_new = new FutureFacet[num_components_new];
-    for (i = 0, k = 0; i < num_components_new; ++i) {
-        future_facet_new[i] = FutureFacet(lenff[i]);
-        future_facet_new[i].set_id(i);
-        for (j = 0; j < lenff[i]; ++j) {
-            buffer_new.get_edge(k++, v0, v1, fid, id_v_new);
-            future_facet_new[i].add_edge(v0, v1, fid);
-        }
-    }
-    //	scanf("%d", &i);
+		} while (v0 != v0_first || v1 != v1_first);
+		++num_components_new;
+	} while (0);
+	fprintf(stdout, "====   SUPER-STEP 2 ENDED  =====");
 
-#ifdef OUTPUT
-    fprintf(stdout, "%d new facets : \n", num_components_new);
-    for (i = 0; i < num_components_new; ++i) {
-        future_facet_new[i].my_fprint(stdout);
-    }
-#endif
-
-    //4. Нахождение компонент рассечения старых граней
-    printf("4. Нахождение компонент рассечения старых граней\n");
-    num_components_old = 0;
-    num_saved_facets = 0;
-    ifSaveFacet = new bool[numFacets];
-    for (i = 0; i < numFacets; ++i) {
-        ifSaveFacet[i] = facets[i].intersect(iplane, buffer_old, num_components_local);
-        printf("\tГрань %d", i);
-        printf(" - %d компонент\n", num_components_local);
-        if (num_components_local > 1)
-            printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-        if (!ifSaveFacet[i])
-            printf("Facet %d is candidate for deleting\n", i);
-        if (facets[i].numVertices < 3)
-            ifSaveFacet[i] = false;  //2012-03-10
-        num_saved_facets += ifSaveFacet[i];
-        num_components_old += num_components_local;
-    }
-
-
-    //5. Расщепление компонент рассечения старых граней
-    FutureFacet* future_facet_old;
-    future_facet_old = new FutureFacet[num_components_old];
-
-    j_begin = 0;
-    int fid_prev = -1;
-
-    bool* ifMultiComponent;
-    ifMultiComponent = new bool[num_components_old];
-
-    for (i = 0; i < num_components_old; ++i) {
-        for (j = j_begin; j < buffer_old.get_nv(); ++j) {
-            buffer_old.get_edge(j, v0, v1, fid, id_v_new);
-            if (v0 == -1 && v1 == -1)
-                break;
-        }
-        len_comp = j - j_begin;
-        if (len_comp <= 0)
-            break;
-        future_facet_old[i] = FutureFacet(len_comp);
-        future_facet_old[i].set_id(i);
-        for (j = j_begin; j < j_begin + len_comp; ++j) {
-            buffer_old.get_edge(j, v0, v1, fid, id_v_new);
-            future_facet_old[i].add_edge(v0, v1, fid);
-        }
-        j_begin = j_begin + len_comp + 1;
-        if (fid == fid_prev && i > 0) {
-            ifMultiComponent[i] = true;
-            ifMultiComponent[i - 1] = true;
-        } else {
-            ifMultiComponent[i] = false;
-        }
-        fid_prev = fid;
-    }
+	//3. Расщепление компонент сечения
+	FutureFacet* future_facet_new;
+	future_facet_new = new FutureFacet[num_components_new];
+	for (i = 0, k = 0; i < num_components_new; ++i) {
+		future_facet_new[i] = FutureFacet(lenff[i]);
+		future_facet_new[i].set_id(i);
+		for (j = 0; j < lenff[i]; ++j) {
+			buffer_new.get_edge(k++, v0, v1, fid, id_v_new);
+			future_facet_new[i].add_edge(v0, v1, fid);
+		}
+	}
+	//	scanf("%d", &i);
 
 #ifdef OUTPUT
-    fprintf(stdout, "ifSaveFacet : \n");
-    for (i = 0; i < numFacets; ++i)
-        if (!ifSaveFacet[i])
-            fprintf(stdout, "Facet %d is deleted\n", i);
-    fprintf(stdout, "\n");
+	fprintf(stdout, "%d new facets : \n", num_components_new);
+	for (i = 0; i < num_components_new; ++i) {
+		future_facet_new[i].my_fprint(stdout);
+	}
 #endif
 
-    //6. Генерирование новых граней
-    Facet* facet_new;
-    numf_new = num_components_new + num_components_old;
-    facet_new = new Facet[numf_new];
-    for (i = 0; i < num_components_new; ++i) {
-        future_facet_new[i].generate_facet(
-                facet_new[i],
-                numFacets + i,
-                iplane,
-                numVertices,
-                &edge_set);
-        facet_new[i].set_poly(this);
-        facet_new[i].set_rgb(255, 0, 0);
-    }
-    for (i = 0; i < num_components_old; ++i) {
-        future_facet_old[i].generate_facet(
-                facet_new[i + num_components_new],
-                numFacets + num_components_new + i,
-                iplane, //TODO. Это неверно!!!
-                numVertices,
-                &edge_set);
-        facet_new[i + num_components_new].set_poly(this);
-        if (ifMultiComponent[i]) {
-            facet_new[i + num_components_new].set_rgb(0, 255, 0);
-            fprintf(stdout, "Multi-component: %d\n", i);
-        } else
-            facet_new[i + num_components_new].set_rgb(100, 0, 0);
-    }
+	//4. Нахождение компонент рассечения старых граней
+	printf("4. Нахождение компонент рассечения старых граней\n");
+	num_components_old = 0;
+	num_saved_facets = 0;
+	ifSaveFacet = new bool[numFacets];
+	for (i = 0; i < numFacets; ++i) {
+		ifSaveFacet[i] = facets[i].intersect(iplane, buffer_old,
+				num_components_local);
+		printf("\tГрань %d", i);
+		printf(" - %d компонент\n", num_components_local);
+		if (num_components_local > 1)
+			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+		if (!ifSaveFacet[i])
+			printf("Facet %d is candidate for deleting\n", i);
+		if (facets[i].numVertices < 3)
+			ifSaveFacet[i] = false;  //2012-03-10
+		num_saved_facets += ifSaveFacet[i];
+		num_components_old += num_components_local;
+	}
+
+	//5. Расщепление компонент рассечения старых граней
+	FutureFacet* future_facet_old;
+	future_facet_old = new FutureFacet[num_components_old];
+
+	j_begin = 0;
+	int fid_prev = -1;
+
+	bool* ifMultiComponent;
+	ifMultiComponent = new bool[num_components_old];
+
+	for (i = 0; i < num_components_old; ++i) {
+		for (j = j_begin; j < buffer_old.get_nv(); ++j) {
+			buffer_old.get_edge(j, v0, v1, fid, id_v_new);
+			if (v0 == -1 && v1 == -1)
+				break;
+		}
+		len_comp = j - j_begin;
+		if (len_comp <= 0)
+			break;
+		future_facet_old[i] = FutureFacet(len_comp);
+		future_facet_old[i].set_id(i);
+		for (j = j_begin; j < j_begin + len_comp; ++j) {
+			buffer_old.get_edge(j, v0, v1, fid, id_v_new);
+			future_facet_old[i].add_edge(v0, v1, fid);
+		}
+		j_begin = j_begin + len_comp + 1;
+		if (fid == fid_prev && i > 0) {
+			ifMultiComponent[i] = true;
+			ifMultiComponent[i - 1] = true;
+		} else {
+			ifMultiComponent[i] = false;
+		}
+		fid_prev = fid;
+	}
 
 #ifdef OUTPUT
-    fprintf(stdout, "%d generated facets : \n", num_components_new + num_components_old);
-    for (i = 0; i < numf_new; ++i)
-        facet_new[i].my_fprint(stdout);
+	fprintf(stdout, "ifSaveFacet : \n");
+	for (i = 0; i < numFacets; ++i)
+		if (!ifSaveFacet[i])
+			fprintf(stdout, "Facet %d is deleted\n", i);
+	fprintf(stdout, "\n");
 #endif
 
-    //7. Создание массива граней нового многогранника. Старые грани удаляются
-    Facet* facet_res;
+	//6. Генерирование новых граней
+	Facet* facet_new;
+	numf_new = num_components_new + num_components_old;
+	facet_new = new Facet[numf_new];
+	for (i = 0; i < num_components_new; ++i) {
+		future_facet_new[i].generate_facet(facet_new[i], numFacets + i, iplane,
+				numVertices, &edge_set);
+		facet_new[i].set_poly(this);
+		facet_new[i].set_rgb(255, 0, 0);
+	}
+	for (i = 0; i < num_components_old; ++i) {
+		future_facet_old[i].generate_facet(facet_new[i + num_components_new],
+				numFacets + num_components_new + i, iplane, //TODO. Это неверно!!!
+				numVertices, &edge_set);
+		facet_new[i + num_components_new].set_poly(this);
+		if (ifMultiComponent[i]) {
+			facet_new[i + num_components_new].set_rgb(0, 255, 0);
+			fprintf(stdout, "Multi-component: %d\n", i);
+		} else
+			facet_new[i + num_components_new].set_rgb(100, 0, 0);
+	}
 
-    numf_res = num_saved_facets + numf_new;
-    printf("numf_res = %d = %d + %d = num_saved_facets + numf_new", numf_res, num_saved_facets, numf_new);
-    facet_res = new Facet[numf_res];
-    
+#ifdef OUTPUT
+	fprintf(stdout, "%d generated facets : \n",
+			num_components_new + num_components_old);
+	for (i = 0; i < numf_new; ++i)
+		facet_new[i].my_fprint(stdout);
+#endif
+
+	//7. Создание массива граней нового многогранника. Старые грани удаляются
+	Facet* facet_res;
+
+	numf_res = num_saved_facets + numf_new;
+	printf("numf_res = %d = %d + %d = num_saved_facets + numf_new", numf_res,
+			num_saved_facets, numf_new);
+	facet_res = new Facet[numf_res];
+
 //    for (i = 0; i < numf; ++i) {
 //        if (facet[i])
 //    }
 
-    j = 0;
-    for (i = 0; i < numFacets; ++i) {
-        if (ifSaveFacet[i]) {
-            facet_res[j] = facets[i];
-            facet_res[j].set_id(j);
+	j = 0;
+	for (i = 0; i < numFacets; ++i) {
+		if (ifSaveFacet[i]) {
+			facet_res[j] = facets[i];
+			facet_res[j].set_id(j);
 //            printf("Грани %d переприсвоен новый номер: %d\n", i, j);
-            ++j;
-        }
-    }
-    for (i = 0; i < numf_new; ++i) {
-        facet_res[j] = facet_new[i];
-        facet_res[j].set_id(j);
-        ++j;
-    }
+			++j;
+		}
+	}
+	for (i = 0; i < numf_new; ++i) {
+		facet_res[j] = facet_new[i];
+		facet_res[j].set_id(j);
+		++j;
+	}
 
 #ifdef OUTPUT
-    fprintf(stdout, "\n\n%d resulting facets : \n", numf_res);
-    for (i = 0; i < numf_res; ++i)
-        facet_res[i].my_fprint(stdout);
+	fprintf(stdout, "\n\n%d resulting facets : \n", numf_res);
+	for (i = 0; i < numf_res; ++i)
+		facet_res[i].my_fprint(stdout);
 #endif
 
-    //8. Создание массива новых вершин. Отрицательные вершины удаляются
-    numv_new = edge_set.get_num();
-    Vector3d* vertex_new;
-    vertex_new = new Vector3d[numv_new];
-    for (i = 0; i < numv_new; ++i) {
-        edge_set.get_edge(i, v0, v1);
-        vec0 = vertices[v0];
-        vec1 = vertices[v1];
-        intersection(iplane, vec1 - vec0, vec0, vec);
-        vertex_new[i] = vec;
-    }
+	//8. Создание массива новых вершин. Отрицательные вершины удаляются
+	numv_new = edge_set.get_num();
+	Vector3d* vertex_new;
+	vertex_new = new Vector3d[numv_new];
+	for (i = 0; i < numv_new; ++i) {
+		edge_set.get_edge(i, v0, v1);
+		vec0 = vertices[v0];
+		vec1 = vertices[v1];
+		intersection(iplane, vec1 - vec0, vec0, vec);
+		vertex_new[i] = vec;
+	}
 
 //#ifdef OUTPUT
 //    fprintf(stdout, "%d new vertexes: \n", numv_new);
@@ -391,60 +388,60 @@ void Polyhedron::intersect_j(Plane iplane, int jfid) {
 //        my_fprint_Vector3d(vertex_new[i], stdout);
 //#endif
 
-    numv_res = 0;
-    for (i = 0; i < numVertices; ++i) {
-        numv_res += signum(vertices[i], iplane) >= 0;
-    }
-    numv_res += numv_new;
-    Vector3d* vertex_res;
-    vertex_res = new Vector3d[numv_res];
+	numv_res = 0;
+	for (i = 0; i < numVertices; ++i) {
+		numv_res += signum(vertices[i], iplane) >= 0;
+	}
+	numv_res += numv_new;
+	Vector3d* vertex_res;
+	vertex_res = new Vector3d[numv_res];
 
-    int sign;
-    j = 0;
-    for (i = 0; i < numVertices; ++i) {
-        sign = signum(vertices[i], iplane);
-        if (sign >= 0) {
-            vertex_res[j] = vertices[i];
-            for (k = 0; k < numf_res; ++k)
-                facet_res[k].find_and_replace_vertex(i, j);
-            ++j;
-        }
-    }
-    for (i = 0; i < numv_new; ++i) {
-        vertex_res[j] = vertex_new[i];
-        for (k = 0; k < numf_res; ++k)
-            facet_res[k].find_and_replace_vertex(numVertices + i, j);
-        ++j;
-    }
+	int sign;
+	j = 0;
+	for (i = 0; i < numVertices; ++i) {
+		sign = signum(vertices[i], iplane);
+		if (sign >= 0) {
+			vertex_res[j] = vertices[i];
+			for (k = 0; k < numf_res; ++k)
+				facet_res[k].find_and_replace_vertex(i, j);
+			++j;
+		}
+	}
+	for (i = 0; i < numv_new; ++i) {
+		vertex_res[j] = vertex_new[i];
+		for (k = 0; k < numf_res; ++k)
+			facet_res[k].find_and_replace_vertex(numVertices + i, j);
+		++j;
+	}
 
-    numVertices = numv_res;
-    numFacets = numf_res;
-    if (vertices != NULL)
-        delete[] vertices;
-    if (facets != NULL)
-        delete[] facets;
-    vertices = vertex_res;
-    facets = facet_res;
-    
-    delete_empty_facets();
-    
-    printf("After test there are %d facets:\n", numFacets);
-    for (i = 0; i < numFacets; ++i)
-        facets[i].my_fprint(stdout);
+	numVertices = numv_res;
+	numFacets = numf_res;
+	if (vertices != NULL)
+		delete[] vertices;
+	if (facets != NULL)
+		delete[] facets;
+	vertices = vertex_res;
+	facets = facet_res;
 
-    if (num_edges != NULL)
-        delete[] num_edges;
-    if (lenff != NULL)
-        delete[] lenff;
-    if (future_facet_new != NULL)
-        delete[] future_facet_new;
-    if (future_facet_old != NULL)
-        delete[] future_facet_old;
-    if (ifSaveFacet != NULL)
-        delete[] ifSaveFacet;
-    if (facet_new != NULL)
-        delete[] facet_new;
-    if (ifMultiComponent != NULL)
-        delete[] ifMultiComponent;
+	delete_empty_facets();
+
+	printf("After test there are %d facets:\n", numFacets);
+	for (i = 0; i < numFacets; ++i)
+		facets[i].my_fprint(stdout);
+
+	if (num_edges != NULL)
+		delete[] num_edges;
+	if (lenff != NULL)
+		delete[] lenff;
+	if (future_facet_new != NULL)
+		delete[] future_facet_new;
+	if (future_facet_old != NULL)
+		delete[] future_facet_old;
+	if (ifSaveFacet != NULL)
+		delete[] ifSaveFacet;
+	if (facet_new != NULL)
+		delete[] facet_new;
+	if (ifMultiComponent != NULL)
+		delete[] ifMultiComponent;
 
 }
