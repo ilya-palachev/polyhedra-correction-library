@@ -9,8 +9,21 @@ enum nameFigure {
 };
 
 void printUsage();
+
 nameFigure parse_figureName(
 		char* figureNameInput);
+
+int parse_commandLine(
+		int argc,
+		char** argv,
+		char* figure,
+		int& numContours,
+		int& indFacetMoved,
+		double& maxMoveDelta);
+
+int makePolyhedron(
+		Polyhedron& poly,
+		nameFigure figureParsed);
 
 int main(
 		int argc,
@@ -21,10 +34,43 @@ int main(
 	int indFacetMoved;
 	double maxMoveDelta;
 
+	if (parse_commandLine(argc, argv, figure, numContours, indFacetMoved,
+			maxMoveDelta) != EXIT_SUCCESS) {
+		return EXIT_FAILURE;
+	}
+	nameFigure figureParsed = parse_figureName(figure);
+	Polyhedron poly;
+	if (makePolyhedron(poly, figureParsed) != EXIT_SUCCESS) {
+		return EXIT_FAILURE;
+	}
+	poly.corpolTest(numContours, indFacetMoved, maxMoveDelta);
+
+	if (figure) {
+		delete[] figure;
+		figure = NULL;
+	}
+	return EXIT_SUCCESS;
+}
+
+void printUsage() {
+	printf("Usage: \n"
+			"./globalCorrectionCube <figure name> <number_of_contours> "
+			"<index of facet to be moved> <max_move_delta>\n");
+	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
+}
+
+int parse_commandLine(
+		int argc,
+		char** argv,
+		char* figure,
+		int& numContours,
+		int& indFacetMoved,
+		double& maxMoveDelta) {
+
 	if (argc != 5) {
 		ERROR_PRINT("Wrong number of arguments!");
 		printUsage();
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	bool ifCorrectInput = sscanf(argv[1], "%s", figure)
@@ -34,11 +80,29 @@ int main(
 	if (!ifCorrectInput) {
 		ERROR_PRINT("Incorrect input!");
 		printUsage();
+		return EXIT_FAILURE;
 	}
+	return EXIT_SUCCESS;
+}
 
-	Polyhedron poly;
-	nameFigure figureParsed = parse_figureName(figure);
+nameFigure parse_figureName(
+		char* figureNameInput) {
+	if (strcmp(figureNameInput, "cube") == 0) {
+		return NAME_CUBE;
+	} else if (strcmp(figureNameInput, "pyramid") == 0) {
+		return NAME_PYRAMID;
+	} else if (strcmp(figureNameInput, "prism") == 0) {
+		return NAME_PRISM;
+	} else if (strcmp(figureNameInput, "cube-cutted") == 0) {
+		return NAME_CUBE_CUTTED;
+	} else {
+		return NAME_UNKNOWN;
+	}
+}
 
+int makePolyhedron(
+		Polyhedron& poly,
+		nameFigure figureParsed) {
 	switch (figureParsed) {
 	case NAME_CUBE:
 		poly.makeCube(1., 0., 0., 0.);
@@ -55,36 +119,7 @@ int main(
 	default:
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
-		return -1;
+		return EXIT_FAILURE;
 	}
-
-	poly.corpolTest(numContours, indFacetMoved, maxMoveDelta);
-
-	if (figure) {
-		delete[] figure;
-		figure = NULL;
-	}
-	return 0;
-}
-
-void printUsage() {
-	printf("Usage: \n"
-			"./globalCorrectionCube <figure name> <number_of_contours> "
-			"<index of facet to be moved> <max_move_delta>\n");
-	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
-}
-
-nameFigure parse_figureName(
-		char* figureNameInput) {
-	if (strcmp(figureNameInput, "cube") == 0) {
-		return NAME_CUBE;
-	} else if (strcmp(figureNameInput, "pyramid") == 0) {
-		return NAME_PYRAMID;
-	} else if (strcmp(figureNameInput, "prism") == 0) {
-		return NAME_PRISM;
-	} else if (strcmp(figureNameInput, "cube-cutted") == 0) {
-		return NAME_CUBE_CUTTED;
-	} else {
-		return NAME_UNKNOWN;
-	}
+	return EXIT_SUCCESS;
 }
