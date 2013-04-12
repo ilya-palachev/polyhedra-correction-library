@@ -19,7 +19,8 @@ int parse_commandLine(
 		char* figure,
 		int& numContours,
 		int& indFacetMoved,
-		double& maxMoveDelta);
+		double& maxMoveDelta,
+		double& shiftAngleFirst);
 
 int makePolyhedron(
 		Polyhedron& poly,
@@ -33,9 +34,10 @@ int main(
 	int numContours;
 	int indFacetMoved;
 	double maxMoveDelta;
+	double shiftAngleFirst;
 
 	if (parse_commandLine(argc, argv, figure, numContours, indFacetMoved,
-			maxMoveDelta) != EXIT_SUCCESS) {
+			maxMoveDelta, shiftAngleFirst) != EXIT_SUCCESS) {
 		return EXIT_FAILURE;
 	}
 	nameFigure figureParsed = parse_figureName(figure);
@@ -43,7 +45,7 @@ int main(
 	if (makePolyhedron(poly, figureParsed) != EXIT_SUCCESS) {
 		return EXIT_FAILURE;
 	}
-	poly.corpolTest(numContours, indFacetMoved, maxMoveDelta);
+	poly.corpolTest(numContours, indFacetMoved, maxMoveDelta, shiftAngleFirst);
 
 	if (figure) {
 		delete[] figure;
@@ -55,7 +57,7 @@ int main(
 void printUsage() {
 	printf("Usage: \n"
 			"./globalCorrectionCube <figure name> <number_of_contours> "
-			"<index of facet to be moved> <max_move_delta>\n");
+			"<index of facet to be moved> <max_move_delta> <first angle shift>\n");
 	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
 }
 
@@ -65,7 +67,8 @@ int parse_commandLine(
 		char* figure,
 		int& numContours,
 		int& indFacetMoved,
-		double& maxMoveDelta) {
+		double& maxMoveDelta,
+		double& shiftAngleFirst) {
 
 	if (argc != 5) {
 		ERROR_PRINT("Wrong number of arguments!");
@@ -76,7 +79,8 @@ int parse_commandLine(
 	bool ifCorrectInput = sscanf(argv[1], "%s", figure)
 			&& sscanf(argv[2], "%d", &numContours)
 			&& sscanf(argv[3], "%d", &indFacetMoved)
-			&& sscanf(argv[4], "%lf", &maxMoveDelta);
+			&& sscanf(argv[4], "%lf", &maxMoveDelta)
+			&& sscanf(argv[4], "%lf", &shiftAngleFirst);
 	if (!ifCorrectInput) {
 		ERROR_PRINT("Incorrect input!");
 		printUsage();

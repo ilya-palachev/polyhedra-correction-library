@@ -5,7 +5,8 @@
 int Polyhedron::corpolTest(
 		int numContours_input,
 		int indFacetMoved,
-		double maxMoveDelta) {
+		double maxMoveDelta,
+		double shiftAngleFirst) {
 	DBG_START;
 	numContours = numContours_input;
 	contours = new SContour[numContours];
@@ -24,7 +25,7 @@ int Polyhedron::corpolTest(
 
 	preprocess_edges();
 
-	corpolTest_createAllContours();
+	corpolTest_createAllContours(shiftAngleFirst);
 
 #ifndef NDEBUG
 	printf("------------\n Begin of print contours in corpol_test\n");
@@ -158,7 +159,8 @@ SContour& Polyhedron::corpolTest_createOneContour(
 	return *outputContour;
 }
 
-int Polyhedron::corpolTest_createAllContours() {
+int Polyhedron::corpolTest_createAllContours(
+		double shiftAngleFirst) {
 	DBG_START;
 	DBGPRINT("Allocating 3 arrays of length %d", numEdges);
 	bool* bufferBool = new bool[numEdges];
@@ -166,7 +168,7 @@ int Polyhedron::corpolTest_createAllContours() {
 	int* bufferInt1 = new int[numEdges];
 
 	for (int icont = 0; icont < numContours; ++icont) {
-		double angle = 2 * M_PI * (icont) / numContours;
+		double angle = shiftAngleFirst + 2 * M_PI * (icont) / numContours;
 		Vector3d nu = Vector3d(cos(angle), sin(angle), 0);
 		Plane planeOfProjection = Plane(nu, 0);
 

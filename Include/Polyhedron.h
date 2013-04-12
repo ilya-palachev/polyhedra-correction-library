@@ -474,7 +474,8 @@ public:
 	int corpolTest(
 			int numContours_input,
 			int indFacetMoved,
-			double maxMoveDelta);
+			double maxMoveDelta,
+			double shiftAngleFirst);
 
 	SContour& corpolTest_createOneContour(
 			int icont,
@@ -483,7 +484,8 @@ public:
 			int* bufferInt0,
 			int* bufferInt1);
 
-	int corpolTest_createAllContours();
+	int corpolTest_createAllContours(
+			double shiftAngleFirst);
 
 	void corpolTest_slightRandomMove(
 			double maxMoveDelta);
