@@ -70,7 +70,7 @@ int parse_commandLine(
 		double& maxMoveDelta,
 		double& shiftAngleFirst) {
 
-	if (argc != 5) {
+	if (argc != 6) {
 		ERROR_PRINT("Wrong number of arguments!");
 		printUsage();
 		return EXIT_FAILURE;
@@ -80,7 +80,7 @@ int parse_commandLine(
 			&& sscanf(argv[2], "%d", &numContours)
 			&& sscanf(argv[3], "%d", &indFacetMoved)
 			&& sscanf(argv[4], "%lf", &maxMoveDelta)
-			&& sscanf(argv[4], "%lf", &shiftAngleFirst);
+			&& sscanf(argv[5], "%lf", &shiftAngleFirst);
 	if (!ifCorrectInput) {
 		ERROR_PRINT("Incorrect input!");
 		printUsage();
