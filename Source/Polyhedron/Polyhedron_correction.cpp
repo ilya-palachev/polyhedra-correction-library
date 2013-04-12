@@ -176,9 +176,6 @@ double Polyhedron::corpol_calculate_functional(
 			summand1 *= summand1;
 			summand1 *= weight;
 
-			ASSERT(summand0 < 1.);
-			ASSERT(summand1 < 1.);
-
 			sum += summand0 + summand1;
 		}
 	}
