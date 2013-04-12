@@ -23,8 +23,12 @@
 #define STDERR_PRINT(...)       fprintf(stderr, __VA_ARGS__)
 
 #ifndef NDEBUG
-#		define DBGPRINT(_fmt, ...)  STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", WHEREARG, ##__VA_ARGS__)
-#		define ERROR_PRINT(_fmt, ...)  STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, WHEREARG, ##__VA_ARGS__)
+#		define DBGPRINT(_fmt, ...)  \
+	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
+			WHEREARG, ##__VA_ARGS__)
+#		define ERROR_PRINT(_fmt, ...)  \
+	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
+			WHEREARG, ##__VA_ARGS__)
 #		define DBG_START DBGPRINT("Start")
 #		define DBG_END DBGPRINT("End")
 #else
