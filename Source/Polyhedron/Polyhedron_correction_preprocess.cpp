@@ -2,11 +2,15 @@
 
 //#define NDEBUG
 
-void print_matrix2(
-		FILE* file,
-		int nrow,
-		int ncol,
-		double* a);
+static double distVertexEdge(
+		Vector3d A,
+		Vector3d A1,
+		Vector3d A2);
+
+static double weightForAssociations(
+		double x) {
+	return x * x;
+}
 
 void Polyhedron::corpol_preprocess() {
 	DBG_START;
@@ -39,12 +43,9 @@ void Polyhedron::preprocess_edges() {
 		edges[iEdge].id = iEdge;
 	}
 
-#ifndef NDEBUG
 	for (int i = 0; i < numEdges; ++i) {
 		edges[i].my_fprint(stdout);
 	}
-#endif
-
 	DBG_END;
 }
 
@@ -79,52 +80,9 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
 	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
 		int iEdge = preprocess_edges_find(indVertices[iVertex],
 				indVertices[iVertex + 1]);
-		corpol_prepFindAssociations_withContour_forFacetEdge(iContour, iFacet,
-				iEdge);
+		corpol_prepAssociator(iContour, iFacet, iEdge);
 	}
 	DBG_END;
-}
-
-static double distVertexEdge(
-		// this routine calculates distance
-		Vector3d A,  				// from this vector
-		Vector3d A1, 				// to the edge [A1, A2]
-		Vector3d A2) {
-
-	double dist;
-	Vector3d edge = A2 - A1;
-	if ((A1 - A) * edge > 0 && (A2 - A) * edge > 0) {
-		dist = sqrt(qmod(A1 - A));
-	} else if ((A1 - A) * edge < 0 && (A2 - A) * edge < 0) {
-		dist = sqrt(qmod(A2 - A));
-	} else {
-
-		Vector3d step = edge * 0.5;
-		Vector3d Aproj = A1 + step;
-		do {
-			step *= 0.5;
-			double scalarProd = (Aproj - A) * edge;
-			if (scalarProd < EPS_COLLINEARITY && scalarProd > -EPS_COLLINEARITY) {
-				break;
-			} else if (scalarProd > 0) {
-				Aproj -= step;
-			} else if (scalarProd < 0) {
-				Aproj += step;
-			}
-		} while (1);
-
-		dist = sqrt(qmod(A - Aproj));
-	}
-	DBGPRINT("dist from (%lf, %lf, %lf) to the edge", A.x, A.y, A.z);
-	DBGPRINT("   (%lf, %lf, %lf) - (%lf, %lf, %lf)", A1.x, A1.y, A1.z, A2.x, A2.y,
-			A2.z);
-	DBGPRINT("   is equal %lf", dist);
-	return dist;
-}
-
-static double weightForAssociations(
-		double x) {
-	return x * x;
 }
 
 double Polyhedron::corpol_weightForAssociation(
@@ -169,7 +127,7 @@ double Polyhedron::corpol_visibilityForAssociation(
 	}
 }
 
-void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
+void Polyhedron::corpol_prepAssociator(
 		int iContour,
 		int iFacet,
 		int iEdge) {
@@ -177,13 +135,49 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	DBGPRINT("processing contour # %d, facet # %d, edge # %d", iContour, iFacet,
 			iEdge);
 
+	bool checkVisibility = corpol_prepAssociator_checkVisibility(iContour, iFacet,
+			iEdge) == EXIT_SUCCESS;
+	if (!checkVisibility)
+		return;
+
+	bool checkAlreadyAdded = corpol_prepAssociator_checkAlreadyAdded(iContour,
+			iFacet, iEdge) == EXIT_SUCCESS;
+	if (!checkAlreadyAdded)
+		return;
+
+	Vector3d v0_projected, v1_projected;
+	corpol_prepAssociator_project(iContour, iFacet, iEdge, v0_projected,
+			v1_projected)
+
+	bool checkExtinction = corpol_prepAssociator_checkExtinction(iContour, iFacet,
+			iEdge, v0_projected, v1_projected) == EXIT_SUCCESS;
+	if (!checkExtinction)
+		return;
+
+	int iSideDistMin = corpol_prepAssociator_findNearest(iContour, iFacet, iEdge,
+			v0_projected, v1_projected);
+	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin);
+
+	DBG_END;
+}
+
+int Polyhedron::corpol_prepAssociator_checkVisibility(
+		int iContour,
+		int iFacet,
+		int iEdge) {
 	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
 	if (visibilityNumber < -EPSILON_EDGE_CONTOUR_VISIBILITY) {
 		DBGPRINT("Edge is invisible on this contour (visibility %lf)!",
 				visibilityNumber);
-		return;
+		return EXIT_FAILURE;
 	}
+	return EXIT_SUCCESS;
+}
 
+int Polyhedron::corpol_prepAssociator_checkAlreadyAdded(
+		int iContour,
+		int iFacet,
+		int iEdge) {
 	// Check whether this association has been already added to the list
 	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
 	list<EdgeContourAssociation>::iterator lastCont =
@@ -195,30 +189,57 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	if (numAlreadyPushedAssocs != 0 && iContourLastInList == iContour) {
 		DBGPRINT("Edge %d already has association with contour # %d", iEdge,
 				iContour);
-		return;
+		return EXIT_FAILURE;
 	}
+	return EXIT_SUCCESS;
+}
 
+int Polyhedron::corpol_prepAssociator_checkExtinction(
+		int iContour,
+		int iFacet,
+		int iEdge,
+		Vector3d v0_projected,
+		Vector3d v1_projected) {
+	int iVertex0 = edges[iEdge].v0;
+	int iVertex1 = edges[iEdge].v1;
+	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
+		DBGPRINT(
+				"Edge # %d (%d, %d) is reduced into point when projecting" "on the plane of projection of contour # %d",
+				iEdge, iVertex0, iVertex1, iContour);
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
+
+void Polyhedron::corpol_prepAssociator_project(
+		int iContour,
+		int iFacet,
+		int iEdge,
+		Vector3d& v0_projected,
+		Vector3d& v1_projected) {
+	int iVertex0 = edges[iEdge].v0;
+	int iVertex1 = edges[iEdge].v1;
+	Vector3d v0 = vertices[iVertex0];
+	Vector3d v1 = vertices[iVertex1];
+	Plane planeOfProjection = contours[iContour].plane;
+	v0_projected = planeOfProjection.project(v0);
+	v1_projected = planeOfProjection.project(v1);
+}
+
+int Polyhedron::corpol_prepAssociator_findNearest(
+		int iContour,
+		int iFacet,
+		int iEdge,
+		Vector3d v0_projected,
+		Vector3d v1_projected) {
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	SideOfContour* sides = contours[iContour].sides;
 	int numSides = contours[iContour].ns;
 	int iSideDistMin;
 	double distMin;
-
 	DBGPRINT("We are processing the following contour:");
 	//contours[iContour].my_fprint(stdout);
-
-	Vector3d v0 = vertices[iVertex0];
-	Vector3d v1 = vertices[iVertex1];
-	Plane planeOfProjection = contours[iContour].plane;
-	Vector3d v0_projected = planeOfProjection.project(v0);
-	Vector3d v1_projected = planeOfProjection.project(v1);
-	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
-		DBGPRINT(
-				"Edge # %d (%d, %d) is reduced into point when projecting" "on the plane of projection of contour # %d",
-				iEdge, iVertex0, iVertex1, iContour);
-		return;
-	}
 
 	for (int iSide = 0; iSide < numSides; ++iSide) {
 		DBGPRINT(
@@ -238,44 +259,65 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 	}
 	DBGPRINT("distMin = %lf", distMin);
 	ASSERT(distMin < 0.1);
+	return iSideDistMin;
+}
 
+void Polyhedron::corpol_prepAssociator_add(
+		int iContour,
+		int iFacet,
+		int iEdge,
+		int iSideDistMin) {
+	int iVertex0 = edges[iEdge].v0;
+	int iVertex1 = edges[iEdge].v1;
+	SideOfContour* sides = contours[iContour].sides;
 	Vector3d side = sides[iSideDistMin].A2 - sides[iSideDistMin].A1;
 	Vector3d edge = vertices[iVertex1] - vertices[iVertex0];
 	bool ifDirectionIsProper = edge * side > 0;
-
 	double weight = corpol_weightForAssociation(iContour, iFacet);
-
 	DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour, iEdge);
 	// Create new association
 	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
 			iContour, iSideDistMin, ifDirectionIsProper, weight);
 	// Push it to the list
 	edges[iEdge].assocList.push_back(*assocForCurrentEdge);
-	DBG_END;
 }
 
-int Polyhedron::corpol_prep_build_lists_of_visible_edges() {
-	DBG_START;
 
-	for (int iedge = 0; iedge < numEdges; ++iedge) {
+static double distVertexEdge(
+		// this routine calculates distance
+		Vector3d A,  				// from this vector
+		Vector3d A1, 				// to the edge [A1, A2]
+		Vector3d A2) {
 
-		DBGPRINT("Processing edge %d (%d, %d)\n", iedge, edges[iedge].v0,
-				edges[iedge].v1);
+	double dist;
+	Vector3d edge = A2 - A1;
+	if ((A1 - A) * edge > 0 && (A2 - A) * edge > 0) {
+		dist = sqrt(qmod(A1 - A));
+	} else if ((A1 - A) * edge < 0 && (A2 - A) * edge < 0) {
+		dist = sqrt(qmod(A2 - A));
+	} else {
 
-		for (int icont = 0; icont < numContours; ++icont) {
-			Plane planeOfProjection = contours[icont].plane;
-			bool ifVisibleOnCurrCont = corpol_edgeIsVisibleOnPlane(edges[iedge],
-					planeOfProjection);
-			if (ifVisibleOnCurrCont) {
-				edges[iedge].assocList.push_back(EdgeContourAssociation(icont));
+		Vector3d step = edge * 0.5;
+		Vector3d Aproj = A1 + step;
+		do {
+			step *= 0.5;
+			double scalarProd = (Aproj - A) * edge;
+			if (scalarProd < EPS_COLLINEARITY && scalarProd > -EPS_COLLINEARITY) {
+				break;
+			} else if (scalarProd > 0) {
+				Aproj -= step;
+			} else if (scalarProd < 0) {
+				Aproj += step;
 			}
-		}
+		} while (1);
 
-		edges[iedge].my_fprint(stdout);
+		dist = sqrt(qmod(A - Aproj));
 	}
-
-	DBG_END;
-	return 0;
+	DBGPRINT("dist from (%lf, %lf, %lf) to the edge", A.x, A.y, A.z);
+	DBGPRINT("   (%lf, %lf, %lf) - (%lf, %lf, %lf)", A1.x, A1.y, A1.z, A2.x, A2.y,
+			A2.z);
+	DBGPRINT("   is equal %lf", dist);
+	return dist;
 }
 
 bool Polyhedron::corpol_edgeIsVisibleOnPlane(
@@ -303,19 +345,19 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 	bool ifOrthogonalTo2ndFacet = fabs(sign1) < EPS_COLLINEARITY;
 
 	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet) {
-		// Regular case. Nothing is orthogonal.
+// Regular case. Nothing is orthogonal.
 		DBGPRINT("\t\tRegular case. Nothing is orthogonal.");
 		return true;
 	}
 
 	else if (ifOrthogonalTo1stFacet && ifOrthogonalTo2ndFacet) {
-		// When the edge is orthogonal to the plane of projection
+// When the edge is orthogonal to the plane of projection
 		DBGPRINT("\t\tThe edge is orthogonal to the plane of projection");
 		return false;
 	}
 
 	else if (ifOrthogonalTo1stFacet) {
-		// When only the first facets is orthogonal to the plane of projection
+// When only the first facets is orthogonal to the plane of projection
 		DBGPRINT(
 				"\t\tOnly the first facet is orthogonal to the plane of projection");
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f0);
@@ -323,7 +365,7 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 
 	else // ifOrthogonalTo2ndFacet
 	{
-		// When only the second facets is orthogonal to the plane of projection
+// When only the second facets is orthogonal to the plane of projection
 		DBGPRINT(
 				"\t\tOnly the second facets is orthogonal to the plane of projection");
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f1);

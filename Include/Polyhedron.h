@@ -453,10 +453,48 @@ public:
 			int iContour,
 			int iEdge);
 
-	void corpol_prepFindAssociations_withContour_forFacetEdge(
+	void corpol_prepAssociator(
 			int iContour,
 			int iFacet,
 			int iEdge);
+
+	int corpol_prepAssociator_checkVisibility(
+			int iContour,
+			int iFacet,
+			int iEdge);
+
+	inline int corpol_prepAssociator_checkAlreadyAdded(
+			int iContour,
+			int iFacet,
+			int iEdge);
+
+	inline int corpol_prepAssociator_checkExtinction(
+			int iContour,
+			int iFacet,
+			int iEdge,
+			Vector3d v0_projected,
+			Vector3d v1_projected);
+
+	inline void corpol_prepAssociator_project(
+			int iContour,
+			int iFacet,
+			int iEdge,
+			Vector3d& v0_projected,
+			Vector3d& v1_projected);
+
+
+	inline int corpol_prepAssociator_findNearest(
+			int iContour,
+			int iFacet,
+			int iEdge,
+			Vector3d v0_projected,
+			Vector3d v1_projected);
+
+	inline void corpol_prepAssociator_add(
+			int iContour,
+			int iFacet,
+			int iEdge,
+			int iSideDistMin);
 
 	int corpol_prep_build_lists_of_visible_edges();
 	int corpol_prep_map_between_edges_and_contours();
