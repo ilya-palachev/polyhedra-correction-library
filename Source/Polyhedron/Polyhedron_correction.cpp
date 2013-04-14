@@ -322,6 +322,18 @@ void Polyhedron::corpol_calculate_matrix(
 				Vector3d A_ij1 = sides[curNearestSide].A1;
 				Vector3d A_ij2 = sides[curNearestSide].A2;
 
+				// Debug!!!
+				if (iplane == 0) {
+					DBGPRINT("nearest side for the first edge of the facet #0");
+					DBGPRINT("    in contour # %d", curContour);
+					DBGPRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)", A_ij1.x,
+							A_ij1.y, A_ij1.z, A_ij2.x, A_ij2.y, A_ij2.z);
+					DBGPRINT("    while the edge is the following:");
+					DBGPRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)", vertices[v0].x,
+							vertices[v0].y, vertices[v0].z, vertices[v1].x, vertices[v1].y,
+							vertices[v1].z);
+				}
+
 				double x0 = A_ij1.x;
 				double y0 = A_ij1.y;
 				double z0 = A_ij1.z;
