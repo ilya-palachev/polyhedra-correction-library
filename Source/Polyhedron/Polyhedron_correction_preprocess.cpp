@@ -91,28 +91,35 @@ static double distVertexEdge(
 		Vector3d A1, 				// to the edge [A1, A2]
 		Vector3d A2) {
 
+	double dist;
 	Vector3d edge = A2 - A1;
 	if ((A1 - A) * edge > 0 && (A2 - A) * edge > 0) {
-		return sqrt(qmod(A1 - A));
-	}
-	if ((A1 - A) * edge < 0 && (A2 - A) * edge < 0) {
-		return sqrt(qmod(A2 - A));
-	}
-	Vector3d step = edge * 0.5;
-	Vector3d Aproj = A1 + step;
-	do {
-		step *= 0.5;
-		double scalarProd = (Aproj - A) * edge;
-		if (scalarProd < EPS_COLLINEARITY && scalarProd > -EPS_COLLINEARITY) {
-			break;
-		} else if (scalarProd > 0) {
-			Aproj -= step;
-		} else if (scalarProd < 0) {
-			Aproj += step;
-		}
-	} while (1);
+		dist = sqrt(qmod(A1 - A));
+	} else if ((A1 - A) * edge < 0 && (A2 - A) * edge < 0) {
+		dist = sqrt(qmod(A2 - A));
+	} else {
 
-	return sqrt(qmod(A - Aproj));
+		Vector3d step = edge * 0.5;
+		Vector3d Aproj = A1 + step;
+		do {
+			step *= 0.5;
+			double scalarProd = (Aproj - A) * edge;
+			if (scalarProd < EPS_COLLINEARITY && scalarProd > -EPS_COLLINEARITY) {
+				break;
+			} else if (scalarProd > 0) {
+				Aproj -= step;
+			} else if (scalarProd < 0) {
+				Aproj += step;
+			}
+		} while (1);
+
+		dist = sqrt(qmod(A - Aproj));
+	}
+	DBGPRINT("dist from (%lf, %lf, %lf) to the edge", A.x, A.y, A.z);
+	DBGPRINT("   (%lf, %lf, %lf) - (%lf, %lf, %lf)", A1.x, A1.y, A1.z, A2.x, A2.y,
+			A2.z);
+	DBGPRINT("   is equal %lf", dist);
+	return dist;
 }
 
 static double weightForAssociations(
@@ -219,14 +226,19 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacetEdge(
 				iContour, iFacet, iEdge, iVertex0, iVertex1, iSide);
 		Vector3d v0 = sides[iSide].A1;
 		Vector3d v1 = sides[iSide].A2;
-		double distCurr1 = distVertexEdge(vertices[iVertex0], v0, v1);
-		double distCurr2 = distVertexEdge(vertices[iVertex1], v0, v1);
+		double distCurr1 = distVertexEdge(v0_projected, v0, v1);
+		double distCurr2 = distVertexEdge(v1_projected, v0, v1);
 		double distCurr = distCurr1 + distCurr2;
+		DBGPRINT("distCurr = %lf", distCurr);
+		DBGPRINT("---");
 		if (iSide == 0 || distMin > distCurr) {
 			iSideDistMin = iSide;
 			distMin = distCurr;
 		}
 	}
+	DBGPRINT("distMin = %lf", distMin);
+	ASSERT(distMin < 0.1);
+
 	Vector3d side = sides[iSideDistMin].A2 - sides[iSideDistMin].A1;
 	Vector3d edge = vertices[iVertex1] - vertices[iVertex0];
 	bool ifDirectionIsProper = edge * side > 0;
