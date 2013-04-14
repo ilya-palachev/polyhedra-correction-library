@@ -147,7 +147,7 @@ void Polyhedron::corpol_prepAssociator(
 
 	Vector3d v0_projected, v1_projected;
 	corpol_prepAssociator_project(iContour, iFacet, iEdge, v0_projected,
-			v1_projected)
+			v1_projected);
 
 	bool checkExtinction = corpol_prepAssociator_checkExtinction(iContour, iFacet,
 			iEdge, v0_projected, v1_projected) == EXIT_SUCCESS;
