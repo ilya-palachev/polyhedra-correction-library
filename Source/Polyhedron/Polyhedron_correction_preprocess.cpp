@@ -166,7 +166,7 @@ int Polyhedron::corpol_prepAssociator_checkVisibility(
 		int iFacet,
 		int iEdge) {
 	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
-	if (visibilityNumber < -EPSILON_EDGE_CONTOUR_VISIBILITY) {
+	if (visibilityNumber < EPSILON_EDGE_CONTOUR_VISIBILITY) {
 		DBGPRINT("Edge is invisible on this contour (visibility %lf)!",
 				visibilityNumber);
 		return EXIT_FAILURE;
