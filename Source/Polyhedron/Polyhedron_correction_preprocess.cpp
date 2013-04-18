@@ -436,57 +436,6 @@ bool Polyhedron::corpol_collinear_visibility(
 	return false;
 }
 
-int Polyhedron::corpol_prep_map_between_edges_and_contours() {
-	DBG_START;
-// NOTE: Testing needed.
-	for (int iedge = 0; iedge < numEdges; ++iedge) {
-		int v0 = edges[iedge].v0;
-		int v1 = edges[iedge].v1;
-		DBGPRINT("Processing edge #%d (%d, %d)", iedge, v0, v1);
-
-		int ncont = edges[iedge].assocList.size();
-		Vector3d A0 = vertices[v0];
-		Vector3d A1 = vertices[v1];
-		for (list<EdgeContourAssociation>::iterator itCont =
-				edges[iedge].assocList.begin(); itCont != edges[iedge].assocList.end();
-				++itCont) {
-			DBGPRINT("\tFind nearest on contour #%d", itCont->indContour);
-			contours[itCont->indContour].my_fprint(stdout);
-
-			int ns = contours[itCont->indContour].ns;
-			SideOfContour * sides = contours[itCont->indContour].sides;
-			int isideMin = -1;
-			double minDist = 0.;
-			bool direction = true;
-			for (int iside = 0; iside < ns; ++iside) {
-				Vector3d B0 = sides[iside].A1;
-				Vector3d B1 = sides[iside].A2;
-				double dist0 = qmod(A0 - B0) + qmod(A1 - B1);
-				double dist1 = qmod(A0 - B1) + qmod(A1 - B0);
-				if (dist0 < minDist || isideMin == -1) {
-					minDist = dist0;
-					isideMin = iside;
-					direction = true;
-				}
-				if (dist1 < minDist) {
-					minDist = dist1;
-					isideMin = iside;
-					direction = false;
-				}
-			}
-			itCont->indNearestSide = isideMin;
-			itCont->ifProperDirection = direction;
-
-			DBGPRINT("\tThe nearest is side #%d = ", isideMin);
-			sides[isideMin].my_fprint_short(stdout);
-		}
-
-		edges[iedge].my_fprint(stdout);
-	}
-
-	DBG_END;
-	return 0;
-}
 
 #define NDEBUG
 

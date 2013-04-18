@@ -496,8 +496,6 @@ public:
 			int iEdge,
 			int iSideDistMin);
 
-	int corpol_prep_build_lists_of_visible_edges();
-	int corpol_prep_map_between_edges_and_contours();
 	bool corpol_edgeIsVisibleOnPlane(
 			Edge& edge,
 			Plane planeOfProjection);
