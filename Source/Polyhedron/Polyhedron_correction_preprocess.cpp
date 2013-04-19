@@ -6,7 +6,7 @@ static double distVertexEdge(
 		Vector3d A,
 		Vector3d A1,
 		Vector3d A2,
-		Vector3d A_nearest);
+		Vector3d& A_nearest);
 
 static double weightForAssociations(
 		double x) {
@@ -165,7 +165,7 @@ void Polyhedron::corpol_prepAssociator(
 	double areaRight = corpol_prepAssociator_calcArea(iContour, iSideDistMin0,
 			iSideDistMin1, v0_nearest, v1_nearest, ORIENTATION_RIGHT);
 
-	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin);
+	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0);
 
 	DBG_END;
 }

@@ -19,6 +19,7 @@ set (SOURCE_vector3d
 )
 
 set (SOURCE_polyhedronCorrection
+./Source/ClusterNorm/ClusterNorm.cpp
 ./Source/EdgeContourAssociation/EdgeContourAssociation.cpp
 ./Source/Edge/Edge.cpp
 ./Source/Edge/Edge_io.cpp
@@ -29,6 +30,7 @@ set (SOURCE_polyhedronCorrection
 ./Source/EdgeSet/EdgeSet_intersection.cpp
 ./Source/EdgeSet/EdgeSet_io.cpp
 ./Source/Facet/Facet.cpp
+./Source/Facet/Facet_inertia.cpp
 ./Source/Facet/Facet_intersection.cpp
 ./Source/Facet/Facet_io.cpp
 ./Source/Facet/Facet_join_facets.cpp
@@ -37,6 +39,8 @@ set (SOURCE_polyhedronCorrection
 ./Source/FutureFacet/FutureFacet.cpp
 ./Source/FutureFacet/FutureFacet_intersection.cpp
 ./Source/FutureFacet/FutureFacet_io.cpp
+./Source/MatrixDistNorm/MatrixDistNorm.cpp
+./Source/Polyhedron/Polyhedron_cluster.cpp
 ./Source/Polyhedron/Polyhedron_correction.cpp
 ./Source/Polyhedron/Polyhedron_correction_derivativeTest.cpp
 ./Source/Polyhedron/Polyhedron_correction_preprocess.cpp
@@ -45,6 +49,8 @@ set (SOURCE_polyhedronCorrection
 ./Source/Polyhedron/Polyhedron_deform.cpp
 ./Source/Polyhedron/Polyhedron_deform_linear.cpp
 ./Source/Polyhedron/Polyhedron_figures.cpp
+./Source/Polyhedron/Polyhedron_hierarchical_clustering.cpp
+./Source/Polyhedron/Polyhedron_intertia.cpp
 ./Source/Polyhedron/Polyhedron_intersection.cpp
 ./Source/Polyhedron/Polyhedron_intersection_j.cpp
 ./Source/Polyhedron/Polyhedron_io.cpp
@@ -53,10 +59,14 @@ set (SOURCE_polyhedronCorrection
 ./Source/Polyhedron/Polyhedron_preprocess.cpp
 ./Source/Polyhedron/Polyhedron_simplify.cpp
 ./Source/Polyhedron/Polyhedron_test_consections.cpp
+./Source/Polyhedron/Polyhedron_volume.cpp
 ./Source/SContour/SContour.cpp
 ./Source/SContour/SContour_io.cpp
 ./Source/SideOfContour/SideOfContour.cpp
 ./Source/SideOfContour/SideOfContour_io.cpp
+./Source/SpherePoint/SpherePoint.cpp
+./Source/TreeClusterNorm/TreeClusterNorm.cpp
+./Source/TreeClusterNormNode/TreeClusterNormNode.cpp
 ./Source/VertexInfo/VertexInfo.cpp
 ./Source/VertexInfo/VertexInfo_intersection.cpp
 ./Source/VertexInfo/VertexInfo_io.cpp

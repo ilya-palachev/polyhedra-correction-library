@@ -1,3 +1,7 @@
+set(SOURCES_buildCluster buildCluster.cpp)
+add_executable(buildCluster ${SOURCES_buildCluster})
+target_link_libraries(buildCluster polyhedronCorrection)
+
 set(SOURCES_globalCorrection globalCorrection.cpp)
 add_executable(globalCorrection ${SOURCES_globalCorrection})
 target_link_libraries(globalCorrection polyhedronCorrection)

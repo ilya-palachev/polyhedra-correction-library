@@ -16,6 +16,8 @@ const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
 
 const double EPSILON_FOR_DIVISION = 1e-16;
 
+const double POROG = 0.5;
+
 enum Orientation {
 	ORIENTATION_LEFT = 0,
 	ORIENTATION_RIGHT = 1
@@ -487,7 +489,6 @@ public:
 			Vector3d& v0_projected,
 			Vector3d& v1_projected);
 
-
 	inline int corpol_prepAssociator_findNearest(
 			int iContour,
 			Vector3d v_projected,
@@ -542,6 +543,55 @@ public:
 	inline void corpolTest_slightRandomMoveVertex(
 			double maxMoveDelta,
 			int ivertex);
+
+	//Polyhedron_inertia.cpp
+	double calculate_J11(
+			int N);
+
+	double consection_x(
+			double y,
+			double z);
+
+	//Polyhedron_volume.cpp
+	double volume();
+	double area();
+	double area(
+			int numfac);
+	void J(
+			double& Jxx,
+			double& Jyy,
+			double& Jzz,
+			double& Jxy,
+			double& Jyz,
+			double& Jxz);
+	void get_center(
+			double& xc,
+			double& yc,
+			double& zc);
+	void inertia(
+			double& l0,
+			double& l1,
+			double& l2,
+			Vector3d& v0,
+			Vector3d& v1,
+			Vector3d& v2);
+
+	//Polyhedron_cluster.cpp
+	int clasterisation(
+			double p);
+	void clasterisation2(
+			double p);
+
+	//Polyhedron_hierarchical_clustering.cpp
+	TreeClusterNorm& build_TreeClusterNorm();
+	void giveClusterNodeArray(
+			TreeClusterNormNode* nodeArray,
+			MatrixDistNorm& matrix);
+	void reClusterNodeArray(
+			TreeClusterNormNode* nodeArray_in,
+			MatrixDistNorm& matrix_in,
+			TreeClusterNormNode* nodeArray_out,
+			MatrixDistNorm& matrix_out);
 
 };
 
