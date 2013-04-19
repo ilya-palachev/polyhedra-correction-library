@@ -5,7 +5,8 @@
 static double distVertexEdge(
 		Vector3d A,
 		Vector3d A1,
-		Vector3d A2);
+		Vector3d A2,
+		Vector3d A_nearest);
 
 static double weightForAssociations(
 		double x) {
@@ -154,8 +155,16 @@ void Polyhedron::corpol_prepAssociator(
 	if (!checkExtinction)
 		return;
 
-	int iSideDistMin = corpol_prepAssociator_findNearest(iContour, iFacet, iEdge,
-			v0_projected, v1_projected);
+	Vector3d v0_nearest, v1_nearest;
+	int iSideDistMin0 = corpol_prepAssociator_findNearest(iContour, v0_projected,
+			v0_nearest);
+	int iSideDistMin1 = corpol_prepAssociator_findNearest(iContour, v1_projected,
+			v1_nearest);
+	double areaLeft = corpol_prepAssociator_calcArea(iContour, iSideDistMin0,
+			iSideDistMin1, v0_nearest, v1_nearest, ORIENTATION_LEFT);
+	double areaRight = corpol_prepAssociator_calcArea(iContour, iSideDistMin0,
+			iSideDistMin1, v0_nearest, v1_nearest, ORIENTATION_RIGHT);
+
 	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin);
 
 	DBG_END;
@@ -228,38 +237,37 @@ void Polyhedron::corpol_prepAssociator_project(
 
 int Polyhedron::corpol_prepAssociator_findNearest(
 		int iContour,
-		int iFacet,
-		int iEdge,
-		Vector3d v0_projected,
-		Vector3d v1_projected) {
-	int iVertex0 = edges[iEdge].v0;
-	int iVertex1 = edges[iEdge].v1;
+		Vector3d v_projected,
+		Vector3d& v_nearest) {
+
 	SideOfContour* sides = contours[iContour].sides;
 	int numSides = contours[iContour].ns;
-	int iSideDistMin;
 	double distMin;
-	DBGPRINT("We are processing the following contour:");
-	//contours[iContour].my_fprint(stdout);
+	Vector3d v_nearestCurr;
+	int iSideDistMin;
 
 	for (int iSide = 0; iSide < numSides; ++iSide) {
-		DBGPRINT(
-				"processing contour # %d, facet # %d, edge # %d (%d, %d), " "side of contour # %d",
-				iContour, iFacet, iEdge, iVertex0, iVertex1, iSide);
 		Vector3d v0 = sides[iSide].A1;
 		Vector3d v1 = sides[iSide].A2;
-		double distCurr1 = distVertexEdge(v0_projected, v0, v1);
-		double distCurr2 = distVertexEdge(v1_projected, v0, v1);
-		double distCurr = distCurr1 + distCurr2;
-		DBGPRINT("distCurr = %lf", distCurr);
-		DBGPRINT("---");
-		if (iSide == 0 || distMin > distCurr) {
+		double distCurr = distVertexEdge(v_projected, v0, v1, v_nearestCurr);
+		if (iSide == 0 || distCurr < distMin) {
 			iSideDistMin = iSide;
 			distMin = distCurr;
+			v_nearest = v_nearestCurr;
 		}
 	}
-	DBGPRINT("distMin = %lf", distMin);
 	ASSERT(distMin < 0.1);
 	return iSideDistMin;
+}
+
+double Polyhedron::corpol_prepAssociator_calcArea(
+			int iContour,
+			int iSideDistMin0,
+			int iSideDistMin1,
+			Vector3d v0_nearest,
+			Vector3d v1_nearest,
+			Orientation orientation) {
+
 }
 
 void Polyhedron::corpol_prepAssociator_add(
@@ -282,12 +290,12 @@ void Polyhedron::corpol_prepAssociator_add(
 	edges[iEdge].assocList.push_back(*assocForCurrentEdge);
 }
 
-
 static double distVertexEdge(
 		// this routine calculates distance
 		Vector3d A,  				// from this vector
 		Vector3d A1, 				// to the edge [A1, A2]
-		Vector3d A2) {
+		Vector3d A2,
+		Vector3d& A_nearest) {
 
 	double dist;
 	Vector3d edge = A2 - A1;
@@ -312,11 +320,8 @@ static double distVertexEdge(
 		} while (1);
 
 		dist = sqrt(qmod(A - Aproj));
+		A_nearest = Aproj;
 	}
-	DBGPRINT("dist from (%lf, %lf, %lf) to the edge", A.x, A.y, A.z);
-	DBGPRINT("   (%lf, %lf, %lf) - (%lf, %lf, %lf)", A1.x, A1.y, A1.z, A2.x, A2.y,
-			A2.z);
-	DBGPRINT("   is equal %lf", dist);
 	return dist;
 }
 
@@ -435,7 +440,6 @@ bool Polyhedron::corpol_collinear_visibility(
 	DBG_END;
 	return false;
 }
-
 
 #define NDEBUG
 

@@ -16,6 +16,11 @@ const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
 
 const double EPSILON_FOR_DIVISION = 1e-16;
 
+enum Orientation {
+	ORIENTATION_LEFT = 0,
+	ORIENTATION_RIGHT = 1
+};
+
 class Polyhedron {
 public:
 	int numVertices;
@@ -485,10 +490,16 @@ public:
 
 	inline int corpol_prepAssociator_findNearest(
 			int iContour,
-			int iFacet,
-			int iEdge,
-			Vector3d v0_projected,
-			Vector3d v1_projected);
+			Vector3d v_projected,
+			Vector3d& v_nearest);
+
+	inline double corpol_prepAssociator_calcArea(
+			int iContour,
+			int iSideDistMin0,
+			int iSideDistMin1,
+			Vector3d v0_nearest,
+			Vector3d v1_nearest,
+			Orientation orientation);
 
 	inline void corpol_prepAssociator_add(
 			int iContour,
