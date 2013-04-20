@@ -228,9 +228,9 @@ int Polyhedron::corpol_prepAssociator_checkExtinction(
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
-		DEBUG_PRINT(
-				"Edge # %d (%d, %d) is reduced into point when projecting" "on the plane of projection of contour # %d",
-				iEdge, iVertex0, iVertex1, iContour);
+		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting",
+				iEdge, iVertex0, iVertex1);
+		DEBUG_PRINT("on the plane of projection of contour # %d", iContour);
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
@@ -427,9 +427,10 @@ bool Polyhedron::corpol_collinear_visibility(
 // then we take its another edge which includes vertex iverteMax
 
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY) {
-		DEBUG_PRINT(
-				"mainEdge (%d, %d) is orthogonal to the plane of projection, " "so we are taking another edge including ivertexMax (%d)",
-				v0Max, v1Max, ivertexMax);
+		DEBUG_PRINT("mainEdge (%d, %d) is orthogonal to the plane of projection, ",
+				v0Max, v1Max);
+		DEBUG_PRINT("so we are taking another edge including ivertexMax (%d)",
+				ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
 		v1Max = index[ivertexMax];
 		vector0Max = planeOfProjection.project(vertices[v0Max]);

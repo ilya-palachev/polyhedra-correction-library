@@ -198,14 +198,23 @@ int Polyhedron::corpol_iteration(
 	if (info == 0) {
 		DEBUG_PRINT("LAPACKE_dsysvx: successful exit");
 	} else if (info < 0) {
-		DEBUG_PRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value", -info);
+		DEBUG_PRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value",
+				-info);
 	} else if (info <= dim) {
-		DEBUG_PRINT(
-				"LAPACKE_dsysvx: D(%d,%d) is exactly zero.  " "The factorization" "has been completed but the factor D is exactly" "singular, so the solution and error bounds could" "not be computed. RCOND = 0 is returned.",
-				info, info);
+		DEBUG_PRINT("LAPACKE_dsysvx: D(%d,%d) is exactly zero.", info, info);
+		DEBUG_PRINT("The factorization has been completed but the factor D is ");
+		DEBUG_PRINT("exactly singular, so the solution and error bounds could");
+		DEBUG_PRINT("not be computed. RCOND = 0 is returned.");
 	} else if (info == dim + 1) {
-		DEBUG_PRINT(
-				"LAPACKE_dsysvx: D is non-singular, but RCOND is " "less than machine" "precision, meaning that the matrix is singular" "to working precision.  Nevertheless, the" "solution and error bounds are computed because" "there are a number of situations where the" "computed solution can be more accurate than the" "value of RCOND would suggest.");
+		DEBUG_PRINT("LAPACKE_dsysvx: D is non-singular, but RCOND is ");
+		DEBUG_PRINT("less than machine");
+		DEBUG_PRINT("precision, meaning that the matrix is singular");
+		DEBUG_PRINT("to working precision.  Nevertheless, the");
+		DEBUG_PRINT("solution and error bounds are computed because");
+		DEBUG_PRINT("there are a number of situations where the");
+		DEBUG_PRINT("computed solution can be more accurate than the");
+		DEBUG_PRINT("value of RCOND would suggest.");
+
 	} else {
 		DEBUG_PRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
 	}
@@ -307,9 +316,9 @@ void Polyhedron::corpol_calculate_matrix(
 					DEBUG_PRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)", A_ij1.x,
 							A_ij1.y, A_ij1.z, A_ij2.x, A_ij2.y, A_ij2.z);
 					DEBUG_PRINT("    while the edge is the following:");
-					DEBUG_PRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)", vertices[v0].x,
-							vertices[v0].y, vertices[v0].z, vertices[v1].x, vertices[v1].y,
-							vertices[v1].z);
+					DEBUG_PRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)",
+							vertices[v0].x, vertices[v0].y, vertices[v0].z, vertices[v1].x,
+							vertices[v1].y, vertices[v1].z);
 				}
 
 				double x0 = A_ij1.x;
