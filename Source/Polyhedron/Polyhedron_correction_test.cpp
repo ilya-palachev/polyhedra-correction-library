@@ -63,8 +63,8 @@ SContour& Polyhedron::corpolTest_createOneContour(
 
 	Vector3d nu = planeOfProjection.norm;
 
-	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n", idOfContour,
-			nu.x, nu.y, nu.z);
+	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n",
+			idOfContour, nu.x, nu.y, nu.z);
 	DEBUG_PRINT("numEdges = %d", numEdges);
 
 	int numVisibleEdges = 0;
