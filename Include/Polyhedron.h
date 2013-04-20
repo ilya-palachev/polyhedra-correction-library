@@ -562,7 +562,7 @@ public:
 	double volume();
 	double area();
 	double area(
-			int numfac);
+			int iFacet);
 	void J(
 			double& Jxx,
 			double& Jyy,

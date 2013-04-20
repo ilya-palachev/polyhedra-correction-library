@@ -60,29 +60,7 @@ double Polyhedron::area() {
 
 double Polyhedron::area(
 		int iFacet) {
-	int iVertex, *index, numVerticesFacet;
-	Vector3d A0, A1, A2;
-	double areaTriangle, areaFacet;
-
-	Vector3d normal;
-
-	index = facets[iFacet].indVertices;
-	numVerticesFacet = facets[iFacet].numVertices;
-	A0 = vertices[index[0]];
-	normal = facets[iFacet].plane.norm;
-
-	areaFacet = 0.;
-	for (iVertex = 1; iVertex < numVerticesFacet - 1; ++iVertex) {
-
-		A1 = vertices[index[iVertex]];
-		A2 = vertices[index[iVertex + 1]];
-		A1 -= A0;
-		A2 -= A0;
-		areaTriangle = (A1 % A2) * normal * 0.5;
-		areaFacet += areaTriangle;
-	}
-
-	return areaFacet;
+	return facets[iFacet].area();
 }
 
 void Polyhedron::J(

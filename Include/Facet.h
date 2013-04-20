@@ -20,7 +20,7 @@ public:
 	EdgeList edgeList;
 
 public:
-	//Facet.cpp
+	// Facet.cpp
 	Facet();
 	Facet(
 			const int id_orig,
@@ -56,7 +56,7 @@ public:
 			char gray,
 			char blue);
 
-	//Facet_preprocess.cpp
+	// Facet_preprocess.cpp
 	void preprocess_free();
 	void preprocess();
 	void preprocess_edge(
@@ -71,7 +71,7 @@ public:
 			int v,
 			int& v_next);
 
-	//Facet_io.cpp
+	// Facet_io.cpp
 	void my_fprint(
 			FILE* file);
 	void my_fprint_all(
@@ -94,7 +94,7 @@ public:
 	void my_fprint_edge_list(
 			FILE* file);
 
-	//Facet_intersecion.cpp
+	// Facet_intersecion.cpp
 	int signum(
 			int i,
 			Plane plane);
@@ -113,10 +113,10 @@ public:
 			int from,
 			int to);
 
-	//Facet_test.cpp
+	// Facet_test.cpp
 	bool test_self_intersection();
 
-	//Facet_join_facets.cpp
+	// Facet_join_facets.cpp
 	void clear_bad_vertexes();
 	void delete_vertex(
 			int v);
@@ -155,11 +155,14 @@ public:
 
 	void test_pair_neighbours();
 
-	//Facet_inertia.cpp
+	// Facet_inertia.cpp
 	bool consect_x(
 			double y,
 			double z,
 			double& x);
+
+	// Facet_area.cpp
+	double area();
 
 };
 

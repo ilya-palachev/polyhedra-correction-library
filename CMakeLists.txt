@@ -30,6 +30,7 @@ set (SOURCE_polyhedronCorrection
 ./Source/EdgeSet/EdgeSet_intersection.cpp
 ./Source/EdgeSet/EdgeSet_io.cpp
 ./Source/Facet/Facet.cpp
+./Source/Facet/Facet_area.cpp
 ./Source/Facet/Facet_inertia.cpp
 ./Source/Facet/Facet_intersection.cpp
 ./Source/Facet/Facet_io.cpp
