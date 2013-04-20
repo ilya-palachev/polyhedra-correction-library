@@ -15,29 +15,7 @@ void print_matrix2(
 		FILE* file,
 		int nrow,
 		int ncol,
-		double* a) {
-	fprintf(file, "=========begin=of=matrix=================\n");
-	fprintf(file, "number of rows: %d\n", nrow);
-	fprintf(file, "number of columns: %d\n", ncol);
-	for (int irow = 0; irow < nrow; ++irow) {
-		for (int icol = 0; icol < ncol; ++icol) {
-			double valuePrinted = a[ncol * irow + icol];
-			if (fabs(valuePrinted) < EPS_FOR_PRINT) {
-				fprintf(file, "\t |\t");
-			} else {
-				fprintf(file, "%lf |\t", valuePrinted);
-			}
-		}
-		fprintf(file, "\n");
-		if (irow % 5 == 4) {
-			for (int icol = 0; icol < ncol; ++icol) {
-				fprintf(file, "----------------");
-			}
-			fprintf(file, "\n");
-		}
-	}
-	fprintf(file, "=========end=of=matrix===================\n");
-}
+		double* a);
 
 static FILE* fout;
 
@@ -402,3 +380,30 @@ void Polyhedron::corpol_calculate_matrix(
 	DBG_END;
 }
 
+void print_matrix2(
+		FILE* file,
+		int nrow,
+		int ncol,
+		double* a) {
+	fprintf(file, "=========begin=of=matrix=================\n");
+	fprintf(file, "number of rows: %d\n", nrow);
+	fprintf(file, "number of columns: %d\n", ncol);
+	for (int irow = 0; irow < nrow; ++irow) {
+		for (int icol = 0; icol < ncol; ++icol) {
+			double valuePrinted = a[ncol * irow + icol];
+			if (fabs(valuePrinted) < EPS_FOR_PRINT) {
+				fprintf(file, "\t |\t");
+			} else {
+				fprintf(file, "%lf |\t", valuePrinted);
+			}
+		}
+		fprintf(file, "\n");
+		if (irow % 5 == 4) {
+			for (int icol = 0; icol < ncol; ++icol) {
+				fprintf(file, "----------------");
+			}
+			fprintf(file, "\n");
+		}
+	}
+	fprintf(file, "=========end=of=matrix===================\n");
+}
