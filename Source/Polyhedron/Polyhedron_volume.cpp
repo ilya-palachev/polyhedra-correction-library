@@ -20,7 +20,6 @@ double Polyhedron::volume() {
 
 	sum = 0.;
 	for (i = 0; i < numFacets; ++i) {
-		//        facet[i].my_fprint(stdout);
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
@@ -32,7 +31,6 @@ double Polyhedron::volume() {
 			A1 -= B;
 			A2 -= B;
 			loc = ((A0 % A1) * A2) * 0.1666666666666666;
-			//            printf("loc = %lf\n", loc);
 			sum += loc;
 		}
 	}
@@ -55,7 +53,6 @@ double Polyhedron::area() {
 		normal = facets[i].plane.norm;
 
 		sum_facet = 0.;
-//        A0 -= B;
 		for (j = 1; j < nv - 1; ++j) {
 
 			A1 = vertices[index[j]];
@@ -63,78 +60,39 @@ double Polyhedron::area() {
 			A1 -= A0;
 			A2 -= A0;
 			loc = (A1 % A2) * normal * 0.5;
-			//printf("loc = %lf\n", loc);
 			sum_facet += loc;
 		}
 		sum_poly += sum_facet;
-//        sum_poly += fabs(sum_facet);
-
-//        printf("area(%d) = \t%lf\n", i, sum_facet);
 	}
 	return sum_poly;
 }
 
 double Polyhedron::area(
-		int numfac) {
-	int i, j, *index, nv;
+		int iFacet) {
+	int iVertex, *index, numVerticesFacet;
 	Vector3d A0, A1, A2;
-	double xmin, xmax, ymin, ymax, zmin, zmax;
-	double sum_poly, loc, sum_facet;
+	double areaTriangle, areaFacet;
 
 	Vector3d normal;
 
-	sum_poly = 0.;
-	i = numfac;
-	index = facets[i].indVertices;
-	nv = facets[i].numVertices;
+	index = facets[iFacet].indVertices;
+	numVerticesFacet = facets[iFacet].numVertices;
 	A0 = vertices[index[0]];
-	normal = facets[i].plane.norm;
+	normal = facets[iFacet].plane.norm;
 
-	sum_facet = 0.;
-//        A0 -= B;
-	for (j = 1; j < nv - 1; ++j) {
+	areaFacet = 0.;
+	for (iVertex = 1; iVertex < numVerticesFacet - 1; ++iVertex) {
 
-		A1 = vertices[index[j]];
-		A2 = vertices[index[j + 1]];
+		A1 = vertices[index[iVertex]];
+		A2 = vertices[index[iVertex + 1]];
 		A1 -= A0;
 		A2 -= A0;
-		loc = (A1 % A2) * normal * 0.5;
-		//printf("loc = %lf\n", loc);
-		sum_facet += loc;
+		areaTriangle = (A1 % A2) * normal * 0.5;
+		areaFacet += areaTriangle;
 	}
-	sum_poly += sum_facet;
 
-//        printf("area(%d) = \t%lf\n", i, sum_facet);
-
-//    return fabs(sum_poly);
-	return sum_poly;
+	return areaFacet;
 }
-//double Polyhedron::area() {
-//    int i, j, *index, nv;
-//    Vector3d A0, A1, A2;
-//    double xmin, xmax, ymin, ymax, zmin, zmax;
-//    double sum, loc;
-//
-//    sum = 0.;
-//    for (i = 0; i < numFacets; ++i) {
-//
-//        index = facet[i].index;
-//        nv = facet[i].nv;
-//        A0 = vertex[index[0]];
-////        A0 -= B;
-//        for (j = 1; j < nv - 1; ++j) {
-//            
-//            A1 = vertex[index[j]];
-//            A2 = vertex[index[j + 1]];
-//            A1 -= A0;
-//            A2 -= A0;
-//            loc = length((A2 % A1)) * 0.5;
-//            //printf("loc = %lf\n", loc);
-//            sum += loc;
-//        }
-//    }
-//    return sum;
-//}
 
 void Polyhedron::J(
 		double& Jxx,
@@ -160,8 +118,6 @@ void Polyhedron::J(
 
 	get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	B = Vector3d(0., 0., zmax + 1);
-//    B = Vector3d(0, 0, 0);
-//    B = Vector3d(100, 100, 100);
 	x0 = B.x;
 	y0 = B.y;
 	z0 = B.z;
@@ -174,7 +130,6 @@ void Polyhedron::J(
 	Jxz = 0.;
 	Jyz = 0.;
 	for (i = 0; i < numFacets; ++i) {
-		//        facet[i].my_fprint(stdout);
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
@@ -278,97 +233,9 @@ void Polyhedron::J(
 			Jyz += Jyz_loc;
 			Jxz += Jxz_loc;
 
-			//            printf("loc = %lf\n", loc);
 		}
 	}
 }
-
-//void Polyhedron::get_center(double& xc, double& yc, double& zc) {
-//    int i, j, *index, nv;
-//    Vector3d B, A0, A1, A2;
-//    double xmin, xmax, ymin, ymax, zmin, zmax;
-//    
-//    double sum, detJ;
-//    
-//    double xc_loc, yc_loc, zc_loc;
-//    
-//    
-//    double x0, y0, z0;
-//    
-//    double ux, uy, uz;
-//    double vx, vy, vz;
-//    double wx, wy, wz;
-//
-//    get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
-//    B = Vector3d(0., 0., zmax + 1);
-//    //B = Vector3d(0., 0., 0.);
-//    x0 = B.x;
-//    y0 = B.y;
-//    z0 = B.z;
-//
-//    sum = 0.;
-//    
-//    xc = 0.;
-//    yc = 0.;
-//    zc = 0.;
-//    
-//    xc_loc = 0.;
-//    yc_loc = 0.;
-//    zc_loc = 0.;
-//    
-//    for (i = 0; i < numFacets; ++i) {
-//        //        facet[i].my_fprint(stdout);
-//
-//        index = facet[i].index;
-//        nv = facet[i].nv;
-//        A0 = vertex[index[0]];
-//        A0 -= B;
-//        ux = A0.x;
-//        uy = A0.y;
-//        uz = A0.z;
-//        for (j = 1; j < nv - 1; ++j) {
-//            A1 = vertex[index[j]];
-//            A2 = vertex[index[j + 1]];
-//            A1 -= B;
-//            A2 -= B;
-//            
-//            vx = A1.x;
-//            vy = A1.y;
-//            vz = A1.z;
-//            wx = A2.x;
-//            wy = A2.y;
-//            wz = A2.z;
-//                    
-//            detJ = ((A0 % A1) * A2);
-////            if(detJ < 0) detJ = -1.;
-////            else if (detJ > 0) detJ = 1.;
-////            else detJ = 0.;
-//            
-//            xc_loc = x0 / 6.;
-//            xc_loc += ( ux + vx + wx )/ 24.;
-//            xc_loc *= detJ;
-//
-//            yc_loc = y0 / 6.;
-//            yc_loc += ( uy + vy + wy )/ 24.;
-//            yc_loc *= detJ;
-//            
-//            zc_loc = z0 / 6.;
-//            zc_loc += ( uz + vz + wz )/ 24.;
-//            zc_loc *= detJ;
-//            
-//                        
-//            xc += xc_loc;
-//            yc += yc_loc;
-//            zc += zc_loc;
-//
-//            //            printf("loc = %lf\n", loc);
-//        }
-//    }
-//    double vol = volume();
-//    xc /= vol;
-//    yc /= vol;
-//    zc /= vol;
-//}
 
 void Polyhedron::get_center(
 		double& xc,
@@ -389,7 +256,6 @@ void Polyhedron::get_center(
 	double wx, wy, wz;
 
 	get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
-	//B = Vector3d(1., 2., 3.);
 	B = Vector3d(0., 0., zmax + 1);
 	x0 = B.x;
 	y0 = B.y;
@@ -400,7 +266,6 @@ void Polyhedron::get_center(
 	yc = 0.;
 	zc = 0.;
 	for (i = 0; i < numFacets; ++i) {
-		//        facet[i].my_fprint(stdout);
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
@@ -471,22 +336,6 @@ void Polyhedron::inertia(
 	double Jxx, Jyy, Jzz, Jxy, Jyz, Jxz;
 	J(Jxx, Jyy, Jzz, Jxy, Jyz, Jxz);
 
-//    JJ[0][0] = Jxx; 
-//    JJ[0][1] = Jxy;
-//    JJ[0][2] = Jxz;
-//    
-//    
-//    JJ[1][0] = Jxy;
-//    JJ[1][1] = Jyy;
-//    JJ[1][2] = Jyz;
-//    
-//    JJ[2][0] = Jxz;
-//    JJ[2][1] = Jyz;
-//    JJ[2][2] = Jzz;
-//    printf("\t\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxx, Jxy, Jxz);
-//    printf("\tJ =\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxy, Jyy, Jyz);
-//    printf("\t\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxz, Jyz, Jzz);
-
 	JJ[0][0] = Jxx;
 	JJ[0][1] = Jxy;
 	JJ[0][2] = Jxz;
@@ -497,10 +346,6 @@ void Polyhedron::inertia(
 	JJ[2][1] = Jyz;
 	JJ[2][2] = Jzz;
 
-//    JJ[0][0] = 5.3; JJ[0][1] = 0;   JJ[0][2] = 0; 
-//    JJ[1][0] = 0;   JJ[1][1] = 5.3; JJ[1][2] = 0; 
-//    JJ[2][0] = 0;   JJ[2][1] = 0;   JJ[2][2] = 5.3;
-
 	jacobi(3, JJ, l, v);
 
 	l0 = l[0];
@@ -510,7 +355,6 @@ void Polyhedron::inertia(
 	v0 = Vector3d(v[0][0], v[1][0], v[2][0]);
 	v1 = Vector3d(v[0][1], v[1][1], v[2][1]);
 	v2 = Vector3d(v[0][2], v[1][2], v[2][2]);
-	//printf("v0 * v0 = %lf, v0 * v1 = %lf, v1 * v1 = %lf\n", v0 * v0, v0 * v1, v1 * v1);
 
 	delete[] JJ[0];
 	delete[] JJ[1];
