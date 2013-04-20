@@ -465,6 +465,13 @@ public:
 			int iFacet,
 			int iEdge);
 
+	inline int corpol_prepAssociator_init(
+			int iContour,
+			int iFacet,
+			int iEdge,
+			Vector3d& v0_projected,
+			Vector3d& v1_projected);
+
 	int corpol_prepAssociator_checkVisibility(
 			int iContour,
 			int iFacet,

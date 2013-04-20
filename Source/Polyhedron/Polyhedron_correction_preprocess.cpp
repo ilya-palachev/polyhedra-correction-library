@@ -133,29 +133,17 @@ void Polyhedron::corpol_prepAssociator(
 		int iFacet,
 		int iEdge) {
 	DBG_START;
-	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour, iFacet,
-			iEdge);
-
-	bool checkVisibility = corpol_prepAssociator_checkVisibility(iContour, iFacet,
-			iEdge) == EXIT_SUCCESS;
-	if (!checkVisibility)
-		return;
-
-	bool checkAlreadyAdded = corpol_prepAssociator_checkAlreadyAdded(iContour,
-			iFacet, iEdge) == EXIT_SUCCESS;
-	if (!checkAlreadyAdded)
-		return;
+	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour,
+			iFacet, iEdge);
 
 	Vector3d v0_projected, v1_projected;
-	corpol_prepAssociator_project(iContour, iFacet, iEdge, v0_projected,
-			v1_projected);
-
-	bool checkExtinction = corpol_prepAssociator_checkExtinction(iContour, iFacet,
-			iEdge, v0_projected, v1_projected) == EXIT_SUCCESS;
-	if (!checkExtinction)
+	bool checkInit = corpol_prepAssociator_init(iContour, iFacet, iEdge,
+			v0_projected, v1_projected);
+	if (!checkInit)
 		return;
 
 	Vector3d v0_nearest, v1_nearest;
+
 	int iSideDistMin0 = corpol_prepAssociator_findNearest(iContour, v0_projected,
 			v0_nearest);
 	int iSideDistMin1 = corpol_prepAssociator_findNearest(iContour, v1_projected,
@@ -168,6 +156,34 @@ void Polyhedron::corpol_prepAssociator(
 	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0);
 
 	DBG_END;
+}
+
+int Polyhedron::corpol_prepAssociator_init(
+		int iContour,
+		int iFacet,
+		int iEdge,
+		Vector3d& v0_projected,
+		Vector3d& v1_projected) {
+	bool checkVisibility = corpol_prepAssociator_checkVisibility(iContour, iFacet,
+			iEdge) == EXIT_SUCCESS;
+	if (!checkVisibility)
+		return EXIT_FAILURE;
+
+	bool checkAlreadyAdded = corpol_prepAssociator_checkAlreadyAdded(iContour,
+			iFacet, iEdge) == EXIT_SUCCESS;
+	if (!checkAlreadyAdded)
+		return EXIT_FAILURE;
+
+	corpol_prepAssociator_project(iContour, iFacet, iEdge, v0_projected,
+			v1_projected);
+
+	bool checkExtinction = corpol_prepAssociator_checkExtinction(iContour, iFacet,
+			iEdge, v0_projected, v1_projected) == EXIT_SUCCESS;
+	if (!checkExtinction)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+
 }
 
 int Polyhedron::corpol_prepAssociator_checkVisibility(
@@ -282,7 +298,8 @@ void Polyhedron::corpol_prepAssociator_add(
 	Vector3d edge = vertices[iVertex1] - vertices[iVertex0];
 	bool ifDirectionIsProper = edge * side > 0;
 	double weight = corpol_weightForAssociation(iContour, iFacet);
-	DEBUG_PRINT("Adding contour # %d to the assoc list of edge %d", iContour, iEdge);
+	DEBUG_PRINT("Adding contour # %d to the assoc list of edge %d", iContour,
+			iEdge);
 	// Create new association
 	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
 			iContour, iSideDistMin, ifDirectionIsProper, weight);
@@ -430,8 +447,8 @@ bool Polyhedron::corpol_collinear_visibility(
 				|| (v0 == v1processed && v1 == v0processed)) {
 			// 3. In case of non-positive scalar product
 			// -- eliminate the edge from the buffer
-			DEBUG_PRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max, v1Max, v0,
-					v1);
+			DEBUG_PRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max, v1Max,
+					v0, v1);
 			return curEdge * mainEdge > 0;
 		}
 	}
