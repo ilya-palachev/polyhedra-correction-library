@@ -4,14 +4,7 @@
  * 
  * Created on 1 Май 2012 г., 12:42
  */
-#include <stdio.h>
-#include <stdlib.h>
-//#include <string.h>
-#include <math.h>
-
-//#include "ClusterNorm.h"
-#include "Polyhedron.h"
-//#include "SpherePoint.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 double distCluster(
 		ClusterNorm& cluster0,

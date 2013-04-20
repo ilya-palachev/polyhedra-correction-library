@@ -8,8 +8,6 @@
 #ifndef DEBUGASSERT_H_
 #define DEBUGASSERT_H_
 
-#include "PolyhedraCorrectionLibrary.h"
-
 #ifndef NDEBUG
 #define ASSERT(x) assert(x)
 #else

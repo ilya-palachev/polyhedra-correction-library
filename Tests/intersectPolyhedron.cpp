@@ -1,9 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctime>
-#include <string.h>
-
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 void test(
 		const char* name,

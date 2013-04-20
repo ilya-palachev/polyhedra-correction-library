@@ -5,8 +5,7 @@
  * Created on 1 Май 2012 г., 12:39
  */
 
-//#include "SpherePoint.h"
-#include "Polyhedron.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 SpherePoint::SpherePoint() :
 				vector(Vector3d(0., 0., 0.)),

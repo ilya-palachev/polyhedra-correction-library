@@ -1,6 +1,5 @@
 #ifndef POLYHEDRON_CLASS_H
 #define	POLYHEDRON_CLASS_H
-#include "PolyhedraCorrectionLibrary.h"
 
 const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-3;
 const double EPS_SIGNUM = 1e-15;
@@ -19,8 +18,8 @@ const double EPSILON_FOR_DIVISION = 1e-16;
 const double POROG = 0.5;
 
 enum Orientation {
-	ORIENTATION_LEFT = 0,
-	ORIENTATION_RIGHT = 1
+	ORIENTATION_LEFT,
+	ORIENTATION_RIGHT
 };
 
 class Polyhedron {

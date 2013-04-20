@@ -8,8 +8,6 @@
 #ifndef EDGESET_H
 #define	EDGESET_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class EdgeSet {
 private:
 	int len;

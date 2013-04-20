@@ -7,8 +7,6 @@
 #ifndef EDGE_H
 #define	EDGE_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 using namespace std;
 
 class Edge {

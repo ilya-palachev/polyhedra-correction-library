@@ -8,8 +8,6 @@
 #ifndef EDGELIST_H
 #define	EDGELIST_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class EdgeList {
 private:
 	int id;

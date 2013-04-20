@@ -9,8 +9,6 @@
 #ifndef MATRIXDISTNORM_H
 #define MATRIXDISTNORM_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class MatrixDistNorm {
 public:
 	int nMax;

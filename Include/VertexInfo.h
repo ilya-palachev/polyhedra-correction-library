@@ -8,9 +8,6 @@
 #ifndef VERTEXINFO_H
 #define	VERTEXINFO_H
 
-#include "PolyhedraCorrectionLibrary.h"
-#include "Vector3d.h"
-
 class VertexInfo {
 public:
 	int id;

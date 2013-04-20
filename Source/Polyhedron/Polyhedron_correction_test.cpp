@@ -1,6 +1,4 @@
-#include <math.h>
 #include "PolyhedraCorrectionLibrary.h"
-#include <ctime>
 
 int Polyhedron::corpolTest(
 		int numContours_input,

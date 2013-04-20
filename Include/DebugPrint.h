@@ -1,8 +1,6 @@
 #ifndef DEBUGPRINT_H
 #define DEBUGPRINT_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 //#define DEBUG
 //#define DEBUG1
 #define OUTPUT

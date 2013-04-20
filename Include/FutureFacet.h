@@ -8,8 +8,6 @@
 #ifndef FUTUREFACET_H
 #define	FUTUREFACET_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class FutureFacet {
 private:
 	int id;

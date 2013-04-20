@@ -8,8 +8,6 @@
 #ifndef CLUSTERNORM_H
 #define CLUSTERNORM_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class ClusterNorm {
 public:
 	int num;

@@ -4,22 +4,7 @@
  * 
  * Created on 1 Май 2012 г., 12:43
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "Polyhedron.h"
-//#include "list_squares_method.h"
-//#include "Vector3d.h"
-//#include "array_operations.h"
-//#include "Gauss_string.h"
-
-//#include "ClusterNorm.h"
-//#include "MatrixDistNorm.h"
-//#include "SpherePoint.h"
-//#include "TreeClusterNorm.h"
-//#include "TreeClusterNormNode.h"
+#include "PolyhedraCorrectionLibrary.h"
 
 TreeClusterNorm::TreeClusterNorm() :
 				root(NULL) {

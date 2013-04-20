@@ -1,6 +1,5 @@
-#include <stdio.h>
-
-#include "Polyhedron.h"
+#include "stdio.h"
+#include "array_operations.h"
 
 int min_int(
 		int a,

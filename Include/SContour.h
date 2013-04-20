@@ -8,8 +8,6 @@
 #ifndef SCONTOUR_H
 #define	SCONTOUR_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class SContour {
 public:
 	int id; // Indetifier

@@ -3,7 +3,6 @@
 #include <ctime>
 #include <string.h>
 
-#include "Polyhedron.h"
 #include "Gauss_test.h"
 
 int main(

@@ -8,8 +8,6 @@
 #ifndef TREECLUSTERNORM_H
 #define TREECLUSTERNORM_H
 
-#include "PolyhedraCorrectionLibrary.h"
-
 class TreeClusterNorm {
 public:
 	TreeClusterNormNode* root;

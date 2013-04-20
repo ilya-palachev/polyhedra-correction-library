@@ -6,7 +6,6 @@
  */
 
 #include "PolyhedraCorrectionLibrary.h"
-#include <dlfcn.h>
 
 const double EPS_MAX_ERROR = 1e-6;
 const double EPS_FOR_PRINT = 1e-15;

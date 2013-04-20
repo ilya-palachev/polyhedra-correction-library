@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "PolyhedraCorrectionLibrary.h"
 
 void my_fprint_Vector3d(

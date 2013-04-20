@@ -1,5 +1,4 @@
 #include "PolyhedraCorrectionLibrary.h"
-#include "array_operations.h"
 
 void EdgeSet::get_edge(
 		int id,

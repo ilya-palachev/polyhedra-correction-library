@@ -6,6 +6,7 @@
 #include <list>
 #include <assert.h>
 #include <time.h>
+#include <dlfcn.h>
 
 #include "Vector3d.h"
 #include "list_squares_method.h"
@@ -13,8 +14,6 @@
 #include "array_operations.h"
 #include "Gauss_string.h"
 
-#ifndef POLY_H
-#define POLY_H
 class Polyhedron;
 class Facet;
 class VertexInfo;
@@ -30,18 +29,17 @@ class ClusterNorm;
 class MatrixDistNorm;
 class TreeClusterNormNode;
 class TreeClusterNorm;
-#endif /* POLY_H */
 
 #include "Polyhedron.h"
 #include "VertexInfo.h"
-#include "Facet.h"
 #include "EdgeList.h"
+#include "Facet.h"
 #include "FutureFacet.h"
 #include "EdgeSet.h"
+#include "EdgeContourAssociation.h"
 #include "Edge.h"
 #include "SContour.h"
 #include "SideOfContour.h"
-#include "EdgeContourAssociation.h"
 
 #include "SpherePoint.h"
 #include "ClusterNorm.h"
