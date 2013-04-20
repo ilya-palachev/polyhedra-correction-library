@@ -20,7 +20,7 @@ void print_matrix2(
 static FILE* fout;
 
 int Polyhedron::correct_polyhedron() {
-	DBG_START;
+	DEBUG_START;
 
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
@@ -99,7 +99,7 @@ int Polyhedron::correct_polyhedron() {
 		delete[] solution;
 		solution = NULL;
 	}
-	DBG_END;
+	DEBUG_END;
 	return 0;
 }
 
@@ -167,7 +167,7 @@ int Polyhedron::corpol_iteration(
 		double* solution,
 		double* matrixFactorized,
 		int* indexPivot) {
-	DBG_START;
+	DEBUG_START;
 	corpol_calculate_matrix(prevPlanes, matrix, rightPart, solution);
 	int dim = 5 * numFacets;
 	print_matrix2(fout, dim, dim, matrix);
@@ -226,7 +226,7 @@ int Polyhedron::corpol_iteration(
 		facets[ifacet].plane.dist = solution[5 * ifacet + 3];
 	}
 
-	DBG_END;
+	DEBUG_END;
 	return info;
 }
 
@@ -235,7 +235,7 @@ void Polyhedron::corpol_calculate_matrix(
 		double* matrix,
 		double* rightPart,
 		double* solution) {
-	DBG_START;
+	DEBUG_START;
 	for (int i = 0; i < (5 * numFacets) * (5 * numFacets); ++i) {
 		matrix[i] = 0.;
 	}
@@ -386,7 +386,7 @@ void Polyhedron::corpol_calculate_matrix(
 			}
 		}
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 void print_matrix2(

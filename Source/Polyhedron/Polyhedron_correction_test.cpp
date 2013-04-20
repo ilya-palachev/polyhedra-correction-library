@@ -7,7 +7,7 @@ int Polyhedron::corpolTest(
 		int indFacetMoved,
 		double maxMoveDelta,
 		double shiftAngleFirst) {
-	DBG_START;
+	DEBUG_START;
 	numContours = numContours_input;
 	contours = new SContour[numContours];
 
@@ -46,7 +46,7 @@ int Polyhedron::corpolTest(
 		edges = NULL;
 	}
 
-	DBG_END;
+	DEBUG_END;
 	return 0;
 }
 
@@ -56,7 +56,7 @@ SContour& Polyhedron::corpolTest_createOneContour(
 		bool* bufferBool,
 		int* bufferInt0,
 		int* bufferInt1) {
-	DBG_START;
+	DEBUG_START;
 	bool* ifVisibleEdges = bufferBool;
 	int* visibleEdges = bufferInt0;
 	int* visibleEdgesSorted = bufferInt1;
@@ -155,13 +155,13 @@ SContour& Polyhedron::corpolTest_createOneContour(
 		sides[i].confidence = 1.;
 		sides[i].type = EEdgeRegular;
 	}
-	DBG_END;
+	DEBUG_END;
 	return *outputContour;
 }
 
 int Polyhedron::corpolTest_createAllContours(
 		double shiftAngleFirst) {
-	DBG_START;
+	DEBUG_START;
 	DEBUG_PRINT("Allocating 3 arrays of length %d", numEdges);
 	bool* bufferBool = new bool[numEdges];
 	int* bufferInt0 = new int[numEdges];
@@ -190,7 +190,7 @@ int Polyhedron::corpolTest_createAllContours(
 		delete[] bufferInt1;
 		bufferInt1 = NULL;
 	}
-	DBG_END;
+	DEBUG_END;
 	return 0;
 }
 

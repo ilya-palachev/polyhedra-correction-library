@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 void Polyhedron::deleteContent() {
-	DBG_START;
+	DEBUG_START;
 	if (vertices != NULL) {
 		delete[] vertices;
 		vertices = NULL;
@@ -18,7 +18,7 @@ void Polyhedron::deleteContent() {
 		delete[] edgeLists;
 		edgeLists = NULL;
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::makeCube(
@@ -26,7 +26,7 @@ void Polyhedron::makeCube(
 		double xCenter,
 		double yCenter,
 		double zCenter) {
-	DBG_START;
+	DEBUG_START;
 	deleteContent();
 
 	numFacets = 6;
@@ -100,14 +100,14 @@ void Polyhedron::makeCube(
 	for (int i = 0; i < numFacets; ++i) {
 		facets[i].parentPolyhedron = this;
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::makePyramid(
 		int numVerticesBase,
 		double height,
 		double radius) {
-	DBG_START;
+	DEBUG_START;
 	deleteContent();
 
 	numVertices = numFacets = numVerticesBase + 1;
@@ -144,14 +144,14 @@ void Polyhedron::makePyramid(
 
 	if (index)
 		delete[] index;
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::makePrism(
 		int numVerticesBase,
 		double height,
 		double radius) {
-	DBG_START;
+	DEBUG_START;
 	deleteContent();
 
 	vertices = new Vector3d[2 * numVerticesBase];
@@ -201,11 +201,11 @@ void Polyhedron::makePrism(
 
 	if (index)
 		delete[] index;
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::makeCubeCutted() {
-	DBG_START;
+	DEBUG_START;
 	deleteContent();
 
 	vertices = new Vector3d[16];
@@ -312,5 +312,5 @@ void Polyhedron::makeCubeCutted() {
 
 	numVertices = 16;
 	numFacets = 10;
-	DBG_END;
+	DEBUG_END;
 }

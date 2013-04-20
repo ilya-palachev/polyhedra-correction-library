@@ -14,14 +14,14 @@ static double weightForAssociations(
 }
 
 void Polyhedron::corpol_preprocess() {
-	DBG_START;
+	DEBUG_START;
 	preprocess_edges();
 	corpol_prepFindAssociations();
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::preprocess_edges() {
-	DBG_START;
+	DEBUG_START;
 	int numEdgesMax = numEdges = 0;
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
 		numEdgesMax += facets[iFacet].numVertices;
@@ -47,11 +47,11 @@ void Polyhedron::preprocess_edges() {
 	for (int i = 0; i < numEdges; ++i) {
 		edges[i].my_fprint(stdout);
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::corpol_prepFindAssociations() {
-	DBG_START;
+	DEBUG_START;
 	for (int iContour = 0; iContour < numContours; ++iContour) {
 		corpol_prepFindAssiciations_withContour(iContour);
 	}
@@ -60,22 +60,22 @@ void Polyhedron::corpol_prepFindAssociations() {
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
 		edges[iEdge].my_fprint(stdout);
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::corpol_prepFindAssiciations_withContour(
 		int iContour) {
-	DBG_START;
+	DEBUG_START;
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
 		corpol_prepFindAssociations_withContour_forFacet(iContour, iFacet);
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
 		int iContour,
 		int iFacet) {
-	DBG_START;
+	DEBUG_START;
 	int numVertex = facets[iFacet].numVertices;
 	int* indVertices = facets[iFacet].indVertices;
 	for (int iVertex = 0; iVertex < numVertex; ++iVertex) {
@@ -83,7 +83,7 @@ void Polyhedron::corpol_prepFindAssociations_withContour_forFacet(
 				indVertices[iVertex + 1]);
 		corpol_prepAssociator(iContour, iFacet, iEdge);
 	}
-	DBG_END;
+	DEBUG_END;
 }
 
 double Polyhedron::corpol_weightForAssociation(
@@ -132,7 +132,7 @@ void Polyhedron::corpol_prepAssociator(
 		int iContour,
 		int iFacet,
 		int iEdge) {
-	DBG_START;
+	DEBUG_START;
 	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour,
 			iFacet, iEdge);
 
@@ -155,7 +155,7 @@ void Polyhedron::corpol_prepAssociator(
 
 	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0);
 
-	DBG_END;
+	DEBUG_END;
 }
 
 int Polyhedron::corpol_prepAssociator_init(
@@ -345,7 +345,7 @@ static double distVertexEdge(
 bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 		Edge& edge,
 		Plane planeOfProjection) {
-	DBG_START;
+	DEBUG_START;
 	int v0 = edge.v0;
 	int v1 = edge.v1;
 	int f0 = edge.f0;
@@ -399,7 +399,7 @@ bool Polyhedron::corpol_collinear_visibility(
 		int v1processed,
 		Plane planeOfProjection,
 		int ifacet) {
-	DBG_START;
+	DEBUG_START;
 	int nv = facets[ifacet].numVertices;
 	int* index = facets[ifacet].indVertices;
 	Vector3d nu = planeOfProjection.norm;
@@ -455,7 +455,7 @@ bool Polyhedron::corpol_collinear_visibility(
 	}
 	DEBUG_PRINT("Error. Edge (%d, %d) cannot be found in facets %d", v0processed,
 			v1processed, ifacet);
-	DBG_END;
+	DEBUG_END;
 	return false;
 }
 
