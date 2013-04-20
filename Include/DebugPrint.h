@@ -23,16 +23,16 @@
 #define STDERR_PRINT(...)       fprintf(stderr, __VA_ARGS__)
 
 #ifndef NDEBUG
-#		define DBGPRINT(_fmt, ...)  \
+#		define DEBUG_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
 			WHEREARG, ##__VA_ARGS__)
 #		define ERROR_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
 			WHEREARG, ##__VA_ARGS__)
-#		define DBG_START DBGPRINT("Start")
-#		define DBG_END DBGPRINT("End")
+#		define DBG_START DEBUG_PRINT("Start")
+#		define DBG_END DEBUG_PRINT("End")
 #else
-#		define DBGPRINT(_fmt, ...)
+#		define DEBUG_PRINT(_fmt, ...)
 #		define ERROR_PRINT(_fmt, ...)
 #		define DBG_START
 #		define DBG_END
