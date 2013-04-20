@@ -27,7 +27,7 @@ void Polyhedron::preprocess_edges() {
 		numEdgesMax += facets[iFacet].numVertices;
 	}
 	numEdgesMax /= 2;
-	DBGPRINT("numEdgesMax = %d", numEdgesMax);
+	DEBUG_PRINT("numEdgesMax = %d", numEdgesMax);
 	for (int i = 0; i < numFacets; ++i) {
 		int numVerticesInFacet = facets[i].numVertices;
 		int * index = facets[i].indVertices;
@@ -108,9 +108,9 @@ double Polyhedron::corpol_visibilityForAssociation(
 	Vector3d directionOfProjection = contours[iContour].plane.norm;
 	directionOfProjection.norm(1.);
 	double x = norm0 * directionOfProjection;
-	DBGPRINT("x = %lf", x);
+	DEBUG_PRINT("x = %lf", x);
 	double y = norm1 * directionOfProjection;
-	DBGPRINT("y = %lf", y);
+	DEBUG_PRINT("y = %lf", y);
 	double sum = y + x;
 	double sub = y - x;
 	if (sum >= 0) {
@@ -133,7 +133,7 @@ void Polyhedron::corpol_prepAssociator(
 		int iFacet,
 		int iEdge) {
 	DBG_START;
-	DBGPRINT("processing contour # %d, facet # %d, edge # %d", iContour, iFacet,
+	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour, iFacet,
 			iEdge);
 
 	bool checkVisibility = corpol_prepAssociator_checkVisibility(iContour, iFacet,
@@ -176,7 +176,7 @@ int Polyhedron::corpol_prepAssociator_checkVisibility(
 		int iEdge) {
 	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
 	if (visibilityNumber < EPSILON_EDGE_CONTOUR_VISIBILITY) {
-		DBGPRINT("Edge is invisible on this contour (visibility %lf)!",
+		DEBUG_PRINT("Edge is invisible on this contour (visibility %lf)!",
 				visibilityNumber);
 		return EXIT_FAILURE;
 	}
@@ -193,10 +193,10 @@ int Polyhedron::corpol_prepAssociator_checkAlreadyAdded(
 			edges[iEdge].assocList.end();
 	--lastCont;
 	int iContourLastInList = lastCont->indContour;
-	DBGPRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
+	DEBUG_PRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
 			iContourLastInList, numAlreadyPushedAssocs);
 	if (numAlreadyPushedAssocs != 0 && iContourLastInList == iContour) {
-		DBGPRINT("Edge %d already has association with contour # %d", iEdge,
+		DEBUG_PRINT("Edge %d already has association with contour # %d", iEdge,
 				iContour);
 		return EXIT_FAILURE;
 	}
@@ -212,7 +212,7 @@ int Polyhedron::corpol_prepAssociator_checkExtinction(
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
-		DBGPRINT(
+		DEBUG_PRINT(
 				"Edge # %d (%d, %d) is reduced into point when projecting" "on the plane of projection of contour # %d",
 				iEdge, iVertex0, iVertex1, iContour);
 		return EXIT_FAILURE;
@@ -282,7 +282,7 @@ void Polyhedron::corpol_prepAssociator_add(
 	Vector3d edge = vertices[iVertex1] - vertices[iVertex0];
 	bool ifDirectionIsProper = edge * side > 0;
 	double weight = corpol_weightForAssociation(iContour, iFacet);
-	DBGPRINT("Adding contour # %d to the assoc list of edge %d", iContour, iEdge);
+	DEBUG_PRINT("Adding contour # %d to the assoc list of edge %d", iContour, iEdge);
 	// Create new association
 	EdgeContourAssociation* assocForCurrentEdge = new EdgeContourAssociation(
 			iContour, iSideDistMin, ifDirectionIsProper, weight);
@@ -340,7 +340,7 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 
 	if ((sign0 > EPS_COLLINEARITY && sign1 > EPS_COLLINEARITY)
 			|| (sign0 < EPS_COLLINEARITY && sign1 < EPS_COLLINEARITY)) {
-		DBGPRINT(
+		DEBUG_PRINT(
 				"Edge is invisible: it's covered by facets, sign0 = %le, sign1 = %le",
 				sign0, sign1);
 		return false;
@@ -351,19 +351,19 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 
 	if (!ifOrthogonalTo1stFacet && !ifOrthogonalTo2ndFacet) {
 // Regular case. Nothing is orthogonal.
-		DBGPRINT("\t\tRegular case. Nothing is orthogonal.");
+		DEBUG_PRINT("\t\tRegular case. Nothing is orthogonal.");
 		return true;
 	}
 
 	else if (ifOrthogonalTo1stFacet && ifOrthogonalTo2ndFacet) {
 // When the edge is orthogonal to the plane of projection
-		DBGPRINT("\t\tThe edge is orthogonal to the plane of projection");
+		DEBUG_PRINT("\t\tThe edge is orthogonal to the plane of projection");
 		return false;
 	}
 
 	else if (ifOrthogonalTo1stFacet) {
 // When only the first facets is orthogonal to the plane of projection
-		DBGPRINT(
+		DEBUG_PRINT(
 				"\t\tOnly the first facet is orthogonal to the plane of projection");
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f0);
 	}
@@ -371,7 +371,7 @@ bool Polyhedron::corpol_edgeIsVisibleOnPlane(
 	else // ifOrthogonalTo2ndFacet
 	{
 // When only the second facets is orthogonal to the plane of projection
-		DBGPRINT(
+		DEBUG_PRINT(
 				"\t\tOnly the second facets is orthogonal to the plane of projection");
 		return corpol_collinear_visibility(v0, v1, planeOfProjection, f1);
 	}
@@ -410,7 +410,7 @@ bool Polyhedron::corpol_collinear_visibility(
 // then we take its another edge which includes vertex iverteMax
 
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY) {
-		DBGPRINT(
+		DEBUG_PRINT(
 				"mainEdge (%d, %d) is orthogonal to the plane of projection, " "so we are taking another edge including ivertexMax (%d)",
 				v0Max, v1Max, ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
@@ -430,12 +430,12 @@ bool Polyhedron::corpol_collinear_visibility(
 				|| (v0 == v1processed && v1 == v0processed)) {
 			// 3. In case of non-positive scalar product
 			// -- eliminate the edge from the buffer
-			DBGPRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max, v1Max, v0,
+			DEBUG_PRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max, v1Max, v0,
 					v1);
 			return curEdge * mainEdge > 0;
 		}
 	}
-	DBGPRINT("Error. Edge (%d, %d) cannot be found in facets %d", v0processed,
+	DEBUG_PRINT("Error. Edge (%d, %d) cannot be found in facets %d", v0processed,
 			v1processed, ifacet);
 	DBG_END;
 	return false;

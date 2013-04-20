@@ -72,7 +72,7 @@ int Gauss_find_main_element(
 			norm = tmp;
 		}
 	}
-	DBGPRINT("Pivot = %le in column %d", norm, coloumn);
+	DEBUG_PRINT("Pivot = %le in column %d", norm, coloumn);
 	return imain;
 }
 

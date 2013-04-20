@@ -39,23 +39,23 @@ int Polyhedron::correct_polyhedron() {
 
 	Plane * prevPlanes = new Plane[numFacets];
 
-	DBGPRINT("memory allocation done");
+	DEBUG_PRINT("memory allocation done");
 
 	for (int i = 0; i < numFacets; ++i) {
 		prevPlanes[i] = facets[i].plane;
 	}
-	DBGPRINT("memory initialization done");
+	DEBUG_PRINT("memory initialization done");
 
 	double error = corpol_calculate_functional(prevPlanes);
 	corpol_calculate_matrix(prevPlanes, matrix, rightPart, solution);
 	print_matrix2(fout, dim, dim, matrix);
 
-	DBGPRINT("first functional calculation done. error = %e", error);
+	DEBUG_PRINT("first functional calculation done. error = %e", error);
 
 	int numIterations = 0;
 
 	while (error > EPS_MAX_ERROR) {
-		DBGPRINT("Iteration %d\n", numIterations);
+		DEBUG_PRINT("Iteration %d\n", numIterations);
 
 		char* fileName = new char[255];
 		sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
@@ -67,14 +67,14 @@ int Polyhedron::correct_polyhedron() {
 		int ret = corpol_iteration(prevPlanes, matrix, rightPart, solution,
 				matrixFactorized, indexPivot);
 		for (int i = 0; i < numFacets; ++i) {
-			DBGPRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)", i,
+			DEBUG_PRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)", i,
 					prevPlanes[i].norm.x, prevPlanes[i].norm.y, prevPlanes[i].norm.z,
 					prevPlanes[i].dist, facets[i].plane.norm.x, facets[i].plane.norm.y,
 					facets[i].plane.norm.z, facets[i].plane.dist);
 			prevPlanes[i] = facets[i].plane;
 		}
 		error = corpol_calculate_functional(prevPlanes);
-		DBGPRINT("error = %le", error);
+		DEBUG_PRINT("error = %le", error);
 		++numIterations;
 		if (ret != 0) {
 			break;
@@ -108,7 +108,7 @@ double Polyhedron::corpol_calculate_functional(
 	double sum = 0;
 
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
-//    	DBGPRINT("%s: processing edge #%d\n", __func__, i);
+//    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
 		int f0 = edges[iEdge].f0;
 		int f1 = edges[iEdge].f1;
 		Plane plane0 = facets[f0].plane;
@@ -120,7 +120,7 @@ double Polyhedron::corpol_calculate_functional(
 		for (list<EdgeContourAssociation>::iterator itCont =
 				edges[iEdge].assocList.begin(); itCont != edges[iEdge].assocList.end();
 				++itCont) {
-//        	DBGPRINT("\t%s: processing contour #%d\n", __func__, j);
+//        	DEBUG_PRINT("\t%s: processing contour #%d\n", __func__, j);
 			int curContour = itCont->indContour;
 			int curNearestSide = itCont->indNearestSide;
 			SideOfContour * sides = contours[curContour].sides;
@@ -130,7 +130,7 @@ double Polyhedron::corpol_calculate_functional(
 			double enumerator = -planePrev1.norm * planeOfProjection.norm;
 			double denominator = (planePrev0.norm - planePrev1.norm)
 					* planeOfProjection.norm;
-//			DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
+//			DEBUG_PRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
 //					iEdge, edges[iEdge].v0, edges[iEdge].v1, itCont->indContour, enumerator, denominator);
 
 //			ASSERT(fabs(denominator) > 1e-10);
@@ -196,18 +196,18 @@ int Polyhedron::corpol_iteration(
 			&relativeBackwardError);
 
 	if (info == 0) {
-		DBGPRINT("LAPACKE_dsysvx: successful exit");
+		DEBUG_PRINT("LAPACKE_dsysvx: successful exit");
 	} else if (info < 0) {
-		DBGPRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value", -info);
+		DEBUG_PRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value", -info);
 	} else if (info <= dim) {
-		DBGPRINT(
+		DEBUG_PRINT(
 				"LAPACKE_dsysvx: D(%d,%d) is exactly zero.  " "The factorization" "has been completed but the factor D is exactly" "singular, so the solution and error bounds could" "not be computed. RCOND = 0 is returned.",
 				info, info);
 	} else if (info == dim + 1) {
-		DBGPRINT(
+		DEBUG_PRINT(
 				"LAPACKE_dsysvx: D is non-singular, but RCOND is " "less than machine" "precision, meaning that the matrix is singular" "to working precision.  Nevertheless, the" "solution and error bounds are computed because" "there are a number of situations where the" "computed solution can be more accurate than the" "value of RCOND would suggest.");
 	} else {
-		DBGPRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
+		DEBUG_PRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
 	}
 
 	for (int ifacet = 0; ifacet < numFacets; ++ifacet) {
@@ -290,7 +290,7 @@ void Polyhedron::corpol_calculate_matrix(
 				double enumerator = -planePrevNeighbour.norm * planeOfProjection.norm;
 				double denominator = ((planePrevThis.norm - planePrevNeighbour.norm)
 						* planeOfProjection.norm);
-//				DBGPRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
+//				DEBUG_PRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
 //						iedge, v0, v1, itCont->indContour, enumerator, denominator);
 //				ASSERT(fabs(denominator) > 1e-10);
 
@@ -302,12 +302,12 @@ void Polyhedron::corpol_calculate_matrix(
 
 				// Debug!!!
 				if (iplane == 0) {
-					DBGPRINT("nearest side for the first edge of the facet #0");
-					DBGPRINT("    in contour # %d", curContour);
-					DBGPRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)", A_ij1.x,
+					DEBUG_PRINT("nearest side for the first edge of the facet #0");
+					DEBUG_PRINT("    in contour # %d", curContour);
+					DEBUG_PRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)", A_ij1.x,
 							A_ij1.y, A_ij1.z, A_ij2.x, A_ij2.y, A_ij2.z);
-					DBGPRINT("    while the edge is the following:");
-					DBGPRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)", vertices[v0].x,
+					DEBUG_PRINT("    while the edge is the following:");
+					DEBUG_PRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)", vertices[v0].x,
 							vertices[v0].y, vertices[v0].z, vertices[v1].x, vertices[v1].y,
 							vertices[v1].z);
 				}
@@ -319,8 +319,8 @@ void Polyhedron::corpol_calculate_matrix(
 				double y1 = A_ij2.y;
 				double z1 = A_ij2.z;
 
-//                DBGPRINT("\t\t A_ij1 = (%lf, %lf, %lf)", x0, y1, z1);
-//                DBGPRINT("\t\t A_ij2 = (%lf, %lf, %lf)", x1, y1, z1);
+//                DEBUG_PRINT("\t\t A_ij1 = (%lf, %lf, %lf)", x0, y1, z1);
+//                DEBUG_PRINT("\t\t A_ij2 = (%lf, %lf, %lf)", x1, y1, z1);
 
 				double xx = x0 * x0 + x1 * x1;
 				double xy = x0 * y0 + x1 * y1;

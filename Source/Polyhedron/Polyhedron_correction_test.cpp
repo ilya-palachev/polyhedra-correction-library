@@ -20,7 +20,7 @@ int Polyhedron::corpolTest(
 	numEdgesMax = numEdgesMax / 2;
 
 	numEdges = numEdgesMax;
-	DBGPRINT("numEdges = %d", numEdges);
+	DEBUG_PRINT("numEdges = %d", numEdges);
 	edges = new Edge[numEdgesMax];
 
 	preprocess_edges();
@@ -63,19 +63,19 @@ SContour& Polyhedron::corpolTest_createOneContour(
 
 	Vector3d nu = planeOfProjection.norm;
 
-	DBGPRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n", idOfContour,
+	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n", idOfContour,
 			nu.x, nu.y, nu.z);
-	DBGPRINT("numEdges = %d", numEdges);
+	DEBUG_PRINT("numEdges = %d", numEdges);
 
 	int numVisibleEdges = 0;
 	bool ifVisibleCurrEdge;
 
 	for (int iedge = 0; iedge < numEdges; ++iedge) {
-		DBGPRINT("\t(1st processing)Processing edge # %d (%d, %d)\n", iedge,
+		DEBUG_PRINT("\t(1st processing)Processing edge # %d (%d, %d)\n", iedge,
 				edges[iedge].v0, edges[iedge].v1);
 		ifVisibleCurrEdge = corpol_edgeIsVisibleOnPlane(edges[iedge],
 				planeOfProjection);
-		DBGPRINT("\t visibility checked : %s", ifVisibleCurrEdge ?
+		DEBUG_PRINT("\t visibility checked : %s", ifVisibleCurrEdge ?
 				"visible" : "invisible");
 		numVisibleEdges += ifVisibleCurrEdge;
 		ifVisibleEdges[iedge] = ifVisibleCurrEdge;
@@ -85,7 +85,7 @@ SContour& Polyhedron::corpolTest_createOneContour(
 	for (int iedge = 0; iedge < numEdges; ++iedge) {
 		if (ifVisibleEdges[iedge]) {
 			visibleEdges[iedgeVisible++] = iedge;
-			DBGPRINT("visibleEdges[%d] = %d, it is (%d, %d)", iedgeVisible - 1,
+			DEBUG_PRINT("visibleEdges[%d] = %d, it is (%d, %d)", iedgeVisible - 1,
 					visibleEdges[iedgeVisible - 1],
 					edges[visibleEdges[iedgeVisible - 1]].v0,
 					edges[visibleEdges[iedgeVisible - 1]].v1);
@@ -98,13 +98,13 @@ SContour& Polyhedron::corpolTest_createOneContour(
 	int ivertexCurr = edges[visibleEdges[iedgeCurr]].v1;
 	int numIterations = 0;
 	while (numVisibleEdgesSorted < numVisibleEdges) {
-		DBGPRINT("Searching next edge for edge # %d (%d, %d)", iedgeCurr,
+		DEBUG_PRINT("Searching next edge for edge # %d (%d, %d)", iedgeCurr,
 				edges[visibleEdges[iedgeCurr]].v0, edges[visibleEdges[iedgeCurr]].v1);
-		DBGPRINT("numVisibleEdgesSorted = %d", numVisibleEdgesSorted);
-		DBGPRINT("numVisibleEdges = %d", numVisibleEdges);
-		DBGPRINT("ivertexCurr = %d", ivertexCurr);
+		DEBUG_PRINT("numVisibleEdgesSorted = %d", numVisibleEdgesSorted);
+		DEBUG_PRINT("numVisibleEdges = %d", numVisibleEdges);
+		DEBUG_PRINT("ivertexCurr = %d", ivertexCurr);
 		for (int iedgeNext = 0; iedgeNext < numVisibleEdges; ++iedgeNext) {
-			DBGPRINT("\tCandidate is # %d (%d, %d)", iedgeNext,
+			DEBUG_PRINT("\tCandidate is # %d (%d, %d)", iedgeNext,
 					edges[visibleEdges[iedgeNext]].v0, edges[visibleEdges[iedgeNext]].v1);
 			if (iedgeNext == iedgeCurr) {
 				continue;
@@ -122,22 +122,22 @@ SContour& Polyhedron::corpolTest_createOneContour(
 			}
 		}
 		if (numIterations++ > numVisibleEdges * numEdges) {
-			DBGPRINT("Error. Infinite loop for search...");
+			DEBUG_PRINT("Error. Infinite loop for search...");
 			break;
 		}
 	}
 
 	for (int iedge = 0; iedge < numVisibleEdgesSorted; ++iedge) {
-		DBGPRINT("visibleEdgesSorted[%d] = %d (%d, %d)", iedge,
+		DEBUG_PRINT("visibleEdgesSorted[%d] = %d (%d, %d)", iedge,
 				visibleEdgesSorted[iedge], edges[visibleEdgesSorted[iedge]].v0,
 				edges[visibleEdgesSorted[iedge]].v1);
 	}
 
-	DBGPRINT("Allocating \"outputContour\"");
+	DEBUG_PRINT("Allocating \"outputContour\"");
 	SContour* outputContour = new SContour;
 	outputContour->id = idOfContour; // To make output more understandable
 	outputContour->sides = new SideOfContour[numVisibleEdges];
-	DBGPRINT("Allocating \"sides\"");
+	DEBUG_PRINT("Allocating \"sides\"");
 	outputContour->ns = numVisibleEdges;
 	outputContour->plane = planeOfProjection;
 	outputContour->poly = this;
@@ -162,7 +162,7 @@ SContour& Polyhedron::corpolTest_createOneContour(
 int Polyhedron::corpolTest_createAllContours(
 		double shiftAngleFirst) {
 	DBG_START;
-	DBGPRINT("Allocating 3 arrays of length %d", numEdges);
+	DEBUG_PRINT("Allocating 3 arrays of length %d", numEdges);
 	bool* bufferBool = new bool[numEdges];
 	int* bufferInt0 = new int[numEdges];
 	int* bufferInt1 = new int[numEdges];

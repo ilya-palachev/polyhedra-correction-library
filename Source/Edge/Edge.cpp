@@ -83,7 +83,7 @@ Edge::Edge(
 }
 
 Edge::~Edge() {
-	DBGPRINT("Attention! edge #%d is deleting now\n", id);
+	DEBUG_PRINT("Attention! edge #%d is deleting now\n", id);
 }
 
 Edge& Edge::operator =(

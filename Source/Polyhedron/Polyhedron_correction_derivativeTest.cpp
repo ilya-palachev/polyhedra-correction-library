@@ -16,7 +16,7 @@ void Polyhedron::corpol_derivativeTest_1(
 		double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_1(
 				iVariable, matrix);
 
-		DBGPRINT("value from derivative test: %le, value from matrix: %le",
+		DEBUG_PRINT("value from derivative test: %le, value from matrix: %le",
 				valueFromDerTest, valueFromMatrix);
 
 		int iFacet = iVariable / 4;
@@ -78,7 +78,7 @@ double Polyhedron::corpol_calculate_functional_derivative_1(
 		Plane* prevPlanes,
 		int iVariable) {
 	if (iVariable < 0 || iVariable >= numFacets * 4) {
-		DBGPRINT("Error. iVariable = %d is out of bounds", iVariable);
+		DEBUG_PRINT("Error. iVariable = %d is out of bounds", iVariable);
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
@@ -131,9 +131,9 @@ void Polyhedron::corpol_derivativeTest_2(
 			int jFacet = jVariable / 4;
 			int jCoefficient = jVariable % 4;
 
-			DBGPRINT("value from derivative test: %le, value from matrix: %le",
+			DEBUG_PRINT("value from derivative test: %le, value from matrix: %le",
 					valueFromDerTest, valueFromMatrix);
-			DBGPRINT(
+			DEBUG_PRINT(
 					" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
 					iFacet, iCoefficient, jFacet, jCoefficient);
 
@@ -166,11 +166,11 @@ double Polyhedron::corpol_calculate_functional_derivative_2(
 		int iVariable,
 		int jVariable) {
 	if (iVariable < 0 || iVariable >= numFacets * 4) {
-		DBGPRINT("Error. iVariable = %d is out of bounds", iVariable);
+		DEBUG_PRINT("Error. iVariable = %d is out of bounds", iVariable);
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 	if (jVariable < 0 || jVariable >= numFacets * 4) {
-		DBGPRINT("Error. jVariable = %d is out of bounds", jVariable);
+		DEBUG_PRINT("Error. jVariable = %d is out of bounds", jVariable);
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
