@@ -156,8 +156,11 @@ public:
 
 	void test_pair_neighbours();
 
-  //Facet_inertia.cpp
-  bool consect_x(double y, double z, double& x);
+	//Facet_inertia.cpp
+	bool consect_x(
+			double y,
+			double z,
+			double& x);
 
 };
 

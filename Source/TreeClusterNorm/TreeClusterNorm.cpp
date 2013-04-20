@@ -21,35 +21,38 @@
 //#include "TreeClusterNorm.h"
 //#include "TreeClusterNormNode.h"
 
-
 TreeClusterNorm::TreeClusterNorm() :
-root(NULL)
-{}
+				root(NULL) {
+}
 
-TreeClusterNorm::TreeClusterNorm(const TreeClusterNorm& orig) :
-root(orig.root)
-{}
+TreeClusterNorm::TreeClusterNorm(
+		const TreeClusterNorm& orig) :
+				root(orig.root) {
+}
 
-TreeClusterNorm::TreeClusterNorm(TreeClusterNormNode* root_orig) :
-root(root_orig)
-{}
+TreeClusterNorm::TreeClusterNorm(
+		TreeClusterNormNode* root_orig) :
+				root(root_orig) {
+}
 
-TreeClusterNorm::~TreeClusterNorm() {}
+TreeClusterNorm::~TreeClusterNorm() {
+}
 
-void TreeClusterNorm::fprint(FILE* file) {
-    root->fprint(file, 0);
+void TreeClusterNorm::fprint(
+		FILE* file) {
+	root->fprint(file, 0);
 }
 
 //void TreeClusterNorm::fprint_dendrogamma(FILE* file) {
 //    root->fprint(file, 0);
 //}
 
-void TreeClusterNorm::fprint_dendrogamma_lev(FILE* file) {
-    for(int i = 0; i< 4; i++)
-    {
-        root->fprint_dendrogramma_lev(file,0,i);
-        fprintf(file, "\n");
-    }
-    root->cluster->fprint(stdout);
+void TreeClusterNorm::fprint_dendrogamma_lev(
+		FILE* file) {
+	for (int i = 0; i < 4; i++) {
+		root->fprint_dendrogramma_lev(file, 0, i);
+		fprintf(file, "\n");
+	}
+	root->cluster->fprint(stdout);
 
 }

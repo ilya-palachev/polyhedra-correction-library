@@ -3,7 +3,7 @@
  *
  * Created on:  01.05.2012
  *     Author:  Kaligin Nikolai <nkaligin@yandex.ru>
-*/
+ */
 
 #ifndef TREECLUSTERNORMNODE_H
 #define TREECLUSTERNORMNODE_H
@@ -12,20 +12,26 @@
 
 class TreeClusterNormNode {
 public:
-    ClusterNorm* cluster;
+	ClusterNorm* cluster;
 
-    TreeClusterNormNode* parent;
+	TreeClusterNormNode* parent;
 
-    TreeClusterNormNode* child0;
-    TreeClusterNormNode* child1;
+	TreeClusterNormNode* child0;
+	TreeClusterNormNode* child1;
 
-    TreeClusterNormNode();
-    TreeClusterNormNode(const TreeClusterNormNode& orig);
-    virtual ~TreeClusterNormNode();
+	TreeClusterNormNode();
+	TreeClusterNormNode(
+			const TreeClusterNormNode& orig);
+	virtual ~TreeClusterNormNode();
 
-    void fprint(FILE* file, int level);
+	void fprint(
+			FILE* file,
+			int level);
 //    void fprint_dendrogramma(FILE* file, int level);
-    void fprint_dendrogramma_lev(FILE* file, int level, int fix);
+	void fprint_dendrogramma_lev(
+			FILE* file,
+			int level,
+			int fix);
 private:
 
 };

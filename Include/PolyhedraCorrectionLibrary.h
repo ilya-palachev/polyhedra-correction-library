@@ -32,7 +32,6 @@ class TreeClusterNormNode;
 class TreeClusterNorm;
 #endif /* POLY_H */
 
-
 #include "Polyhedron.h"
 #include "VertexInfo.h"
 #include "Facet.h"

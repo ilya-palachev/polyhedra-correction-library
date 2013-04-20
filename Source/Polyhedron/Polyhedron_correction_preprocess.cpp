@@ -261,12 +261,12 @@ int Polyhedron::corpol_prepAssociator_findNearest(
 }
 
 double Polyhedron::corpol_prepAssociator_calcArea(
-			int iContour,
-			int iSideDistMin0,
-			int iSideDistMin1,
-			Vector3d v0_nearest,
-			Vector3d v1_nearest,
-			Orientation orientation) {
+		int iContour,
+		int iSideDistMin0,
+		int iSideDistMin1,
+		Vector3d v0_nearest,
+		Vector3d v1_nearest,
+		Orientation orientation) {
 
 }
 
