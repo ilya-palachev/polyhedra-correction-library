@@ -216,8 +216,7 @@ void test_J11(
 	sprintf(file_name_in, "./poly-data-in/%s.dat", name);
 	sprintf(file_name_out, "./poly-data-out/%s.ply", name);
 
-	printf(name);
-	printf("\n");
+	printf("%s\n", name);
 	switch (type) {
 	case 0:
 		poly.fscan_default_0(file_name_in);
@@ -766,8 +765,7 @@ void test_BuildTreeNorm(
 	sprintf(file_name_in, "./poly-data-in/%s.dat", name);
 	sprintf(file_name_out, "../poly-data-out/%s - cluster.ply", name);
 
-	printf(name);
-	printf("\n");
+	printf("%s\n", name);
 	switch (type) {
 	case 0:
 		poly.fscan_default_0(file_name_in);
