@@ -53,6 +53,14 @@ SpherePoint::SpherePoint(
 SpherePoint::~SpherePoint() {
 }
 
+SpherePoint& SpherePoint::operator =(
+		const SpherePoint& orig) {
+	vector = orig.vector;
+	phi = orig.phi;
+	psi = orig.psi;
+	return *this;
+}
+
 double dist(
 		SpherePoint& point0,
 		SpherePoint& point1) {
@@ -106,7 +114,7 @@ SpherePoint& MassCentre(
 	}
 	sum_phi /= areaTotal;
 	sum_psi /= areaTotal;
-	newSpherePoint = SpherePoint(sum_phi, sum_psi);
-	return newSpherePoint;
+	SpherePoint* newSpherePoint_returned = new SpherePoint(sum_phi, sum_psi);
+	return *newSpherePoint_returned;
 
 }

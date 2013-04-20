@@ -28,6 +28,8 @@ public:
 	SpherePoint(
 			const SpherePoint& orig);
 	~SpherePoint();
+	SpherePoint& operator =(
+			const SpherePoint& orig);
 };
 
 double dist(
