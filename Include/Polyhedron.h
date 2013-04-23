@@ -1,6 +1,8 @@
 #ifndef POLYHEDRON_CLASS_H
 #define	POLYHEDRON_CLASS_H
 
+const int INT_NOT_INITIALIZED = -RAND_MAX;
+
 const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-3;
 const double EPS_SIGNUM = 1e-15;
 const double EPS_COLLINEARITY = 1e-14;
@@ -16,6 +18,8 @@ const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
 const double EPSILON_FOR_DIVISION = 1e-16;
 
 const double POROG = 0.5;
+
+const double ASSOCIATOR_MIN_PORTION_REL = 0.1;
 
 enum Orientation {
 	ORIENTATION_LEFT,
@@ -444,12 +448,17 @@ public:
 
 	void corpol_prepFindAssociations();
 
+	void corpol_prepFindAssociations_init(
+			Polyhedron* polyhedronTmp);
+
 	void corpol_prepFindAssiciations_withContour(
-			int iContour);
+			int iContour,
+			Polyhedron* polyhedronTmp);
 
 	void corpol_prepFindAssociations_withContour_forFacet(
 			int iContour,
-			int iFacet);
+			int iFacet,
+			Polyhedron* polyhedronTmp);
 
 	double corpol_weightForAssociation(
 			int iContour,
@@ -462,12 +471,14 @@ public:
 	void corpol_prepAssociator(
 			int iContour,
 			int iFacet,
-			int iEdge);
+			int iEdge,
+			Polyhedron* polyhedronTmp);
 
 	inline int corpol_prepAssociator_init(
 			int iContour,
 			int iFacet,
 			int iEdge,
+			Polyhedron* polyhedronTmp,
 			Vector3d& v0_projected,
 			Vector3d& v1_projected);
 
@@ -502,6 +513,7 @@ public:
 
 	inline double corpol_prepAssociator_calcArea(
 			int iContour,
+			Polyhedron* polyhedronTmp,
 			int iSideDistMin0,
 			int iSideDistMin1,
 			Vector3d v0_nearest,
@@ -512,7 +524,11 @@ public:
 			int iContour,
 			int iFacet,
 			int iEdge,
-			int iSideDistMin);
+			int iSideDistMin0,
+			int iSideDistMin1,
+			Vector3d v0_nearest,
+			Vector3d v1_nearest,
+			Orientation orientation);
 
 	bool corpol_edgeIsVisibleOnPlane(
 			Edge& edge,
