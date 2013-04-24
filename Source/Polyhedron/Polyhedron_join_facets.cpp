@@ -1562,6 +1562,23 @@ int Polyhedron::add_vertex(
 	return numVertices - 1;
 }
 
+void Polyhedron::set_vertex(
+		int position,
+		Vector3d vec) {
+	DEBUG_START;
+	DEBUG_PRINT("Setting vertex %d of polyhedron", position);
+	DEBUG_PRINT("sizeof vertices = %d, sizeof Vector3d = %d", sizeof(vertices),
+			sizeof(Vector3d));
+	if (position >= numVertices) {
+		ERROR_PRINT("Cannot set %d-th vertex, because number of vertices",
+				position);
+		ERROR_PRINT("is bounded with %d", numVertices);
+		return;
+	}
+	vertices[position] = vec;
+	DEBUG_END;
+}
+
 void Polyhedron::print_vertex(
 		int i) {
 	printf("vertex %d : (%lf , %lf , %lf)\n", i, vertices[i].x, vertices[i].y,

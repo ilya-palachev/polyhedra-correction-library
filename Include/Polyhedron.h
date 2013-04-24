@@ -48,6 +48,9 @@ public:
 	Polyhedron();
 	Polyhedron(
 			int numv_orig,
+			int numf_orig);
+	Polyhedron(
+			int numv_orig,
 			int numf_orig,
 			Vector3d* vertex_orig,
 			Facet* facet_orig);
@@ -158,6 +161,9 @@ public:
 			int v);
 	int add_vertex(
 			Vector3d& vec);
+	void set_vertex(
+			int position,
+			Vector3d vec);
 	void print_vertex(
 			int i);
 
