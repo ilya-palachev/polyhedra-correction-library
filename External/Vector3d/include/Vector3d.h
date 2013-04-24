@@ -33,6 +33,16 @@ public:
 					z(c) {
 	}
 
+	/* Added by Ilya Palachev on 2013-04-24
+	 * to make possible some tricks with associator
+	 * in Polyhedron correction
+	 */
+	Vector3d& operator =(const Vector3d& orig) {
+		x = orig.x;
+		y = orig.y;
+		z = orig.z;
+	}
+
 	Vector3d operator -() const {
 		return Vector3d(-x, -y, -z);
 	}
