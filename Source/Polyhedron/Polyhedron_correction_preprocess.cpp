@@ -203,6 +203,7 @@ int Polyhedron::corpol_prepAssociator_init(
 		Polyhedron* polyhedronTmp,
 		Vector3d& v0_projected,
 		Vector3d& v1_projected) {
+	DEBUG_START;
 	bool checkVisibility = corpol_prepAssociator_checkVisibility(iContour, iFacet,
 			iEdge) == EXIT_SUCCESS;
 	if (!checkVisibility)
@@ -230,20 +231,23 @@ int Polyhedron::corpol_prepAssociator_init(
 				contours[iContour].sides[iSide].A2;
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;
-	return EXIT_SUCCESS;
 
+	DEBUG_END;
+	return EXIT_SUCCESS;
 }
 
 int Polyhedron::corpol_prepAssociator_checkVisibility(
 		int iContour,
 		int iFacet,
 		int iEdge) {
+	DEBUG_START;
 	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
 	if (visibilityNumber < EPSILON_EDGE_CONTOUR_VISIBILITY) {
 		DEBUG_PRINT("Edge is invisible on this contour (visibility %lf)!",
 				visibilityNumber);
 		return EXIT_FAILURE;
 	}
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
@@ -251,6 +255,7 @@ int Polyhedron::corpol_prepAssociator_checkAlreadyAdded(
 		int iContour,
 		int iFacet,
 		int iEdge) {
+	DEBUG_START;
 	// Check whether this association has been already added to the list
 	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
 	list<EdgeContourAssociation>::iterator lastCont =
@@ -264,6 +269,7 @@ int Polyhedron::corpol_prepAssociator_checkAlreadyAdded(
 				iContour);
 		return EXIT_FAILURE;
 	}
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
@@ -273,6 +279,7 @@ int Polyhedron::corpol_prepAssociator_checkExtinction(
 		int iEdge,
 		Vector3d v0_projected,
 		Vector3d v1_projected) {
+	DEBUG_START;
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS) {
@@ -281,6 +288,7 @@ int Polyhedron::corpol_prepAssociator_checkExtinction(
 		DEBUG_PRINT("on the plane of projection of contour # %d", iContour);
 		return EXIT_FAILURE;
 	}
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
@@ -290,6 +298,7 @@ void Polyhedron::corpol_prepAssociator_project(
 		int iEdge,
 		Vector3d& v0_projected,
 		Vector3d& v1_projected) {
+	DEBUG_START;
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
 	Vector3d v0 = vertices[iVertex0];
@@ -303,7 +312,7 @@ void Polyhedron::corpol_prepAssociator_project(
 			v0_projected.y, v0_projected.z);
 	DEBUG_PRINT("v1 after projection: (%lf, %lf, %lf)", v1_projected.x,
 			v1_projected.y, v1_projected.z);
-
+	DEBUG_END;
 }
 
 int Polyhedron::corpol_prepAssociator_findNearest(
@@ -311,6 +320,7 @@ int Polyhedron::corpol_prepAssociator_findNearest(
 		Vector3d v_projected,
 		Vector3d& v_nearest) {
 
+	DEBUG_START;
 	SideOfContour* sides = contours[iContour].sides;
 	int numSides = contours[iContour].ns;
 	double distMin;
@@ -333,6 +343,7 @@ int Polyhedron::corpol_prepAssociator_findNearest(
 		}
 	}
 	ASSERT(distMin < 0.1);
+	DEBUG_END;
 	return iSideDistMin;
 }
 
@@ -351,6 +362,7 @@ double Polyhedron::corpol_prepAssociator_calcArea(
 		Vector3d v1_nearest,
 		Orientation orientation) {
 
+	DEBUG_START;
 	int numVerticesTmp = polyhedronTmp->numVertices;
 	const int iNearest0 = numVerticesTmp + 1;
 	const int iNearest1 = numVerticesTmp + 2;
@@ -401,6 +413,7 @@ double Polyhedron::corpol_prepAssociator_calcArea(
 	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet,
 			contours[iContour].plane, index, this, false);
 
+	DEBUG_END;
 	return polyhedronTmp->facets[fPart].area();
 }
 
@@ -414,6 +427,7 @@ void Polyhedron::corpol_prepAssociator_add(
 		Vector3d v1_nearest,
 		Orientation orientation) {
 
+	DEBUG_START;
 	int iSide0, iSide1;
 	if (iSideDistMin0 < iSideDistMin1) {
 		iSide0 = iSideDistMin0;
@@ -506,6 +520,7 @@ void Polyhedron::corpol_prepAssociator_add(
 		// Push it to the list
 		edges[iEdge].assocList.push_back(*assocForCurrentEdge);
 	}
+	DEBUG_END;
 }
 
 static double distVertexEdge(
@@ -515,6 +530,7 @@ static double distVertexEdge(
 		Vector3d A2,
 		Vector3d& A_nearest) {
 
+	DEBUG_START;
 	double dist;
 	Vector3d edge = A2 - A1;
 	if ((A1 - A) * edge > 0 && (A2 - A) * edge > 0) {
@@ -540,6 +556,7 @@ static double distVertexEdge(
 		dist = sqrt(qmod(A - Aproj));
 		A_nearest = Aproj;
 	}
+	DEBUG_END;
 	return dist;
 }
 
