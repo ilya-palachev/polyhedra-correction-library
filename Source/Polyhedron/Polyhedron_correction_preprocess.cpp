@@ -75,11 +75,12 @@ void Polyhedron::corpol_prepFindAssociations_init(
 			numSidesMax = numSidesCurr;
 	}
 	int numVerticesTmp = 2 * numSidesMax;
-	Vector3d* verticesTmp = new Vector3d[numVerticesTmp];
+//	Vector3d* verticesTmp = new Vector3d[numVerticesTmp];
 	int numFacetsTmp = 3;
-	Facet* facetsTmp = new Facet[numFacetsTmp];
-	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp, verticesTmp,
-			facetsTmp);
+//	Facet* facetsTmp = new Facet[numFacetsTmp];
+//	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp, verticesTmp,
+//			facetsTmp);
+	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp);
 }
 
 void Polyhedron::corpol_prepFindAssiciations_withContour(
@@ -225,10 +226,10 @@ int Polyhedron::corpol_prepAssociator_init(
 	int numSides = contours[iContour].ns;
 	int numVerticesAdded = 0;
 	for (int iSide = 0; iSide < numSides; iContour) {
-		polyhedronTmp->vertices[numVerticesAdded++] =
-				contours[iContour].sides[iSide].A1;
-		polyhedronTmp->vertices[numVerticesAdded++] =
-				contours[iContour].sides[iSide].A2;
+		polyhedronTmp->set_vertex(numVerticesAdded++,
+				contours[iContour].sides[iSide].A1);
+		polyhedronTmp->set_vertex(numVerticesAdded++,
+				contours[iContour].sides[iSide].A2);
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;
 
