@@ -164,7 +164,7 @@ void Polyhedron::corpol_prepAssociator(
 
 	Vector3d v0_projected, v1_projected;
 	bool checkInit = corpol_prepAssociator_init(iContour, iFacet, iEdge,
-			polyhedronTmp, v0_projected, v1_projected);
+			polyhedronTmp, v0_projected, v1_projected) == EXIT_SUCCESS;
 	if (!checkInit)
 		return;
 
@@ -295,8 +295,15 @@ void Polyhedron::corpol_prepAssociator_project(
 	Vector3d v0 = vertices[iVertex0];
 	Vector3d v1 = vertices[iVertex1];
 	Plane planeOfProjection = contours[iContour].plane;
+	DEBUG_PRINT("v0 before projection: (%lf, %lf, %lf)", v0.x, v0.y, v0.z);
+	DEBUG_PRINT("v1 before projection: (%lf, %lf, %lf)", v1.x, v1.y, v1.z);
 	v0_projected = planeOfProjection.project(v0);
 	v1_projected = planeOfProjection.project(v1);
+	DEBUG_PRINT("v0 after projection: (%lf, %lf, %lf)", v0_projected.x,
+			v0_projected.y, v0_projected.z);
+	DEBUG_PRINT("v1 after projection: (%lf, %lf, %lf)", v1_projected.x,
+			v1_projected.y, v1_projected.z);
+
 }
 
 int Polyhedron::corpol_prepAssociator_findNearest(
@@ -313,7 +320,12 @@ int Polyhedron::corpol_prepAssociator_findNearest(
 	for (int iSide = 0; iSide < numSides; ++iSide) {
 		Vector3d v0 = sides[iSide].A1;
 		Vector3d v1 = sides[iSide].A2;
+		DEBUG_PRINT("finding dist from (%lf, %lf, %lf) to edge", v_projected.x,
+				v_projected.y, v_projected.z);
+		DEBUG_PRINT("  [ (%lf, %lf, %lf) (%lf, %lf, %lf)]", v0.x, v0.y, v0.z, v1.x,
+				v1.y, v1.z);
 		double distCurr = distVertexEdge(v_projected, v0, v1, v_nearestCurr);
+		DEBUG_PRINT("dist to side %d  = %lf", iSide, distCurr);
 		if (iSide == 0 || distCurr < distMin) {
 			iSideDistMin = iSide;
 			distMin = distCurr;
