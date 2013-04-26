@@ -223,7 +223,7 @@ int Polyhedron::corpol_prepAssociator_init(
 
 	int numSides = contours[iContour].ns;
 	int numVerticesAdded = 0;
-	for (int iSide = 0; iSide < numSides; iContour) {
+	for (int iSide = 0; iSide < numSides; ++iSide) {
 		polyhedronTmp->set_vertex(numVerticesAdded++,
 				contours[iContour].sides[iSide].A1);
 		polyhedronTmp->set_vertex(numVerticesAdded++,
