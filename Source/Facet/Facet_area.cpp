@@ -8,6 +8,9 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 double Facet::area() {
+	DEBUG_START;
+	my_fprint_all(stderr);
+
 	Vector3d A0 = parentPolyhedron->vertices[indVertices[0]];
 
 	double areaFacet = 0.;
@@ -18,5 +21,6 @@ double Facet::area() {
 		areaFacet += areaTriangle;
 	}
 
+	DEBUG_END;
 	return areaFacet;
 }
