@@ -19,15 +19,17 @@ Polyhedron::Polyhedron(
 		int numf_orig) :
 				numVertices(numv_orig),
 				numFacets(numf_orig),
-				vertices(new Vector3d[numv_orig]),
-				facets(new Facet[numf_orig]),
+				vertices(),
+				facets(),
 				vertexInfos(NULL),
 				edgeLists(NULL),
 				numEdges(0),
 				edges(NULL),
 				numContours(0),
 				contours(NULL) {
-	fprintf(stdout, "Creating polyhedron with numv = %d, numf = %d...\n",
+	vertices = new Vector3d[numv_orig];
+	facets = new Facet[numf_orig];
+	DEBUG_PRINT("Creating polyhedron with numv = %d, numf = %d...\n",
 			numVertices, numFacets);
 }
 
@@ -56,7 +58,7 @@ Polyhedron::Polyhedron(
 }
 
 Polyhedron::~Polyhedron() {
-//	fprintf(stdout, "Deleting polyhedron...\n");
+	DEBUG_PRINT("Deleting Polyhedron...");
 	if (vertices)
 		delete[] vertices;
 	if (facets)
