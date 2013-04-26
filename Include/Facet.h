@@ -29,6 +29,11 @@ public:
 			const int* index_orig,
 			Polyhedron* poly_orig,
 			const bool ifLong);
+	Facet(
+			const int id_orig,
+			const int nv_orig,
+			const Plane plane_orig,
+			Polyhedron* poly_orig);
 	Facet& operator =(
 			const Facet& facet1);
 	~Facet();
@@ -55,6 +60,9 @@ public:
 			char red,
 			char gray,
 			char blue);
+	void set_ind_vertex(
+			int position,
+			int value);
 
 	// Facet_preprocess.cpp
 	void preprocess_free();

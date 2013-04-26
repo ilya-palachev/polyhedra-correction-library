@@ -51,6 +51,19 @@ Facet::Facet(
 	}
 }
 
+Facet::Facet(
+		int id_orig,
+		int nv_orig,
+		Plane plane_orig,
+		Polyhedron* poly_orig) :
+				id(id_orig),
+				numVertices(nv_orig),
+				indVertices(new int[3 * numVertices + 1]),
+				plane(plane_orig),
+				parentPolyhedron(poly_orig),
+				rgb( { 255, 255, 255 }) {
+}
+
 Facet& Facet::operator =(
 		const Facet& facet1) {
 	int i;
@@ -121,6 +134,16 @@ void Facet::set_rgb(
 	rgb[0] = red;
 	rgb[1] = gray;
 	rgb[2] = blue;
+}
+
+void Facet::set_ind_vertex(
+		int position,
+		int value) {
+	if (position >= numVertices) {
+		ERROR_PRINT("Facet overflow: %d >= %d", position, numVertices);
+		return;
+	}
+	indVertices[position] = value;
 }
 
 void Facet::get_next_facet(
