@@ -27,7 +27,7 @@ Polyhedron::Polyhedron(
 				edges(NULL),
 				numContours(0),
 				contours(NULL) {
-	fprintf(stdout, "Creating polyhedron with numf = %d, numv = %d...\n",
+	fprintf(stdout, "Creating polyhedron with numv = %d, numf = %d...\n",
 			numVertices, numFacets);
 }
 
