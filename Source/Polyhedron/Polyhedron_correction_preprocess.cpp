@@ -185,6 +185,10 @@ void Polyhedron::corpol_prepAssociator(
 	bool criteriaRight = (areaRight < EPSILON_MIN_AREA_ABS)
 			|| (areaRight / areaTotal < EPSILON_MIN_AREA_REL);
 
+	DEBUG_PRINT("areaLeft = %lf, areaRight = %lf, areaTotal = %lf", areaLeft,
+			areaRight, areaTotal);
+	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft,
+			criteriaRight);
 	ASSERT(!(criteriaLeft && criteriaRight) && (criteriaLeft || criteriaRight));
 
 	Orientation orientation = criteriaLeft ?
@@ -377,41 +381,50 @@ double Polyhedron::corpol_prepAssociator_calcArea(
 		iSide0 = iSideDistMin1;
 		iSide1 = iSideDistMin0;
 	}
+	DEBUG_PRINT("iSideDistMin0 = %d, iSideDistMin1 = %d", iSideDistMin0,
+			iSideDistMin1);
+	DEBUG_PRINT("iSide0 = %d, iSide1 = %d", iSide0, iSide1);
+
 	facetPart fPart;
 	int numSides = contours[iContour].ns;
-	int* index = new int[numSides * 2];
 	int numVerticesFacet = 0;
 	int numPairsToBeAdded;
 	int iBegin;
+	int iFirst, iSecond;
 
 	switch (orientation) {
 	case ORIENTATION_LEFT:
 		fPart = FACET_LEFT;
-		index[numVerticesFacet++] = iNearest1;
-		index[numVerticesFacet++] = iNearest0;
+		iFirst = iNearest1;
+		iSecond = iNearest0;
 		numPairsToBeAdded = (numSides + iSide0 - iSide1) % numSides;
 		iBegin = iSide1;
 		break;
 	case ORIENTATION_RIGHT:
 		fPart = FACET_RIGHT;
-		index[numVerticesFacet++] = iNearest0;
-		index[numVerticesFacet++] = iNearest1;
-		numPairsToBeAdded = (numSides + iSide1 - iSide0) % numSides;
+		iFirst = iNearest0;
+		iSecond = iNearest1;
+		numPairsToBeAdded = numSides - (numSides + iSide0 - iSide1) % numSides;
 		iBegin = iSide0;
 		break;
 	}
 
+	numVerticesFacet = 2 * numPairsToBeAdded + 2;
+	DEBUG_PRINT("numVerticesFacet = %d", numVerticesFacet);
+	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet,
+			contours[iContour].plane, polyhedronTmp);
+
+	polyhedronTmp->facets[fPart].set_ind_vertex(0, iFirst);
+	polyhedronTmp->facets[fPart].set_ind_vertex(1, iSecond);
+
 	int iAdded = (numVerticesTmp + 2 * iBegin + 1) % numVerticesTmp;
-	for (int numPairsAdded = 0; numPairsAdded < numPairsToBeAdded;
+	for (int numPairsAdded = 1; numPairsAdded < numPairsToBeAdded;
 			++numPairsAdded, ++iBegin) {
 		iAdded = (numVerticesTmp + iAdded + 1) % numVerticesTmp;
-		index[numVerticesFacet++] = iAdded;
+		polyhedronTmp->facets[fPart].set_ind_vertex(2 * numPairsAdded, iAdded);
 		iAdded = (numVerticesTmp + iAdded + 1) % numVerticesTmp;
-		index[numVerticesFacet++] = iAdded;
+		polyhedronTmp->facets[fPart].set_ind_vertex(2 * numPairsAdded + 1, iAdded);
 	}
-	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet,
-			contours[iContour].plane, index, this, false);
-
 	DEBUG_END;
 	return polyhedronTmp->facets[fPart].area();
 }
