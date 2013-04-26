@@ -1565,10 +1565,6 @@ int Polyhedron::add_vertex(
 void Polyhedron::set_vertex(
 		int position,
 		Vector3d vec) {
-	DEBUG_START;
-	DEBUG_PRINT("Setting vertex %d of polyhedron", position);
-	DEBUG_PRINT("sizeof vertices = %d, sizeof Vector3d = %d", sizeof(vertices),
-			sizeof(Vector3d));
 	if (position >= numVertices) {
 		ERROR_PRINT("Cannot set %d-th vertex, because number of vertices",
 				position);
@@ -1576,7 +1572,6 @@ void Polyhedron::set_vertex(
 		return;
 	}
 	vertices[position] = vec;
-	DEBUG_END;
 }
 
 void Polyhedron::print_vertex(
