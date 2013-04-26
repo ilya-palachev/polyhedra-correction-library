@@ -455,7 +455,7 @@ public:
 	void corpol_prepFindAssociations();
 
 	void corpol_prepFindAssociations_init(
-			Polyhedron* polyhedronTmp);
+			Polyhedron* &polyhedronTmp);
 
 	void corpol_prepFindAssiciations_withContour(
 			int iContour,

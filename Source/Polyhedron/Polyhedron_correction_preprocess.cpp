@@ -67,7 +67,8 @@ void Polyhedron::corpol_prepFindAssociations() {
 }
 
 void Polyhedron::corpol_prepFindAssociations_init(
-		Polyhedron* polyhedronTmp) {
+		Polyhedron* &polyhedronTmp) {
+	DEBUG_START;
 	int numSidesMax = 0;
 	for (int iContour = 0; iContour < numContours; ++iContour) {
 		int numSidesCurr = contours[iContour].ns;
@@ -75,12 +76,9 @@ void Polyhedron::corpol_prepFindAssociations_init(
 			numSidesMax = numSidesCurr;
 	}
 	int numVerticesTmp = 2 * numSidesMax;
-//	Vector3d* verticesTmp = new Vector3d[numVerticesTmp];
 	int numFacetsTmp = 3;
-//	Facet* facetsTmp = new Facet[numFacetsTmp];
-//	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp, verticesTmp,
-//			facetsTmp);
 	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp);
+	DEBUG_END;
 }
 
 void Polyhedron::corpol_prepFindAssiciations_withContour(
