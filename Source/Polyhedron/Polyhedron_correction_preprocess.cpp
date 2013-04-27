@@ -189,13 +189,14 @@ void Polyhedron::corpol_prepAssociator(
 			areaRight, areaTotal);
 	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft,
 			criteriaRight);
-	ASSERT(!(criteriaLeft && criteriaRight) && (criteriaLeft || criteriaRight));
+	ASSERT(!(criteriaLeft && criteriaRight));
 
-	Orientation orientation = criteriaLeft ?
-			ORIENTATION_LEFT : ORIENTATION_RIGHT;
-	corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0,
-			iSideDistMin1, v0_nearest, v1_nearest, orientation);
-
+	if (criteriaLeft || criteriaRight) {
+		Orientation orientation = criteriaLeft ?
+				ORIENTATION_LEFT : ORIENTATION_RIGHT;
+		corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0,
+				iSideDistMin1, v0_nearest, v1_nearest, orientation);
+	}
 	DEBUG_END;
 }
 
@@ -423,7 +424,7 @@ double Polyhedron::corpol_prepAssociator_calcArea(
 		iAdded = (numVerticesTmp + iAdded + 1) % numVerticesTmp;
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * numPairsAdded + 2, iAdded);
 		iAdded = (numVerticesTmp + iAdded + 1) % numVerticesTmp;
-		polyhedronTmp->facets[fPart].set_ind_vertex(2 * numPairsAdded + 2, iAdded);
+		polyhedronTmp->facets[fPart].set_ind_vertex(2 * numPairsAdded + 3, iAdded);
 	}
 	DEBUG_END;
 	return fabs(polyhedronTmp->facets[fPart].area());
