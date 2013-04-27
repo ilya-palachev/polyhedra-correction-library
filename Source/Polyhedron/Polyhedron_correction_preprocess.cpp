@@ -426,7 +426,7 @@ double Polyhedron::corpol_prepAssociator_calcArea(
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * numPairsAdded + 2, iAdded);
 	}
 	DEBUG_END;
-	return polyhedronTmp->facets[fPart].area();
+	return fabs(polyhedronTmp->facets[fPart].area());
 }
 
 void Polyhedron::corpol_prepAssociator_add(
