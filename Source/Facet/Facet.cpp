@@ -98,6 +98,15 @@ Facet::~Facet() {
 		delete[] indVertices;
 }
 
+bool Facet::test_initialization() {
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex) {
+		if (indVertices[iVertex] == INT_NOT_INITIALIZED) {
+			return false;
+		}
+	}
+	return true;
+}
+
 int Facet::get_id() {
 	return id;
 }

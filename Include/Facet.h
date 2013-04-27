@@ -37,6 +37,7 @@ public:
 	Facet& operator =(
 			const Facet& facet1);
 	~Facet();
+	bool test_initialization();
 
 	int get_id();
 	int get_nv();
