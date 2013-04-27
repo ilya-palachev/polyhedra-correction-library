@@ -62,6 +62,9 @@ Facet::Facet(
 				plane(plane_orig),
 				parentPolyhedron(poly_orig),
 				rgb( { 255, 255, 255 }) {
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex) {
+		indVertices[iVertex] = INT_NOT_INITIALIZED;
+	}
 }
 
 Facet& Facet::operator =(
