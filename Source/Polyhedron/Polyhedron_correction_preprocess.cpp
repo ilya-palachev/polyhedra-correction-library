@@ -189,9 +189,8 @@ void Polyhedron::corpol_prepAssociator(
 			areaRight, areaTotal);
 	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft,
 			criteriaRight);
-	ASSERT(!(criteriaLeft && criteriaRight));
 
-	if (criteriaLeft || criteriaRight) {
+	if ((	criteriaLeft && !criteriaRight) || (!criteriaLeft && criteriaRight)) {
 		Orientation orientation = criteriaLeft ?
 				ORIENTATION_LEFT : ORIENTATION_RIGHT;
 		corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0,
