@@ -14,6 +14,8 @@
 #include "array_operations.h"
 #include "Gauss_string.h"
 
+using namespace std;
+
 class Polyhedron;
 class Facet;
 class VertexInfo;

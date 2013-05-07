@@ -1,7 +1,5 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-using namespace std;
-
 void Edge::my_fprint(
 		FILE* file) {
 #ifndef NDEBUG
