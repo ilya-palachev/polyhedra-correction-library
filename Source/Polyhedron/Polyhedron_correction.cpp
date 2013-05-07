@@ -288,16 +288,15 @@ void Polyhedron::corpol_calculate_matrix(
 		iplane -= countNotAssociated;
 
 		int i_ak_ak = dim * 5 * iplane + 5 * iplane;
-		int i_bk_ak = i_ak_ak + 5 * numFacets;
-		int i_ck_ak = i_ak_ak + 2 * 5 * numFacets;
-		int i_dk_ak = i_ak_ak + 3 * 5 * numFacets;
-		int i_lk_ak = i_ak_ak + 4 * 5 * numFacets;
+		int i_bk_ak = i_ak_ak + dim;
+		int i_ck_ak = i_ak_ak + 2 * dim;
+		int i_dk_ak = i_ak_ak + 3 * dim;
+		int i_lk_ak = i_ak_ak + 4 * dim;
 
 		matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
 		matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
 		matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
-		matrix[i_lk_ak + 3] = 0;
-		matrix[i_lk_ak + 4] = -1.;
+		matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0.;
 		rightPart[5 * iplane + 4] = 1.;
 
 		matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
