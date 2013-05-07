@@ -273,21 +273,23 @@ void Polyhedron::corpol_calculate_matrix(
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 
-	for (int iplane = 0; iplane < numFacets; ++iplane) {
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
 
-		if (*iterNotAssicated == iplane) {
+		DEBUG_PRINT("Processing facet # %d", iFacet);
+
+		if (*iterNotAssicated == iFacet) {
 			++iterNotAssicated;
 			++countNotAssociated;
 			continue;
 		}
-		int nv = facets[iplane].numVertices;
-		int * index = facets[iplane].indVertices;
+		int iFacetShifted = iFacet - countNotAssociated;
 
-		Plane planePrevThis = prevPlanes[iplane];
+		int nv = facets[iFacet].numVertices;
+		int * index = facets[iFacet].indVertices;
 
-		iplane -= countNotAssociated;
+		Plane planePrevThis = prevPlanes[iFacet];
 
-		int i_ak_ak = dim * 5 * iplane + 5 * iplane;
+		int i_ak_ak = dim * 5 * iFacetShifted + 5 * iFacetShifted;
 		int i_bk_ak = i_ak_ak + dim;
 		int i_ck_ak = i_ak_ak + 2 * dim;
 		int i_dk_ak = i_ak_ak + 3 * dim;
@@ -297,25 +299,27 @@ void Polyhedron::corpol_calculate_matrix(
 		matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
 		matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
 		matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0.;
-		rightPart[5 * iplane + 4] = 1.;
+		rightPart[5 * iFacetShifted + 4] = 1.;
 
 		matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
 		matrix[i_bk_ak + 4] = 0.5 * planePrevThis.norm.y;
 		matrix[i_ck_ak + 4] = 0.5 * planePrevThis.norm.z;
 
-		for (int iedge = 0; iedge < nv; ++iedge) {
-			int v0 = index[iedge];
-			int v1 = index[iedge + 1];
-			int iplaneNeighbour = index[nv + 1 + iedge];
-			int iplaneNeighbourShifted = iplaneNeighbour - countNotAssociated;
+		for (int iEdge = 0; iEdge < nv; ++iEdge) {
+			DEBUG_PRINT("Processing edge # %d", iEdge);
 
-			int i_ak_an = dim * 5 * iplane + 5 * iplaneNeighbourShifted;
+			int v0 = index[iEdge];
+			int v1 = index[iEdge + 1];
+			int iFacetNeighbour = index[nv + 1 + iEdge];
+			int iFacetNeighbourShifted = iFacetNeighbour - countNotAssociated;
+
+			int i_ak_an = dim * 5 * iFacetShifted + 5 * iFacetNeighbourShifted;
 			int i_bk_an = i_ak_an + dim;
 			int i_ck_an = i_ak_an + 2 * dim;
 			int i_dk_an = i_ak_an + 3 * dim;
 			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * dim;
 
-			Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
+			Plane planePrevNeighbour = prevPlanes[iFacetNeighbour];
 
 			int edgeid = preprocess_edges_find(v0, v1);
 
@@ -323,10 +327,11 @@ void Polyhedron::corpol_calculate_matrix(
 				printf("Error! edge (%d, %d) cannot be found\n", v0, v1);
 				return;
 			}
-
+			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::iterator itCont =
 					edges[edgeid].assocList.begin();
 					itCont != edges[edgeid].assocList.end(); ++itCont) {
+				DEBUG_PRINT("Processing association # %d", iAssociation++);
 
 				int curContour = itCont->indContour;
 				int curNearestSide = itCont->indNearestSide;
@@ -348,7 +353,7 @@ void Polyhedron::corpol_calculate_matrix(
 				Vector3d A_ij2 = sides[curNearestSide].A2;
 
 				// Debug!!!
-				if (iplane == 0) {
+				if (iFacetShifted == 0) {
 					DEBUG_PRINT("nearest side for the first edge of the facet #0");
 					DEBUG_PRINT("    in contour # %d", curContour);
 					DEBUG_PRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)", A_ij1.x,
