@@ -23,12 +23,14 @@ int Polyhedron::correct_polyhedron() {
 
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
-	int dim = numFacets * 5;
-
 	int numEdges;
 	Edge* edges = NULL;
 
 	corpol_preprocess();
+
+	list<int>* facetsNotAssociated = corpol_find_not_associated_facets();
+	int numFacetsNotAssociated = facetsNotAssociated->size();
+	int dim = (numFacets - numFacetsNotAssociated) * 5;
 
 	double * matrix = new double[dim * dim];
 	double * matrixFactorized = new double[dim * dim];
@@ -46,7 +48,8 @@ int Polyhedron::correct_polyhedron() {
 	DEBUG_PRINT("memory initialization done");
 
 	double error = corpol_calculate_functional(prevPlanes);
-	corpol_calculate_matrix(prevPlanes, matrix, rightPart, solution);
+	corpol_calculate_matrix(dim, prevPlanes, matrix, rightPart, solution,
+			facetsNotAssociated);
 	print_matrix2(fout, dim, dim, matrix);
 
 	DEBUG_PRINT("first functional calculation done. error = %e", error);
@@ -63,8 +66,8 @@ int Polyhedron::correct_polyhedron() {
 		this->my_fprint(fileName);
 		delete[] fileName;
 
-		int ret = corpol_iteration(prevPlanes, matrix, rightPart, solution,
-				matrixFactorized, indexPivot);
+		int ret = corpol_iteration(dim, prevPlanes, matrix, rightPart, solution,
+				matrixFactorized, indexPivot, facetsNotAssociated);
 		for (int i = 0; i < numFacets; ++i) {
 			DEBUG_PRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)", i,
 					prevPlanes[i].norm.x, prevPlanes[i].norm.y, prevPlanes[i].norm.z,
@@ -100,6 +103,24 @@ int Polyhedron::correct_polyhedron() {
 	}
 	DEBUG_END;
 	return 0;
+}
+
+list<int>* Polyhedron::corpol_find_not_associated_facets() {
+	list<int>* facetsNotAssociated = new list<int>;
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
+		int* indVertices = facets[iFacet].indVertices;
+		int numVerticesFacet = facets[iFacet].numVertices;
+		int numAssociations = 0;
+		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex) {
+			int edgeid = preprocess_edges_find(indVertices[iVertex],
+					indVertices[iVertex + 1]);
+			numAssociations += edges[edgeid].assocList.size();
+		}
+		if (numAssociations == 0) {
+			facetsNotAssociated->push_back(iFacet);
+		}
+	}
+	return facetsNotAssociated;
 }
 
 double Polyhedron::corpol_calculate_functional(
@@ -160,15 +181,17 @@ double Polyhedron::corpol_calculate_functional(
 }
 
 int Polyhedron::corpol_iteration(
+		int dim,
 		Plane* prevPlanes,
 		double* matrix,
 		double* rightPart,
 		double* solution,
 		double* matrixFactorized,
-		int* indexPivot) {
+		int* indexPivot,
+		list<int>* facetsNotAssociated) {
 	DEBUG_START;
-	corpol_calculate_matrix(prevPlanes, matrix, rightPart, solution);
-	int dim = 5 * numFacets;
+	corpol_calculate_matrix(dim, prevPlanes, matrix, rightPart, solution,
+			facetsNotAssociated);
 	print_matrix2(fout, dim, dim, matrix);
 
 #ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
@@ -230,26 +253,39 @@ int Polyhedron::corpol_iteration(
 }
 
 void Polyhedron::corpol_calculate_matrix(
+		int dim,
 		Plane* prevPlanes,
 		double* matrix,
 		double* rightPart,
-		double* solution) {
+		double* solution,
+		list<int>* facetsNotAssociated) {
 	DEBUG_START;
-	for (int i = 0; i < (5 * numFacets) * (5 * numFacets); ++i) {
+	for (int i = 0; i < dim * dim; ++i) {
 		matrix[i] = 0.;
 	}
 
-	for (int i = 0; i < 5 * numFacets; ++i) {
+	for (int i = 0; i < dim; ++i) {
 		rightPart[i] = 0.;
 	}
 
+	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
+	int countNotAssociated = 0;
+
 	for (int iplane = 0; iplane < numFacets; ++iplane) {
+
+		if (*iterNotAssicated == iplane) {
+			++iterNotAssicated;
+			++countNotAssociated;
+			continue;
+		}
 		int nv = facets[iplane].numVertices;
 		int * index = facets[iplane].indVertices;
 
 		Plane planePrevThis = prevPlanes[iplane];
 
-		int i_ak_ak = 5 * numFacets * 5 * iplane + 5 * iplane;
+		iplane -= countNotAssociated;
+
+		int i_ak_ak = dim * 5 * iplane + 5 * iplane;
 		int i_bk_ak = i_ak_ak + 5 * numFacets;
 		int i_ck_ak = i_ak_ak + 2 * 5 * numFacets;
 		int i_dk_ak = i_ak_ak + 3 * 5 * numFacets;
@@ -270,12 +306,13 @@ void Polyhedron::corpol_calculate_matrix(
 			int v0 = index[iedge];
 			int v1 = index[iedge + 1];
 			int iplaneNeighbour = index[nv + 1 + iedge];
+			int iplaneNeighbourShifted = iplaneNeighbour - countNotAssociated;
 
-			int i_ak_an = 5 * numFacets * 5 * iplane + 5 * iplaneNeighbour;
-			int i_bk_an = i_ak_an + 5 * numFacets;
-			int i_ck_an = i_ak_an + 2 * 5 * numFacets;
-			int i_dk_an = i_ak_an + 3 * 5 * numFacets;
-			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * 5 * numFacets;
+			int i_ak_an = dim * 5 * iplane + 5 * iplaneNeighbourShifted;
+			int i_bk_an = i_ak_an + dim;
+			int i_ck_an = i_ak_an + 2 * dim;
+			int i_dk_an = i_ak_an + 3 * dim;
+			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * dim;
 
 			Plane planePrevNeighbour = prevPlanes[iplaneNeighbour];
 

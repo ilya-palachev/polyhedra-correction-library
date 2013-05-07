@@ -388,22 +388,28 @@ public:
 	//Poyhedron_correction.cpp
 	int correct_polyhedron();
 
+	list<int>* corpol_find_not_associated_facets();
+
 	double corpol_calculate_functional(
 			Plane* prevPlanes);
 
 	int corpol_iteration(
+			int dim,
 			Plane* prevPlanes,
 			double* matrix,
 			double* rightPart,
 			double* solution,
 			double* matrixFactorized,
-			int* indexPivot);
+			int* indexPivot,
+			list<int>* facetsNotAssociated);
 
 	void corpol_calculate_matrix(
+			int dim,
 			Plane* prevPlanes,
 			double* matrix,
 			double* rightPart,
-			double* solution);
+			double* solution,
+			list<int>* facetsNotAssociated);
 
 	// Polyhedron_correction_derivativeTest.cpp
 
