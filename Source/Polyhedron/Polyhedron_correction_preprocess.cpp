@@ -190,7 +190,7 @@ void Polyhedron::corpol_prepAssociator(
 	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft,
 			criteriaRight);
 
-	if ((	criteriaLeft && !criteriaRight) || (!criteriaLeft && criteriaRight)) {
+	if ((criteriaLeft && !criteriaRight) || (!criteriaLeft && criteriaRight)) {
 		Orientation orientation = criteriaLeft ?
 				ORIENTATION_LEFT : ORIENTATION_RIGHT;
 		corpol_prepAssociator_add(iContour, iFacet, iEdge, iSideDistMin0,
@@ -523,6 +523,7 @@ void Polyhedron::corpol_prepAssociator_add(
 			break;
 		}
 	}
+	iEndToBeAdded = (numSides + iEndToBeAdded + 1) % numSides;
 	DEBUG_PRINT("iEndToBeAdded = %d", iEndToBeAdded);
 
 	int iVertex0 = edges[iEdge].v0;
