@@ -258,7 +258,8 @@ void Polyhedron::corpol_calculate_matrix(
 		matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
 		matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
 		matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
-		matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0;
+		matrix[i_lk_ak + 3] = 0;
+		matrix[i_lk_ak + 4] = -1.;
 		rightPart[5 * iplane + 4] = 1.;
 
 		matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
