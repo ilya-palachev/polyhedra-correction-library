@@ -57,7 +57,7 @@ int Polyhedron::correct_polyhedron() {
 	int numIterations = 0;
 
 	while (error > EPS_MAX_ERROR) {
-		DEBUG_PRINT("Iteration %d\n", numIterations);
+		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n", numIterations);
 
 		char* fileName = new char[255];
 		sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
@@ -77,7 +77,9 @@ int Polyhedron::correct_polyhedron() {
 		}
 		error = corpol_calculate_functional(prevPlanes);
 		DEBUG_PRINT("error = %le", error);
+		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
 		++numIterations;
+
 		if (ret != 0) {
 			break;
 		}
