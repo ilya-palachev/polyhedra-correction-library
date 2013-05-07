@@ -243,11 +243,20 @@ int Polyhedron::corpol_iteration(
 		DEBUG_PRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
 	}
 
-	for (int ifacet = 0; ifacet < numFacets; ++ifacet) {
-		facets[ifacet].plane.norm.x = solution[5 * ifacet];
-		facets[ifacet].plane.norm.y = solution[5 * ifacet + 1];
-		facets[ifacet].plane.norm.z = solution[5 * ifacet + 2];
-		facets[ifacet].plane.dist = solution[5 * ifacet + 3];
+	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
+	int countNotAssociated = 0;
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
+		if (*iterNotAssicated == iFacet) {
+			facets[iFacet].plane = prevPlanes[iFacet];
+			++iterNotAssicated;
+			++countNotAssociated;
+			continue;
+		}
+		int iFacetShifted = iFacet - countNotAssociated;
+		facets[iFacet].plane.norm.x = solution[5 * iFacetShifted];
+		facets[iFacet].plane.norm.y = solution[5 * iFacetShifted + 1];
+		facets[iFacet].plane.norm.z = solution[5 * iFacetShifted + 2];
+		facets[iFacet].plane.dist = solution[5 * iFacetShifted + 3];
 	}
 
 	DEBUG_END;
