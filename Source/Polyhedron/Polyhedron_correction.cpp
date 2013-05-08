@@ -317,9 +317,6 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
-
-		DEBUG_PRINT("Processing facet # %d", iFacet);
-
 		if (*iterNotAssicated == iFacet)
 		{
 			++iterNotAssicated;
@@ -351,8 +348,6 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 
 		for (int iEdge = 0; iEdge < nv; ++iEdge)
 		{
-			DEBUG_PRINT("Processing edge # %d", iEdge);
-
 			int v0 = index[iEdge];
 			int v1 = index[iEdge + 1];
 			int iFacetNeighbour = index[nv + 1 + iEdge];
@@ -370,7 +365,7 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 
 			if (edgeid == -1)
 			{
-				printf("Error! edge (%d, %d) cannot be found\n", v0, v1);
+				ERROR_PRINT("Error! edge (%d, %d) cannot be found\n", v0, v1);
 				return;
 			}
 			int iAssociation = 0;
@@ -378,8 +373,6 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 					edges[edgeid].assocList.begin();
 					itCont != edges[edgeid].assocList.end(); ++itCont)
 			{
-				DEBUG_PRINT("Processing association # %d", iAssociation++);
-
 				int curContour = itCont->indContour;
 				int curNearestSide = itCont->indNearestSide;
 				double weight = itCont->weight;
@@ -390,9 +383,6 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 						* planeOfProjection.norm;
 				double denominator = ((planePrevThis.norm
 						- planePrevNeighbour.norm) * planeOfProjection.norm);
-//				DEBUG_PRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
-//						iedge, v0, v1, itCont->indContour, enumerator, denominator);
-//				ASSERT(fabs(denominator) > 1e-10);
 
 				double gamma_ij = enumerator / denominator;
 				ASSERT(!isnan(gamma_ij));
@@ -400,30 +390,12 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 				Vector3d A_ij1 = sides[curNearestSide].A1;
 				Vector3d A_ij2 = sides[curNearestSide].A2;
 
-				// Debug!!!
-				if (iFacetShifted == 0)
-				{
-					DEBUG_PRINT(
-							"nearest side for the first edge of the facet #0");
-					DEBUG_PRINT("    in contour # %d", curContour);
-					DEBUG_PRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)",
-							A_ij1.x, A_ij1.y, A_ij1.z, A_ij2.x, A_ij2.y,
-							A_ij2.z);
-					DEBUG_PRINT("    while the edge is the following:");
-					DEBUG_PRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)",
-							vertices[v0].x, vertices[v0].y, vertices[v0].z,
-							vertices[v1].x, vertices[v1].y, vertices[v1].z);
-				}
-
 				double x0 = A_ij1.x;
 				double y0 = A_ij1.y;
 				double z0 = A_ij1.z;
 				double x1 = A_ij2.x;
 				double y1 = A_ij2.y;
 				double z1 = A_ij2.z;
-
-//                DEBUG_PRINT("\t\t A_ij1 = (%lf, %lf, %lf)", x0, y1, z1);
-//                DEBUG_PRINT("\t\t A_ij2 = (%lf, %lf, %lf)", x1, y1, z1);
 
 				double xx = x0 * x0 + x1 * x1;
 				double xy = x0 * y0 + x1 * y1;
