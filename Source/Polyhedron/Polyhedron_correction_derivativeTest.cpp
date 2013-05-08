@@ -17,8 +17,6 @@ void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix,
 	{
 		if (iFacet == *iIteratorNotAssociated)
 		{
-			DEBUG_PRINT("iFacet == %d == %d == *iIteratorNotAssociated",
-					iFacet, *iIteratorNotAssociated);
 			++iIteratorNotAssociated;
 			++iCountNotAssociated;
 			continue;
@@ -86,12 +84,12 @@ double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_1(int iFacet,
 		{
 			++jIteratorNotAssociated;
 			++jCountNotAssociated;
+			continue;
 		}
 		int jFacetShifted = jFacet - jCountNotAssociated;
 
 		for (int jCoefficient = 0; jCoefficient < 4; ++jCoefficient)
 		{
-
 			double elementOfMatrix = matrix[(5 * iFacet + iCoefficient) * dim
 					+ 5 * jFacetShifted + jCoefficient];
 			double currentCoefficient;
