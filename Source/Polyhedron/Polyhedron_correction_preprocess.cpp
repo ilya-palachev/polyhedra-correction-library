@@ -226,26 +226,27 @@ int Polyhedron::corpol_prepAssociator_checkVisibility(int iContour, int iFacet,
 	norm1.norm(1.);
 	Vector3d directionOfProjection = contours[iContour].plane.norm;
 	directionOfProjection.norm(1.);
-	double x = norm0 * directionOfProjection;
-	double y = norm1 * directionOfProjection;
-	double polarAngle = atan2(y, x);
-	bool quadrant1 = -EPSILON_EDGE_CONTOUR_VISIBILITY < polarAngle
-			&& polarAngle < 0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
-	bool quadrant3 = polarAngle > M_PI - EPSILON_EDGE_CONTOUR_VISIBILITY
-			|| polarAngle < -0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
-	if (quadrant1 || quadrant3)
+
+	double angle0 = acos(directionOfProjection * norm0);
+	double angle1 = acos(directionOfProjection * norm1);
+
+	if ((angle0 <= 0.5 * M_PI - EPSILON_EDGE_CONTOUR_VISIBILITY
+			&& angle1 >= 0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY)
+			|| (angle0 >= 0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY
+					&& angle1 <= 0.5 * M_PI - EPSILON_EDGE_CONTOUR_VISIBILITY))
 	{
-		DEBUG_PRINT("Edge is INVISIBLE on this contour (polar angle %lf)!",
-				polarAngle);
+		DEBUG_PRINT("Edge is visible on this contour");
+		DEBUG_PRINT("\tangle0 = %lf, angle1 = %lf", angle0, angle1);
 		DEBUG_END;
-		return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 	else
 	{
-		DEBUG_PRINT("Edge is visible on this contour (polar angle %lf)!",
-				polarAngle);
+		DEBUG_PRINT("Edge is INVISIBLE on this contour");
+		DEBUG_PRINT("\tangle0 = %lf, angle1 = %lf", angle0, angle1);
 		DEBUG_END;
-		return EXIT_SUCCESS;
+		return EXIT_FAILURE;
+
 	}
 }
 
