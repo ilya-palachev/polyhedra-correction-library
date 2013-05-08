@@ -1,100 +1,136 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::corpol_derivativeTest_all(Plane* prevPlanes, double* matrix)
+void Polyhedron::corpol_derivativeTest_all(Plane* prevPlanes, double* matrix,
+		list<int>* facetsNotAssociated)
 {
-	corpol_derivativeTest_1(prevPlanes, matrix);
-	corpol_derivativeTest_2(prevPlanes, matrix);
+	corpol_derivativeTest_1(prevPlanes, matrix, facetsNotAssociated);
+	corpol_derivativeTest_2(prevPlanes, matrix, facetsNotAssociated);
 }
 
-void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix)
+void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix,
+		list<int>* facetsNotAssociated)
 {
-	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable)
+	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated->begin();
+	int iCountNotAssociated = 0;
+
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
-		double valueFromDerTest = corpol_calculate_functional_derivative_1(
-				prevPlanes, iVariable);
-		double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_1(
-				iVariable, matrix);
-
-		bool makeAssertion = false;
-
-		DEBUG_PRINT("value from derivative test: %le, value from matrix: %le",
-				valueFromDerTest, valueFromMatrix);
-
-		int iFacet = iVariable / 4;
-		int iCoefficient = iVariable % 4;
-
-		double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
-		if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE)
+		if (iFacet == *iIteratorNotAssociated)
 		{
-			ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
-			ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
-					iCoefficient);
-			makeAssertion = true;
-		}
-
-		double absValue = fabs(valueFromDerTest);
-		if (absValue <= EPSILON_FOR_DIVISION)
-			// In this case we cannot compare values
+			DEBUG_PRINT("iFacet == %d == %d == *iIteratorNotAssociated",
+					iFacet, *iIteratorNotAssociated);
+			++iIteratorNotAssociated;
+			++iCountNotAssociated;
 			continue;
-
-		double errorRelative = errorAbsolute / absValue;
-		if (errorRelative > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE)
-		{
-			ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
-			ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
-					iCoefficient);
-			makeAssertion = true;
 		}
+		int iFacetShifted = iFacet - iCountNotAssociated;
 
-		ASSERT(!makeAssertion);
+		for (int iCoefficient = 0; iCoefficient < 4; ++iCoefficient)
+		{
+			double valueFromDerTest = corpol_calculate_functional_derivative_1(
+					prevPlanes, iFacet, iCoefficient);
+			double valueFromMatrix =
+					corpol_derivativeTest_calculateValFromMatrix_1(
+							iFacetShifted, iCoefficient, matrix,
+							facetsNotAssociated);
+
+			bool makeAssertion = false;
+
+			DEBUG_PRINT(
+					"value from derivative test: %le, value from matrix: %le",
+					valueFromDerTest, valueFromMatrix);
+
+			double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
+			if (errorAbsolute
+					> EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE)
+			{
+				ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
+				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
+						iCoefficient);
+				makeAssertion = true;
+			}
+
+			double absValue = fabs(valueFromDerTest);
+			if (absValue <= EPSILON_FOR_DIVISION)
+				// In this case we cannot compare values
+				continue;
+
+			double errorRelative = errorAbsolute / absValue;
+			if (errorRelative
+					> EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE)
+			{
+				ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
+				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
+						iCoefficient);
+				makeAssertion = true;
+			}
+
+			ASSERT(!makeAssertion);
+
+		}
 	}
 }
 
-double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_1(int iVariable,
-		double* matrix)
+double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_1(int iFacet,
+		int iCoefficient, double* matrix, list<int>* facetsNotAssociated)
 {
+	list<int>::iterator jIteratorNotAssociated = facetsNotAssociated->begin();
+	int jCountNotAssociated = 0;
+	int numFacetsNotAssociated = facetsNotAssociated->size();
+	int dim = 5 * (numFacets - numFacetsNotAssociated);
+
 	double valueFromMatrix = 0.;
-	int iFacet = iVariable / 4;
-	int iCoefficient = iVariable % 4;
-	for (int jVariable = 0; jVariable < 4 * numFacets; ++jVariable)
+	for (int jFacet = 0; jFacet < numFacets; ++jFacet)
 	{
-		int jFacet = jVariable / 4;
-		int jCoefficient = jVariable % 4;
-		double elementOfMatrix = matrix[(5 * iFacet + iCoefficient) * 5
-				* numFacets + 5 * jFacet + jCoefficient];
-		double currentCoefficient;
-		switch (jCoefficient)
+		if (jFacet == *jIteratorNotAssociated)
 		{
-		case 0:
-			currentCoefficient = facets[jFacet].plane.norm.x;
-			break;
-		case 1:
-			currentCoefficient = facets[jFacet].plane.norm.y;
-			break;
-		case 2:
-			currentCoefficient = facets[jFacet].plane.norm.z;
-			break;
-		case 3:
-			currentCoefficient = facets[jFacet].plane.dist;
-			break;
+			++jIteratorNotAssociated;
+			++jCountNotAssociated;
 		}
-		valueFromMatrix += elementOfMatrix * currentCoefficient;
+		int jFacetShifted = jFacet - jCountNotAssociated;
+
+		for (int jCoefficient = 0; jCoefficient < 4; ++jCoefficient)
+		{
+
+			double elementOfMatrix = matrix[(5 * iFacet + iCoefficient) * dim
+					+ 5 * jFacetShifted + jCoefficient];
+			double currentCoefficient;
+			switch (jCoefficient)
+			{
+			case 0:
+				currentCoefficient = facets[jFacetShifted].plane.norm.x;
+				break;
+			case 1:
+				currentCoefficient = facets[jFacetShifted].plane.norm.y;
+				break;
+			case 2:
+				currentCoefficient = facets[jFacetShifted].plane.norm.z;
+				break;
+			case 3:
+				currentCoefficient = facets[jFacetShifted].plane.dist;
+				break;
+			}
+			valueFromMatrix += elementOfMatrix * currentCoefficient;
+		}
 	}
 	return valueFromMatrix;
 
 }
 
 double Polyhedron::corpol_calculate_functional_derivative_1(Plane* prevPlanes,
-		int iVariable)
+		int iFacet, int iCoefficient)
 {
-	if (iVariable < 0 || iVariable >= numFacets * 4)
+	if (iFacet < 0 || iFacet >= numFacets)
 	{
-		DEBUG_PRINT("Error. iVariable = %d is out of bounds", iVariable);
+		ERROR_PRINT("Error. iFacet = %d is out of bounds", iFacet);
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
-	int iFacet = iVariable / 4;
-	int iCoefficient = iVariable % 4;
+	if (iCoefficient < 0 || iCoefficient >= 4)
+	{
+		ERROR_PRINT("Error. iCoefficient = %d is out of bounds", iCoefficient);
+		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+	}
 
 	double* changedValue;
 	switch (iCoefficient)
@@ -123,85 +159,122 @@ double Polyhedron::corpol_calculate_functional_derivative_1(Plane* prevPlanes,
 
 	return 0.5 * DEFAULT_DERIVATIVE_STEP_RECIPROCAL
 			* (funcValueRight - funcValueLeft);
-
 }
 
-void Polyhedron::corpol_derivativeTest_2(Plane* prevPlanes, double* matrix)
+void Polyhedron::corpol_derivativeTest_2(Plane* prevPlanes, double* matrix,
+		list<int>* facetsNotAssociated)
 {
-	for (int iVariable = 0; iVariable < 4 * numFacets; ++iVariable)
+	int numFacetsNotAssociated = facetsNotAssociated->size();
+	int dim = 5 * (numFacets - numFacetsNotAssociated);
+
+	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated->begin();
+	int iCountNotAssociated = 0;
+
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
-
-		for (int jVariable = 0; jVariable < 4 * numFacets; ++jVariable)
+		if (iFacet == *iIteratorNotAssociated)
 		{
+			++iIteratorNotAssociated;
+			++iCountNotAssociated;
+			continue;
+		}
+		int iFacetShifted = iFacet - iCountNotAssociated;
 
-			double valueFromDerTest = corpol_calculate_functional_derivative_2(
-					prevPlanes, iVariable, jVariable);
-			double valueFromMatrix =
-					corpol_derivativeTest_calculateValFromMatrix_2(iVariable,
-							jVariable, matrix);
+		for (int iCoefficient = 0; iCoefficient < 4; ++iCoefficient)
+		{
+			list<int>::iterator jIteratorNotAssociated =
+					facetsNotAssociated->begin();
+			int jCountNotAssociated = 0;
 
-			int iFacet = iVariable / 4;
-			int iCoefficient = iVariable % 4;
-			int jFacet = jVariable / 4;
-			int jCoefficient = jVariable % 4;
-
-			DEBUG_PRINT(
-					"value from derivative test: %le, value from matrix: %le",
-					valueFromDerTest, valueFromMatrix);
-			DEBUG_PRINT(
-					" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
-					iFacet, iCoefficient, jFacet, jCoefficient);
-
-			double errorAbsolute = fabs(valueFromDerTest - valueFromMatrix);
-			if (errorAbsolute
-					> EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE)
+			for (int jFacet = 0; jFacet < numFacets; ++jFacet)
 			{
-				ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
-				ERROR_PRINT(
-						" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
-						iFacet, iCoefficient, jFacet, jCoefficient);
-			}
+				if (jFacet == *jIteratorNotAssociated)
+				{
+					++jIteratorNotAssociated;
+					++jCountNotAssociated;
+					continue;
+				}
+				int jFacetShifted = jFacet - jCountNotAssociated;
 
-			double absValue = fabs(valueFromDerTest);
-			if (absValue <= EPSILON_FOR_DIVISION)
-				// In this case we cannot compare values
-				continue;
+				for (int jCoefficient = 0; jCoefficient < 4; ++jCoefficient)
+				{
 
-			double errorRelative = errorAbsolute / absValue;
-			if (errorRelative
-					> EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE)
-			{
-				ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
-				ERROR_PRINT(
-						" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
-						iFacet, iCoefficient, jFacet, jCoefficient);
+					double valueFromDerTest =
+							corpol_calculate_functional_derivative_2(prevPlanes,
+									iFacet, iCoefficient, jFacet, jCoefficient);
+					double valueFromMatrix =
+							corpol_derivativeTest_calculateValFromMatrix_2(
+									iFacetShifted, iCoefficient, jFacetShifted,
+									jCoefficient, matrix, facetsNotAssociated);
+
+					DEBUG_PRINT(
+							"value from derivative test: %le, value from matrix: %le",
+							valueFromDerTest, valueFromMatrix);
+					DEBUG_PRINT(
+							" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
+							iFacet, iCoefficient, jFacet, jCoefficient);
+
+					double errorAbsolute = fabs(
+							valueFromDerTest - valueFromMatrix);
+					if (errorAbsolute
+							> EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE)
+					{
+						ERROR_PRINT("!!! Too big absolute error: %le",
+								errorAbsolute);
+						ERROR_PRINT(
+								" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
+								iFacet, iCoefficient, jFacet, jCoefficient);
+					}
+
+					double absValue = fabs(valueFromDerTest);
+					if (absValue <= EPSILON_FOR_DIVISION)
+						// In this case we cannot compare values
+						continue;
+
+					double errorRelative = errorAbsolute / absValue;
+					if (errorRelative
+							> EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE)
+					{
+						ERROR_PRINT("!!! Too big relative error: %lf",
+								errorRelative);
+						ERROR_PRINT(
+								" iFacet = %d, iCoefficient = %d, jFacet = %d, jCoefficient = %d",
+								iFacet, iCoefficient, jFacet, jCoefficient);
+					}
+				}
 			}
 		}
 	}
 }
 
 double Polyhedron::corpol_calculate_functional_derivative_2(Plane* prevPlanes,
-		int iVariable, int jVariable)
+		int iFacet, int iCoefficient, int jFacet, int jCoefficient)
 {
-	if (iVariable < 0 || iVariable >= numFacets * 4)
+	if (iFacet < 0 || iFacet >= numFacets)
 	{
-		DEBUG_PRINT("Error. iVariable = %d is out of bounds", iVariable);
-		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
-	}
-	if (jVariable < 0 || jVariable >= numFacets * 4)
-	{
-		DEBUG_PRINT("Error. jVariable = %d is out of bounds", jVariable);
+		ERROR_PRINT("Error. iFacet = %d is out of bounds", iFacet);
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
-	if (iVariable != jVariable)
+	if (iCoefficient < 0 || iCoefficient >= 4)
 	{
-		int iFacet = iVariable / 4;
-		int iCoefficient = iVariable % 4;
+		ERROR_PRINT("Error. iCoefficient = %d is out of bounds", iCoefficient);
+		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+	}
+	if (jFacet < 0 || jFacet >= numFacets)
+	{
+		ERROR_PRINT("Error. jFacet = %d is out of bounds", jFacet);
+		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+	}
 
-		int jFacet = jVariable / 4;
-		int jCoefficient = jVariable % 4;
+	if (jCoefficient < 0 || jCoefficient >= 4)
+	{
+		ERROR_PRINT("Error. jCoefficient = %d is out of bounds", jCoefficient);
+		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+	}
 
+	if (iFacet != jFacet || iCoefficient != jCoefficient)
+	{
 		double* changedValueI;
 		switch (iCoefficient)
 		{
@@ -267,8 +340,6 @@ double Polyhedron::corpol_calculate_functional_derivative_2(Plane* prevPlanes,
 	else
 	{
 		// iVariable == jVariable
-		int iFacet = iVariable / 4;
-		int iCoefficient = iVariable % 4;
 
 		double* changedValue;
 		switch (iCoefficient)
@@ -303,16 +374,12 @@ double Polyhedron::corpol_calculate_functional_derivative_2(Plane* prevPlanes,
 	}
 }
 
-double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_2(int iVariable,
-		int jVariable, double* matrix)
+double Polyhedron::corpol_derivativeTest_calculateValFromMatrix_2(int iFacet,
+		int iCoefficient, int jFacet, int jCoefficient, double* matrix,
+		list<int>* facetsNotAssociated)
 {
-	int iFacet = iVariable / 4;
-	int iCoefficient = iVariable % 4;
-
-	int jFacet = jVariable / 4;
-	int jCoefficient = jVariable % 4;
-
-	int dim = 5 * numFacets;
+	int numFacetsNotAssociated = facetsNotAssociated->size();
+	int dim = 5 * (numFacets - numFacetsNotAssociated);
 
 	return matrix[dim * (5 * iFacet + iCoefficient) + 5 * jFacet + jCoefficient];
 }

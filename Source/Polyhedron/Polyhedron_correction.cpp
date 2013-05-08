@@ -26,7 +26,16 @@ int Polyhedron::correct_polyhedron()
 	corpol_preprocess();
 
 	list<int>* facetsNotAssociated = corpol_find_not_associated_facets();
-	int numFacetsNotAssociated = facetsNotAssociated->size();
+#ifndef NDEBUG
+	DEBUG_PRINT("The following facets have no associations:");
+	for (list<int>::iterator iter = facetsNotAssociated->begin();
+			iter != facetsNotAssociated->end(); ++iter)
+	{
+		DEBUG_PRINT("%d", *iter);
+	}
+#endif
+
+		int numFacetsNotAssociated = facetsNotAssociated->size();
 	int dim = (numFacets - numFacetsNotAssociated) * 5;
 
 	double * matrix = new double[dim * dim];
@@ -213,7 +222,7 @@ int Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* matrix,
 	// Test the calculated matrix by the method of
 	// numerical calculation of first derivatives
 	// of the functional
-	corpol_derivativeTest_all(prevPlanes, matrix);
+	corpol_derivativeTest_all(prevPlanes, matrix, facetsNotAssociated);
 #endif
 
 	lapack_int dimLapack = dim;
