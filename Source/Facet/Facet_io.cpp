@@ -36,6 +36,16 @@ void Facet::my_fprint_all(FILE* file)
 
 	if (parentPolyhedron == NULL)
 		fprintf(file, "Warning! poly == NULL !\n");
+	else
+	{
+		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+		{
+			int ind = indVertices[iVertex];
+			Vector3d vector = parentPolyhedron->vertices[indVertices[iVertex]];
+			fprintf(file, "vertices[%d] = (%lf, %lf, %lf)\n", ind, vector.x,
+					vector.y, vector.z);
+		}
+	}
 //
 //	else
 //		fprintf(file, "poly->numf = %d\n", poly->numf);
