@@ -317,8 +317,8 @@ public:
 			Vector3d& v2);
 
 	//Polyhedron_cluster.cpp
-	int clasterisation(double p);
-	void clasterisation2(double p);
+	int clusterisation(double p);
+	void clusterisation2(double p);
 
 	//Polyhedron_hierarchical_clustering.cpp
 	TreeClusterNorm& build_TreeClusterNorm();

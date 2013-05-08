@@ -14,7 +14,7 @@ using namespace std;
 void test_J11(const char* name, int type);
 void test_Jtwo(const char* name1, const char* name2, int type);
 
-void test_claster(const char* name, int type);
+void test_cluster(const char* name, int type);
 void test_viev(const char* name, int type);
 double norm_J(double Jxx1, double Jyy1, double Jzz1, double Jxy1, double Jyz1,
 		double Jxz1);
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 //      test_Jtwo("2009_08_17_brilliant_1.27ct_lexus_400c_wol_2"
 //                , "2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
 //      test_BuildTreeNorm("Pi-cube", 0);
-	//   test_claster("poly-cube", 0);
+	//   test_cluster("poly-cube", 0);
 	//test_viev("poly-cube", 0);
 
 //    Polyhedron s;
@@ -252,8 +252,8 @@ void test_J11(const char* name, int type)
 //    printf("center = (%lf,%lf,%lf) for %s.dat\n", xc, yc, zc,name);
 //    printf("vol = %lf\n", vol);
 	//double s = 
-	//poly.clasterisation2(0.03);// .volume();
-	//poly.clasterisation2(0.001);
+	//poly.clusterisation2(0.03);// .volume();
+	//poly.clusterisation2(0.001);
 	//printf("%10.50lf\n", s);
 
 	if (file_name_in != NULL)
@@ -263,7 +263,7 @@ void test_J11(const char* name, int type)
 
 }
 
-void test_claster(const char* name, int type)
+void test_cluster(const char* name, int type)
 {
 	double vol;
 
@@ -294,16 +294,16 @@ void test_claster(const char* name, int type)
 
 	poly.preprocess_polyhedron();
 
-	int i, nclaster;
+	int i, ncluster;
 	double p;
 	p = EPSILON;
 //    for (i = 0; i < 20; ++i) {
-//        nclaster = poly.clasterisation(p);
-//        printf("p = %le, \tncalster = %d\n", p, nclaster);
+//        ncluster = poly.clusterisation(p);
+//        printf("p = %le, \tncalster = %d\n", p, ncluster);
 //        p *= 10.;
 //    }
 
-	poly.clasterisation2(p);
+	poly.clusterisation2(p);
 	if (file_name_in != NULL)
 		delete[] file_name_in;
 

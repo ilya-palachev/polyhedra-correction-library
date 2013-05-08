@@ -15,7 +15,7 @@ ClusterNorm::ClusterNorm() :
 
 double ClusterNorm::area()
 {
-	double claster_area = 0.;
+	double cluster_area = 0.;
 	double areaOneFacet;
 
 //    printf("\n");
@@ -23,11 +23,11 @@ double ClusterNorm::area()
 	{
 		areaOneFacet = poly->area(indexFacet[i]);
 //        printf("areaOneFacet = %lf\n", areaOneFacet);       
-		claster_area += areaOneFacet;
+		cluster_area += areaOneFacet;
 
 	}
-	//printf(" %lf ", claster_area);
-	return claster_area;
+	//printf(" %lf ", cluster_area);
+	return cluster_area;
 }
 
 ClusterNorm::ClusterNorm(const ClusterNorm& orig) :

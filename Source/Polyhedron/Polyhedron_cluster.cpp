@@ -1,19 +1,19 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-int Polyhedron::clasterisation(double p)
+int Polyhedron::clusterisation(double p)
 {
 
 	int i, j, nv, *index, fid;
 	double *dist, sin_alpha, alpha;
 	bool *inc;
 
-	int *claster, nclaster;
+	int *cluster, ncluster;
 
 	Vector3d n0, n1;
 
 	dist = new double[numFacets * numFacets];
 	inc = new bool[numFacets * numFacets];
-	claster = new int[numFacets];
+	cluster = new int[numFacets];
 
 	for (i = 0; i < numFacets * numFacets; ++i)
 		dist[i] = 100.;
@@ -45,17 +45,17 @@ int Polyhedron::clasterisation(double p)
 	}
 
 	for (i = 0; i < numFacets; ++i)
-		claster[i] = i;
+		cluster[i] = i;
 
-	nclaster = numFacets;
+	ncluster = numFacets;
 	for (i = 0; i < numFacets; ++i)
 	{
 		for (j = 0; j < i; ++j)
 		{
 			if (inc[i * numFacets + j])
 			{
-				claster[i] = claster[j];
-				--nclaster;
+				cluster[i] = cluster[j];
+				--ncluster;
 				break;
 			}
 		}
@@ -67,10 +67,10 @@ int Polyhedron::clasterisation(double p)
 	if (inc != NULL)
 		delete[] inc;
 
-	if (claster != NULL)
-		delete[] claster;
+	if (cluster != NULL)
+		delete[] cluster;
 
-	return nclaster;
+	return ncluster;
 }
 
 class SortedSetOfPairs
@@ -151,7 +151,7 @@ void SortedSetOfPairs::print()
 	}
 }
 
-void fire(int l, int* A, int* claster, SortedSetOfPairs& ssop, int depth)
+void fire(int l, int* A, int* cluster, SortedSetOfPairs& ssop, int depth)
 {
 
 	int k, i;
@@ -164,26 +164,26 @@ void fire(int l, int* A, int* claster, SortedSetOfPairs& ssop, int depth)
 
 		i = ssop.jj[k];
 
-		if (claster[i] != claster[l])
+		if (cluster[i] != cluster[l])
 		{
-			claster[i] = claster[l];
-			fire(i, A, claster, ssop, depth + 1);
+			cluster[i] = cluster[l];
+			fire(i, A, cluster, ssop, depth + 1);
 		}
 	}
 }
 
-void Polyhedron::clasterisation2(double p)
+void Polyhedron::clusterisation2(double p)
 {
 
 	int i, j, nv, *index, fid;
 	double sin_alpha, alpha;
 
-	int *claster;
+	int *cluster;
 	int *A;
 
 	Vector3d n0, n1;
 
-	claster = new int[numFacets];
+	cluster = new int[numFacets];
 	A = new int[numFacets];
 
 	for (i = 0; i < numFacets; ++i)
@@ -233,26 +233,26 @@ void Polyhedron::clasterisation2(double p)
 //    return;
 
 	for (i = 0; i < numFacets; ++i)
-		claster[i] = i;
+		cluster[i] = i;
 
 	int l = 0;
 	while (l < numFacets - 1)
 	{
-		while (claster[l] != l)
+		while (cluster[l] != l)
 			++l;
 		printf("begin new step l = %d\n", l);
-		fire(l, A, claster, ssop, 0);
+		fire(l, A, cluster, ssop, 0);
 		++l;
 	}
 
 	for (i = 0; i < numFacets; ++i)
 	{
-		if (claster[i] != i)
-			printf("claster[%d] = %d\n", i, claster[i]);
+		if (cluster[i] != i)
+			printf("cluster[%d] = %d\n", i, cluster[i]);
 	}
 
-	if (claster != NULL)
-		delete[] claster;
+	if (cluster != NULL)
+		delete[] cluster;
 
 	if (A != NULL)
 		delete[] A;
