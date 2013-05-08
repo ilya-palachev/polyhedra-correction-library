@@ -18,6 +18,10 @@ int Polyhedron::correct_polyhedron()
 {
 	DEBUG_START;
 
+	fprintf(stdout, COLOUR_MAGENTA);
+	my_fprint(stdout);
+	fprintf(stdout, COLOUR_WHITE);
+
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
 	int numEdges;
