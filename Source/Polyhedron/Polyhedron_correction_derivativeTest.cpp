@@ -15,6 +15,8 @@ void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix)
 		double valueFromMatrix = corpol_derivativeTest_calculateValFromMatrix_1(
 				iVariable, matrix);
 
+		bool makeAssertion = false;
+
 		DEBUG_PRINT("value from derivative test: %le, value from matrix: %le",
 				valueFromDerTest, valueFromMatrix);
 
@@ -27,6 +29,7 @@ void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix)
 			ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
 			ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
 					iCoefficient);
+			makeAssertion = true;
 		}
 
 		double absValue = fabs(valueFromDerTest);
@@ -40,8 +43,10 @@ void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix)
 			ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
 			ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
 					iCoefficient);
+			makeAssertion = true;
 		}
 
+		ASSERT(!makeAssertion);
 	}
 }
 
