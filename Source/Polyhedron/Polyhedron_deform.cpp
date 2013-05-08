@@ -46,13 +46,13 @@
 //
 //#define nl(i) (4 * numf + 3  * (numv - 1) + (i))
 
-double norm_vector(
-		int n,
-		double* a) {
+double norm_vector(int n, double* a)
+{
 	int i;
 	double max, tmp;
 	max = 0.;
-	for (i = 0; i < n; ++i) {
+	for (i = 0; i < n; ++i)
+	{
 		tmp = fabs(a[i]);
 		if (tmp > max)
 			max = tmp;
@@ -65,11 +65,8 @@ double norm_vector(
 //    return sqrt(sum);
 }
 
-void print_matrix(
-		FILE* file,
-		int n,
-		int m,
-		double* A) {
+void print_matrix(FILE* file, int n, int m, double* A)
+{
 	int i, j;
 
 	fprintf(file, "\n");
@@ -77,14 +74,18 @@ void print_matrix(
 		fprintf(file, "--");
 	fprintf(file, "\n");
 
-	for (i = 0; i < n; ++i) {
-		for (j = 0; j < m; ++j) {
-			if (fabs(A[i * n + j]) >= 1e-16) {
+	for (i = 0; i < n; ++i)
+	{
+		for (j = 0; j < m; ++j)
+		{
+			if (fabs(A[i * n + j]) >= 1e-16)
+			{
 				if (fabs(A[i * n + j]) < 9.5)
 					fprintf(file, "%1.0lf ", fabs(A[i * n + j]));
 				else
 					fprintf(file, "# ");
-			} else
+			}
+			else
 				fprintf(file, "  ");
 		}
 		fprintf(file, "|\n");
@@ -94,11 +95,8 @@ void print_matrix(
 	fprintf(file, "\n");
 }
 
-void print_matrix_bool(
-		FILE* file,
-		int n,
-		int m,
-		bool* A) {
+void print_matrix_bool(FILE* file, int n, int m, bool* A)
+{
 	int i, j;
 
 	fprintf(file, "\n");
@@ -106,8 +104,10 @@ void print_matrix_bool(
 		fprintf(file, "--");
 	fprintf(file, "\n");
 
-	for (i = 0; i < n; ++i) {
-		for (j = 0; j < m; ++j) {
+	for (i = 0; i < n; ++i)
+	{
+		for (j = 0; j < m; ++j)
+		{
 			if (A[i * m + j])
 				fprintf(file, "1 ");
 			else
@@ -120,17 +120,15 @@ void print_matrix_bool(
 	fprintf(file, "\n");
 }
 
-void print_vector(
-		int n,
-		double* v) {
+void print_vector(int n, double* v)
+{
 	int i;
 	for (i = 0; i < n; ++i)
 		printf("\t%lf\n", v[i]);
 }
 
-void Polyhedron::deform(
-		int id,
-		Vector3d delta) {
+void Polyhedron::deform(int id, Vector3d delta)
+{
 	int i, step;
 	double *X, *X1, *fx, *A, err, err_new, gamma;
 	double *tmp0, *tmp1, *tmp2, *tmp3;
@@ -144,25 +142,29 @@ void Polyhedron::deform(
 	double xx, yy, zz;
 	double a, b, c, d;
 	int nv, *index;
-	for (int j = 0; j < numFacets; ++j) {
+	for (int j = 0; j < numFacets; ++j)
+	{
 		a = facets[j].plane.norm.x;
 		b = facets[j].plane.norm.y;
 		c = facets[j].plane.norm.z;
 		d = facets[j].plane.dist;
 		index = facets[j].indVertices;
 		nv = facets[j].numVertices;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 			xx = vertices[index[i]].x;
 			yy = vertices[index[i]].y;
 			zz = vertices[index[i]].z;
-			printf("v%d -> f%d : %lf\n", index[i], j, a * xx + b * yy + c * zz + d);
+			printf("v%d -> f%d : %lf\n", index[i], j,
+					a * xx + b * yy + c * zz + d);
 		}
 	}
 
 	vertices[id] = vertices[id] + delta;
 
 	n = 0;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		n += facets[i].numVertices;
 	}
 	n += 4 * numFacets + 3 * (numVertices - 1);
@@ -171,11 +173,13 @@ void Polyhedron::deform(
 
 	sum = new int[numFacets];
 	sum[0] = 0;
-	for (i = 0; i < numFacets - 1; ++i) {
+	for (i = 0; i < numFacets - 1; ++i)
+	{
 		sum[i + 1] = sum[i] + facets[i].numVertices;
 	}
 
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		printf("sum[%d] = %d\n", i, sum[i]);
 	}
 
@@ -188,7 +192,8 @@ void Polyhedron::deform(
 	fx = new double[n];
 	A = new double[n * n];
 
-	for (i = 0; i < n; ++i) {
+	for (i = 0; i < n; ++i)
+	{
 		X[i] = 0.;
 	}
 //    X[0] = 1.01;
@@ -198,7 +203,8 @@ void Polyhedron::deform(
 	err = norm_vector(n, fx);
 
 	step = 0;
-	while (err > EPSILON) {
+	while (err > EPSILON)
+	{
 //        derf(n, X, A, id, sum);
 		derf2(n, X, A, id, sum, tmp0, tmp1, tmp2, tmp3);
 		f(n, X, fx, id, sum);
@@ -206,24 +212,28 @@ void Polyhedron::deform(
 
 		printf("step %d\terr = %le\n", step++, err);
 		print_vector(n, fx);
-		if (err > 100) {
+		if (err > 100)
+		{
 			printf("Ошибка. Метод Ньютона разошелся\n");
 			break;
 		}
 		print_matrix(stdout, n, n, A);
 
 		success = Gauss_string(n, A, fx);
-		if (!success) {
+		if (!success)
+		{
 			printf("Stoping deform...\n");
 			return;
 		}
-		for (i = 0; i < n; ++i) {
+		for (i = 0; i < n; ++i)
+		{
 			X1[i] = fx[i];
 		}
 		gamma = 2.;
 		auto_step = 0;
 		printf("\tauto_step : ");
-		do {
+		do
+		{
 			if (auto_step > 100)
 				break;
 
@@ -239,32 +249,37 @@ void Polyhedron::deform(
 		printf("\n");
 	}
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		if (i == id)
 			continue;
 		vertices[i].x += x(i);
 		vertices[i].y += y(i);
 		vertices[i].z += z(i);
 	}
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		facets[i].plane.norm.x += a(i);
 		facets[i].plane.norm.y += b(i);
 		facets[i].plane.norm.z += c(i);
 		facets[i].plane.dist += d(i);
 	}
 
-	for (int j = 0; j < numFacets; ++j) {
+	for (int j = 0; j < numFacets; ++j)
+	{
 		a = facets[j].plane.norm.x;
 		b = facets[j].plane.norm.y;
 		c = facets[j].plane.norm.z;
 		d = facets[j].plane.dist;
 		index = facets[j].indVertices;
 		nv = facets[j].numVertices;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 			xx = vertices[index[i]].x;
 			yy = vertices[index[i]].y;
 			zz = vertices[index[i]].z;
-			printf("v%d -> f%d : %lf\n", index[i], j, a * xx + b * yy + c * zz + d);
+			printf("v%d -> f%d : %lf\n", index[i], j,
+					a * xx + b * yy + c * zz + d);
 		}
 	}
 
@@ -287,12 +302,8 @@ void Polyhedron::deform(
 
 }
 
-void Polyhedron::f(
-		int n,
-		double* X,
-		double* fx,
-		int id,
-		int* sum) {
+void Polyhedron::f(int n, double* X, double* fx, int id, int* sum)
+{
 	int i, j, k, p, m;
 	int *index, nv, nf;
 	Plane plane;
@@ -314,20 +325,25 @@ void Polyhedron::f(
 //    }
 //    printf("\n\n");
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		nv = facets[j].numVertices;
 		index = facets[j].indVertices;
 		plane = facets[j].plane;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 //            printf("fx[%d] = ", k);
-			if (index[i] == id) {
+			if (index[i] == id)
+			{
 				fx[k] = (vertices[index[i]].x) * (plane.norm.x + a(j));
 				fx[k] += (vertices[index[i]].y) * (plane.norm.y + b(j));
 				fx[k] += (vertices[index[i]].z) * (plane.norm.z + c(j));
 				fx[k] += plane.dist + d(j);
 //                printf("X%d*(a0%d + a%d) + Y%d*(b0%d + b%d) + Z%d*(c0%d + c%d) + d0%d + d%d\n",
 //                        id, j, j, id, j, j, id, j, j, j, j);
-					} else {
+					}
+					else
+					{
 //                printf("(%.2lf + %.2lf) * (%.2lf + %.2lf) + \n", 
 //                        vertex[index[i]].x, x(index[i]), plane.norm.x, a(j));
 //                printf("(%.2lf + %.2lf) * (%.2lf + %.2lf) + \n",
@@ -347,8 +363,10 @@ void Polyhedron::f(
 			}
 		}
 
-	for (i = 0; i < numVertices; ++i) {
-		if (i == id) {
+	for (i = 0; i < numVertices; ++i)
+	{
+		if (i == id)
+		{
 			continue;
 		}
 		fx[k] = 2 * eps * x(i);
@@ -360,7 +378,8 @@ void Polyhedron::f(
 		nf = vertexInfos[i].numFacets;
 		;
 		index = vertexInfos[i].indFacets;
-		for (j = 0; j < nf; ++j) {
+		for (j = 0; j < nf; ++j)
+		{
 			p = index[j];
 			m = facets[p].find_vertex(i);
 //            m = index[2 * j + 1];
@@ -375,7 +394,8 @@ void Polyhedron::f(
 		k += 3;
 	}
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		fx[k] = 2 * a(j);
 		fx[k + 1] = 2 * b(j);
 		fx[k + 2] = 2 * c(j);
@@ -386,14 +406,18 @@ void Polyhedron::f(
 		index = facets[j].indVertices;
 		plane = facets[j].plane;
 
-		for (i = 0; i < nv; ++i) {
-			if (index[i] == id) {
+		for (i = 0; i < nv; ++i)
+		{
+			if (index[i] == id)
+			{
 				fx[k ] -= l(sum[j] + i) * vertices[index[i]].x;
 				fx[k + 1] -= l(sum[j] + i) * vertices[index[i]].y;
 				fx[k + 2] -= l(sum[j] + i) * vertices[index[i]].z;
 				fx[k + 3] -= l(sum[j] + i);
 //                printf(" + l%d%d X%d", j, i, index[i]);
-			} else {
+			}
+			else
+			{
 				fx[k ] -= l(sum[j] + i) * (vertices[index[i]].x + x(index[i]));
 				fx[k + 1] -= l(sum[j] + i) * (vertices[index[i]].y + y(index[i]));
 				fx[k + 2] -= l(sum[j] + i) * (vertices[index[i]].z + z(index[i]));
@@ -409,28 +433,28 @@ void Polyhedron::f(
 	}
 }
 
-void Polyhedron::derf(
-		int n,
-		double* X,
-		double* A,
-		int id,
-		int* sum) {
+void Polyhedron::derf(int n, double* X, double* A, int id, int* sum)
+{
 	int i, j, k, p, m;
 	int *index, nv, nf;
 	Plane plane;
 
 	k = 0;
 
-	for (i = 0; i < n * n; ++i) {
+	for (i = 0; i < n * n; ++i)
+	{
 		A[i] = 0.;
 	}
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		nv = facets[j].numVertices;
 		index = facets[j].indVertices;
 		plane = facets[j].plane;
-		for (i = 0; i < nv; ++i) {
-			if (index[i] == id) {
+		for (i = 0; i < nv; ++i)
+		{
+			if (index[i] == id)
+			{
 				A[k * n + na(j)] = vertices[index[i]].x;
 				A[k * n + nb(j)] = vertices[index[i]].y;
 				A[k * n + nc(j)] = vertices[index[i]].z;
@@ -438,7 +462,9 @@ void Polyhedron::derf(
 				A[k * n + nx(index[i])] = plane.norm.x + a(j);
 				A[k * n + ny(index[i])] = plane.norm.y + b(j);
 				A[k * n + nz(index[i])] = plane.norm.z + c(j);
-			} else {
+			}
+			else
+			{
 				A[k * n + na(j)] = vertices[index[i]].x + x(index[i]);
 				A[k * n + nb(j)] = vertices[index[i]].y + y(index[i]);
 				A[k * n + nc(j)] = vertices[index[i]].z + z(index[i]);
@@ -451,8 +477,10 @@ void Polyhedron::derf(
 		}
 	}
 
-	for (i = 0; i < numVertices; ++i) {
-		if (i == id) {
+	for (i = 0; i < numVertices; ++i)
+	{
+		if (i == id)
+		{
 			continue;
 		}
 		A[k * n + nx(i)] = 2 * eps;
@@ -462,7 +490,8 @@ void Polyhedron::derf(
 		nf = vertexInfos[i].numFacets;
 		;
 		index = vertexInfos[i].indFacets;
-		for (j = 0; j < nf; ++j) {
+		for (j = 0; j < nf; ++j)
+		{
 			p = index[j];
 			m = facets[p].find_vertex(i) + sum[p];
 //            m = index[2 * j + 1] + sum[p];
@@ -476,7 +505,8 @@ void Polyhedron::derf(
 		k += 3;
 	}
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		A[k * n + na(j)] = 2.;
 		A[(k + 1) * n + nb(j)] = 2.;
 		A[(k + 2) * n + nc(j)] = 2.;
@@ -486,13 +516,17 @@ void Polyhedron::derf(
 		index = facets[j].indVertices;
 		plane = facets[j].plane;
 
-		for (i = 0; i < nv; ++i) {
-			if (index[i] == id) {
+		for (i = 0; i < nv; ++i)
+		{
+			if (index[i] == id)
+			{
 				A[k * n + nl(sum[j] + i)] = -vertices[index[i]].x;
 				A[(k + 1) * n + nl(sum[j] + i)] = -vertices[index[i]].y;
 				A[(k + 2) * n + nl(sum[j] + i)] = -vertices[index[i]].z;
 				A[(k + 3) * n + nl(sum[j] + i)] = -1.;
-			} else {
+			}
+			else
+			{
 				A[k * n + nx(index[i])] = -l(sum[j] + i);
 				A[k * n + nl(sum[j] + i)] = - (vertices[index[i]].x + x(index[i]));
 				A[(k + 1) * n + ny(index[i])] = - l(sum[j] + i);
@@ -564,21 +598,16 @@ void Polyhedron::derf(
 //    
 //}
 
-void Polyhedron::derf2(
-		int n,
-		double* x,
-		double* A,
-		int id,
-		int* sum,
-		double* tmp0,
-		double* tmp1,
-		double* tmp2,
-		double* tmp3) {
+void Polyhedron::derf2(int n, double* x, double* A, int id, int* sum,
+		double* tmp0, double* tmp1, double* tmp2, double* tmp3)
+{
 	int i, j;
 	double ieps = 0.5 / EPS_DERIVATE;
 
-	for (j = 0; j < n; ++j) {
-		for (i = 0; i < n; ++i) {
+	for (j = 0; j < n; ++j)
+	{
+		for (i = 0; i < n; ++i)
+		{
 			tmp0[i] = x[i];
 			tmp1[i] = x[i];
 		}
@@ -631,9 +660,8 @@ void Polyhedron::derf2(
 
 #define khi(i, j) khi[(i) * numVertices + (j)]
 
-void Polyhedron::deform_w(
-		int id,
-		Vector3d delta) {
+void Polyhedron::deform_w(int id, Vector3d delta)
+{
 	int i, j, step;
 	double *X, *X1, *fx, *A, err, err_new, gamma;
 	double *tmp0, *tmp1, *tmp2, *tmp3;
@@ -649,18 +677,21 @@ void Polyhedron::deform_w(
 	double xx, yy, zz;
 	double a, b, c, d;
 	int nv, *index;
-	for (int j = 0; j < numFacets; ++j) {
+	for (int j = 0; j < numFacets; ++j)
+	{
 		a = facets[j].plane.norm.x;
 		b = facets[j].plane.norm.y;
 		c = facets[j].plane.norm.z;
 		d = facets[j].plane.dist;
 		index = facets[j].indVertices;
 		nv = facets[j].numVertices;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 			xx = vertices[index[i]].x;
 			yy = vertices[index[i]].y;
 			zz = vertices[index[i]].z;
-			printf("v%d -> f%d : %lf\n", index[i], j, a * xx + b * yy + c * zz + d);
+			printf("v%d -> f%d : %lf\n", index[i], j,
+					a * xx + b * yy + c * zz + d);
 		}
 	}
 
@@ -682,7 +713,8 @@ void Polyhedron::deform_w(
 			khi[i * numFacets + j] = (facets[j].find_vertex(i) != -1);
 	print_matrix_bool(stdout, numVertices, numFacets, khi);
 
-	for (i = 0; i < n; ++i) {
+	for (i = 0; i < n; ++i)
+	{
 		X[i] = 0.;
 	}
 	K = 1;
@@ -690,7 +722,8 @@ void Polyhedron::deform_w(
 	err = norm_vector(n, fx);
 
 	step = 0;
-	while (err > EPSILON) {
+	while (err > EPSILON)
+	{
 //        derf(n, X, A, id, sum);
 		derf_w(n, X, A, id, khi, K, tmp0, tmp1, tmp2, tmp3);
 		f_w(n, X, fx, id, khi, K);
@@ -698,24 +731,28 @@ void Polyhedron::deform_w(
 
 		printf("step %d\terr = %le\n", step++, err);
 //        print_vector(n, fx);
-		if (err > 100) {
+		if (err > 100)
+		{
 			printf("Ошибка. Метод Ньютона разошелся\n");
 			break;
 		}
 		print_matrix(stdout, n, n, A);
 
 		success = Gauss_string(n, A, fx);
-		if (!success) {
+		if (!success)
+		{
 			printf("Stoping deform...\n");
 			return;
 		}
-		for (i = 0; i < n; ++i) {
+		for (i = 0; i < n; ++i)
+		{
 			X1[i] = fx[i];
 		}
 		gamma = 2.;
 		auto_step = 0;
 		printf("\tauto_step : ");
-		do {
+		do
+		{
 			if (auto_step > 0)
 				break;
 
@@ -731,32 +768,37 @@ void Polyhedron::deform_w(
 		printf("\n");
 	}
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		if (i == id)
 			continue;
 		vertices[i].x += x(i);
 		vertices[i].y += y(i);
 		vertices[i].z += z(i);
 	}
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		facets[i].plane.norm.x += a(i);
 		facets[i].plane.norm.y += b(i);
 		facets[i].plane.norm.z += c(i);
 		facets[i].plane.dist += d(i);
 	}
 
-	for (int j = 0; j < numFacets; ++j) {
+	for (int j = 0; j < numFacets; ++j)
+	{
 		a = facets[j].plane.norm.x;
 		b = facets[j].plane.norm.y;
 		c = facets[j].plane.norm.z;
 		d = facets[j].plane.dist;
 		index = facets[j].indVertices;
 		nv = facets[j].numVertices;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 			xx = vertices[index[i]].x;
 			yy = vertices[index[i]].y;
 			zz = vertices[index[i]].z;
-			printf("v%d -> f%d : %lf\n", index[i], j, a * xx + b * yy + c * zz + d);
+			printf("v%d -> f%d : %lf\n", index[i], j,
+					a * xx + b * yy + c * zz + d);
 		}
 	}
 
@@ -781,13 +823,8 @@ void Polyhedron::deform_w(
 	printf("End of deform_w\n");
 }
 
-void Polyhedron::f_w(
-		int n,
-		double* X,
-		double* fx,
-		int id,
-		bool* khi,
-		int K) {
+void Polyhedron::f_w(int n, double* X, double* fx, int id, bool* khi, int K)
+{
 	int i, j;
 	double sx, sy, sz;
 	double sa, sb, sc, sd;
@@ -805,7 +842,8 @@ void Polyhedron::f_w(
 //    }
 //    printf("\n");
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		if (i == id)
 			continue;
 		xi = vertices[i].x;
@@ -814,8 +852,10 @@ void Polyhedron::f_w(
 		sx = 0;
 		sy = 0;
 		sz = 0;
-		for (j = 0; j < numFacets; ++j) {
-			if (khi(i, j)) {
+		for (j = 0; j < numFacets; ++j)
+		{
+			if (khi(i, j))
+			{
 				aj = facets[j].plane.norm.x;
 				bj = facets[j].plane.norm.y;
 				cj = facets[j].plane.norm.z;
@@ -834,7 +874,8 @@ void Polyhedron::f_w(
 		fx[nz(i)] = 2 * z(i)+ 2 * K * sz;
 	}
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		aj = facets[j].plane.norm.x;
 		bj = facets[j].plane.norm.y;
 		cj = facets[j].plane.norm.z;
@@ -843,12 +884,15 @@ void Polyhedron::f_w(
 		sb = 0;
 		sc = 0;
 		sd = 0;
-		for (i = 0; i < numVertices; ++i) {
-			if (khi(i, j)) {
+		for (i = 0; i < numVertices; ++i)
+		{
+			if (khi(i, j))
+			{
 				xi = vertices[i].x;
 				yi = vertices[i].y;
 				zi = vertices[i].z;
-				if (i == id) {
+				if (i == id)
+				{
 					coeff = (aj + a(j)) * xi
 					+ (bj + b(j)) * yi
 					+ (cj + c(j)) * zi
@@ -857,7 +901,9 @@ void Polyhedron::f_w(
 					sb += coeff * yi;
 					sc += coeff * zi;
 					sd += coeff;
-				} else {
+				}
+				else
+				{
 					coeff = (aj + a(j)) * (xi + x(i))
 					+ (bj + b(j)) * (yi + y(i))
 					+ (cj + c(j)) * (zi + z(i))
@@ -876,22 +922,16 @@ void Polyhedron::f_w(
 	}
 }
 
-void Polyhedron::derf_w(
-		int n,
-		double* x,
-		double* A,
-		int id,
-		bool* khi,
-		int K,
-		double* tmp0,
-		double* tmp1,
-		double* tmp2,
-		double* tmp3) {
+void Polyhedron::derf_w(int n, double* x, double* A, int id, bool* khi, int K,
+		double* tmp0, double* tmp1, double* tmp2, double* tmp3)
+{
 	int i, j;
 	double ieps = 0.5 / EPS_DERIVATE;
 
-	for (j = 0; j < n; ++j) {
-		for (i = 0; i < n; ++i) {
+	for (j = 0; j < n; ++j)
+	{
+		for (i = 0; i < n; ++i)
+		{
 			tmp0[i] = x[i];
 			tmp1[i] = x[i];
 		}

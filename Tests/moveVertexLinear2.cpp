@@ -1,14 +1,9 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void test_deform_linear(
-		const char* name,
-		int type,
-		int id,
-		Vector3d delta);
+void test_deform_linear(const char* name, int type, int id, Vector3d delta);
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 	test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
 	test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
 	test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
@@ -22,18 +17,16 @@ int main(
 	test_deform_linear("poly-small", 0, 9, Vector3d(-1e-1, 1e-1, 1e-1));
 }
 
-void test_deform_linear(
-		const char* name,
-		int type,
-		int id,
-		Vector3d delta) {
+void test_deform_linear(const char* name, int type, int id, Vector3d delta)
+{
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
 	char *file_name_in, *file_name_out0, *file_name_out;
 
 	fprintf(stdout, "******************************************************\n");
-	fprintf(stdout, "********************   Deform linear    ****************\n");
+	fprintf(stdout,
+			"********************   Deform linear    ****************\n");
 	fprintf(stdout, "********************     [%d]        *****************\n",
 			id);
 	fprintf(stdout, "*********** (%lf, %lf, %lf) *****************\n", delta.x,
@@ -47,7 +40,8 @@ void test_deform_linear(
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 	sprintf(file_name_out0, "../poly-data-out/%s.ply", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -97,8 +91,9 @@ void test_deform_linear(
 	tm* timeinfo = localtime(&seconds);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
-			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
-			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, id);
+			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
+			timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min,
+			timeinfo->tm_sec, id);
 
 	poly.fprint_ply_scale(1000., file_name_out,
 			"made-by-Polyhedron_join_facets_2");

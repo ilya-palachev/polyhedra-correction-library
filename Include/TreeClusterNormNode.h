@@ -8,7 +8,8 @@
 #ifndef TREECLUSTERNORMNODE_H
 #define TREECLUSTERNORMNODE_H
 
-class TreeClusterNormNode {
+class TreeClusterNormNode
+{
 public:
 	ClusterNorm* cluster;
 
@@ -18,18 +19,12 @@ public:
 	TreeClusterNormNode* child1;
 
 	TreeClusterNormNode();
-	TreeClusterNormNode(
-			const TreeClusterNormNode& orig);
+	TreeClusterNormNode(const TreeClusterNormNode& orig);
 	virtual ~TreeClusterNormNode();
 
-	void fprint(
-			FILE* file,
-			int level);
+	void fprint(FILE* file, int level);
 //    void fprint_dendrogramma(FILE* file, int level);
-	void fprint_dendrogramma_lev(
-			FILE* file,
-			int level,
-			int fix);
+	void fprint_dendrogramma_lev(FILE* file, int level, int fix);
 private:
 
 };

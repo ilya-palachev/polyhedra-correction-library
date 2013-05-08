@@ -7,83 +7,88 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 MatrixDistNorm::MatrixDistNorm() :
-				n(0),
-				nMax(0),
-				matrix(NULL),
-				ifStay(NULL) {
+		n(0), nMax(0), matrix(NULL), ifStay(NULL)
+{
 }
 
-MatrixDistNorm::MatrixDistNorm(
-		int nMax_orig) :
-				n(0),
-				nMax(nMax_orig),
-				matrix(new double[nMax_orig * nMax_orig]),
-				ifStay(new bool[nMax_orig]) {
+MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
+		n(0), nMax(nMax_orig), matrix(new double[nMax_orig * nMax_orig]), ifStay(
+				new bool[nMax_orig])
+{
 	for (int i = 0; i < nMax_orig; ++i)
 		ifStay[i] = true;
 }
 
-MatrixDistNorm::MatrixDistNorm(
-		const MatrixDistNorm& orig) :
-				n(orig.n),
-				nMax(orig.nMax),
-				matrix(new double[orig.nMax * orig.nMax]),
-				ifStay(new bool[orig.nMax]) {
-	for (int i = 0; i < nMax * nMax; ++i) {
+MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
+		n(orig.n), nMax(orig.nMax), matrix(new double[orig.nMax * orig.nMax]), ifStay(
+				new bool[orig.nMax])
+{
+	for (int i = 0; i < nMax * nMax; ++i)
+	{
 		matrix[i] = orig.matrix[i];
 	}
-	for (int i = 0; i < nMax; ++i) {
+	for (int i = 0; i < nMax; ++i)
+	{
 		ifStay[i] = orig.ifStay[i];
 	}
 }
 
-MatrixDistNorm::~MatrixDistNorm() {
-	if (matrix != NULL) {
+MatrixDistNorm::~MatrixDistNorm()
+{
+	if (matrix != NULL)
+	{
 		delete[] matrix;
 		matrix = NULL;
 	}
-	if (ifStay != NULL) {
+	if (ifStay != NULL)
+	{
 		delete[] ifStay;
 		ifStay = NULL;
 	}
 }
 
-void MatrixDistNorm::build(
-		int m,
-		TreeClusterNormNode* nodeArray) {
+void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
+{
 
-	if (m > nMax) {
+	if (m > nMax)
+	{
 		printf("Error. m > nMax\n");
 		return;
 	}
 
 	n = m;
 	double distance;
-	for (int i = 0; i < n; ++i) {
-		for (int j = i + 1; j < n; ++j) {
-			distance = distCluster(*(nodeArray[i].cluster), *(nodeArray[j].cluster));
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = i + 1; j < n; ++j)
+		{
+			distance = distCluster(*(nodeArray[i].cluster),
+					*(nodeArray[j].cluster));
 			//printf("distance (%d, %d) = %lf\n", i, j, distance);
 			matrix[i * m + j] = distance;
 			matrix[j * m + i] = distance;
 		}
 	}
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i)
+	{
 		ifStay[i] = true;
 	}
 }
 
-double MatrixDistNorm::findMin(
-		int& imin,
-		int& jmin) {
+double MatrixDistNorm::findMin(int& imin, int& jmin)
+{
 	double min, distance;
 	bool ifAnyMinFound = false;
-	for (int i = 0; i < n; ++i) {
-		for (int j = i + 1; j < n; ++j) {
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = i + 1; j < n; ++j)
+		{
 			if (!ifStay[i] || !ifStay[j])
 				continue;
 			distance = matrix[i * n + j];
 			//printf("\t\tdistance(%d, %d) = %lf\n", i, j, distance);
-			if (!ifAnyMinFound || distance < min) {
+			if (!ifAnyMinFound || distance < min)
+			{
 				ifAnyMinFound = true;
 				imin = i;
 				jmin = j;
@@ -94,10 +99,8 @@ double MatrixDistNorm::findMin(
 	return min;
 }
 
-void MatrixDistNorm::rebuild(
-		int imin,
-		int jmin,
-		TreeClusterNormNode* nodeArray) {
+void MatrixDistNorm::rebuild(int imin, int jmin, TreeClusterNormNode* nodeArray)
+{
 
 	double distance;
 
@@ -105,7 +108,8 @@ void MatrixDistNorm::rebuild(
 	ifStay[jmin] = false;
 	//  printf("ifStay[%d] = 0\n", jmin);
 
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i)
+	{
 		if (!ifStay[i])
 			continue;
 		distance = distCluster(*nodeArray[imin].cluster, *nodeArray[i].cluster);
@@ -115,12 +119,13 @@ void MatrixDistNorm::rebuild(
 
 }
 
-void MatrixDistNorm::fprint_clusters(
-		FILE* file,
-		TreeClusterNormNode* nodeArray) {
+void MatrixDistNorm::fprint_clusters(FILE* file, TreeClusterNormNode* nodeArray)
+{
 
-	for (int i = 0; i < n; ++i) {
-		if (ifStay[i] == true) {
+	for (int i = 0; i < n; ++i)
+	{
+		if (ifStay[i] == true)
+		{
 			printf("cluster%d = {", i);
 			nodeArray[i].cluster->fprint(file);
 			printf("}\n");
@@ -128,19 +133,22 @@ void MatrixDistNorm::fprint_clusters(
 	}
 }
 
-void MatrixDistNorm::fprint_clusters2(
-		FILE* file,
-		TreeClusterNormNode* nodeArray) {
+void MatrixDistNorm::fprint_clusters2(FILE* file,
+		TreeClusterNormNode* nodeArray)
+{
 
 	int numcl = 0;
 	double allarea = 0;
-	for (int i = 0; i < n; ++i) {
-		if (ifStay[i] == true) {
+	for (int i = 0; i < n; ++i)
+	{
+		if (ifStay[i] == true)
+		{
 			numcl++;
 		}
 	}
 
-	for (int i = 0; i < numcl; ++i) {
+	for (int i = 0; i < numcl; ++i)
+	{
 		//        if(ifStay[i] == true)
 		//        {
 		printf("cluster%d = {", i);
@@ -152,21 +160,24 @@ void MatrixDistNorm::fprint_clusters2(
 	printf("allarea = %lf\n", allarea);
 }
 
-double MatrixDistNorm::sqNorm(
-		TreeClusterNormNode* nodeArray1,
-		TreeClusterNormNode* nodeArray2) {
+double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
+		TreeClusterNormNode* nodeArray2)
+{
 
 	int numcl = 0;
 	double area1 = 0;
 	double area2 = 0;
 	double norm = 0;
-	for (int i = 0; i < n; ++i) {
-		if (ifStay[i] == true) {
+	for (int i = 0; i < n; ++i)
+	{
+		if (ifStay[i] == true)
+		{
 			numcl++;
 		}
 	}
 
-	for (int i = 0; i < numcl; ++i) {
+	for (int i = 0; i < numcl; ++i)
+	{
 		//        if(ifStay[i] == true)
 		//        {
 		//printf("cluster%d = {",i);
@@ -182,12 +193,14 @@ double MatrixDistNorm::sqNorm(
 	return norm / numcl;
 }
 
-void MatrixDistNorm::setColors(
-		TreeClusterNormNode* nodeArray) {
+void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
+{
 
 	int numcl = 0;
-	for (int i = 0; i < n; ++i) {
-		if (ifStay[i] == true) {
+	for (int i = 0; i < n; ++i)
+	{
+		if (ifStay[i] == true)
+		{
 			numcl++;
 		}
 	}
@@ -195,10 +208,12 @@ void MatrixDistNorm::setColors(
 	int j;
 	char red, green, blue;
 
-	for (int i = 0; i < numcl; ++i) {
+	for (int i = 0; i < numcl; ++i)
+	{
 
 		j = i % 24;
-		switch (j) {
+		switch (j)
+		{
 		case 0:
 			red = 255;
 			green = 0;
@@ -326,18 +341,21 @@ void MatrixDistNorm::setColors(
 			break;
 		}
 
-		if (ifStay[i]) {
+		if (ifStay[i])
+		{
 			nodeArray[i].cluster->setColor(red, green, blue);
 		}
 	}
 }
 
-void MatrixDistNorm::setColors2(
-		TreeClusterNormNode* nodeArray) {
+void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
+{
 
 	int numcl = 0;
-	for (int i = 0; i < n; ++i) {
-		if (ifStay[i] == true) {
+	for (int i = 0; i < n; ++i)
+	{
+		if (ifStay[i] == true)
+		{
 			numcl++;
 		}
 	}
@@ -345,10 +363,12 @@ void MatrixDistNorm::setColors2(
 	int j;
 	char red, green, blue;
 
-	for (int i = 0; i < numcl; ++i) {
+	for (int i = 0; i < numcl; ++i)
+	{
 
 		j = i % 24;
-		switch (j) {
+		switch (j)
+		{
 		case 0:
 			red = 255;
 			green = 0;
@@ -482,27 +502,31 @@ void MatrixDistNorm::setColors2(
 	}
 }
 
-void MatrixDistNorm::fprint(
-		FILE* file) {
+void MatrixDistNorm::fprint(FILE* file)
+{
 
 	printf("MatrixDistNorm : \n\n");
 
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i)
+	{
 		printf("ifStay[%d] = %d\n", i, ifStay[i]);
 	}
-	for (int i = 0; i < n; ++i) {
-		for (int j = i + 1; j < n; ++j) {
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = i + 1; j < n; ++j)
+		{
 			printf("matrix[%d][%d] = %lf\n", i, j, matrix[i * n + j]);
 		}
 	}
 }
 
-void MatrixDistNorm::fprint_ifStay(
-		FILE* file) {
+void MatrixDistNorm::fprint_ifStay(FILE* file)
+{
 
 	//printf("MatrixDistNorm : ifStay : \n\n");
 
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i)
+	{
 		if (i < 100)
 			printf("\\;");
 		if (i < 10)
@@ -510,7 +534,8 @@ void MatrixDistNorm::fprint_ifStay(
 		printf("\\;%d", i);
 	}
 	printf("\n");
-	for (int i = 0; i < n; ++i) {
+	for (int i = 0; i < n; ++i)
+	{
 		if (i > 10 && i < 20)
 			printf("\\;");
 		if (i > 21)

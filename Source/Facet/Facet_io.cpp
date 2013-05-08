@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Facet::my_fprint(
-		FILE* file) {
+void Facet::my_fprint(FILE* file)
+{
 	int i;
 	fprintf(file, "Facet %d: ", id);
 	for (i = 0; i < numVertices; ++i)
@@ -9,8 +9,8 @@ void Facet::my_fprint(
 	printf("\n");
 }
 
-void Facet::my_fprint_all(
-		FILE* file) {
+void Facet::my_fprint_all(FILE* file)
+{
 	int i;
 	fprintf(file, "\n------------ Facet %d: ------------\n", id);
 	fprintf(file, "id = %d\n nv = %d\n", id, numVertices);
@@ -43,8 +43,8 @@ void Facet::my_fprint_all(
 
 }
 
-void Facet::fprint_default_0(
-		FILE* file) {
+void Facet::fprint_default_0(FILE* file)
+{
 	fprintf(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices, plane.norm.x,
 			plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < numVertices; ++j)
@@ -52,8 +52,8 @@ void Facet::fprint_default_0(
 	fprintf(file, "\n");
 }
 
-void Facet::fprint_default_1(
-		FILE* file) {
+void Facet::fprint_default_1(FILE* file)
+{
 	fprintf(file, "%d %d %.16lf %.16lf %.16lf %.16lf", id, numVertices,
 			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < numVertices; ++j)
@@ -61,8 +61,8 @@ void Facet::fprint_default_1(
 	fprintf(file, "\n");
 }
 
-void Facet::fprint_my_format(
-		FILE* file) {
+void Facet::fprint_my_format(FILE* file)
+{
 	fprintf(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices, plane.norm.x,
 			plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < 3 * numVertices + 1; ++j)
@@ -70,28 +70,30 @@ void Facet::fprint_my_format(
 	fprintf(file, "\n");
 }
 
-void Facet::fprint_ply_vertex(
-		FILE* file) {
+void Facet::fprint_ply_vertex(FILE* file)
+{
 	int v_id;
-	for (int j = 0; j < numVertices; ++j) {
+	for (int j = 0; j < numVertices; ++j)
+	{
 		v_id = indVertices[j];
 		fprintf(file, "%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf\n",
-				parentPolyhedron->vertices[v_id].x, parentPolyhedron->vertices[v_id].y,
+				parentPolyhedron->vertices[v_id].x,
+				parentPolyhedron->vertices[v_id].y,
 				parentPolyhedron->vertices[v_id].z, plane.norm.x, plane.norm.y,
 				plane.norm.z);
 	}
 }
 
-void Facet::fprint_ply_index(
-		FILE* file) {
+void Facet::fprint_ply_index(FILE* file)
+{
 	fprintf(file, "%d", numVertices);
 	for (int j = 0; j < numVertices; ++j)
 		fprintf(file, " %d", indVertices[j]);
 	fprintf(file, "\n");
 }
 
-void Facet::fprint_ply_scale(
-		FILE* file) {
+void Facet::fprint_ply_scale(FILE* file)
+{
 	fprintf(file, "%d", numVertices);
 	for (int j = 0; j < numVertices; ++j)
 		fprintf(file, " %d", indVertices[j]);

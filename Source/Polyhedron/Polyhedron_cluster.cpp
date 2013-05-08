@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-int Polyhedron::clasterisation(
-		double p) {
+int Polyhedron::clasterisation(double p)
+{
 
 	int i, j, nv, *index, fid;
 	double *dist, sin_alpha, alpha;
@@ -18,11 +18,13 @@ int Polyhedron::clasterisation(
 	for (i = 0; i < numFacets * numFacets; ++i)
 		dist[i] = 100.;
 
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		nv = facets[i].numVertices;
 		index = facets[i].indVertices;
 		n0 = facets[i].plane.norm;
-		for (j = 0; j < nv; ++j) {
+		for (j = 0; j < nv; ++j)
+		{
 			fid = index[nv + 1 + j];
 			n1 = facets[fid].plane.norm;
 			sin_alpha = sqrt(qmod(n0 % n1) / (qmod(n0) * qmod(n1)));
@@ -34,7 +36,8 @@ int Polyhedron::clasterisation(
 		}
 	}
 
-	for (i = 0; i < numFacets * numFacets; ++i) {
+	for (i = 0; i < numFacets * numFacets; ++i)
+	{
 		if (dist[i] < p)
 			inc[i] = true;
 		else
@@ -45,9 +48,12 @@ int Polyhedron::clasterisation(
 		claster[i] = i;
 
 	nclaster = numFacets;
-	for (i = 0; i < numFacets; ++i) {
-		for (j = 0; j < i; ++j) {
-			if (inc[i * numFacets + j]) {
+	for (i = 0; i < numFacets; ++i)
+	{
+		for (j = 0; j < i; ++j)
+		{
+			if (inc[i * numFacets + j])
+			{
 				claster[i] = claster[j];
 				--nclaster;
 				break;
@@ -67,7 +73,8 @@ int Polyhedron::clasterisation(
 	return nclaster;
 }
 
-class SortedSetOfPairs {
+class SortedSetOfPairs
+{
 public:
 	int num;
 	int len;
@@ -75,24 +82,22 @@ public:
 	int* ii;
 	int* jj;
 
-	SortedSetOfPairs(
-			int Len);
+	SortedSetOfPairs(int Len);
 	~SortedSetOfPairs();
-	void add(
-			int i,
-			int j);
+	void add(int i, int j);
 	void print();
 };
 
-SortedSetOfPairs::SortedSetOfPairs(
-		int Len) {
+SortedSetOfPairs::SortedSetOfPairs(int Len)
+{
 	len = Len;
 	num = 0;
 	ii = new int[Len];
 	jj = new int[Len];
 }
 
-SortedSetOfPairs::~SortedSetOfPairs() {
+SortedSetOfPairs::~SortedSetOfPairs()
+{
 	if (ii != NULL)
 		delete[] ii;
 	if (jj != NULL)
@@ -101,11 +106,11 @@ SortedSetOfPairs::~SortedSetOfPairs() {
 	jj = NULL;
 }
 
-void SortedSetOfPairs::add(
-		int i,
-		int j) {
+void SortedSetOfPairs::add(int i, int j)
+{
 
-	if (num == len) {
+	if (num == len)
+	{
 		printf("Error. OVERFLOW in SortedSetOfPairs\n");
 		return;
 	}
@@ -113,11 +118,15 @@ void SortedSetOfPairs::add(
 	int first = 0; // Первый элемент в массиве
 	int last = num; // Последний элемент в массиве
 
-	while (first < last) {
+	while (first < last)
+	{
 		int mid = (first + last) / 2;
-		if (i < ii[mid] || (i == ii[mid] && j < jj[mid])) {
+		if (i < ii[mid] || (i == ii[mid] && j < jj[mid]))
+		{
 			last = mid;
-		} else {
+		}
+		else
+		{
 			first = mid + 1;
 		}
 	}
@@ -133,38 +142,38 @@ void SortedSetOfPairs::add(
 	++num;
 }
 
-void SortedSetOfPairs::print() {
+void SortedSetOfPairs::print()
+{
 	int i;
-	for (i = 0; i < num; ++i) {
+	for (i = 0; i < num; ++i)
+	{
 		printf("ssop[%d] = \t(%d, \t%d)\n", i, ii[i], jj[i]);
 	}
 }
 
-void fire(
-		int l,
-		int* A,
-		int* claster,
-		SortedSetOfPairs& ssop,
-		int depth) {
+void fire(int l, int* A, int* claster, SortedSetOfPairs& ssop, int depth)
+{
 
 	int k, i;
 	for (i = 0; i < depth; ++i)
 		printf(" ");
 	printf("fire %d\n", l);
 
-	for (k = A[l]; k < A[l + 1]; ++k) {
+	for (k = A[l]; k < A[l + 1]; ++k)
+	{
 
 		i = ssop.jj[k];
 
-		if (claster[i] != claster[l]) {
+		if (claster[i] != claster[l])
+		{
 			claster[i] = claster[l];
 			fire(i, A, claster, ssop, depth + 1);
 		}
 	}
 }
 
-void Polyhedron::clasterisation2(
-		double p) {
+void Polyhedron::clasterisation2(double p)
+{
 
 	int i, j, nv, *index, fid;
 	double sin_alpha, alpha;
@@ -177,22 +186,26 @@ void Polyhedron::clasterisation2(
 	claster = new int[numFacets];
 	A = new int[numFacets];
 
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		A[i] = 0;
 	}
 	SortedSetOfPairs ssop(numFacets * numFacets);
 
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		nv = facets[i].numVertices;
 		index = facets[i].indVertices;
 		n0 = facets[i].plane.norm;
-		for (j = 0; j < nv; ++j) {
+		for (j = 0; j < nv; ++j)
+		{
 			fid = index[nv + 1 + j];
 			n1 = facets[fid].plane.norm;
 			sin_alpha = sqrt(qmod(n0 % n1) / (qmod(n0) * qmod(n1)));
 			alpha = asin(sin_alpha);
 			alpha = fabs(alpha);
-			if (alpha < p) {
+			if (alpha < p)
+			{
 				ssop.add(i, fid);
 				ssop.add(fid, i);
 				++A[i];
@@ -201,17 +214,20 @@ void Polyhedron::clasterisation2(
 
 	}
 
-	for (i = 0; i < numFacets - 1; ++i) {
+	for (i = 0; i < numFacets - 1; ++i)
+	{
 		A[i + 1] += A[i];
 	}
 
-	for (i = numFacets - 1; i > 0; --i) {
+	for (i = numFacets - 1; i > 0; --i)
+	{
 		A[i] = A[i - 1];
 	}
 	A[0] = 0;
 
 	ssop.print();
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		printf("A[%d] = %d\n", i, A[i]);
 	}
 //    return;
@@ -220,7 +236,8 @@ void Polyhedron::clasterisation2(
 		claster[i] = i;
 
 	int l = 0;
-	while (l < numFacets - 1) {
+	while (l < numFacets - 1)
+	{
 		while (claster[l] != l)
 			++l;
 		printf("begin new step l = %d\n", l);
@@ -228,7 +245,8 @@ void Polyhedron::clasterisation2(
 		++l;
 	}
 
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		if (claster[i] != i)
 			printf("claster[%d] = %d\n", i, claster[i]);
 	}

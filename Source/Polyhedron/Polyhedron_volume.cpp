@@ -1,6 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-double Polyhedron::volume() {
+double Polyhedron::volume()
+{
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -10,13 +11,15 @@ double Polyhedron::volume() {
 	B = Vector3d(0., 0., zmax + 1);
 
 	sum = 0.;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
 		A0 = vertices[index[0]];
 		A0 -= B;
-		for (j = 1; j < nv - 1; ++j) {
+		for (j = 1; j < nv - 1; ++j)
+		{
 			A1 = vertices[index[j]];
 			A2 = vertices[index[j + 1]];
 			A1 -= B;
@@ -28,7 +31,8 @@ double Polyhedron::volume() {
 	return sum;
 }
 
-double Polyhedron::area() {
+double Polyhedron::area()
+{
 	int i, j, *index, nv;
 	Vector3d A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -36,7 +40,8 @@ double Polyhedron::area() {
 
 	Vector3d normal;
 
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
@@ -44,7 +49,8 @@ double Polyhedron::area() {
 		normal = facets[i].plane.norm;
 
 		sum_facet = 0.;
-		for (j = 1; j < nv - 1; ++j) {
+		for (j = 1; j < nv - 1; ++j)
+		{
 
 			A1 = vertices[index[j]];
 			A2 = vertices[index[j + 1]];
@@ -58,18 +64,14 @@ double Polyhedron::area() {
 	return sum_poly;
 }
 
-double Polyhedron::area(
-		int iFacet) {
+double Polyhedron::area(int iFacet)
+{
 	return facets[iFacet].area();
 }
 
-void Polyhedron::J(
-		double& Jxx,
-		double& Jyy,
-		double& Jzz,
-		double& Jxy,
-		double& Jyz,
-		double& Jxz) {
+void Polyhedron::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
+		double& Jyz, double& Jxz)
+{
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -98,7 +100,8 @@ void Polyhedron::J(
 	Jxy = 0.;
 	Jxz = 0.;
 	Jyz = 0.;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
@@ -107,7 +110,8 @@ void Polyhedron::J(
 		ux = A0.x;
 		uy = A0.y;
 		uz = A0.z;
-		for (j = 1; j < nv - 1; ++j) {
+		for (j = 1; j < nv - 1; ++j)
+		{
 			A1 = vertices[index[j]];
 			A2 = vertices[index[j + 1]];
 			A1 -= B;
@@ -206,10 +210,8 @@ void Polyhedron::J(
 	}
 }
 
-void Polyhedron::get_center(
-		double& xc,
-		double& yc,
-		double& zc) {
+void Polyhedron::get_center(double& xc, double& yc, double& zc)
+{
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -234,7 +236,8 @@ void Polyhedron::get_center(
 	xc = 0.;
 	yc = 0.;
 	zc = 0.;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 
 		index = facets[i].indVertices;
 		nv = facets[i].numVertices;
@@ -244,7 +247,8 @@ void Polyhedron::get_center(
 		uy = A0.y;
 		uz = A0.z;
 
-		for (j = 1; j < nv - 1; ++j) {
+		for (j = 1; j < nv - 1; ++j)
+		{
 			A1 = vertices[index[j]];
 			A2 = vertices[index[j + 1]];
 			A1 -= B;
@@ -281,13 +285,9 @@ void Polyhedron::get_center(
 	zc /= sum;
 }
 
-void Polyhedron::inertia(
-		double& l0,
-		double& l1,
-		double& l2,
-		Vector3d& v0,
-		Vector3d& v1,
-		Vector3d& v2) {
+void Polyhedron::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
+		Vector3d& v1, Vector3d& v2)
+{
 	double **JJ, **v, *l;
 
 	JJ = new double*[3];

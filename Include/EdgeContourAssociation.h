@@ -8,7 +8,8 @@
 #ifndef EDGECONTOURASSOCIATION_H_
 #define EDGECONTOURASSOCIATION_H_
 
-class EdgeContourAssociation {
+class EdgeContourAssociation
+{
 public:
 	int indContour;
 	int indNearestSide;
@@ -16,15 +17,10 @@ public:
 	double weight;
 
 	EdgeContourAssociation();
-	EdgeContourAssociation(
-			int indContour_orig,
-			int indNearestSide_orig,
-			bool ifProperDirection_orig,
-			double weight_orig);
-	EdgeContourAssociation(
-			int indContour_orig);
-	EdgeContourAssociation(
-			const EdgeContourAssociation& orig);
+	EdgeContourAssociation(int indContour_orig, int indNearestSide_orig,
+			bool ifProperDirection_orig, double weight_orig);
+	EdgeContourAssociation(int indContour_orig);
+	EdgeContourAssociation(const EdgeContourAssociation& orig);
 
 	~EdgeContourAssociation();
 };

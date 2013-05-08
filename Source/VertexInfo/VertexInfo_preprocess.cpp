@@ -1,6 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void VertexInfo::preprocess() {
+void VertexInfo::preprocess()
+{
 
 	int i;
 	int pos_curr;
@@ -18,14 +19,17 @@ void VertexInfo::preprocess() {
 	//	fid_next = -100;
 
 //    printf("\t1. Searching first facet : ");
-	for (i = 0; i < parentPolyhedron->numFacets; ++i) {
+	for (i = 0; i < parentPolyhedron->numFacets; ++i)
+	{
 //        printf("%d ", i);
-		pos_next = parentPolyhedron->facets[i].preprocess_search_vertex(id, v_curr);
+		pos_next = parentPolyhedron->facets[i].preprocess_search_vertex(id,
+				v_curr);
 		if (pos_next != -1)
 			break;
 	}
 //    printf("\n");
-	if (pos_next == -1) {
+	if (pos_next == -1)
+	{
 		return;
 	}
 	fid_first = fid_next = i;
@@ -33,14 +37,16 @@ void VertexInfo::preprocess() {
 	//count nf
 //    printf("\t2. Searching the number of facets : ");
 	numFacets = 0;
-	do {
+	do
+	{
 //        printf("%d ", fid_curr);
 		++numFacets;
 		pos_curr = pos_next;
 		fid_curr = fid_next;
 		parentPolyhedron->facets[fid_curr].get_next_facet(pos_curr, pos_next,
 				fid_next, v_curr);
-		if (pos_next == -1 || fid_next == -1) {
+		if (pos_next == -1 || fid_next == -1)
+		{
 			printf("\nVertxInfo::preprocess : Error. Cannot find v%d in f%d\n",
 					v_curr, fid_curr);
 			return;
@@ -55,7 +61,8 @@ void VertexInfo::preprocess() {
 	pos_next = parentPolyhedron->facets[fid_first].preprocess_search_vertex(id,
 			v_curr);
 	fid_next = fid_first;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		pos_curr = pos_next;
 		fid_curr = fid_next;
 
@@ -70,20 +77,20 @@ void VertexInfo::preprocess() {
 //    printf("\t4. End!\n");
 }
 
-void VertexInfo::find_and_replace_facet(
-		int from,
-		int to) {
+void VertexInfo::find_and_replace_facet(int from, int to)
+{
 	for (int i = 0; i < numFacets + 1; ++i)
-		if (indFacets[i] == from) {
+		if (indFacets[i] == from)
+		{
 			indFacets[i] = to;
 		}
 }
 
-void VertexInfo::find_and_replace_vertex(
-		int from,
-		int to) {
+void VertexInfo::find_and_replace_vertex(int from, int to)
+{
 	for (int i = numFacets + 1; i < 2 * numFacets + 1; ++i)
-		if (indFacets[i] == from) {
+		if (indFacets[i] == from)
+		{
 			indFacets[i] = to;
 		}
 }

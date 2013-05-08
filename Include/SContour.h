@@ -8,32 +8,31 @@
 #ifndef SCONTOUR_H
 #define	SCONTOUR_H
 
-class SContour {
+class SContour
+{
 public:
 	int id; // Indetifier
 
 	int ns; // Number of sides
 
 	Plane plane; // Plane of contour. Usually it includes (0, 0, 0),
-							 // so in its equation a*x + b*y + c*z + d = 0
-							 // coefficient d = 0
+				 // so in its equation a*x + b*y + c*z + d = 0
+				 // coefficient d = 0
 
 	Polyhedron* poly; // Pointer to parent polyhedon which given contour
-										// is the part of.
+					  // is the part of.
 
 	SideOfContour* sides; // Array of contour sides
 
 	// SContour.cpp :
 
 	SContour();
-	SContour(
-			const SContour& orig);
+	SContour(const SContour& orig);
 	~SContour();
 
 	// SContour_io.cpp :
 
-	void my_fprint(
-			FILE* file);
+	void my_fprint(FILE* file);
 };
 
 #endif	/* SCONTOUR_H */

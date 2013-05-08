@@ -1,31 +1,34 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::deleteContent() {
+void Polyhedron::deleteContent()
+{
 	DEBUG_START;
-	if (vertices != NULL) {
+	if (vertices != NULL)
+	{
 		delete[] vertices;
 		vertices = NULL;
 	}
-	if (facets != NULL) {
+	if (facets != NULL)
+	{
 		delete[] facets;
 		facets = NULL;
 	}
-	if (vertexInfos != NULL) {
+	if (vertexInfos != NULL)
+	{
 		delete[] vertexInfos;
 		vertexInfos = NULL;
 	}
-	if (edgeLists != NULL) {
+	if (edgeLists != NULL)
+	{
 		delete[] edgeLists;
 		edgeLists = NULL;
 	}
 	DEBUG_END;
 }
 
-void Polyhedron::makeCube(
-		double height,
-		double xCenter,
-		double yCenter,
-		double zCenter) {
+void Polyhedron::makeCube(double height, double xCenter, double yCenter,
+		double zCenter)
+{
 	DEBUG_START;
 	deleteContent();
 
@@ -54,7 +57,8 @@ void Polyhedron::makeCube(
 	vertices[7] = Vector3d(xCenter - halfHeight, yCenter + halfHeight,
 			zCenter + halfHeight);
 
-	for (int ifacet = 0; ifacet < numFacets; ++ifacet) {
+	for (int ifacet = 0; ifacet < numFacets; ++ifacet)
+	{
 		int nv = facets[ifacet].numVertices = 4;
 		facets[ifacet].indVertices = new int[3 * nv + 1];
 		facets[ifacet].id = ifacet;
@@ -97,16 +101,15 @@ void Polyhedron::makeCube(
 	facets[5].indVertices[3] = 4;
 	facets[5].plane = Plane(Vector3d(0., -1., 0.), yCenter - halfHeight);
 
-	for (int i = 0; i < numFacets; ++i) {
+	for (int i = 0; i < numFacets; ++i)
+	{
 		facets[i].parentPolyhedron = this;
 	}
 	DEBUG_END;
 }
 
-void Polyhedron::makePyramid(
-		int numVerticesBase,
-		double height,
-		double radius) {
+void Polyhedron::makePyramid(int numVerticesBase, double height, double radius)
+{
 	DEBUG_START;
 	deleteContent();
 
@@ -124,7 +127,8 @@ void Polyhedron::makePyramid(
 	int *index;
 	index = new int[3];
 
-	for (int i = 0; i < numVerticesBase; ++i) {
+	for (int i = 0; i < numVerticesBase; ++i)
+	{
 		index[0] = numVerticesBase;
 		index[1] = i;
 		index[2] = (i + 1) % numVerticesBase;
@@ -147,10 +151,8 @@ void Polyhedron::makePyramid(
 	DEBUG_END;
 }
 
-void Polyhedron::makePrism(
-		int numVerticesBase,
-		double height,
-		double radius) {
+void Polyhedron::makePrism(int numVerticesBase, double height, double radius)
+{
 	DEBUG_START;
 	deleteContent();
 
@@ -171,12 +173,14 @@ void Polyhedron::makePrism(
 
 	Plane plane;
 
-	for (int i = 0; i < numVerticesBase; ++i) {
+	for (int i = 0; i < numVerticesBase; ++i)
+	{
 		index[0] = i;
 		index[1] = (i + 1) % numVerticesBase;
 		index[2] = index[1] + numVerticesBase;
 		index[3] = index[0] + numVerticesBase;
-		plane = Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
+		plane = Plane(vertices[index[0]], vertices[index[1]],
+				vertices[index[2]]);
 		facets[i] = Facet(i, 4, plane, index, this, false);
 	}
 
@@ -204,7 +208,8 @@ void Polyhedron::makePrism(
 	DEBUG_END;
 }
 
-void Polyhedron::makeCubeCutted() {
+void Polyhedron::makeCubeCutted()
+{
 	DEBUG_START;
 	deleteContent();
 

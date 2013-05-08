@@ -7,7 +7,8 @@
 #ifndef EDGE_H
 #define	EDGE_H
 
-class Edge {
+class Edge
+{
 public:
 	int id;
 	int v0;
@@ -19,44 +20,23 @@ public:
 
 	// Edge.cpp :
 	Edge();
-	Edge(
-			int id_orig,
-			int v0_orig,
-			int v1_orig,
-			int f0_orig,
-			int f1_orig);
+	Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig);
 
-	Edge(
-			int v0_orig,
-			int v1_orig,
-			int f0_orig,
-			int f1_orig);
+	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig);
 
-	Edge(
-			int id_orig,
-			int v0_orig,
-			int v1_orig,
-			int f0_orig,
-			int f1_orig,
+	Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
 			list<EdgeContourAssociation> accocList_orig);
 
-	Edge(
-			int v0_orig,
-			int v1_orig,
-			int f0_orig,
-			int f1_orig,
+	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig,
 			list<EdgeContourAssociation> accocList_orig);
 
-	Edge(
-			const Edge& orig);
+	Edge(const Edge& orig);
 	~Edge();
 
-	Edge& operator =(
-			const Edge& orig);
+	Edge& operator =(const Edge& orig);
 
 	//Edge_io.cpp :
-	void my_fprint(
-			FILE* file);
+	void my_fprint(FILE* file);
 
 private:
 

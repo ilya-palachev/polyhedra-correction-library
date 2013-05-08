@@ -10,15 +10,12 @@
 const double EPS_MAX_ERROR = 1e-6;
 const double EPS_FOR_PRINT = 1e-15;
 
-void print_matrix2(
-		FILE* file,
-		int nrow,
-		int ncol,
-		double* a);
+void print_matrix2(FILE* file, int nrow, int ncol, double* a);
 
 static FILE* fout;
 
-int Polyhedron::correct_polyhedron() {
+int Polyhedron::correct_polyhedron()
+{
 	DEBUG_START;
 
 	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
@@ -42,7 +39,8 @@ int Polyhedron::correct_polyhedron() {
 
 	DEBUG_PRINT("memory allocation done");
 
-	for (int i = 0; i < numFacets; ++i) {
+	for (int i = 0; i < numFacets; ++i)
+	{
 		prevPlanes[i] = facets[i].plane;
 	}
 	DEBUG_PRINT("memory initialization done");
@@ -56,7 +54,8 @@ int Polyhedron::correct_polyhedron() {
 
 	int numIterations = 0;
 
-	while (error > EPS_MAX_ERROR) {
+	while (error > EPS_MAX_ERROR)
+	{
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n", numIterations);
 
 		char* fileName = new char[255];
@@ -68,10 +67,13 @@ int Polyhedron::correct_polyhedron() {
 
 		int ret = corpol_iteration(dim, prevPlanes, matrix, rightPart, solution,
 				matrixFactorized, indexPivot, facetsNotAssociated);
-		for (int i = 0; i < numFacets; ++i) {
-			DEBUG_PRINT("PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)", i,
-					prevPlanes[i].norm.x, prevPlanes[i].norm.y, prevPlanes[i].norm.z,
-					prevPlanes[i].dist, facets[i].plane.norm.x, facets[i].plane.norm.y,
+		for (int i = 0; i < numFacets; ++i)
+		{
+			DEBUG_PRINT(
+					"PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)",
+					i, prevPlanes[i].norm.x, prevPlanes[i].norm.y,
+					prevPlanes[i].norm.z, prevPlanes[i].dist,
+					facets[i].plane.norm.x, facets[i].plane.norm.y,
 					facets[i].plane.norm.z, facets[i].plane.dist);
 			prevPlanes[i] = facets[i].plane;
 		}
@@ -80,26 +82,31 @@ int Polyhedron::correct_polyhedron() {
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
 		++numIterations;
 
-		if (ret != 0) {
+		if (ret != 0)
+		{
 			break;
 		}
 	}
 
 	fclose(fout);
 
-	if (matrix != NULL) {
+	if (matrix != NULL)
+	{
 		delete[] matrix;
 		matrix = NULL;
 	}
-	if (matrixFactorized != NULL) {
+	if (matrixFactorized != NULL)
+	{
 		delete[] matrixFactorized;
 		matrixFactorized = NULL;
 	}
-	if (rightPart != NULL) {
+	if (rightPart != NULL)
+	{
 		delete[] rightPart;
 		rightPart = NULL;
 	}
-	if (solution != NULL) {
+	if (solution != NULL)
+	{
 		delete[] solution;
 		solution = NULL;
 	}
@@ -107,29 +114,34 @@ int Polyhedron::correct_polyhedron() {
 	return 0;
 }
 
-list<int>* Polyhedron::corpol_find_not_associated_facets() {
+list<int>* Polyhedron::corpol_find_not_associated_facets()
+{
 	list<int>* facetsNotAssociated = new list<int>;
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	{
 		int* indVertices = facets[iFacet].indVertices;
 		int numVerticesFacet = facets[iFacet].numVertices;
 		int numAssociations = 0;
-		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex) {
+		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
+		{
 			int edgeid = preprocess_edges_find(indVertices[iVertex],
 					indVertices[iVertex + 1]);
 			numAssociations += edges[edgeid].assocList.size();
 		}
-		if (numAssociations == 0) {
+		if (numAssociations == 0)
+		{
 			facetsNotAssociated->push_back(iFacet);
 		}
 	}
 	return facetsNotAssociated;
 }
 
-double Polyhedron::corpol_calculate_functional(
-		Plane* prevPlanes) {
+double Polyhedron::corpol_calculate_functional(Plane* prevPlanes)
+{
 	double sum = 0;
 
-	for (int iEdge = 0; iEdge < numEdges; ++iEdge) {
+	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
+	{
 //    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
 		int f0 = edges[iEdge].f0;
 		int f1 = edges[iEdge].f1;
@@ -140,8 +152,9 @@ double Polyhedron::corpol_calculate_functional(
 
 		int iAssoc = 0;
 		for (list<EdgeContourAssociation>::iterator itCont =
-				edges[iEdge].assocList.begin(); itCont != edges[iEdge].assocList.end();
-				++itCont) {
+				edges[iEdge].assocList.begin();
+				itCont != edges[iEdge].assocList.end(); ++itCont)
+		{
 //        	DEBUG_PRINT("\t%s: processing contour #%d\n", __func__, j);
 			int curContour = itCont->indContour;
 			int curNearestSide = itCont->indNearestSide;
@@ -158,20 +171,25 @@ double Polyhedron::corpol_calculate_functional(
 //			ASSERT(fabs(denominator) > 1e-10);
 			double gamma_ij = enumerator / denominator;
 
-			double a_ij = gamma_ij * plane0.norm.x + (1 - gamma_ij) * plane1.norm.x;
-			double b_ij = gamma_ij * plane0.norm.y + (1 - gamma_ij) * plane1.norm.y;
-			double c_ij = gamma_ij * plane0.norm.z + (1 - gamma_ij) * plane1.norm.z;
+			double a_ij = gamma_ij * plane0.norm.x
+					+ (1 - gamma_ij) * plane1.norm.x;
+			double b_ij = gamma_ij * plane0.norm.y
+					+ (1 - gamma_ij) * plane1.norm.y;
+			double c_ij = gamma_ij * plane0.norm.z
+					+ (1 - gamma_ij) * plane1.norm.z;
 			double d_ij = gamma_ij * plane0.dist + (1 - gamma_ij) * plane1.dist;
 
 			Vector3d A_ij0 = sides[curNearestSide].A1;
 			Vector3d A_ij1 = sides[curNearestSide].A2;
 
-			double summand0 = a_ij * A_ij0.x + b_ij * A_ij0.y + c_ij * A_ij0.z + d_ij;
+			double summand0 = a_ij * A_ij0.x + b_ij * A_ij0.y + c_ij * A_ij0.z
+					+ d_ij;
 
 			summand0 *= summand0;
 			summand0 *= weight;
 
-			double summand1 = a_ij * A_ij1.x + b_ij * A_ij1.y + c_ij * A_ij1.z + d_ij;
+			double summand1 = a_ij * A_ij1.x + b_ij * A_ij1.y + c_ij * A_ij1.z
+					+ d_ij;
 
 			summand1 *= summand1;
 			summand1 *= weight;
@@ -182,15 +200,10 @@ double Polyhedron::corpol_calculate_functional(
 	return sum;
 }
 
-int Polyhedron::corpol_iteration(
-		int dim,
-		Plane* prevPlanes,
-		double* matrix,
-		double* rightPart,
-		double* solution,
-		double* matrixFactorized,
-		int* indexPivot,
-		list<int>* facetsNotAssociated) {
+int Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* matrix,
+		double* rightPart, double* solution, double* matrixFactorized,
+		int* indexPivot, list<int>* facetsNotAssociated)
+{
 	DEBUG_START;
 	corpol_calculate_matrix(dim, prevPlanes, matrix, rightPart, solution,
 			facetsNotAssociated);
@@ -215,21 +228,29 @@ int Polyhedron::corpol_iteration(
 	double relativeBackwardError;
 
 	info = LAPACKE_dsysvx(LAPACK_ROW_MAJOR, 'N', 'U', dimLapack, nrhs, matrix,
-			lda, matrixFactorized, ldaf, indexPivot, rightPart, ldb, solution, ldx,
-			&reciprocalToConditionalNumber, &forwardErrorBound,
+			lda, matrixFactorized, ldaf, indexPivot, rightPart, ldb, solution,
+			ldx, &reciprocalToConditionalNumber, &forwardErrorBound,
 			&relativeBackwardError);
 
-	if (info == 0) {
+	if (info == 0)
+	{
 		DEBUG_PRINT("LAPACKE_dsysvx: successful exit");
-	} else if (info < 0) {
+	}
+	else if (info < 0)
+	{
 		DEBUG_PRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value",
 				-info);
-	} else if (info <= dim) {
+	}
+	else if (info <= dim)
+	{
 		DEBUG_PRINT("LAPACKE_dsysvx: D(%d,%d) is exactly zero.", info, info);
-		DEBUG_PRINT("The factorization has been completed but the factor D is ");
+		DEBUG_PRINT(
+				"The factorization has been completed but the factor D is ");
 		DEBUG_PRINT("exactly singular, so the solution and error bounds could");
 		DEBUG_PRINT("not be computed. RCOND = 0 is returned.");
-	} else if (info == dim + 1) {
+	}
+	else if (info == dim + 1)
+	{
 		DEBUG_PRINT("LAPACKE_dsysvx: D is non-singular, but RCOND is ");
 		DEBUG_PRINT("less than machine");
 		DEBUG_PRINT("precision, meaning that the matrix is singular");
@@ -239,14 +260,18 @@ int Polyhedron::corpol_iteration(
 		DEBUG_PRINT("computed solution can be more accurate than the");
 		DEBUG_PRINT("value of RCOND would suggest.");
 
-	} else {
+	}
+	else
+	{
 		DEBUG_PRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
 	}
 
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
-		if (*iterNotAssicated == iFacet) {
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	{
+		if (*iterNotAssicated == iFacet)
+		{
 			facets[iFacet].plane = prevPlanes[iFacet];
 			++iterNotAssicated;
 			++countNotAssociated;
@@ -263,30 +288,31 @@ int Polyhedron::corpol_iteration(
 	return info;
 }
 
-void Polyhedron::corpol_calculate_matrix(
-		int dim,
-		Plane* prevPlanes,
-		double* matrix,
-		double* rightPart,
-		double* solution,
-		list<int>* facetsNotAssociated) {
+void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
+		double* matrix, double* rightPart, double* solution,
+		list<int>* facetsNotAssociated)
+{
 	DEBUG_START;
-	for (int i = 0; i < dim * dim; ++i) {
+	for (int i = 0; i < dim * dim; ++i)
+	{
 		matrix[i] = 0.;
 	}
 
-	for (int i = 0; i < dim; ++i) {
+	for (int i = 0; i < dim; ++i)
+	{
 		rightPart[i] = 0.;
 	}
 
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet) {
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	{
 
 		DEBUG_PRINT("Processing facet # %d", iFacet);
 
-		if (*iterNotAssicated == iFacet) {
+		if (*iterNotAssicated == iFacet)
+		{
 			++iterNotAssicated;
 			++countNotAssociated;
 			continue;
@@ -314,7 +340,8 @@ void Polyhedron::corpol_calculate_matrix(
 		matrix[i_bk_ak + 4] = 0.5 * planePrevThis.norm.y;
 		matrix[i_ck_ak + 4] = 0.5 * planePrevThis.norm.z;
 
-		for (int iEdge = 0; iEdge < nv; ++iEdge) {
+		for (int iEdge = 0; iEdge < nv; ++iEdge)
+		{
 			DEBUG_PRINT("Processing edge # %d", iEdge);
 
 			int v0 = index[iEdge];
@@ -332,14 +359,16 @@ void Polyhedron::corpol_calculate_matrix(
 
 			int edgeid = preprocess_edges_find(v0, v1);
 
-			if (edgeid == -1) {
+			if (edgeid == -1)
+			{
 				printf("Error! edge (%d, %d) cannot be found\n", v0, v1);
 				return;
 			}
 			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::iterator itCont =
 					edges[edgeid].assocList.begin();
-					itCont != edges[edgeid].assocList.end(); ++itCont) {
+					itCont != edges[edgeid].assocList.end(); ++itCont)
+			{
 				DEBUG_PRINT("Processing association # %d", iAssociation++);
 
 				int curContour = itCont->indContour;
@@ -348,9 +377,10 @@ void Polyhedron::corpol_calculate_matrix(
 				SideOfContour * sides = contours[curContour].sides;
 				Plane planeOfProjection = contours[curContour].plane;
 
-				double enumerator = -planePrevNeighbour.norm * planeOfProjection.norm;
-				double denominator = ((planePrevThis.norm - planePrevNeighbour.norm)
-						* planeOfProjection.norm);
+				double enumerator = -planePrevNeighbour.norm
+						* planeOfProjection.norm;
+				double denominator = ((planePrevThis.norm
+						- planePrevNeighbour.norm) * planeOfProjection.norm);
 //				DEBUG_PRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf, den = %lf",
 //						iedge, v0, v1, itCont->indContour, enumerator, denominator);
 //				ASSERT(fabs(denominator) > 1e-10);
@@ -362,15 +392,18 @@ void Polyhedron::corpol_calculate_matrix(
 				Vector3d A_ij2 = sides[curNearestSide].A2;
 
 				// Debug!!!
-				if (iFacetShifted == 0) {
-					DEBUG_PRINT("nearest side for the first edge of the facet #0");
+				if (iFacetShifted == 0)
+				{
+					DEBUG_PRINT(
+							"nearest side for the first edge of the facet #0");
 					DEBUG_PRINT("    in contour # %d", curContour);
-					DEBUG_PRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)", A_ij1.x,
-							A_ij1.y, A_ij1.z, A_ij2.x, A_ij2.y, A_ij2.z);
+					DEBUG_PRINT("A1 = (%lf, %lf, %lf), A2 = (%lf, %lf, %lf)",
+							A_ij1.x, A_ij1.y, A_ij1.z, A_ij2.x, A_ij2.y,
+							A_ij2.z);
 					DEBUG_PRINT("    while the edge is the following:");
 					DEBUG_PRINT("X1 = (%lf, %lf, %lf), X2 = (%lf, %lf, %lf)",
-							vertices[v0].x, vertices[v0].y, vertices[v0].z, vertices[v1].x,
-							vertices[v1].y, vertices[v1].z);
+							vertices[v0].x, vertices[v0].y, vertices[v0].z,
+							vertices[v1].x, vertices[v1].y, vertices[v1].z);
 				}
 
 				double x0 = A_ij1.x;
@@ -441,26 +474,30 @@ void Polyhedron::corpol_calculate_matrix(
 	DEBUG_END;
 }
 
-void print_matrix2(
-		FILE* file,
-		int nrow,
-		int ncol,
-		double* a) {
+void print_matrix2(FILE* file, int nrow, int ncol, double* a)
+{
 	fprintf(file, "=========begin=of=matrix=================\n");
 	fprintf(file, "number of rows: %d\n", nrow);
 	fprintf(file, "number of columns: %d\n", ncol);
-	for (int irow = 0; irow < nrow; ++irow) {
-		for (int icol = 0; icol < ncol; ++icol) {
+	for (int irow = 0; irow < nrow; ++irow)
+	{
+		for (int icol = 0; icol < ncol; ++icol)
+		{
 			double valuePrinted = a[ncol * irow + icol];
-			if (fabs(valuePrinted) < EPS_FOR_PRINT) {
+			if (fabs(valuePrinted) < EPS_FOR_PRINT)
+			{
 				fprintf(file, "\t |\t");
-			} else {
+			}
+			else
+			{
 				fprintf(file, "%lf |\t", valuePrinted);
 			}
 		}
 		fprintf(file, "\n");
-		if (irow % 5 == 4) {
-			for (int icol = 0; icol < ncol; ++icol) {
+		if (irow % 5 == 4)
+		{
+			for (int icol = 0; icol < ncol; ++icol)
+			{
 				fprintf(file, "----------------");
 			}
 			fprintf(file, "\n");

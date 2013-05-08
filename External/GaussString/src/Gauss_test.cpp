@@ -1,22 +1,17 @@
 #include "Gauss_test.h"
 #include "matrix_invert.h"
 
-void print_vector2(
-		int n,
-		double* v) {
+void print_vector2(int n, double* v)
+{
 	int i;
 	for (i = 0; i < n; ++i)
 		printf("\t%lf\n", v[i]);
 }
 
-void mult_matrix_vector(
-		int n,
-		double* A,
-		double* x,
-		double* y);
+void mult_matrix_vector(int n, double* A, double* x, double* y);
 
-void Gauss_test(
-		int n) {
+void Gauss_test(int n)
+{
 	double *x, *b, *b0, *A, err1, err2;
 
 	printf("Gauss_test:\n");
@@ -64,10 +59,8 @@ void Gauss_test(
 
 }
 
-inline double f(
-		int n,
-		int i,
-		int j) {
+inline double f(int n, int i, int j)
+{
 //Variant 1
 	if (i > j)
 		return n - i;
@@ -90,20 +83,19 @@ inline double f(
 //	return i*i+j*j;
 }
 
-void create_A(
-		int n,
-		double* A) {
+void create_A(int n, double* A)
+{
 	int i, j;
 	for (i = 0; i < n; ++i)
 		for (j = 0; j < n; ++j)
 			A[i * n + j] = f(n, i, j);
 }
 
-void create_x(
-		int n,
-		double* x) {
+void create_x(int n, double* x)
+{
 	int i;
-	for (i = 0; i < n; ++i) {
+	for (i = 0; i < n; ++i)
+	{
 		if (i % 2 == 0)
 			x[i] = 1.;
 		else
@@ -111,13 +103,11 @@ void create_x(
 	}
 }
 
-void mult_matrix_vector(
-		int n,
-		double* A,
-		double* x,
-		double* y) {
+void mult_matrix_vector(int n, double* A, double* x, double* y)
+{
 	int i, j;
-	for (i = 0; i < n; ++i) {
+	for (i = 0; i < n; ++i)
+	{
 		y[i] = 0.;
 		for (j = 0; j < n; ++j)
 			y[i] += A[i * n + j] * x[j];

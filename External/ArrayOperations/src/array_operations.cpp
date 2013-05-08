@@ -1,34 +1,28 @@
 #include "stdio.h"
 #include "array_operations.h"
 
-int min_int(
-		int a,
-		int b) {
-	return a > b ?
-			b : a;
+int min_int(int a, int b)
+{
+	return a > b ? b : a;
 }
 
-int max_int(
-		int a,
-		int b) {
-	return a > b ?
-			a : b;
+int max_int(int a, int b)
+{
+	return a > b ? a : b;
 }
 
-void swap_int(
-		int& a,
-		int& b) {
+void swap_int(int& a, int& b)
+{
 	int tmp = a;
 	a = b;
 	b = tmp;
 }
 
-void cut_int(
-		int* array,
-		int len,
-		int pos) {
+void cut_int(int* array, int len, int pos)
+{
 	int i;
-	if (len < 1 || pos < 0 || pos > len - 1) {
+	if (len < 1 || pos < 0 || pos > len - 1)
+	{
 		printf("cut_int: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}
@@ -37,14 +31,12 @@ void cut_int(
 			array[i] = array[i + 1];
 }
 
-void insert_int(
-		int* array,
-		int len,
-		int pos,
-		int val) {
+void insert_int(int* array, int len, int pos, int val)
+{
 	int i;
 
-	if (len < 0 || pos < 0 || pos > len) {
+	if (len < 0 || pos < 0 || pos > len)
+	{
 		printf("insert_int: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}
@@ -59,14 +51,12 @@ void insert_int(
 	array[pos] = val;
 }
 
-void insert_bool(
-		bool* array,
-		int len,
-		int pos,
-		bool val) {
+void insert_bool(bool* array, int len, int pos, bool val)
+{
 	int i;
 
-	if (len < 0 || pos < 0 || pos > len) {
+	if (len < 0 || pos < 0 || pos > len)
+	{
 		printf("insert_int: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}
@@ -81,13 +71,11 @@ void insert_bool(
 	array[pos] = val;
 }
 
-void insert_double(
-		double* array,
-		int len,
-		int pos,
-		double val) {
+void insert_double(double* array, int len, int pos, double val)
+{
 	int i;
-	if (len < 0 || pos < 0 || pos > len) {
+	if (len < 0 || pos < 0 || pos > len)
+	{
 		printf("insert_double: Error. pos = %d, but len = %d\n", pos, len);
 		return;
 	}

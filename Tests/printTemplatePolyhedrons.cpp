@@ -2,13 +2,13 @@
 
 void test_figures();
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 	test_figures();
 }
 
-void test_figures() {
+void test_figures()
+{
 	char *curr_time, *file_name;
 
 	file_name = new char[255];

@@ -1,23 +1,15 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void test_join_facets(
-		const char* name,
-		int type,
-		int fid0,
-		int fid1);
+void test_join_facets(const char* name, int type, int fid0, int fid1);
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 
 	test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
 }
 
-void test_join_facets(
-		const char* name,
-		int type,
-		int fid0,
-		int fid1) {
+void test_join_facets(const char* name, int type, int fid0, int fid1)
+{
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Plane iplane;
 	Polyhedron poly;
@@ -36,7 +28,8 @@ void test_join_facets(
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 	sprintf(file_name_out0, "../poly-data-out/%s.ply", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;

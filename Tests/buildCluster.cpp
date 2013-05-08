@@ -11,36 +11,19 @@
 
 using namespace std;
 
-void test_J11(
-		const char* name,
-		int type);
-void test_Jtwo(
-		const char* name1,
-		const char* name2,
-		int type);
+void test_J11(const char* name, int type);
+void test_Jtwo(const char* name1, const char* name2, int type);
 
-void test_claster(
-		const char* name,
-		int type);
-void test_viev(
-		const char* name,
-		int type);
-double norm_J(
-		double Jxx1,
-		double Jyy1,
-		double Jzz1,
-		double Jxy1,
-		double Jyz1,
+void test_claster(const char* name, int type);
+void test_viev(const char* name, int type);
+double norm_J(double Jxx1, double Jyy1, double Jzz1, double Jxy1, double Jyz1,
 		double Jxz1);
 
-void test_BuildTreeNorm(
-		const char* name,
-		int type);
+void test_BuildTreeNorm(const char* name, int type);
 void test_BuildClaster();
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 
 //    test_J11("poly-small", 0);
 	//  test_BuildTreeNorm("poly-small", 0);
@@ -84,10 +67,8 @@ int main(
 	return 0;
 }
 
-void test_Jtwo(
-		const char* name1,
-		const char* name2,
-		int type) {
+void test_Jtwo(const char* name1, const char* name2, int type)
+{
 
 	Polyhedron poly1;
 	Polyhedron poly2;
@@ -103,7 +84,8 @@ void test_Jtwo(
 //    poly1.fscan_default_0(file_name1);
 //    poly2.fscan_default_0(file_name2);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly1.fscan_default_0(file_name1);
 		poly2.fscan_default_0(file_name2);
@@ -117,11 +99,13 @@ void test_Jtwo(
 		poly2.fscan_default_1_1(file_name2);
 		break;
 	default:
-		if (file_name1 != NULL) {
+		if (file_name1 != NULL)
+		{
 			delete[] file_name1;
 			file_name1 = NULL;
 		}
-		if (file_name2 != NULL) {
+		if (file_name2 != NULL)
+		{
 			delete[] file_name2;
 			file_name2 = NULL;
 		}
@@ -191,19 +175,20 @@ void test_Jtwo(
 	double norm1 = norm_J(Jxx1, Jyy1, Jzz1, Jxy1, Jyz1, Jxz1);
 	printf("norm = %lf", norm1);
 
-	if (file_name1 != NULL) {
+	if (file_name1 != NULL)
+	{
 		delete[] file_name1;
 		file_name1 = NULL;
 	}
-	if (file_name2 != NULL) {
+	if (file_name2 != NULL)
+	{
 		delete[] file_name2;
 		file_name2 = NULL;
 	}
 }
 
-void test_J11(
-		const char* name,
-		int type) {
+void test_J11(const char* name, int type)
+{
 	double vol;
 
 	Polyhedron poly;
@@ -217,7 +202,8 @@ void test_J11(
 	sprintf(file_name_out, "./poly-data-out/%s.ply", name);
 
 	printf("%s\n", name);
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -277,9 +263,8 @@ void test_J11(
 
 }
 
-void test_claster(
-		const char* name,
-		int type) {
+void test_claster(const char* name, int type)
+{
 	double vol;
 
 	Polyhedron poly;
@@ -289,7 +274,8 @@ void test_claster(
 
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -323,9 +309,8 @@ void test_claster(
 
 }
 
-void test_viev(
-		const char* name,
-		int type) {
+void test_viev(const char* name, int type)
+{
 	double vol;
 
 	Polyhedron poly;
@@ -335,7 +320,8 @@ void test_viev(
 
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -366,9 +352,8 @@ void test_viev(
 #define step_len 10
 #define num_rand 100
 
-void get_statistics_deform_linear(
-		const char* name,
-		int type) {
+void get_statistics_deform_linear(const char* name, int type)
+{
 
 	int i_len, i_vertex, numv, i, count;
 	double dist, norm, a, b, c, d, part, norm0;
@@ -382,7 +367,8 @@ void get_statistics_deform_linear(
 	file_name_in = new char[255];
 
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		poly1.fscan_default_0(file_name_in);
@@ -411,14 +397,16 @@ void get_statistics_deform_linear(
 	printf("\\hline\n\tnorm0 &\tpart\\\\\n");
 
 	norm0 = 5.;
-	for (i_len = 0; i_len < num_len; ++i_len) {
+	for (i_len = 0; i_len < num_len; ++i_len)
+	{
 		count = 0;
 		if (i_len % 2 == 0)
 			norm0 *= 0.2;
 		else
 			norm0 *= 0.5;
 
-		for (i = 0; i < num_rand; ++i) {
+		for (i = 0; i < num_rand; ++i)
+		{
 			i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);
 //            printf("%d ", i_vertex);
 			dist = poly.min_dist(i_vertex);
@@ -435,7 +423,8 @@ void get_statistics_deform_linear(
 
 			poly.deform_linear_partial(i_vertex, delta, 10);
 
-			if (poly.test_consections(true) > 0) {
+			if (poly.test_consections(true) > 0)
+			{
 				++count;
 			}
 			poly.import_coordinates(poly1);
@@ -471,11 +460,8 @@ void get_statistics_deform_linear(
 
 }
 
-void test_deform(
-		const char* name,
-		int type,
-		int id,
-		Vector3d delta) {
+void test_deform(const char* name, int type, int id, Vector3d delta)
+{
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
@@ -496,7 +482,8 @@ void test_deform(
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 	sprintf(file_name_out0, "../poly-data-out/%s.ply", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -532,8 +519,9 @@ void test_deform(
 	curr_time = asctime(timeinfo);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
-			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
-			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, id);
+			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
+			timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min,
+			timeinfo->tm_sec, id);
 
 	poly.fprint_ply_scale(1000., file_name_out,
 			"made-by-Polyhedron_join_facets_2");
@@ -547,18 +535,16 @@ void test_deform(
 
 }
 
-void test_deform_linear(
-		const char* name,
-		int type,
-		int id,
-		Vector3d delta) {
+void test_deform_linear(const char* name, int type, int id, Vector3d delta)
+{
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
 	char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
 
 	fprintf(stdout, "******************************************************\n");
-	fprintf(stdout, "********************   Deform linear    ****************\n");
+	fprintf(stdout,
+			"********************   Deform linear    ****************\n");
 	fprintf(stdout, "********************     [%d]        *****************\n",
 			id);
 	fprintf(stdout, "*********** (%lf, %lf, %lf) *****************\n", delta.x,
@@ -572,7 +558,8 @@ void test_deform_linear(
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 	sprintf(file_name_out0, "../poly-data-out/%s.ply", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -610,8 +597,9 @@ void test_deform_linear(
 	curr_time = asctime(timeinfo);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
-			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
-			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, id);
+			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
+			timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min,
+			timeinfo->tm_sec, id);
 
 	poly.fprint_ply_scale(1000., file_name_out,
 			"made-by-Polyhedron_join_facets_2");
@@ -625,13 +613,9 @@ void test_deform_linear(
 
 }
 
-double norm_J(
-		double Jxx,
-		double Jyy,
-		double Jzz,
-		double Jxy,
-		double Jyz,
-		double Jxz) {
+double norm_J(double Jxx, double Jyy, double Jzz, double Jxy, double Jyz,
+		double Jxz)
+{
 	double st, nd, rd;
 	st = fabs(Jxx) + fabs(Jxy) + fabs(Jxz);
 	nd = fabs(Jxy) + fabs(Jyy) + fabs(Jyz);
@@ -644,7 +628,8 @@ double norm_J(
 	return max;
 }
 
-void test_BuildClaster() {
+void test_BuildClaster()
+{
 	Polyhedron poly1;
 	Polyhedron poly2;
 	Polyhedron poly3;
@@ -752,9 +737,8 @@ void test_BuildClaster() {
 
 }
 
-void test_BuildTreeNorm(
-		const char* name,
-		int type) {
+void test_BuildTreeNorm(const char* name, int type)
+{
 	Polyhedron poly;
 
 	char *file_name_in;
@@ -766,7 +750,8 @@ void test_BuildTreeNorm(
 	sprintf(file_name_out, "../poly-data-out/%s - cluster.ply", name);
 
 	printf("%s\n", name);
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;

@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Edge::my_fprint(
-		FILE* file) {
+void Edge::my_fprint(FILE* file)
+{
 #ifndef NDEBUG
 	fprintf(file, "Printing content of edge #%d", id);
 	fprintf(file, "\tid = %d (id of the edge)\n", id);
@@ -19,7 +19,8 @@ void Edge::my_fprint(
 
 	int i = 0;
 	for (list<EdgeContourAssociation>::iterator iter = assocList.begin();
-			iter != assocList.end(); ++iter, ++i) {
+			iter != assocList.end(); ++iter, ++i)
+	{
 
 		fprintf(file, "\t%d\t|\t%d\t\t|\t%d\t\t|\t%d\t\t|\t%lf\n", i,
 				iter->indContour, iter->indNearestSide, iter->ifProperDirection,

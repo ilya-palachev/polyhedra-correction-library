@@ -2,13 +2,13 @@
 
 void test_cube_cutted();
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 	test_cube_cutted();
 }
 
-void test_cube_cutted() {
+void test_cube_cutted()
+{
 	Plane iplane;
 
 	Polyhedron poly;

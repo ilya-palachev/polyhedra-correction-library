@@ -1,27 +1,23 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 VertexInfo::VertexInfo() :
-				id(-1),
-				numFacets(0),
-				indFacets(NULL),
-				parentPolyhedron(NULL) {
+		id(-1), numFacets(0), indFacets(NULL), parentPolyhedron(NULL)
+{
 }
 
-VertexInfo::VertexInfo(
-		const int id_orig,
-		const int nf_orig,
-		const Vector3d vector_orig,
-		const int* index_orig,
+VertexInfo::VertexInfo(const int id_orig, const int nf_orig,
+		const Vector3d vector_orig, const int* index_orig,
 		Polyhedron* poly_orig) :
-				id(id_orig),
-				numFacets(nf_orig),
-				vector(vector_orig),
-				parentPolyhedron(poly_orig) {
+		id(id_orig), numFacets(nf_orig), vector(vector_orig), parentPolyhedron(
+				poly_orig)
+{
 
-	if (!index_orig) {
+	if (!index_orig)
+	{
 		fprintf(stdout, "VertexInfo::VertexInfo. Error. index1 = NULL\n");
 	}
-	if (nf_orig < 3) {
+	if (nf_orig < 3)
+	{
 		fprintf(stdout, "VertexInfo::VertexInfo. Error. nf1 < 3\n");
 	}
 	indFacets = new int[3 * numFacets + 1];
@@ -29,28 +25,26 @@ VertexInfo::VertexInfo(
 		indFacets[i] = index_orig[i];
 }
 
-VertexInfo::VertexInfo(
-		const int id_orig,
-		const Vector3d vector_orig,
+VertexInfo::VertexInfo(const int id_orig, const Vector3d vector_orig,
 		Polyhedron* poly_orig) :
-				id(id_orig),
-				numFacets(0),
-				vector(vector_orig),
-				indFacets(NULL),
-				parentPolyhedron(poly_orig) {
+		id(id_orig), numFacets(0), vector(vector_orig), indFacets(NULL), parentPolyhedron(
+				poly_orig)
+{
 }
 
-VertexInfo::~VertexInfo() {
+VertexInfo::~VertexInfo()
+{
 
-	if (indFacets != NULL && numFacets != 0) {
+	if (indFacets != NULL && numFacets != 0)
+	{
 		delete[] indFacets;
 	}
 	indFacets = NULL;
 	numFacets = 0;
 }
 
-VertexInfo& VertexInfo::operator =(
-		const VertexInfo& orig) {
+VertexInfo& VertexInfo::operator =(const VertexInfo& orig)
+{
 	int i;
 
 	this->id = orig.id;
@@ -58,7 +52,8 @@ VertexInfo& VertexInfo::operator =(
 	this->parentPolyhedron = orig.parentPolyhedron;
 	this->numFacets = orig.numFacets;
 
-	if (numFacets > 0) {
+	if (numFacets > 0)
+	{
 		if (indFacets)
 			delete[] indFacets;
 		indFacets = new int[3 * numFacets + 1];
@@ -68,6 +63,7 @@ VertexInfo& VertexInfo::operator =(
 	return *this;
 }
 
-int VertexInfo::get_nf() {
+int VertexInfo::get_nf()
+{
 	return numFacets;
 }

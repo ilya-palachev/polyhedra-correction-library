@@ -3,21 +3,16 @@
 
 #include "list_squares_method.h"
 
-void aprox(
-		int n,
-		double * x,
-		double * y,
-		double * z,
-		double& a,
-		double& b,
-		double& c,
-		double& d) {
+void aprox(int n, double * x, double * y, double * z, double& a, double& b,
+		double& c, double& d)
+{
 	double Ex2 = 0, Ex = 0, Ey2 = 0, Ey = 0, Ez2 = 0, Ez = 0, Exy = 0, Exz = 0,
 			Eyz = 0;
 	double** matr;
 	double** m_it;
 
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++)
+	{
 		Ex += x[i];
 		Ey += y[i];
 		Ez += z[i];
@@ -55,15 +50,18 @@ void aprox(
 	double s2 = 0;
 	double s3 = 0;
 	double sw;
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++)
+	{
 		sw = (x[i] * m_it[0][0] + y[i] * m_it[1][0] + z[i] * m_it[2][0] + D1);
 		s1 += sw * sw;
 	}
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++)
+	{
 		sw = (x[i] * m_it[0][1] + y[i] * m_it[1][1] + z[i] * m_it[2][1] + D2);
 		s2 += sw * sw;
 	}
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++)
+	{
 		sw = (x[i] * m_it[0][2] + y[i] * m_it[1][2] + z[i] * m_it[2][2] + D3);
 		s3 += sw * sw;
 	}
@@ -73,14 +71,16 @@ void aprox(
 	c = m_it[2][0];
 	d = D1;
 
-	if (s2 < sw) {
+	if (s2 < sw)
+	{
 		sw = s2;
 		a = m_it[0][1];
 		b = m_it[1][1];
 		c = m_it[2][1];
 		d = D2;
 	}
-	if (s3 < sw) {
+	if (s3 < sw)
+	{
 		a = m_it[0][2];
 		b = m_it[1][2];
 		c = m_it[2][2];
@@ -97,11 +97,8 @@ void aprox(
 	delete[] lam;
 }
 
-void jacobi(
-		int n,
-		double ** a,
-		double * d,
-		double ** v) {
+void jacobi(int n, double ** a, double * d, double ** v)
+{
 
 	if (n == 0)
 		return;
@@ -109,32 +106,38 @@ void jacobi(
 	double * z = b + n;
 	int i, j;
 
-	for (i = 0; i < n; ++i) {
+	for (i = 0; i < n; ++i)
+	{
 		z[i] = 0.;
 		b[i] = d[i] = a[i][i];
-		for (j = 0; j < n; ++j) {
-			v[i][j] = i == j ?
-					1. : 0.;
+		for (j = 0; j < n; ++j)
+		{
+			v[i][j] = i == j ? 1. : 0.;
 		}
 	}
-	for (i = 0; i < 50; ++i) {
+	for (i = 0; i < 50; ++i)
+	{
 		double sm = 0.;
 		int p, q;
-		for (p = 0; p < n - 1; ++p) {
-			for (q = p + 1; q < n; ++q) {
+		for (p = 0; p < n - 1; ++p)
+		{
+			for (q = p + 1; q < n; ++q)
+			{
 				sm += fabs(a[p][q]);
 			}
 		}
 		if (fabs(sm) < 1e-20)
 			break;
-		const double tresh = i < 3 ?
-				0.2 * sm / (n * n) : 0.;
-		for (p = 0; p < n - 1; ++p) {
-			for (q = p + 1; q < n; ++q) {
+		const double tresh = i < 3 ? 0.2 * sm / (n * n) : 0.;
+		for (p = 0; p < n - 1; ++p)
+		{
+			for (q = p + 1; q < n; ++q)
+			{
 				const double g = 1e12 * fabs(a[p][q]);
 				if (i >= 3 && fabs(d[p]) > g && fabs(d[q]) > g)
 					a[p][q] = 0.;
-				else if (fabs(a[p][q]) > tresh) {
+				else if (fabs(a[p][q]) > tresh)
+				{
 					const double theta = 0.5 * (d[q] - d[p]) / a[p][q];
 					double t = 1. / (fabs(theta) + sqrt(1. + theta * theta));
 					if (theta < 0)
@@ -148,25 +151,29 @@ void jacobi(
 					d[p] -= h;
 					d[q] += h;
 					a[p][q] = 0.;
-					for (j = 0; j < p; ++j) {
+					for (j = 0; j < p; ++j)
+					{
 						const double g = a[j][p];
 						const double h = a[j][q];
 						a[j][p] = g - s * (h + g * tau);
 						a[j][q] = h + s * (g - h * tau);
 					}
-					for (j = p + 1; j < q; ++j) {
+					for (j = p + 1; j < q; ++j)
+					{
 						const double g = a[p][j];
 						const double h = a[j][q];
 						a[p][j] = g - s * (h + g * tau);
 						a[j][q] = h + s * (g - h * tau);
 					}
-					for (j = q + 1; j < n; ++j) {
+					for (j = q + 1; j < n; ++j)
+					{
 						const double g = a[p][j];
 						const double h = a[q][j];
 						a[p][j] = g - s * (h + g * tau);
 						a[q][j] = h + s * (g - h * tau);
 					}
-					for (j = 0; j < n; ++j) {
+					for (j = 0; j < n; ++j)
+					{
 						const double g = v[j][p];
 						const double h = v[j][q];
 						v[j][p] = g - s * (h + g * tau);
@@ -175,7 +182,8 @@ void jacobi(
 				}
 			}
 		}
-		for (p = 0; p < n; ++p) {
+		for (p = 0; p < n; ++p)
+		{
 			d[p] = (b[p] += z[p]);
 			z[p] = 0.;
 		}

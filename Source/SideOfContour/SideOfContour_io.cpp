@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void SideOfContour::my_fprint(
-		FILE* file) {
+void SideOfContour::my_fprint(FILE* file)
+{
 #ifndef NDEBUG
 	fprintf(file, "Printing content of side of contour\n");
 	fprintf(file, "confidence = %lf (number from 0 to 1)\n", confidence);
@@ -22,8 +22,8 @@ void SideOfContour::my_fprint(
 #endif
 }
 
-void SideOfContour::my_fprint_short(
-		FILE* file) {
+void SideOfContour::my_fprint_short(FILE* file)
+{
 #ifndef NDEBUG
 	fprintf(file, "%lf\t%d\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\n", confidence, type,
 			A1.x, A1.y, A1.z, A2.x, A2.y, A2.z);

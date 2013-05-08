@@ -1,24 +1,17 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void test_multi_join_facets(
-		const char* name,
-		int type,
-		int n,
-		int *fid);
+void test_multi_join_facets(const char* name, int type, int n, int *fid);
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 
-	int fid[3] = { 0, 250, 14 };
+	int fid[3] =
+	{ 0, 250, 14 };
 	test_multi_join_facets("polyhedron-2010-11-25", 2, 3, fid);
 }
 
-void test_multi_join_facets(
-		const char* name,
-		int type,
-		int n,
-		int *fid) {
+void test_multi_join_facets(const char* name, int type, int n, int *fid)
+{
 
 	int i;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -30,7 +23,8 @@ void test_multi_join_facets(
 	fprintf(stdout, "******************************************************\n");
 	fprintf(stdout, "********************");
 	fprintf(stdout, "  %d", fid[0]);
-	for (i = 1; i < n - 1; ++i) {
+	for (i = 1; i < n - 1; ++i)
+	{
 		fprintf(stdout, ", %d", fid[i]);
 	}
 	fprintf(stdout, " и %d  ", fid[n - 1]);
@@ -44,7 +38,8 @@ void test_multi_join_facets(
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 	sprintf(file_name_out0, "../poly-data-out/%s.ply", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;

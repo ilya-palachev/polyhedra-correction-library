@@ -1,10 +1,12 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::preprocess_polyhedron() {
+void Polyhedron::preprocess_polyhedron()
+{
 //    printf("\tНачинаем предобработку ...\n");
 	int i;
 //    printf("\t\tЧистка граней: ");
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		if (facets[i].numVertices < 1)
 			continue;
 //        printf("%d, ", i);
@@ -12,7 +14,8 @@ void Polyhedron::preprocess_polyhedron() {
 		facets[i].preprocess_free();
 	}
 //    printf("\n\t\tПредобработка граней: ");
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		if (facets[i].numVertices < 1)
 			continue;
 //        printf("%d ", i);
@@ -25,7 +28,8 @@ void Polyhedron::preprocess_polyhedron() {
 	//		delete[] vertexinfo;
 //    printf("\n\t\tПредобработка вершин: ");
 	vertexInfos = new VertexInfo[numVertices];
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 //        printf("%d ", i);
 //        printf("Preprocess vertexinfo %d\n", i);
 		vertexInfos[i] = VertexInfo(i, vertices[i], &(*this));

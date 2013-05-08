@@ -7,7 +7,8 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-double Facet::area() {
+double Facet::area()
+{
 	DEBUG_START;
 	my_fprint_all(stderr);
 
@@ -18,7 +19,8 @@ double Facet::area() {
 			parentPolyhedron->numVertices);
 
 	double areaFacet = 0.;
-	for (int iVertex = 1; iVertex < numVertices - 1; ++iVertex) {
+	for (int iVertex = 1; iVertex < numVertices - 1; ++iVertex)
+	{
 		DEBUG_PRINT("  calculating area of triangle %d : 1 begin", iVertex);
 		Vector3d A1 = parentPolyhedron->vertices[indVertices[iVertex]] - A0;
 		DEBUG_PRINT("  calculating area of triangle %d : 2", iVertex);

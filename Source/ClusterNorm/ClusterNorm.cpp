@@ -6,24 +6,21 @@
  */
 #include "PolyhedraCorrectionLibrary.h"
 
-double distCluster(
-		ClusterNorm& cluster0,
-		ClusterNorm& cluster1);
+double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
 
 ClusterNorm::ClusterNorm() :
-				num(0),
-				numMax(0),
-				P(),
-				indexFacet(NULL),
-				poly(NULL) {
+		num(0), numMax(0), P(), indexFacet(NULL), poly(NULL)
+{
 }
 
-double ClusterNorm::area() {
+double ClusterNorm::area()
+{
 	double claster_area = 0.;
 	double areaOneFacet;
 
 //    printf("\n");
-	for (int i = 0; i < num; i++) {
+	for (int i = 0; i < num; i++)
+	{
 		areaOneFacet = poly->area(indexFacet[i]);
 //        printf("areaOneFacet = %lf\n", areaOneFacet);       
 		claster_area += areaOneFacet;
@@ -33,60 +30,51 @@ double ClusterNorm::area() {
 	return claster_area;
 }
 
-ClusterNorm::ClusterNorm(
-		const ClusterNorm& orig) :
+ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 
-				num(orig.num),
-				numMax(orig.numMax),
-				P(orig.P),
-				indexFacet(new int[orig.numMax]),
-				poly(orig.poly) {
-	for (int i = 0; i < num; ++i) {
+		num(orig.num), numMax(orig.numMax), P(orig.P), indexFacet(
+				new int[orig.numMax]), poly(orig.poly)
+{
+	for (int i = 0; i < num; ++i)
+	{
 		indexFacet[i] = orig.indexFacet[i];
 	}
 	poly = new Polyhedron;
-	for (int i = 0; i < num; ++i) {
+	for (int i = 0; i < num; ++i)
+	{
 		poly->facets[i] = orig.poly->facets[i];
 	}
 }
 
-ClusterNorm::ClusterNorm(
-		int num_orig,
-		int numMax_orig,
-		SpherePoint P_orig,
+ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 		Polyhedron* poly_orig) :
-				num(num_orig),
-				numMax(numMax_orig),
-				P(P_orig),
-				indexFacet(new int[numMax_orig]),
-				poly(poly_orig) {
+		num(num_orig), numMax(numMax_orig), P(P_orig), indexFacet(
+				new int[numMax_orig]), poly(poly_orig)
+{
 }
 
-ClusterNorm::ClusterNorm(
-		int num_orig,
-		int numMax_orig,
-		SpherePoint P_orig,
-		int* indexFacet_orig,
-		Polyhedron* poly_orig) :
-				num(num_orig),
-				numMax(numMax_orig),
-				P(P_orig),
-				indexFacet(new int[numMax_orig]),
-				poly(poly_orig) {
-	for (int i = 0; i < num; ++i) {
+ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
+		int* indexFacet_orig, Polyhedron* poly_orig) :
+		num(num_orig), numMax(numMax_orig), P(P_orig), indexFacet(
+				new int[numMax_orig]), poly(poly_orig)
+{
+	for (int i = 0; i < num; ++i)
+	{
 		indexFacet[i] = indexFacet_orig[i];
 	}
 }
 
-ClusterNorm::~ClusterNorm() {
-	if (indexFacet != NULL) {
+ClusterNorm::~ClusterNorm()
+{
+	if (indexFacet != NULL)
+	{
 		delete[] indexFacet;
 		indexFacet = NULL;
 	}
 }
 
-ClusterNorm& ClusterNorm::operator +=(
-		ClusterNorm& cluster1) {
+ClusterNorm& ClusterNorm::operator +=(ClusterNorm& cluster1)
+{
 
 	int i, j;
 	int newNum, newNumMax;
@@ -111,11 +99,13 @@ ClusterNorm& ClusterNorm::operator +=(
 
 	newIndexFacet = new int[newNumMax];
 
-	for (i = 0, j = 0; i < this->num; ++i) {
+	for (i = 0, j = 0; i < this->num; ++i)
+	{
 		newIndexFacet[j] = this->indexFacet[j];
 		++j;
 	}
-	for (i = 0; i < cluster1.num; ++i) {
+	for (i = 0; i < cluster1.num; ++i)
+	{
 		newIndexFacet[j] = cluster1.indexFacet[i];
 		++j;
 	}
@@ -139,27 +129,28 @@ ClusterNorm& ClusterNorm::operator +=(
 
 }
 
-ClusterNorm& ClusterNorm::operator =(
-		const ClusterNorm& orig) {
+ClusterNorm& ClusterNorm::operator =(const ClusterNorm& orig)
+{
 	num = orig.num;
 	numMax = orig.numMax;
 	P = orig.P;
 	poly = orig.poly;
 
-	if (indexFacet != NULL) {
+	if (indexFacet != NULL)
+	{
 		delete[] indexFacet;
 		indexFacet = NULL;
 	}
 
 	indexFacet = new int[numMax];
-	for (int i = 0; i < num; ++i) {
+	for (int i = 0; i < num; ++i)
+	{
 		indexFacet[i] = orig.indexFacet[i];
 	}
 }
 
-double distCluster(
-		ClusterNorm& cluster0,
-		ClusterNorm& cluster1) {
+double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1)
+{
 //    printf("\tcluster0.P = (%lf, %lf, %lf)\n", 
 //            cluster0.P.vector.x,
 //            cluster0.P.vector.y,
@@ -171,13 +162,14 @@ double distCluster(
 	return dist(cluster0.P, cluster1.P);
 }
 
-void ClusterNorm::fprint(
-		FILE* file) {
+void ClusterNorm::fprint(FILE* file)
+{
 //    fprintf(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y, P.vector.z);
 
 	if (num < 1)
 		return;
-	for (int i = 0; i < num; ++i) {
+	for (int i = 0; i < num; ++i)
+	{
 		fprintf(file, "%d, ", indexFacet[i]);
 	}
 
@@ -185,11 +177,10 @@ void ClusterNorm::fprint(
 	fprintf(file, "; area = %lf", a);
 }
 
-void ClusterNorm::setColor(
-		char red,
-		char green,
-		char blue) {
-	for (int i = 0; i < num; ++i) {
+void ClusterNorm::setColor(char red, char green, char blue)
+{
+	for (int i = 0; i < num; ++i)
+	{
 		poly->facets[indexFacet[i]].set_rgb(red, green, blue);
 	}
 }

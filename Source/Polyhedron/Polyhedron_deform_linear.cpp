@@ -5,14 +5,15 @@
 // экспоненциальным ростом штрафа или масштабированием
 // (если он определен - то масштабированием)
 
-double Polyhedron::min_dist(
-		int id) {
+double Polyhedron::min_dist(int id)
+{
 	int i, nf, *index;
 	double dist, min_dist;
 
 	nf = vertexInfos[id].numFacets;
 	index = vertexInfos[id].indFacets;
-	for (i = 0; i < nf; ++i) {
+	for (i = 0; i < nf; ++i)
+	{
 		dist = qmod(vertices[id] - vertices[index[nf + 1 + i]]);
 		dist = sqrt(dist);
 		if (i == 0 || dist < min_dist)
@@ -21,20 +22,22 @@ double Polyhedron::min_dist(
 	return min_dist;
 }
 
-void Polyhedron::deform_linear_partial(
-		int id,
-		Vector3d delta,
-		int num) {
+void Polyhedron::deform_linear_partial(int id, Vector3d delta, int num)
+{
 	int i;
 	double coeff;
 	Vector3d delta_step;
 
-	if (num == 1) {
+	if (num == 1)
+	{
 		deform_linear(id, delta);
-	} else {
+	}
+	else
+	{
 		coeff = 1. / num;
 		delta_step = delta * coeff;
-		for (i = 0; i < num; ++i) {
+		for (i = 0; i < num; ++i)
+		{
 			deform_linear(id, delta_step);
 		}
 	}
@@ -43,9 +46,8 @@ void Polyhedron::deform_linear_partial(
 #define MAX_STEPS 1e4
 
 //Данная функция отвечает за глобальную минимизацию (т. е. минимизируется отклонение в целом)
-void Polyhedron::deform_linear(
-		int id,
-		Vector3d delta) {
+void Polyhedron::deform_linear(int id, Vector3d delta)
+{
 	//    printf(".");
 
 	int step, i;
@@ -97,7 +99,8 @@ void Polyhedron::deform_linear(
 	//    printf("vertex[%d] = (%lf, %lf, %lf)\n", 
 	//        id, vertex[id].x, vertex[id].y, vertex[id].z);
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		xold[i] = vertices[i].x;
 		yold[i] = vertices[i].y;
 		zold[i] = vertices[i].z;
@@ -109,8 +112,10 @@ void Polyhedron::deform_linear(
 	err = deform_linear_calculate_error();
 	//    K = sqrt(qmod(delta)) / err;
 	err_eps = EPSILON;
-	for (i = 0; err > 1e-10; ++i) {
-		do {
+	for (i = 0; err > 1e-10; ++i)
+	{
+		do
+		{
 
 			printf("\\hline\n %d & %d & ", i, step);
 			//                    vertex[id].x = xold[id];
@@ -126,7 +131,8 @@ void Polyhedron::deform_linear(
 			printf("%le & %le & %lf\\\\\n", err, norm, K);
 			//                    printf("%d\t%d\terr = %le\tnorm = %le\terr_eps = %le\tK = %lf\n", i, step++, err, norm, err_eps, K);
 			++step;
-			if (step > MAX_STEPS) {
+			if (step > MAX_STEPS)
+			{
 				printf("Too much steps...\n");
 				return;
 			}
@@ -148,7 +154,8 @@ void Polyhedron::deform_linear(
 	err = deform_linear_calculate_error();
 //        K = sqrt(qmod(delta)) / err;
 	K = 1. / err;
-	do {
+	do
+	{
 		//        vertex[id].x = xold[id];
 		//        vertex[id].y = yold[id];
 		//        vertex[id].z = zold[id];
@@ -157,13 +164,15 @@ void Polyhedron::deform_linear(
 		deform_linear_vertices(id, K, A, B, xold, yold, zold);
 		err = deform_linear_calculate_error();
 		norm = deform_linear_calculate_deform(xold, yold, zold);
-		if (step % 100 == 0 || step >= 2059) {
+		if (step % 100 == 0 || step >= 2059)
+		{
 			printf("\\hline\n %d & %le & %le & %lf\\\\\n", step, err, norm, K);
 
 			//                printf("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++, err, norm, K);
 		}
 		++step;
-		if (step > MAX_STEPS) {
+		if (step > MAX_STEPS)
+		{
 			printf("Too much steps...\n");
 			return;
 		}
@@ -200,12 +209,9 @@ void Polyhedron::deform_linear(
 
 }
 
-void Polyhedron::deform_linear_test(
-		int id,
-		Vector3d delta,
-		int mode,
-		int& num_steps,
-		double& norm_sum) {
+void Polyhedron::deform_linear_test(int id, Vector3d delta, int mode,
+		int& num_steps, double& norm_sum)
+{
 
 	int step, i;
 	double err, err_eps;
@@ -228,21 +234,25 @@ void Polyhedron::deform_linear_test(
 	printf("vertex[%d] = (%lf, %lf, %lf)\n", id, vertices[id].x, vertices[id].y,
 			vertices[id].z);
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		xold[i] = vertices[i].x;
 		yold[i] = vertices[i].y;
 		zold[i] = vertices[i].z;
 	}
 
-	switch (mode) {
+	switch (mode)
+	{
 	case 0:
 		step = 0;
 		K = 100;
 		//    err = deform_linear_calculate_error();
 		//    K = sqrt(qmod(delta)) / err;
 		err_eps = EPSILON;
-		for (i = 0; i < 10; ++i) {
-			do {
+		for (i = 0; i < 10; ++i)
+		{
+			do
+			{
 
 				//                    printf("\\hline\n %d & %d & ", i, step);
 				//                    vertex[id].x = xold[id];
@@ -256,7 +266,8 @@ void Polyhedron::deform_linear_test(
 				//                    printf("%le & %le & %lf\\\\\n", err, norm, K);
 				//                    printf("%d\t%d\terr = %le\tnorm = %le\terr_eps = %le\tK = %lf\n", i, step++, err, norm, err_eps, K);
 				++step;
-				if (step > MAX_STEPS) {
+				if (step > MAX_STEPS)
+				{
 					printf("Too much steps...\n");
 					return;
 				}
@@ -275,7 +286,8 @@ void Polyhedron::deform_linear_test(
 		err = deform_linear_calculate_error();
 		K = sqrt(qmod(delta)) / err;
 		//    K = 1. / err;
-		do {
+		do
+		{
 			//                vertex[id].x = xold[id];
 			//                vertex[id].y = yold[id];
 			//                vertex[id].z = zold[id];
@@ -283,13 +295,15 @@ void Polyhedron::deform_linear_test(
 			deform_linear_vertices(id, K, A, B, xold, yold, zold);
 			err = deform_linear_calculate_error();
 			norm = deform_linear_calculate_deform(xold, yold, zold);
-			if (step % 100 == 0 || step >= 2059) {
+			if (step % 100 == 0 || step >= 2059)
+			{
 				//                    printf("\\hline\n %d & %le & %le & %lf\\\\\n", step, err, norm, K);
 
 				//                printf("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++, err, norm, K);
 			}
 			++step;
-			if (step > MAX_STEPS) {
+			if (step > MAX_STEPS)
+			{
 				printf("Too much steps...\n");
 				return;
 			}
@@ -324,10 +338,8 @@ void Polyhedron::deform_linear_test(
 
 }
 
-void Polyhedron::deform_linear_facets(
-		double* x,
-		double* y,
-		double* z) {
+void Polyhedron::deform_linear_facets(double* x, double* y, double* z)
+{
 	int i, j, nv, *index;
 	//    double *x, *y, *z;
 	double a0, b0, c0, d0;
@@ -338,10 +350,12 @@ void Polyhedron::deform_linear_facets(
 	//    y = new double[numv];
 	//    z = new double[numv];
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		nv = facets[j].numVertices;
 		index = facets[j].indVertices;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 			x[i] = vertices[index[i]].x;
 			y[i] = vertices[index[i]].y;
 			z[i] = vertices[index[i]].z;
@@ -368,12 +382,14 @@ void Polyhedron::deform_linear_facets(
 	//    if (z != NULL) delete[] z;
 }
 
-double Polyhedron::deform_linear_calculate_error() {
+double Polyhedron::deform_linear_calculate_error()
+{
 	int i, j, nv, *index;
 	double err, a, b, c, d, x, y, z, locerr;
 	err = 0.;
 
-	for (j = 0; j < numFacets; ++j) {
+	for (j = 0; j < numFacets; ++j)
+	{
 		nv = facets[j].numVertices;
 		index = facets[j].indVertices;
 		a = facets[j].plane.norm.x;
@@ -383,7 +399,8 @@ double Polyhedron::deform_linear_calculate_error() {
 		if (nv < 3)
 			continue;
 		locerr = 0.;
-		for (i = 0; i < nv; ++i) {
+		for (i = 0; i < nv; ++i)
+		{
 			x = vertices[index[i]].x;
 			y = vertices[index[i]].y;
 			z = vertices[index[i]].z;
@@ -396,14 +413,14 @@ double Polyhedron::deform_linear_calculate_error() {
 	return err;
 }
 
-double Polyhedron::deform_linear_calculate_deform(
-		double* x,
-		double* y,
-		double* z) {
+double Polyhedron::deform_linear_calculate_deform(double* x, double* y,
+		double* z)
+{
 	int i;
 	double deform, xx, yy, zz;
 	deform = 0.;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		xx = vertices[i].x;
 		yy = vertices[i].y;
 		zz = vertices[i].z;
@@ -414,14 +431,9 @@ double Polyhedron::deform_linear_calculate_deform(
 	return deform;
 }
 
-void Polyhedron::deform_linear_vertices(
-		int id,
-		double K,
-		double* A,
-		double* B,
-		double* xold,
-		double* yold,
-		double* zold) {
+void Polyhedron::deform_linear_vertices(int id, double K, double* A, double* B,
+		double* xold, double* yold, double* zold)
+{
 	int i, j, nf, *index;
 	double a, b, c, d;
 	double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
@@ -433,7 +445,8 @@ void Polyhedron::deform_linear_vertices(
 	//    B = new double[3];
 
 	//    norm = 0.;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		if (i == id)
 			continue;
 		Maa = 0.;
@@ -447,7 +460,8 @@ void Polyhedron::deform_linear_vertices(
 		Mcd = 0.;
 		nf = vertexInfos[i].numFacets;
 		index = vertexInfos[i].indFacets;
-		for (j = 0; j < nf; ++j) {
+		for (j = 0; j < nf; ++j)
+		{
 			pl = facets[index[j]].plane;
 			a = pl.norm.x;
 			b = pl.norm.y;
@@ -491,21 +505,22 @@ void Polyhedron::deform_linear_vertices(
 	//    if (B != NULL) delete[] B;
 }
 
-void Polyhedron::import_coordinates(
-		Polyhedron& orig) {
+void Polyhedron::import_coordinates(Polyhedron& orig)
+{
 	int i;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		vertices[i] = orig.vertices[i];
 	}
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		facets[i].plane = orig.facets[i].plane;
 	}
 }
 
 //Данная функция отвечает за локальную минимизацию (т. е. минимизируется отклонение на шаге)
-void Polyhedron::deform_linear2(
-		int id,
-		Vector3d delta) {
+void Polyhedron::deform_linear2(int id, Vector3d delta)
+{
 	//    printf(".");
 
 	int step, i;
@@ -542,7 +557,8 @@ void Polyhedron::deform_linear2(
 	//    delta += vertex[id]; //Сохраняем положение деформированной точки
 	vertices[id] += delta;
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		xold[i] = vertices[i].x;
 		yold[i] = vertices[i].y;
 		zold[i] = vertices[i].z;
@@ -555,8 +571,10 @@ void Polyhedron::deform_linear2(
 	//    K = sqrt(qmod(delta)) / err;
 	err_eps = EPSILON;
 	ncons_prev = test_consections(false);
-	for (i = 0; i < 10; ++i) {
-		do {
+	for (i = 0; i < 10; ++i)
+	{
+		do
+		{
 
 			vertices[id].x = xold[id];
 			vertices[id].y = yold[id];
@@ -569,7 +587,8 @@ void Polyhedron::deform_linear2(
 			norm = deform_linear_calculate_deform(xold, yold, zold);
 
 			ncons_curr = test_consections(false);
-			if (ncons_curr != ncons_prev) {
+			if (ncons_curr != ncons_prev)
+			{
 				ncons_prev = ncons_curr;
 			}
 
@@ -579,7 +598,8 @@ void Polyhedron::deform_linear2(
 			join_points(id);
 
 			++step;
-			if (step > MAX_STEPS) {
+			if (step > MAX_STEPS)
+			{
 				printf("Too much steps...\n");
 				return;
 			}
@@ -604,7 +624,8 @@ void Polyhedron::deform_linear2(
 	ifPrint = false;
 
 	//    K = 1. / err;
-	do {
+	do
+	{
 		vertices[id].x = xold[id];
 		vertices[id].y = yold[id];
 		vertices[id].z = zold[id];
@@ -612,7 +633,8 @@ void Polyhedron::deform_linear2(
 
 		ncons_curr = test_consections();
 //        if (ncons_curr != ncons_prev) {
-		if (1) {
+		if (1)
+		{
 			ifPrint = true;
 			ncons_prev = ncons_curr;
 		}
@@ -621,7 +643,8 @@ void Polyhedron::deform_linear2(
 		err = deform_linear_calculate_error();
 		norm = deform_linear_calculate_deform(xold, yold, zold);
 //        if (step % 100 == 0 || step >= 2059) {
-		if (ifPrint) {
+		if (ifPrint)
+		{
 			printf("\\hline\n %d & %le & %le & %lf & %d\\\\\n", step, err, norm, K, ncons_curr);
 			sprintf(fname, "../poly-data-out/Consections - %d.ply", ncons_curr);
 			fprint_ply_scale(1000., fname, "generated-in-deform-linear");
@@ -630,7 +653,8 @@ void Polyhedron::deform_linear2(
 			//                printf("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++, err, norm, K);
 		}
 		++step;
-		if (step > MAX_STEPS) {
+		if (step > MAX_STEPS)
+		{
 			printf("Too much steps...\n");
 			return;
 		}
@@ -667,10 +691,8 @@ void Polyhedron::deform_linear2(
 
 }
 
-void Polyhedron::deform_linear_vertices(
-		double K,
-		double* A,
-		double* B) {
+void Polyhedron::deform_linear_vertices(double K, double* A, double* B)
+{
 	int i, j, nf, *index;
 	double a, b, c, d;
 	double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
@@ -682,7 +704,8 @@ void Polyhedron::deform_linear_vertices(
 //    B = new double[3];
 
 	norm = 0.;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		Maa = 0.;
 		Mab = 0.;
 		Mac = 0.;
@@ -693,12 +716,14 @@ void Polyhedron::deform_linear_vertices(
 		Mcc = 0.;
 		Mcd = 0.;
 		nf = vertexInfos[i].numFacets;
-		if (nf == 0) {
+		if (nf == 0)
+		{
 			printf("Vertex %d cannot be found in any facet...\n", i);
 			continue;
 		}
 		index = vertexInfos[i].indFacets;
-		for (j = 0; j < nf; ++j) {
+		for (j = 0; j < nf; ++j)
+		{
 			pl = facets[index[j]].plane;
 			a = pl.norm.x;
 			b = pl.norm.y;

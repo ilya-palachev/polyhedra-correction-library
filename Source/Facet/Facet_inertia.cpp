@@ -1,9 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-bool Facet::consect_x(
-		double y,
-		double z,
-		double& x) {
+bool Facet::consect_x(double y, double z, double& x)
+{
 
 	int i;
 	double u, delta, alpha, sum;
@@ -26,7 +24,8 @@ bool Facet::consect_x(
 //    printf("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
 
 	sum = 0.;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 //        if (i > 0)
 //            printf("+");
 		A0 = parentPolyhedron->vertices[indVertices[i % numVertices]] - A;
@@ -41,9 +40,12 @@ bool Facet::consect_x(
 //    printf(" = sum = %lf*\n", sum / M_PI * 180);
 	printf("facet[%d].consect_x(%lf, %lf) : sum = %lf\n", id, y, z, sum);
 
-	if (fabs(sum) < 2 * M_PI) {
+	if (fabs(sum) < 2 * M_PI)
+	{
 		return false;
-	} else {
+	}
+	else
+	{
 		x = u;
 		return true;
 	}

@@ -1,39 +1,39 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-class SortedDouble {
+class SortedDouble
+{
 public:
 	int len;
 	int num;
 	double* array;
 
-	SortedDouble(
-			int Len);
+	SortedDouble(int Len);
 	~SortedDouble();
 
-	void add(
-			double x);
+	void add(double x);
 	double calclulate();
 
 };
 
-SortedDouble::SortedDouble(
-		int Len) :
-				len(Len),
-				num(0) {
+SortedDouble::SortedDouble(int Len) :
+		len(Len), num(0)
+{
 	array = new double[len];
 }
 
-SortedDouble::~SortedDouble() {
+SortedDouble::~SortedDouble()
+{
 	if (array != NULL)
 		delete[] array;
 }
 
-void SortedDouble::add(
-		double x) {
+void SortedDouble::add(double x)
+{
 
 	int first, last, mid;
 
-	if (num >= len) {
+	if (num >= len)
+	{
 		printf("Error.OVERULL!!!\n");
 		return;
 	}
@@ -41,11 +41,15 @@ void SortedDouble::add(
 	first = 0; // Первый элемент в массиве
 	last = num; // Последний элемент в массиве
 
-	while (first < last) {
+	while (first < last)
+	{
 		mid = (first + last) / 2;
-		if (x <= array[mid]) {
+		if (x <= array[mid])
+		{
 			last = mid;
-		} else {
+		}
+		else
+		{
 			first = mid + 1;
 		}
 	}
@@ -53,12 +57,14 @@ void SortedDouble::add(
 	++num;
 }
 
-double SortedDouble::calclulate() {
+double SortedDouble::calclulate()
+{
 	int i;
 	double s;
 
 	s = 0;
-	for (i = 0; i < num; ++i) {
+	for (i = 0; i < num; ++i)
+	{
 		if (i % 2 == 0)
 			s -= array[i];
 		else
@@ -67,8 +73,8 @@ double SortedDouble::calclulate() {
 	return s;
 }
 
-double Polyhedron::calculate_J11(
-		int N) {
+double Polyhedron::calculate_J11(int N)
+{
 
 	int k, l;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -86,9 +92,11 @@ double Polyhedron::calculate_J11(
 
 	s = 0.;
 
-	for (k = 0; k < N; ++k) {
+	for (k = 0; k < N; ++k)
+	{
 		z = k * h * (zmax - zmin) + zmin;
-		for (l = 0; l < N; ++l) {
+		for (l = 0; l < N; ++l)
+		{
 			y = l * h * (ymax - ymin) + ymin;
 			integral = consection_x(y, z);
 			s += h * h * integral * (z * z + y * y);
@@ -99,9 +107,8 @@ double Polyhedron::calculate_J11(
 	return s;
 }
 
-double Polyhedron::consection_x(
-		double y,
-		double z) {
+double Polyhedron::consection_x(double y, double z)
+{
 
 	int i;
 	double x;
@@ -109,10 +116,12 @@ double Polyhedron::consection_x(
 
 	SortedDouble SD(20);
 
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 
 		ifConsect = facets[i].consect_x(y, z, x);
-		if (ifConsect == true) {
+		if (ifConsect == true)
+		{
 			printf("SD.add(%lf) y = %lf, z = %lf\n", x, y, z);
 			SD.add(x);
 		}

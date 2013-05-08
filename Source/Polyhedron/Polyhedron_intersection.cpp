@@ -1,23 +1,21 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void my_fprint_Vector3d(
-		Vector3d& v,
-		FILE* file) {
+void my_fprint_Vector3d(Vector3d& v, FILE* file)
+{
 	fprintf(file, "(%lf, %lf, %lf)\n", v.x, v.y, v.z);
 }
 
-void Polyhedron::set_isUsed(
-		int v0,
-		int v1,
-		bool val) {
+void Polyhedron::set_isUsed(int v0, int v1, bool val)
+{
 	int i;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		edgeLists[i].set_isUsed(v0, v1, val);
 	}
 }
 
-void Polyhedron::intersect(
-		Plane iplane) {
+void Polyhedron::intersect(Plane iplane)
+{
 
 	int i, j, k, j_begin;
 	int nume;
@@ -51,7 +49,8 @@ void Polyhedron::intersect(
 
 	Vector3d vec0, vec1, vec;
 
-	fprintf(stdout, "\n======================================================\n");
+	fprintf(stdout,
+			"\n======================================================\n");
 	fprintf(stdout, "Intersection the polyhedron by plane : \n");
 	fprintf(stdout, "(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n",
 			iplane.norm.x, iplane.norm.y, iplane.norm.z, iplane.dist);
@@ -61,7 +60,8 @@ void Polyhedron::intersect(
 	edgeLists = new EdgeList[numFacets];
 
 	nume = 0;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		nume += facets[i].get_nv();
 	}
 	FutureFacet buffer_old(nume);
@@ -72,7 +72,8 @@ void Polyhedron::intersect(
 	// 1. Подготовка списков ребер
 
 	total_edges = 0;
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		edgeLists[i] = EdgeList(i, facets[i].get_nv(), this);
 		res = facets[i].prepare_edge_list(iplane);
 		edgeLists[i].send(&total_edge_set);
@@ -80,7 +81,8 @@ void Polyhedron::intersect(
 #ifdef DEBUG
 		//		if (edge_list[i].get_num() == 2)
 		edgeLists[i].my_fprint(stdout);
-		switch (edge_list[i].get_num()) {
+		switch (edge_list[i].get_num())
+		{
 			case 2:
 			++n_2;
 			break;
@@ -104,14 +106,17 @@ void Polyhedron::intersect(
 
 	num_components_new = 0;
 	bool flag = true;
-	while (total_edges > 0 && flag) {
+	while (total_edges > 0 && flag)
+	{
 
-		for (i = 0; i < numFacets; ++i) {
+		for (i = 0; i < numFacets; ++i)
+		{
 			if (num_edges[i] > 0)
 				break;
 		}
 		fid_curr = i;
-		if (fid_curr == numFacets) {
+		if (fid_curr == numFacets)
+		{
 			continue;
 		}
 		edgeLists[fid_curr].get_first_edge(v0, v1);
@@ -119,8 +124,10 @@ void Polyhedron::intersect(
 		v0_first = v0;
 		v1_first = v1;
 		lenff[num_components_new] = 0;
-		do {
-			if (edgeLists[fid_next].get_num() < 1) {
+		do
+		{
+			if (edgeLists[fid_next].get_num() < 1)
+			{
 				if (fid_next != fid_curr)
 					drctn = 0;
 			}
@@ -129,7 +136,8 @@ void Polyhedron::intersect(
 			--total_edges;
 			--num_edges[fid_curr];
 			++lenff[num_components_new];
-			if (v0 != v1) {
+			if (v0 != v1)
+			{
 				edge_set.add_edge(v0, v1);
 			}
 #ifdef DEBUG
@@ -142,7 +150,8 @@ void Polyhedron::intersect(
 			//			fprintf(stdout, "v0 = %d, v1 = %d, fid = %d\n", v0, v1, fid_curr);
 #endif
 			buffer_new.add_edge(v0, v1, fid);
-			if (buffer_new.get_nv() >= nume) {
+			if (buffer_new.get_nv() >= nume)
+			{
 				fprintf(stdout, "Error. Stack overflow  in buffer_new\n");
 				return;
 			}
@@ -155,7 +164,8 @@ void Polyhedron::intersect(
 
 			edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
 			if ((v0_prev == v0 && v1_prev == v1)
-					|| (v0_prev == v1 && v1_prev == v0)) {
+					|| (v0_prev == v1 && v1_prev == v0))
+			{
 				fprintf(stdout, "Endless loop!!!!!\n");
 				flag = false;
 				break;
@@ -163,7 +173,8 @@ void Polyhedron::intersect(
 			if (fid_next != fid_curr)
 				--num_edges[fid_curr];
 
-			if (v0 == -1 || v1 == -1) {
+			if (v0 == -1 || v1 == -1)
+			{
 				fprintf(stdout, "Warning. v0 = %d, v1 = %d\n", v0, v1);
 				return;
 			}
@@ -176,10 +187,12 @@ void Polyhedron::intersect(
 	//3. Расщепление компонент сечения
 	FutureFacet* future_facet_new;
 	future_facet_new = new FutureFacet[num_components_new];
-	for (i = 0, k = 0; i < num_components_new; ++i) {
+	for (i = 0, k = 0; i < num_components_new; ++i)
+	{
 		future_facet_new[i] = FutureFacet(lenff[i]);
 		future_facet_new[i].set_id(i);
-		for (j = 0; j < lenff[i]; ++j) {
+		for (j = 0; j < lenff[i]; ++j)
+		{
 			buffer_new.get_edge(k++, v0, v1, fid, id_v_new);
 			future_facet_new[i].add_edge(v0, v1, fid);
 		}
@@ -188,7 +201,8 @@ void Polyhedron::intersect(
 
 #ifdef OUTPUT
 	fprintf(stdout, "%d new facets : \n", num_components_new);
-	for (i = 0; i < num_components_new; ++i) {
+	for (i = 0; i < num_components_new; ++i)
+	{
 		future_facet_new[i].my_fprint(stdout);
 	}
 #endif
@@ -198,7 +212,8 @@ void Polyhedron::intersect(
 	num_components_old = 0;
 	num_saved_facets = 0;
 	ifSaveFacet = new bool[numFacets];
-	for (i = 0; i < numFacets; ++i) {
+	for (i = 0; i < numFacets; ++i)
+	{
 		printf("\tГрань %d\n", i);
 		ifSaveFacet[i] = facets[i].intersect(iplane, buffer_old,
 				num_components_local);
@@ -220,8 +235,10 @@ void Polyhedron::intersect(
 	bool* ifMultiComponent;
 	ifMultiComponent = new bool[num_components_old];
 
-	for (i = 0; i < num_components_old; ++i) {
-		for (j = j_begin; j < buffer_old.get_nv(); ++j) {
+	for (i = 0; i < num_components_old; ++i)
+	{
+		for (j = j_begin; j < buffer_old.get_nv(); ++j)
+		{
 			buffer_old.get_edge(j, v0, v1, fid, id_v_new);
 			if (v0 == -1 && v1 == -1)
 				break;
@@ -231,15 +248,19 @@ void Polyhedron::intersect(
 			break;
 		future_facet_old[i] = FutureFacet(len_comp);
 		future_facet_old[i].set_id(i);
-		for (j = j_begin; j < j_begin + len_comp; ++j) {
+		for (j = j_begin; j < j_begin + len_comp; ++j)
+		{
 			buffer_old.get_edge(j, v0, v1, fid, id_v_new);
 			future_facet_old[i].add_edge(v0, v1, fid);
 		}
 		j_begin = j_begin + len_comp + 1;
-		if (fid == fid_prev && i > 0) {
+		if (fid == fid_prev && i > 0)
+		{
 			ifMultiComponent[i] = true;
 			ifMultiComponent[i - 1] = true;
-		} else {
+		}
+		else
+		{
 			ifMultiComponent[i] = false;
 		}
 		fid_prev = fid;
@@ -257,21 +278,25 @@ void Polyhedron::intersect(
 	Facet* facet_new;
 	numf_new = num_components_new + num_components_old;
 	facet_new = new Facet[numf_new];
-	for (i = 0; i < num_components_new; ++i) {
+	for (i = 0; i < num_components_new; ++i)
+	{
 		future_facet_new[i].generate_facet(facet_new[i], numFacets + i, iplane,
 				numVertices, &edge_set);
 		facet_new[i].set_poly(this);
 		facet_new[i].set_rgb(255, 0, 0);
 	}
-	for (i = 0; i < num_components_old; ++i) {
+	for (i = 0; i < num_components_old; ++i)
+	{
 		future_facet_old[i].generate_facet(facet_new[i + num_components_new],
 				numFacets + num_components_new + i, iplane, //TODO. Это неверно!!!
 				numVertices, &edge_set);
 		facet_new[i + num_components_new].set_poly(this);
-		if (ifMultiComponent[i]) {
+		if (ifMultiComponent[i])
+		{
 			facet_new[i + num_components_new].set_rgb(0, 255, 0);
 			fprintf(stdout, "Multi-component: %d\n", i);
-		} else
+		}
+		else
 			facet_new[i + num_components_new].set_rgb(100, 0, 0);
 	}
 
@@ -295,14 +320,17 @@ void Polyhedron::intersect(
 //    }
 
 	j = 0;
-	for (i = 0; i < numFacets; ++i) {
-		if (ifSaveFacet[i]) {
+	for (i = 0; i < numFacets; ++i)
+	{
+		if (ifSaveFacet[i])
+		{
 			facet_res[j] = facets[i];
 			facet_res[j].set_id(j);
 			++j;
 		}
 	}
-	for (i = 0; i < numf_new; ++i) {
+	for (i = 0; i < numf_new; ++i)
+	{
 		facet_res[j] = facet_new[i];
 		facet_res[j].set_id(j);
 		++j;
@@ -318,7 +346,8 @@ void Polyhedron::intersect(
 	numv_new = edge_set.get_num();
 	Vector3d* vertex_new;
 	vertex_new = new Vector3d[numv_new];
-	for (i = 0; i < numv_new; ++i) {
+	for (i = 0; i < numv_new; ++i)
+	{
 		edge_set.get_edge(i, v0, v1);
 		vec0 = vertices[v0];
 		vec1 = vertices[v1];
@@ -333,7 +362,8 @@ void Polyhedron::intersect(
 #endif
 
 	numv_res = 0;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		numv_res += signum(vertices[i], iplane) >= 0;
 	}
 	numv_res += numv_new;
@@ -342,16 +372,19 @@ void Polyhedron::intersect(
 
 	int sign;
 	j = 0;
-	for (i = 0; i < numVertices; ++i) {
+	for (i = 0; i < numVertices; ++i)
+	{
 		sign = signum(vertices[i], iplane);
-		if (sign >= 0) {
+		if (sign >= 0)
+		{
 			vertex_res[j] = vertices[i];
 			for (k = 0; k < numf_res; ++k)
 				facet_res[k].find_and_replace_vertex(i, j);
 			++j;
 		}
 	}
-	for (i = 0; i < numv_new; ++i) {
+	for (i = 0; i < numv_new; ++i)
+	{
 		vertex_res[j] = vertex_new[i];
 		for (k = 0; k < numf_res; ++k)
 			facet_res[k].find_and_replace_vertex(numVertices + i, j);
@@ -367,8 +400,10 @@ void Polyhedron::intersect(
 	vertices = vertex_res;
 	facets = facet_res;
 
-	for (i = 0; i < numFacets; ++i) {
-		if (facets[i].numVertices < 1) {
+	for (i = 0; i < numFacets; ++i)
+	{
+		if (facets[i].numVertices < 1)
+		{
 			printf("===Facet %d is empty...\n", i);
 			for (j = i; j < numFacets - 1; ++j)
 				facets[j] = facets[j + 1];

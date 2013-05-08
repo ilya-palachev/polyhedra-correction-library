@@ -1,22 +1,14 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void test_deform(
-		const char* name,
-		int type,
-		int id,
-		Vector3d delta);
+void test_deform(const char* name, int type, int id, Vector3d delta);
 
-int main(
-		int argc,
-		char** argv) {
+int main(int argc, char** argv)
+{
 	test_deform("poly-tetrahedron", 0, 3, Vector3d(0, 0, 0.1));
 }
 
-void test_deform(
-		const char* name,
-		int type,
-		int id,
-		Vector3d delta) {
+void test_deform(const char* name, int type, int id, Vector3d delta)
+{
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
@@ -37,7 +29,8 @@ void test_deform(
 	sprintf(file_name_in, "../poly-data-in/%s.dat", name);
 	sprintf(file_name_out0, "../poly-data-out/%s.ply", name);
 
-	switch (type) {
+	switch (type)
+	{
 	case 0:
 		poly.fscan_default_0(file_name_in);
 		break;
@@ -72,8 +65,9 @@ void test_deform(
 	tm* timeinfo = localtime(&seconds);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
-			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
-			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, id);
+			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
+			timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min,
+			timeinfo->tm_sec, id);
 
 	poly.fprint_ply_scale(1000., file_name_out,
 			"made-by-Polyhedron_join_facets_2");

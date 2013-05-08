@@ -7,39 +7,38 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 TreeClusterNormNode::TreeClusterNormNode() :
-				cluster(NULL),
-				parent(NULL),
-				child0(NULL),
-				child1(NULL) {
+		cluster(NULL), parent(NULL), child0(NULL), child1(NULL)
+{
 }
 
-TreeClusterNormNode::TreeClusterNormNode(
-		const TreeClusterNormNode& orig) :
-				cluster(orig.cluster),
-				parent(orig.parent),
-				child0(orig.child0),
-				child1(orig.child1) {
+TreeClusterNormNode::TreeClusterNormNode(const TreeClusterNormNode& orig) :
+		cluster(orig.cluster), parent(orig.parent), child0(orig.child0), child1(
+				orig.child1)
+{
 }
 
-TreeClusterNormNode::~TreeClusterNormNode() {
+TreeClusterNormNode::~TreeClusterNormNode()
+{
 }
 
-void TreeClusterNormNode::fprint(
-		FILE* file,
-		int level) {
+void TreeClusterNormNode::fprint(FILE* file, int level)
+{
 
 //    if (level > 10)
 //        return;
 
-	for (int i = 0; i < level; ++i) {
+	for (int i = 0; i < level; ++i)
+	{
 		fprintf(file, " ");
 	}
 	cluster->fprint(file);
 	fprintf(file, "\n");
-	if (child0 != NULL) {
+	if (child0 != NULL)
+	{
 		child0->fprint(file, level + 1);
 	}
-	if (child1 != NULL) {
+	if (child1 != NULL)
+	{
 		child1->fprint(file, level + 1);
 	}
 }
@@ -72,26 +71,31 @@ void TreeClusterNormNode::fprint(
 //    }
 //}
 
-void TreeClusterNormNode::fprint_dendrogramma_lev(
-		FILE* file,
-		int level,
-		int fix) {
-	if (level > fix) {
+void TreeClusterNormNode::fprint_dendrogramma_lev(FILE* file, int level,
+		int fix)
+{
+	if (level > fix)
+	{
 		return;
 	}
 
 	int numLeft = child0->cluster->num;
 	int numRight = child1->cluster->num;
 
-	if (level == fix) {
+	if (level == fix)
+	{
 		fprintf(file, "|___");
-		for (int i = 1; i < numLeft; ++i) {
+		for (int i = 1; i < numLeft; ++i)
+		{
 			fprintf(file, "____");
 		}
-		for (int i = 0; i < numRight; ++i) {
+		for (int i = 0; i < numRight; ++i)
+		{
 			fprintf(file, "    ");
 		}
-	} else {
+	}
+	else
+	{
 		child0->fprint_dendrogramma_lev(file, level + 1, fix);
 		child1->fprint_dendrogramma_lev(file, level + 1, fix);
 	}

@@ -8,7 +8,8 @@
 #ifndef CLUSTERNORM_H
 #define CLUSTERNORM_H
 
-class ClusterNorm {
+class ClusterNorm
+{
 public:
 	int num;
 	int numMax;
@@ -16,42 +17,26 @@ public:
 	int* indexFacet;
 	Polyhedron* poly;
 
-	ClusterNorm& operator+=(
-			ClusterNorm& cluster0);
-	ClusterNorm& operator=(
-			const ClusterNorm& orig);
+	ClusterNorm& operator+=(ClusterNorm& cluster0);
+	ClusterNorm& operator=(const ClusterNorm& orig);
 
 	ClusterNorm();
-	ClusterNorm(
-			int num_orig,
-			int numMax_orig,
-			SpherePoint P_orig,
+	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 			Polyhedron* poly_orig);
-	ClusterNorm(
-			int num_orig,
-			int numMax_orig,
-			SpherePoint P_orig,
-			int* indexFacet_orig,
-			Polyhedron* poly_orig);
-	ClusterNorm(
-			const ClusterNorm& orig);
+	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
+			int* indexFacet_orig, Polyhedron* poly_orig);
+	ClusterNorm(const ClusterNorm& orig);
 
 	double area();
 	~ClusterNorm();
 
-	void fprint(
-			FILE* file);
-	void setColor(
-			char red,
-			char green,
-			char blue);
+	void fprint(FILE* file);
+	void setColor(char red, char green, char blue);
 
 private:
 
 };
 
-double distCluster(
-		ClusterNorm& cluster0,
-		ClusterNorm& cluster1);
+double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
 
 #endif /* CLUSTERNORM_H */

@@ -1,6 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-TreeClusterNorm& Polyhedron::build_TreeClusterNorm() {
+TreeClusterNorm& Polyhedron::build_TreeClusterNorm()
+{
 
 //    my_fprint(stdout);
 
@@ -17,7 +18,8 @@ TreeClusterNorm& Polyhedron::build_TreeClusterNorm() {
 	nodeArray = new TreeClusterNormNode[numFacets];
 	newIndex = new int[1];
 
-	for (int i = 0; i < numFacets; ++i) {
+	for (int i = 0; i < numFacets; ++i)
+	{
 //        printf("norm[%d] = %lf\n", i, sqrt(qmod(facets[i].plane.norm)) );
 		spherePoint = SpherePoint(facets[i].plane.norm);
 		newIndex[0] = i;
@@ -28,7 +30,8 @@ TreeClusterNorm& Polyhedron::build_TreeClusterNorm() {
 
 //        nodeArray[i].fprint(stdout, 0);
 	}
-	for (int i = 0; i < numFacets; ++i) {
+	for (int i = 0; i < numFacets; ++i)
+	{
 //        nodeArray[i].fprint(stdout, 0);
 	}
 
@@ -39,9 +42,11 @@ TreeClusterNorm& Polyhedron::build_TreeClusterNorm() {
 	matrix.fprint_clusters(stdout, nodeArray);
 
 	int id0, id1;
-	for (int i = 0; i < numFacets - 1; ++i) {
+	for (int i = 0; i < numFacets - 1; ++i)
+	{
 		printf("---------------------------------------------------------\n");
-		printf("-----------------------    %d    ------------------------\n", i);
+		printf("-----------------------    %d    ------------------------\n",
+				i);
 		printf("---------------------------------------------------------\n");
 
 		matrix.fprint_ifStay(stdout);
@@ -96,9 +101,9 @@ TreeClusterNorm& Polyhedron::build_TreeClusterNorm() {
 	return *tree;
 }
 
-void Polyhedron::giveClusterNodeArray(
-		TreeClusterNormNode* nodeArray,
-		MatrixDistNorm& matrix) {
+void Polyhedron::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
+		MatrixDistNorm& matrix)
+{
 //    my_fprint(stdout);
 
 	int* newIndex;
@@ -114,7 +119,8 @@ void Polyhedron::giveClusterNodeArray(
 	//nodeArray = new TreeClusterNormNode[numFacets];
 	newIndex = new int[1];
 
-	for (int i = 0; i < numFacets; ++i) {
+	for (int i = 0; i < numFacets; ++i)
+	{
 //        printf("norm[%d] = %lf\n", i, sqrt(qmod(facet[i].plane.norm)) );
 		spherePoint = SpherePoint(facets[i].plane.norm);
 		newIndex[0] = i;
@@ -125,7 +131,8 @@ void Polyhedron::giveClusterNodeArray(
 
 //        nodeArray[i].fprint(stdout, 0);
 	}
-	for (int i = 0; i < numFacets; ++i) {
+	for (int i = 0; i < numFacets; ++i)
+	{
 //        nodeArray[i].fprint(stdout, 0);
 	}
 
@@ -136,9 +143,11 @@ void Polyhedron::giveClusterNodeArray(
 //    matrix.fprint_clusters(stdout, nodeArray);
 
 	int id0, id1;
-	for (int i = 0; i < numFacets - 1; ++i) {
+	for (int i = 0; i < numFacets - 1; ++i)
+	{
 		printf("---------------------------------------------------------\n");
-		printf("-----------------------    %d    ------------------------\n", i);
+		printf("-----------------------    %d    ------------------------\n",
+				i);
 		printf("---------------------------------------------------------\n");
 
 		//matrix.fprint_ifStay(stdout);
@@ -193,14 +202,15 @@ void Polyhedron::giveClusterNodeArray(
 //    return *tree;
 }
 
-void Polyhedron::reClusterNodeArray(
-		TreeClusterNormNode* nodeArray_in,
-		MatrixDistNorm& matrix_in,
-		TreeClusterNormNode* nodeArray_out,
-		MatrixDistNorm& matrix_out) {
+void Polyhedron::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
+		MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
+		MatrixDistNorm& matrix_out)
+{
 	int numCluster = 0;
-	for (int i = 0; i < matrix_in.n; ++i) {
-		if (matrix_in.ifStay[i]) {
+	for (int i = 0; i < matrix_in.n; ++i)
+	{
+		if (matrix_in.ifStay[i])
+		{
 			++numCluster;
 		}
 	}
@@ -221,19 +231,23 @@ void Polyhedron::reClusterNodeArray(
 
 	newIndex = new int[1];
 
-	for (int i = 0; i < matrix_in.n; ++i) {
+	for (int i = 0; i < matrix_in.n; ++i)
+	{
 		nodeArray_out[i].cluster = new ClusterNorm;
 	}
 
-	for (int i = 0; i < numFacets; i++) {
+	for (int i = 0; i < numFacets; i++)
+	{
 //        printf("Trying to find nearest cluster for facet %d\n", i);
 
 		SpherePoint FacetNorm(facets[i].plane.norm);
 		double minDistPoint = 1000000;
 		position = -1;
-		for (int j = 0; j < numCluster; j++) {
+		for (int j = 0; j < numCluster; j++)
+		{
 			double tmpdist = dist(FacetNorm, nodeArray_in[j].cluster->P);
-			if (tmpdist < minDistPoint) {
+			if (tmpdist < minDistPoint)
+			{
 				minDistPoint = tmpdist;
 				position = j;
 			}
@@ -253,19 +267,24 @@ void Polyhedron::reClusterNodeArray(
 //        nodeArray_out[position].cluster->fprint(stdout);
 //        printf("\n");
 
-		if (nodeArray_out[position].cluster->num == 0) {
+		if (nodeArray_out[position].cluster->num == 0)
+		{
 			nodeArray_out[position].cluster = newCluster;
-		} else {
+		}
+		else
+		{
 			*(nodeArray_out[position].cluster) += *newCluster;
 		}
 //        printf("End of step %d\n", i);
 
 	}
 
-	for (int i = 0; i < numCluster; i++) {
+	for (int i = 0; i < numCluster; i++)
+	{
 		matrix_out.ifStay[i] = true;
 	}
-	for (int i = numCluster + 1; i < matrix_in.n; i++) {
+	for (int i = numCluster + 1; i < matrix_in.n; i++)
+	{
 		matrix_out.ifStay[i] = false;
 	}
 
