@@ -125,46 +125,6 @@ double Polyhedron::corpol_weightForAssociation(int iFacet, int iContour)
 	return weightForAssociations(normalToFacet * directionOfProjection);
 }
 
-double Polyhedron::corpol_visibilityForAssociation(int iContour, int iEdge)
-{
-	int f0 = edges[iEdge].f0;
-	int f1 = edges[iEdge].f1;
-	Vector3d norm0 = facets[f0].plane.norm;
-	norm0.norm(1.);
-	Vector3d norm1 = facets[f1].plane.norm;
-	norm1.norm(1.);
-	Vector3d directionOfProjection = contours[iContour].plane.norm;
-	directionOfProjection.norm(1.);
-	double x = norm0 * directionOfProjection;
-	DEBUG_PRINT("x = %lf", x);
-	double y = norm1 * directionOfProjection;
-	DEBUG_PRINT("y = %lf", y);
-	double sum = y + x;
-	double sub = y - x;
-	if (sum >= 0)
-	{
-		if (sub >= 0)
-		{
-			return -x;
-		}
-		else
-		{
-			return -y;
-		}
-	}
-	else
-	{
-		if (sub >= 0)
-		{
-			return y;
-		}
-		else
-		{
-			return x;
-		}
-	}
-}
-
 const double EPSILON_MIN_AREA_ABS = 1e-4;
 const double EPSILON_MIN_AREA_REL = 1e-2;
 
@@ -258,11 +218,25 @@ int Polyhedron::corpol_prepAssociator_checkVisibility(int iContour, int iFacet,
 		int iEdge)
 {
 	DEBUG_START;
-	double visibilityNumber = corpol_visibilityForAssociation(iContour, iEdge);
-	if (visibilityNumber < EPSILON_EDGE_CONTOUR_VISIBILITY)
+	int f0 = edges[iEdge].f0;
+	int f1 = edges[iEdge].f1;
+	Vector3d norm0 = facets[f0].plane.norm;
+	norm0.norm(1.);
+	Vector3d norm1 = facets[f1].plane.norm;
+	norm1.norm(1.);
+	Vector3d directionOfProjection = contours[iContour].plane.norm;
+	directionOfProjection.norm(1.);
+	double x = norm0 * directionOfProjection;
+	double y = norm1 * directionOfProjection;
+	double polarAngle = atan2(y, x);
+	bool quadrant1 = -EPSILON_EDGE_CONTOUR_VISIBILITY < polarAngle
+				&& polarAngle < 0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
+	bool quadrant3 = M_PI - EPSILON_EDGE_CONTOUR_VISIBILITY < polarAngle
+				&& polarAngle < 1.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
+	if (quadrant1 || quadrant3)
 	{
-		DEBUG_PRINT("Edge is invisible on this contour (visibility %lf)!",
-				visibilityNumber);
+		DEBUG_PRINT("Edge is invisible on this contour (polar angle %lf)!",
+				polarAngle);
 		return EXIT_FAILURE;
 	}
 	DEBUG_END;
@@ -273,7 +247,7 @@ int Polyhedron::corpol_prepAssociator_checkAlreadyAdded(int iContour,
 		int iFacet, int iEdge)
 {
 	DEBUG_START;
-	// Check whether this association has been already added to the list
+// Check whether this association has been already added to the list
 	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
 	list<EdgeContourAssociation>::iterator lastCont =
 			edges[iEdge].assocList.end();

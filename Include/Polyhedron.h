@@ -3,7 +3,7 @@
 
 const int INT_NOT_INITIALIZED = -RAND_MAX;
 
-const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-3;
+const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-16;
 const double EPS_SIGNUM = 1e-15;
 const double EPS_COLLINEARITY = 1e-14;
 const double EPS_SAME_POINTS = 1e-16;
@@ -20,6 +20,8 @@ const double EPSILON_FOR_DIVISION = 1e-16;
 const double POROG = 0.5;
 
 const double ASSOCIATOR_MIN_PORTION_REL = 0.1;
+
+const double THRESHOLD_ESSENTIAL_ASSOCIATION = 0.1;
 
 enum Orientation
 {
@@ -248,8 +250,6 @@ public:
 			int iFacet, Polyhedron* polyhedronTmp);
 
 	double corpol_weightForAssociation(int iContour, int iFacet);
-
-	double corpol_visibilityForAssociation(int iContour, int iEdge);
 
 	void corpol_prepAssociator(int iContour, int iFacet, int iEdge,
 			Polyhedron* polyhedronTmp);
