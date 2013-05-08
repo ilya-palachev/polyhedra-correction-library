@@ -4,7 +4,14 @@ void Polyhedron::corpol_derivativeTest_all(Plane* prevPlanes, double* matrix,
 		list<int>* facetsNotAssociated)
 {
 	corpol_derivativeTest_1(prevPlanes, matrix, facetsNotAssociated);
-	corpol_derivativeTest_2(prevPlanes, matrix, facetsNotAssociated);
+
+	/* We have disabled 2nd derivative testing, since it never
+	 * produces any useful output, but only errors.
+	 * This is caused with the fact that there is not enough
+	 * machine precision to calculate exact 2nd derivative
+	 * numerically
+	 */
+//	corpol_derivativeTest_2(prevPlanes, matrix, facetsNotAssociated);
 }
 
 void Polyhedron::corpol_derivativeTest_1(Plane* prevPlanes, double* matrix,
