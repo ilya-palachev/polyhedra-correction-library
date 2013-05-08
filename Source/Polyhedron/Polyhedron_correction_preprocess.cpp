@@ -230,17 +230,23 @@ int Polyhedron::corpol_prepAssociator_checkVisibility(int iContour, int iFacet,
 	double y = norm1 * directionOfProjection;
 	double polarAngle = atan2(y, x);
 	bool quadrant1 = -EPSILON_EDGE_CONTOUR_VISIBILITY < polarAngle
-				&& polarAngle < 0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
-	bool quadrant3 = M_PI - EPSILON_EDGE_CONTOUR_VISIBILITY < polarAngle
-				&& polarAngle < 1.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
+			&& polarAngle < 0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
+	bool quadrant3 = polarAngle > M_PI - EPSILON_EDGE_CONTOUR_VISIBILITY
+			|| polarAngle < -0.5 * M_PI + EPSILON_EDGE_CONTOUR_VISIBILITY;
 	if (quadrant1 || quadrant3)
 	{
-		DEBUG_PRINT("Edge is invisible on this contour (polar angle %lf)!",
+		DEBUG_PRINT("Edge is INVISIBLE on this contour (polar angle %lf)!",
 				polarAngle);
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
-	DEBUG_END;
-	return EXIT_SUCCESS;
+	else
+	{
+		DEBUG_PRINT("Edge is visible on this contour (polar angle %lf)!",
+				polarAngle);
+		DEBUG_END;
+		return EXIT_SUCCESS;
+	}
 }
 
 int Polyhedron::corpol_prepAssociator_checkAlreadyAdded(int iContour,
