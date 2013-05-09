@@ -249,7 +249,7 @@ public:
 	void corpol_prepFindAssociations_withContour_forFacet(int iContour,
 			int iFacet, Polyhedron* polyhedronTmp);
 
-	double corpol_weightForAssociation(int iContour, int iFacet);
+	double corpol_weightForAssociation(int iContour, int iEdge);
 
 	void corpol_prepAssociator(int iContour, int iFacet, int iEdge,
 			Polyhedron* polyhedronTmp);
@@ -257,6 +257,8 @@ public:
 	inline int corpol_prepAssociator_init(int iContour, int iFacet, int iEdge,
 			Polyhedron* polyhedronTmp, Vector3d& v0_projected,
 			Vector3d& v1_projected);
+
+	double corpol_prepAssociator_visibility(int iContour, int iEdge);
 
 	int corpol_prepAssociator_checkVisibility(int iContour, int iFacet,
 			int iEdge);
