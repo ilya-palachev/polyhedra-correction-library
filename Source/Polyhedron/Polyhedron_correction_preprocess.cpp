@@ -368,23 +368,25 @@ double Polyhedron::corpol_prepAssociator_calcArea(int iContour,
 	int numPairsToBeAdded;
 	int iStep;
 
+	int numLeft = (numSides + iSideDistMin1 - iSideDistMin0) % numSides;
+
 	switch (orientation)
 	{
 	case ORIENTATION_LEFT:
+		DEBUG_PRINT("ORIENTATION_LEFT");
 		fPart = FACET_LEFT;
 		iStep = -1;
-		numPairsToBeAdded = (numSides + iSideDistMin1 - iSideDistMin0)
-				% numSides;
+		numPairsToBeAdded = numLeft + 1;
 		break;
 	case ORIENTATION_RIGHT:
+		DEBUG_PRINT("ORIENTATION_RIGHT");
 		fPart = FACET_RIGHT;
 		iStep = 1;
-		numPairsToBeAdded = (numSides + iSideDistMin0 - iSideDistMin1)
-				% numSides;
+		numPairsToBeAdded = numSides - numLeft + 1;
 		break;
 	}
 
-	numVerticesFacet = 2 * numPairsToBeAdded + 2;
+	numVerticesFacet = 2 * numPairsToBeAdded;
 	DEBUG_PRINT("numVerticesFacet = %d", numVerticesFacet);
 	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet,
 			contours[iContour].plane, polyhedronTmp);
@@ -394,16 +396,17 @@ double Polyhedron::corpol_prepAssociator_calcArea(int iContour,
 
 	int iBegin = iSideDistMin1;
 	int iEnd = iSideDistMin0;
-	int iPairsAdded = 1;
 
 	DEBUG_PRINT("iStep = %d", iStep);
 	DEBUG_PRINT("iBegin = %d", iBegin);
 	DEBUG_PRINT("iEnd = %d", iEnd);
 	DEBUG_PRINT("iSideDistMin0 = %d", iSideDistMin0);
 	DEBUG_PRINT("iSideDistMin1 = %d", iSideDistMin1);
+	DEBUG_PRINT("numPairsToBeAdded = %d", numPairsToBeAdded);
 
-	for (int iSide = iBegin; iSide != iEnd;
-			iSide = (numSides + iSide + iStep) % numSides)
+	int iSide = iBegin;
+
+	for (int iPairsAdded = 1; iPairsAdded < numPairsToBeAdded; ++iPairsAdded)
 	{
 		int iAdded0, iAdded1;
 		if (iStep == 1)
@@ -419,7 +422,7 @@ double Polyhedron::corpol_prepAssociator_calcArea(int iContour,
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded, iAdded0);
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded + 1,
 				iAdded1);
-		++iPairsAdded;
+		iSide = (numSides + iSide + iStep) % numSides;
 	}
 	DEBUG_END;
 	return fabs(polyhedronTmp->facets[fPart].area());
