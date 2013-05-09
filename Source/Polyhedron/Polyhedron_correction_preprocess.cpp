@@ -409,15 +409,16 @@ double Polyhedron::corpol_prepAssociator_calcArea(int iContour,
 	for (int iPairsAdded = 1; iPairsAdded < numPairsToBeAdded; ++iPairsAdded)
 	{
 		int iAdded0, iAdded1;
-		if (iStep == 1)
+		switch (orientation)
 		{
+		case ORIENTATION_LEFT:
+			iAdded0 = 2 * iSide;
+			iAdded1 = 2 * iSide - 1;
+			break;
+		case ORIENTATION_RIGHT:
 			iAdded0 = 2 * iSide + 1;
 			iAdded1 = 2 * iSide + 2;
-		}
-		else
-		{
-			iAdded0 = 2 * iSide + 2;
-			iAdded1 = 2 * iSide + 1;
+			break;
 		}
 		iAdded0 %= numVerticesTmp;
 		iAdded1 %= numVerticesTmp;
