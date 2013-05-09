@@ -125,8 +125,8 @@ double Polyhedron::corpol_weightForAssociation(int iFacet, int iContour)
 	return weightForAssociations(normalToFacet * directionOfProjection);
 }
 
-const double EPSILON_MIN_AREA_ABS = 1e-4;
-const double EPSILON_MIN_AREA_REL = 1e-2;
+const double EPSILON_MIN_AREA_ABS = 1e-3;
+const double EPSILON_MIN_AREA_REL = 0.2;
 
 void Polyhedron::corpol_prepAssociator(int iContour, int iFacet, int iEdge,
 		Polyhedron* polyhedronTmp)
@@ -419,6 +419,9 @@ double Polyhedron::corpol_prepAssociator_calcArea(int iContour,
 			iAdded0 = 2 * iSide + 2;
 			iAdded1 = 2 * iSide + 1;
 		}
+		iAdded0 %= numVerticesTmp;
+		iAdded1 %= numVerticesTmp;
+
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded, iAdded0);
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded + 1,
 				iAdded1);
