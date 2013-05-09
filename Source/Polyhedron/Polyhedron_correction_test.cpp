@@ -97,6 +97,28 @@ SContour& Polyhedron::corpolTest_createOneContour(int idOfContour,
 	visibleEdgesSorted[numVisibleEdgesSorted++] = visibleEdges[iedgeCurr];
 	int ivertexCurr = edges[visibleEdges[iedgeCurr]].v1;
 	int numIterations = 0;
+
+	/*
+	 * We need to have sequences of sides like the following:
+	 *    a0   a1
+	 *    a1   a2
+	 *    a2   a3
+	 *    a3   a0
+	 * But if we don't ensure that a1 is always followed by a1,
+	 * and a2 with a2, and so on, there can arise the following
+	 * non-correct contours:
+	 *    a0   a1
+	 *    a1   a2
+	 *    a3   a2
+	 *    a0   a3
+	 * To avoid such situation we must remember whether to reverse
+	 * the order of vertices of the edge, during its detection.
+	 */
+	bool* ifEdgeShouldBeReversed = bufferBool;
+
+	// First edge is always not reversed:
+	ifEdgeShouldBeReversed[visibleEdgesSorted[0]] = false;
+
 	while (numVisibleEdgesSorted < numVisibleEdges)
 	{
 		DEBUG_PRINT("Searching next edge for edge # %d (%d, %d)", iedgeCurr,
@@ -118,16 +140,20 @@ SContour& Polyhedron::corpolTest_createOneContour(int idOfContour,
 			{
 				iedgeCurr = iedgeNext;
 				ivertexCurr = edges[visibleEdges[iedgeCurr]].v1;
-				visibleEdgesSorted[numVisibleEdgesSorted++] =
+				visibleEdgesSorted[numVisibleEdgesSorted] =
 						visibleEdges[iedgeCurr];
+				ifEdgeShouldBeReversed[numVisibleEdgesSorted] = false;
+				++numVisibleEdgesSorted;
 				break;
 			}
 			else if (edges[visibleEdges[iedgeNext]].v1 == ivertexCurr)
 			{
 				iedgeCurr = iedgeNext;
 				ivertexCurr = edges[visibleEdges[iedgeCurr]].v0;
-				visibleEdgesSorted[numVisibleEdgesSorted++] =
+				visibleEdgesSorted[numVisibleEdgesSorted] =
 						visibleEdges[iedgeCurr];
+				ifEdgeShouldBeReversed[numVisibleEdgesSorted] = true;
+				++numVisibleEdgesSorted;
 				break;
 			}
 		}
@@ -157,8 +183,17 @@ SContour& Polyhedron::corpolTest_createOneContour(int idOfContour,
 
 	for (int i = 0; i < numVisibleEdges; ++i)
 	{
-		Vector3d A1 = vertices[edges[visibleEdgesSorted[i]].v0];
-		Vector3d A2 = vertices[edges[visibleEdgesSorted[i]].v1];
+		Vector3d A1, A2;
+		if (ifEdgeShouldBeReversed[i])
+		{
+			A1 = vertices[edges[visibleEdgesSorted[i]].v1];
+			A2 = vertices[edges[visibleEdgesSorted[i]].v0];
+		}
+		else
+		{
+			A1 = vertices[edges[visibleEdgesSorted[i]].v0];
+			A2 = vertices[edges[visibleEdgesSorted[i]].v1];
+		}
 
 		A1 = planeOfProjection.project(A1);
 		A2 = planeOfProjection.project(A2);
