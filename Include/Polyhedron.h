@@ -198,12 +198,10 @@ public:
 
 	double corpol_calculate_functional(Plane* prevPlanes);
 
-	int corpol_iteration(int dim, Plane* prevPlanes, double* matrix,
-			double* rightPart, double* solution, double* matrixFactorized,
-			int* indexPivot, list<int>* facetsNotAssociated);
+	void corpol_iteration(int dim, Plane* prevPlanes, double* gradient,
+			list<int>* facetsNotAssociated);
 
-	void corpol_calculate_matrix(int dim, Plane* prevPlanes, double* matrix,
-			double* rightPart, double* solution,
+	void corpol_calculate_gradient(int dim, Plane* prevPlanes, double* gradient,
 			list<int>* facetsNotAssociated);
 
 	// Polyhedron_correction_derivativeTest.cpp

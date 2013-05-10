@@ -10,10 +10,6 @@
 const double EPS_MAX_ERROR = 1e-6;
 const double EPS_FOR_PRINT = 1e-15;
 
-void print_matrix2(FILE* file, int nrow, int ncol, double* a);
-
-static FILE* fout;
-
 int Polyhedron::correct_polyhedron()
 {
 	DEBUG_START;
@@ -21,8 +17,6 @@ int Polyhedron::correct_polyhedron()
 	fprintf(stdout, COLOUR_MAGENTA);
 	my_fprint(stdout);
 	fprintf(stdout, COLOUR_WHITE);
-
-	fout = (FILE*) fopen("corpol_matrix_dbg.txt", "w");
 
 	int numEdges;
 	Edge* edges = NULL;
@@ -39,16 +33,11 @@ int Polyhedron::correct_polyhedron()
 	}
 #endif
 
-		int numFacetsNotAssociated = facetsNotAssociated->size();
+	int numFacetsNotAssociated = facetsNotAssociated->size();
 	int dim = (numFacets - numFacetsNotAssociated) * 5;
 
-	double * matrix = new double[dim * dim];
-	double * matrixFactorized = new double[dim * dim];
-	double * rightPart = new double[dim];
-	double * solution = new double[dim];
-	int * indexPivot = new int[dim];
-
-	Plane * prevPlanes = new Plane[numFacets];
+	double* gradient = new double[dim * dim];
+	Plane* prevPlanes = new Plane[numFacets];
 
 	DEBUG_PRINT("memory allocation done");
 
@@ -59,9 +48,6 @@ int Polyhedron::correct_polyhedron()
 	DEBUG_PRINT("memory initialization done");
 
 	double error = corpol_calculate_functional(prevPlanes);
-	corpol_calculate_matrix(dim, prevPlanes, matrix, rightPart, solution,
-			facetsNotAssociated);
-	print_matrix2(fout, dim, dim, matrix);
 
 	DEBUG_PRINT("first functional calculation done. error = %e", error);
 
@@ -78,8 +64,8 @@ int Polyhedron::correct_polyhedron()
 		this->my_fprint(fileName);
 		delete[] fileName;
 
-		int ret = corpol_iteration(dim, prevPlanes, matrix, rightPart, solution,
-				matrixFactorized, indexPivot, facetsNotAssociated);
+		corpol_iteration(dim, prevPlanes, gradient,
+				facetsNotAssociated);
 		for (int i = 0; i < numFacets; ++i)
 		{
 			DEBUG_PRINT(
@@ -94,34 +80,12 @@ int Polyhedron::correct_polyhedron()
 		DEBUG_PRINT("error = %le", error);
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
 		++numIterations;
-
-		if (ret != 0)
-		{
-			break;
-		}
 	}
 
-	fclose(fout);
-
-	if (matrix != NULL)
+	if (gradient != NULL)
 	{
-		delete[] matrix;
-		matrix = NULL;
-	}
-	if (matrixFactorized != NULL)
-	{
-		delete[] matrixFactorized;
-		matrixFactorized = NULL;
-	}
-	if (rightPart != NULL)
-	{
-		delete[] rightPart;
-		rightPart = NULL;
-	}
-	if (solution != NULL)
-	{
-		delete[] solution;
-		solution = NULL;
+		delete[] gradient;
+		gradient = NULL;
 	}
 	DEBUG_END;
 	return 0;
@@ -213,71 +177,13 @@ double Polyhedron::corpol_calculate_functional(Plane* prevPlanes)
 	return sum;
 }
 
-int Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* matrix,
-		double* rightPart, double* solution, double* matrixFactorized,
-		int* indexPivot, list<int>* facetsNotAssociated)
+const double DEFAULT_GRADIENT_STEP = 1e-4;
+
+void Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* gradient,
+		list<int>* facetsNotAssociated)
 {
 	DEBUG_START;
-	corpol_calculate_matrix(dim, prevPlanes, matrix, rightPart, solution,
-			facetsNotAssociated);
-	print_matrix2(fout, dim, dim, matrix);
-
-#ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
-	// Test the calculated matrix by the method of
-	// numerical calculation of first derivatives
-	// of the functional
-	corpol_derivativeTest_all(prevPlanes, matrix, facetsNotAssociated);
-#endif
-
-	lapack_int dimLapack = dim;
-	lapack_int nrhs = 1;
-	lapack_int lda = dim;
-	lapack_int ldaf = dim;
-	lapack_int ldb = 1;
-	lapack_int ldx = 1;
-	lapack_int info;
-	double reciprocalToConditionalNumber;
-	double forwardErrorBound;
-	double relativeBackwardError;
-
-	info = LAPACKE_dsysvx(LAPACK_ROW_MAJOR, 'N', 'U', dimLapack, nrhs, matrix,
-			lda, matrixFactorized, ldaf, indexPivot, rightPart, ldb, solution,
-			ldx, &reciprocalToConditionalNumber, &forwardErrorBound,
-			&relativeBackwardError);
-
-	if (info == 0)
-	{
-		DEBUG_PRINT("LAPACKE_dsysvx: successful exit");
-	}
-	else if (info < 0)
-	{
-		DEBUG_PRINT("LAPACKE_dsysvx: the %d-th argument had an illegal value",
-				-info);
-	}
-	else if (info <= dim)
-	{
-		DEBUG_PRINT("LAPACKE_dsysvx: D(%d,%d) is exactly zero.", info, info);
-		DEBUG_PRINT(
-				"The factorization has been completed but the factor D is ");
-		DEBUG_PRINT("exactly singular, so the solution and error bounds could");
-		DEBUG_PRINT("not be computed. RCOND = 0 is returned.");
-	}
-	else if (info == dim + 1)
-	{
-		DEBUG_PRINT("LAPACKE_dsysvx: D is non-singular, but RCOND is ");
-		DEBUG_PRINT("less than machine");
-		DEBUG_PRINT("precision, meaning that the matrix is singular");
-		DEBUG_PRINT("to working precision.  Nevertheless, the");
-		DEBUG_PRINT("solution and error bounds are computed because");
-		DEBUG_PRINT("there are a number of situations where the");
-		DEBUG_PRINT("computed solution can be more accurate than the");
-		DEBUG_PRINT("value of RCOND would suggest.");
-
-	}
-	else
-	{
-		DEBUG_PRINT("LAPACKE_dsysvx: FATAL. Unknown output value");
-	}
+	corpol_calculate_gradient(dim, prevPlanes, gradient, facetsNotAssociated);
 
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
@@ -291,29 +197,29 @@ int Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* matrix,
 			continue;
 		}
 		int iFacetShifted = iFacet - countNotAssociated;
-		facets[iFacet].plane.norm.x = solution[5 * iFacetShifted];
-		facets[iFacet].plane.norm.y = solution[5 * iFacetShifted + 1];
-		facets[iFacet].plane.norm.z = solution[5 * iFacetShifted + 2];
-		facets[iFacet].plane.dist = solution[5 * iFacetShifted + 3];
+		facets[iFacet].plane.norm.x -= DEFAULT_GRADIENT_STEP
+				* gradient[4 * iFacetShifted];
+		facets[iFacet].plane.norm.y -= DEFAULT_GRADIENT_STEP
+				* gradient[4 * iFacetShifted + 1];
+		facets[iFacet].plane.norm.z -= DEFAULT_GRADIENT_STEP
+				* gradient[4 * iFacetShifted + 2];
+		facets[iFacet].plane.dist -= DEFAULT_GRADIENT_STEP
+				* gradient[4 * iFacetShifted + 3];
+		double norm = sqrt(qmod(facets[iFacet].plane.norm));
+		facets[iFacet].plane.norm.norm(1.);
+		facets[iFacet].plane.dist /= norm;
 	}
 
 	DEBUG_END;
-	return info;
 }
 
-void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
-		double* matrix, double* rightPart, double* solution,
-		list<int>* facetsNotAssociated)
+void Polyhedron::corpol_calculate_gradient(int dim, Plane* prevPlanes,
+		double* gradient, list<int>* facetsNotAssociated)
 {
 	DEBUG_START;
 	for (int i = 0; i < dim * dim; ++i)
 	{
-		matrix[i] = 0.;
-	}
-
-	for (int i = 0; i < dim; ++i)
-	{
-		rightPart[i] = 0.;
+		gradient[i] = 0.;
 	}
 
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
@@ -330,40 +236,31 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 		int iFacetShifted = iFacet - countNotAssociated;
 
 		int nv = facets[iFacet].numVertices;
-		int * index = facets[iFacet].indVertices;
+		int *index = facets[iFacet].indVertices;
 
 		Plane planePrevThis = prevPlanes[iFacet];
 
-		int i_ak_ak = dim * 5 * iFacetShifted + 5 * iFacetShifted;
-		int i_bk_ak = i_ak_ak + dim;
-		int i_ck_ak = i_ak_ak + 2 * dim;
-		int i_dk_ak = i_ak_ak + 3 * dim;
-		int i_lk_ak = i_ak_ak + 4 * dim;
+		int i_ak = 4 * iFacetShifted;
+		int i_bk = i_ak + 1;
+		int i_ck = i_ak + 2;
+		int i_dk = i_ak + 3;
 
-		matrix[i_lk_ak] = 0.5 * planePrevThis.norm.x;
-		matrix[i_lk_ak + 1] = 0.5 * planePrevThis.norm.y;
-		matrix[i_lk_ak + 2] = 0.5 * planePrevThis.norm.z;
-		matrix[i_lk_ak + 3] = matrix[i_lk_ak + 4] = 0.;
-		rightPart[5 * iFacetShifted + 4] = 1.;
-
-		matrix[i_ak_ak + 4] = 0.5 * planePrevThis.norm.x;
-		matrix[i_bk_ak + 4] = 0.5 * planePrevThis.norm.y;
-		matrix[i_ck_ak + 4] = 0.5 * planePrevThis.norm.z;
+		double ak = planePrevThis.norm.x;
+		double bk = planePrevThis.norm.y;
+		double ck = planePrevThis.norm.z;
+		double dk = planePrevThis.dist;
 
 		for (int iEdge = 0; iEdge < nv; ++iEdge)
 		{
 			int v0 = index[iEdge];
 			int v1 = index[iEdge + 1];
 			int iFacetNeighbour = index[nv + 1 + iEdge];
-			int iFacetNeighbourShifted = iFacetNeighbour - countNotAssociated;
-
-			int i_ak_an = dim * 5 * iFacetShifted + 5 * iFacetNeighbourShifted;
-			int i_bk_an = i_ak_an + dim;
-			int i_ck_an = i_ak_an + 2 * dim;
-			int i_dk_an = i_ak_an + 3 * dim;
-			__attribute__((unused)) int i_lk_an = i_ak_an + 4 * dim;
 
 			Plane planePrevNeighbour = prevPlanes[iFacetNeighbour];
+			double an = planePrevNeighbour.norm.x;
+			double bn = planePrevNeighbour.norm.y;
+			double cn = planePrevNeighbour.norm.z;
+			double dn = planePrevNeighbour.dist;
 
 			int edgeid = preprocess_edges_find(v0, v1);
 
@@ -414,79 +311,71 @@ void Polyhedron::corpol_calculate_matrix(int dim, Plane* prevPlanes,
 				double gamma1 = gamma_ij * gamma_ij * weight;
 				double gamma2 = gamma_ij * (1 - gamma_ij) * weight;
 
-				matrix[i_ak_ak] += gamma1 * xx;
-				matrix[i_ak_ak + 1] += gamma1 * xy;
-				matrix[i_ak_ak + 2] += gamma1 * xz;
-				matrix[i_ak_ak + 3] += gamma1 * x;
+				double coeff_ak_ak = gamma1 * xx;
+				double coeff_ak_bk = gamma1 * xy;
+				double coeff_ak_ck = gamma1 * xz;
+				double coeff_ak_dk = gamma1 * x;
 
-				matrix[i_bk_ak] += gamma1 * xy;
-				matrix[i_bk_ak + 1] += gamma1 * yy;
-				matrix[i_bk_ak + 2] += gamma1 * yz;
-				matrix[i_bk_ak + 3] += gamma1 * y;
+				gradient[i_ak] += ak * coeff_ak_ak + bk * coeff_ak_bk
+						+ ck * coeff_ak_ck + dk * coeff_ak_dk;
 
-				matrix[i_ck_ak] += gamma1 * xz;
-				matrix[i_ck_ak + 1] += gamma1 * yz;
-				matrix[i_ck_ak + 2] += gamma1 * zz;
-				matrix[i_ck_ak + 3] += gamma1 * z;
+				double coeff_bk_ak = gamma1 * xy;
+				double coeff_bk_bk = gamma1 * yy;
+				double coeff_bk_ck = gamma1 * yz;
+				double coeff_bk_dk = gamma1 * y;
 
-				matrix[i_dk_ak] += gamma1 * x;
-				matrix[i_dk_ak + 1] += gamma1 * y;
-				matrix[i_dk_ak + 2] += gamma1 * z;
-				matrix[i_dk_ak + 3] += gamma1 * 2;
+				gradient[i_bk] += ak * coeff_bk_ak + bk * coeff_bk_bk
+						+ ck * coeff_bk_ck + dk * coeff_bk_dk;
 
-				matrix[i_ak_an] += gamma2 * xx;
-				matrix[i_ak_an + 1] += gamma2 * xy;
-				matrix[i_ak_an + 2] += gamma2 * xz;
-				matrix[i_ak_an + 3] += gamma2 * x;
+				double coeff_ck_ak = gamma1 * xz;
+				double coeff_ck_bk = gamma1 * yz;
+				double coeff_ck_ck = gamma1 * zz;
+				double coeff_ck_dk = gamma1 * z;
 
-				matrix[i_bk_an] += gamma2 * xy;
-				matrix[i_bk_an + 1] += gamma2 * yy;
-				matrix[i_bk_an + 2] += gamma2 * yz;
-				matrix[i_bk_an + 3] += gamma2 * y;
+				gradient[i_ck] += ak * coeff_ck_ak + bk * coeff_ck_bk
+						+ ck * coeff_ck_ck + dk * coeff_ck_dk;
 
-				matrix[i_ck_an] += gamma2 * xz;
-				matrix[i_ck_an + 1] += gamma2 * yz;
-				matrix[i_ck_an + 2] += gamma2 * zz;
-				matrix[i_ck_an + 3] += gamma2 * z;
+				double coeff_dk_ak = gamma1 * x;
+				double coeff_dk_bk = gamma1 * y;
+				double coeff_dk_ck = gamma1 * z;
+				double coeff_dk_dk = gamma1 * 2;
 
-				matrix[i_dk_an] += gamma2 * x;
-				matrix[i_dk_an + 1] += gamma2 * y;
-				matrix[i_dk_an + 2] += gamma2 * z;
-				matrix[i_dk_an + 3] += gamma2 * 2;
+				gradient[i_dk] += ak * coeff_dk_ak + bk * coeff_dk_bk
+						+ ck * coeff_dk_ck + dk * coeff_dk_dk;
+
+				double coeff_ak_an = gamma2 * xx;
+				double coeff_ak_bn = gamma2 * xy;
+				double coeff_ak_cn = gamma2 * xz;
+				double coeff_ak_dn = gamma2 * x;
+
+				gradient[i_ak] += an * coeff_ak_an + bn * coeff_ak_bn
+						+ cn * coeff_ak_cn + dn * coeff_ak_dn;
+
+				double coeff_bk_an = gamma2 * xy;
+				double coeff_bk_bn = gamma2 * yy;
+				double coeff_bk_cn = gamma2 * yz;
+				double coeff_bk_dn = gamma2 * y;
+
+				gradient[i_bk] += an * coeff_bk_an + bn * coeff_bk_bn
+						+ cn * coeff_bk_cn + dn * coeff_bk_dn;
+
+				double coeff_ck_an = gamma2 * xz;
+				double coeff_ck_bn = gamma2 * yz;
+				double coeff_ck_cn = gamma2 * zz;
+				double coeff_ck_dn = gamma2 * z;
+
+				gradient[i_ck] += an * coeff_ck_an + bn * coeff_ck_bn
+						+ cn * coeff_ck_cn + dn * coeff_ck_dn;
+
+				double coeff_dk_an = gamma2 * x;
+				double coeff_dk_bn = gamma2 * y;
+				double coeff_dk_cn = gamma2 * z;
+				double coeff_dk_dn = gamma2 * 2;
+
+				gradient[i_dk] += an * coeff_dk_an + bn * coeff_dk_bn
+						+ cn * coeff_dk_cn + dn * coeff_dk_dn;
 			}
 		}
 	}
 	DEBUG_END;
-}
-
-void print_matrix2(FILE* file, int nrow, int ncol, double* a)
-{
-	fprintf(file, "=========begin=of=matrix=================\n");
-	fprintf(file, "number of rows: %d\n", nrow);
-	fprintf(file, "number of columns: %d\n", ncol);
-	for (int irow = 0; irow < nrow; ++irow)
-	{
-		for (int icol = 0; icol < ncol; ++icol)
-		{
-			double valuePrinted = a[ncol * irow + icol];
-			if (fabs(valuePrinted) < EPS_FOR_PRINT)
-			{
-				fprintf(file, "\t |\t");
-			}
-			else
-			{
-				fprintf(file, "%lf |\t", valuePrinted);
-			}
-		}
-		fprintf(file, "\n");
-		if (irow % 5 == 4)
-		{
-			for (int icol = 0; icol < ncol; ++icol)
-			{
-				fprintf(file, "----------------");
-			}
-			fprintf(file, "\n");
-		}
-	}
-	fprintf(file, "=========end=of=matrix===================\n");
 }
