@@ -241,18 +241,19 @@ public:
 
 	void corpol_prepFindAssociations();
 
-	void corpol_prepFindAssociations_init(Polyhedron* &polyhedronTmp);
+	void corpol_prepFindAssociations_init(Polyhedron* &polyhedronTmp,
+			double* &bufDouble);
 
 	void corpol_prepFindAssiciations_withContour(int iContour,
-			Polyhedron* polyhedronTmp);
+			Polyhedron* polyhedronTmp, double* bufDouble);
 
 	void corpol_prepFindAssociations_withContour_forFacet(int iContour,
-			int iFacet, Polyhedron* polyhedronTmp);
+			int iFacet, Polyhedron* polyhedronTmp, double* bufDouble);
 
 	double corpol_weightForAssociation(int iContour, int iEdge);
 
 	void corpol_prepAssociator(int iContour, int iFacet, int iEdge,
-			Polyhedron* polyhedronTmp);
+			Polyhedron* polyhedronTmp, double* bufDouble);
 
 	inline int corpol_prepAssociator_init(int iContour, int iFacet, int iEdge,
 			Polyhedron* polyhedronTmp, Vector3d& v0_projected,
@@ -281,7 +282,12 @@ public:
 
 	inline void corpol_prepAssociator_add(int iContour, int iFacet, int iEdge,
 			int iSideDistMin0, int iSideDistMin1, Vector3d v0_nearest,
-			Vector3d v1_nearest, Orientation orientation);
+			Vector3d v1_nearest, Orientation orientation, double* bufDouble);
+
+	inline void corpol_prepAssociator_add_findBounds(int iContour,
+			int iSideDistMin0, int iSideDistMin1, Vector3d v0_nearest,
+			Vector3d v1_nearest, Orientation orientation, int& iResultBegin,
+			int& iResultEnd, double* bufDouble);
 
 	bool corpol_edgeIsVisibleOnPlane(Edge& edge, Plane planeOfProjection);
 	bool corpol_collinear_visibility(int v0, int v1, Plane planeOfProjection,
