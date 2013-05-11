@@ -215,19 +215,6 @@ public:
 	double corpol_calculate_functional_derivative_1(Plane* prevPlanes,
 			int iFacet, int iCoefficient);
 
-	double corpol_derivativeTest_calculateValFromMatrix_1(int iFacet,
-			int iCoefficient, double* matrix, list<int>* facetsNotAssociated);
-
-	void corpol_derivativeTest_2(Plane* prevPlanes, double* matrix,
-			list<int>* facetsNotAssociated);
-
-	double corpol_calculate_functional_derivative_2(Plane* prevPlanes,
-			int iFacet, int iCoefficient, int jFacet, int jCoefficient);
-
-	double corpol_derivativeTest_calculateValFromMatrix_2(int iFacet,
-			int iCoefficient, int jFacet, int jCoefficient, double* matrix,
-			list<int>* facetsNotAssociated);
-
 	// Polyhedron_correction_preprocess.cpp
 	void corpol_preprocess();
 

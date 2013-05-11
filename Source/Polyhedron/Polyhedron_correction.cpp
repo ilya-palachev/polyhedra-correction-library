@@ -185,6 +185,10 @@ void Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* gradient,
 	DEBUG_START;
 	corpol_calculate_gradient(dim, prevPlanes, gradient, facetsNotAssociated);
 
+#ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
+	corpol_derivativeTest_all(prevPlanes, gradient, facetsNotAssociated);
+#endif
+
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
