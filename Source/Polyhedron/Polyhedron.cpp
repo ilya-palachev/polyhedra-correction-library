@@ -1,17 +1,31 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 Polyhedron::Polyhedron() :
-		numVertices(0), numFacets(0), vertices(NULL), facets(NULL), vertexInfos(
-				NULL), edgeLists(NULL), numEdges(0), edges(NULL), numContours(
-				0), contours(NULL)
+				numVertices(0),
+				numFacets(0),
+				vertices(NULL),
+				facets(NULL),
+				vertexInfos(NULL),
+				edgeLists(NULL),
+				numEdges(0),
+				edges(NULL),
+				numContours(0),
+				contours(NULL)
 {
 	fprintf(stdout, "Creating empty polyhedron...\n");
 }
 
 Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
-		numVertices(numv_orig), numFacets(numf_orig), vertices(), facets(), vertexInfos(
-				NULL), edgeLists(NULL), numEdges(0), edges(NULL), numContours(
-				0), contours(NULL)
+				numVertices(numv_orig),
+				numFacets(numf_orig),
+				vertices(),
+				facets(),
+				vertexInfos(NULL),
+				edgeLists(NULL),
+				numEdges(0),
+				edges(NULL),
+				numContours(0),
+				contours(NULL)
 {
 	vertices = new Vector3d[numv_orig];
 	facets = new Facet[numf_orig];
@@ -21,10 +35,16 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
 
 Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 		Facet* facet_orig) :
-		numVertices(numv_orig), numFacets(numf_orig), vertices(
-				new Vector3d[numv_orig]), facets(new Facet[numf_orig]), vertexInfos(
-				NULL), edgeLists(NULL), numEdges(0), edges(NULL), numContours(
-				0), contours(NULL)
+				numVertices(numv_orig),
+				numFacets(numf_orig),
+				vertices(new Vector3d[numv_orig]),
+				facets(new Facet[numf_orig]),
+				vertexInfos(NULL),
+				edgeLists(NULL),
+				numEdges(0),
+				edges(NULL),
+				numContours(0),
+				contours(NULL)
 {
 	fprintf(stdout, "Creating polyhedron by coping...\n");
 

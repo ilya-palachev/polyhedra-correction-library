@@ -2,49 +2,44 @@
 
 enum nameFigure
 {
-	NAME_UNKNOWN = -1,
-	NAME_CUBE = 0,
-	NAME_PYRAMID = 1,
-	NAME_PRISM = 2,
-	NAME_CUBE_CUTTED = 3
+	FIGURE_UNKNOWN,
+	FIGURE_CUBE,
+	FIGURE_PYRAMID,
+	FIGURE_PRISM,
+	FIGURE_CUBE_CUTTED
 };
 
-void printUsage();
-
-nameFigure parse_figureName(char* figureNameInput);
-
-int parse_commandLine(int argc, char** argv, char* figure, int& numContours,
-		int& indFacetMoved, double& maxMoveDelta, double& shiftAngleFirst);
-
-int makePolyhedron(Polyhedron& poly, nameFigure figureParsed);
-
-int main(int argc, char** argv)
+enum nameMethod
 {
+	METHOD_UNKNOWN, METHOD_GRADIENT_DESCENT, METHOD_GRADIENT_DESCENT_FAST
+};
 
-	char* figure = new char[255];
+struct testParameters
+{
+	nameFigure figure;
+	nameMethod method;
 	int numContours;
 	int indFacetMoved;
 	double maxMoveDelta;
 	double shiftAngleFirst;
+};
 
-	if (parse_commandLine(argc, argv, figure, numContours, indFacetMoved,
-			maxMoveDelta, shiftAngleFirst) != EXIT_SUCCESS)
-	{
+void printUsage();
+nameFigure parse_figureName(char* figureNameInput);
+nameMethod parse_methodName(char* methodNameInput);
+int parse_commandLine(int argc, char** argv, testParameters& parameters);
+void makePolyhedron(Polyhedron& poly, nameFigure figureParsed);
+
+int main(int argc, char** argv)
+{
+	testParameters parameters;
+
+	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	}
-	nameFigure figureParsed = parse_figureName(figure);
 	Polyhedron poly;
-	if (makePolyhedron(poly, figureParsed) != EXIT_SUCCESS)
-	{
-		return EXIT_FAILURE;
-	}
+	makePolyhedron(poly, parameters.figure);
 	poly.corpolTest(numContours, indFacetMoved, maxMoveDelta, shiftAngleFirst);
 
-	if (figure)
-	{
-		delete[] figure;
-		figure = NULL;
-	}
 	return EXIT_SUCCESS;
 }
 
@@ -57,28 +52,47 @@ void printUsage()
 	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
 }
 
-int parse_commandLine(int argc, char** argv, char* figure, int& numContours,
-		int& indFacetMoved, double& maxMoveDelta, double& shiftAngleFirst)
+int parse_commandLine(int argc, char** argv, testParameters& parameters)
 {
 
-	if (argc != 6)
+	if (argc != 7)
 	{
 		ERROR_PRINT("Wrong number of arguments!");
 		printUsage();
 		return EXIT_FAILURE;
 	}
 
+	char* figure = new char[255];
+	char* method = new char[255];
+
 	bool ifCorrectInput = sscanf(argv[1], "%s", figure)
-			&& sscanf(argv[2], "%d", &numContours)
-			&& sscanf(argv[3], "%d", &indFacetMoved)
-			&& sscanf(argv[4], "%lf", &maxMoveDelta)
-			&& sscanf(argv[5], "%lf", &shiftAngleFirst);
+			&& sscanf(argv[2], "%s", method)
+			&& sscanf(argv[3], "%d", &parameters.numContours)
+			&& sscanf(argv[4], "%d", &parameters.indFacetMoved)
+			&& sscanf(argv[5], "%lf", &parameters.maxMoveDelta)
+			&& sscanf(argv[6], "%lf", &parameters.shiftAngleFirst);
+
+	parameters.figure = parse_figureName(figure);
+	parameters.method = parse_methodName(method);
+
 	if (!ifCorrectInput)
 	{
 		ERROR_PRINT("Incorrect input!");
 		printUsage();
 		return EXIT_FAILURE;
 	}
+	if (figure)
+	{
+		delete[] figure;
+		figure = NULL;
+	}
+
+	if (method)
+	{
+		delete[] method;
+		method = NULL;
+	}
+
 	return EXIT_SUCCESS;
 }
 
@@ -86,46 +100,60 @@ nameFigure parse_figureName(char* figureNameInput)
 {
 	if (strcmp(figureNameInput, "cube") == 0)
 	{
-		return NAME_CUBE;
+		return FIGURE_CUBE;
 	}
 	else if (strcmp(figureNameInput, "pyramid") == 0)
 	{
-		return NAME_PYRAMID;
+		return FIGURE_PYRAMID;
 	}
 	else if (strcmp(figureNameInput, "prism") == 0)
 	{
-		return NAME_PRISM;
+		return FIGURE_PRISM;
 	}
 	else if (strcmp(figureNameInput, "cube-cutted") == 0)
 	{
-		return NAME_CUBE_CUTTED;
+		return FIGURE_CUBE_CUTTED;
 	}
 	else
 	{
-		return NAME_UNKNOWN;
+		return FIGURE_UNKNOWN;
 	}
 }
 
-int makePolyhedron(Polyhedron& poly, nameFigure figureParsed)
+nameMethod parse_methodName(char* methodNameInput)
+{
+	if (strcmp(methodNameInput, "gd") == 0)
+	{
+		return METHOD_GRADIENT_DESCENT;
+	}
+	else if (strcmp(methodNameInput, "gdf") == 0)
+	{
+		return METHOD_GRADIENT_DESCENT_FAST;
+	}
+	else
+	{
+		return METHOD_UNKNOWN;
+	}
+}
+
+void makePolyhedron(Polyhedron& poly, nameFigure figureParsed)
 {
 	switch (figureParsed)
 	{
-	case NAME_CUBE:
+	case FIGURE_CUBE:
 		poly.makeCube(1., 0., 0., 0.);
 		break;
-	case NAME_PYRAMID:
+	case FIGURE_PYRAMID:
 		poly.makePyramid(3, 1., 1.);
 		break;
-	case NAME_PRISM:
+	case FIGURE_PRISM:
 		poly.makePrism(3, 1., 1.);
 		break;
-	case NAME_CUBE_CUTTED:
+	case FIGURE_CUBE_CUTTED:
 		poly.makeCubeCutted();
 		break;
 	default:
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
-		return EXIT_FAILURE;
 	}
-	return EXIT_SUCCESS;
 }

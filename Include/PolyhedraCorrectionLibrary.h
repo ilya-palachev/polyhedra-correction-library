@@ -32,6 +32,10 @@ class MatrixDistNorm;
 class TreeClusterNormNode;
 class TreeClusterNorm;
 
+class PCorrector;
+class GlobalShadeCorrector;
+class GSAssociator;
+
 #include "Polyhedron.h"
 #include "VertexInfo.h"
 #include "EdgeList.h"
@@ -48,6 +52,9 @@ class TreeClusterNorm;
 #include "MatrixDistNorm.h"
 #include "TreeClusterNormNode.h"
 #include "TreeClusterNorm.h"
+
+#include "Correctors/PCorrector.h"
+#include "Correctors/GlobalShadeCorrector.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

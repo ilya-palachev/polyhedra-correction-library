@@ -16,7 +16,8 @@ public:
 };
 
 SortedDouble::SortedDouble(int Len) :
-		len(Len), num(0)
+				len(Len),
+				num(0)
 {
 	array = new double[len];
 }

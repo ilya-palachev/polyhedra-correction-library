@@ -1,29 +1,46 @@
-/* 
- * File:   Polyhedron_correction.cpp
- * Author: ilya
- * 
- * Created on 19 Ноябрь 2012 г., 07:39
+/*
+ * GlobalShadeCorrector.cpp
+ *
+ *  Created on: 12.05.2013
+ *      Author: iliya
  */
 
 #include "PolyhedraCorrectionLibrary.h"
 
-const double EPS_MAX_ERROR = 1e-6;
-const double EPS_FOR_PRINT = 1e-15;
+GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* input) :
+				polyhedron(input),
+				numEdges(0),
+				edges(NULL),
+				numContours(0),
+				contours(NULL),
+				numVertices(input->numVertices),
+				vertices(input->vertices),
+				numFacets(input->numFacets),
+				facets(input->numFacets),
+				parameters(
+				{ EPS_LOOP_STOP_DEFAULT })
+{
+}
 
-int Polyhedron::correct_polyhedron()
+GlobalShadeCorrector::~GlobalShadeCorrector()
+{
+	if (edges)
+	{
+		delete[] edges;
+		edges = NULL;
+	}
+	if (contours)
+	{
+		delete[] contours;
+		contours = NULL;
+	}
+}
+
+void GlobalShadeCorrector::runCorrection()
 {
 	DEBUG_START;
-
-	fprintf(stdout, COLOUR_MAGENTA);
-	my_fprint(stdout);
-	fprintf(stdout, COLOUR_WHITE);
-
-	int numEdges;
-	Edge* edges = NULL;
-
-	corpol_preprocess();
-
-	list<int>* facetsNotAssociated = corpol_find_not_associated_facets();
+	preprocess();
+	findNotAssociatedFacets();
 #ifndef NDEBUG
 	DEBUG_PRINT("The following facets have no associations:");
 	for (list<int>::iterator iter = facetsNotAssociated->begin();
@@ -32,12 +49,11 @@ int Polyhedron::correct_polyhedron()
 		DEBUG_PRINT("%d", *iter);
 	}
 #endif
-
 	int numFacetsNotAssociated = facetsNotAssociated->size();
 	int dim = (numFacets - numFacetsNotAssociated) * 5;
 
-	double* gradient = new double[dim * dim];
-	Plane* prevPlanes = new Plane[numFacets];
+	gradient = new double[dim * dim];
+	prevPlanes = new Plane[numFacets];
 
 	DEBUG_PRINT("memory allocation done");
 
@@ -47,12 +63,10 @@ int Polyhedron::correct_polyhedron()
 	}
 	DEBUG_PRINT("memory initialization done");
 
-	double error = corpol_calculate_functional(prevPlanes);
-
+	double error = calculateFunctional();
 	DEBUG_PRINT("first functional calculation done. error = %e", error);
 
 	int numIterations = 0;
-
 	while (error > EPS_MAX_ERROR)
 	{
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n", numIterations);
@@ -61,10 +75,11 @@ int Polyhedron::correct_polyhedron()
 		sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
 				numIterations);
 
-		this->my_fprint(fileName);
+		polyhedron->my_fprint(fileName);
 		delete[] fileName;
 
-		corpol_iteration(dim, prevPlanes, gradient, facetsNotAssociated);
+		runCorrectionIteration();
+
 		for (int i = 0; i < numFacets; ++i)
 		{
 			DEBUG_PRINT(
@@ -75,24 +90,17 @@ int Polyhedron::correct_polyhedron()
 					facets[i].plane.norm.z, facets[i].plane.dist);
 			prevPlanes[i] = facets[i].plane;
 		}
-		error = corpol_calculate_functional(prevPlanes);
+		error = calculateFunctional();
 		DEBUG_PRINT("error = %le", error);
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
 		++numIterations;
 	}
-
-	if (gradient != NULL)
-	{
-		delete[] gradient;
-		gradient = NULL;
-	}
 	DEBUG_END;
-	return 0;
 }
 
-list<int>* Polyhedron::corpol_find_not_associated_facets()
+void GlobalShadeCorrector::findNotAssociatedFacets()
 {
-	list<int>* facetsNotAssociated = new list<int>;
+	facetsNotAssociated = new list<int>;
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
 		int* indVertices = facets[iFacet].indVertices;
@@ -100,7 +108,7 @@ list<int>* Polyhedron::corpol_find_not_associated_facets()
 		int numAssociations = 0;
 		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 		{
-			int edgeid = preprocess_edges_find(indVertices[iVertex],
+			int edgeid = findEdge(indVertices[iVertex],
 					indVertices[iVertex + 1]);
 			numAssociations += edges[edgeid].assocList.size();
 		}
@@ -109,10 +117,9 @@ list<int>* Polyhedron::corpol_find_not_associated_facets()
 			facetsNotAssociated->push_back(iFacet);
 		}
 	}
-	return facetsNotAssociated;
 }
 
-double Polyhedron::corpol_calculate_functional(Plane* prevPlanes)
+double GlobalShadeCorrector::calculateFunctional()
 {
 	double sum = 0;
 
@@ -174,18 +181,16 @@ double Polyhedron::corpol_calculate_functional(Plane* prevPlanes)
 		}
 	}
 	return sum;
+
 }
 
-const double DEFAULT_GRADIENT_STEP = 1e-4;
-
-void Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* gradient,
-		list<int>* facetsNotAssociated)
+void GlobalShadeCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
-	corpol_calculate_gradient(dim, prevPlanes, gradient, facetsNotAssociated);
+	calculateGradient();
 
 #ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
-	corpol_derivativeTest_all(prevPlanes, gradient, facetsNotAssociated);
+	derivativeTest_all();
 #endif
 
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
@@ -212,12 +217,10 @@ void Polyhedron::corpol_iteration(int dim, Plane* prevPlanes, double* gradient,
 		facets[iFacet].plane.norm.norm(1.);
 		facets[iFacet].plane.dist /= norm;
 	}
-
 	DEBUG_END;
 }
 
-void Polyhedron::corpol_calculate_gradient(int dim, Plane* prevPlanes,
-		double* gradient, list<int>* facetsNotAssociated)
+void GlobalShadeCorrector::calculateGradient()
 {
 	DEBUG_START;
 	for (int i = 0; i < dim * dim; ++i)
@@ -265,7 +268,7 @@ void Polyhedron::corpol_calculate_gradient(int dim, Plane* prevPlanes,
 			double cn = planePrevNeighbour.norm.z;
 			double dn = planePrevNeighbour.dist;
 
-			int edgeid = preprocess_edges_find(v0, v1);
+			int edgeid = findEdge(v0, v1);
 
 			if (edgeid == -1)
 			{

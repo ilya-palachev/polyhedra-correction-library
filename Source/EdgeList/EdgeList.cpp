@@ -1,18 +1,38 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeList::EdgeList() :
-		id(-1), len(0), num(0), pointer(0), edge0(NULL), edge1(NULL), ind0(
-				NULL), ind1(NULL), next_facet(NULL), next_direction(NULL), scalar_mult(
-				NULL), id_v_new(NULL), isUsed(NULL), poly(NULL)
+				id(-1),
+				len(0),
+				num(0),
+				pointer(0),
+				edge0(NULL),
+				edge1(NULL),
+				ind0(NULL),
+				ind1(NULL),
+				next_facet(NULL),
+				next_direction(NULL),
+				scalar_mult(NULL),
+				id_v_new(NULL),
+				isUsed(NULL),
+				poly(NULL)
 {
 }
 
 EdgeList::EdgeList(int id_orig, int len_orig, Polyhedron* poly_orig) :
-		id(id_orig), len(len_orig), num(0), pointer(0), edge0(new int[len]), edge1(
-				new int[len]), ind0(new int[len]), ind1(new int[len]), next_facet(
-				new int[len]), next_direction(new int[len]), scalar_mult(
-				new double[len]), id_v_new(new int[len]), isUsed(new bool[len]), poly(
-				poly_orig)
+				id(id_orig),
+				len(len_orig),
+				num(0),
+				pointer(0),
+				edge0(new int[len]),
+				edge1(new int[len]),
+				ind0(new int[len]),
+				ind1(new int[len]),
+				next_facet(new int[len]),
+				next_direction(new int[len]),
+				scalar_mult(new double[len]),
+				id_v_new(new int[len]),
+				isUsed(new bool[len]),
+				poly(poly_orig)
 {
 }
 

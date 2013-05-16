@@ -7,13 +7,18 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 TreeClusterNormNode::TreeClusterNormNode() :
-		cluster(NULL), parent(NULL), child0(NULL), child1(NULL)
+				cluster(NULL),
+				parent(NULL),
+				child0(NULL),
+				child1(NULL)
 {
 }
 
 TreeClusterNormNode::TreeClusterNormNode(const TreeClusterNormNode& orig) :
-		cluster(orig.cluster), parent(orig.parent), child0(orig.child0), child1(
-				orig.child1)
+				cluster(orig.cluster),
+				parent(orig.parent),
+				child0(orig.child0),
+				child1(orig.child1)
 {
 }
 

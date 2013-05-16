@@ -1,8 +1,13 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 FutureFacet::FutureFacet() :
-		id(-1), len(0), nv(0), edge0(NULL), edge1(NULL), src_facet(NULL), id_v_new(
-				NULL)
+				id(-1),
+				len(0),
+				nv(0),
+				edge0(NULL),
+				edge1(NULL),
+				src_facet(NULL),
+				id_v_new(NULL)
 {
 }
 
@@ -31,13 +36,20 @@ FutureFacet::~FutureFacet()
 }
 
 FutureFacet::FutureFacet(int len_orig) :
-		id(-1), len(len_orig), nv(0), edge0(new int[len]), edge1(new int[len]), src_facet(
-				new int[len]), id_v_new(new int[len])
+				id(-1),
+				len(len_orig),
+				nv(0),
+				edge0(new int[len]),
+				edge1(new int[len]),
+				src_facet(new int[len]),
+				id_v_new(new int[len])
 {
 }
 
 FutureFacet::FutureFacet(const FutureFacet& orig) :
-		id(orig.id), len(orig.len), nv(orig.nv)
+				id(orig.id),
+				len(orig.len),
+				nv(orig.nv)
 {
 
 	int i;

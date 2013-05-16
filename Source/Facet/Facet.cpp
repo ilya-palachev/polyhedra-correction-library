@@ -3,8 +3,11 @@
 #define DEFAULT_NV 1000
 
 Facet::Facet() :
-		id(-1), numVertices(0), plane(), indVertices(new int[1]), parentPolyhedron(
-				NULL)
+				id(-1),
+				numVertices(0),
+				plane(),
+				indVertices(new int[1]),
+				parentPolyhedron(NULL)
 {
 	rgb[0] = 100;
 	rgb[1] = 100;
@@ -15,8 +18,10 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 		const int* index_orig, Polyhedron* poly_orig = NULL, const bool ifLong =
 				false) :
 
-		id(id_orig), numVertices(nv_orig), plane(plane_orig), parentPolyhedron(
-				poly_orig)
+				id(id_orig),
+				numVertices(nv_orig),
+				plane(plane_orig),
+				parentPolyhedron(poly_orig)
 {
 
 	rgb[0] = 100;
@@ -50,10 +55,13 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 }
 
 Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, Polyhedron* poly_orig) :
-		id(id_orig), numVertices(nv_orig), indVertices(
-				new int[3 * numVertices + 1]), plane(plane_orig), parentPolyhedron(
-				poly_orig), rgb(
-		{ 255, 255, 255 })
+				id(id_orig),
+				numVertices(nv_orig),
+				indVertices(new int[3 * numVertices + 1]),
+				plane(plane_orig),
+				parentPolyhedron(poly_orig),
+				rgb(
+				{ 255, 255, 255 })
 {
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{

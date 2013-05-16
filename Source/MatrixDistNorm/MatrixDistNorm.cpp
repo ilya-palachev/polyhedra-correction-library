@@ -7,21 +7,28 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 MatrixDistNorm::MatrixDistNorm() :
-		n(0), nMax(0), matrix(NULL), ifStay(NULL)
+				n(0),
+				nMax(0),
+				matrix(NULL),
+				ifStay(NULL)
 {
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
-		n(0), nMax(nMax_orig), matrix(new double[nMax_orig * nMax_orig]), ifStay(
-				new bool[nMax_orig])
+				n(0),
+				nMax(nMax_orig),
+				matrix(new double[nMax_orig * nMax_orig]),
+				ifStay(new bool[nMax_orig])
 {
 	for (int i = 0; i < nMax_orig; ++i)
 		ifStay[i] = true;
 }
 
 MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
-		n(orig.n), nMax(orig.nMax), matrix(new double[orig.nMax * orig.nMax]), ifStay(
-				new bool[orig.nMax])
+				n(orig.n),
+				nMax(orig.nMax),
+				matrix(new double[orig.nMax * orig.nMax]),
+				ifStay(new bool[orig.nMax])
 {
 	for (int i = 0; i < nMax * nMax; ++i)
 	{

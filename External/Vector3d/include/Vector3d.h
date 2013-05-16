@@ -21,11 +21,15 @@ public:
 	double x, y, z;
 
 	Vector3d() :
-			x(0), y(0), z(0)
+					x(0),
+					y(0),
+					z(0)
 	{
 	}
 	Vector3d(double a, double b, double c) :
-			x(a), y(b), z(c)
+					x(a),
+					y(b),
+					z(c)
 	{
 	}
 
@@ -161,7 +165,8 @@ public:
 	{
 	}
 	Segment3d(const Vector3d & va, const Vector3d & vb) :
-			a(va), b(vb)
+					a(va),
+					b(vb)
 	{
 	}
 };
@@ -190,12 +195,13 @@ public:
 	double dist;
 
 	Plane() :
-			dist(0)
+					dist(0)
 	{
 	}
 	Plane(const Vector3d &, const Vector3d &, const Vector3d &);
 	Plane(const Vector3d & v, const double & d) :
-			norm(v), dist(d)
+					norm(v),
+					dist(d)
 	{
 	}
 	double operator %(const Vector3d & v) const
@@ -282,17 +288,22 @@ public:
 	double magn;
 
 	Conform() :
-			trans(0., 0., 0.), magn(1.)
+					trans(0., 0., 0.),
+					magn(1.)
 	{
 	}
 
 	explicit Conform(const Spin & s) :
-			spin(s), trans(0., 0., 0.), magn(1.)
+					spin(s),
+					trans(0., 0., 0.),
+					magn(1.)
 	{
 	}
 
 	Conform(const Spin & s, const Vector3d & t, double m = 1.) :
-			spin(s), trans(t), magn(m)
+					spin(s),
+					trans(t),
+					magn(m)
 	{
 	}
 
@@ -339,7 +350,8 @@ class Similarity
 	Vector3d ax, ay, az, trans;
 public:
 	explicit Similarity(const Spin & spin) :
-			magn(1.), trans(0., 0., 0.)
+					magn(1.),
+					trans(0., 0., 0.)
 	{
 		spin.getReper(ox, oy, oz);
 		ax = ox;
@@ -348,7 +360,8 @@ public:
 	}
 
 	explicit Similarity(const Conform & c) :
-			magn(c.magn), trans(c.trans)
+					magn(c.magn),
+					trans(c.trans)
 	{
 		c.spin.getReper(ox, oy, oz);
 		ax = ox * magn;

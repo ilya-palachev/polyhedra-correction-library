@@ -8,7 +8,9 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 SpherePoint::SpherePoint() :
-		vector(Vector3d(0., 0., 0.)), phi(0.), psi(0.)
+				vector(Vector3d(0., 0., 0.)),
+				phi(0.),
+				psi(0.)
 {
 }
 
@@ -25,7 +27,9 @@ SpherePoint::SpherePoint(const Vector3d& vector_orig)
 
 SpherePoint::SpherePoint(const Vector3d& vector_orig, const double phi_orig,
 		const double psi_orig) :
-		vector(vector_orig), phi(phi_orig), psi(psi_orig)
+				vector(vector_orig),
+				phi(phi_orig),
+				psi(psi_orig)
 {
 }
 
@@ -38,7 +42,9 @@ SpherePoint::SpherePoint(const double phi_orig, const double psi_orig)
 }
 
 SpherePoint::SpherePoint(const SpherePoint& orig) :
-		vector(orig.vector), phi(orig.phi), psi(orig.psi)
+				vector(orig.vector),
+				phi(orig.phi),
+				psi(orig.psi)
 {
 }
 

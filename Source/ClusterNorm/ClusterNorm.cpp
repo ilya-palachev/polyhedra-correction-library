@@ -9,7 +9,11 @@
 double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
 
 ClusterNorm::ClusterNorm() :
-		num(0), numMax(0), P(), indexFacet(NULL), poly(NULL)
+				num(0),
+				numMax(0),
+				P(),
+				indexFacet(NULL),
+				poly(NULL)
 {
 }
 
@@ -32,8 +36,11 @@ double ClusterNorm::area()
 
 ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 
-		num(orig.num), numMax(orig.numMax), P(orig.P), indexFacet(
-				new int[orig.numMax]), poly(orig.poly)
+				num(orig.num),
+				numMax(orig.numMax),
+				P(orig.P),
+				indexFacet(new int[orig.numMax]),
+				poly(orig.poly)
 {
 	for (int i = 0; i < num; ++i)
 	{
@@ -48,15 +55,21 @@ ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 		Polyhedron* poly_orig) :
-		num(num_orig), numMax(numMax_orig), P(P_orig), indexFacet(
-				new int[numMax_orig]), poly(poly_orig)
+				num(num_orig),
+				numMax(numMax_orig),
+				P(P_orig),
+				indexFacet(new int[numMax_orig]),
+				poly(poly_orig)
 {
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 		int* indexFacet_orig, Polyhedron* poly_orig) :
-		num(num_orig), numMax(numMax_orig), P(P_orig), indexFacet(
-				new int[numMax_orig]), poly(poly_orig)
+				num(num_orig),
+				numMax(numMax_orig),
+				P(P_orig),
+				indexFacet(new int[numMax_orig]),
+				poly(poly_orig)
 {
 	for (int i = 0; i < num; ++i)
 	{
