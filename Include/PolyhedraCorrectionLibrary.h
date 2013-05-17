@@ -55,6 +55,7 @@ class GSAssociator;
 
 #include "Correctors/PCorrector.h"
 #include "Correctors/GlobalShadeCorrector.h"
+#include "Correctors/GSAssociator.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
