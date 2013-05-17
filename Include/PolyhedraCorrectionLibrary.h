@@ -36,6 +36,11 @@ class PCorrector;
 class GlobalShadeCorrector;
 class GSAssociator;
 
+class PData;
+class ShadeContourData;
+
+class PDataConstructor;
+
 #include "Polyhedron.h"
 #include "VertexInfo.h"
 #include "EdgeList.h"
@@ -56,6 +61,11 @@ class GSAssociator;
 #include "Correctors/PCorrector.h"
 #include "Correctors/GlobalShadeCorrector.h"
 #include "Correctors/GSAssociator.h"
+
+#include "DataContainers/PData.h"
+#include "DataContainers/ShadeContourData.h"
+
+#include "DataConstructors/PDataConstructor.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

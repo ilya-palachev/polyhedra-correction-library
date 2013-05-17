@@ -228,6 +228,8 @@ public:
 			MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
 			MatrixDistNorm& matrix_out);
 
+	//
+
 };
 
 #endif	/* POLYHEDRON_CLASS_H */
