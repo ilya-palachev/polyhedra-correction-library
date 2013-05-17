@@ -54,7 +54,7 @@ void GlobalShadeCorrector::preprocessEdges()
 void GlobalShadeCorrector::preprocessAssociations()
 {
 	DEBUG_START;
-	GSAssociator associator;
+	GSAssociator associator(this);
 	associator.preinit();
 
 	for (int iContour = 0; iContour < numContours; ++iContour)
