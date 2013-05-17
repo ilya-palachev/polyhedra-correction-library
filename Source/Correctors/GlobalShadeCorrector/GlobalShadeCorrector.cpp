@@ -13,12 +13,12 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* input) :
 				edges(NULL),
 				numContours(0),
 				contours(NULL),
-				numVertices(input->numVertices),
-				vertices(input->vertices),
-				numFacets(input->numFacets),
-				facets(input->numFacets),
 				parameters(
-				{ EPS_LOOP_STOP_DEFAULT })
+				{ EPS_LOOP_STOP_DEFAULT }),
+				facetsNotAssociated(new list<int>),
+				gradient(NULL),
+				prevPlanes(NULL),
+				dim(0)
 {
 }
 
@@ -50,16 +50,16 @@ void GlobalShadeCorrector::runCorrection()
 	}
 #endif
 	int numFacetsNotAssociated = facetsNotAssociated->size();
-	int dim = (numFacets - numFacetsNotAssociated) * 5;
+	int dim = (polyhedron->numFacets - numFacetsNotAssociated) * 5;
 
-	gradient = new double[dim * dim];
-	prevPlanes = new Plane[numFacets];
+	gradient = new double[dim];
+	prevPlanes = new Plane[polyhedron->numFacets];
 
 	DEBUG_PRINT("memory allocation done");
 
-	for (int i = 0; i < numFacets; ++i)
+	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
-		prevPlanes[i] = facets[i].plane;
+		prevPlanes[i] = polyhedron->facets[i].plane;
 	}
 	DEBUG_PRINT("memory initialization done");
 
@@ -80,15 +80,17 @@ void GlobalShadeCorrector::runCorrection()
 
 		runCorrectionIteration();
 
-		for (int i = 0; i < numFacets; ++i)
+		for (int i = 0; i < polyhedron->numFacets; ++i)
 		{
 			DEBUG_PRINT(
 					"PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)",
 					i, prevPlanes[i].norm.x, prevPlanes[i].norm.y,
 					prevPlanes[i].norm.z, prevPlanes[i].dist,
-					facets[i].plane.norm.x, facets[i].plane.norm.y,
-					facets[i].plane.norm.z, facets[i].plane.dist);
-			prevPlanes[i] = facets[i].plane;
+					polyhedron->facets[i].plane.norm.x,
+					polyhedron->facets[i].plane.norm.y,
+					polyhedron->facets[i].plane.norm.z,
+					polyhedron->facets[i].plane.dist);
+			prevPlanes[i] = polyhedron->facets[i].plane;
 		}
 		error = calculateFunctional();
 		DEBUG_PRINT("error = %le", error);
@@ -100,11 +102,10 @@ void GlobalShadeCorrector::runCorrection()
 
 void GlobalShadeCorrector::findNotAssociatedFacets()
 {
-	facetsNotAssociated = new list<int>;
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		int* indVertices = facets[iFacet].indVertices;
-		int numVerticesFacet = facets[iFacet].numVertices;
+		int* indVertices = polyhedron->facets[iFacet].indVertices;
+		int numVerticesFacet = polyhedron->facets[iFacet].numVertices;
 		int numAssociations = 0;
 		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 		{
@@ -128,8 +129,8 @@ double GlobalShadeCorrector::calculateFunctional()
 //    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
 		int f0 = edges[iEdge].f0;
 		int f1 = edges[iEdge].f1;
-		Plane plane0 = facets[f0].plane;
-		Plane plane1 = facets[f1].plane;
+		Plane plane0 = polyhedron->facets[f0].plane;
+		Plane plane1 = polyhedron->facets[f1].plane;
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
@@ -195,27 +196,27 @@ void GlobalShadeCorrector::runCorrectionIteration()
 
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		if (*iterNotAssicated == iFacet)
 		{
-			facets[iFacet].plane = prevPlanes[iFacet];
+			polyhedron->facets[iFacet].plane = prevPlanes[iFacet];
 			++iterNotAssicated;
 			++countNotAssociated;
 			continue;
 		}
 		int iFacetShifted = iFacet - countNotAssociated;
-		facets[iFacet].plane.norm.x -= DEFAULT_GRADIENT_STEP
+		polyhedron->facets[iFacet].plane.norm.x -= DEFAULT_GRADIENT_STEP
 				* gradient[4 * iFacetShifted];
-		facets[iFacet].plane.norm.y -= DEFAULT_GRADIENT_STEP
+		polyhedron->facets[iFacet].plane.norm.y -= DEFAULT_GRADIENT_STEP
 				* gradient[4 * iFacetShifted + 1];
-		facets[iFacet].plane.norm.z -= DEFAULT_GRADIENT_STEP
+		polyhedron->facets[iFacet].plane.norm.z -= DEFAULT_GRADIENT_STEP
 				* gradient[4 * iFacetShifted + 2];
-		facets[iFacet].plane.dist -= DEFAULT_GRADIENT_STEP
+		polyhedron->facets[iFacet].plane.dist -= DEFAULT_GRADIENT_STEP
 				* gradient[4 * iFacetShifted + 3];
-		double norm = sqrt(qmod(facets[iFacet].plane.norm));
-		facets[iFacet].plane.norm.norm(1.);
-		facets[iFacet].plane.dist /= norm;
+		double norm = sqrt(qmod(polyhedron->facets[iFacet].plane.norm));
+		polyhedron->facets[iFacet].plane.norm.norm(1.);
+		polyhedron->facets[iFacet].plane.dist /= norm;
 	}
 	DEBUG_END;
 }
@@ -231,7 +232,7 @@ void GlobalShadeCorrector::calculateGradient()
 	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		if (*iterNotAssicated == iFacet)
 		{
@@ -241,8 +242,8 @@ void GlobalShadeCorrector::calculateGradient()
 		}
 		int iFacetShifted = iFacet - countNotAssociated;
 
-		int nv = facets[iFacet].numVertices;
-		int *index = facets[iFacet].indVertices;
+		int nv = polyhedron->facets[iFacet].numVertices;
+		int *index = polyhedron->facets[iFacet].indVertices;
 
 		Plane planePrevThis = prevPlanes[iFacet];
 

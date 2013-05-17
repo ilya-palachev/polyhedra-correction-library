@@ -19,16 +19,16 @@ void GlobalShadeCorrector::preprocessEdges()
 {
 	DEBUG_START;
 	int numEdgesMax = numEdges = 0;
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		numEdgesMax += facets[iFacet].numVertices;
+		numEdgesMax += polyhedron->facets[iFacet].numVertices;
 	}
 	numEdgesMax /= 2;
 	DEBUG_PRINT("numEdgesMax = %d", numEdgesMax);
-	for (int i = 0; i < numFacets; ++i)
+	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
-		int numVerticesInFacet = facets[i].numVertices;
-		int * index = facets[i].indVertices;
+		int numVerticesInFacet = polyhedron->facets[i].numVertices;
+		int * index = polyhedron->facets[i].indVertices;
 		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex)
 		{
 			addEdge(numEdgesMax, // Number of edges which we are going add finally
@@ -59,10 +59,10 @@ void GlobalShadeCorrector::preprocessAssociations()
 
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
-		for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+		for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 		{
-			int numVerticesFacet = facets[iFacet].numVertices;
-			int* indVertices = facets[iFacet].indVertices;
+			int numVerticesFacet = polyhedron->facets[iFacet].numVertices;
+			int* indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 			{
 				int iEdge = findEdge(indVertices[iVertex],

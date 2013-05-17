@@ -49,7 +49,7 @@ private:
 	double calculateWeight();
 
 public:
-	GSAssociator();
+	GSAssociator(const GlobalShadeCorrector* corrector);
 	~GSAssociator();
 };
 

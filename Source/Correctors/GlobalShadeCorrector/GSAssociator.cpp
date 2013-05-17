@@ -18,8 +18,16 @@ static double weightForAssociations(double x)
 	return x * x;
 }
 
-
-GSAssociator::GSAssociator() :
+GSAssociator::GSAssociator(const GlobalShadeCorrector* corrector) :
+				numEdges(corrector->numEdges),
+				edges(corrector->edges),
+				numContours(corrector->numContours),
+				contours(corrector->contours),
+				parameters(corrector->parameters),
+				facetsNotAssociated(corrector->facetsNotAssociated),
+				gradient(corrector->gradient),
+				prevPlanes(corrector->prevPlanes),
+				dim(corrector->dim),
 				iContour(INT_NOT_INITIALIZED),
 				iFacet(INT_NOT_INITIALIZED),
 				iEdge(INT_NOT_INITIALIZED),
@@ -155,9 +163,9 @@ double GSAssociator::calculateVisibility()
 {
 	int f0 = edges[iEdge].f0;
 	int f1 = edges[iEdge].f1;
-	Vector3d norm0 = facets[f0].plane.norm;
+	Vector3d norm0 = polyhedron->facets[f0].plane.norm;
 	norm0.norm(1.);
-	Vector3d norm1 = facets[f1].plane.norm;
+	Vector3d norm1 = polyhedron->facets[f1].plane.norm;
 	norm1.norm(1.);
 	Vector3d directionOfProjection = contours[iContour].plane.norm;
 	directionOfProjection.norm(1.);
@@ -237,8 +245,8 @@ int GSAssociator::projectEdge()
 	DEBUG_START;
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
-	Vector3d v0 = vertices[iVertex0];
-	Vector3d v1 = vertices[iVertex1];
+	Vector3d v0 = polyhedron->vertices[iVertex0];
+	Vector3d v1 = polyhedron->vertices[iVertex1];
 	Plane planeOfProjection = contours[iContour].plane;
 	DEBUG_PRINT("v0 before projection: (%lf, %lf, %lf)", v0.x, v0.y, v0.z);
 	DEBUG_PRINT("v1 before projection: (%lf, %lf, %lf)", v1.x, v1.y, v1.z);
@@ -440,7 +448,8 @@ void GSAssociator::add(Orientation orientation)
 
 	int iVertex0 = edges[iEdge].v0;
 	int iVertex1 = edges[iEdge].v1;
-	Vector3d edge = vertices[iVertex1] - vertices[iVertex0];
+	Vector3d edge = polyhedron->vertices[iVertex1]
+			- polyhedron->vertices[iVertex0];
 	double weight = calculateWeight();
 
 	DEBUG_PRINT("Starting addition");

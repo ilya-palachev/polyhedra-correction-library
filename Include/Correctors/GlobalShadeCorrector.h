@@ -27,12 +27,6 @@ private:
 	int numContours;
 	SContour* contours;
 
-	int numVertices;
-	Vector3d* vertices;
-
-	int numFacets;
-	Facet* facets;
-
 	GSCorrectorParameters parameters;
 
 	list<int>* facetsNotAssociated;
@@ -41,6 +35,8 @@ private:
 	Plane* prevPlanes;
 
 	int dim;
+
+	GlobalShadeCorrector(const Polyhedron& polyhedron);
 
 	void preprocess();
 	void preprocessEdges();

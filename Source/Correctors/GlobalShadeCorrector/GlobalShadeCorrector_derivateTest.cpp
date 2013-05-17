@@ -17,7 +17,7 @@ void GlobalShadeCorrector::derivativeTest_1()
 	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated->begin();
 	int iCountNotAssociated = 0;
 
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		if (iFacet == *iIteratorNotAssociated)
 		{
@@ -72,7 +72,7 @@ void GlobalShadeCorrector::derivativeTest_1()
 double GlobalShadeCorrector::calculateFunctionalDerivative_1(int iFacet,
 		int iCoefficient)
 {
-	if (iFacet < 0 || iFacet >= numFacets)
+	if (iFacet < 0 || iFacet >= polyhedron->numFacets)
 	{
 		ERROR_PRINT("Error. iFacet = %d is out of bounds", iFacet);
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
@@ -88,16 +88,16 @@ double GlobalShadeCorrector::calculateFunctionalDerivative_1(int iFacet,
 	switch (iCoefficient)
 	{
 	case 0:
-		changedValue = &(facets[iFacet].plane.norm.x);
+		changedValue = &(polyhedron->facets[iFacet].plane.norm.x);
 		break;
 	case 1:
-		changedValue = &(facets[iFacet].plane.norm.y);
+		changedValue = &(polyhedron->facets[iFacet].plane.norm.y);
 		break;
 	case 2:
-		changedValue = &(facets[iFacet].plane.norm.z);
+		changedValue = &(polyhedron->facets[iFacet].plane.norm.z);
 		break;
 	case 3:
-		changedValue = &(facets[iFacet].plane.dist);
+		changedValue = &(polyhedron->facets[iFacet].plane.dist);
 		break;
 	}
 	double changedValuePrev = *changedValue;
