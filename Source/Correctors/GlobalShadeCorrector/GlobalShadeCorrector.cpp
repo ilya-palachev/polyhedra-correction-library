@@ -7,12 +7,10 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* input) :
-				polyhedron(input),
-				numEdges(0),
+GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd) :
+				polyhedron(p),
 				edges(NULL),
-				numContours(0),
-				contours(NULL),
+				contours(scd),
 				parameters(
 				{ EPS_LOOP_STOP_DEFAULT }),
 				facetsNotAssociated(new list<int>),
@@ -24,16 +22,6 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* input) :
 
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
-	if (edges)
-	{
-		delete[] edges;
-		edges = NULL;
-	}
-	if (contours)
-	{
-		delete[] contours;
-		contours = NULL;
-	}
 }
 
 void GlobalShadeCorrector::runCorrection()
@@ -111,7 +99,7 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 		{
 			int edgeid = findEdge(indVertices[iVertex],
 					indVertices[iVertex + 1]);
-			numAssociations += edges[edgeid].assocList.size();
+			numAssociations += edges->edges[edgeid].assocList.size();
 		}
 		if (numAssociations == 0)
 		{
@@ -124,11 +112,11 @@ double GlobalShadeCorrector::calculateFunctional()
 {
 	double sum = 0;
 
-	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
+	for (int iEdge = 0; iEdge < edges->numEdges; ++iEdge)
 	{
 //    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
-		int f0 = edges[iEdge].f0;
-		int f1 = edges[iEdge].f1;
+		int f0 = edges->edges[iEdge].f0;
+		int f1 = edges->edges[iEdge].f1;
 		Plane plane0 = polyhedron->facets[f0].plane;
 		Plane plane1 = polyhedron->facets[f1].plane;
 		Plane planePrev0 = prevPlanes[f0];
@@ -136,14 +124,14 @@ double GlobalShadeCorrector::calculateFunctional()
 
 		int iAssoc = 0;
 		for (list<EdgeContourAssociation>::iterator itCont =
-				edges[iEdge].assocList.begin();
-				itCont != edges[iEdge].assocList.end(); ++itCont)
+				edges->edges[iEdge].assocList.begin();
+				itCont != edges->edges[iEdge].assocList.end(); ++itCont)
 		{
 //        	DEBUG_PRINT("\t%s: processing contour #%d\n", __func__, j);
 			int curContour = itCont->indContour;
 			int curNearestSide = itCont->indNearestSide;
-			SideOfContour * sides = contours[curContour].sides;
-			Plane planeOfProjection = contours[curContour].plane;
+			SideOfContour * sides = contours->contours[curContour].sides;
+			Plane planeOfProjection = contours->contours[curContour].plane;
 			double weight = itCont->weight;
 
 			double enumerator = -planePrev1.norm * planeOfProjection.norm;
@@ -278,14 +266,14 @@ void GlobalShadeCorrector::calculateGradient()
 			}
 			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::iterator itCont =
-					edges[edgeid].assocList.begin();
-					itCont != edges[edgeid].assocList.end(); ++itCont)
+					edges->edges[edgeid].assocList.begin();
+					itCont != edges->edges[edgeid].assocList.end(); ++itCont)
 			{
 				int curContour = itCont->indContour;
 				int curNearestSide = itCont->indNearestSide;
 				double weight = itCont->weight;
-				SideOfContour * sides = contours[curContour].sides;
-				Plane planeOfProjection = contours[curContour].plane;
+				SideOfContour * sides = contours->contours[curContour].sides;
+				Plane planeOfProjection = contours->contours[curContour].plane;
 
 				double enumerator = -planePrevNeighbour.norm
 						* planeOfProjection.norm;

@@ -21,11 +21,8 @@ const double EPS_LOOP_STOP_DEFAULT = 1e-6;
 class GlobalShadeCorrector: public PCorrector
 {
 private:
-	int numEdges;
-	Edge* edges;
-
-	int numContours;
-	SContour* contours;
+	EdgeData* edges;
+	ShadeContourData* contours;
 
 	GSCorrectorParameters parameters;
 
@@ -36,10 +33,9 @@ private:
 
 	int dim;
 
-	GlobalShadeCorrector(const Polyhedron& polyhedron);
+	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd);
 
 	void preprocess();
-	void preprocessEdges();
 	void preprocessAssociations();
 
 	int findEdge(int v0, int v1);

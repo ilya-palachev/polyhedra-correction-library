@@ -19,6 +19,13 @@ private:
 	int* bufferInt0;
 	int* bufferInt1;
 
+	EdgeData* edgeData;
+
+	SContour& createContour(int idOfContour, Plane planeOfProjection);
+	bool edgeIsVisibleOnPlane(Edge& edge, Plane planeOfProjection);
+	bool collinearVisibility(int v0processed, int v1processed,
+			Plane planeOfProjection, int ifacet);
+
 public:
 	ShadeContourConstructor(const Polyhedron* p, const ShadeContourData* d);
 	~ShadeContourConstructor();

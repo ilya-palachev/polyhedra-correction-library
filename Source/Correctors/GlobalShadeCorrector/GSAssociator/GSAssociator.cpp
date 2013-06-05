@@ -19,9 +19,7 @@ static double weightForAssociations(double x)
 }
 
 GSAssociator::GSAssociator(const GlobalShadeCorrector* corrector) :
-				numEdges(corrector->numEdges),
 				edges(corrector->edges),
-				numContours(corrector->numContours),
 				contours(corrector->contours),
 				parameters(corrector->parameters),
 				facetsNotAssociated(corrector->facetsNotAssociated),
@@ -55,7 +53,7 @@ void GSAssociator::preinit()
 {
 	DEBUG_START;
 	int numSidesMax = 0;
-	for (int iContour = 0; iContour < numContours; ++iContour)
+	for (int iContour = 0; iContour < contours->getNumContours(); ++iContour)
 	{
 		int numSidesCurr = contours[iContour].ns;
 		if (numSidesCurr > numSidesMax)
@@ -161,8 +159,8 @@ int GSAssociator::checkVisibility()
 
 double GSAssociator::calculateVisibility()
 {
-	int f0 = edges[iEdge].f0;
-	int f1 = edges[iEdge].f1;
+	int f0 = edges->edges[iEdge].f0;
+	int f1 = edges->edges[iEdge].f1;
 	Vector3d norm0 = polyhedron->facets[f0].plane.norm;
 	norm0.norm(1.);
 	Vector3d norm1 = polyhedron->facets[f1].plane.norm;
@@ -207,9 +205,9 @@ int GSAssociator::checkAlreadyAdded()
 {
 	DEBUG_START;
 // Check whether this association has been already added to the list
-	int numAlreadyPushedAssocs = edges[iEdge].assocList.size();
-	list<EdgeContourAssociation>::iterator lastCont =
-			edges[iEdge].assocList.end();
+	int numAlreadyPushedAssocs = edges->edges[iEdge].assocList.size();
+	list<EdgeContourAssociation>::iterator lastCont = edges->edges[iEdge]
+			.assocList.end();
 	--lastCont;
 	int iContourLastInList = lastCont->indContour;
 	DEBUG_PRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
@@ -227,8 +225,8 @@ int GSAssociator::checkAlreadyAdded()
 int GSAssociator::checkExtinction()
 {
 	DEBUG_START;
-	int iVertex0 = edges[iEdge].v0;
-	int iVertex1 = edges[iEdge].v1;
+	int iVertex0 = edges->edges[iEdge].v0;
+	int iVertex1 = edges->edges[iEdge].v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS)
 	{
 		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting",
@@ -243,8 +241,8 @@ int GSAssociator::checkExtinction()
 int GSAssociator::projectEdge()
 {
 	DEBUG_START;
-	int iVertex0 = edges[iEdge].v0;
-	int iVertex1 = edges[iEdge].v1;
+	int iVertex0 = edges->edges[iEdge].v0;
+	int iVertex1 = edges->edges[iEdge].v1;
 	Vector3d v0 = polyhedron->vertices[iVertex0];
 	Vector3d v1 = polyhedron->vertices[iVertex1];
 	Plane planeOfProjection = contours[iContour].plane;
@@ -446,8 +444,8 @@ void GSAssociator::add(Orientation orientation)
 	int iBeginToBeAdded, iEndToBeAdded;
 	findBounds(orientation, iBeginToBeAdded, iEndToBeAdded);
 
-	int iVertex0 = edges[iEdge].v0;
-	int iVertex1 = edges[iEdge].v1;
+	int iVertex0 = edges->edges[iEdge].v0;
+	int iVertex1 = edges->edges[iEdge].v1;
 	Vector3d edge = polyhedron->vertices[iVertex1]
 			- polyhedron->vertices[iVertex0];
 	double weight = calculateWeight();
@@ -466,7 +464,7 @@ void GSAssociator::add(Orientation orientation)
 				new EdgeContourAssociation(iContour, iSide, ifDirectionIsProper,
 						weight);
 		// Push it to the list
-		edges[iEdge].assocList.push_back(*assocForCurrentEdge);
+		edges->edges[iEdge].assocList.push_back(*assocForCurrentEdge);
 	}
 	DEBUG_PRINT("Addition done");
 	DEBUG_END;
