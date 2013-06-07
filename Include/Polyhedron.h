@@ -185,22 +185,6 @@ public:
 	int simplify_vertex(double eps);
 	double dist_vertex(int i, int j);
 
-	// Polyhedron_correction_test.cpp
-
-	int corpolTest(int numContours_input, int indFacetMoved,
-			double maxMoveDelta, double shiftAngleFirst);
-
-	SContour& corpolTest_createOneContour(int icont, Plane planeOfProjection,
-			bool* bufferBool, int* bufferInt0, int* bufferInt1);
-
-	int corpolTest_createAllContours(double shiftAngleFirst);
-
-	void corpolTest_slightRandomMove(double maxMoveDelta);
-	inline void corpolTest_slightRandomMoveFacet(double maxMoveDelta,
-			int ifacet);
-	inline void corpolTest_slightRandomMoveVertex(double maxMoveDelta,
-			int ivertex);
-
 	//Polyhedron_inertia.cpp
 	double calculate_J11(int N);
 
@@ -228,7 +212,8 @@ public:
 			MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
 			MatrixDistNorm& matrix_out);
 
-	//
+	// Polyhedron_correction.cpp
+	void correctGlobal(ShadeContourData* contourData);
 
 };
 

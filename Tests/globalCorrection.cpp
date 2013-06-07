@@ -29,6 +29,8 @@ nameFigure parse_figureName(char* figureNameInput);
 nameMethod parse_methodName(char* methodNameInput);
 int parse_commandLine(int argc, char** argv, testParameters& parameters);
 void makePolyhedron(Polyhedron& poly, nameFigure figureParsed);
+inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
+		int ifacet);
 
 int main(int argc, char** argv)
 {
@@ -36,9 +38,15 @@ int main(int argc, char** argv)
 
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	Polyhedron poly;
-	makePolyhedron(poly, parameters.figure);
-	poly.corpolTest(numContours, indFacetMoved, maxMoveDelta, shiftAngleFirst);
+	Polyhedron polyhedron;
+	makePolyhedron(polyhedron, parameters.figure);
+	ShadeContourData* contourData = new ShadeContourData(polyhedron);
+	ShadeContourConstructor* scConstructor = new ShadeContourConstructor(
+			polyhedron, contourData);
+	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
+	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
+
+	polyhedron.correctGlobal(contourData);
 
 	return EXIT_SUCCESS;
 }
@@ -156,4 +164,31 @@ void makePolyhedron(Polyhedron& poly, nameFigure figureParsed)
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
 	}
+}
+
+static double genRandomDouble(double maxDelta)
+{
+	srand((unsigned) time(0));
+	int randomInteger = rand();
+	double randomDouble = randomInteger;
+	const double halfRandMax = RAND_MAX * 0.5;
+	randomDouble -= halfRandMax;
+	randomDouble /= halfRandMax;
+
+	randomDouble *= maxDelta;
+
+	return randomDouble;
+}
+
+inline void moveFacetRandom(Polyhedron& polyhedron, double maxMoveDelta,
+		int ifacet)
+{
+	Plane& plane = polyhedron.facets[ifacet].plane;
+	plane.norm.x += genRandomDouble(maxMoveDelta);
+	plane.norm.y += genRandomDouble(maxMoveDelta);
+	plane.norm.z += genRandomDouble(maxMoveDelta);
+	plane.dist += genRandomDouble(maxMoveDelta);
+	double newNorm = sqrt(qmod(plane.norm));
+	plane.norm.norm(1.);
+	plane.dist /= newNorm;
 }
