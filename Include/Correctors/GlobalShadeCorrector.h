@@ -20,7 +20,7 @@ const double EPS_LOOP_STOP_DEFAULT = 1e-6;
 
 class GlobalShadeCorrector: public PCorrector
 {
-private:
+public:
 	EdgeData* edgeData;
 	ShadeContourData* contourData;
 

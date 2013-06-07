@@ -42,10 +42,6 @@ set (SOURCE_polyhedronCorrection
 ./Source/FutureFacet/FutureFacet_io.cpp
 ./Source/MatrixDistNorm/MatrixDistNorm.cpp
 ./Source/Polyhedron/Polyhedron_cluster.cpp
-./Source/Polyhedron/Polyhedron_correction.cpp
-./Source/Polyhedron/Polyhedron_correction_derivativeTest.cpp
-./Source/Polyhedron/Polyhedron_correction_preprocess.cpp
-./Source/Polyhedron/Polyhedron_correction_test.cpp
 ./Source/Polyhedron/Polyhedron.cpp
 ./Source/Polyhedron/Polyhedron_deform.cpp
 ./Source/Polyhedron/Polyhedron_deform_linear.cpp
@@ -72,6 +68,18 @@ set (SOURCE_polyhedronCorrection
 ./Source/VertexInfo/VertexInfo_intersection.cpp
 ./Source/VertexInfo/VertexInfo_io.cpp
 ./Source/VertexInfo/VertexInfo_preprocess.cpp
+
+./Source/Correctors/PCorrector/PCorrector.cpp
+./Source/Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.cpp
+./Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector.cpp
+./Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_derivateTest.cpp
+./Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_preprocess.cpp
+./Source/DataContainers/EdgeData/EdgeData.cpp
+./Source/DataContainers/PData/PData.cpp
+./Source/DataConstructors/ShadeContourConstructor/ShadeContourConstructor.cpp
+./Source/DataContainers/EdgeData/EdgeData.cpp
+./Source/DataContainers/PData/PData.cpp
+./Source/DataContainers/ShadeContourData/ShadeContourData.cpp
 )
 
 include_directories( 

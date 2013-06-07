@@ -13,10 +13,10 @@
  */
 class EdgeData
 {
-private:
+public:
 	Edge* edges;
 	int numEdges;
-public:
+
 	EdgeData();
 	~EdgeData();
 };

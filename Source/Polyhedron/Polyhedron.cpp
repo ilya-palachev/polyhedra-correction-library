@@ -6,11 +6,7 @@ Polyhedron::Polyhedron() :
 				vertices(NULL),
 				facets(NULL),
 				vertexInfos(NULL),
-				edgeLists(NULL),
-				numEdges(0),
-				edges(NULL),
-				numContours(0),
-				contours(NULL)
+				edgeLists(NULL)
 {
 	fprintf(stdout, "Creating empty polyhedron...\n");
 }
@@ -21,11 +17,7 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
 				vertices(),
 				facets(),
 				vertexInfos(NULL),
-				edgeLists(NULL),
-				numEdges(0),
-				edges(NULL),
-				numContours(0),
-				contours(NULL)
+				edgeLists(NULL)
 {
 	vertices = new Vector3d[numv_orig];
 	facets = new Facet[numf_orig];
@@ -40,11 +32,7 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 				vertices(new Vector3d[numv_orig]),
 				facets(new Facet[numf_orig]),
 				vertexInfos(NULL),
-				edgeLists(NULL),
-				numEdges(0),
-				edges(NULL),
-				numContours(0),
-				contours(NULL)
+				edgeLists(NULL)
 {
 	fprintf(stdout, "Creating polyhedron by coping...\n");
 
@@ -66,11 +54,6 @@ Polyhedron::~Polyhedron()
 		delete[] vertexInfos;
 	if (edgeLists)
 		delete[] edgeLists;
-	if (edges)
-		delete[] edges;
-	if (contours)
-		delete[] contours;
-
 }
 
 int Polyhedron::signum(Vector3d point, Plane plane)

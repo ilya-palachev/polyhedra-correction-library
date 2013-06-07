@@ -32,14 +32,17 @@ class MatrixDistNorm;
 class TreeClusterNormNode;
 class TreeClusterNorm;
 
-class PCorrector;
-class GlobalShadeCorrector;
-class GSAssociator;
-
 class PData;
+class EdgeData;
 class ShadeContourData;
 
 class PDataConstructor;
+class EdgeConstructor;
+class ShadeContourConstructor;
+
+class PCorrector;
+class GlobalShadeCorrector;
+class GSAssociator;
 
 #include "Polyhedron.h"
 #include "VertexInfo.h"
@@ -58,14 +61,17 @@ class PDataConstructor;
 #include "TreeClusterNormNode.h"
 #include "TreeClusterNorm.h"
 
-#include "Correctors/PCorrector.h"
-#include "Correctors/GlobalShadeCorrector.h"
-#include "Correctors/GSAssociator.h"
-
 #include "DataContainers/PData.h"
+#include "DataContainers/EdgeData.h"
 #include "DataContainers/ShadeContourData.h"
 
 #include "DataConstructors/PDataConstructor.h"
+#include "DataConstructors/EdgeConstructor.h"
+#include "DataConstructors/ShadeContourConstructor.h"
+
+#include "Correctors/PCorrector.h"
+#include "Correctors/GlobalShadeCorrector.h"
+#include "Correctors/GSAssociator.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

@@ -8,8 +8,6 @@
 #ifndef EDGECONSTRUCTOR_H_
 #define EDGECONSTRUCTOR_H_
 
-#include "PolyhedraCorrectionLibrary.h"
-
 /*
  *
  */

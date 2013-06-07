@@ -7,14 +7,12 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-PCorrector::PCorrector()
+PCorrector::PCorrector(Polyhedron* input) :
+				polyhedron(input)
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 PCorrector::~PCorrector()
 {
-	// TODO Auto-generated destructor stub
 }
 
