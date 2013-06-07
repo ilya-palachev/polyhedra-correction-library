@@ -19,8 +19,8 @@ static double weightForAssociations(double x)
 }
 
 GSAssociator::GSAssociator(const GlobalShadeCorrector* corrector) :
-				edges(corrector->edges),
-				contours(corrector->contours),
+				edgeData(corrector->edgeData),
+				contourData(corrector->contourData),
 				parameters(corrector->parameters),
 				facetsNotAssociated(corrector->facetsNotAssociated),
 				gradient(corrector->gradient),
@@ -53,9 +53,9 @@ void GSAssociator::preinit()
 {
 	DEBUG_START;
 	int numSidesMax = 0;
-	for (int iContour = 0; iContour < contours->getNumContours(); ++iContour)
+	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
-		int numSidesCurr = contours[iContour].ns;
+		int numSidesCurr = contourData->contours[iContour].ns;
 		if (numSidesCurr > numSidesMax)
 			numSidesMax = numSidesCurr;
 	}
@@ -120,14 +120,14 @@ int GSAssociator::init()
 	if (!checkExtinction() != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	int numSides = contours[iContour].ns;
+	int numSides = contourData->contours[iContour].ns;
 	int numVerticesAdded = 0;
 	for (int iSide = 0; iSide < numSides; ++iSide)
 	{
 		polyhedronTmp->set_vertex(numVerticesAdded++,
-				contours[iContour].sides[iSide].A1);
+				contourData->contours[iContour].sides[iSide].A1);
 		polyhedronTmp->set_vertex(numVerticesAdded++,
-				contours[iContour].sides[iSide].A2);
+				contourData->contours[iContour].sides[iSide].A2);
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;
 	polyhedronTmp->my_fprint(stdout);
@@ -159,13 +159,13 @@ int GSAssociator::checkVisibility()
 
 double GSAssociator::calculateVisibility()
 {
-	int f0 = edges->edges[iEdge].f0;
-	int f1 = edges->edges[iEdge].f1;
+	int f0 = edgeData->edges[iEdge].f0;
+	int f1 = edgeData->edges[iEdge].f1;
 	Vector3d norm0 = polyhedron->facets[f0].plane.norm;
 	norm0.norm(1.);
 	Vector3d norm1 = polyhedron->facets[f1].plane.norm;
 	norm1.norm(1.);
-	Vector3d directionOfProjection = contours[iContour].plane.norm;
+	Vector3d directionOfProjection = contourData->contours[iContour].plane.norm;
 	directionOfProjection.norm(1.);
 
 	double angle0 = acos(directionOfProjection * norm0);
@@ -205,8 +205,8 @@ int GSAssociator::checkAlreadyAdded()
 {
 	DEBUG_START;
 // Check whether this association has been already added to the list
-	int numAlreadyPushedAssocs = edges->edges[iEdge].assocList.size();
-	list<EdgeContourAssociation>::iterator lastCont = edges->edges[iEdge]
+	int numAlreadyPushedAssocs = edgeData->edges[iEdge].assocList.size();
+	list<EdgeContourAssociation>::iterator lastCont = edgeData->edges[iEdge]
 			.assocList.end();
 	--lastCont;
 	int iContourLastInList = lastCont->indContour;
@@ -225,8 +225,8 @@ int GSAssociator::checkAlreadyAdded()
 int GSAssociator::checkExtinction()
 {
 	DEBUG_START;
-	int iVertex0 = edges->edges[iEdge].v0;
-	int iVertex1 = edges->edges[iEdge].v1;
+	int iVertex0 = edgeData->edges[iEdge].v0;
+	int iVertex1 = edgeData->edges[iEdge].v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS)
 	{
 		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting",
@@ -241,11 +241,11 @@ int GSAssociator::checkExtinction()
 int GSAssociator::projectEdge()
 {
 	DEBUG_START;
-	int iVertex0 = edges->edges[iEdge].v0;
-	int iVertex1 = edges->edges[iEdge].v1;
+	int iVertex0 = edgeData->edges[iEdge].v0;
+	int iVertex1 = edgeData->edges[iEdge].v1;
 	Vector3d v0 = polyhedron->vertices[iVertex0];
 	Vector3d v1 = polyhedron->vertices[iVertex1];
-	Plane planeOfProjection = contours[iContour].plane;
+	Plane planeOfProjection = contourData->contours[iContour].plane;
 	DEBUG_PRINT("v0 before projection: (%lf, %lf, %lf)", v0.x, v0.y, v0.z);
 	DEBUG_PRINT("v1 before projection: (%lf, %lf, %lf)", v1.x, v1.y, v1.z);
 	v0_projected = planeOfProjection.project(v0);
@@ -260,8 +260,8 @@ int GSAssociator::projectEdge()
 int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest)
 {
 	DEBUG_START;
-	SideOfContour* sides = contours[iContour].sides;
-	int numSides = contours[iContour].ns;
+	SideOfContour* sides = contourData->contours[iContour].sides;
+	int numSides = contourData->contours[iContour].ns;
 	double distMin;
 	Vector3d v_nearestCurr;
 	int iSideDistMin;
@@ -353,7 +353,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 	polyhedronTmp->vertices[iNearest1] = v1_nearest;
 
 	facetPart fPart;
-	int numSides = contours[iContour].ns;
+	int numSides = contourData->contours[iContour].ns;
 	int numVerticesFacet = 0;
 	int numPairsToBeAdded;
 	int iStep;
@@ -379,7 +379,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 	numVerticesFacet = 2 * numPairsToBeAdded;
 	DEBUG_PRINT("numVerticesFacet = %d", numVerticesFacet);
 	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet,
-			contours[iContour].plane, polyhedronTmp);
+			contourData->contours[iContour].plane, polyhedronTmp);
 
 	polyhedronTmp->facets[fPart].set_ind_vertex(0, iNearest0);
 	polyhedronTmp->facets[fPart].set_ind_vertex(1, iNearest1);
@@ -438,14 +438,14 @@ void GSAssociator::add(Orientation orientation)
 		DEBUG_PRINT("ORIENTATION_RIGHT");
 		break;
 	}
-	int numSides = contours[iContour].ns;
-	SideOfContour* sides = contours[iContour].sides;
+	int numSides = contourData->contours[iContour].ns;
+	SideOfContour* sides = contourData->contours[iContour].sides;
 
 	int iBeginToBeAdded, iEndToBeAdded;
 	findBounds(orientation, iBeginToBeAdded, iEndToBeAdded);
 
-	int iVertex0 = edges->edges[iEdge].v0;
-	int iVertex1 = edges->edges[iEdge].v1;
+	int iVertex0 = edgeData->edges[iEdge].v0;
+	int iVertex1 = edgeData->edges[iEdge].v1;
 	Vector3d edge = polyhedron->vertices[iVertex1]
 			- polyhedron->vertices[iVertex0];
 	double weight = calculateWeight();
@@ -464,7 +464,7 @@ void GSAssociator::add(Orientation orientation)
 				new EdgeContourAssociation(iContour, iSide, ifDirectionIsProper,
 						weight);
 		// Push it to the list
-		edges->edges[iEdge].assocList.push_back(*assocForCurrentEdge);
+		edgeData->edges[iEdge].assocList.push_back(*assocForCurrentEdge);
 	}
 	DEBUG_PRINT("Addition done");
 	DEBUG_END;
@@ -475,8 +475,8 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 		int& iResultEnd)
 {
 	DEBUG_START;
-	int numSides = contours[iContour].ns;
-	SideOfContour* sides = contours[iContour].sides;
+	int numSides = contourData->contours[iContour].ns;
+	SideOfContour* sides = contourData->contours[iContour].sides;
 
 	int iStep;
 	int numSidesProcessed;

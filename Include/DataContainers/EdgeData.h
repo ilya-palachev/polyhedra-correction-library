@@ -19,14 +19,6 @@ private:
 public:
 	EdgeData();
 	~EdgeData();
-	inline Edge& operator[] (const int i)
-	{
-		return edges[i];
-	}
-	inline int getNumEdges()
-	{
-		return numEdges;
-	}
 };
 
 #endif /* EDGEDATA_H_ */

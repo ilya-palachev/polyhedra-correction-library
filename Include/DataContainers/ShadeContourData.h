@@ -22,16 +22,6 @@ public:
 	~ShadeContourData();
 
 	void photographContours(int numContoursNeeded, double firstAngle);
-
-	inline SContour& operator[] (const int i)
-	{
-		return contours[i];
-	}
-
-	inline int getNumContours()
-	{
-		return numContours;
-	}
 };
 
 #endif /* SHADECONTOURDATA_H_ */

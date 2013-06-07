@@ -11,7 +11,7 @@ void GlobalShadeCorrector::preprocess()
 {
 	DEBUG_START;
 	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron,
-			edges);
+			edgeData);
 	edgeConstructor->run();
 	preprocessAssociations();
 	DEBUG_END;
@@ -23,7 +23,7 @@ void GlobalShadeCorrector::preprocessAssociations()
 	GSAssociator associator(this);
 	associator.preinit();
 
-	for (int iContour = 0; iContour < contours->getNumContours(); ++iContour)
+	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
 		for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 		{
@@ -38,9 +38,9 @@ void GlobalShadeCorrector::preprocessAssociations()
 		}
 	}
 	/* Print found associations : */
-	for (int iEdge = 0; iEdge < edges->numEdges; ++iEdge)
+	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-		edges->edges[iEdge].my_fprint(stdout);
+		edgeData->edges[iEdge].my_fprint(stdout);
 	}
 	DEBUG_END;
 }
