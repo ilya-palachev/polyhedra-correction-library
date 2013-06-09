@@ -29,7 +29,7 @@ nameFigure parse_figureName(char* figureNameInput);
 nameMethod parse_methodName(char* methodNameInput);
 int parse_commandLine(int argc, char** argv, testParameters& parameters);
 void makePolyhedron(Polyhedron& poly, nameFigure figureParsed);
-inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
+inline void moveFacetRandom(Polyhedron& polyhedron, double maxMoveDelta,
 		int ifacet);
 
 int main(int argc, char** argv)
@@ -40,9 +40,9 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	Polyhedron polyhedron;
 	makePolyhedron(polyhedron, parameters.figure);
-	ShadeContourData* contourData = new ShadeContourData(polyhedron);
+	ShadeContourData* contourData = new ShadeContourData(&polyhedron);
 	ShadeContourConstructor* scConstructor = new ShadeContourConstructor(
-			polyhedron, contourData);
+			&polyhedron, contourData);
 	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
