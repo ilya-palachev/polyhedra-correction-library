@@ -13,6 +13,12 @@ EdgeData::EdgeData() :
 {
 }
 
+EdgeData::EdgeData(int numEdgesMax) :
+				edges(new Edge[numEdgesMax]),
+				numEdges(0)
+{
+}
+
 EdgeData::~EdgeData()
 {
 	if (edges != NULL)
@@ -22,8 +28,7 @@ EdgeData::~EdgeData()
 	}
 }
 
-void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0,
-		int f1)
+void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 {
 	if (numEdges >= numEdgesMax)
 	{
@@ -46,8 +51,7 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0,
 	}
 
 	int retvalfind = findEdge(v0, v1);
-	if (edges[retvalfind].v0 == v0 &&
-			edges[retvalfind].v1 == v1)
+	if (edges[retvalfind].v0 == v0 && edges[retvalfind].v1 == v1)
 	{
 		return;
 	}
@@ -96,6 +100,4 @@ int EdgeData::findEdge(int v0, int v1)
 	}
 	return last;
 }
-
-
 

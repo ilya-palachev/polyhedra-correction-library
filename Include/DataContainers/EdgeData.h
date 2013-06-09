@@ -18,6 +18,7 @@ public:
 	int numEdges;
 
 	EdgeData();
+	EdgeData(int numEdgesMax);
 	~EdgeData();
 
 	int findEdge(int v0, int v1);

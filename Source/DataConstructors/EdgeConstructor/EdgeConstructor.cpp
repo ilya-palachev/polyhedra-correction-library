@@ -20,12 +20,13 @@ EdgeConstructor::~EdgeConstructor()
 void EdgeConstructor::run()
 {
 	DEBUG_START;
-	int numEdgesMax = edgeData->numEdges = 0;
+	int numEdgesMax = 0;
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		numEdgesMax += polyhedron->facets[iFacet].numVertices;
 	}
 	numEdgesMax /= 2;
+	edgeData = new EdgeData(numEdgesMax);
 	DEBUG_PRINT("numEdgesMax = %d", numEdgesMax);
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
