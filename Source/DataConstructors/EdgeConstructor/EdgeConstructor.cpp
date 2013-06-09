@@ -8,8 +8,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeConstructor::EdgeConstructor(Polyhedron* p, EdgeData* e) :
-				PDataConstructor(p),
-				edgeData(e)
+				PDataConstructor(p)
 {
 }
 
@@ -17,7 +16,7 @@ EdgeConstructor::~EdgeConstructor()
 {
 }
 
-void EdgeConstructor::run()
+void EdgeConstructor::run(EdgeData* &edgeData)
 {
 	DEBUG_START;
 	int numEdgesMax = 0;

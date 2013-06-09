@@ -13,13 +13,10 @@
  */
 class EdgeConstructor : public PDataConstructor
 {
-private:
-	EdgeData* edgeData;
-
 public:
 	EdgeConstructor(Polyhedron* p, EdgeData* e);
 	~EdgeConstructor();
-	void run();
+	void run(EdgeData* &edgeData);
 };
 
 #endif /* EDGECONSTRUCTOR_H_ */
