@@ -16,9 +16,6 @@ class EdgeConstructor : public PDataConstructor
 private:
 	EdgeData* edgeData;
 
-	int findEdge(int v0, int v1);
-	void addEdge(int numEdgesMax, int v0, int v1, int f0, int f1);
-
 public:
 	EdgeConstructor(Polyhedron* p, EdgeData* e);
 	~EdgeConstructor();

@@ -113,7 +113,7 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 		int numAssociations = 0;
 		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 		{
-			int edgeid = findEdge(indVertices[iVertex],
+			int edgeid = edgeData->findEdge(indVertices[iVertex],
 					indVertices[iVertex + 1]);
 			numAssociations += edgeData->edges[edgeid].assocList.size();
 		}
@@ -275,7 +275,7 @@ void GlobalShadeCorrector::calculateGradient()
 			double cn = planePrevNeighbour.norm.z;
 			double dn = planePrevNeighbour.dist;
 
-			int edgeid = findEdge(v0, v1);
+			int edgeid = edgeData->findEdge(v0, v1);
 
 			if (edgeid == -1)
 			{

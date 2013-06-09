@@ -19,8 +19,6 @@ public:
 	PCorrector();
 	PCorrector(Polyhedron* input);
 	virtual ~PCorrector();
-
-	virtual void runCorrection();
 };
 
 #endif /* PCORRECTOR_H_ */

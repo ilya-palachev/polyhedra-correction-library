@@ -31,7 +31,7 @@ void GlobalShadeCorrector::preprocessAssociations()
 			int* indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 			{
-				int iEdge = findEdge(indVertices[iVertex],
+				int iEdge = edgeData->findEdge(indVertices[iVertex],
 						indVertices[iVertex + 1]);
 				associator.run(iContour, iFacet, iEdge);
 			}
