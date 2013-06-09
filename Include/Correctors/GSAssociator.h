@@ -27,9 +27,6 @@ private:
 	int iSideDistMin0;
 	int iSideDistMin1;
 
-	void preinit();
-
-	void run(int iContourIn, int iFacetIn, int iEdgeIn);
 
 	int init();
 	int checkVisibility();
@@ -49,8 +46,13 @@ private:
 	double calculateWeight();
 
 public:
-	GSAssociator(const GlobalShadeCorrector* corrector);
+	GSAssociator(GlobalShadeCorrector* corrector);
 	~GSAssociator();
+
+	void preinit();
+
+	void run(int iContourIn, int iFacetIn, int iEdgeIn);
+
 };
 
 

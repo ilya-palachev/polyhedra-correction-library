@@ -7,7 +7,7 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-PDataConstructor::PDataConstructor(const Polyhedron* p) :
+PDataConstructor::PDataConstructor(Polyhedron* p) :
 				polyhedron(p)
 {
 }

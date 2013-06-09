@@ -7,9 +7,9 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-ShadeContourConstructor::ShadeContourConstructor(const Polyhedron* p,
-		const ShadeContourData* d) :
-				polyhedron(p),
+ShadeContourConstructor::ShadeContourConstructor(Polyhedron* p,
+		ShadeContourData* d) :
+				PDataConstructor(p),
 				data(d),
 				bufferBool(NULL),
 				bufferInt0(NULL),
@@ -189,7 +189,7 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 	DEBUG_PRINT("Allocating \"sides\"");
 	outputContour->ns = numVisibleEdges;
 	outputContour->plane = planeOfProjection;
-	outputContour->poly = this;
+	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
 
 	for (int i = 0; i < numVisibleEdges; ++i)

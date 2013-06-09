@@ -33,13 +33,11 @@ public:
 
 	int dim;
 
+	GlobalShadeCorrector();
 	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd);
 
 	void preprocess();
 	void preprocessAssociations();
-
-	int findEdge(int v0, int v1);
-	void addEdge(int numEdgesMax, int v0, int v1, int f0, int f1);
 
 	void findNotAssociatedFacets();
 
@@ -142,7 +140,7 @@ public:
 
 public:
 	GlobalShadeCorrector(Polyhedron* input);
-	~GlobalShadeCorrector();
+	virtual ~GlobalShadeCorrector();
 
 	void runCorrection();
 };

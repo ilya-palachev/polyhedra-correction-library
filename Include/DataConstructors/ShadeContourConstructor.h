@@ -27,7 +27,7 @@ private:
 			Plane planeOfProjection, int ifacet);
 
 public:
-	ShadeContourConstructor(const Polyhedron* p, const ShadeContourData* d);
+	ShadeContourConstructor(Polyhedron* p, ShadeContourData* d);
 	~ShadeContourConstructor();
 	void run(int numContoursNeeded, double firstAngle);
 };

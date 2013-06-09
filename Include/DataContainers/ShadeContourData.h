@@ -13,7 +13,7 @@
  */
 class ShadeContourData : public PData
 {
-private:
+public:
 	int numContours;
 	SContour* contours;
 

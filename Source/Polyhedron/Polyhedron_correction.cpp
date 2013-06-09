@@ -5,6 +5,8 @@
  *      Author: iliya
  */
 
+#include "PolyhedraCorrectionLibrary.h"
+
 void Polyhedron::correctGlobal(ShadeContourData* contourData)
 {
 	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(this, contourData);

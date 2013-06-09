@@ -13,9 +13,10 @@
  */
 class PCorrector
 {
-private:
-	Polyhedron* polyhedron;
 public:
+	Polyhedron* polyhedron;
+
+	PCorrector();
 	PCorrector(Polyhedron* input);
 	virtual ~PCorrector();
 

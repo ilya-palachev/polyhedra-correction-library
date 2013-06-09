@@ -16,7 +16,7 @@ class PDataConstructor
 public:
 	Polyhedron* polyhedron;
 
-	PDataConstructor(const Polyhedron* p);
+	PDataConstructor(Polyhedron* p);
 	virtual ~PDataConstructor();
 };
 

@@ -7,8 +7,21 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
+GlobalShadeCorrector::GlobalShadeCorrector() :
+				PCorrector(),
+				edgeData(NULL),
+				contourData(NULL),
+				parameters(
+				{ EPS_LOOP_STOP_DEFAULT }),
+				facetsNotAssociated(NULL),
+				gradient(NULL),
+				prevPlanes(NULL),
+				dim(0)
+{
+}
+
 GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd) :
-				polyhedron(p),
+				PCorrector(p),
 				edgeData(NULL),
 				contourData(scd),
 				parameters(
@@ -23,6 +36,9 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd)
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
 }
+
+const double EPS_MAX_ERROR = 1e-6;
+const double EPS_FOR_PRINT = 1e-15;
 
 void GlobalShadeCorrector::runCorrection()
 {
@@ -173,6 +189,8 @@ double GlobalShadeCorrector::calculateFunctional()
 
 }
 
+const double DEFAULT_GRADIENT_STEP = 1e-4;
+
 void GlobalShadeCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
@@ -273,7 +291,8 @@ void GlobalShadeCorrector::calculateGradient()
 				int curNearestSide = itCont->indNearestSide;
 				double weight = itCont->weight;
 				SideOfContour * sides = contourData->contours[curContour].sides;
-				Plane planeOfProjection = contourData->contours[curContour].plane;
+				Plane planeOfProjection = contourData->contours[curContour]
+						.plane;
 
 				double enumerator = -planePrevNeighbour.norm
 						* planeOfProjection.norm;

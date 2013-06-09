@@ -8,7 +8,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeConstructor::EdgeConstructor(Polyhedron* p, EdgeData* e) :
-				polyhedron(p),
+				PDataConstructor(p),
 				edgeData(e)
 {
 }

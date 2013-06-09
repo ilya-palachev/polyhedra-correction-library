@@ -7,6 +7,11 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
+PCorrector::PCorrector() :
+				polyhedron(NULL)
+{
+}
+
 PCorrector::PCorrector(Polyhedron* input) :
 				polyhedron(input)
 {

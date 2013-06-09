@@ -18,14 +18,8 @@ static double weightForAssociations(double x)
 	return x * x;
 }
 
-GSAssociator::GSAssociator(const GlobalShadeCorrector* corrector) :
-				edgeData(corrector->edgeData),
-				contourData(corrector->contourData),
-				parameters(corrector->parameters),
-				facetsNotAssociated(corrector->facetsNotAssociated),
-				gradient(corrector->gradient),
-				prevPlanes(corrector->prevPlanes),
-				dim(corrector->dim),
+GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
+				GlobalShadeCorrector(*corrector),
 				iContour(INT_NOT_INITIALIZED),
 				iFacet(INT_NOT_INITIALIZED),
 				iEdge(INT_NOT_INITIALIZED),
@@ -65,6 +59,9 @@ void GSAssociator::preinit()
 	bufDouble = new double[numSidesMax + 1];
 	DEBUG_END;
 }
+
+const double EPSILON_MIN_AREA_ABS = 1e-3;
+const double EPSILON_MIN_AREA_REL = 0.2;
 
 void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 {
