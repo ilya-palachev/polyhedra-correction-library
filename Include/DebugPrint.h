@@ -17,7 +17,7 @@
 #define COLOUR_WHITE  	"\x1B[37m"
 
 #define WHERESTR  "[%s: %d]: "
-#define WHEREARG  __func__, __LINE__
+#define WHEREARG  __PRETTY_FUNCTION__, __LINE__
 #define STDERR_PRINT(...)       fprintf(stderr, __VA_ARGS__)
 
 #ifndef NDEBUG
