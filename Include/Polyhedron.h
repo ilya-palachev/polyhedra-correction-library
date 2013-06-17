@@ -1,5 +1,5 @@
 #ifndef POLYHEDRON_CLASS_H
-#define	POLYHEDRON_CLASS_H
+#define	 POLYHEDRON_CLASS_H
 
 const int INT_NOT_INITIALIZED = -RAND_MAX;
 
@@ -90,15 +90,11 @@ public:
 	//Polyhedron_intersection.cpp
 	void set_isUsed(int v0, int v1, bool val);
 	void intersect(Plane iplane);
-	void intersect_test(int facet_id0, int facet_id1);
 
 	//Polyhedron_join_facets.cpp
-	void join_facets_create_vertex_list(int facet_id0, int facet_id1, int nv,
-			int* vertex_list, int* edge_list);
 	void list_squares_method(int nv, int* vertex_list, Plane* plane);
 	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
 
-	void join_create_first_facet(int fid0, int fid1);
 	void delete_vertex_polyhedron(int v);
 	int add_vertex(Vector3d& vec);
 	void set_vertex(int position, Vector3d vec);
