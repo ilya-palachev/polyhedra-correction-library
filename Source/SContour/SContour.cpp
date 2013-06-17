@@ -42,3 +42,26 @@ SContour::~SContour()
 	}
 }
 
+SContour& SContour::operator =(const SContour& scontour)
+{
+	id = scontour.id;
+	ns = scontour.ns;
+	plane = scontour.plane;
+	poly = scontour.poly;
+
+	if (sides)
+	{
+		delete[] sides;
+		sides = NULL;
+	}
+
+	sides = new SideOfContour[ns];
+
+	for (int iSide = 0; iSide < ns; ++iSide)
+	{
+		sides[iSide] = scontour.sides[iSide];
+	}
+
+	return *this;
+}
+

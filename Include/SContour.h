@@ -30,6 +30,8 @@ public:
 	SContour(const SContour& orig);
 	~SContour();
 
+	SContour& operator =(const SContour& scontour);
+
 	// SContour_io.cpp :
 
 	void my_fprint(FILE* file);

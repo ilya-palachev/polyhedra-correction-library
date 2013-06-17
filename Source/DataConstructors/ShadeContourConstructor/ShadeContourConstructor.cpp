@@ -51,6 +51,12 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 	bufferInt1 = new int[edgeData->numEdges];
 
 	data->numContours = numContoursNeeded;
+	if (data->contours)
+	{
+		delete[] data->contours;
+		data->contours = NULL;
+	}
+	data->contours = new SContour[data->numContours];
 
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
