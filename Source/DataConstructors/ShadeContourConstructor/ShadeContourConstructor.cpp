@@ -46,9 +46,9 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 	edgeConstructor->run(edgeData);
 
 	DEBUG_PRINT("Allocating 3 arrays of length %d", edgeData->numEdges);
-	bool* bufferBool = new bool[edgeData->numEdges];
-	int* bufferInt0 = new int[edgeData->numEdges];
-	int* bufferInt1 = new int[edgeData->numEdges];
+	bufferBool = new bool[edgeData->numEdges];
+	bufferInt0 = new int[edgeData->numEdges];
+	bufferInt1 = new int[edgeData->numEdges];
 
 	data->numContours = numContoursNeeded;
 
