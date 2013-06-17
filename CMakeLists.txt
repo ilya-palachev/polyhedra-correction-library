@@ -98,7 +98,6 @@ add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(polyhedronCorrection SHARED ${SOURCE_polyhedronCorrection})
 
 target_link_libraries(polyhedronCorrection 
-lapacke 
 arrayOperations 
 gaussString 
 lsm 
