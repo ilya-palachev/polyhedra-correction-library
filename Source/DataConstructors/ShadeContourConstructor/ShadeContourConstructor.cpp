@@ -50,6 +50,8 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 	int* bufferInt0 = new int[edgeData->numEdges];
 	int* bufferInt1 = new int[edgeData->numEdges];
 
+	data->numContours = numContoursNeeded;
+
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
 		double angle = firstAngle + 2 * M_PI * (iContour) / data->numContours;
