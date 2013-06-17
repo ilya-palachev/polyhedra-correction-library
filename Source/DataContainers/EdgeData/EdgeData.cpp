@@ -30,11 +30,8 @@ EdgeData::~EdgeData()
 
 void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 {
-	if (numEdges >= numEdgesMax)
-	{
-		DEBUG_PRINT("Warning. List is overflow\n");
-		return;
-	}
+	DEBUG_START;
+	DEBUG_PRINT("Trying to add edge (%d, %d) to the edge list", v0, v1);
 
 	if (v0 > v1)
 	{
@@ -53,10 +50,17 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 	int retvalfind = findEdge(v0, v1);
 	if (edges[retvalfind].v0 == v0 && edges[retvalfind].v1 == v1)
 	{
+		DEBUG_PRINT("Edge (%d, %d) already presents in the list!", v0, v1);
+		DEBUG_END;
 		return;
 	}
 
-// If not, add current edge to array of edges :
+	if (numEdges >= numEdgesMax)
+	{
+		DEBUG_PRINT("Warning. List is overflow\n");
+		return;
+	}
+
 	for (int i = numEdges; i > retvalfind; --i)
 	{
 		edges[i] = edges[i - 1];
@@ -67,6 +71,9 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 	edges[retvalfind].f1 = f1;
 	edges[retvalfind].id = numEdges;
 	++numEdges;
+	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edge list",
+			v0, v1);
+	DEBUG_END;
 }
 
 int EdgeData::findEdge(int v0, int v1)
