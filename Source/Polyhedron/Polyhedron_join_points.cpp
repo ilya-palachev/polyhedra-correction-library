@@ -275,7 +275,7 @@ int Polyhedron::join_points_inner_pair(int id, int fid, int id0, int id1,
 		}
 		printf("Слияние завершено\n");
 		delete_empty_facets();
-		preprocess_polyhedron();
+		preprocessAdjacency();
 		return 1;
 	}
 	else

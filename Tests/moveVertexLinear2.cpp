@@ -69,7 +69,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.test_consections(true);
 
 //    printf("simpify_vertex:\n");

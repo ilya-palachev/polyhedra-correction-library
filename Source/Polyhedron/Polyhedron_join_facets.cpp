@@ -31,7 +31,7 @@ void Polyhedron::join_facets(int fid0, int fid1)
 	printf("III ). Дополнительная предобработка многогранника\n");
 	facets[fid0] = join_facet;
 	facets[fid1] = Facet();
-	preprocess_polyhedron();
+	preprocessAdjacency();
 
 	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
 	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
@@ -39,7 +39,7 @@ void Polyhedron::join_facets(int fid0, int fid1)
 
 	// V ). Предобработка многогранника после поднятия
 	printf("V ). Предобработка многогранника после поднятия\n");
-	preprocess_polyhedron();
+	preprocessAdjacency();
 
 	//     VI). Рассечение многогранника плоскостью
 	printf("VI). Рассечение многогранника плоскостью\n");
@@ -75,7 +75,7 @@ void Polyhedron::multi_join_facets(int n, int *fid)
 
 	// III ). Дополнительная предобработка многогранника
 	printf("III ). Дополнительная предобработка многогранника\n");
-	preprocess_polyhedron();
+	preprocessAdjacency();
 	facets[fid[0]].my_fprint_all(stdout);
 
 	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
@@ -84,7 +84,7 @@ void Polyhedron::multi_join_facets(int n, int *fid)
 
 	// V ). Предобработка многогранника после поднятия
 	printf("V ). Предобработка многогранника после поднятия\n");
-	preprocess_polyhedron();
+	preprocessAdjacency();
 
 	//     VI). Рассечение многогранника плоскостью
 //    printf("VI). Рассечение многогранника плоскостью\n");
@@ -442,7 +442,7 @@ void Polyhedron::multi_join_facets_build_index(int n, int* fid,
 	}
 	facets[fid[0]].my_fprint_all(stdout);
 
-	preprocess_polyhedron();
+	preprocessAdjacency();
 	printf("------End of preprocess_polyhedron...------\n");
 	index = facets[fid[0]].indVertices;
 	del = new bool[numVertices];
@@ -572,7 +572,7 @@ void Polyhedron::join_facets_rise(int fid0)
 		printf("Used plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0\n",
 				plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 
-		preprocess_polyhedron();
+		preprocessAdjacency();
 	}
 
 	printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
@@ -639,7 +639,7 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin)
 			{
 				delete_vertex_polyhedron(index[i + 1]);
 			}
-			preprocess_polyhedron();
+			preprocessAdjacency();
 			--i;
 			facets[fid0].my_fprint_all(stdout);
 			facets[fr2].my_fprint_all(stdout);
@@ -1720,7 +1720,7 @@ void Polyhedron::clear_unused()
 	numFacets = numf_used;
 
 	//    my_fprint(stdout);
-	preprocess_polyhedron();
+	preprocessAdjacency();
 
 	if (index_vertex != NULL)
 		delete[] index_vertex;

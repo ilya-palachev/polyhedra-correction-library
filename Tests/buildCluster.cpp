@@ -113,8 +113,8 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 		break;
 	}
 
-	poly1.preprocess_polyhedron();
-	poly2.preprocess_polyhedron();
+	poly1.preprocessAdjacency();
+	poly2.preprocessAdjacency();
 
 	double Jxx1, Jyy1, Jzz1, Jxy1, Jyz1, Jxz1;
 	double Jxx2, Jyy2, Jzz2, Jxy2, Jyz2, Jxz2;
@@ -219,7 +219,7 @@ void test_J11(const char* name, int type)
 		return;
 		break;
 	}
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 //    vol = poly.volume();
 
 	double Jxx, Jyy, Jzz, Jxy, Jyz, Jxz;
@@ -239,7 +239,7 @@ void test_J11(const char* name, int type)
 	printf("v1 = (%lf, %lf, %lf)\n", v1.x, v1.y, v1.z);
 	printf("v2 = (%lf, %lf, %lf)\n\n", v2.x, v2.y, v2.z);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.fprint_ply_scale(1000., file_name_out, "J11");
 //    
 //    double xc, yc, zc;
@@ -292,7 +292,7 @@ void test_cluster(const char* name, int type)
 		break;
 	}
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 
 	int i, ncluster;
 	double p;
@@ -338,7 +338,7 @@ void test_viev(const char* name, int type)
 		break;
 	}
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	double v = poly.volume();
 	double a = poly.area();
 	printf("volume = %lf\tarea = %lf\n", v, a);
@@ -388,8 +388,8 @@ void get_statistics_deform_linear(const char* name, int type)
 		break;
 	}
 	//    printf("Scanning ended...\n");
-	poly.preprocess_polyhedron();
-	poly1.preprocess_polyhedron();
+	poly.preprocessAdjacency();
+	poly1.preprocessAdjacency();
 	//    printf("Preprocessing ended...\n");
 	numv = poly.numVertices;
 
@@ -511,7 +511,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.deform_w(id, delta);
 
 	time_t seconds = time(NULL);
@@ -587,7 +587,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.test_consections(true);
 	poly.deform_linear(id, delta);
 	poly.test_consections(true);
@@ -665,9 +665,9 @@ void test_BuildClaster()
 	poly2.fscan_default_1(file_name_in2);
 	poly3.fscan_default_1(file_name_in3);
 
-	poly1.preprocess_polyhedron();
-	poly2.preprocess_polyhedron();
-	poly3.preprocess_polyhedron();
+	poly1.preprocessAdjacency();
+	poly2.preprocessAdjacency();
+	poly3.preprocessAdjacency();
 
 	double v = poly1.volume();
 	double s = poly1.area();
@@ -767,7 +767,7 @@ void test_BuildTreeNorm(const char* name, int type)
 		return;
 		break;
 	}
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 
 	double v = poly.volume();
 	double s = poly.area();

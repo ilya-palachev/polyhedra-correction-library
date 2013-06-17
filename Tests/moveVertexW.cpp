@@ -58,7 +58,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.deform_w(id, delta);
 
 	time_t seconds = time(NULL);

@@ -72,7 +72,7 @@ public:
 			const char *comment);
 
 	//Polyhedron_preprocess.cpp
-	void preprocess_polyhedron();
+	void preprocessAdjacency();
 
 	//Polyhedron_figures.cpp
 

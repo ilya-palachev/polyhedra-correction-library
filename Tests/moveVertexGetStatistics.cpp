@@ -54,8 +54,8 @@ void get_statistics_deform_linear(const char* name, int type)
 		break;
 	}
 	//    printf("Scanning ended...\n");
-	poly.preprocess_polyhedron();
-	poly1.preprocess_polyhedron();
+	poly.preprocessAdjacency();
+	poly1.preprocessAdjacency();
 	//    printf("Preprocessing ended...\n");
 	numv = poly.numVertices;
 
@@ -165,8 +165,8 @@ void get_statistics_deform_linear_test(const char* name, int type)
 		break;
 	}
 	//    printf("Scanning ended...\n");
-	poly.preprocess_polyhedron();
-	poly1.preprocess_polyhedron();
+	poly.preprocessAdjacency();
+	poly1.preprocessAdjacency();
 	//    printf("Preprocessing ended...\n");
 	numv = poly.numVertices;
 

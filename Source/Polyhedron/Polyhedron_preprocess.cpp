@@ -1,6 +1,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::preprocess_polyhedron()
+void Polyhedron::preprocessAdjacency()
 {
 	DEBUG_START;
 	int i;

@@ -67,7 +67,7 @@ void test_multi_join_facets(const char* name, int type, int n, int *fid)
 	fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.multi_join_facets(n, fid);
 	//	poly.join_create_first_facet(fid0, fid1);
 

@@ -40,7 +40,7 @@ ShadeContourConstructor::~ShadeContourConstructor()
 void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 {
 	DEBUG_START;
-	polyhedron->preprocess_polyhedron();
+	polyhedron->preprocessAdjacency();
 	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron,
 			edgeData);
 	edgeConstructor->run(edgeData);

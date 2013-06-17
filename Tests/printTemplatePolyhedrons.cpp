@@ -33,7 +33,7 @@ void test_figures()
 	sprintf(file_name, "../poly-data-out/pyramid - %d-%d-%d %d:%d:%d.txt",
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.fprint_my_format(file_name);
 #ifdef NOT_DEBUG
 	poly.my_fprint("poly-data-out/my_fprint.txt");
@@ -53,7 +53,7 @@ void test_figures()
 	sprintf(file_name, "../poly-data-out/prism - %d-%d-%d %d:%d:%d.txt",
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 #ifdef NOT_DEBUG
 	poly.fprint_my_format(file_name);
 #endif

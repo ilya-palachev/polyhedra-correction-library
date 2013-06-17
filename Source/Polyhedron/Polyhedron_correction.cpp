@@ -9,7 +9,7 @@
 
 void Polyhedron::correctGlobal(ShadeContourData* contourData)
 {
-	preprocess_polyhedron();
+	preprocessAdjacency();
 	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(this, contourData);
 	gsCorrector->runCorrection();
 }

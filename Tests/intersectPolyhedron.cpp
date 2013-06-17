@@ -69,7 +69,7 @@ void test(const char* name, int type, double a, double b, double c, double d)
 	fprintf(stdout, "y [%lf,  %lf]\n", ymin, ymax);
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
-	poly.preprocess_polyhedron();
+	poly.preprocessAdjacency();
 	poly.intersect(Plane(Vector3d(a, b, c), d));
 
 	time_t seconds = time(NULL);
