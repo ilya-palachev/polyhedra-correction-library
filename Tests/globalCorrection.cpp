@@ -28,8 +28,8 @@ void printUsage();
 nameFigure parse_figureName(char* figureNameInput);
 nameMethod parse_methodName(char* methodNameInput);
 int parse_commandLine(int argc, char** argv, testParameters& parameters);
-void makePolyhedron(Polyhedron& poly, nameFigure figureParsed);
-inline void moveFacetRandom(Polyhedron& polyhedron, double maxMoveDelta,
+Polyhedron* makePolyhedron(nameFigure figureParsed);
+inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 		int ifacet);
 
 int main(int argc, char** argv)
@@ -38,15 +38,14 @@ int main(int argc, char** argv)
 
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	Polyhedron polyhedron;
-	makePolyhedron(polyhedron, parameters.figure);
-	ShadeContourData* contourData = new ShadeContourData(&polyhedron);
+	Polyhedron* polyhedron = makePolyhedron(parameters.figure);
+	ShadeContourData* contourData = new ShadeContourData(polyhedron);
 	ShadeContourConstructor* scConstructor = new ShadeContourConstructor(
-			&polyhedron, contourData);
+			polyhedron, contourData);
 	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
-	polyhedron.correctGlobal(contourData);
+	polyhedron->correctGlobal(contourData);
 
 	return EXIT_SUCCESS;
 }
@@ -145,25 +144,22 @@ nameMethod parse_methodName(char* methodNameInput)
 	}
 }
 
-void makePolyhedron(Polyhedron& poly, nameFigure figureParsed)
+Polyhedron* makePolyhedron(nameFigure figureParsed)
 {
 	switch (figureParsed)
 	{
 	case FIGURE_CUBE:
-		poly.makeCube(1., 0., 0., 0.);
-		break;
+		return new Cube(1., 0., 0., 0.);
 	case FIGURE_PYRAMID:
-		poly.makePyramid(3, 1., 1.);
-		break;
+		return new Pyramid(3, 1., 1.);
 	case FIGURE_PRISM:
-		poly.makePrism(3, 1., 1.);
-		break;
+		return new Prism(3, 1., 1.);
 	case FIGURE_CUBE_CUTTED:
-		poly.makeCubeCutted();
-		break;
+		return new CubeCutted();
 	default:
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
+		return NULL;
 	}
 }
 
@@ -181,10 +177,10 @@ static double genRandomDouble(double maxDelta)
 	return randomDouble;
 }
 
-inline void moveFacetRandom(Polyhedron& polyhedron, double maxMoveDelta,
+inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 		int ifacet)
 {
-	Plane& plane = polyhedron.facets[ifacet].plane;
+	Plane& plane = polyhedron->facets[ifacet].plane;
 	plane.norm.x += genRandomDouble(maxMoveDelta);
 	plane.norm.y += genRandomDouble(maxMoveDelta);
 	plane.norm.z += genRandomDouble(maxMoveDelta);

@@ -22,6 +22,10 @@ set (SOURCE_polyhedronCorrection
 Source/MatrixDistNorm/MatrixDistNorm.cpp
 Source/SideOfContour/SideOfContour_io.cpp
 Source/SideOfContour/SideOfContour.cpp
+Source/SpecificPolyhedrons/Cube.cpp
+Source/SpecificPolyhedrons/Prism.cpp
+Source/SpecificPolyhedrons/Pyramid.cpp
+Source/SpecificPolyhedrons/CubeCutted.cpp
 Source/TreeClusterNormNode/TreeClusterNormNode.cpp
 Source/SpherePoint/SpherePoint.cpp
 Source/VertexInfo/VertexInfo_intersection.cpp
@@ -45,7 +49,6 @@ Source/Polyhedron/Polyhedron_deform_linear.cpp
 Source/Polyhedron/Polyhedron_intersection_j.cpp
 Source/Polyhedron/Polyhedron_preprocess.cpp
 Source/Polyhedron/Polyhedron_correction.cpp
-Source/Polyhedron/Polyhedron_figures.cpp
 Source/Polyhedron/Polyhedron_join_facets.cpp
 Source/Polyhedron/Polyhedron_test_consections.cpp
 Source/Polyhedron/Polyhedron_io.cpp

@@ -16,6 +16,13 @@
 using namespace std;
 
 class Polyhedron;
+
+/* Specific polyhedrons. For testing purposes. */
+class Cube;
+class Pyramid;
+class Prism;
+class CubeCutted;
+
 class Facet;
 class VertexInfo;
 class EdgeList;
@@ -44,6 +51,11 @@ class GlobalShadeCorrector;
 class GSAssociator;
 
 #include "Polyhedron.h"
+#include "SpecificPolyhedrons/Cube.h"
+#include "SpecificPolyhedrons/Pyramid.h"
+#include "SpecificPolyhedrons/Prism.h"
+#include "SpecificPolyhedrons/CubeCutted.h"
+
 #include "VertexInfo.h"
 #include "EdgeList.h"
 #include "Facet.h"
