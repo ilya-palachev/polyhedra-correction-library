@@ -114,7 +114,7 @@ int GSAssociator::init()
 
 	projectEdge();
 
-	if (!checkExtinction() != EXIT_SUCCESS)
+	if (checkExtinction() != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	int numSides = contourData->contours[iContour].ns;
