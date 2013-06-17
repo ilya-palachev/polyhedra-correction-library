@@ -16,6 +16,7 @@ ShadeContourData::ShadeContourData(const Polyhedron* p) :
 
 ShadeContourData::~ShadeContourData()
 {
+	DEBUG_PRINT("Shade contour data is being deleted now!");
 	if (contours != NULL)
 	{
 		delete[] contours;
