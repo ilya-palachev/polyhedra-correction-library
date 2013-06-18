@@ -114,29 +114,3 @@ void Polyhedron::delete_empty_facets()
 		}
 	}
 }
-
-void Polyhedron::deleteContent()
-{
-	DEBUG_START;
-	if (vertices != NULL)
-	{
-		delete[] vertices;
-		vertices = NULL;
-	}
-	if (facets != NULL)
-	{
-		delete[] facets;
-		facets = NULL;
-	}
-	if (vertexInfos != NULL)
-	{
-		delete[] vertexInfos;
-		vertexInfos = NULL;
-	}
-	if (edgeLists != NULL)
-	{
-		delete[] edgeLists;
-		edgeLists = NULL;
-	}
-	DEBUG_END;
-}

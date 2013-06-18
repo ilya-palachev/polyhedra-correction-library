@@ -74,19 +74,6 @@ public:
 	//Polyhedron_preprocess.cpp
 	void preprocessAdjacency();
 
-	//Polyhedron_figures.cpp
-
-	void deleteContent();
-
-	void makeCube(double height, double xCenter, double yCenter,
-			double zCenter);
-
-	void makePyramid(int numVerticesBase, double height, double radius);
-
-	void makePrism(int numVerticesBase, double height, double radius);
-
-	void makeCubeCutted();
-
 	//Polyhedron_intersection.cpp
 	void set_isUsed(int v0, int v1, bool val);
 	void intersect(Plane iplane);
