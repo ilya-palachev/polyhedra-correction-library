@@ -17,20 +17,6 @@ void Polyhedron::coalesceFacets(int n, int* fid)
 	delete coalescer;
 }
 
-int Polyhedron::appendVertex(Vector3d& vec)
-{
-	Vector3d* vertex1;
-	vertex1 = new Vector3d[numVertices + 1];
-	for (int i = 0; i < numVertices; ++i)
-		vertex1[i] = vertices[i];
-	vertex1[numVertices] = vec;
-	if (vertices != NULL)
-		delete[] vertices;
-	vertices = vertex1;
-	++numVertices;
-	return numVertices - 1;
-}
-
 void Polyhedron::changeVertex(int position, Vector3d vec)
 {
 	if (position >= numVertices)

@@ -217,7 +217,7 @@ int Coalescer::buildIndex(int fid0, int fid1)
 			del[index1[i]] = true;
 	for (i = 0; i < polyhedron->numVertices; ++i)
 		if (del[i])
-			polyhedron->deleteVertexInPolyhedron(i);
+			deleteVertexInPolyhedron(i);
 
 	// 8. По построенному списку создается грань
 	coalescedFacet = Facet(fid0, nv, plane, index, polyhedron, true);
@@ -368,7 +368,7 @@ int Coalescer::buildIndex(int n, int* fid)
 	{
 		if (del[i])
 		{
-			polyhedron->deleteVertexInPolyhedron(i);
+			deleteVertexInPolyhedron(i);
 		}
 	}
 
@@ -613,11 +613,11 @@ int Coalescer::riseFind(int fid0)
 			DEBUG_PRINT(" - Вместо вершины %d  в главной грани пишем вершину %d",
 					index[i], polyhedron->facets[fr1].indVertices[pos]);
 			index[i] = polyhedron->facets[fr1].indVertices[pos];
-			polyhedron->deleteVertexInPolyhedron(tmp);
+			deleteVertexInPolyhedron(tmp);
 			polyhedron->facets[fr1] = Facet();
 			if (polyhedron->vertexInfos[index[i + 1]].numFacets == 3)
 			{
-				polyhedron->deleteVertexInPolyhedron(index[i + 1]);
+				deleteVertexInPolyhedron(index[i + 1]);
 			}
 			polyhedron->preprocessAdjacency();
 			--i;
@@ -861,7 +861,7 @@ void Coalescer::risePoint(int fid0, int imin)
 			{
 
 				// Создать новую вершину с номером ind_new
-				ind_new = polyhedron->appendVertex(v1);
+				ind_new = appendVertex(v1);
 
 				// Добавить v1 в грань fl2 с информацией
 
@@ -1067,7 +1067,7 @@ void Coalescer::risePoint(int fid0, int imin)
 			{
 
 				// Создать новую вершину с номером ind_new
-				ind_new = polyhedron->appendVertex(v2);
+				ind_new = appendVertex(v2);
 
 				// Добавить вершину v2 в грань fl1 после imin и исправить грань
 				what = ind_new;
@@ -1238,4 +1238,19 @@ void Coalescer::deleteVertexInPolyhedron(int v)
 	DEBUG_PRINT("Vertex #%d is being deleted from polyhedron now.", v);
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 		polyhedron->facets[i].delete_vertex(v);
+}
+
+
+int Coalescer::appendVertex(Vector3d& vec)
+{
+	Vector3d* vertex1;
+	vertex1 = new Vector3d[polyhedron->numVertices + 1];
+	for (int i = 0; i < polyhedron->numVertices; ++i)
+		vertex1[i] = polyhedron->vertices[i];
+	vertex1[polyhedron->numVertices] = vec;
+	if (polyhedron->vertices != NULL)
+		delete[] polyhedron->vertices;
+	polyhedron->vertices = vertex1;
+	++polyhedron->numVertices;
+	return polyhedron->numVertices - 1;
 }

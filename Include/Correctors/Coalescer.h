@@ -22,7 +22,8 @@ private:
 	int riseFind(int fid0);
 	double riseFindStep(int fid0, int i);
 	void risePoint(int fid0, int imin);
-	void deleteVertexInPolyhedron(int v)
+	void deleteVertexInPolyhedron(int v);
+	int appendVertex(Vector3d& vec);
 public:
 	Coalescer();
 	Coalescer(Polyhedron* p);
