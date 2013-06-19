@@ -16,14 +16,3 @@ void Polyhedron::coalesceFacets(int n, int* fid)
 	coalescer->run(n, fid);
 	delete coalescer;
 }
-
-int Polyhedron::test_structure()
-{
-	int i, res;
-	res = 0;
-	for (i = 0; i < numFacets; ++i)
-	{
-		res += facets[i].test_structure();
-	}
-	return res;
-}
