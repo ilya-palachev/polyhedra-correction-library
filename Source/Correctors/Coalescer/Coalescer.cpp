@@ -220,7 +220,7 @@ int Coalescer::buildIndex(int fid0, int fid1)
 			polyhedron->delete_vertex_polyhedron(i);
 
 	// 8. По построенному списку создается грань
-	coalescedFacet = Facet(fid0, nv, plane, index, this, true);
+	coalescedFacet = Facet(fid0, nv, plane, index, polyhedron, true);
 
 	if (is != NULL)
 		delete[] is;
@@ -271,7 +271,7 @@ int Coalescer::buildIndex(int n, int* fid)
 		DEBUG_PRINT("");
 		for (j = 0; j < nnv; ++j)
 		{
-			DEBUG_PRINT("\t%d", nfindpolyhedron->[facets[fid[i]].indVertices[j]]);
+			DEBUG_PRINT("\t%d", nfind[polyhedron->facets[fid[i]].indVertices[j]]);
 		}
 		DEBUG_PRINT("");
 		polyhedron->facets[fid[i]].my_fprint_all(stdout);

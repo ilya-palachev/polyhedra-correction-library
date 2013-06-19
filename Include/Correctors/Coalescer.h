@@ -8,8 +8,6 @@
 #ifndef COALESCER_H_
 #define COALESCER_H_
 
-#include "PCorrector.h"
-
 class Coalescer: public PCorrector
 {
 private:

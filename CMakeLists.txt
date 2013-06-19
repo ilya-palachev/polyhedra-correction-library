@@ -33,6 +33,7 @@ Source/VertexInfo/VertexInfo_preprocess.cpp
 Source/VertexInfo/VertexInfo_io.cpp
 Source/VertexInfo/VertexInfo.cpp
 Source/Correctors/PCorrector/PCorrector.cpp
+Source/Correctors/Coalescer/Coalescer.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_preprocess.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_derivateTest.cpp
 Source/Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.cpp
