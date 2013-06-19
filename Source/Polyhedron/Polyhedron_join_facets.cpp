@@ -17,12 +17,6 @@ void Polyhedron::coalesceFacets(int n, int* fid)
 	delete coalescer;
 }
 
-void Polyhedron::printVertex(int i)
-{
-	printf("vertex %d : (%lf , %lf , %lf)\n", i, vertices[i].x, vertices[i].y,
-			vertices[i].z);
-}
-
 void Polyhedron::find_and_replace_vertex(int from, int to)
 {
 	int i;

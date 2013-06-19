@@ -81,8 +81,6 @@ public:
 	void list_squares_method(int nv, int* vertex_list, Plane* plane);
 	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
 
-	void printVertex(int i);
-
 	void find_and_replace_vertex(int from, int to);
 	void find_and_replace_facet(int from, int to);
 
