@@ -360,7 +360,7 @@ void Polyhedron::deform_linear_facets(double* x, double* y, double* z)
 			y[i] = vertices[index[i]].y;
 			z[i] = vertices[index[i]].z;
 		}
-		aprox(nv, x, y, z, a, b, c, d);
+		runListSquaresMethod(nv, x, y, z, a, b, c, d);
 		a0 = facets[j].plane.norm.x;
 		b0 = facets[j].plane.norm.y;
 		c0 = facets[j].plane.norm.z;

@@ -99,7 +99,7 @@ void Polyhedron::list_squares_method(int nv, int *vertex_list, Plane *plane)
 		z[i] = vertices[id].z;
 	}
 
-	aprox(nv, x, y, z, a, b, c, d);
+	runListSquaresMethod(nv, x, y, z, a, b, c, d);
 
 	plane->norm.x = a;
 	plane->norm.y = b;
@@ -152,7 +152,7 @@ void Polyhedron::list_squares_method_weight(int nv, int *vertex_list,
 		z[i] = vertices[id].z * w[i];
 	}
 
-	aprox(nv, x, y, z, a, b, c, d);
+	runListSquaresMethod(nv, x, y, z, a, b, c, d);
 
 	plane->norm.x = a;
 	plane->norm.y = b;

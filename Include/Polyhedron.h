@@ -75,6 +75,7 @@ public:
 
 	//Polyhedron_intersection.cpp
 	void intersect(Plane iplane);
+	void intersectCoalesceMode(Plane iplane, int jfid);
 
 	//Polyhedron_join_facets.cpp
 	void list_squares_method(int nv, int* vertex_list, Plane* plane);
@@ -94,8 +95,6 @@ public:
 
 	int test_structure();
 
-	//Polyhedron_intersection_j.cpp
-	void intersectCoalesceMode(Plane iplane, int jfid);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);

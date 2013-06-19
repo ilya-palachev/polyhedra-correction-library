@@ -3,7 +3,7 @@
 
 #include "list_squares_method.h"
 
-void aprox(int n, double * x, double * y, double * z, double& a, double& b,
+void runListSquaresMethod(int n, double * x, double * y, double * z, double& a, double& b,
 		double& c, double& d)
 {
 	double Ex2 = 0, Ex = 0, Ey2 = 0, Ey = 0, Ez2 = 0, Ez = 0, Exy = 0, Exz = 0,
