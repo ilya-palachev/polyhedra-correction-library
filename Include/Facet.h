@@ -75,7 +75,6 @@ public:
 	bool test_self_intersection();
 
 	// Facet_join_facets.cpp
-	void clear_bad_vertexes();
 	void delete_vertex(int v);
 	void add_before_position(int pos, int v, int next_f);
 	void add_after_position(int pos, int v, int next_f);

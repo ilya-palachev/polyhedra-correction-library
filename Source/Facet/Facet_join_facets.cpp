@@ -1,26 +1,5 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void Facet::clear_bad_vertexes()
-{
-	for (int i = 0; i < numVertices - 1; ++i)
-	{
-		if (indVertices[numVertices + 1 + i]
-				== indVertices[numVertices + 2 + i])
-		{
-			parentPolyhedron->delete_vertex_polyhedron(indVertices[i + 1]);
-			this->delete_vertex(indVertices[i + 1]);
-			this->my_fprint_all(stdout);
-			--i;
-		}
-	}
-	if (indVertices[2 * numVertices] == indVertices[numVertices + 1])
-	{
-		parentPolyhedron->delete_vertex_polyhedron(indVertices[0]);
-		this->delete_vertex(indVertices[0]);
-		this->my_fprint_all(stdout);
-	}
-}
-
 void Facet::delete_vertex(int v)
 {
 	int i, j, found = 0;
