@@ -78,11 +78,8 @@ public:
 	void intersectCoalesceMode(Plane iplane, int jfid);
 
 	//Polyhedron_join_facets.cpp
-	void list_squares_method(int nv, int* vertex_list, Plane* plane);
-	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
-
-	void find_and_replace_vertex(int from, int to);
-	void find_and_replace_facet(int from, int to);
+	void least_squares_method(int nv, int* vertex_list, Plane* plane);
+	void least_squares_method_weight(int nv, int* vertex_list, Plane* plane);
 
 	/////////////////////////////////////////
 	void coalesceFacets(int fid0, int fid1);

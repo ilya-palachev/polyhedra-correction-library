@@ -387,7 +387,7 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 	index = coalescedFacet.indVertices;
 	nv = coalescedFacet.numVertices;
 
-	polyhedron->list_squares_method(nv, index, &plane);
+	polyhedron->least_squares_method(nv, index, &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
 	if (plane.norm * polyhedron->facets[fid0].plane.norm < 0
@@ -411,7 +411,7 @@ void Coalescer::calculatePlane(int n, int* fid)
 	index = coalescedFacet.indVertices;
 	nv = coalescedFacet.numVertices;
 
-	polyhedron->list_squares_method(nv, index, &plane);
+	polyhedron->least_squares_method(nv, index, &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
 

@@ -17,33 +17,7 @@ void Polyhedron::coalesceFacets(int n, int* fid)
 	delete coalescer;
 }
 
-void Polyhedron::find_and_replace_vertex(int from, int to)
-{
-	int i;
-	for (i = 0; i < numFacets; ++i)
-	{
-		facets[i].find_and_replace_vertex(from, to);
-	}
-	for (i = 0; i < numVertices; ++i)
-	{
-		vertexInfos[i].find_and_replace_vertex(from, to);
-	}
-}
-
-void Polyhedron::find_and_replace_facet(int from, int to)
-{
-	int i;
-	for (i = 0; i < numFacets; ++i)
-	{
-		facets[i].find_and_replace_facet(from, to);
-	}
-	for (i = 0; i < numVertices; ++i)
-	{
-		vertexInfos[i].find_and_replace_facet(from, to);
-	}
-}
-
-void Polyhedron::list_squares_method(int nv, int *vertex_list, Plane *plane)
+void Polyhedron::least_squares_method(int nv, int *vertex_list, Plane *plane)
 {
 	int i, id;
 	double *x, *y, *z, a, b, c, d;
@@ -78,7 +52,7 @@ void Polyhedron::list_squares_method(int nv, int *vertex_list, Plane *plane)
 		delete[] z;
 }
 
-void Polyhedron::list_squares_method_weight(int nv, int *vertex_list,
+void Polyhedron::least_squares_method_weight(int nv, int *vertex_list,
 		Plane *plane)
 {
 	int i, id, i_prev, i_next, id0, id1;
