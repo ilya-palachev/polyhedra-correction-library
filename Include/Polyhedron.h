@@ -74,7 +74,6 @@ public:
 	void preprocessAdjacency();
 
 	//Polyhedron_intersection.cpp
-	void set_isUsed(int v0, int v1, bool val);
 	void intersect(Plane iplane);
 
 	//Polyhedron_join_facets.cpp
