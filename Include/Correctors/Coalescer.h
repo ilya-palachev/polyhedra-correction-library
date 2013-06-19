@@ -24,6 +24,8 @@ private:
 	void risePoint(int fid0, int imin);
 	void deleteVertexInPolyhedron(int v);
 	int appendVertex(Vector3d& vec);
+	void leastSquaresMethod(int nv, int* vertex_list, Plane* plane);
+	void leastSquaresMethodWeighted(int nv, int* vertex_list, Plane* plane);
 public:
 	Coalescer();
 	Coalescer(Polyhedron* p);

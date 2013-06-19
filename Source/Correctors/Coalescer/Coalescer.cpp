@@ -387,7 +387,7 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 	index = coalescedFacet.indVertices;
 	nv = coalescedFacet.numVertices;
 
-	polyhedron->least_squares_method(nv, index, &plane);
+	leastSquaresMethod(nv, index, &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
 	if (plane.norm * polyhedron->facets[fid0].plane.norm < 0
@@ -411,7 +411,7 @@ void Coalescer::calculatePlane(int n, int* fid)
 	index = coalescedFacet.indVertices;
 	nv = coalescedFacet.numVertices;
 
-	polyhedron->least_squares_method(nv, index, &plane);
+	leastSquaresMethod(nv, index, &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
 
@@ -1253,4 +1253,91 @@ int Coalescer::appendVertex(Vector3d& vec)
 	polyhedron->vertices = vertex1;
 	++polyhedron->numVertices;
 	return polyhedron->numVertices - 1;
+}
+
+void Coalescer::leastSquaresMethod(int nv, int *vertex_list, Plane *plane)
+{
+	int i, id;
+	double *x, *y, *z, a, b, c, d;
+
+	x = new double[nv];
+	y = new double[nv];
+	z = new double[nv];
+
+	for (i = 0; i < nv; ++i)
+	{
+		id = vertex_list[i];
+		x[i] = polyhedron->vertices[id].x;
+		y[i] = polyhedron->vertices[id].y;
+		z[i] = polyhedron->vertices[id].z;
+	}
+
+	runListSquaresMethod(nv, x, y, z, a, b, c, d);
+
+	plane->norm.x = a;
+	plane->norm.y = b;
+	plane->norm.z = c;
+	plane->dist = d;
+
+	if (x != NULL)
+		delete[] x;
+	if (y != NULL)
+		delete[] y;
+	if (z != NULL)
+		delete[] z;
+}
+
+void Coalescer::leastSquaresMethodWeighted(int nv, int *vertex_list,
+		Plane *plane)
+{
+	int i, id, i_prev, i_next, id0, id1;
+	double *x, *y, *z, a, b, c, d;
+	double *l, *w;
+
+	x = new double[nv];
+	y = new double[nv];
+	z = new double[nv];
+	l = new double[nv];
+	w = new double[nv];
+
+	for (i = 0; i < nv; ++i)
+	{
+		i_next = (i + 1) % nv;
+		id0 = vertex_list[i];
+		id1 = vertex_list[i_next];
+		l[i] = sqrt(qmod(polyhedron->vertices[id0] -
+				polyhedron->vertices[id1]));
+	}
+
+	for (i = 0; i < nv; ++i)
+	{
+		i_prev = (i - 1 + nv) % nv;
+		w[i] = 0.5 * (l[i_prev] + l[i]);
+	}
+
+	for (i = 0; i < nv; ++i)
+	{
+		id = vertex_list[i];
+		x[i] = polyhedron->vertices[id].x * w[i];
+		y[i] = polyhedron->vertices[id].y * w[i];
+		z[i] = polyhedron->vertices[id].z * w[i];
+	}
+
+	runListSquaresMethod(nv, x, y, z, a, b, c, d);
+
+	plane->norm.x = a;
+	plane->norm.y = b;
+	plane->norm.z = c;
+	plane->dist = d;
+
+	if (x != NULL)
+		delete[] x;
+	if (y != NULL)
+		delete[] y;
+	if (z != NULL)
+		delete[] z;
+	if (z != NULL)
+		delete[] l;
+	if (z != NULL)
+		delete[] w;
 }
