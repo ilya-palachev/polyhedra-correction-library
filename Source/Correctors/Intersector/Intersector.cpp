@@ -779,7 +779,7 @@ void Intersector::run(Plane iplane)
 
 }
 
-void Intersector::runJoinMode(Plane iplane, int jfid)
+void Intersector::runCoalesceMode(Plane iplane, int jfid)
 {
 
 	int i, j, k, j_begin;

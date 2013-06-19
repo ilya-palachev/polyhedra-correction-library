@@ -95,7 +95,7 @@ public:
 	int test_structure();
 
 	//Polyhedron_intersection_j.cpp
-	void intersectJoinMode(Plane iplane, int jfid);
+	void intersectCoalesceMode(Plane iplane, int jfid);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);

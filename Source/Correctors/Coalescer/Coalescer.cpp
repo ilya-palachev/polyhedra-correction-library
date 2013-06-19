@@ -64,7 +64,7 @@ void Coalescer::run(int fid0, int fid1)
 
 	//     VI). Рассечение многогранника плоскостью
 	DEBUG_PRINT("VI). Рассечение многогранника плоскостью");
-	polyhedron->intersectJoinMode(-plane, fid0);
+	polyhedron->intersectCoalesceMode(-plane, fid0);
 
 	polyhedron->test_consections(true);
 

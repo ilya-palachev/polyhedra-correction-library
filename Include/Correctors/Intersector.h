@@ -23,7 +23,7 @@ public:
 	Intersector(Polyhedron* input);
 	~Intersector();
 	void run(Plane iplane);
-	void runJoinMode(Plane iplane, int jfid);
+	void runCoalesceMode(Plane iplane, int jfid);
 };
 
 #endif /* INTERSECTOR_H_ */
