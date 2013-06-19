@@ -81,7 +81,7 @@ public:
 	void list_squares_method(int nv, int* vertex_list, Plane* plane);
 	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
 
-	void delete_vertex_polyhedron(int v);
+	void deleteVertexInPolyhedron(int v);
 	int appendVertex(Vector3d& vec);
 	void changeVertex(int position, Vector3d vec);
 	void printVertex(int i);

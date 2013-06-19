@@ -217,7 +217,7 @@ int Coalescer::buildIndex(int fid0, int fid1)
 			del[index1[i]] = true;
 	for (i = 0; i < polyhedron->numVertices; ++i)
 		if (del[i])
-			polyhedron->delete_vertex_polyhedron(i);
+			polyhedron->deleteVertexInPolyhedron(i);
 
 	// 8. По построенному списку создается грань
 	coalescedFacet = Facet(fid0, nv, plane, index, polyhedron, true);
@@ -368,7 +368,7 @@ int Coalescer::buildIndex(int n, int* fid)
 	{
 		if (del[i])
 		{
-			polyhedron->delete_vertex_polyhedron(i);
+			polyhedron->deleteVertexInPolyhedron(i);
 		}
 	}
 
@@ -613,11 +613,11 @@ int Coalescer::riseFind(int fid0)
 			DEBUG_PRINT(" - Вместо вершины %d  в главной грани пишем вершину %d",
 					index[i], polyhedron->facets[fr1].indVertices[pos]);
 			index[i] = polyhedron->facets[fr1].indVertices[pos];
-			polyhedron->delete_vertex_polyhedron(tmp);
+			polyhedron->deleteVertexInPolyhedron(tmp);
 			polyhedron->facets[fr1] = Facet();
 			if (polyhedron->vertexInfos[index[i + 1]].numFacets == 3)
 			{
-				polyhedron->delete_vertex_polyhedron(index[i + 1]);
+				polyhedron->deleteVertexInPolyhedron(index[i + 1]);
 			}
 			polyhedron->preprocessAdjacency();
 			--i;

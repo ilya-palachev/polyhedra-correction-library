@@ -17,7 +17,7 @@ void Polyhedron::coalesceFacets(int n, int* fid)
 	delete coalescer;
 }
 
-void Polyhedron::delete_vertex_polyhedron(int v)
+void Polyhedron::deleteVertexInPolyhedron(int v)
 {
 	printf("delete_vertex_polyhedron(%d)\n", v);
 	for (int i = 0; i < numFacets; ++i)
