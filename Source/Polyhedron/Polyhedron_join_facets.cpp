@@ -3,7 +3,7 @@
 #define EPS_PARALL 1e-16
 #define MAX_MIN_DIST 1e+1
 
-void Polyhedron::join_facets(int fid0, int fid1)
+void Polyhedron::coalesce_facets(int fid0, int fid1)
 {
 
 	int nv;
@@ -18,13 +18,13 @@ void Polyhedron::join_facets(int fid0, int fid1)
 
 	// I ). Составление списка вершин
 	printf("I ). Составление списка вершин\n");
-	join_facets_build_index(fid0, fid1, plane, join_facet, nv);
+	coalesce_facets_build_index(fid0, fid1, plane, join_facet, nv);
 	if (nv == -1)
 		return;
 
 	// II ). Вычисление средней плоскости
 	printf("II ). Вычисление средней плоскости\n");
-	join_facets_calculate_plane(fid0, fid1, join_facet, plane);
+	coalesce_facets_calculate_plane(fid0, fid1, join_facet, plane);
 	join_facet.plane = plane;
 
 	// III ). Дополнительная предобработка многогранника
@@ -35,7 +35,7 @@ void Polyhedron::join_facets(int fid0, int fid1)
 
 	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
 	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
-	join_facets_rise(fid0);
+	coalesce_facets_rise(fid0);
 
 	// V ). Предобработка многогранника после поднятия
 	printf("V ). Предобработка многогранника после поднятия\n");
@@ -53,7 +53,7 @@ void Polyhedron::join_facets(int fid0, int fid1)
 	printf("=====================================================\n");
 }
 
-void Polyhedron::multi_join_facets(int n, int *fid)
+void Polyhedron::multi_coalesce_facets(int n, int *fid)
 {
 
 	int i;
@@ -64,13 +64,13 @@ void Polyhedron::multi_join_facets(int n, int *fid)
 
 	// I ). Составление списка вершин
 	printf("I ). Составление списка вершин\n");
-	multi_join_facets_build_index(n, fid, join_facet, nv);
+	multi_coalesce_facets_build_index(n, fid, join_facet, nv);
 	if (nv == -1)
 		return;
 
 	// II ). Вычисление средней плоскости
 	printf("II ). Вычисление средней плоскости\n");
-	multi_join_facets_calculate_plane(n, fid, join_facet, plane);
+	multi_coalesce_facets_calculate_plane(n, fid, join_facet, plane);
 	facets[fid[0]].plane = plane;
 
 	// III ). Дополнительная предобработка многогранника
@@ -80,7 +80,7 @@ void Polyhedron::multi_join_facets(int n, int *fid)
 
 	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
 	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
-	join_facets_rise(fid0);
+	coalesce_facets_rise(fid0);
 
 	// V ). Предобработка многогранника после поднятия
 	printf("V ). Предобработка многогранника после поднятия\n");
@@ -104,7 +104,7 @@ void Polyhedron::multi_join_facets(int n, int *fid)
 	printf("=====================================================\n");
 }
 
-void Polyhedron::join_facets_calculate_plane(int fid0, int fid1,
+void Polyhedron::coalesce_facets_calculate_plane(int fid0, int fid1,
 		Facet& join_facet, Plane& plane)
 {
 
@@ -129,7 +129,7 @@ void Polyhedron::join_facets_calculate_plane(int fid0, int fid1,
 
 }
 
-void Polyhedron::multi_join_facets_calculate_plane(int n, int* fid,
+void Polyhedron::multi_coalesce_facets_calculate_plane(int n, int* fid,
 		Facet& join_facet, Plane& plane)
 {
 
@@ -225,7 +225,7 @@ void Polyhedron::multi_join_facets_calculate_plane(int n, int* fid,
 //        delete[] is;
 //}
 
-void Polyhedron::join_facets_build_index(int fid0, int fid1, Plane& plane,
+void Polyhedron::coalesce_facets_build_index(int fid0, int fid1, Plane& plane,
 		Facet& join_facet, int& nv)
 {
 
@@ -329,7 +329,7 @@ void Polyhedron::join_facets_build_index(int fid0, int fid1, Plane& plane,
 		delete[] index;
 }
 
-void Polyhedron::multi_join_facets_build_index(int n, int* fid,
+void Polyhedron::multi_coalesce_facets_build_index(int n, int* fid,
 		Facet& join_facet, int& nv)
 {
 	int i, j, *index, *nfind, nnv, nv_safe;
@@ -472,7 +472,7 @@ void Polyhedron::multi_join_facets_build_index(int n, int* fid,
 		delete[] del;
 }
 
-void Polyhedron::join_facets_rise(int fid0)
+void Polyhedron::coalesce_facets_rise(int fid0)
 {
 
 	int i;
@@ -537,7 +537,7 @@ void Polyhedron::join_facets_rise(int fid0)
 		// 2. 1). Находим, по какой вершине нужно шагать, и минимальное расстояние
 		printf(
 				"\t2. 1). Находим, по какой вершине нужно шагать, и минимальное расстояние\n");
-		join_facets_rise_find(fid0, imin);
+		coalesce_facets_rise_find(fid0, imin);
 
 		if (imin == -1)
 		{
@@ -549,7 +549,7 @@ void Polyhedron::join_facets_rise(int fid0)
 		// 2. 2). Шагаем по выбранной вершине
 		printf("\t2. 2). Шагаем по выбранной вершине\n");
 		facets[fid0].my_fprint_all(stdout);
-		join_facets_rise_point(fid0, imin);
+		coalesce_facets_rise_point(fid0, imin);
 
 		if (test_structure() > 0)
 		{
@@ -589,7 +589,7 @@ void Polyhedron::join_facets_rise(int fid0)
 
 }
 
-void Polyhedron::join_facets_rise_find(int fid0, int& imin)
+void Polyhedron::coalesce_facets_rise_find(int fid0, int& imin)
 {
 	int i;
 	int nv, *index;
@@ -661,7 +661,7 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin)
 		printf("ниже плоскости");
 		//        printf("\n");
 
-		join_facets_rise_find_step(fid0, i, d);
+		coalesce_facets_rise_find_step(fid0, i, d);
 
 		if (d < 0)
 		{
@@ -677,7 +677,7 @@ void Polyhedron::join_facets_rise_find(int fid0, int& imin)
 	}
 }
 
-void Polyhedron::join_facets_rise_find_step(int fid0, int i, double& d)
+void Polyhedron::coalesce_facets_rise_find_step(int fid0, int i, double& d)
 {
 	int nv, *index;
 	int fl2, fl1, fr1, fr2;
@@ -766,7 +766,7 @@ void Polyhedron::join_facets_rise_find_step(int fid0, int i, double& d)
 	}
 }
 
-void Polyhedron::join_facets_rise_point(int fid0, int imin)
+void Polyhedron::coalesce_facets_rise_point(int fid0, int imin)
 {
 
 	int nv, *index;

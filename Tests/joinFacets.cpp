@@ -58,7 +58,7 @@ void test_join_facets(const char* name, int type, int fid0, int fid1)
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocessAdjacency();
-	poly.join_facets(fid0, fid1);
+	poly.coalesce_facets(fid0, fid1);
 	//	poly.join_create_first_facet(fid0, fid1);
 
 	time_t seconds = time(NULL);
