@@ -181,49 +181,6 @@ void Polyhedron::multi_coalesce_facets_calculate_plane(int n, int* fid,
 	}
 
 }
-//void Polyhedron::join_facets_calculate_plane(int fid0, int fid1, Plane& plane, int& nv) {
-//
-//    int i, j;
-//    int nv0, *index0;
-//    int nv1, *index1;
-//    int *index;
-//    bool *is;
-//
-//
-//    nv0 = facet[fid0].nv;
-//    nv1 = facet[fid1].nv;
-//    index0 = facet[fid0].index;
-//    index1 = facet[fid1].index;
-//
-//    is = new bool[numv];
-//    for (i = 0; i < numv; ++i)
-//        is[i] = false;
-//    for (i = 0; i < nv0; ++i)
-//        is[index0[i]] = true;
-//    for (i = 0; i < nv1; ++i)
-//        is[index1[i]] = true;
-//    nv = 0;
-//    for (i = 0; i < numv; ++i)
-//        if (is[i])
-//            ++nv;
-//    index = new int[nv];
-//    for (i = 0, j = 0; i < numv; ++i)
-//        if (is[i])
-//            index[j++] = i;
-//    list_squares_method(nv, index, &plane);
-//
-//    //Проверка, что нормаль построенной плокости направлена извне многогранника
-//    if (plane.norm * facet[fid0].plane.norm < 0 &&
-//            plane.norm * facet[fid1].plane.norm < 0) {
-//        plane.norm *= -1.;
-//        plane.dist *= -1.;
-//    }
-//
-//    if (index != NULL)
-//        delete[] index;
-//    if (is != NULL)
-//        delete[] is;
-//}
 
 void Polyhedron::coalesce_facets_build_index(int fid0, int fid1, Plane& plane,
 		Facet& join_facet, int& nv)
