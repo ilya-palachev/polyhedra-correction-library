@@ -47,10 +47,14 @@ class EdgeConstructor;
 class ShadeContourConstructor;
 
 class PCorrector;
+
 class Intersector;
 class FacetIntersector;
+
 class GlobalShadeCorrector;
 class GSAssociator;
+
+class Coalescer;
 
 #include "Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
@@ -87,6 +91,7 @@ class GSAssociator;
 #include "Correctors/FacetIntersector.h"
 #include "Correctors/GlobalShadeCorrector.h"
 #include "Correctors/GSAssociator.h"
+#include "Correctors/Coalescer.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
