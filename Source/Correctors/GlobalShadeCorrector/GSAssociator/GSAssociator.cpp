@@ -121,9 +121,9 @@ int GSAssociator::init()
 	int numVerticesAdded = 0;
 	for (int iSide = 0; iSide < numSides; ++iSide)
 	{
-		polyhedronTmp->set_vertex(numVerticesAdded++,
+		polyhedronTmp->changeVertex(numVerticesAdded++,
 				contourData->contours[iContour].sides[iSide].A1);
-		polyhedronTmp->set_vertex(numVerticesAdded++,
+		polyhedronTmp->changeVertex(numVerticesAdded++,
 				contourData->contours[iContour].sides[iSide].A2);
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;

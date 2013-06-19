@@ -232,7 +232,7 @@ void Polyhedron::delete_vertex_polyhedron(int v)
 		facets[i].delete_vertex(v);
 }
 
-int Polyhedron::add_vertex(Vector3d& vec)
+int Polyhedron::appendVertex(Vector3d& vec)
 {
 	Vector3d* vertex1;
 	vertex1 = new Vector3d[numVertices + 1];
@@ -246,7 +246,7 @@ int Polyhedron::add_vertex(Vector3d& vec)
 	return numVertices - 1;
 }
 
-void Polyhedron::set_vertex(int position, Vector3d vec)
+void Polyhedron::changeVertex(int position, Vector3d vec)
 {
 	if (position >= numVertices)
 	{
@@ -258,81 +258,10 @@ void Polyhedron::set_vertex(int position, Vector3d vec)
 	vertices[position] = vec;
 }
 
-void Polyhedron::print_vertex(int i)
+void Polyhedron::printVertex(int i)
 {
 	printf("vertex %d : (%lf , %lf , %lf)\n", i, vertices[i].x, vertices[i].y,
 			vertices[i].z);
-}
-
-void Polyhedron::clear_unused()
-{
-	int i, numf_used, numv_used, nf;
-	int *index_facet, *index_vertex;
-
-	printf("\tvertex analyse\n");
-
-	index_vertex = new int[numVertices];
-	numv_used = 0;
-	for (i = 0; i < numVertices; ++i)
-	{
-		nf = vertexInfos[i].get_nf();
-		printf("\tanalyze vertex %d, nf = %d\n", i, nf);
-		if (nf > 0)
-		{
-			index_vertex[numv_used++] = i;
-		}
-	}
-
-	printf("index_vertex : ");
-	for (i = 0; i < numv_used; ++i)
-		printf("%d ", index_vertex[i]);
-	printf("\n");
-
-	for (i = 0; i < numv_used; ++i)
-	{
-		if (index_vertex[i] != i)
-		{
-			printf("\treplacing vertex %d by vertex %d\n", i, index_vertex[i]);
-			find_and_replace_vertex(index_vertex[i], i);
-			vertices[i] = vertices[index_vertex[i]];
-			vertexInfos[i] = vertexInfos[index_vertex[i]];
-		}
-	}
-	numVertices = numv_used;
-
-	index_facet = new int[numFacets];
-	numf_used = 0;
-	for (i = 0; i < numFacets; ++i)
-	{
-		if (facets[i].numVertices > 0)
-		{
-			index_facet[numf_used++] = i;
-		}
-	}
-
-	printf("index_facet : ");
-	for (i = 0; i < numf_used; ++i)
-		printf("%d ", index_facet[i]);
-	printf("\n");
-
-	for (i = 0; i < numf_used; ++i)
-	{
-		if (index_facet[i] != i)
-		{
-			printf("\treplacing facet %d by facet %d\n", i, index_facet[i]);
-			find_and_replace_facet(index_facet[i], i);
-			facets[i] = facets[index_facet[i]];
-		}
-	}
-	numFacets = numf_used;
-
-	//    my_fprint(stdout);
-	preprocessAdjacency();
-
-	if (index_vertex != NULL)
-		delete[] index_vertex;
-	if (index_facet != NULL)
-		delete[] index_facet;
 }
 
 void Polyhedron::find_and_replace_vertex(int from, int to)

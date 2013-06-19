@@ -81,11 +81,10 @@ public:
 	void list_squares_method_weight(int nv, int* vertex_list, Plane* plane);
 
 	void delete_vertex_polyhedron(int v);
-	int add_vertex(Vector3d& vec);
-	void set_vertex(int position, Vector3d vec);
-	void print_vertex(int i);
+	int appendVertex(Vector3d& vec);
+	void changeVertex(int position, Vector3d vec);
+	void printVertex(int i);
 
-	void clear_unused();
 	void find_and_replace_vertex(int from, int to);
 	void find_and_replace_facet(int from, int to);
 

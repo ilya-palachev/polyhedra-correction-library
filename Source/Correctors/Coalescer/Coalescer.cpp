@@ -557,7 +557,7 @@ void Coalescer::risePoint(int fid0, int imin)
 			{
 
 				// Создать новую вершину с номером ind_new
-				ind_new = polyhedron->add_vertex(v1);
+				ind_new = polyhedron->appendVertex(v1);
 
 				// Добавить v1 в грань fl2 с информацией
 
@@ -763,7 +763,7 @@ void Coalescer::risePoint(int fid0, int imin)
 			{
 
 				// Создать новую вершину с номером ind_new
-				ind_new = polyhedron->add_vertex(v2);
+				ind_new = polyhedron->appendVertex(v2);
 
 				// Добавить вершину v2 в грань fl1 после imin и исправить грань
 				what = ind_new;
