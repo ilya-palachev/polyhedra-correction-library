@@ -43,7 +43,7 @@ void Polyhedron::coalesce_facets(int fid0, int fid1)
 
 	//     VI). Рассечение многогранника плоскостью
 	printf("VI). Рассечение многогранника плоскостью\n");
-	intersect_j(-plane, fid0);
+	intersectJoinMode(-plane, fid0);
 
 	test_consections(true);
 

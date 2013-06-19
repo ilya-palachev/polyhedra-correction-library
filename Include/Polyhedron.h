@@ -109,7 +109,7 @@ public:
 	int test_structure();
 
 	//Polyhedron_intersection_j.cpp
-	void intersect_j(Plane iplane, int jfid);
+	void intersectJoinMode(Plane iplane, int jfid);
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);

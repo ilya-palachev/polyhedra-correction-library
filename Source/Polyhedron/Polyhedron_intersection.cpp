@@ -7,7 +7,7 @@ void Polyhedron::intersect(Plane iplane)
 	delete intersector;
 }
 
-void Polyhedron::intersect_j(Plane iplane, int jfid)
+void Polyhedron::intersectJoinMode(Plane iplane, int jfid)
 {
 	Intersector* intersector = new Intersector(this);
 	intersector->runJoinMode(iplane, jfid);
