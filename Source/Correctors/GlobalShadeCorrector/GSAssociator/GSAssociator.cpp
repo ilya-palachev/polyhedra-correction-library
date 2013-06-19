@@ -103,6 +103,18 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 	DEBUG_END;
 }
 
+void changeVertex(Polyhedron* p, int position, Vector3d vec)
+{
+	if (position >= p->numVertices)
+	{
+		ERROR_PRINT("Cannot set %d-th vertex, because number of vertices",
+				position);
+		ERROR_PRINT("is bounded with %d", p->numVertices);
+		return;
+	}
+	p->vertices[position] = vec;
+}
+
 int GSAssociator::init()
 {
 	DEBUG_START;
@@ -121,9 +133,9 @@ int GSAssociator::init()
 	int numVerticesAdded = 0;
 	for (int iSide = 0; iSide < numSides; ++iSide)
 	{
-		polyhedronTmp->changeVertex(numVerticesAdded++,
+		changeVertex(polyhedronTmp, numVerticesAdded++,
 				contourData->contours[iContour].sides[iSide].A1);
-		polyhedronTmp->changeVertex(numVerticesAdded++,
+		changeVertex(polyhedronTmp, numVerticesAdded++,
 				contourData->contours[iContour].sides[iSide].A2);
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;

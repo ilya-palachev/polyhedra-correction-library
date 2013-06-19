@@ -17,18 +17,6 @@ void Polyhedron::coalesceFacets(int n, int* fid)
 	delete coalescer;
 }
 
-void Polyhedron::changeVertex(int position, Vector3d vec)
-{
-	if (position >= numVertices)
-	{
-		ERROR_PRINT("Cannot set %d-th vertex, because number of vertices",
-				position);
-		ERROR_PRINT("is bounded with %d", numVertices);
-		return;
-	}
-	vertices[position] = vec;
-}
-
 void Polyhedron::printVertex(int i)
 {
 	printf("vertex %d : (%lf , %lf , %lf)\n", i, vertices[i].x, vertices[i].y,
