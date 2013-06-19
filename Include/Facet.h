@@ -76,13 +76,8 @@ public:
 
 	// Facet_join_facets.cpp
 	void delete_vertex(int v);
-	void add_before_position(int pos, int v, int next_f);
-	void add_after_position(int pos, int v, int next_f);
 
 	void find_next_facet(int v, int& fid_next);
-	void find_next_facet2(int v, int& fid_next);
-	void find_and_replace2(int from, int to);
-	int find_total(int what);
 	int find_vertex(int what);
 
 	void add(int what, int pos);

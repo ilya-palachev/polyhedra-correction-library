@@ -28,81 +28,6 @@ void Facet::delete_vertex(int v)
 	}
 }
 
-void Facet::add_before_position(int pos, int v, int next_f)
-{
-	int* index1;
-	int nv1 = numVertices + 1;
-	int i;
-
-	this->my_fprint(stdout);
-
-	index1 = new int[3 * nv1 + 1];
-
-	for (i = 0; i < pos; ++i)
-	{
-		index1[i] = indVertices[i];
-	}
-	index1[pos] = v;
-	for (i = pos + 1; i < nv1 + 1 + pos; ++i)
-	{
-		index1[i] = indVertices[i - 1];
-	}
-	index1[nv1 + 1 + pos] = next_f;
-	for (i = nv1 + 2 + pos; i < 2 * nv1 + 1 + pos; ++i)
-	{
-		index1[i] = indVertices[i - 2];
-	}
-	index1[2 * nv1 + 1 + pos] = -1;
-	for (i = 2 * nv1 + 1 + pos; i < 3 * nv1 + 1; ++i)
-	{
-		index1[i] = indVertices[i - 3];
-	}
-	if (indVertices != NULL)
-		delete[] indVertices;
-	indVertices = index1;
-	numVertices = nv1;
-
-	printf("add_before_position : ");
-	this->my_fprint(stdout);
-}
-
-void Facet::add_after_position(int pos, int v, int next_f)
-{
-	int* index1;
-	int nv1 = numVertices + 1;
-	int i;
-
-	index1 = new int[3 * nv1 + 1];
-
-	for (i = 0; i < pos + 1; ++i)
-	{
-		index1[i] = indVertices[i];
-	}
-	index1[pos + 1] = v;
-	for (i = pos + 2; i < nv1 + 1 + pos; ++i)
-	{
-		index1[i] = indVertices[i - 1];
-	}
-	index1[nv1 + 2 + pos] = index1[nv1 + 1 + pos];
-	index1[nv1 + 1 + pos] = next_f;
-	for (i = nv1 + 3 + pos; i < 2 * nv1 + 2 + pos; ++i)
-	{
-		index1[i] = indVertices[i - 2];
-	}
-	index1[2 * nv1 + 2 + pos] = -1;
-	for (i = 2 * nv1 + 2 + pos; i < 3 * nv1 + 1; ++i)
-	{
-		index1[i] = indVertices[i - 3];
-	}
-	if (indVertices != NULL)
-		delete[] indVertices;
-	indVertices = index1;
-	numVertices = nv1;
-
-	printf("add_after_position : ");
-	this->my_fprint(stdout);
-
-}
 
 void Facet::find_next_facet(int v, int& fid_next)
 {
@@ -119,49 +44,6 @@ void Facet::find_next_facet(int v, int& fid_next)
 		return;
 	}
 	fid_next = indVertices[numVertices + 1 + i];
-}
-
-void Facet::find_next_facet2(int v, int& fid_next)
-{
-	int i;
-	for (i = 0; i < numVertices; ++i)
-		if (indVertices[i] == v)
-			break;
-	if (i == numVertices)
-	{
-		fid_next = -1;
-		printf(
-				"Facet::find_next_facet2 : Error. Cannot find vertex %d at facet %d",
-				v, id);
-		return;
-	}
-	i = i > 0 ? i - 1 : numVertices - 1;
-	fid_next = indVertices[numVertices + 1 + i];
-}
-
-void Facet::find_and_replace2(int from, int to)
-{
-	int i;
-	for (i = 0; i < numVertices; ++i)
-		if (indVertices[i] == to)
-			break;
-	if (i < numVertices)
-	{
-		this->delete_vertex(from);
-		return;
-	}
-	for (int i = 0; i < numVertices + 1; ++i)
-		if (indVertices[i] == from)
-			indVertices[i] = to;
-}
-
-int Facet::find_total(int what)
-{
-	int i;
-	for (i = 0; i < 3 * numVertices + 1; ++i)
-		if (indVertices[i] == what)
-			return i;
-	return -1;
 }
 
 int Facet::find_vertex(int what)
