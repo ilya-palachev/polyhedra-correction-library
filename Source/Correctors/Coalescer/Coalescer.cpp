@@ -1231,5 +1231,11 @@ void Coalescer::risePoint(int fid0, int imin)
 			polyhedron->vertices[index[imin]] = v2;
 		}
 	}
+}
 
+void Coalescer::deleteVertexInPolyhedron(int v)
+{
+	DEBUG_PRINT("Vertex #%d is being deleted from polyhedron now.", v);
+	for (int i = 0; i < polyhedron->numFacets; ++i)
+		polyhedron->facets[i].delete_vertex(v);
 }
