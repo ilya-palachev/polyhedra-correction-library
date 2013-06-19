@@ -90,20 +90,7 @@ public:
 
 	/////////////////////////////////////////
 	void coalesceFacets(int fid0, int fid1);
-	void multi_coalesce_facets(int n, int* fid);
-	//        void join_facets_calculate_plane(int fid0, int fid1, Plane& plane, int& nv);
-	void coalesce_facets_calculate_plane(int fid0, int fid1, Facet& join_facet,
-			Plane& plane);
-	void multi_coalesce_facets_calculate_plane(int n, int* fid, Facet& join_facet,
-			Plane& plane);
-	void coalesce_facets_build_index(int fid0, int fid1, Plane& plane,
-			Facet& join_facet, int& nv);
-	void multi_coalesce_facets_build_index(int n, int* fid, Facet& join_facet,
-			int& nv);
-	void coalesce_facets_rise(int fid0);
-	void coalesce_facets_rise_find(int fid0, int& imin);
-	void coalesce_facets_rise_find_step(int fid0, int i, double& d);
-	void coalesce_facets_rise_point(int fid0, int imin);
+	void coalesceFacets(int n, int* fid);
 
 	int test_structure();
 

@@ -10,6 +10,12 @@ void Polyhedron::coalesceFacets(int fid0, int fid1)
 	delete coalescer;
 }
 
+void Polyhedron::coalesceFacets(int n, int* fid)
+{
+	Coalescer* coalescer = new Coalescer(this);
+	coalescer->run(n, fid);
+	delete coalescer;
+}
 
 void Polyhedron::delete_vertex_polyhedron(int v)
 {
