@@ -37,7 +37,6 @@ public:
 	Vector3d* vertices;
 	Facet* facets;
 	VertexInfo* vertexInfos;
-	EdgeList* edgeLists;
 
 public:
 

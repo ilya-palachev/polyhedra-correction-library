@@ -47,6 +47,8 @@ class EdgeConstructor;
 class ShadeContourConstructor;
 
 class PCorrector;
+class Intersector;
+class FacetIntersector;
 class GlobalShadeCorrector;
 class GSAssociator;
 
@@ -81,6 +83,8 @@ class GSAssociator;
 #include "DataConstructors/ShadeContourConstructor.h"
 
 #include "Correctors/PCorrector.h"
+#include "Correctors/Intersector.h"
+#include "Correctors/FacetIntersector.h"
 #include "Correctors/GlobalShadeCorrector.h"
 #include "Correctors/GSAssociator.h"
 

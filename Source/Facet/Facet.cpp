@@ -173,3 +173,27 @@ void Facet::get_next_facet(int pos_curr, int& pos_next, int& fid_next,
 	pos_next = indVertices[pos_curr + 2 * numVertices + 1];
 	v_curr = indVertices[pos_curr + 1];
 }
+
+int Facet::signum(int i, Plane plane)
+{
+	return parentPolyhedron->signum(parentPolyhedron->vertices[indVertices[i]],
+			plane);
+}
+
+void Facet::find_and_replace_vertex(int from, int to)
+{
+	for (int i = 0; i < numVertices + 1; ++i)
+		if (indVertices[i] == from)
+		{
+			indVertices[i] = to;
+		}
+}
+
+void Facet::find_and_replace_facet(int from, int to)
+{
+	for (int i = numVertices + 1; i < 2 * numVertices + 1; ++i)
+		if (indVertices[i] == from)
+		{
+			indVertices[i] = to;
+		}
+}

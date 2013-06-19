@@ -37,6 +37,8 @@ Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_preprocess.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_derivateTest.cpp
 Source/Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector.cpp
+Source/Correctors/Intersector/FacetIntersector.cpp
+Source/Correctors/Intersector/Intersector.cpp
 Source/Polyhedron/Polyhedron_deform.cpp
 Source/Polyhedron/Polyhedron_intertia.cpp
 Source/Polyhedron/Polyhedron.cpp
@@ -46,7 +48,6 @@ Source/Polyhedron/Polyhedron_join_points.cpp
 Source/Polyhedron/Polyhedron_volume.cpp
 Source/Polyhedron/Polyhedron_hierarchical_clustering.cpp
 Source/Polyhedron/Polyhedron_deform_linear.cpp
-Source/Polyhedron/Polyhedron_intersection_j.cpp
 Source/Polyhedron/Polyhedron_preprocess.cpp
 Source/Polyhedron/Polyhedron_correction.cpp
 Source/Polyhedron/Polyhedron_join_facets.cpp
@@ -68,7 +69,6 @@ Source/DataContainers/EdgeData/EdgeData.cpp
 Source/Facet/Facet_io.cpp
 Source/Facet/Facet_area.cpp
 Source/Facet/Facet_join_facets.cpp
-Source/Facet/Facet_intersection.cpp
 Source/Facet/Facet_test.cpp
 Source/Facet/Facet_inertia.cpp
 Source/Facet/Facet.cpp

@@ -45,6 +45,10 @@ public:
 	void set_rgb(char red, char gray, char blue);
 	void set_ind_vertex(int position, int value);
 
+	int signum(int i, Plane plane);
+	void find_and_replace_vertex(int from, int to);
+	void find_and_replace_facet(int from, int to);
+
 	// Facet_preprocess.cpp
 	void preprocess_free();
 	void preprocess();
@@ -66,15 +70,6 @@ public:
 	void fprint_ply_scale(FILE* file);
 
 	void my_fprint_edge_list(FILE* file);
-
-	// Facet_intersecion.cpp
-	int signum(int i, Plane plane);
-	int prepare_edge_list(Plane iplane);
-
-	bool intersect(Plane iplane, FutureFacet& ff, int& n_components);
-
-	void find_and_replace_vertex(int from, int to);
-	void find_and_replace_facet(int from, int to);
 
 	// Facet_test.cpp
 	bool test_self_intersection();
