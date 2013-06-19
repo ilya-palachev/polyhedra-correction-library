@@ -18,8 +18,6 @@ public:
 	Polyhedron* parentPolyhedron;
 	char rgb[3];
 
-	EdgeList edgeList;
-
 public:
 	// Facet.cpp
 	Facet();
