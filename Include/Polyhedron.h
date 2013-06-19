@@ -89,7 +89,7 @@ public:
 	void find_and_replace_facet(int from, int to);
 
 	/////////////////////////////////////////
-	void coalesce_facets(int fid0, int fid1);
+	void coalesceFacets(int fid0, int fid1);
 	void multi_coalesce_facets(int n, int* fid);
 	//        void join_facets_calculate_plane(int fid0, int fid1, Plane& plane, int& nv);
 	void coalesce_facets_calculate_plane(int fid0, int fid1, Facet& join_facet,

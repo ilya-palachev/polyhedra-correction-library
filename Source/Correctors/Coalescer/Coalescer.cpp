@@ -9,7 +9,17 @@
 
 #define EPS_PARALL 1e-16
 
-Coalescer::Coalescer()
+Coalescer::Coalescer() :
+		PCorrector(),
+		plane(),
+		coalescedFacet()
+{
+}
+
+Coalescer::Coalescer(Polyhedron* p) :
+		PCorrector(p),
+		plane(),
+		coalescedFacet()
 {
 }
 
@@ -17,8 +27,108 @@ Coalescer::~Coalescer()
 {
 }
 
-void Coalescer::buildIndex(int fid0, int fid1, int& nv)
+void Coalescer::run(int fid0, int fid1)
 {
+	int nv;
+
+	if (fid0 == fid1)
+	{
+		ERROR_PRINT("Error. Cannot coalesce facet with itself.");
+		return;
+	}
+
+	// I ). Составление списка вершин
+	printf("I ). Составление списка вершин\n");
+	nv = buildIndex(fid0, fid1);
+	if (nv == -1)
+		return;
+
+	// II ). Вычисление средней плоскости
+	printf("II ). Вычисление средней плоскости\n");
+	calculatePlane(fid0, fid1);
+	coalescedFacet.plane = plane;
+
+	// III ). Дополнительная предобработка многогранника
+	printf("III ). Дополнительная предобработка многогранника\n");
+	polyhedron->facets[fid0] = coalescedFacet;
+	polyhedron->facets[fid1] = Facet();
+	polyhedron->preprocessAdjacency();
+
+	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
+	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
+	rise(fid0);
+
+	// V ). Предобработка многогранника после поднятия
+	printf("V ). Предобработка многогранника после поднятия\n");
+	polyhedron->preprocessAdjacency();
+
+	//     VI). Рассечение многогранника плоскостью
+	printf("VI). Рассечение многогранника плоскостью\n");
+	polyhedron->intersectJoinMode(-plane, fid0);
+
+	polyhedron->test_consections(true);
+
+	printf("=====================================================\n");
+	printf("=========    Грани %d и %d объединены !!!   =========\n", fid0,
+			fid1);
+	printf("=====================================================\n");
+}
+
+void Coalescer::run(int n, int* fid)
+{
+
+	int i;
+	int nv;
+	Plane plane;
+	Facet join_facet;
+	int fid0 = fid[0];
+
+	// I ). Составление списка вершин
+	printf("I ). Составление списка вершин\n");
+	nv = buildIndex(n, fid);
+	if (nv == -1)
+		return;
+
+	// II ). Вычисление средней плоскости
+	printf("II ). Вычисление средней плоскости\n");
+	calculatePlane(n, fid);
+	polyhedron->facets[fid[0]].plane = plane;
+
+	// III ). Дополнительная предобработка многогранника
+	printf("III ). Дополнительная предобработка многогранника\n");
+	polyhedron->preprocessAdjacency();
+	polyhedron->facets[fid[0]].my_fprint_all(stdout);
+
+	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
+	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
+	rise(fid0);
+
+	// V ). Предобработка многогранника после поднятия
+	printf("V ). Предобработка многогранника после поднятия\n");
+	polyhedron->preprocessAdjacency();
+
+	//     VI). Рассечение многогранника плоскостью
+//    printf("VI). Рассечение многогранника плоскостью\n");
+//    intersect_j(-plane, fid0);
+
+	polyhedron->test_consections(true);
+
+	printf("=====================================================\n");
+	printf("=========    Грани ");
+	printf("%d", fid[0]);
+	for (i = 1; i < n - 1; ++i)
+	{
+		printf(", %d", fid[i]);
+	}
+	printf(" и %d ", fid[n - 1]);
+	printf("объединены !!!   =========\n");
+	printf("=====================================================\n");
+}
+
+
+int Coalescer::buildIndex(int fid0, int fid1)
+{
+	int nv;
 
 	int i, j;
 	int *index, *index0, *index1, nv0, nv1;
@@ -41,7 +151,7 @@ void Coalescer::buildIndex(int fid0, int fid1, int& nv)
 				"join_facets : Error. Facets %d and %d have no common vertexes\n",
 				fid0, fid1);
 		nv = -1;
-		return;
+		return 0;
 	}
 
 	// 2. Найдем последнюю против часовой стрелки (для 1-й грани) общую точку граней
@@ -118,6 +228,154 @@ void Coalescer::buildIndex(int fid0, int fid1, int& nv)
 		delete[] del;
 	if (index != NULL)
 		delete[] index;
+
+	return nv;
+}
+
+int Coalescer::buildIndex(int n, int* fid)
+{
+	int nv;
+
+	int i, j, *index, *nfind, nnv, nv_safe;
+	int v_first, v;
+	int i_next;
+	bool* del;
+
+	nv_safe = 0;
+	for (i = 0; i < n; ++i)
+	{
+		nv_safe += polyhedron->facets[fid[i]].numVertices;
+	}
+	index = new int[3 * nv_safe + 1];
+	nfind = new int[polyhedron->numVertices];
+	for (i = 0; i < polyhedron->numVertices; ++i)
+	{
+		nfind[i] = 0;
+	}
+	for (i = 0; i < n; ++i)
+	{
+		for (j = 0; j < polyhedron->facets[fid[i]].numVertices; ++j)
+		{
+			++(nfind[polyhedron->facets[fid[i]].indVertices[j]]);
+		}
+	}
+
+	for (i = 0; i < n; ++i)
+	{
+		printf("facet  fid[%d] = %d : \n\n", i, fid[i]);
+		nnv = polyhedron->facets[fid[i]].numVertices;
+		for (j = 0; j < nnv; ++j)
+		{
+			printf("\t%d", polyhedron->facets[fid[i]].indVertices[j]);
+		}
+		printf("\n");
+		for (j = 0; j < nnv; ++j)
+		{
+			printf("\t%d", nfindpolyhedron->[facets[fid[i]].indVertices[j]]);
+		}
+		printf("\n\n");
+		polyhedron->facets[fid[i]].my_fprint_all(stdout);
+	}
+
+	nv = 0;
+	j = 0;
+	nnv = polyhedron->facets[fid[0]].numVertices;
+	while (nfind[polyhedron->facets[fid[0]].indVertices[j]] > 1)
+	{
+		j = (nnv + j + 1) % nnv;
+	}
+	v_first = polyhedron->facets[fid[0]].indVertices[j];
+
+	i = 0;
+	v = v_first;
+	printf("v = %d\n", v);
+	printf("New index : ");
+	do
+	{
+		printf("\n next facet %d\n", fid[i]);
+		nnv = polyhedron->facets[fid[i]].numVertices;
+		while (nfind[polyhedron->facets[fid[i]].indVertices[j]] == 1)
+		{
+			if (polyhedron->facets[fid[i]].indVertices[j] == v_first && nv > 0)
+			{
+				break;
+			}
+			index[nv] = polyhedron->facets[fid[i]].indVertices[j];
+
+			printf("%d ", index[nv]);
+			++nv;
+			j = (nnv + j + 1) % nnv;
+		}
+		v = polyhedron->facets[fid[i]].indVertices[j];
+		index[nv] = polyhedron->facets[fid[i]].indVertices[j];
+		printf("%d\n", index[nv]);
+		++nv;
+		if (v == v_first)
+			break;
+		for (i = 0; i < n; ++i)
+		{
+			j = polyhedron->facets[fid[i]].find_vertex(v);
+			printf("\tVertex %d was found in facet %d at position %d\n", v,
+					fid[i], j);
+			if (j != -1)
+			{
+				nnv = polyhedron->facets[fid[i]].numVertices;
+				j = (nnv + j + 1) % nnv;
+				printf("\tnfind[%d] = %d\n", polyhedron->facets[fid[i]].indVertices[j],
+						nfind[polyhedron->facets[fid[i]].indVertices[j]]);
+				if (nfind[polyhedron->facets[fid[i]].indVertices[j]] == 1)
+				{
+					break;
+				}
+			}
+		}
+
+		v = polyhedron->facets[fid[i]].indVertices[j];
+		printf("v = %d\n", v);
+	} while (v != v_first);
+	printf("\n\n");
+	--nv;
+
+	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index, polyhedron, true);
+
+	polyhedron->facets[fid[0]] = coalescedFacet;
+	for (i = 1; i < n; ++i)
+	{
+		polyhedron->facets[fid[i]].numVertices = 0;
+		printf("Внимание! Грань %d пуста\n", fid[i]);
+	}
+	polyhedron->facets[fid[0]].my_fprint_all(stdout);
+
+	polyhedron->preprocessAdjacency();
+	printf("------End of preprocess_polyhedron...------\n");
+	index = polyhedron->facets[fid[0]].indVertices;
+	del = new bool[polyhedron->numVertices];
+
+	for (i = 0; i < polyhedron->numVertices; ++i)
+	{
+		del[i] = false;
+	}
+
+	for (i = 0; i < nv; ++i)
+	{
+		i_next = (nv + i + 1) % nv;
+		if (index[nv + 1 + i] == index[nv + 1 + i_next])
+		{
+			del[index[i_next]] = true;
+		}
+	}
+	for (i = 0; i < polyhedron->numVertices; ++i)
+	{
+		if (del[i])
+		{
+			polyhedron->delete_vertex_polyhedron(i);
+		}
+	}
+
+	if (del != NULL)
+		delete[] del;
+
+	return nv;
 }
 
 void Coalescer::calculatePlane(int fid0, int fid1)
@@ -140,198 +398,62 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 	}
 	printf("Calculated plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0\n",
 			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
-
 }
 
-double Coalescer::riseFindStep(int fid0, int i)
+void Coalescer::calculatePlane(int n, int* fid)
 {
-	double d;
 
-	int nv, *index;
-	int fl2, fl1, fr1, fr2;
+	int *index, nv;
+	int ninvert, i;
 
-	double d1, d2;
+	coalescedFacet.my_fprint_all(stdout);
 
-	Plane plane;
-	Plane pl2, pl1, pr1, pr2;
-	Vector3d v1, v2;
+	index = coalescedFacet.indVertices;
+	nv = coalescedFacet.numVertices;
 
-	nv = polyhedron->facets[fid0].numVertices;
-	index = polyhedron->facets[fid0].indVertices;
-	plane = polyhedron->facets[fid0].plane;
+	polyhedron->list_squares_method(nv, index, &plane);
 
-	// Номера соседних с контуром граней вблизи рассматриваемой точки:
-	fl2 = index[nv + 1 + (nv + i - 2) % nv];
-	fl1 = index[nv + 1 + (nv + i - 1) % nv];
-	fr1 = index[nv + 1 + (nv + i) % nv];
-	fr2 = index[nv + 1 + (nv + i + 1) % nv];
+	//Проверка, что нормаль построенной плокости направлена извне многогранника
 
-	pl2 = polyhedron->facets[fl2].plane;
-	pl1 = polyhedron->facets[fl1].plane;
-	pr1 = polyhedron->facets[fr1].plane;
-	pr2 = polyhedron->facets[fr2].plane;
-
-	// Найдем точку пересечения первой тройки граней
-
-	if (qmod(pl2.norm % pr1.norm) < EPS_PARALL)
+	ninvert = 0;
+	for (i = 0; i < n; ++i)
 	{
-		// Если грани параллельны:
-		printf("(parallel)");
-		intersection(plane, pl1, pr1, v1);
+		ninvert += (plane.norm * polyhedron->facets[fid[i]].plane.norm < 0);
 	}
-	else
+	if (ninvert == n)
 	{
-		// Если грани не параллельны:
-		intersection(pl2, pl1, pr1, v1);
-		if (polyhedron->signum(v1, plane) == 1)
-		{
-			// Если точка пересечения лежит выше плоскости:
-			intersection(plane, pl1, pr1, v1);
-		}
+		printf("...Меняем направление вычисленной МНК плоскости...\n");
+		plane.norm *= -1.;
+		plane.dist *= -1.;
 	}
-	// Найдем проекцию перемещения точки на нормаль плоскости:
-	d1 = (v1 - polyhedron->vertices[index[i]]) * plane.norm;
-	if (polyhedron->facets[fl1].numVertices < 4)
-		d1 = -1;
-	printf("\td1 = %lf", d1);
-
-	// Найдем точку пересечения второй тройки граней
-
-	if (qmod(pl1.norm % pr2.norm) < EPS_PARALL)
+	else if (ninvert > 0)
 	{
-		// Если грани параллельны:
-		printf("(parallel)");
-		intersection(plane, pl1, pr1, v2);
+		printf(
+				"Warning. Cannot define direction of facet (%d positive and %d negative)\n",
+				n - ninvert, n);
 	}
-	else
-	{
-		// Если грани не параллельны:
-		intersection(pl1, pr1, pr2, v2);
-		if (polyhedron->signum(v2, plane) == 1)
-		{
-			// Если точка пересечения лежит выше плоскости:
-			intersection(plane, pl1, pr1, v2);
-		}
-	}
-	// Найдем проекцию перемещения точки на нормаль плоскости:
-	d2 = (v2 - polyhedron->vertices[index[i]]) * plane.norm;
-	if (polyhedron->facets[fr1].numVertices < 4)
-		d2 = -1;
-	printf("\td2 = %lf", d2);
-	printf("\n");
+	printf(
+			"За перемену направления плоскости проголосовало %d граней, а против - %d граней\n",
+			ninvert, n - ninvert);
+//    if (plane.norm * facet[fid[0]].plane.norm < 0) {
+//        plane = -plane;
+//        printf("...Меняем направление вычисленной МНК плоскости...\n");
+//    }
 
-	d = (d1 < d2) ? d1 : d2;
-	if (d1 < 0 && d2 > 0)
-		d = d2;
-	if (d1 > 0 && d2 < 0)
-		d = d1;
-
-	if (d < 0)
+	printf(
+			"Caluclated plane: \n(%.16lf)x  +  (%.16lf)y  + (%.16lf)z  +  (%.16lf)  =  0\n",
+			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	printf("Privious planes:\n");
+	for (i = 0; i < n; ++i)
 	{
-		printf("For vertex %d:\n", i);
-		polyhedron->facets[fl1].my_fprint_all(stdout);
-		polyhedron->facets[fr1].my_fprint_all(stdout);
+		printf("\t(%.16lf)x  +  (%.16lf)y  + (%.16lf)z  +  (%.16lf)  =  0\n",
+				plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	}
-	return d;
+
 }
-
-int Coalescer::riseFind(int fid0)
-{
-	int imin;
-
-	int i;
-	int nv, *index;
-	int fr1, fr2;
-
-	double d, dmin;
-	int pos, tmp;
-
-	Plane plane;
-
-	nv = polyhedron->facets[fid0].numVertices;
-	index = polyhedron->facets[fid0].indVertices;
-	plane = polyhedron->facets[fid0].plane;
-
-	printf("Предварительный анализ вершин: ");
-	for (i = 0; i < nv; ++i)
-	{
-		printf("\t\t2. 1. %d ). Предварительный анализ %d-й вершины : ", i,
-				index[i]);
-		if (polyhedron->signum(polyhedron->vertices[index[i]], plane) != -1)
-		{
-			printf("выше плоскости или на плоскости\n");
-			continue;
-		}
-//        printf("\t%d ( %d )", i, index[i]);
-		//Написано 2012-03-31 для решения проблемы с треугольными соседними гранями
-		fr1 = index[nv + 1 + (nv + i) % nv];
-		fr2 = index[nv + 1 + (nv + i + 1) % nv];
-		//        if (facet[fl1].nv < 4) {
-		//            delete_vertex_polyhedron(index[i]);
-		//            facet[fl1] = Facet();
-		//            --i;
-		//            continue;
-		//        } else
-		if (polyhedron->facets[fr1].numVertices == 3)
-		{
-			polyhedron->facets[fr1].my_fprint(stdout);
-			pos = index[2 * nv + 1 + i];
-			pos = (pos + 1) % 3;
-			tmp = index[i];
-			printf(" - Вместо вершины %d  в главной грани пишем вершину %d\n",
-					index[i], polyhedron->facets[fr1].indVertices[pos]);
-			index[i] = polyhedron->facets[fr1].indVertices[pos];
-			polyhedron->delete_vertex_polyhedron(tmp);
-			polyhedron->facets[fr1] = Facet();
-			if (polyhedron->vertexInfos[index[i + 1]].numFacets == 3)
-			{
-				polyhedron->delete_vertex_polyhedron(index[i + 1]);
-			}
-			polyhedron->preprocessAdjacency();
-			--i;
-			polyhedron->facets[fid0].my_fprint_all(stdout);
-			polyhedron->facets[fr2].my_fprint_all(stdout);
-//            continue;
-		}
-		//конец написанного 2012-03-31
-		printf("\n");
-	}
-
-	imin = -1;
-	for (i = 0; i < nv; ++i)
-	{
-		printf("\t\t2. 1. %d ). Обработка %d-й вершины : ", i, index[i]);
-		if (polyhedron->signum(polyhedron->vertices[index[i]], plane) != -1)
-		{
-			printf("выше плоскости или на плоскости\n");
-			continue;
-		}
-		printf("ниже плоскости");
-		//        printf("\n");
-
-		d = riseFindStep(fid0, i);
-
-		if (d < 0)
-		{
-			//Если перемещение отдаляет точку от плоскости
-			//?????????????????????????????
-			continue;
-		}
-		if ((dmin > d || imin == -1) && d > 1e-15)
-		{
-			dmin = d;
-			imin = i;
-		}
-	}
-
-	return imin;
-}
-
-
 
 void Coalescer::rise(int fid0)
 {
-
 	int i;
 	int nv, *index, *sign_vertex;
 	int ndown;
@@ -443,8 +565,190 @@ void Coalescer::rise(int fid0)
 		delete[] sign_vertex;
 	if (file_name_out != NULL)
 		delete[] file_name_out;
+}
 
+int Coalescer::riseFind(int fid0)
+{
+	int imin;
 
+	int i;
+	int nv, *index;
+	int fr1, fr2;
+
+	double d, dmin;
+	int pos, tmp;
+
+	Plane plane;
+
+	nv = polyhedron->facets[fid0].numVertices;
+	index = polyhedron->facets[fid0].indVertices;
+	plane = polyhedron->facets[fid0].plane;
+
+	printf("Предварительный анализ вершин: ");
+	for (i = 0; i < nv; ++i)
+	{
+		printf("\t\t2. 1. %d ). Предварительный анализ %d-й вершины : ", i,
+				index[i]);
+		if (polyhedron->signum(polyhedron->vertices[index[i]], plane) != -1)
+		{
+			printf("выше плоскости или на плоскости\n");
+			continue;
+		}
+//        printf("\t%d ( %d )", i, index[i]);
+		//Написано 2012-03-31 для решения проблемы с треугольными соседними гранями
+		fr1 = index[nv + 1 + (nv + i) % nv];
+		fr2 = index[nv + 1 + (nv + i + 1) % nv];
+		//        if (facet[fl1].nv < 4) {
+		//            delete_vertex_polyhedron(index[i]);
+		//            facet[fl1] = Facet();
+		//            --i;
+		//            continue;
+		//        } else
+		if (polyhedron->facets[fr1].numVertices == 3)
+		{
+			polyhedron->facets[fr1].my_fprint(stdout);
+			pos = index[2 * nv + 1 + i];
+			pos = (pos + 1) % 3;
+			tmp = index[i];
+			printf(" - Вместо вершины %d  в главной грани пишем вершину %d\n",
+					index[i], polyhedron->facets[fr1].indVertices[pos]);
+			index[i] = polyhedron->facets[fr1].indVertices[pos];
+			polyhedron->delete_vertex_polyhedron(tmp);
+			polyhedron->facets[fr1] = Facet();
+			if (polyhedron->vertexInfos[index[i + 1]].numFacets == 3)
+			{
+				polyhedron->delete_vertex_polyhedron(index[i + 1]);
+			}
+			polyhedron->preprocessAdjacency();
+			--i;
+			polyhedron->facets[fid0].my_fprint_all(stdout);
+			polyhedron->facets[fr2].my_fprint_all(stdout);
+//            continue;
+		}
+		//конец написанного 2012-03-31
+		printf("\n");
+	}
+
+	imin = -1;
+	for (i = 0; i < nv; ++i)
+	{
+		printf("\t\t2. 1. %d ). Обработка %d-й вершины : ", i, index[i]);
+		if (polyhedron->signum(polyhedron->vertices[index[i]], plane) != -1)
+		{
+			printf("выше плоскости или на плоскости\n");
+			continue;
+		}
+		printf("ниже плоскости");
+		//        printf("\n");
+
+		d = riseFindStep(fid0, i);
+
+		if (d < 0)
+		{
+			//Если перемещение отдаляет точку от плоскости
+			//?????????????????????????????
+			continue;
+		}
+		if ((dmin > d || imin == -1) && d > 1e-15)
+		{
+			dmin = d;
+			imin = i;
+		}
+	}
+
+	return imin;
+}
+
+double Coalescer::riseFindStep(int fid0, int i)
+{
+	double d;
+
+	int nv, *index;
+	int fl2, fl1, fr1, fr2;
+
+	double d1, d2;
+
+	Plane plane;
+	Plane pl2, pl1, pr1, pr2;
+	Vector3d v1, v2;
+
+	nv = polyhedron->facets[fid0].numVertices;
+	index = polyhedron->facets[fid0].indVertices;
+	plane = polyhedron->facets[fid0].plane;
+
+	// Номера соседних с контуром граней вблизи рассматриваемой точки:
+	fl2 = index[nv + 1 + (nv + i - 2) % nv];
+	fl1 = index[nv + 1 + (nv + i - 1) % nv];
+	fr1 = index[nv + 1 + (nv + i) % nv];
+	fr2 = index[nv + 1 + (nv + i + 1) % nv];
+
+	pl2 = polyhedron->facets[fl2].plane;
+	pl1 = polyhedron->facets[fl1].plane;
+	pr1 = polyhedron->facets[fr1].plane;
+	pr2 = polyhedron->facets[fr2].plane;
+
+	// Найдем точку пересечения первой тройки граней
+
+	if (qmod(pl2.norm % pr1.norm) < EPS_PARALL)
+	{
+		// Если грани параллельны:
+		printf("(parallel)");
+		intersection(plane, pl1, pr1, v1);
+	}
+	else
+	{
+		// Если грани не параллельны:
+		intersection(pl2, pl1, pr1, v1);
+		if (polyhedron->signum(v1, plane) == 1)
+		{
+			// Если точка пересечения лежит выше плоскости:
+			intersection(plane, pl1, pr1, v1);
+		}
+	}
+	// Найдем проекцию перемещения точки на нормаль плоскости:
+	d1 = (v1 - polyhedron->vertices[index[i]]) * plane.norm;
+	if (polyhedron->facets[fl1].numVertices < 4)
+		d1 = -1;
+	printf("\td1 = %lf", d1);
+
+	// Найдем точку пересечения второй тройки граней
+
+	if (qmod(pl1.norm % pr2.norm) < EPS_PARALL)
+	{
+		// Если грани параллельны:
+		printf("(parallel)");
+		intersection(plane, pl1, pr1, v2);
+	}
+	else
+	{
+		// Если грани не параллельны:
+		intersection(pl1, pr1, pr2, v2);
+		if (polyhedron->signum(v2, plane) == 1)
+		{
+			// Если точка пересечения лежит выше плоскости:
+			intersection(plane, pl1, pr1, v2);
+		}
+	}
+	// Найдем проекцию перемещения точки на нормаль плоскости:
+	d2 = (v2 - polyhedron->vertices[index[i]]) * plane.norm;
+	if (polyhedron->facets[fr1].numVertices < 4)
+		d2 = -1;
+	printf("\td2 = %lf", d2);
+	printf("\n");
+
+	d = (d1 < d2) ? d1 : d2;
+	if (d1 < 0 && d2 > 0)
+		d = d2;
+	if (d1 > 0 && d2 < 0)
+		d = d1;
+
+	if (d < 0)
+	{
+		printf("For vertex %d:\n", i);
+		polyhedron->facets[fl1].my_fprint_all(stdout);
+		polyhedron->facets[fr1].my_fprint_all(stdout);
+	}
+	return d;
 }
 
 void Coalescer::risePoint(int fid0, int imin)
@@ -928,247 +1232,4 @@ void Coalescer::risePoint(int fid0, int imin)
 		}
 	}
 
-}
-
-void Coalescer::run(int fid0, int fid1)
-{
-
-	int nv;
-
-
-	if (fid0 == fid1)
-	{
-		ERROR_PRINT("Error. Cannot coalesce facet with itself.");
-		return;
-	}
-
-	// I ). Составление списка вершин
-	printf("I ). Составление списка вершин\n");
-	buildIndex(fid0, fid1, nv);
-	if (nv == -1)
-		return;
-
-	// II ). Вычисление средней плоскости
-	printf("II ). Вычисление средней плоскости\n");
-	calculatePlane(fid0, fid1);
-	coalescedFacet.plane = plane;
-
-	// III ). Дополнительная предобработка многогранника
-	printf("III ). Дополнительная предобработка многогранника\n");
-	polyhedron->facets[fid0] = coalescedFacet;
-	polyhedron->facets[fid1] = Facet();
-	polyhedron->preprocessAdjacency();
-
-	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
-	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
-	rise(fid0);
-
-	// V ). Предобработка многогранника после поднятия
-	printf("V ). Предобработка многогранника после поднятия\n");
-	polyhedron->preprocessAdjacency();
-
-	//     VI). Рассечение многогранника плоскостью
-	printf("VI). Рассечение многогранника плоскостью\n");
-	polyhedron->intersectJoinMode(-plane, fid0);
-
-	polyhedron->test_consections(true);
-
-	printf("=====================================================\n");
-	printf("=========    Грани %d и %d объединены !!!   =========\n", fid0,
-			fid1);
-	printf("=====================================================\n");
-}
-
-void Coalescer::buildIndex(int n, int* fid, int& nv)
-{
-	int i, j, *index, *nfind, nnv, nv_safe;
-	int v_first, v;
-	int i_next;
-	bool* del;
-
-	nv_safe = 0;
-	for (i = 0; i < n; ++i)
-	{
-		nv_safe += polyhedron->facets[fid[i]].numVertices;
-	}
-	index = new int[3 * nv_safe + 1];
-	nfind = new int[polyhedron->numVertices];
-	for (i = 0; i < polyhedron->numVertices; ++i)
-	{
-		nfind[i] = 0;
-	}
-	for (i = 0; i < n; ++i)
-	{
-		for (j = 0; j < polyhedron->facets[fid[i]].numVertices; ++j)
-		{
-			++(nfind[polyhedron->facets[fid[i]].indVertices[j]]);
-		}
-	}
-
-	for (i = 0; i < n; ++i)
-	{
-		printf("facet  fid[%d] = %d : \n\n", i, fid[i]);
-		nnv = polyhedron->facets[fid[i]].numVertices;
-		for (j = 0; j < nnv; ++j)
-		{
-			printf("\t%d", polyhedron->facets[fid[i]].indVertices[j]);
-		}
-		printf("\n");
-		for (j = 0; j < nnv; ++j)
-		{
-			printf("\t%d", nfindpolyhedron->[facets[fid[i]].indVertices[j]]);
-		}
-		printf("\n\n");
-		polyhedron->facets[fid[i]].my_fprint_all(stdout);
-	}
-
-	nv = 0;
-	j = 0;
-	nnv = polyhedron->facets[fid[0]].numVertices;
-	while (nfind[polyhedron->facets[fid[0]].indVertices[j]] > 1)
-	{
-		j = (nnv + j + 1) % nnv;
-	}
-	v_first = polyhedron->facets[fid[0]].indVertices[j];
-
-	i = 0;
-	v = v_first;
-	printf("v = %d\n", v);
-	printf("New index : ");
-	do
-	{
-		printf("\n next facet %d\n", fid[i]);
-		nnv = polyhedron->facets[fid[i]].numVertices;
-		while (nfind[polyhedron->facets[fid[i]].indVertices[j]] == 1)
-		{
-			if (polyhedron->facets[fid[i]].indVertices[j] == v_first && nv > 0)
-			{
-				break;
-			}
-			index[nv] = polyhedron->facets[fid[i]].indVertices[j];
-
-			printf("%d ", index[nv]);
-			++nv;
-			j = (nnv + j + 1) % nnv;
-		}
-		v = polyhedron->facets[fid[i]].indVertices[j];
-		index[nv] = polyhedron->facets[fid[i]].indVertices[j];
-		printf("%d\n", index[nv]);
-		++nv;
-		if (v == v_first)
-			break;
-		for (i = 0; i < n; ++i)
-		{
-			j = polyhedron->facets[fid[i]].find_vertex(v);
-			printf("\tVertex %d was found in facet %d at position %d\n", v,
-					fid[i], j);
-			if (j != -1)
-			{
-				nnv = polyhedron->facets[fid[i]].numVertices;
-				j = (nnv + j + 1) % nnv;
-				printf("\tnfind[%d] = %d\n", polyhedron->facets[fid[i]].indVertices[j],
-						nfind[polyhedron->facets[fid[i]].indVertices[j]]);
-				if (nfind[polyhedron->facets[fid[i]].indVertices[j]] == 1)
-				{
-					break;
-				}
-			}
-		}
-
-		v = polyhedron->facets[fid[i]].indVertices[j];
-		printf("v = %d\n", v);
-	} while (v != v_first);
-	printf("\n\n");
-	--nv;
-
-	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index, polyhedron, true);
-
-	polyhedron->facets[fid[0]] = coalescedFacet;
-	for (i = 1; i < n; ++i)
-	{
-		polyhedron->facets[fid[i]].numVertices = 0;
-		printf("Внимание! Грань %d пуста\n", fid[i]);
-	}
-	polyhedron->facets[fid[0]].my_fprint_all(stdout);
-
-	polyhedron->preprocessAdjacency();
-	printf("------End of preprocess_polyhedron...------\n");
-	index = polyhedron->facets[fid[0]].indVertices;
-	del = new bool[polyhedron->numVertices];
-
-	for (i = 0; i < polyhedron->numVertices; ++i)
-	{
-		del[i] = false;
-	}
-
-	for (i = 0; i < nv; ++i)
-	{
-		i_next = (nv + i + 1) % nv;
-		if (index[nv + 1 + i] == index[nv + 1 + i_next])
-		{
-			del[index[i_next]] = true;
-		}
-	}
-	for (i = 0; i < polyhedron->numVertices; ++i)
-	{
-		if (del[i])
-		{
-			polyhedron->delete_vertex_polyhedron(i);
-		}
-	}
-
-	if (del != NULL)
-		delete[] del;
-}
-
-
-void Coalescer::run(int n, int* fid)
-{
-
-	int i;
-	int nv;
-	Plane plane;
-	Facet join_facet;
-	int fid0 = fid[0];
-
-	// I ). Составление списка вершин
-	printf("I ). Составление списка вершин\n");
-	buildIndex(n, fid, nv);
-	if (nv == -1)
-		return;
-
-	// II ). Вычисление средней плоскости
-	printf("II ). Вычисление средней плоскости\n");
-	multi_coalesce_facets_calculate_plane(n, fid, join_facet, plane);
-	polyhedron->facets[fid[0]].plane = plane;
-
-	// III ). Дополнительная предобработка многогранника
-	printf("III ). Дополнительная предобработка многогранника\n");
-	polyhedron->preprocessAdjacency();
-	polyhedron->facets[fid[0]].my_fprint_all(stdout);
-
-	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
-	printf("IV ). Алгортм поднятия вершин, лежащих ниже плоскости\n");
-	rise(fid0);
-
-	// V ). Предобработка многогранника после поднятия
-	printf("V ). Предобработка многогранника после поднятия\n");
-	polyhedron->preprocessAdjacency();
-
-	//     VI). Рассечение многогранника плоскостью
-//    printf("VI). Рассечение многогранника плоскостью\n");
-//    intersect_j(-plane, fid0);
-
-	polyhedron->test_consections(true);
-
-	printf("=====================================================\n");
-	printf("=========    Грани ");
-	printf("%d", fid[0]);
-	for (i = 1; i < n - 1; ++i)
-	{
-		printf(", %d", fid[i]);
-	}
-	printf(" и %d ", fid[n - 1]);
-	printf("объединены !!!   =========\n");
-	printf("=====================================================\n");
 }
