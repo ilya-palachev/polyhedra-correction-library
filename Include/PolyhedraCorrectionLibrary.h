@@ -58,6 +58,7 @@ class Coalescer;
 
 class PointShifter;
 class PointShifterWeighted;
+class PointShifterLinear;
 
 #include "Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
@@ -97,6 +98,7 @@ class PointShifterWeighted;
 #include "Correctors/Coalescer.h"
 #include "Correctors/PointShifter.h"
 #include "Correctors/PointShifterWeighted.h"
+#include "Correctors/PointShifterLinear.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

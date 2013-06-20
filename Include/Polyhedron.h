@@ -70,7 +70,6 @@ public:
 	void deform_linear_vertices(int id, double K, double* A, double* B,
 			double* x, double* y, double* z);
 	void deform_linear_vertices(double K, double* A, double* B);
-	double deform_linear_calculate_error();
 	double deform_linear_calculate_deform(double* x, double* y, double* z);
 	double min_dist(int id);
 	void import_coordinates(Polyhedron& orig);

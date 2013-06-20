@@ -42,6 +42,7 @@ Source/Correctors/Intersector/FacetIntersector.cpp
 Source/Correctors/Intersector/Intersector.cpp
 Source/Correctors/PointShifter/PointShifter.cpp
 Source/Correctors/PointShifterWeighted/PointShifterWeighted.cpp
+Source/Correctors/PointShifterLinear/PointShifterLinear.cpp
 Source/Polyhedron/Polyhedron_deform.cpp
 Source/Polyhedron/Polyhedron_intertia.cpp
 Source/Polyhedron/Polyhedron.cpp
