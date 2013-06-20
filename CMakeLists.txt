@@ -40,6 +40,7 @@ Source/Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector.cpp
 Source/Correctors/Intersector/FacetIntersector.cpp
 Source/Correctors/Intersector/Intersector.cpp
+Source/Correctors/PointShifter/PointShifter.cpp
 Source/Polyhedron/Polyhedron_deform.cpp
 Source/Polyhedron/Polyhedron_intertia.cpp
 Source/Polyhedron/Polyhedron.cpp
