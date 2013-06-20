@@ -1,5 +1,19 @@
 #include "PolyhedraCorrectionLibrary.h"
 
+void Polyhedron::shiftPoint(int id, Vector3d delta)
+{
+	PointShifter* pShifter = new PointShifter(this);
+	pShifter->run(id, delta);
+	delete pShifter;
+}
+
+void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
+{
+	PointShifterWeighted* pShifter = new PointShifterWeighted(this);
+	pShifter->run(id, delta);
+	delete pShifter;
+}
+
 #define EPSILON 1e-7
 //#define DEFORM_SCALE //Этот макрос определяет, каким методом производить деформацию:
 // экспоненциальным ростом штрафа или масштабированием
@@ -65,4 +79,5 @@ void Polyhedron::import_coordinates(Polyhedron& orig)
 		facets[i].plane = orig.facets[i].plane;
 	}
 }
+
 
