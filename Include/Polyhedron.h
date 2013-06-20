@@ -29,6 +29,7 @@ public:
 			double& zmin, double& zmax);
 
 	void delete_empty_facets();
+	int signum(Vector3d point, Plane plane);
 
 	//Polyhedron_io.cpp
 	void my_fprint(const char* filename);
@@ -56,9 +57,6 @@ public:
 	//Polyhedron_coalesce_facets.cpp
 	void coalesceFacets(int fid0, int fid1);
 	void coalesceFacets(int n, int* fid);
-
-	//Polyhedron.h
-	int signum(Vector3d point, Plane plane);
 
 	//Polyhedron_deform.cpp
 	void deform(int id, Vector3d delta);
