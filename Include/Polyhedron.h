@@ -67,8 +67,8 @@ public:
 			double& norm_sum);
 	void shiftPointLinearPartial(int id, Vector3d delta, int num);
 
-	double min_dist(int id);
-	void import_coordinates(Polyhedron& orig);
+	double distToNearestNeighbour(int id);
+	void copyCoordinates(Polyhedron& orig);
 
 
 	//Polyhedron_test_consections.cpp

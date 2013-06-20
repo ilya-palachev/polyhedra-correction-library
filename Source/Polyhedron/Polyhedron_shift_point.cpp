@@ -50,7 +50,7 @@ void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 	delete pShifter;
 }
 
-double Polyhedron::min_dist(int id)
+double Polyhedron::distToNearestNeighbour(int id)
 {
 	int i, nf, *index;
 	double dist, min_dist;
@@ -67,7 +67,7 @@ double Polyhedron::min_dist(int id)
 	return min_dist;
 }
 
-void Polyhedron::import_coordinates(Polyhedron& orig)
+void Polyhedron::copyCoordinates(Polyhedron& orig)
 {
 	int i;
 	for (i = 0; i < numVertices; ++i)

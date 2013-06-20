@@ -75,7 +75,7 @@ void get_statistics_deform_linear(const char* name, int type)
 		{
 			i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);
 			//            printf("%d ", i_vertex);
-			dist = poly.min_dist(i_vertex);
+			dist = poly.distToNearestNeighbour(i_vertex);
 			norm = dist * norm0;
 
 			a = rand();
@@ -93,7 +93,7 @@ void get_statistics_deform_linear(const char* name, int type)
 			{
 				++count;
 			}
-			poly.import_coordinates(poly1);
+			poly.copyCoordinates(poly1);
 		}
 		//        for (i_vertex = 0; i_vertex < 50 && i_vertex < numv; ++i_vertex) {
 		//            dist = poly.min_dist(i_vertex);
@@ -174,7 +174,7 @@ void get_statistics_deform_linear_test(const char* name, int type)
 	{
 		i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);
 		//            printf("%d ", i_vertex);
-		dist = poly.min_dist(i_vertex);
+		dist = poly.distToNearestNeighbour(i_vertex);
 		norm = dist * 0.0001;
 
 		a = rand();
@@ -187,10 +187,10 @@ void get_statistics_deform_linear_test(const char* name, int type)
 		delta = norm * Vector3d(a, b, c);
 
 		poly.shiftPointLinearTest(i_vertex, delta, 0, num_steps0, norm_sum0);
-		poly.import_coordinates(poly1);
+		poly.copyCoordinates(poly1);
 		num_steps1 = -1;
 		poly.shiftPointLinearTest(i_vertex, delta, 1, num_steps1, norm_sum1);
-		poly.import_coordinates(poly1);
+		poly.copyCoordinates(poly1);
 		if (num_steps1 != -1)
 		{
 			printf(
