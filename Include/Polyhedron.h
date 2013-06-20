@@ -63,14 +63,15 @@ public:
 	void shiftPointWeighted(int id, Vector3d delta);
 
 	//Polyhedron_deform_linear.cpp
-	void deform_linear(int id, Vector3d delta);
-	void deform_linear2(int id, Vector3d delta);
-	void deform_linear_partial(int id, Vector3d delta, int num);
+	void shiftPointLinearGlobal(int id, Vector3d delta);
+	void shiftPointLinearLocal(int id, Vector3d delta);
+	void shiftPointLinearTest(int id, Vector3d delta, int mode, int& num_steps,
+			double& norm_sum);
+	void shiftPointLinearPartial(int id, Vector3d delta, int num);
+
 	double min_dist(int id);
 	void import_coordinates(Polyhedron& orig);
 
-	void deform_linear_test(int id, Vector3d delta, int mode, int& num_steps,
-			double& norm_sum);
 
 	//Polyhedron_test_consections.cpp
 	int test_consections(bool ifPrint);

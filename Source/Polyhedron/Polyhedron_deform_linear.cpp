@@ -6,7 +6,7 @@
 // (если он определен - то масштабированием)
 
 //Данная функция отвечает за глобальную минимизацию (т. е. минимизируется отклонение в целом)
-void Polyhedron::deform_linear(int id, Vector3d delta)
+void Polyhedron::shiftPointLinearGlobal(int id, Vector3d delta)
 {
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runGlobal(id, delta);
@@ -14,14 +14,14 @@ void Polyhedron::deform_linear(int id, Vector3d delta)
 }
 
 //Данная функция отвечает за локальную минимизацию (т. е. минимизируется отклонение на шаге)
-void Polyhedron::deform_linear2(int id, Vector3d delta)
+void Polyhedron::shiftPointLinearLocal(int id, Vector3d delta)
 {
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runLocal(id, delta);
 	delete pShifter;
 }
 
-void Polyhedron::deform_linear_test(int id, Vector3d delta, int mode,
+void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
 		int& num_steps, double& norm_sum)
 {
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
@@ -29,7 +29,7 @@ void Polyhedron::deform_linear_test(int id, Vector3d delta, int mode,
 	delete pShifter;
 }
 
-void Polyhedron::deform_linear_partial(int id, Vector3d delta, int num)
+void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 {
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runPartial(id, delta, num);

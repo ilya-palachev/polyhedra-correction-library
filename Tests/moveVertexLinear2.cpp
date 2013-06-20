@@ -84,7 +84,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 //        eps *= 2.;
 //    }
 
-	poly.deform_linear2(id, delta);
+	poly.shiftPointLinearLocal(id, delta);
 	poly.test_consections(false);
 
 	time_t seconds = time(NULL);

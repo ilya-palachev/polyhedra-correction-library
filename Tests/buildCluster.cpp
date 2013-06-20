@@ -421,7 +421,7 @@ void get_statistics_deform_linear(const char* name, int type)
 			c /= d;
 			delta = norm * Vector3d(a, b, c);
 
-			poly.deform_linear_partial(i_vertex, delta, 10);
+			poly.shiftPointLinearPartial(i_vertex, delta, 10);
 
 			if (poly.test_consections(true) > 0)
 			{
@@ -589,7 +589,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 
 	poly.preprocessAdjacency();
 	poly.test_consections(true);
-	poly.deform_linear(id, delta);
+	poly.shiftPointLinearGlobal(id, delta);
 	poly.test_consections(true);
 
 	time_t seconds = time(NULL);
