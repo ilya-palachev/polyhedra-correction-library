@@ -59,8 +59,8 @@ public:
 	void coalesceFacets(int n, int* fid);
 
 	//Polyhedron_deform.cpp
-	void deform(int id, Vector3d delta);
-	void deform_w(int id, Vector3d delta);
+	void shiftPoint(int id, Vector3d delta);
+	void shiftPointWeighted(int id, Vector3d delta);
 
 	//Polyhedron_deform_linear.cpp
 	void deform_linear(int id, Vector3d delta);

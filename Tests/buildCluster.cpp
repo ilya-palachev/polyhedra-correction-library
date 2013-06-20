@@ -512,7 +512,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocessAdjacency();
-	poly.deform_w(id, delta);
+	poly.shiftPointWeighted(id, delta);
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
