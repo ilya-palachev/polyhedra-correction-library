@@ -8,8 +8,7 @@
 #ifndef FACET_H
 #define	FACET_H
 
-class Facet
-{
+class Facet {
 public:
 	int id;
 	int numVertices;

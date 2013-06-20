@@ -51,7 +51,7 @@ Source/Polyhedron/Polyhedron_hierarchical_clustering.cpp
 Source/Polyhedron/Polyhedron_deform_linear.cpp
 Source/Polyhedron/Polyhedron_preprocess.cpp
 Source/Polyhedron/Polyhedron_correction.cpp
-Source/Polyhedron/Polyhedron_join_facets.cpp
+Source/Polyhedron/Polyhedron_coalesce_facets.cpp
 Source/Polyhedron/Polyhedron_test_consections.cpp
 Source/Polyhedron/Polyhedron_io.cpp
 Source/Polyhedron/Polyhedron_cluster.cpp

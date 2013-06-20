@@ -17,8 +17,8 @@ void Facet::test_pair_neighbours()
 			if (indVertices[numVertices + 1 + i]
 					== indVertices[numVertices + 1 + j])
 			{
-				printf(
-						"WARNING!!! test_pair_neighbours in facet %d. neighbour[%d] = %d and neighbour[%d] = %d\n\n",
+				DEBUG_PRINT(
+						"WARNING!!! test_pair_neighbours in facet %d. neighbour[%d] = %d and neighbour[%d] = %d",
 						id, j, indVertices[numVertices + 1 + j], i,
 						indVertices[numVertices + 1 + i]);
 			}
@@ -38,8 +38,8 @@ int Facet::test_structure()
 		pos = parentPolyhedron->facets[facet].find_vertex(indVertices[i]);
 		if (pos == -1)
 		{
-			printf(
-					"=======test_structure: Error. Cannot find vertex %d in facet %d\n",
+			ERROR_PRINT(
+					"=======test_structure: Error. Cannot find vertex %d in facet %d",
 					indVertices[i], facet);
 			parentPolyhedron->facets[facet].my_fprint_all(stdout);
 			this->my_fprint_all(stdout);
@@ -50,8 +50,8 @@ int Facet::test_structure()
 		pos = (pos + nnv - 1) % nnv;
 		if (parentPolyhedron->facets[facet].indVertices[nnv + 1 + pos] != id)
 		{
-			printf(
-					"=======test_structure: Error. Wrong neighbor facet for vertex %d in facet %d\n",
+			ERROR_PRINT(
+					"=======test_structure: Error. Wrong neighbor facet for vertex %d in facet %d",
 					indVertices[i], facet);
 			parentPolyhedron->facets[facet].my_fprint_all(stdout);
 			this->my_fprint_all(stdout);
@@ -61,6 +61,3 @@ int Facet::test_structure()
 	}
 	return 0;
 }
-
-
-

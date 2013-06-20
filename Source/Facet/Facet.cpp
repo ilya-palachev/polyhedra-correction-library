@@ -29,15 +29,15 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	rgb[2] = 100;
 
 //	if (!poly) {
-//		fprintf(stdout, "Facet::Facet. Error. poly = NULL\n");
+//		fprintf(stdout, "Facet::Facet. Error. poly = NULL");
 //	}
 	if (!index_orig)
 	{
-		fprintf(stdout, "Facet::Facet. Error. index_orig = NULL\n");
+		fprintf(stdout, "Facet::Facet. Error. index_orig = NULL");
 	}
 	if (nv_orig < 3)
 	{
-		fprintf(stdout, "Facet::Facet. Error. nv_orig < 3\n");
+		fprintf(stdout, "Facet::Facet. Error. nv_orig < 3");
 	}
 	indVertices = new int[3 * numVertices + 1];
 	if (ifLong)
@@ -95,7 +95,7 @@ Facet& Facet::operator =(const Facet& facet1)
 Facet::~Facet()
 {
 #ifdef DEBUG1
-	fprintf(stdout, "Deleting facet[%d]\n", id);
+	fprintf(stdout, "Deleting facet[%d]", id);
 #endif
 	if (indVertices != NULL)
 		delete[] indVertices;
@@ -221,7 +221,7 @@ void Facet::delete_vertex(int v)
 	}
 	if (found == 1)
 	{
-		printf("\tdelete_vertex(%d) in facet %d\n", v, id);
+		DEBUG_PRINT("\tdelete_vertex(%d) in facet %d", v, id);
 		//        this->my_fprint_all(stdout);
 	}
 }
@@ -235,7 +235,7 @@ void Facet::find_next_facet(int v, int& fid_next)
         if (i == numVertices)
         {
                 fid_next = -1;
-                printf(
+                ERROR_PRINT(
                                 "Facet::find_next_facet : Error. Cannot find vertex %d at facet %d",
                                 v, id);
                 return;
@@ -256,8 +256,8 @@ void Facet::add(int what, int pos)
 {
 
 	int i, *index_new;
-	printf("add %d at position %d in facet %d\n", what, pos, id);
-	printf("{{{\n");
+	DEBUG_PRINT("add %d at position %d in facet %d", what, pos, id);
+	DEBUG_PRINT("{{{");
 	this->my_fprint_all(stdout);
 
 	if (pos < numVertices)
@@ -295,15 +295,15 @@ void Facet::add(int what, int pos)
 	}
 	this->my_fprint_all(stdout);
 	test_pair_neighbours();
-	printf("}}}\n");
+	DEBUG_PRINT("}}}");
 }
 
 void Facet::remove(int pos)
 {
 	int i;
-	printf("remove position %d (vertex %d) in facet %d\n", pos,
+	DEBUG_PRINT("remove position %d (vertex %d) in facet %d", pos,
 			indVertices[pos], id);
-	printf("{{{\n");
+	DEBUG_PRINT("{{{");
 	this->my_fprint_all(stdout);
 
 	for (i = pos; i < numVertices + pos; ++i)
@@ -321,7 +321,7 @@ void Facet::remove(int pos)
 	--numVertices;
 	this->my_fprint_all(stdout);
 	test_pair_neighbours();
-	printf("}}}\n");
+	DEBUG_PRINT("}}}");
 }
 
 void Facet::update_info()
@@ -329,8 +329,8 @@ void Facet::update_info()
 
 	int i, facet, pos, nnv;
 
-	printf("update info in facet %d\n", id);
-	printf("{{{\n");
+	DEBUG_PRINT("update info in facet %d", id);
+	DEBUG_PRINT("{{{");
 	this->my_fprint_all(stdout);
 
 	for (i = 0; i < numVertices; ++i)
@@ -339,8 +339,8 @@ void Facet::update_info()
 		pos = parentPolyhedron->facets[facet].find_vertex(indVertices[i]);
 		if (pos == -1)
 		{
-			printf(
-					"=======update_info: Error. Cannot find vertex %d in facet %d\n",
+			ERROR_PRINT(
+					"=======update_info: Error. Cannot find vertex %d in facet %d",
 					indVertices[i], facet);
 			parentPolyhedron->facets[facet].my_fprint_all(stdout);
 			this->my_fprint_all(stdout);
@@ -351,8 +351,8 @@ void Facet::update_info()
 		pos = (pos + nnv - 1) % nnv;
 		if (parentPolyhedron->facets[facet].indVertices[nnv + 1 + pos] != id)
 		{
-			printf(
-					"=======update_info: Error. Wrong neighbor facet for vertex %d in facet %d\n",
+			ERROR_PRINT(
+					"=======update_info: Error. Wrong neighbor facet for vertex %d in facet %d",
 					indVertices[i], facet);
 			parentPolyhedron->facets[facet].my_fprint_all(stdout);
 			this->my_fprint_all(stdout);
@@ -362,7 +362,7 @@ void Facet::update_info()
 	}
 	this->my_fprint_all(stdout);
 	test_pair_neighbours();
-	printf("}}}\n");
+	DEBUG_PRINT("}}}");
 }
 
 Vector3d& Facet::find_mass_centre()
@@ -375,7 +375,7 @@ Vector3d& Facet::find_mass_centre()
 	{
 		a = parentPolyhedron->vertices[indVertices[i]];
 		*v += a;
-		printf("facet[%d].index[%d] = (%lf, %lf, %lf)\n", id, i, a.x, a.y, a.z);
+		DEBUG_PRINT("facet[%d].index[%d] = (%lf, %lf, %lf)", id, i, a.x, a.y, a.z);
 	}
 	*v *= c;
 	return *v;
