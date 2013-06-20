@@ -47,6 +47,17 @@ public:
 	void find_and_replace_vertex(int from, int to);
 	void find_and_replace_facet(int from, int to);
 
+	void delete_vertex(int v);
+
+	void find_next_facet(int v, int& fid_next);
+	int find_vertex(int what);
+
+	void add(int what, int pos);
+	void remove(int pos);
+	void update_info();
+
+	Vector3d& find_mass_centre();
+
 	// Facet_preprocess.cpp
 	void preprocess_free();
 	void preprocess();
@@ -72,26 +83,15 @@ public:
 	// Facet_test.cpp
 	bool test_self_intersection();
 
-	// Facet_join_facets.cpp
-	void delete_vertex(int v);
-
-	void find_next_facet(int v, int& fid_next);
-	int find_vertex(int what);
-
-	void add(int what, int pos);
-	void remove(int pos);
-	void update_info();
-	int test_structure();
-
-	Vector3d& find_mass_centre();
-
-	void test_pair_neighbours();
-
 	// Facet_inertia.cpp
 	bool consect_x(double y, double z, double& x);
 
 	// Facet_area.cpp
 	double area();
+
+	// Facet_verification.cpp
+	int test_structure();
+	void test_pair_neighbours();
 
 };
 

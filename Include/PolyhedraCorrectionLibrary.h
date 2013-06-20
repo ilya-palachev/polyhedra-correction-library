@@ -55,7 +55,6 @@ class GlobalShadeCorrector;
 class GSAssociator;
 
 class Coalescer;
-class FacetCoalescer;
 
 #include "Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
@@ -93,8 +92,6 @@ class FacetCoalescer;
 #include "Correctors/GlobalShadeCorrector.h"
 #include "Correctors/GSAssociator.h"
 #include "Correctors/Coalescer.h"
-#include "Correctors/FacetCoalescer.h"
-
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 

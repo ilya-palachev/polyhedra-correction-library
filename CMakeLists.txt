@@ -34,7 +34,6 @@ Source/VertexInfo/VertexInfo_io.cpp
 Source/VertexInfo/VertexInfo.cpp
 Source/Correctors/PCorrector/PCorrector.cpp
 Source/Correctors/Coalescer/Coalescer.cpp
-Source/Correctors/Coalescer/FacetCoalescer.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_preprocess.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector_derivateTest.cpp
 Source/Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.cpp
@@ -56,7 +55,6 @@ Source/Polyhedron/Polyhedron_join_facets.cpp
 Source/Polyhedron/Polyhedron_test_consections.cpp
 Source/Polyhedron/Polyhedron_io.cpp
 Source/Polyhedron/Polyhedron_cluster.cpp
-Source/Polyhedron/Polyhedron_verification.cpp
 Source/EdgeContourAssociation/EdgeContourAssociation.cpp
 Source/EdgeContourAssociation/EdgeContourAssociation_test.cpp
 Source/ClusterNorm/ClusterNorm.cpp
@@ -71,7 +69,7 @@ Source/DataContainers/ShadeContourData/ShadeContourData.cpp
 Source/DataContainers/EdgeData/EdgeData.cpp
 Source/Facet/Facet_io.cpp
 Source/Facet/Facet_area.cpp
-Source/Facet/Facet_join_facets.cpp
+Source/Facet/Facet_verification.cpp
 Source/Facet/Facet_test.cpp
 Source/Facet/Facet_inertia.cpp
 Source/Facet/Facet.cpp
