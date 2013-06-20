@@ -51,6 +51,9 @@ Polyhedron::~Polyhedron()
 		delete[] vertexInfos;
 }
 
+
+const double EPS_SIGNUM = 1e-15;
+
 int Polyhedron::signum(Vector3d point, Plane plane)
 {
 	double d = plane % point;

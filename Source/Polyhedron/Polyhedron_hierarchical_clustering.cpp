@@ -1,5 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
+const double LIMIT_FOR_CLUSTERIZATION = 0.5;
+
 TreeClusterNorm& Polyhedron::build_TreeClusterNorm()
 {
 
@@ -54,7 +56,7 @@ TreeClusterNorm& Polyhedron::build_TreeClusterNorm()
 		double distance_id0_id1 = matrix.findMin(id0, id1);
 
 #ifndef NOPOROG
-		if (distance_id0_id1 > POROG)
+		if (distance_id0_id1 > LIMIT_FOR_CLUSTERIZATION)
 			break;
 #endif
 		//  printf("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n", id0, id1, distance_id0_id1);
@@ -155,7 +157,7 @@ void Polyhedron::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 		double distance_id0_id1 = matrix.findMin(id0, id1);
 
 #ifndef NOPOROG
-		if (distance_id0_id1 > POROG)
+		if (distance_id0_id1 > LIMIT_FOR_CLUSTERIZATION)
 			break;
 #endif
 		//  printf("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n", id0, id1, distance_id0_id1);

@@ -7,6 +7,10 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
+const double ASSOCIATOR_MIN_PORTION_REL = 0.1;
+const double EPS_SAME_POINTS = 1e-16;
+const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-6;
+
 static double distVertexEdge(
 // this routine calculates distance
 		Vector3d A, // from this vector

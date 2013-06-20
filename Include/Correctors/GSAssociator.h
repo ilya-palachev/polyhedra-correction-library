@@ -8,6 +8,11 @@
 #ifndef GSASSOCIATOR_H_
 #define GSASSOCIATOR_H_
 
+enum Orientation
+{
+	ORIENTATION_LEFT, ORIENTATION_RIGHT
+};
+
 class GSAssociator: public GlobalShadeCorrector
 {
 private:

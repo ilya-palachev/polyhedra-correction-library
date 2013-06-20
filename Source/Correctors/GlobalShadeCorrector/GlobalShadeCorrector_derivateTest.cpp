@@ -7,6 +7,13 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
+const double EPSILON_FOR_DIVISION = 1e-16;
+const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
+const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE = 1e-2;
+const double DEFAULT_DERIVATIVE_STEP = 1e-8;
+const double DEFAULT_DERIVATIVE_STEP_RECIPROCAL = 1e+8;
+const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
+
 void GlobalShadeCorrector::derivativeTest_all()
 {
 	derivativeTest_1();

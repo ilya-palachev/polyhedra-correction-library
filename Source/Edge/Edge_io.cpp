@@ -1,5 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
+const double THRESHOLD_ESSENTIAL_ASSOCIATION = 0.1;
+
 void Edge::my_fprint(FILE* file)
 {
 #ifndef NDEBUG
