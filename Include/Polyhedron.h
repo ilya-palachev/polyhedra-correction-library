@@ -60,11 +60,7 @@ public:
 
 	//Polyhedron_deform.cpp
 	void deform(int id, Vector3d delta);
-
 	void deform_w(int id, Vector3d delta);
-	void f_w(int n, double* x, double* fx, int id, bool* khi, int K);
-	void derf_w(int n, double* x, double* A, int id, bool* khi, int K,
-			double* tmp0, double* tmp1, double* tmp2, double* tmp3);
 
 	//Polyhedron_deform_linear.cpp
 	void deform_linear(int id, Vector3d delta);

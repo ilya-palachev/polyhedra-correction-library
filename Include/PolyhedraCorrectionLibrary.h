@@ -57,6 +57,7 @@ class GSAssociator;
 class Coalescer;
 
 class PointShifter;
+class PointShifterWeighted;
 
 #include "Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
@@ -95,6 +96,7 @@ class PointShifter;
 #include "Correctors/GSAssociator.h"
 #include "Correctors/Coalescer.h"
 #include "Correctors/PointShifter.h"
+#include "Correctors/PointShifterWeighted.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
