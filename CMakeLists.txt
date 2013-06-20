@@ -20,8 +20,6 @@ set (SOURCE_vector3d
 
 set (SOURCE_polyhedronCorrection
 Source/MatrixDistNorm/MatrixDistNorm.cpp
-Source/SideOfContour/SideOfContour_io.cpp
-Source/SideOfContour/SideOfContour.cpp
 Source/SpecificPolyhedrons/Cube.cpp
 Source/SpecificPolyhedrons/Prism.cpp
 Source/SpecificPolyhedrons/Pyramid.cpp
@@ -40,6 +38,15 @@ Source/Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.cpp
 Source/Correctors/GlobalShadeCorrector/GlobalShadeCorrector.cpp
 Source/Correctors/Intersector/FacetIntersector.cpp
 Source/Correctors/Intersector/Intersector.cpp
+Source/Correctors/Intersector/EdgeList/EdgeList.cpp
+Source/Correctors/Intersector/EdgeList/EdgeList_intersection.cpp
+Source/Correctors/Intersector/EdgeList/EdgeList_io.cpp
+Source/Correctors/Intersector/EdgeSet/EdgeSet_io.cpp
+Source/Correctors/Intersector/EdgeSet/EdgeSet_intersection.cpp
+Source/Correctors/Intersector/EdgeSet/EdgeSet.cpp
+Source/Correctors/Intersector/FutureFacet/FutureFacet_intersection.cpp
+Source/Correctors/Intersector/FutureFacet/FutureFacet_io.cpp
+Source/Correctors/Intersector/FutureFacet/FutureFacet.cpp
 Source/Correctors/PointShifter/PointShifter.cpp
 Source/Correctors/PointShifterWeighted/PointShifterWeighted.cpp
 Source/Correctors/PointShifterLinear/PointShifterLinear.cpp
@@ -58,18 +65,18 @@ Source/Polyhedron/Polyhedron_test_consections.cpp
 Source/Polyhedron/Polyhedron_io.cpp
 Source/Polyhedron/Polyhedron_cluster.cpp
 Source/Polyhedron/Polyhedron_verification.cpp
-Source/EdgeContourAssociation/EdgeContourAssociation.cpp
-Source/EdgeContourAssociation/EdgeContourAssociation_test.cpp
 Source/ClusterNorm/ClusterNorm.cpp
-Source/EdgeList/EdgeList.cpp
-Source/EdgeList/EdgeList_intersection.cpp
-Source/EdgeList/EdgeList_io.cpp
-Source/EdgeSet/EdgeSet_io.cpp
-Source/EdgeSet/EdgeSet_intersection.cpp
-Source/EdgeSet/EdgeSet.cpp
 Source/DataContainers/PData/PData.cpp
 Source/DataContainers/ShadeContourData/ShadeContourData.cpp
+Source/DataContainers/ShadeContourData/SideOfContour/SideOfContour_io.cpp
+Source/DataContainers/ShadeContourData/SideOfContour/SideOfContour.cpp
+Source/DataContainers/ShadeContourData/SContour/SContour.cpp
+Source/DataContainers/ShadeContourData/SContour/SContour_io.cpp
 Source/DataContainers/EdgeData/EdgeData.cpp
+Source/DataContainers/EdgeData/Edge/Edge_io.cpp
+Source/DataContainers/EdgeData/Edge/Edge.cpp
+Source/DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.cpp
+Source/DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation_test.cpp
 Source/Facet/Facet_io.cpp
 Source/Facet/Facet_area.cpp
 Source/Facet/Facet_verification.cpp
@@ -80,14 +87,7 @@ Source/Facet/Facet_preprocess.cpp
 Source/DataConstructors/EdgeConstructor/EdgeConstructor.cpp
 Source/DataConstructors/ShadeContourConstructor/ShadeContourConstructor.cpp
 Source/DataConstructors/PDataConstructor/PDataConstructor.cpp
-Source/FutureFacet/FutureFacet_intersection.cpp
-Source/FutureFacet/FutureFacet_io.cpp
-Source/FutureFacet/FutureFacet.cpp
 Source/TreeClusterNorm/TreeClusterNorm.cpp
-Source/SContour/SContour.cpp
-Source/SContour/SContour_io.cpp
-Source/Edge/Edge_io.cpp
-Source/Edge/Edge.cpp
 )
 
 include_directories( 
