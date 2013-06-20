@@ -55,6 +55,7 @@ Source/Polyhedron/Polyhedron_coalesce_facets.cpp
 Source/Polyhedron/Polyhedron_test_consections.cpp
 Source/Polyhedron/Polyhedron_io.cpp
 Source/Polyhedron/Polyhedron_cluster.cpp
+Source/Polyhedron/Polyhedron_verification.cpp
 Source/EdgeContourAssociation/EdgeContourAssociation.cpp
 Source/EdgeContourAssociation/EdgeContourAssociation_test.cpp
 Source/ClusterNorm/ClusterNorm.cpp

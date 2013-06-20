@@ -53,12 +53,9 @@ public:
 	void intersect(Plane iplane);
 	void intersectCoalesceMode(Plane iplane, int jfid);
 
-	//Polyhedron_join_facets.cpp
+	//Polyhedron_coalesce_facets.cpp
 	void coalesceFacets(int fid0, int fid1);
 	void coalesceFacets(int n, int* fid);
-
-	int test_structure();
-
 
 	//Polyhedron.h
 	int signum(Vector3d point, Plane plane);
@@ -145,6 +142,8 @@ public:
 	// Polyhedron_correction.cpp
 	void correctGlobal(ShadeContourData* contourData);
 
+	// Polyhedron_verification.cpp
+	int test_structure();
 };
 
 #endif	/* POLYHEDRON_CLASS_H */
