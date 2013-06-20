@@ -23,9 +23,9 @@ private:
 	double* tmp2;
 	double* tmp3;
 
-	void f();
-	void derf();
-	void derf2();
+	void calculateFunctional();
+	void calculateFunctionalDerivative();
+	void calculateFunctionalDerivative2();
 
 public:
 	PointShifter();

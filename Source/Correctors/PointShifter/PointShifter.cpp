@@ -176,14 +176,14 @@ void PointShifter::run(int id, Vector3d delta)
 	{
 		x[i] = 0.;
 	}
-	f();
+	calculateFunctional();
 	err = norm_vector(n, fx);
 
 	step = 0;
 	while (err > EPSILON)
 	{
-		derf2();
-		f();
+		calculateFunctionalDerivative2();
+		calculateFunctional();
 		err = norm_vector(n, fx);
 
 		printf("step %d\terr = %le\n", step++, err);
@@ -219,7 +219,7 @@ void PointShifter::run(int id, Vector3d delta)
 
 			for (i = 0; i < n; ++i)
 				x[i] += gamma * x1[i];
-			f();
+			calculateFunctional();
 			err_new = norm_vector(n, fx);
 		} while (err_new > err);
 		printf("\n");
@@ -337,7 +337,7 @@ void print_vector(int n, double* v)
 }
 
 
-void PointShifter::f()
+void PointShifter::calculateFunctional()
 {
 	int i, j, k, p, m;
 	int *index, nv, nf;
@@ -426,7 +426,7 @@ void PointShifter::f()
 	}
 }
 
-void PointShifter::derf()
+void PointShifter::calculateFunctionalDerivative()
 {
 	int i, j, k, p, m;
 	int *index, nv, nf;
@@ -533,7 +533,7 @@ void PointShifter::derf()
 	}
 }
 
-void PointShifter::derf2()
+void PointShifter::calculateFunctionalDerivative2()
 {
 	int i, j;
 	double ieps = 0.5 / EPS_DERIVATE;
@@ -552,10 +552,10 @@ void PointShifter::derf2()
 		swap1 = fx;
 		x = tmp0;
 		fx = tmp2;
-		f();
+		calculateFunctional();
 		x = tmp1;
 		fx = tmp3;
-		f();
+		calculateFunctional();
 		for (i = 0; i < n; ++i)
 			A[i * n + j] = (tmp2[i] - tmp3[i]) * ieps;
 		x = swap0;
