@@ -167,7 +167,7 @@ void PointShifter::run(int id, Vector3d delta)
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;
 			zz = polyhedron->vertices[index[i]].z;
-			printf("v%d -> f%d : %lf\n", index[i], j,
+			DEBUG_PRINT("v%d -> f%d : %lf", index[i], j,
 					a * xx + b * yy + c * zz + d);
 		}
 	}
@@ -188,11 +188,11 @@ void PointShifter::run(int id, Vector3d delta)
 		calculateFunctional();
 		err = norm_vector(n, fx);
 
-		printf("step %d\terr = %le\n", step++, err);
+		DEBUG_PRINT("step %d\terr = %le", step++, err);
 		print_vector(n, fx);
 		if (err > 100)
 		{
-			printf("Ошибка. Метод Ньютона разошелся\n");
+			DEBUG_PRINT("Ошибка. Метод Ньютона разошелся");
 			break;
 		}
 		print_matrix(stdout, n, n, A);
@@ -200,7 +200,7 @@ void PointShifter::run(int id, Vector3d delta)
 		success = Gauss_string(n, A, fx);
 		if (!success)
 		{
-			printf("Stoping deform...\n");
+			DEBUG_PRINT("Stoping deform...");
 			return;
 		}
 		for (i = 0; i < n; ++i)
@@ -209,7 +209,7 @@ void PointShifter::run(int id, Vector3d delta)
 		}
 		gamma = 2.;
 		auto_step = 0;
-		printf("\tauto_step : ");
+		DEBUG_PRINT("\tauto_step : ");
 		do
 		{
 			if (auto_step > 100)
@@ -217,14 +217,13 @@ void PointShifter::run(int id, Vector3d delta)
 
 			gamma *= 0.5;
 			++auto_step;
-			printf("%d ", auto_step);
+			DEBUG_PRINT("%d ", auto_step);
 
 			for (i = 0; i < n; ++i)
 				x[i] += gamma * x1[i];
 			calculateFunctional();
 			err_new = norm_vector(n, fx);
 		} while (err_new > err);
-		printf("\n");
 	}
 
 	for (i = 0; i < polyhedron->numVertices; ++i)
@@ -256,7 +255,7 @@ void PointShifter::run(int id, Vector3d delta)
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;
 			zz = polyhedron->vertices[index[i]].z;
-			printf("v%d -> f%d : %lf\n", index[i], j,
+			DEBUG_PRINT("v%d -> f%d : %lf", index[i], j,
 					a * xx + b * yy + c * zz + d);
 		}
 	}
@@ -335,7 +334,7 @@ void print_vector(int n, double* v)
 {
 	int i;
 	for (i = 0; i < n; ++i)
-		printf("\t%lf\n", v[i]);
+		DEBUG_PRINT("\t%lf", v[i]);
 }
 
 
