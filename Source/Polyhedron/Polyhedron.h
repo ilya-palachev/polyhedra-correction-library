@@ -84,11 +84,9 @@ public:
 	void inertia(double& l0, double& l1, double& l2, Vector3d& v0, Vector3d& v1,
 			Vector3d& v2);
 
-	//Polyhedron_cluster.cpp
+	//Polyhedron_clusterize.cpp
 	int clusterize(double p);
 	void clusterize2(double p);
-
-	//Polyhedron_hierarchical_clustering.cpp
 	TreeClusterNorm& build_TreeClusterNorm();
 	void giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 			MatrixDistNorm& matrix);

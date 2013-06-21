@@ -66,6 +66,8 @@ class Verifier;
 class PAnalyzer;
 class SizeCalculator;
 class SortedDouble;
+class Clusterizer;
+class SortedSetOfPairs;
 
 #include "Polyhedron/Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
@@ -113,6 +115,8 @@ class SortedDouble;
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
+#include "Analyzers/Clusterizer/Clusterizer.h"
+#include "Analyzers/Clusterizer/SortedSetOfPairs/SortedSetOfPairs.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

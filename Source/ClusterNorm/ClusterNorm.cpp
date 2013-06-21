@@ -173,7 +173,7 @@ double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1)
 //            cluster1.P.vector.x,
 //            cluster1.P.vector.y,
 //            cluster1.P.vector.z);
-	return dist(cluster0.P, cluster1.P);
+	return distSpherePoint(cluster0.P, cluster1.P);
 }
 
 void ClusterNorm::fprint(FILE* file)

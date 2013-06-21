@@ -26,7 +26,7 @@ public:
 	SpherePoint& operator =(const SpherePoint& orig);
 };
 
-double dist(SpherePoint& point0, SpherePoint& point1);
+double distSpherePoint(SpherePoint& point0, SpherePoint& point1);
 
 SpherePoint& MassCentre(int n, int* indexFacet, Polyhedron* poly);
 SpherePoint& MassCentre(int n, SpherePoint* points);

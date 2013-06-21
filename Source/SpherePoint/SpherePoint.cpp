@@ -60,7 +60,7 @@ SpherePoint& SpherePoint::operator =(const SpherePoint& orig)
 	return *this;
 }
 
-double dist(SpherePoint& point0, SpherePoint& point1)
+double distSpherePoint(SpherePoint& point0, SpherePoint& point1)
 {
 	//return asin(sqrt(qmod(point0.vector % point1.vector)));
 	double sinus = sqrt(qmod(point0.vector % point1.vector));
