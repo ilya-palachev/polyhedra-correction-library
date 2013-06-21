@@ -63,6 +63,8 @@ class PointShifterLinear;
 
 class Verifier;
 
+class PAnalyzer;
+
 #include "Polyhedron/Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
 #include "SpecificPolyhedrons/Pyramid.h"
@@ -105,6 +107,8 @@ class Verifier;
 #include "Correctors/PointShifterLinear/PointShifterLinear.h"
 
 #include "Verifier/Verifier.h"
+
+#include "Analyzers/PAnalyzer/PAnalyzer.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
