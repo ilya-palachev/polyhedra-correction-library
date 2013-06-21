@@ -31,7 +31,7 @@ void swap(int& i, int& j)
 	j = tmp;
 }
 
-int VertexGrouper::join_points(int id)
+int VertexGrouper::run(int id)
 {
 	int count;
 #ifdef TCPRINT
@@ -39,14 +39,14 @@ int VertexGrouper::join_points(int id)
 #endif
 
 	count = 0;
-	count += join_points_inner();
+	count += groupInner();
 #ifdef TCPRINT
 //    printf("Total: %d consections found\n", count);
 #endif
 	return count;
 }
 
-int VertexGrouper::join_points_inner()
+int VertexGrouper::groupInner()
 {
 	int i, count;
 
@@ -60,7 +60,7 @@ int VertexGrouper::join_points_inner()
 	count = 0;
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
-		count += join_points_inner_facet(i, A, b, vertex_old);
+		count += groupInnerFacet(i, A, b, vertex_old);
 	}
 #ifdef TCPRINT
 	if (count > 0)
@@ -76,7 +76,7 @@ int VertexGrouper::join_points_inner()
 	return count;
 }
 
-int VertexGrouper::join_points_inner_facet(int fid, double* A, double* b,
+int VertexGrouper::groupInnerFacet(int fid, double* A, double* b,
 		Vector3d* vertex_old)
 {
 
@@ -103,7 +103,7 @@ int VertexGrouper::join_points_inner_facet(int fid, double* A, double* b,
 	count = 0;
 	for (i = 0; i < nv; ++i)
 	{
-		count += join_points_inner_pair(fid, index[i % nv],
+		count += grouptInnerPair(fid, index[i % nv],
 				index[(i + 1) % nv], index[(i + 2) % nv], index[(i + 3) % nv],
 				A, b);
 	}
@@ -120,7 +120,7 @@ int VertexGrouper::join_points_inner_facet(int fid, double* A, double* b,
 	return count;
 }
 
-int VertexGrouper::join_points_inner_pair(int fid, int id0, int id1,
+int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 		int id2, int id3, double* A, double* b)
 {
 
@@ -268,7 +268,7 @@ int VertexGrouper::join_points_inner_pair(int fid, int id0, int id1,
 		printf(
 				"Принято решение сливать вершины %d и %d, расстояние между которыми равно %lf\n",
 				id1, id2, dist);
-		if (id2 == id)
+		if (id2 == idSavedVertex)
 		{
 			swap(id1, id2);
 		}

@@ -70,13 +70,8 @@ public:
 	double distToNearestNeighbour(int id);
 	void copyCoordinates(Polyhedron& orig);
 
-	//Polyhedron_join_points.cpp
-	int join_points(int id);
-	int join_points_inner(int id);
-	int join_points_inner_facet(int id, int fid, double* A, double* b,
-			Vector3d* vertex_old);
-	int join_points_inner_pair(int id, int fid, int id0, int id1, int id2,
-			int id3, double* A, double* b);
+	//Polyhedron_group_vertices.cpp
+	int groupVertices(int id);
 
 	//Polyhedron_simplify.cpp
 	int simplify_vertex(double eps);

@@ -13,18 +13,18 @@
 class VertexGrouper: public PCorrector
 {
 private:
-	int id;
+	int idSavedVertex;
 
-	int join_points_inner();
-	int join_points_inner_facet(int fid, double* A, double* b,
+	int groupInner();
+	int groupInnerFacet(int fid, double* A, double* b,
 			Vector3d* vertex_old);
-	int join_points_inner_pair(int fid, int id0, int id1, int id2,
+	int grouptInnerPair(int fid, int id0, int id1, int id2,
 			int id3, double* A, double* b);
 public:
 	VertexGrouper();
 	VertexGrouper(Polyhedron* p);
 	~VertexGrouper();
-	int join_points(int _id);
+	int run(int _id);
 };
 
 #endif /* VERTEXGROUPER_H_ */

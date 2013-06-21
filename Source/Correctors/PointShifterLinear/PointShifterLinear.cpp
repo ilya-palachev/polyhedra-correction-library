@@ -368,7 +368,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 			DEBUG_PRINT("\\hline\n %d & %d & ", i, step);
 			DEBUG_PRINT("%le & %le & %lf & %d\\\\\n", err, norm, K, ncons_curr);
 			polyhedron->countConsections(true);
-			polyhedron->join_points(id);
+			polyhedron->groupVertices(id);
 
 			++step;
 			if (step > MAX_STEPS)
