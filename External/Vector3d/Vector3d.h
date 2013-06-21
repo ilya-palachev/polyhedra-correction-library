@@ -42,6 +42,7 @@ public:
 		x = orig.x;
 		y = orig.y;
 		z = orig.z;
+		return *this;
 	}
 
 	Vector3d operator -() const

@@ -37,7 +37,7 @@ private:
 	int checkVisibility();
 	double calculateVisibility();
 	int checkAlreadyAdded();
-	int projectEdge();
+	void projectEdge();
 	int checkExtinction();
 
 	int findNearestPoint(Vector3d v_projected, Vector3d& v_nearest);

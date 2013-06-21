@@ -251,7 +251,7 @@ int GSAssociator::checkExtinction()
 	return EXIT_SUCCESS;
 }
 
-int GSAssociator::projectEdge()
+void GSAssociator::projectEdge()
 {
 	DEBUG_START;
 	int iVertex0 = edgeData->edges[iEdge].v0;

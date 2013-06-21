@@ -160,6 +160,7 @@ ClusterNorm& ClusterNorm::operator =(const ClusterNorm& orig)
 	{
 		indexFacet[i] = orig.indexFacet[i];
 	}
+	return *this;
 }
 
 double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1)
