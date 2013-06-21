@@ -120,7 +120,7 @@ void PointShifterLinear::runGlobal(int id, Vector3d delta)
 			//                    vertex[id].z = zold[id];
 			//            vertex[id] = delta;
 			moveFacets();
-			polyhedron->test_consections(true);
+			polyhedron->countConsections(true);
 //            join_points();
 			moveVerticesGlobal();
 			err = calculateError();
@@ -153,7 +153,7 @@ void PointShifterLinear::runGlobal(int id, Vector3d delta)
 	do
 	{
 		moveFacets();
-		polyhedron->test_consections();
+		polyhedron->countConsections();
 		moveVerticesGlobal();
 		err = calculateError();
 		norm = calculateDeform();
@@ -344,7 +344,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 	//    err = deform_linear_calculate_error();
 	//    K = sqrt(qmod(delta)) / err;
 	err_eps = EPSILON;
-	ncons_prev = polyhedron->test_consections(false);
+	ncons_prev = polyhedron->countConsections(false);
 	for (i = 0; i < 10; ++i)
 	{
 		do
@@ -359,7 +359,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 			err = calculateError();
 			norm = calculateDeform();
 
-			ncons_curr = polyhedron->test_consections(false);
+			ncons_curr = polyhedron->countConsections(false);
 			if (ncons_curr != ncons_prev)
 			{
 				ncons_prev = ncons_curr;
@@ -367,7 +367,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 
 			DEBUG_PRINT("\\hline\n %d & %d & ", i, step);
 			DEBUG_PRINT("%le & %le & %lf & %d\\\\\n", err, norm, K, ncons_curr);
-			polyhedron->test_consections(true);
+			polyhedron->countConsections(true);
 			polyhedron->join_points(id);
 
 			++step;
@@ -393,7 +393,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 	err = calculateError();
 	K = sqrt(qmod(delta)) / err;
 
-	ncons_prev = polyhedron->test_consections();
+	ncons_prev = polyhedron->countConsections();
 	ifPrint = false;
 
 	//    K = 1. / err;
@@ -404,7 +404,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 		polyhedron->vertices[id].z = zold[id];
 		moveFacets();
 
-		ncons_curr = polyhedron->test_consections();
+		ncons_curr = polyhedron->countConsections();
 //        if (ncons_curr != ncons_prev) {
 		if (1)
 		{

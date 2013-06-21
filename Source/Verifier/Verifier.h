@@ -14,20 +14,20 @@ private:
 	Polyhedron* polyhedron;
 	bool ifPrint;
 
-	int test_inner_consections();
-	int test_inner_consections_facet(int fid, double* A,
+	int countInnerConsections();
+	int countInnerConsectionsFacet(int fid, double* A,
 			double* b, Vector3d* vertex_old);
-	int test_inner_consections_pair(int fid, int id0, int id1,
+	int countInnerConsectionsPair(int fid, int id0, int id1,
 			int id2, int id3, double* A, double* b);
-	int test_outer_consections();
-	int test_outer_consections_facet(int fid);
-	int test_outer_consections_edge(int id0, int id1);
-	int test_outer_consections_pair(int id0, int id1, int fid);
+	int countOuterConsections();
+	int countOuterConsectionsFacet(int fid);
+	int countOuterConsectionsEdge(int id0, int id1);
+	int countOuterConsectionsPair(int id0, int id1, int fid);
 public:
 	Verifier();
 	Verifier(Polyhedron* p, bool _ifPrint);
 	~Verifier();
-	int test_consections();
+	int countConsections();
 
 };
 

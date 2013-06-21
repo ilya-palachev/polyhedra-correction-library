@@ -423,7 +423,7 @@ void get_statistics_deform_linear(const char* name, int type)
 
 			poly.shiftPointLinearPartial(i_vertex, delta, 10);
 
-			if (poly.test_consections(true) > 0)
+			if (poly.countConsections(true) > 0)
 			{
 				++count;
 			}
@@ -588,9 +588,9 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocessAdjacency();
-	poly.test_consections(true);
+	poly.countConsections(true);
 	poly.shiftPointLinearGlobal(id, delta);
-	poly.test_consections(true);
+	poly.countConsections(true);
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);

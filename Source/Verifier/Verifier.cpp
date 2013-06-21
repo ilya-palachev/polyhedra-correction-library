@@ -25,7 +25,7 @@ Verifier::~Verifier()
 
 #define EPS_PARALLEL 1e-15
 
-int Verifier::test_consections()
+int Verifier::countConsections()
 {
 	int count;
 	if (ifPrint)
@@ -34,8 +34,8 @@ int Verifier::test_consections()
 	}
 
 	count = 0;
-	count += test_inner_consections();
-	count += test_outer_consections();
+	count += countInnerConsections();
+	count += countOuterConsections();
 	if (ifPrint)
 	{
 		if (count > 0)
@@ -46,7 +46,7 @@ int Verifier::test_consections()
 	return count;
 }
 
-int Verifier::test_inner_consections()
+int Verifier::countInnerConsections()
 {
 	int i, count;
 
@@ -60,7 +60,7 @@ int Verifier::test_inner_consections()
 	count = 0;
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
-		count += test_inner_consections_facet(i, A, b, vertex_old);
+		count += countInnerConsectionsFacet(i, A, b, vertex_old);
 	}
 	if (ifPrint)
 	{
@@ -77,7 +77,7 @@ int Verifier::test_inner_consections()
 	return count;
 }
 
-int Verifier::test_inner_consections_facet(int fid, double* A,
+int Verifier::countInnerConsectionsFacet(int fid, double* A,
 		double* b, Vector3d* vertex_old)
 {
 
@@ -111,7 +111,7 @@ int Verifier::test_inner_consections_facet(int fid, double* A,
 	{
 		for (j = i + 1; j < nv; ++j)
 		{
-			count += test_inner_consections_pair(fid, index[i % nv],
+			count += countInnerConsectionsPair(fid, index[i % nv],
 					index[(i + 1) % nv], index[j % nv], index[(j + 1) % nv], A,
 					b);
 		}
@@ -133,7 +133,7 @@ int Verifier::test_inner_consections_facet(int fid, double* A,
 	return count;
 }
 
-int Verifier::test_inner_consections_pair(int fid, int id0,
+int Verifier::countInnerConsectionsPair(int fid, int id0,
 		int id1, int id2, int id3, double* A, double* b)
 {
 
@@ -287,14 +287,14 @@ int Verifier::test_inner_consections_pair(int fid, int id0,
 		return 0;
 }
 
-int Verifier::test_outer_consections()
+int Verifier::countOuterConsections()
 {
 	int i, count;
 
 	count = 0;
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
-		count += test_outer_consections_facet(i);
+		count += countOuterConsectionsFacet(i);
 	}
 	if (ifPrint)
 	{
@@ -304,7 +304,7 @@ int Verifier::test_outer_consections()
 	return count;
 }
 
-int Verifier::test_outer_consections_facet(int fid)
+int Verifier::countOuterConsectionsFacet(int fid)
 {
 	int i, nv, *index, count;
 
@@ -314,7 +314,7 @@ int Verifier::test_outer_consections_facet(int fid)
 	count = 0;
 	for (i = 0; i < nv; ++i)
 	{
-		count += test_outer_consections_edge(index[i % nv],
+		count += countOuterConsectionsEdge(index[i % nv],
 				index[(i + 1) % nv]);
 	}
 	if (ifPrint)
@@ -325,7 +325,7 @@ int Verifier::test_outer_consections_facet(int fid)
 	return count;
 }
 
-int Verifier::test_outer_consections_edge(int id0, int id1)
+int Verifier::countOuterConsectionsEdge(int id0, int id1)
 {
 
 	int j, count;
@@ -334,7 +334,7 @@ int Verifier::test_outer_consections_edge(int id0, int id1)
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		//        printf("\tj = %d\n", j);
-		count += test_outer_consections_pair(id0, id1, j);
+		count += countOuterConsectionsPair(id0, id1, j);
 	}
 	if (ifPrint)
 	{
@@ -345,7 +345,7 @@ int Verifier::test_outer_consections_edge(int id0, int id1)
 	return count;
 }
 
-int Verifier::test_outer_consections_pair(int id0, int id1,
+int Verifier::countOuterConsectionsPair(int id0, int id1,
 		int fid)
 {
 

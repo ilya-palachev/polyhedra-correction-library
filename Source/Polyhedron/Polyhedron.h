@@ -70,10 +70,6 @@ public:
 	double distToNearestNeighbour(int id);
 	void copyCoordinates(Polyhedron& orig);
 
-
-	//Polyhedron_test_consections.cpp
-	int test_consections(bool ifPrint);
-
 	//Polyhedron_join_points.cpp
 	int join_points(int id);
 	int join_points_inner(int id);
@@ -118,6 +114,7 @@ public:
 
 	// Polyhedron_verification.cpp
 	int test_structure();
+	int countConsections(bool ifPrint);
 };
 
 #endif	/* POLYHEDRON_CLASS_H */

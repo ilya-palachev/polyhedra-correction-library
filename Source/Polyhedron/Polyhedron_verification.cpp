@@ -18,3 +18,10 @@ int Polyhedron::test_structure()
 	return res;
 }
 
+int Polyhedron::countConsections(bool ifPrint)
+{
+	Verifier* verifier = new Verifier(this, ifPrint);
+	int numConsections = verifier->countConsections();
+	delete verifier;
+	return numConsections;
+}

@@ -89,7 +89,7 @@ void get_statistics_deform_linear(const char* name, int type)
 
 			poly.shiftPointLinearPartial(i_vertex, delta, 10);
 
-			if (poly.test_consections(true) > 0)
+			if (poly.countConsections(true) > 0)
 			{
 				++count;
 			}

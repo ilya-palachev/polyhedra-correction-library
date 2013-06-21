@@ -70,7 +70,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	fprintf(stdout, "z [%lf,  %lf]\n", zmin, zmax);
 
 	poly.preprocessAdjacency();
-	poly.test_consections(true);
+	poly.countConsections(true);
 
 //    printf("simpify_vertex:\n");
 //    double eps = 1e-16;
@@ -85,7 +85,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 //    }
 
 	poly.shiftPointLinearLocal(id, delta);
-	poly.test_consections(false);
+	poly.countConsections(false);
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);

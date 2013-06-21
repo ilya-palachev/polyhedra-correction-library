@@ -66,7 +66,7 @@ void Coalescer::run(int fid0, int fid1)
 	DEBUG_PRINT("VI). Рассечение многогранника плоскостью");
 	polyhedron->intersectCoalesceMode(-plane, fid0);
 
-	polyhedron->test_consections(true);
+	polyhedron->countConsections(true);
 
 	DEBUG_PRINT("=====================================================");
 	DEBUG_PRINT("=========    Грани %d и %d объединены !!!   =========", fid0,
@@ -111,7 +111,7 @@ void Coalescer::run(int n, int* fid)
 //    DEBUG_PRINT("VI). Рассечение многогранника плоскостью");
 //    intersect_j(-plane, fid0);
 
-	polyhedron->test_consections(true);
+	polyhedron->countConsections(true);
 
 	DEBUG_PRINT("=====================================================");
 	DEBUG_PRINT("=========    Грани ");
