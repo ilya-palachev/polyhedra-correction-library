@@ -73,10 +73,6 @@ public:
 	//Polyhedron_group_vertices.cpp
 	int groupVertices(int id);
 
-	//Polyhedron_simplify.cpp
-	int simplify_vertex(double eps);
-	double dist_vertex(int i, int j);
-
 	//Polyhedron_inertia.cpp
 	double calculate_J11(int N);
 
