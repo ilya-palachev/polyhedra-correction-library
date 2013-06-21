@@ -1,6 +1,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-int Polyhedron::clusterisation(double p)
+int Polyhedron::clusterize(double p)
 {
 
 	int i, j, nv, *index, fid;
@@ -172,7 +172,7 @@ void fire(int l, int* A, int* cluster, SortedSetOfPairs& ssop, int depth)
 	}
 }
 
-void Polyhedron::clusterisation2(double p)
+void Polyhedron::clusterize2(double p)
 {
 
 	int i, j, nv, *index, fid;

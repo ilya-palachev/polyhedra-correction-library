@@ -303,7 +303,7 @@ void test_cluster(const char* name, int type)
 //        p *= 10.;
 //    }
 
-	poly.clusterisation2(p);
+	poly.clusterize2(p);
 	if (file_name_in != NULL)
 		delete[] file_name_in;
 
