@@ -54,7 +54,7 @@ void GlobalShadeCorrector::runCorrection()
 	}
 #endif
 	int numFacetsNotAssociated = facetsNotAssociated->size();
-	int dim = (polyhedron->numFacets - numFacetsNotAssociated) * 5;
+	dim = (polyhedron->numFacets - numFacetsNotAssociated) * 5;
 
 	gradient = new double[dim];
 	prevPlanes = new Plane[polyhedron->numFacets];
