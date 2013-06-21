@@ -30,7 +30,7 @@ int Verifier::countConsections()
 	int count;
 	if (ifPrint)
 	{
-		//    printf("Begin test_consections...\n");
+		//    DEBUG_PRINT("Begin test_consections...\n");
 	}
 
 	count = 0;
@@ -40,7 +40,7 @@ int Verifier::countConsections()
 	{
 		if (count > 0)
 		{
-			printf("Total: %d consections found\n", count);
+			DEBUG_PRINT("Total: %d consections found\n", count);
 		}
 	}
 	return count;
@@ -65,7 +65,7 @@ int Verifier::countInnerConsections()
 	if (ifPrint)
 	{
 		if (count > 0)
-			printf("\tTotal: %d inner consections found\n", count);
+			DEBUG_PRINT("\tTotal: %d inner consections found\n", count);
 	}
 	if (A != NULL)
 		delete[] A;
@@ -87,7 +87,7 @@ int Verifier::countInnerConsectionsFacet(int fid, double* A,
 	//Написано для случая, когда немного нарушена плоскостность грани
 	//Перед проверкой на самопересечение все вершины грани проецируются на
 	//плоскость наименьших квадратов (2012-03-12)
-	//    printf("\tBegin test_inner_consections_facet(%d)\n", fid);
+	//    DEBUG_PRINT("\tBegin test_inner_consections_facet(%d)\n", fid);
 
 	nv = polyhedron->facets[fid].numVertices;
 	index = polyhedron->facets[fid].indVertices;
@@ -120,7 +120,7 @@ int Verifier::countInnerConsectionsFacet(int fid, double* A,
 	{
 		if (count > 0)
 		{
-			printf("\t\tIn facet %d: %d inner consections found\n", fid, count);
+			DEBUG_PRINT("\t\tIn facet %d: %d inner consections found\n", fid, count);
 			polyhedron->facets[fid].my_fprint(stdout);
 		}
 	}
@@ -151,7 +151,7 @@ int Verifier::countInnerConsectionsPair(int fid, int id0,
 	{
 		if (ifPrint)
 		{
-			printf(
+			DEBUG_PRINT(
 					"\t\t\ttest_inner_consections_pair: Error. incorrect input\n");
 		}
 		return 0;
@@ -161,7 +161,7 @@ int Verifier::countInnerConsectionsPair(int fid, int id0,
 	{
 		if (ifPrint)
 		{
-			printf("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1,
+			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1,
 					id2, id3);
 		}
 		return 2;
@@ -177,7 +177,7 @@ int Verifier::countInnerConsectionsPair(int fid, int id0,
 		{
 			if (ifPrint)
 			{
-				printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n", id0,
+				DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n", id0,
 						id1, id2, id3);
 			}
 			return 2;
@@ -198,7 +198,7 @@ int Verifier::countInnerConsectionsPair(int fid, int id0,
 		{
 			if (ifPrint)
 			{
-				printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n", id0,
+				DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n", id0,
 						id1, id2, id3);
 			}
 			return 2;
@@ -278,7 +278,7 @@ int Verifier::countInnerConsectionsPair(int fid, int id0,
 	{
 		if (ifPrint)
 		{
-			printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2,
+			DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2,
 					id3);
 		}
 		return 1;
@@ -299,7 +299,7 @@ int Verifier::countOuterConsections()
 	if (ifPrint)
 	{
 		if (count > 0)
-			printf("\tTotal: %d outer consections found\n", count);
+			DEBUG_PRINT("\tTotal: %d outer consections found\n", count);
 	}
 	return count;
 }
@@ -320,7 +320,7 @@ int Verifier::countOuterConsectionsFacet(int fid)
 	if (ifPrint)
 	{
 		if (count > 0)
-			printf("\t\tIn facet %d: %d outer consections found\n", fid, count);
+			DEBUG_PRINT("\t\tIn facet %d: %d outer consections found\n", fid, count);
 	}
 	return count;
 }
@@ -333,13 +333,13 @@ int Verifier::countOuterConsectionsEdge(int id0, int id1)
 	count = 0;
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
-		//        printf("\tj = %d\n", j);
+		//        DEBUG_PRINT("\tj = %d\n", j);
 		count += countOuterConsectionsPair(id0, id1, j);
 	}
 	if (ifPrint)
 	{
 		if (count > 0)
-			printf("\t\t\tFor edge (%d, %d): %d outer consections found\n", id0,
+			DEBUG_PRINT("\t\t\tFor edge (%d, %d): %d outer consections found\n", id0,
 					id1, count);
 	}
 	return count;
@@ -355,7 +355,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 
 	if (polyhedron->facets[fid].find_vertex(id0) >= 0 || polyhedron->facets[fid].find_vertex(id1) >= 0)
 	{
-		//        printf("contains.\n");
+		//        DEBUG_PRINT("contains.\n");
 		return 0;
 	}
 
@@ -363,7 +363,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 
 	if (fabs(AA) < EPS_PARALLEL)
 	{
-		//        printf("parallel %le.\n", fabs(AA));
+		//        DEBUG_PRINT("parallel %le.\n", fabs(AA));
 		return 0;
 	}
 
@@ -372,37 +372,37 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 
 	if (u > 1. || u < 0.)
 	{
-		//        printf("consection out of interval u = %lf.\n", u);
+		//        DEBUG_PRINT("consection out of interval u = %lf.\n", u);
 		return 0;
 	}
-	//    printf("\ttesting whether edge (%d, %d) consects facet %d.\n",
+	//    DEBUG_PRINT("\ttesting whether edge (%d, %d) consects facet %d.\n",
 	//            id0, id1, fid);
-	//    printf("\t\tu = %lf\n", u);
+	//    DEBUG_PRINT("\t\tu = %lf\n", u);
 
 	A = u * polyhedron->vertices[id0] + (1. - u) * polyhedron->vertices[id1];
-	//    printf("\t\tA = (%.2lf, %.2lf, %.2lf)\n", A.x, A.y, A.z);
+	//    DEBUG_PRINT("\t\tA = (%.2lf, %.2lf, %.2lf)\n", A.x, A.y, A.z);
 
 	nv = polyhedron->facets[fid].numVertices;
 	index = polyhedron->facets[fid].indVertices;
 	normal = polyhedron->facets[fid].plane.norm;
 	normal.norm(1.);
-	//    printf("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
+	//    DEBUG_PRINT("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
 
 	sum = 0.;
 	for (i = 0; i < nv; ++i)
 	{
 		//        if (i > 0)
-		//            printf("+");
+		//            DEBUG_PRINT("+");
 		A0 = polyhedron->vertices[index[i % nv]] - A;
 		A1 = polyhedron->vertices[index[(i + 1) % nv]] - A;
 		delta = (A0 % A1) * normal;
 		delta /= sqrt(qmod(A0) * qmod(A1));
 		alpha = asin(delta);
-		//        printf(" %lf ", alpha / M_PI * 180);
+		//        DEBUG_PRINT(" %lf ", alpha / M_PI * 180);
 		sum += alpha;
 	}
 
-	//    printf(" = sum = %lf*\n", sum / M_PI * 180);
+	//    DEBUG_PRINT(" = sum = %lf*\n", sum / M_PI * 180);
 
 	if (fabs(sum) < 2 * M_PI)
 	{
@@ -412,7 +412,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 	{
 		if (ifPrint)
 		{
-			printf("\t\t\t\tEdge (%d, %d) consects facet %d\n", id0, id1, fid);
+			DEBUG_PRINT("\t\t\t\tEdge (%d, %d) consects facet %d\n", id0, id1, fid);
 		}
 		return 1;
 	}
