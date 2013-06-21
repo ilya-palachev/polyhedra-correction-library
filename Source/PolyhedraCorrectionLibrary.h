@@ -55,6 +55,7 @@ class GlobalShadeCorrector;
 class GSAssociator;
 
 class Coalescer;
+class VertexGrouper;
 
 class PointShifter;
 class PointShifterWeighted;
@@ -98,6 +99,7 @@ class Verifier;
 #include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
 #include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
 #include "Correctors/Coalescer/Coalescer.h"
+#include "Correctors/VertexGrouper/VertexGrouper.h"
 #include "Correctors/PointShifter/PointShifter.h"
 #include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
 #include "Correctors/PointShifterLinear/PointShifterLinear.h"
