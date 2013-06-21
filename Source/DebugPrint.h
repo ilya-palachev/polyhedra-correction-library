@@ -36,4 +36,8 @@
 #		define DEBUG_END
 #endif
 
+#		define MAIN_PRINT(_fmt, ...)  \
+	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
+			WHEREARG, ##__VA_ARGS__)
+
 #endif //DEBUGPRINT_H

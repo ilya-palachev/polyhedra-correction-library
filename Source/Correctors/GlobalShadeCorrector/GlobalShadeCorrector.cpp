@@ -97,8 +97,8 @@ void GlobalShadeCorrector::runCorrection()
 			prevPlanes[i] = polyhedron->facets[i].plane;
 		}
 		error = calculateFunctional();
-		DEBUG_PRINT("error = %le", error);
-		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
+		MAIN_PRINT("error = %le", error);
+		MAIN_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
 		++numIterations;
 	}
 	DEBUG_END;
