@@ -35,13 +35,13 @@ int VertexGrouper::run(int id)
 {
 	int count;
 #ifdef TCPRINT
-//    printf("Begin join_points...\n");
+//    DEBUG_PRINT("Begin join_points...\n");
 #endif
 
 	count = 0;
 	count += groupInner();
 #ifdef TCPRINT
-//    printf("Total: %d consections found\n", count);
+//    DEBUG_PRINT("Total: %d consections found\n", count);
 #endif
 	return count;
 }
@@ -64,7 +64,7 @@ int VertexGrouper::groupInner()
 	}
 #ifdef TCPRINT
 	if (count > 0)
-	printf("\tTotal: %d inner consections found\n", count);
+	DEBUG_PRINT("\tTotal: %d inner consections found\n", count);
 #endif
 	if (A != NULL)
 		delete[] A;
@@ -86,7 +86,7 @@ int VertexGrouper::groupInnerFacet(int fid, double* A, double* b,
 	//Написано для случая, когда немного нарушена плоскостность грани
 	//Перед проверкой на самопересечение все вершины грани проецируются на
 	//плоскость наименьших квадратов (2012-03-12)
-//    printf("\tBegin join_points_inner_facet(%d)\n", fid);
+//    DEBUG_PRINT("\tBegin join_points_inner_facet(%d)\n", fid);
 
 	nv = polyhedron->facets[fid].numVertices;
 	index = polyhedron->facets[fid].indVertices;
@@ -109,7 +109,7 @@ int VertexGrouper::groupInnerFacet(int fid, double* A, double* b,
 	}
 #ifdef TCPRINT
 	if (count > 0)
-	printf("\t\tIn facet %d: %d inner consections found\n", fid, count);
+	DEBUG_PRINT("\t\tIn facet %d: %d inner consections found\n", fid, count);
 #endif
 //    if (count > 0)
 //        facet[fid].my_fprint(stdout);
@@ -140,7 +140,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 			|| id3 >= polyhedron->numVertices)
 	{
 #ifdef TCPRINT
-		printf("\t\t\tjoin_points_inner_pair: Error. incorrect input\n");
+		DEBUG_PRINT("\t\t\tjoin_points_inner_pair: Error. incorrect input\n");
 #endif
 		return 0;
 	}
@@ -148,7 +148,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 	if ((id0 == id3 && id1 == id2) || (id0 == id2 && id1 == id3))
 	{
 #ifdef TCPRINT
-		printf("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
+		DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
 #endif
 		return 2;
 	}
@@ -162,7 +162,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 						* (polyhedron->vertices[id3] - polyhedron->vertices[id2]) < 0)
 		{
 #ifdef TCPRINT
-			printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
+			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
 					id0, id1, id2, id3);
 #endif
 			return 2;
@@ -182,7 +182,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 						* (polyhedron->vertices[id3] - polyhedron->vertices[id2]) > 0)
 		{
 #ifdef TCPRINT
-			printf("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
+			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
 					id0, id1, id2, id3);
 #endif
 			return 2;
@@ -261,11 +261,11 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 	if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.)
 	{
 #ifdef TCPRINT
-		printf("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
+		DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
 #endif
 		//В этом случае будем объединять вершины...
 		double dist = sqrt(qmod(polyhedron->vertices[id1] - polyhedron->vertices[id2]));
-		printf(
+		DEBUG_PRINT(
 				"Принято решение сливать вершины %d и %d, расстояние между которыми равно %lf\n",
 				id1, id2, dist);
 		if (id2 == idSavedVertex)
@@ -278,7 +278,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 			pos2 = polyhedron->facets[i].find_vertex(id2);
 			if (pos1 != -1 && pos2 != -1)
 			{
-				printf(
+				DEBUG_PRINT(
 						"\tОбе вершины найдены в грани %d. Из нее удаляется вершина %d\n",
 						i, id2);
 				polyhedron->facets[i].my_fprint(stdout);
@@ -286,19 +286,19 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 			}
 			else if (pos1 != -1)
 			{
-				printf(
+				DEBUG_PRINT(
 						"\tВершина %d найдена в грани %d. Оставляем грань без изменения\n",
 						id1, i);
 			}
 			else if (pos2 != -1)
 			{
-				printf(
+				DEBUG_PRINT(
 						"\tВершина %d найдена в грани %d. Заменим здесь вершину %d на вершину %d\n",
 						id2, i, id2, id1);
 				polyhedron->facets[i].indVertices[pos2] = id1;
 			}
 		}
-		printf("Слияние завершено\n");
+		DEBUG_PRINT("Слияние завершено\n");
 		polyhedron->delete_empty_facets();
 		polyhedron->preprocessAdjacency();
 		return 1;
