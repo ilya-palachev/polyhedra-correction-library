@@ -230,7 +230,7 @@ void GlobalShadeCorrector::runCorrectionIteration()
 void GlobalShadeCorrector::calculateGradient()
 {
 	DEBUG_START;
-	for (int i = 0; i < dim * dim; ++i)
+	for (int i = 0; i < dim; ++i)
 	{
 		gradient[i] = 0.;
 	}
