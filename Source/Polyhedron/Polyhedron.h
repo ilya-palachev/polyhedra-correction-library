@@ -80,8 +80,8 @@ public:
 
 	//Polyhedron_volume.cpp
 	double volume();
-	double area();
-	double area(int iFacet);
+	double areaOfSurface();
+	double areaOfFacet(int iFacet);
 	void J(double& Jxx, double& Jyy, double& Jzz, double& Jxy, double& Jyz,
 			double& Jxz);
 	void get_center(double& xc, double& yc, double& zc);

@@ -25,7 +25,7 @@ double ClusterNorm::area()
 //    printf("\n");
 	for (int i = 0; i < num; i++)
 	{
-		areaOneFacet = poly->area(indexFacet[i]);
+		areaOneFacet = poly->areaOfFacet(indexFacet[i]);
 //        printf("areaOneFacet = %lf\n", areaOneFacet);       
 		cluster_area += areaOneFacet;
 

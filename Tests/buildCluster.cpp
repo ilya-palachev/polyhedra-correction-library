@@ -125,8 +125,8 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 
 	double v1 = poly1.volume();
 	double v2 = poly1.volume();
-	double s1 = poly2.area();
-	double s2 = poly2.area();
+	double s1 = poly2.areaOfSurface();
+	double s2 = poly2.areaOfSurface();
 
 	Vector3d v01;
 	Vector3d v11;
@@ -227,7 +227,7 @@ void test_J11(const char* name, int type)
 	double l0, l1, l2;
 
 	double v = poly.volume();
-	double s = poly.area();
+	double s = poly.areaOfSurface();
 	printf("volume = %lf, area = %lf\n", v, s);
 	Vector3d v0;
 	Vector3d v1;
@@ -340,7 +340,7 @@ void test_viev(const char* name, int type)
 
 	poly.preprocessAdjacency();
 	double v = poly.volume();
-	double a = poly.area();
+	double a = poly.areaOfSurface();
 	printf("volume = %lf\tarea = %lf\n", v, a);
 
 	if (file_name_in != NULL)
@@ -670,7 +670,7 @@ void test_BuildClaster()
 	poly3.preprocessAdjacency();
 
 	double v = poly1.volume();
-	double s = poly1.area();
+	double s = poly1.areaOfSurface();
 	printf("volume = %10.50lf, area = %10.50lf\n", v, s);
 
 	TreeClusterNormNode *nodeArray;        // = new TreeClusterNormNode;
@@ -770,7 +770,7 @@ void test_BuildTreeNorm(const char* name, int type)
 	poly.preprocessAdjacency();
 
 	double v = poly.volume();
-	double s = poly.area();
+	double s = poly.areaOfSurface();
 	printf("volume = %10.50lf, area = %10.50lf\n", v, s);
 
 	poly.build_TreeClusterNorm();        //.fprint_dendrogamma_lev(stdout);

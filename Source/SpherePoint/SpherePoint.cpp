@@ -102,7 +102,7 @@ SpherePoint& MassCentre(int n, int* indexFacet, Polyhedron* poly)
 
 		newSpherePoint = SpherePoint(normal);
 
-		areaOne = poly->area(indexFacet[i]);
+		areaOne = poly->areaOfFacet(indexFacet[i]);
 		areaTotal += areaOne;
 
 		sum_phi += areaOne * newSpherePoint.phi;

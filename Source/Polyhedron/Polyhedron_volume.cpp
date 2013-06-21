@@ -31,7 +31,7 @@ double Polyhedron::volume()
 	return sum;
 }
 
-double Polyhedron::area()
+double Polyhedron::areaOfSurface()
 {
 	int i, j, *index, nv;
 	Vector3d A0, A1, A2;
@@ -64,7 +64,7 @@ double Polyhedron::area()
 	return sum_poly;
 }
 
-double Polyhedron::area(int iFacet)
+double Polyhedron::areaOfFacet(int iFacet)
 {
 	return facets[iFacet].area();
 }
