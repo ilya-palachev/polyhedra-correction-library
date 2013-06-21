@@ -60,6 +60,8 @@ class PointShifter;
 class PointShifterWeighted;
 class PointShifterLinear;
 
+class Verifier;
+
 #include "Polyhedron/Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
 #include "SpecificPolyhedrons/Pyramid.h"
@@ -99,6 +101,8 @@ class PointShifterLinear;
 #include "Correctors/PointShifter/PointShifter.h"
 #include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
 #include "Correctors/PointShifterLinear/PointShifterLinear.h"
+
+#include "Verifier/Verifier.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

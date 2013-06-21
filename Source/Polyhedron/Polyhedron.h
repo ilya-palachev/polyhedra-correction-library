@@ -73,15 +73,6 @@ public:
 
 	//Polyhedron_test_consections.cpp
 	int test_consections(bool ifPrint);
-	int test_inner_consections(bool ifPrint);
-	int test_inner_consections_facet(bool ifPrint, int fid, double* A,
-			double* b, Vector3d* vertex_old);
-	int test_inner_consections_pair(bool ifPrint, int fid, int id0, int id1,
-			int id2, int id3, double* A, double* b);
-	int test_outer_consections(bool ifPrint);
-	int test_outer_consections_facet(bool ifPrint, int fid);
-	int test_outer_consections_edge(bool ifPrint, int id0, int id1);
-	int test_outer_consections_pair(bool ifPrint, int id0, int id1, int fid);
 
 	//Polyhedron_join_points.cpp
 	int join_points(int id);
