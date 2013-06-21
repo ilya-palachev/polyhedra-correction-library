@@ -64,6 +64,8 @@ class PointShifterLinear;
 class Verifier;
 
 class PAnalyzer;
+class SizeCalculator;
+class SortedDouble;
 
 #include "Polyhedron/Polyhedron.h"
 #include "SpecificPolyhedrons/Cube.h"
@@ -109,6 +111,8 @@ class PAnalyzer;
 #include "Verifier/Verifier.h"
 
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
+#include "Analyzers/SizeCalculator/SizeCalculator.h"
+#include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

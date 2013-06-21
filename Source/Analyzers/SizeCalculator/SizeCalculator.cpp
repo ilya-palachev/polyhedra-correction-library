@@ -1,27 +1,104 @@
+/*
+ * SizeCalculator.cpp
+ *
+ *  Created on: 21.06.2013
+ *      Author: ilya
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
-double Polyhedron::volume()
+SizeCalculator::SizeCalculator() :
+		PAnalyzer()
+{
+}
+
+SizeCalculator::SizeCalculator(Polyhedron* p) :
+		PAnalyzer(p)
+{
+}
+
+SizeCalculator::~SizeCalculator()
+{
+}
+
+double SizeCalculator::calculate_J11(int N)
+{
+
+	int k, l;
+	double xmin, xmax, ymin, ymax, zmin, zmax;
+	double h, s, z, y, integral;
+
+	polyhedron->get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
+	xmin *= 1.001;
+	xmax *= 1.001;
+	ymin *= 1.001;
+	ymax *= 1.001;
+	zmin *= 1.001;
+	zmax *= 1.001;
+
+	h = 1. / N;
+
+	s = 0.;
+
+	for (k = 0; k < N; ++k)
+	{
+		z = k * h * (zmax - zmin) + zmin;
+		for (l = 0; l < N; ++l)
+		{
+			y = l * h * (ymax - ymin) + ymin;
+			integral = consection_x(y, z);
+			s += h * h * integral * (z * z + y * y);
+			if (fabs(integral) > 1e-16)
+				DEBUG_PRINT("integral[%d, %d] = %lf\n", k, l, integral);
+		}
+	}
+	return s;
+}
+
+double SizeCalculator::consection_x(double y, double z)
+{
+
+	int i;
+	double x;
+	bool ifConsect;
+
+	SortedDouble SD(20);
+
+	for (i = 0; i < polyhedron->numVertices; ++i)
+	{
+
+		ifConsect = polyhedron->facets[i].consect_x(y, z, x);
+		if (ifConsect == true)
+		{
+			DEBUG_PRINT("SD.add(%lf) y = %lf, z = %lf\n", x, y, z);
+			SD.add(x);
+		}
+	}
+	return SD.calclulate();
+}
+
+double SizeCalculator::volume()
 {
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	double sum, loc;
 
-	get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
+	polyhedron->get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	B = Vector3d(0., 0., zmax + 1);
 
 	sum = 0.;
-	for (i = 0; i < numFacets; ++i)
+	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = facets[i].indVertices;
-		nv = facets[i].numVertices;
-		A0 = vertices[index[0]];
+		index = polyhedron->facets[i].indVertices;
+		nv = polyhedron->facets[i].numVertices;
+		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
 		for (j = 1; j < nv - 1; ++j)
 		{
-			A1 = vertices[index[j]];
-			A2 = vertices[index[j + 1]];
+			A1 = polyhedron->vertices[index[j]];
+			A2 = polyhedron->vertices[index[j + 1]];
 			A1 -= B;
 			A2 -= B;
 			loc = ((A0 % A1) * A2) * 0.1666666666666666;
@@ -31,7 +108,7 @@ double Polyhedron::volume()
 	return sum;
 }
 
-double Polyhedron::areaOfSurface()
+double SizeCalculator::areaOfSurface()
 {
 	int i, j, *index, nv;
 	Vector3d A0, A1, A2;
@@ -40,20 +117,20 @@ double Polyhedron::areaOfSurface()
 
 	Vector3d normal;
 
-	for (i = 0; i < numFacets; ++i)
+	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = facets[i].indVertices;
-		nv = facets[i].numVertices;
-		A0 = vertices[index[0]];
-		normal = facets[i].plane.norm;
+		index = polyhedron->facets[i].indVertices;
+		nv = polyhedron->facets[i].numVertices;
+		A0 = polyhedron->vertices[index[0]];
+		normal = polyhedron->facets[i].plane.norm;
 
 		sum_facet = 0.;
 		for (j = 1; j < nv - 1; ++j)
 		{
 
-			A1 = vertices[index[j]];
-			A2 = vertices[index[j + 1]];
+			A1 = polyhedron->vertices[index[j]];
+			A2 = polyhedron->vertices[index[j + 1]];
 			A1 -= A0;
 			A2 -= A0;
 			loc = (A1 % A2) * normal * 0.5;
@@ -64,12 +141,12 @@ double Polyhedron::areaOfSurface()
 	return sum_poly;
 }
 
-double Polyhedron::areaOfFacet(int iFacet)
+double SizeCalculator::areaOfFacet(int iFacet)
 {
-	return facets[iFacet].area();
+	return polyhedron->facets[iFacet].area();
 }
 
-void Polyhedron::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
+void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 		double& Jyz, double& Jxz)
 {
 	int i, j, *index, nv;
@@ -87,7 +164,7 @@ void Polyhedron::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 	double vx, vy, vz;
 	double wx, wy, wz;
 
-	get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
+	polyhedron->get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	B = Vector3d(0., 0., zmax + 1);
 	x0 = B.x;
 	y0 = B.y;
@@ -100,20 +177,20 @@ void Polyhedron::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 	Jxy = 0.;
 	Jxz = 0.;
 	Jyz = 0.;
-	for (i = 0; i < numFacets; ++i)
+	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = facets[i].indVertices;
-		nv = facets[i].numVertices;
-		A0 = vertices[index[0]];
+		index = polyhedron->facets[i].indVertices;
+		nv = polyhedron->facets[i].numVertices;
+		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
 		ux = A0.x;
 		uy = A0.y;
 		uz = A0.z;
 		for (j = 1; j < nv - 1; ++j)
 		{
-			A1 = vertices[index[j]];
-			A2 = vertices[index[j + 1]];
+			A1 = polyhedron->vertices[index[j]];
+			A2 = polyhedron->vertices[index[j + 1]];
 			A1 -= B;
 			A2 -= B;
 
@@ -210,7 +287,7 @@ void Polyhedron::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 	}
 }
 
-void Polyhedron::get_center(double& xc, double& yc, double& zc)
+void SizeCalculator::get_center(double& xc, double& yc, double& zc)
 {
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
@@ -226,7 +303,7 @@ void Polyhedron::get_center(double& xc, double& yc, double& zc)
 	double vx, vy, vz;
 	double wx, wy, wz;
 
-	get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
+	polyhedron->get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	B = Vector3d(0., 0., zmax + 1);
 	x0 = B.x;
 	y0 = B.y;
@@ -236,12 +313,12 @@ void Polyhedron::get_center(double& xc, double& yc, double& zc)
 	xc = 0.;
 	yc = 0.;
 	zc = 0.;
-	for (i = 0; i < numFacets; ++i)
+	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = facets[i].indVertices;
-		nv = facets[i].numVertices;
-		A0 = vertices[index[0]];
+		index = polyhedron->facets[i].indVertices;
+		nv = polyhedron->facets[i].numVertices;
+		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
 		ux = A0.x;
 		uy = A0.y;
@@ -249,8 +326,8 @@ void Polyhedron::get_center(double& xc, double& yc, double& zc)
 
 		for (j = 1; j < nv - 1; ++j)
 		{
-			A1 = vertices[index[j]];
-			A2 = vertices[index[j + 1]];
+			A1 = polyhedron->vertices[index[j]];
+			A2 = polyhedron->vertices[index[j + 1]];
 			A1 -= B;
 			A2 -= B;
 			vx = A1.x;
@@ -285,7 +362,7 @@ void Polyhedron::get_center(double& xc, double& yc, double& zc)
 	zc /= sum;
 }
 
-void Polyhedron::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
+void SizeCalculator::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
 		Vector3d& v1, Vector3d& v2)
 {
 	double **JJ, **v, *l;

@@ -73,12 +73,8 @@ public:
 	//Polyhedron_group_vertices.cpp
 	int groupVertices(int id);
 
-	//Polyhedron_inertia.cpp
+	//Polyhedron_size.cpp
 	double calculate_J11(int N);
-
-	double consection_x(double y, double z);
-
-	//Polyhedron_volume.cpp
 	double volume();
 	double areaOfSurface();
 	double areaOfFacet(int iFacet);
