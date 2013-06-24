@@ -7,10 +7,12 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::correctGlobal(ShadeContourData* contourData)
+void Polyhedron::correctGlobal(ShadeContourData* contourData,
+		GSCorrectorParameters* parameters)
 {
 	preprocessAdjacency();
-	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(this, contourData);
+	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(this,
+			contourData, parameters);
 	gsCorrector->runCorrection();
 	delete gsCorrector;
 }

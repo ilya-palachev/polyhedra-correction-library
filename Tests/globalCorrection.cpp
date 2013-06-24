@@ -22,6 +22,8 @@ struct testParameters
 	int indFacetMoved;
 	double maxMoveDelta;
 	double shiftAngleFirst;
+	double epsLoopStop;
+	double deltaGardientStep;
 };
 
 void printUsage();
@@ -45,7 +47,9 @@ int main(int argc, char** argv)
 	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
-	polyhedron->correctGlobal(contourData);
+	GSCorrectorParameters gsParameters;
+	gsParameters = {parameters.epsLoopStop, parameters.deltaGardientStep};
+	polyhedron->correctGlobal(contourData, &gsParameters);
 
 	return EXIT_SUCCESS;
 }
@@ -55,7 +59,8 @@ void printUsage()
 	printf(
 			"Usage: \n"
 					"./globalCorrectionCube <figure name> <method> <number_of_contours> "
-					"<index of facet to be moved> <max_move_delta> <first angle shift>\n");
+					"<index of facet to be moved> <max_move_delta> <first angle shift> "
+					"<eps max loop> <delta gradient descend>\n");
 	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
 	printf("\nPossible methods: gd (gradient descent), gdf (gradient descent - fast)");
 }
@@ -63,7 +68,7 @@ void printUsage()
 int parse_commandLine(int argc, char** argv, testParameters& parameters)
 {
 
-	if (argc != 7)
+	if (argc != 9)
 	{
 		ERROR_PRINT("Wrong number of arguments!");
 		printUsage();
@@ -78,7 +83,9 @@ int parse_commandLine(int argc, char** argv, testParameters& parameters)
 			&& sscanf(argv[3], "%d", &parameters.numContours)
 			&& sscanf(argv[4], "%d", &parameters.indFacetMoved)
 			&& sscanf(argv[5], "%lf", &parameters.maxMoveDelta)
-			&& sscanf(argv[6], "%lf", &parameters.shiftAngleFirst);
+			&& sscanf(argv[6], "%lf", &parameters.shiftAngleFirst)
+			&& sscanf(argv[7], "%lf", &parameters.epsLoopStop)
+			&& sscanf(argv[8], "%lf", &parameters.deltaGardientStep);
 
 	parameters.figure = parse_figureName(figure);
 	parameters.method = parse_methodName(method);

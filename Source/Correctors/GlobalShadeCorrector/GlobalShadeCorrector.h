@@ -11,12 +11,16 @@
 /*
  *
  */
-struct GSCorrectorParameters
+struct _GSCorrectorParameters
 {
 	double epsLoopStop;
+	double deltaGradientStep;
 };
 
+typedef struct _GSCorrectorParameters GSCorrectorParameters;
+
 const double EPS_LOOP_STOP_DEFAULT = 1e-6;
+const double DELTA_GRADIENT_STEP_DEFAULT = 1e-4;
 
 class GlobalShadeCorrector: public PCorrector
 {
@@ -34,7 +38,8 @@ public:
 	int dim;
 
 	GlobalShadeCorrector();
-	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd);
+	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd,
+			GSCorrectorParameters* _parameters);
 
 	void preprocess();
 	void preprocessAssociations();

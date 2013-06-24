@@ -95,7 +95,8 @@ public:
 			MatrixDistNorm& matrix_out);
 
 	// Polyhedron_correction.cpp
-	void correctGlobal(ShadeContourData* contourData);
+	void correctGlobal(ShadeContourData* contourData,
+			GSCorrectorParameters* parameters);
 
 	// Polyhedron_verification.cpp
 	int test_structure();

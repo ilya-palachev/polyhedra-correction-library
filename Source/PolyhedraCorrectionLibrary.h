@@ -15,6 +15,8 @@
 
 using namespace std;
 
+typedef struct _GSCorrectorParameters GSCorrectorParameters;
+
 class Polyhedron;
 
 /* Specific polyhedrons. For testing purposes. */

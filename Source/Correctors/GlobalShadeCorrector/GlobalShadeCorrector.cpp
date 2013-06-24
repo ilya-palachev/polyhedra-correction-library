@@ -12,7 +12,7 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				edgeData(NULL),
 				contourData(NULL),
 				parameters(
-				{ EPS_LOOP_STOP_DEFAULT }),
+				{ EPS_LOOP_STOP_DEFAULT, DELTA_GRADIENT_STEP_DEFAULT}),
 				facetsNotAssociated(NULL),
 				gradient(NULL),
 				prevPlanes(NULL),
@@ -20,12 +20,12 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 {
 }
 
-GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd) :
+GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
+		ShadeContourData* scd, GSCorrectorParameters* _parameters) :
 				PCorrector(p),
 				edgeData(NULL),
 				contourData(scd),
-				parameters(
-				{ EPS_LOOP_STOP_DEFAULT }),
+				parameters(*_parameters),
 				facetsNotAssociated(new list<int>),
 				gradient(NULL),
 				prevPlanes(NULL),
@@ -36,9 +36,6 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd)
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
 }
-
-const double EPS_MAX_ERROR = 1e-6;
-const double EPS_FOR_PRINT = 1e-15;
 
 void GlobalShadeCorrector::runCorrection()
 {
@@ -71,7 +68,7 @@ void GlobalShadeCorrector::runCorrection()
 	DEBUG_PRINT("first functional calculation done. error = %e", error);
 
 	int numIterations = 0;
-	while (error > EPS_MAX_ERROR)
+	while (error > parameters.epsLoopStop)
 	{
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n", numIterations);
 
@@ -189,8 +186,6 @@ double GlobalShadeCorrector::calculateFunctional()
 
 }
 
-const double DEFAULT_GRADIENT_STEP = 1e-4;
-
 void GlobalShadeCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
@@ -200,26 +195,26 @@ void GlobalShadeCorrector::runCorrectionIteration()
 	derivativeTest_all();
 #endif
 
-	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
+	list<int>::iterator iterNotAssocicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		if (*iterNotAssicated == iFacet)
+		if (*iterNotAssocicated == iFacet)
 		{
 			polyhedron->facets[iFacet].plane = prevPlanes[iFacet];
-			++iterNotAssicated;
+			++iterNotAssocicated;
 			++countNotAssociated;
 			continue;
 		}
 		int iFacetShifted = iFacet - countNotAssociated;
-		polyhedron->facets[iFacet].plane.norm.x -= DEFAULT_GRADIENT_STEP
-				* gradient[4 * iFacetShifted];
-		polyhedron->facets[iFacet].plane.norm.y -= DEFAULT_GRADIENT_STEP
-				* gradient[4 * iFacetShifted + 1];
-		polyhedron->facets[iFacet].plane.norm.z -= DEFAULT_GRADIENT_STEP
-				* gradient[4 * iFacetShifted + 2];
-		polyhedron->facets[iFacet].plane.dist -= DEFAULT_GRADIENT_STEP
-				* gradient[4 * iFacetShifted + 3];
+		Plane deltaPlane = Plane(Vector3d(gradient[4 * iFacetShifted],
+				gradient[4 * iFacetShifted + 1],
+				gradient[4 * iFacetShifted + 2]),
+				gradient[4 * iFacetShifted + 3]);
+		deltaPlane.norm *= parameters.deltaGradientStep;
+		deltaPlane.dist *= parameters.deltaGradientStep;
+		polyhedron->facets[iFacet].plane.norm -= deltaPlane.norm;
+		polyhedron->facets[iFacet].plane.dist -= deltaPlane.dist;
 		double norm = sqrt(qmod(polyhedron->facets[iFacet].plane.norm));
 		polyhedron->facets[iFacet].plane.norm.norm(1.);
 		polyhedron->facets[iFacet].plane.dist /= norm;
