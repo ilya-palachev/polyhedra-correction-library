@@ -72,7 +72,8 @@ void GlobalShadeCorrector::runCorrection()
 	int numIterations = 0;
 	while (error > parameters.epsLoopStop)
 	{
-		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n", numIterations);
+		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n" COLOUR_NORM,
+				numIterations);
 
 		char* fileName = new char[255];
 		sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
@@ -97,7 +98,8 @@ void GlobalShadeCorrector::runCorrection()
 		}
 		error = calculateFunctional();
 		MAIN_PRINT("error = %le", error);
-		MAIN_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
+		MAIN_PRINT(COLOUR_GREEN "Iteration %d : End\n" COLOUR_NORM,
+				numIterations);
 		if (error > MAX_ERROR_ABSOLUTE)
 		{
 			ERROR_PRINT("Too big absolute value of error.");
