@@ -186,22 +186,14 @@ double GlobalShadeCorrector::calculateFunctional()
 
 }
 
-void GlobalShadeCorrector::runCorrectionIteration()
+void GlobalShadeCorrector::shiftCoefficients(double delta)
 {
-	DEBUG_START;
-	calculateGradient();
-
-#ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
-	derivativeTest_all();
-#endif
-
 	list<int>::iterator iterNotAssociated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		if (*iterNotAssociated == iFacet)
 		{
-			polyhedron->facets[iFacet].plane = prevPlanes[iFacet];
 			++iterNotAssociated;
 			++countNotAssociated;
 			continue;
@@ -215,10 +207,17 @@ void GlobalShadeCorrector::runCorrectionIteration()
 		deltaPlane.dist *= parameters.deltaGradientStep;
 		polyhedron->facets[iFacet].plane.norm -= deltaPlane.norm;
 		polyhedron->facets[iFacet].plane.dist -= deltaPlane.dist;
-		double norm = sqrt(qmod(polyhedron->facets[iFacet].plane.norm));
-		polyhedron->facets[iFacet].plane.norm.norm(1.);
-		polyhedron->facets[iFacet].plane.dist /= norm;
 	}
+}
+
+void GlobalShadeCorrector::runCorrectionIteration()
+{
+	DEBUG_START;
+	calculateGradient();
+#ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
+	derivativeTest_all();
+#endif
+	shiftCoefficients(parameters.deltaGradientStep);
 	DEBUG_END;
 }
 

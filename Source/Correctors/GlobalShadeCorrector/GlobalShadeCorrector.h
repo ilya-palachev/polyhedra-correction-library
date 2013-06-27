@@ -45,6 +45,9 @@ private:
 
 	double calculateFunctional();
 
+	void shiftCoefficients(double delta);
+	double calculateFunctional(double delta);
+
 	void runCorrectionIteration();
 
 	void calculateGradient();
