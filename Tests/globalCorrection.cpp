@@ -141,6 +141,10 @@ MethodCorrector parse_methodName(char* methodNameInput)
 	{
 		return METHOD_GRADIENT_DESCENT_FAST;
 	}
+	else if (strcmp(methodNameInput, "cg") == 0)
+	{
+		return METHOD_CONJUGATE_GRADIENT;
+	}
 	else
 	{
 		return METHOD_UNKNOWN;

@@ -16,6 +16,10 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 	DELTA_GRADIENT_STEP_DEFAULT}),
 				facetsNotAssociated(NULL),
 				gradient(NULL),
+				gradientPrevious(NULL),
+				gradientNormPrevious(0.),
+				iMinimizedDimension(0),
+				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0)
 {
@@ -29,6 +33,10 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				parameters(*_parameters),
 				facetsNotAssociated(new list<int>),
 				gradient(NULL),
+				gradientPrevious(NULL),
+				gradientNormPrevious(0.),
+				iMinimizedDimension(0),
+				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0)
 {
@@ -36,6 +44,26 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
+	if (gradient != NULL)
+	{
+		delete[] gradient;
+		gradient = NULL;
+	}
+	if (gradientPrevious != NULL)
+	{
+		delete[] gradientPrevious;
+		gradientPrevious = NULL;
+	}
+	if (prevPlanes != NULL)
+	{
+		delete[] prevPlanes;
+		prevPlanes = NULL;
+	}
+	if (facetsNotAssociated != NULL)
+	{
+		delete facetsNotAssociated;
+		facetsNotAssociated = NULL;
+	}
 }
 
 void GlobalShadeCorrector::runCorrection()
@@ -55,6 +83,7 @@ void GlobalShadeCorrector::runCorrection()
 	dim = (polyhedron->numFacets - numFacetsNotAssociated) * 5;
 
 	gradient = new double[dim];
+	gradientPrevious = new double[dim];
 	prevPlanes = new Plane[polyhedron->numFacets];
 
 	DEBUG_PRINT("memory allocation done");
@@ -271,6 +300,16 @@ double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 	return leftBound;
 }
 
+double GlobalShadeCorrector::calculateGradientNorm()
+{
+	double norm = 0.;
+	for (int iDimension = 0; iDimension < dim; ++iDimension)
+	{
+		norm += gradient[iDimension] * gradient[iDimension];
+	}
+	return norm;
+}
+
 void GlobalShadeCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
@@ -279,6 +318,8 @@ void GlobalShadeCorrector::runCorrectionIteration()
 	derivativeTest_all();
 #endif
 	double deltaOptimal;
+	double gradientNorm;
+	double omega;
 	switch (parameters.methodName)
 	{
 	case METHOD_GRADIENT_DESCENT:
@@ -288,6 +329,39 @@ void GlobalShadeCorrector::runCorrectionIteration()
 		deltaOptimal = findOptimalDelta(parameters.deltaGradientStep);
 		MAIN_PRINT("deltaOptimal = %lf", deltaOptimal);
 		shiftCoefficients(deltaOptimal);
+		break;
+	case METHOD_CONJUGATE_GRADIENT:
+		MAIN_PRINT("iMinimizationLevel = %d, iMinimizedDimension = %d",
+				iMinimizationLevel, iMinimizedDimension);
+		if (iMinimizedDimension != 0)
+		{
+			gradientNorm = calculateGradientNorm();
+			omega = gradientNorm / gradientNormPrevious;
+			if (iMinimizedDimension != 1)
+			{
+				for (int iDimension = 0; iDimension < dim; ++iDimension)
+				{
+					gradient[iDimension] -= omega *
+							gradientPrevious[iDimension];
+				}
+			}
+			deltaOptimal = findOptimalDelta(parameters.deltaGradientStep);
+			MAIN_PRINT("deltaOptimal = %lf", deltaOptimal);
+			shiftCoefficients(deltaOptimal);
+		}
+
+		/* Saving previous values of gradient: */
+		gradientNormPrevious = gradientNorm;
+		for (int iDimension = 0; iDimension < dim; ++iDimension)
+		{
+			gradientPrevious[iDimension] = gradient[iDimension];
+		}
+		++iMinimizedDimension;
+		if (iMinimizedDimension == dim)
+		{
+			iMinimizedDimension = 0;
+			++iMinimizationLevel;
+		}
 		break;
 	case METHOD_UNKNOWN:
 	default:
