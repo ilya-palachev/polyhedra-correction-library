@@ -24,10 +24,11 @@ const double DELTA_GRADIENT_STEP_DEFAULT = 1e-4;
 
 class GlobalShadeCorrector: public PCorrector
 {
-public:
+protected:
 	EdgeData* edgeData;
 	ShadeContourData* contourData;
 
+private:
 	GSCorrectorParameters parameters;
 
 	list<int>* facetsNotAssociated;
@@ -36,10 +37,6 @@ public:
 	Plane* prevPlanes;
 
 	int dim;
-
-	GlobalShadeCorrector();
-	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd,
-			GSCorrectorParameters* _parameters);
 
 	void preprocess();
 	void preprocessAssociations();
@@ -57,6 +54,9 @@ public:
 	double calculateFunctionalDerivative_1(int iFacet, int iCoefficient);
 
 public:
+	GlobalShadeCorrector();
+	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd,
+		GSCorrectorParameters* _parameters);
 	GlobalShadeCorrector(Polyhedron* input);
 	virtual ~GlobalShadeCorrector();
 

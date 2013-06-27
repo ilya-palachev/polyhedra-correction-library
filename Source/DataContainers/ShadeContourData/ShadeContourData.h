@@ -17,7 +17,6 @@ public:
 	int numContours;
 	SContour* contours;
 
-public:
 	ShadeContourData(const Polyhedron* p);
 	~ShadeContourData();
 
