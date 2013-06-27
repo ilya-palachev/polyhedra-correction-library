@@ -24,20 +24,20 @@
 #		define DEBUG_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
 			WHEREARG, ##__VA_ARGS__)
-#		define ERROR_PRINT(_fmt, ...)  \
-	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
-			WHEREARG, ##__VA_ARGS__)
 #		define DEBUG_START DEBUG_PRINT("Start")
 #		define DEBUG_END DEBUG_PRINT("End")
 #else
 #		define DEBUG_PRINT(_fmt, ...)
-#		define ERROR_PRINT(_fmt, ...)
 #		define DEBUG_START
 #		define DEBUG_END
 #endif
 
 #		define MAIN_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
+			WHEREARG, ##__VA_ARGS__)
+
+#		define ERROR_PRINT(_fmt, ...)  \
+	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
 			WHEREARG, ##__VA_ARGS__)
 
 #endif //DEBUGPRINT_H
