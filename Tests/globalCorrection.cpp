@@ -58,7 +58,7 @@ void printUsage()
 					"<index of facet to be moved> <max_move_delta> <first angle shift> "
 					"<eps max loop> <delta gradient descend>\n");
 	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
-	printf("\nPossible methods: gd (gradient descent), gdf (gradient descent - fast)");
+	printf("\nPossible methods: gd (gradient descent), gdf (gradient descent - fast)\n");
 }
 
 int parse_commandLine(int argc, char** argv, testParameters& parameters)
