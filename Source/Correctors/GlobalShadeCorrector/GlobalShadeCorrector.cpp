@@ -195,14 +195,14 @@ void GlobalShadeCorrector::runCorrectionIteration()
 	derivativeTest_all();
 #endif
 
-	list<int>::iterator iterNotAssocicated = facetsNotAssociated->begin();
+	list<int>::iterator iterNotAssociated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		if (*iterNotAssocicated == iFacet)
+		if (*iterNotAssociated == iFacet)
 		{
 			polyhedron->facets[iFacet].plane = prevPlanes[iFacet];
-			++iterNotAssocicated;
+			++iterNotAssociated;
 			++countNotAssociated;
 			continue;
 		}
