@@ -8,11 +8,14 @@
 #ifndef GLOBALSHADECORRECTOR_H_
 #define GLOBALSHADECORRECTOR_H_
 
-/*
- *
- */
+enum MethodCorrector
+{
+	METHOD_UNKNOWN, METHOD_GRADIENT_DESCENT, METHOD_GRADIENT_DESCENT_FAST
+};
+
 struct _GSCorrectorParameters
 {
+	MethodCorrector methodName;
 	double epsLoopStop;
 	double deltaGradientStep;
 };
@@ -21,6 +24,7 @@ typedef struct _GSCorrectorParameters GSCorrectorParameters;
 
 const double EPS_LOOP_STOP_DEFAULT = 1e-6;
 const double DELTA_GRADIENT_STEP_DEFAULT = 1e-4;
+const MethodCorrector METHOD_CORRECTOR_DEFAULT = METHOD_UNKNOWN;
 
 class GlobalShadeCorrector: public PCorrector
 {
@@ -47,6 +51,7 @@ private:
 
 	void shiftCoefficients(double delta);
 	double calculateFunctional(double delta);
+	double findOptimalDelta(double deltaMax);
 
 	void runCorrectionIteration();
 

@@ -12,7 +12,8 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				edgeData(NULL),
 				contourData(NULL),
 				parameters(
-				{ EPS_LOOP_STOP_DEFAULT, DELTA_GRADIENT_STEP_DEFAULT}),
+				{ METHOD_CORRECTOR_DEFAULT, EPS_LOOP_STOP_DEFAULT,
+	DELTA_GRADIENT_STEP_DEFAULT}),
 				facetsNotAssociated(NULL),
 				gradient(NULL),
 				prevPlanes(NULL),
@@ -210,6 +211,51 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 	}
 }
 
+double GlobalShadeCorrector::calculateFunctional(double delta)
+{
+	shiftCoefficients(delta);
+	double functionalValue = calculateFunctional();
+	shiftCoefficients(-delta);
+	return functionalValue;
+}
+
+const double GOLDEN_RATIO_RECIPROCAL = 0.5 * (sqrt(5) - 1);
+
+enum GoldenRatioMethodState
+{
+	ELIMINATING_LEFT_BOUND, ELIMINATING_RIGHT_BOUND
+};
+
+double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
+{
+	double leftBound = 0.;
+	double rightBound = deltaMax;
+	double leftChecker = rightBound - GOLDEN_RATIO_RECIPROCAL *
+			(rightBound - leftBound);
+	double rightChecker = leftBound + GOLDEN_RATIO_RECIPROCAL *
+			(rightBound - leftBound);
+	while (rightBound > leftBound)
+	{
+		double leftValue = calculateFunctional(leftChecker);
+		double rightValue = calculateFunctional(rightChecker);
+		if (leftValue > rightValue)
+		{
+			leftBound = leftChecker;
+			leftChecker = rightChecker;
+			rightChecker = leftBound + GOLDEN_RATIO_RECIPROCAL *
+					(rightBound - leftBound);
+		}
+		else
+		{
+			rightBound = rightChecker;
+			rightChecker = leftChecker;
+			leftChecker = rightBound - GOLDEN_RATIO_RECIPROCAL *
+					(rightBound - leftBound);
+		}
+	}
+	return leftBound;
+}
+
 void GlobalShadeCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
@@ -217,7 +263,22 @@ void GlobalShadeCorrector::runCorrectionIteration()
 #ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
 	derivativeTest_all();
 #endif
-	shiftCoefficients(parameters.deltaGradientStep);
+	double deltaOptimal;
+	switch (parameters.methodName)
+	{
+	case METHOD_GRADIENT_DESCENT:
+		shiftCoefficients(parameters.deltaGradientStep);
+		break;
+	case METHOD_GRADIENT_DESCENT_FAST:
+		deltaOptimal = findOptimalDelta(parameters.deltaGradientStep);
+		MAIN_PRINT("deltaOptimal = %lf", deltaOptimal);
+		shiftCoefficients(deltaOptimal);
+		break;
+	case METHOD_UNKNOWN:
+	default:
+		ERROR_PRINT("Unknown method name!");
+		break;
+	}
 	DEBUG_END;
 }
 

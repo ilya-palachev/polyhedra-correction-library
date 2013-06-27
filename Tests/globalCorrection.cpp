@@ -1,6 +1,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-enum nameFigure
+enum NameFigure
 {
 	FIGURE_UNKNOWN,
 	FIGURE_CUBE,
@@ -9,15 +9,10 @@ enum nameFigure
 	FIGURE_CUBE_CUTTED
 };
 
-enum nameMethod
-{
-	METHOD_UNKNOWN, METHOD_GRADIENT_DESCENT, METHOD_GRADIENT_DESCENT_FAST
-};
-
 struct testParameters
 {
-	nameFigure figure;
-	nameMethod method;
+	NameFigure figure;
+	MethodCorrector method;
 	int numContours;
 	int indFacetMoved;
 	double maxMoveDelta;
@@ -27,10 +22,10 @@ struct testParameters
 };
 
 void printUsage();
-nameFigure parse_figureName(char* figureNameInput);
-nameMethod parse_methodName(char* methodNameInput);
+NameFigure parse_figureName(char* figureNameInput);
+MethodCorrector parse_methodName(char* methodNameInput);
 int parse_commandLine(int argc, char** argv, testParameters& parameters);
-Polyhedron* makePolyhedron(nameFigure figureParsed);
+Polyhedron* makePolyhedron(NameFigure figureParsed);
 inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 		int ifacet);
 
@@ -48,7 +43,8 @@ int main(int argc, char** argv)
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
 	GSCorrectorParameters gsParameters;
-	gsParameters = {parameters.epsLoopStop, parameters.deltaGardientStep};
+	gsParameters = {parameters.method, parameters.epsLoopStop,
+			parameters.deltaGardientStep};
 	polyhedron->correctGlobal(contourData, &gsParameters);
 
 	return EXIT_SUCCESS;
@@ -111,7 +107,7 @@ int parse_commandLine(int argc, char** argv, testParameters& parameters)
 	return EXIT_SUCCESS;
 }
 
-nameFigure parse_figureName(char* figureNameInput)
+NameFigure parse_figureName(char* figureNameInput)
 {
 	if (strcmp(figureNameInput, "cube") == 0)
 	{
@@ -135,7 +131,7 @@ nameFigure parse_figureName(char* figureNameInput)
 	}
 }
 
-nameMethod parse_methodName(char* methodNameInput)
+MethodCorrector parse_methodName(char* methodNameInput)
 {
 	if (strcmp(methodNameInput, "gd") == 0)
 	{
@@ -151,7 +147,7 @@ nameMethod parse_methodName(char* methodNameInput)
 	}
 }
 
-Polyhedron* makePolyhedron(nameFigure figureParsed)
+Polyhedron* makePolyhedron(NameFigure figureParsed)
 {
 	switch (figureParsed)
 	{
