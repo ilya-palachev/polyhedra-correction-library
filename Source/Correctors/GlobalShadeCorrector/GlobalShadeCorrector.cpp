@@ -66,6 +66,7 @@ void GlobalShadeCorrector::runCorrection()
 	DEBUG_PRINT("memory initialization done");
 
 	double error = calculateFunctional();
+	double errorInitial = error;
 	DEBUG_PRINT("first functional calculation done. error = %e", error);
 
 	int numIterations = 0;
@@ -97,6 +98,16 @@ void GlobalShadeCorrector::runCorrection()
 		error = calculateFunctional();
 		MAIN_PRINT("error = %le", error);
 		MAIN_PRINT(COLOUR_GREEN "Iteration %d : End\n", numIterations);
+		if (error > MAX_ERROR_ABSOLUTE)
+		{
+			ERROR_PRINT("Too big absolute value of error.");
+			break;
+		}
+		if (error / errorInitial > MAX_ERROR_RELATIVE)
+		{
+			ERROR_PRINT("Too big relative value of error.");
+			break;
+		}
 		++numIterations;
 	}
 	DEBUG_END;

@@ -25,6 +25,8 @@ typedef struct _GSCorrectorParameters GSCorrectorParameters;
 const double EPS_LOOP_STOP_DEFAULT = 1e-6;
 const double DELTA_GRADIENT_STEP_DEFAULT = 1e-4;
 const MethodCorrector METHOD_CORRECTOR_DEFAULT = METHOD_UNKNOWN;
+const double MAX_ERROR_ABSOLUTE = 10.;
+const double MAX_ERROR_RELATIVE = 10.;
 
 class GlobalShadeCorrector: public PCorrector
 {
