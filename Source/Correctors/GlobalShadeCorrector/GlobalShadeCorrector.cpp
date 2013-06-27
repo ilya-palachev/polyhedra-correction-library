@@ -215,8 +215,8 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 				gradient[4 * iFacetShifted + 1],
 				gradient[4 * iFacetShifted + 2]),
 				gradient[4 * iFacetShifted + 3]);
-		deltaPlane.norm *= parameters.deltaGradientStep;
-		deltaPlane.dist *= parameters.deltaGradientStep;
+		deltaPlane.norm *= delta;
+		deltaPlane.dist *= delta;
 		polyhedron->facets[iFacet].plane.norm -= deltaPlane.norm;
 		polyhedron->facets[iFacet].plane.dist -= deltaPlane.dist;
 	}
@@ -231,11 +231,7 @@ double GlobalShadeCorrector::calculateFunctional(double delta)
 }
 
 const double GOLDEN_RATIO_RECIPROCAL = 0.5 * (sqrt(5) - 1);
-
-enum GoldenRatioMethodState
-{
-	ELIMINATING_LEFT_BOUND, ELIMINATING_RIGHT_BOUND
-};
+const double INTERVAL_PRECISION = 1e-10;
 
 double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 {
@@ -245,12 +241,16 @@ double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 			(rightBound - leftBound);
 	double rightChecker = leftBound + GOLDEN_RATIO_RECIPROCAL *
 			(rightBound - leftBound);
-	while (rightBound > leftBound)
+	while (rightBound - leftBound > INTERVAL_PRECISION)
 	{
+		DEBUG_PRINT("[%lf   (%lf   %lf)   %lf]", leftBound, leftChecker,
+				rightChecker, rightBound);
 		double leftValue = calculateFunctional(leftChecker);
 		double rightValue = calculateFunctional(rightChecker);
 		if (leftValue > rightValue)
 		{
+			DEBUG_PRINT("left = %lf > %lf = right, eliminating left",
+					leftValue, rightValue);
 			leftBound = leftChecker;
 			leftChecker = rightChecker;
 			rightChecker = leftBound + GOLDEN_RATIO_RECIPROCAL *
@@ -258,6 +258,8 @@ double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 		}
 		else
 		{
+			DEBUG_PRINT("left = %lf < %lf = right, eliminating right",
+					leftValue, rightValue);
 			rightBound = rightChecker;
 			rightChecker = leftChecker;
 			leftChecker = rightBound - GOLDEN_RATIO_RECIPROCAL *
