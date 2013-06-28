@@ -11,8 +11,10 @@
 enum MethodCorrector
 {
 	METHOD_UNKNOWN, METHOD_GRADIENT_DESCENT, METHOD_GRADIENT_DESCENT_FAST,
-	METHOD_CONJUGATE_GRADIENT
+	METHOD_CONJUGATE_GRADIENT, METHOD_ALL
 };
+/* Number of different methods of the corrector. */
+const int NUMBER_METHOD_CORRECTOR = 3;
 
 struct _GSCorrectorParameters
 {
@@ -20,14 +22,33 @@ struct _GSCorrectorParameters
 	double epsLoopStop;
 	double deltaGradientStep;
 };
-
 typedef struct _GSCorrectorParameters GSCorrectorParameters;
+
+enum GSCorrectorExitReason
+{
+	GSC_SUCCESS, GSC_BIG_ERROR_ABSOLUTE, GSC_BIG_ERROR_RELATIVE,
+	GSC_SMALL_GRADIENT, GSC_SMALL_MOVEMENT
+};
+
+struct _GSCorrectorStatus
+{
+	GSCorrectorParameters parameters;
+	int numIterations;
+	GSCorrectorExitReason exitReason;
+	double valueCausedExit;
+};
+typedef struct _GSCorrectorStatus GSCorrectorStatus;
+
 
 const double EPS_LOOP_STOP_DEFAULT = 1e-6;
 const double DELTA_GRADIENT_STEP_DEFAULT = 1e-4;
 const MethodCorrector METHOD_CORRECTOR_DEFAULT = METHOD_UNKNOWN;
 const double MAX_ERROR_ABSOLUTE = 10.;
 const double MAX_ERROR_RELATIVE = 10.;
+const double EPSILON_MINIMAL_GRADIENT_NORM = 1e-16;
+const double EPSILON_MINIMAL_MOVEMENT = 1e-32;
+
+const double DEFAULT_MAX_DELTA = 1.;
 
 class GlobalShadeCorrector: public PCorrector
 {
@@ -53,8 +74,9 @@ private:
 	 * gradient method only. */
 	double* gradientPrevious;
 
-	/* Euclid norm of previous gradient - used in conjugate gradient method
-	 * only. */
+	/* Euclid norm of current and previous gradient - used in conjugate
+	 * gradient method only. */
+	double gradientNorm;
 	double gradientNormPrevious;
 
 	/* Number of currently minimized dimension in cojugate gradient method
@@ -93,11 +115,13 @@ private:
 	void derivativeTest_1();
 	double calculateFunctionalDerivative_1(int iFacet, int iCoefficient);
 
+	GSCorrectorStatus repairAndRun(MethodCorrector method,
+			Plane* planesInitial);
+	GSCorrectorStatus runCorrectionDo();
 public:
 	GlobalShadeCorrector();
 	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd,
 		GSCorrectorParameters* _parameters);
-	GlobalShadeCorrector(Polyhedron* input);
 	virtual ~GlobalShadeCorrector();
 
 	void runCorrection();

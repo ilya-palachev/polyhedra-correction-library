@@ -145,6 +145,10 @@ MethodCorrector parse_methodName(char* methodNameInput)
 	{
 		return METHOD_CONJUGATE_GRADIENT;
 	}
+	else if (strcmp(methodNameInput, "all") == 0)
+	{
+		return METHOD_ALL;
+	}
 	else
 	{
 		return METHOD_UNKNOWN;

@@ -32,12 +32,15 @@
 #		define DEBUG_END
 #endif
 
-#		define MAIN_PRINT(_fmt, ...)  \
+#define MAIN_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
 			WHEREARG, ##__VA_ARGS__)
 
-#		define ERROR_PRINT(_fmt, ...)  \
+#define ERROR_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
 			WHEREARG, ##__VA_ARGS__)
+
+#define PRINT(_fmt, ...)  \
+	STDERR_PRINT(COLOUR_NORM _fmt COLOUR_NORM, ##__VA_ARGS__)
 
 #endif //DEBUGPRINT_H

@@ -17,6 +17,7 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				facetsNotAssociated(NULL),
 				gradient(NULL),
 				gradientPrevious(NULL),
+				gradientNorm(0.),
 				gradientNormPrevious(0.),
 				iMinimizedDimension(0),
 				iMinimizationLevel(0),
@@ -34,6 +35,7 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				facetsNotAssociated(new list<int>),
 				gradient(NULL),
 				gradientPrevious(NULL),
+				gradientNorm(0.),
 				gradientNormPrevious(0.),
 				iMinimizedDimension(0),
 				iMinimizationLevel(0),
@@ -68,6 +70,103 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 
 void GlobalShadeCorrector::runCorrection()
 {
+	if (parameters.methodName != METHOD_ALL)
+	{
+		runCorrectionDo();
+	}
+	else
+	{
+		/* This branch has been added for testing purposes. We test all
+		 * algorithms to compare their performance. */
+		Plane* planesInitial = new Plane[polyhedron->numFacets];
+		GSCorrectorStatus* status = new
+				GSCorrectorStatus[NUMBER_METHOD_CORRECTOR];
+
+		for (int iPlane = 0; iPlane < polyhedron->numFacets; ++iPlane)
+		{
+			planesInitial[iPlane] = polyhedron->facets[iPlane].plane;
+		}
+
+		status[0] = repairAndRun(METHOD_GRADIENT_DESCENT, planesInitial);
+		parameters.deltaGradientStep = DEFAULT_MAX_DELTA;
+		status[1] = repairAndRun(METHOD_GRADIENT_DESCENT_FAST, planesInitial);
+		status[2] = repairAndRun(METHOD_CONJUGATE_GRADIENT, planesInitial);
+
+		/* Begin of printing the report */
+
+		PRINT("# \t|\t method \t\t|\t "
+				"exit reason \t\t|\t "
+				"value caused exit \t|\t "
+				"number of iterations \n");
+
+		for(int iMethod = 0; iMethod < NUMBER_METHOD_CORRECTOR; ++iMethod)
+		{
+			PRINT("%d \t|\t ", iMethod);
+			switch(status[iMethod].parameters.methodName)
+			{
+			case METHOD_GRADIENT_DESCENT:
+				PRINT("gradient descend \t|\t ");
+				break;
+			case METHOD_GRADIENT_DESCENT_FAST:
+				PRINT("fast gradient descend \t|\t ");
+				break;
+			case METHOD_CONJUGATE_GRADIENT:
+				PRINT("conjugate gradient \t|\t");
+				break;
+			default:
+				PRINT("??? \t|\t");
+				break;
+			}
+			switch(status[iMethod].exitReason)
+			{
+			case GSC_SUCCESS:
+				PRINT("success \t|\t ");
+				break;
+			case GSC_BIG_ERROR_ABSOLUTE:
+				PRINT("big abs error \t|\t ");
+				break;
+			case GSC_BIG_ERROR_RELATIVE:
+				PRINT("big rel error \t|\t ");
+				break;
+			case GSC_SMALL_GRADIENT:
+				PRINT("small gradient \t|\t ");
+				break;
+			case GSC_SMALL_MOVEMENT:
+				PRINT("small movement \t|\t ");
+				break;
+			}
+			PRINT("%le \t|\t %d \n", status[iMethod].valueCausedExit,
+					status[iMethod].numIterations);
+		}
+
+		/* End of printing the report */
+
+		if (planesInitial != NULL)
+		{
+			delete[] planesInitial;
+			planesInitial = NULL;
+		}
+		if (status != NULL)
+		{
+			delete[] status;
+			status = NULL;
+		}
+	}
+}
+
+GSCorrectorStatus GlobalShadeCorrector::repairAndRun(MethodCorrector method,
+		Plane* planesInitial)
+{
+	for (int iPlane = 0; iPlane < polyhedron->numFacets; ++iPlane)
+	{
+		polyhedron->facets[iPlane].plane = planesInitial[iPlane];
+	}
+	parameters.methodName = method;
+	return runCorrectionDo();
+}
+
+GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
+{
 	DEBUG_START;
 	preprocess();
 	findNotAssociatedFacets();
@@ -99,6 +198,10 @@ void GlobalShadeCorrector::runCorrection()
 	DEBUG_PRINT("first functional calculation done. error = %e", error);
 
 	int numIterations = 0;
+	GSCorrectorStatus status;
+	status.parameters = parameters;
+	status.exitReason = GSC_SUCCESS;
+
 	while (error > parameters.epsLoopStop)
 	{
 		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n" COLOUR_NORM,
@@ -113,16 +216,23 @@ void GlobalShadeCorrector::runCorrection()
 
 		runCorrectionIteration();
 
+		double movement = 0.;
 		for (int i = 0; i < polyhedron->numFacets; ++i)
 		{
 			DEBUG_PRINT(
-					"PLane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)",
+					"Plane[%d]: (%lf, %lf, %lf, %lf) --> (%lf, %lf, %lf, %lf)",
 					i, prevPlanes[i].norm.x, prevPlanes[i].norm.y,
 					prevPlanes[i].norm.z, prevPlanes[i].dist,
 					polyhedron->facets[i].plane.norm.x,
 					polyhedron->facets[i].plane.norm.y,
 					polyhedron->facets[i].plane.norm.z,
 					polyhedron->facets[i].plane.dist);
+			double oneMovement = qmod(prevPlanes[i].norm -
+					polyhedron->facets[i].plane.norm);
+			oneMovement += (prevPlanes[i].dist -
+					polyhedron->facets[i].plane.dist) * (prevPlanes[i].dist -
+							polyhedron->facets[i].plane.dist);
+			movement += oneMovement;
 			prevPlanes[i] = polyhedron->facets[i].plane;
 		}
 		error = calculateFunctional();
@@ -132,16 +242,48 @@ void GlobalShadeCorrector::runCorrection()
 		if (error > MAX_ERROR_ABSOLUTE)
 		{
 			ERROR_PRINT("Too big absolute value of error.");
+			status.exitReason = GSC_BIG_ERROR_ABSOLUTE;
+			status.valueCausedExit = error;
 			break;
 		}
 		if (error / errorInitial > MAX_ERROR_RELATIVE)
 		{
 			ERROR_PRINT("Too big relative value of error.");
+			status.exitReason = GSC_BIG_ERROR_RELATIVE;
+			status.valueCausedExit = error / errorInitial;
 			break;
+		}
+		if (gradientNorm < EPSILON_MINIMAL_GRADIENT_NORM)
+		{
+			ERROR_PRINT("Stopping, because gradient is too small");
+			status.exitReason = GSC_SMALL_GRADIENT;
+			status.valueCausedExit = gradientNorm;
+			break;
+		}
+		if (!(parameters.methodName == METHOD_CONJUGATE_GRADIENT &&
+				iMinimizedDimension == 0) &&
+				movement < EPSILON_MINIMAL_MOVEMENT)
+		{
+			ERROR_PRINT("Stopping, because movement is too small");
+			status.exitReason = GSC_SMALL_MOVEMENT;
+			status.valueCausedExit = movement;
+			break;
+		}
+		++iMinimizedDimension;
+		if (iMinimizedDimension == dim)
+		{
+			iMinimizedDimension = 0;
+			++iMinimizationLevel;
 		}
 		++numIterations;
 	}
+	status.numIterations = numIterations;
+	if (status.exitReason == GSC_SUCCESS)
+	{
+		status.valueCausedExit = error;
+	}
 	DEBUG_END;
+	return status;
 }
 
 void GlobalShadeCorrector::findNotAssociatedFacets()
@@ -314,11 +456,13 @@ void GlobalShadeCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
 	calculateGradient();
+	gradientNorm = calculateGradientNorm();
+
 #ifdef GLOBAL_CORRECTION_DERIVATIVE_TESTING
 	derivativeTest_all();
 #endif
+
 	double deltaOptimal;
-	double gradientNorm;
 	double omega;
 	switch (parameters.methodName)
 	{
@@ -335,7 +479,6 @@ void GlobalShadeCorrector::runCorrectionIteration()
 				iMinimizationLevel, iMinimizedDimension);
 		if (iMinimizedDimension != 0)
 		{
-			gradientNorm = calculateGradientNorm();
 			omega = gradientNorm / gradientNormPrevious;
 			if (iMinimizedDimension != 1)
 			{
@@ -349,24 +492,21 @@ void GlobalShadeCorrector::runCorrectionIteration()
 			MAIN_PRINT("deltaOptimal = %lf", deltaOptimal);
 			shiftCoefficients(deltaOptimal);
 		}
-
-		/* Saving previous values of gradient: */
-		gradientNormPrevious = gradientNorm;
-		for (int iDimension = 0; iDimension < dim; ++iDimension)
-		{
-			gradientPrevious[iDimension] = gradient[iDimension];
-		}
-		++iMinimizedDimension;
-		if (iMinimizedDimension == dim)
-		{
-			iMinimizedDimension = 0;
-			++iMinimizationLevel;
-		}
+		break;
+	case METHOD_ALL:
+		ERROR_PRINT("This point is unreachable!");
 		break;
 	case METHOD_UNKNOWN:
 	default:
 		ERROR_PRINT("Unknown method name!");
 		break;
+	}
+
+	/* Saving previous values of gradient: */
+	gradientNormPrevious = gradientNorm;
+	for (int iDimension = 0; iDimension < dim; ++iDimension)
+	{
+		gradientPrevious[iDimension] = gradient[iDimension];
 	}
 	DEBUG_END;
 }
