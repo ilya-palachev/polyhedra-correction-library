@@ -2,15 +2,18 @@
 
 void Facet::my_fprint(FILE* file)
 {
+#ifndef NDEBUG
 	int i;
 	fprintf(file, "Facet %d: ", id);
 	for (i = 0; i < numVertices; ++i)
 		fprintf(file, "%d ", indVertices[i]);
 	printf("\n");
+#endif
 }
 
 void Facet::my_fprint_all(FILE* file)
 {
+#ifndef NDEBUG
 	int i;
 	fprintf(file, "\n------------ Facet %d: ------------\n", id);
 	fprintf(file, "id = %d\n nv = %d\n", id, numVertices);
@@ -50,7 +53,7 @@ void Facet::my_fprint_all(FILE* file)
 //	else
 //		fprintf(file, "poly->numf = %d\n", poly->numf);
 	test_pair_neighbours();
-
+#endif
 }
 
 void Facet::fprint_default_0(FILE* file)

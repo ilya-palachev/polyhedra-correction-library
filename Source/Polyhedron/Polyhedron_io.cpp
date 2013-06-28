@@ -18,6 +18,7 @@ void Polyhedron::my_fprint(const char* filename)
 
 void Polyhedron::my_fprint(FILE* file)
 {
+#ifndef NDEBUG
 	int i;
 	fprintf(file, "Polyhedron:\n");
 	fprintf(file, "numv = %d\nnumf = %d\n", numVertices, numFacets);
@@ -31,6 +32,7 @@ void Polyhedron::my_fprint(FILE* file)
 		for (i = 0; i < numVertices; ++i)
 			vertexInfos[i].my_fprint_all(file);
 	}
+#endif
 }
 
 /////////////////////////////////////
