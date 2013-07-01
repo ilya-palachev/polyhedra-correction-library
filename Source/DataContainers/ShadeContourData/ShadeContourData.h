@@ -21,6 +21,7 @@ public:
 	~ShadeContourData();
 
 	void photographContours(int numContoursNeeded, double firstAngle);
+	void fscanDefault(char* fileNamePolyhedron);
 };
 
 #endif /* SHADECONTOURDATA_H_ */
