@@ -54,11 +54,13 @@ void printUsage()
 {
 	printf(
 			"Usage: \n"
-					"./globalCorrectionCube <figure name> <method> <number_of_contours> "
+					"./globalCorrection <figure name> <method> <number_of_contours> "
 					"<index of facet to be moved> <max_move_delta> <first angle shift> "
 					"<eps max loop> <delta gradient descend>\n");
 	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
-	printf("\nPossible methods: gd (gradient descent), gdf (gradient descent - fast)\n");
+	printf("\nPossible methods: gd (gradient descent), "
+				"gdf (gradient descent - fast),"
+				"cg (conjugate gradient).\n");
 }
 
 int parse_commandLine(int argc, char** argv, TestParameters& parameters)
