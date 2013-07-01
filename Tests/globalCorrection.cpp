@@ -9,7 +9,7 @@ enum NameFigure
 	FIGURE_CUBE_CUTTED
 };
 
-struct testParameters
+struct TestParameters
 {
 	NameFigure figure;
 	MethodCorrector method;
@@ -24,14 +24,14 @@ struct testParameters
 void printUsage();
 NameFigure parse_figureName(char* figureNameInput);
 MethodCorrector parse_methodName(char* methodNameInput);
-int parse_commandLine(int argc, char** argv, testParameters& parameters);
+int parse_commandLine(int argc, char** argv, TestParameters& parameters);
 Polyhedron* makePolyhedron(NameFigure figureParsed);
 inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 		int ifacet);
 
 int main(int argc, char** argv)
 {
-	testParameters parameters;
+	TestParameters parameters;
 
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -61,7 +61,7 @@ void printUsage()
 	printf("\nPossible methods: gd (gradient descent), gdf (gradient descent - fast)\n");
 }
 
-int parse_commandLine(int argc, char** argv, testParameters& parameters)
+int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 {
 
 	if (argc != 9)
