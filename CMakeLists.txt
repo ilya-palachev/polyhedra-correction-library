@@ -9,7 +9,9 @@ file(GLOB_RECURSE SOURCE_pcl                  "./Source/*.cpp")
 
 file(GLOB_RECURSE HEADERS_pcl "./Source/*.h")
 file(GLOB_RECURSE HEADERS_external "./External/*.h")
-set (HEADERS_all "${HEADERS_pcl} ${HEADERS_external}")
+set (HEADERS_all "")
+list (APPEND HEADERS_all ${HEADERS_pcl})
+list (APPEND HEADERS_all ${HEADERS_external})
 
 set (INCLUDE_DIRS_all "")
 foreach (_headerFile ${HEADERS_all})
