@@ -6,6 +6,10 @@ set(SOURCES_globalCorrection globalCorrection.cpp)
 add_executable(globalCorrection ${SOURCES_globalCorrection})
 target_link_libraries(globalCorrection pcl)
 
+set(SOURCES_globalCorrectionReal GlobalCorrectionReal.cpp)
+add_executable(globalCorrectionReal ${SOURCES_globalCorrectionReal})
+target_link_libraries(globalCorrectionReal pcl)
+
 set(SOURCES_gaussStringTest gaussStringTest.cpp)
 add_executable(gaussStringTest ${SOURCES_gaussStringTest})
 target_link_libraries(gaussStringTest pcl gaussString)
