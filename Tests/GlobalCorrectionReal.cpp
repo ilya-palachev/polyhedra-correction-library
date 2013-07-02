@@ -65,8 +65,8 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	parameters.fileNameShadeContours = new char[255];
 	char* method = new char[255];
 
-	bool ifCorrectInput = sscanf(argv[1], "%s", &parameters.fileNamePolyhedron)
-			&& sscanf(argv[2], "%s", &parameters.fileNameShadeContours)
+	bool ifCorrectInput = sscanf(argv[1], "%s", parameters.fileNamePolyhedron)
+			&& sscanf(argv[2], "%s", parameters.fileNameShadeContours)
 			&& sscanf(argv[3], "%s", method)
 			&& sscanf(argv[4], "%lf", &parameters.epsLoopStop)
 			&& sscanf(argv[5], "%lf", &parameters.deltaGardientStep);
