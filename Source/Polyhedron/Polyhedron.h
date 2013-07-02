@@ -38,6 +38,7 @@ public:
 	void fscan_default_0(const char* filename);
 	void fscan_default_1(const char* filename);
 	void fscan_default_1_1(const char* filename);
+	void fscan_default_1_2(const char* filename);
 	void fscan_my_format(const char* filename);
 	void fscan_ply(const char* filename);
 	void fprint_default_0(const char* filename);

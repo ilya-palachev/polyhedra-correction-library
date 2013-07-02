@@ -332,6 +332,35 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 /////////////////////////////////////
 // Format:
 //
+// # WPolyhedron::Dump
+// # num_vertices   num_facets   num_edges
+//    446  225 1338
+// # vertices:  ind  x y z
+// ...
+// i x_i y_i z_i
+// ...
+// # facets:  num_of_sides   plane_coeff
+// #          vertex_inds
+// ...
+// j nv_j a_j b_j c_j d_j   k_j_1 k_j_2 ... k_j_(nv_j) (k_j_1)
+// ...
+// # edges:  vertex1 vetrex2 facet ind_in_list
+// ...
+// v1_k v2_k f_k f_ind_k
+// ...
+//
+/////////////////////////////////////
+//Example: MSS_MARQ_G_VS2_0.54_2012_09_18/polyhedron.dat
+/////////////////////////////////////
+
+void Polyhedron::fscan_default_1_2(const char *filename)
+{
+	// TODO: implement this function
+}
+
+/////////////////////////////////////
+// Format:
+//
 // numv numf
 //
 // x_i y_i z_i
