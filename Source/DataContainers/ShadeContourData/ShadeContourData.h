@@ -20,7 +20,6 @@ public:
 	ShadeContourData(const Polyhedron* p);
 	~ShadeContourData();
 
-	void photographContours(int numContoursNeeded, double firstAngle);
 	void fscanDefault(char* fileNamePolyhedron);
 };
 

@@ -23,10 +23,3 @@ ShadeContourData::~ShadeContourData()
 		contours = NULL;
 	}
 }
-
-void ShadeContourData::photographContours(int numContoursNeeded,
-		double firstAngle)
-{
-	numContours = numContoursNeeded;
-
-}
