@@ -17,6 +17,11 @@ EdgeData::EdgeData(int numEdgesMax) :
 				edges(new Edge[numEdgesMax]),
 				numEdges(0)
 {
+	for (int iEdge = 0; iEdge < numEdgesMax; ++iEdge)
+	{
+		edges[iEdge] = Edge(INT_NOT_INITIALIZED, INT_NOT_INITIALIZED,
+				INT_NOT_INITIALIZED, INT_NOT_INITIALIZED, INT_NOT_INITIALIZED);
+	}
 }
 
 EdgeData::~EdgeData()
@@ -26,6 +31,104 @@ EdgeData::~EdgeData()
 		delete[] edges;
 		edges = NULL;
 	}
+}
+
+EdgeData& operator =(const EdgeData* e)
+{
+//	TODO: Implement this function.
+}
+
+
+void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
+{
+	DEBUG_START;
+	DEBUG_PRINT("Trying to add edge (%d, %d) to the edge list", v0, v1);
+
+	if (v0 > v1)
+	{
+		int tmp = v0;
+		v0 = v1;
+		v1 = tmp;
+	}
+
+	int retvalfind = findEdge(v0, v1);
+	if (edges[retvalfind].v0 == v0 && edges[retvalfind].v1 == v1)
+	{
+		if (edges[retvalfind].f0 == INT_NOT_INITIALIZED
+				&& edges[retvalfind].f1 == INT_NOT_INITIALIZED)
+		{
+			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+					"facet values are empty, initializing value #0", v0, v1);
+			edges[retvalfind].f0 = f0;
+			DEBUG_END;
+			return;
+		}
+
+		if (edges[retvalfind].f0 != INT_NOT_INITIALIZED
+				&& edges[retvalfind].f1 == INT_NOT_INITIALIZED)
+		{
+			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+					"facet value #1 is empty, initializing value #0", v0, v1);
+			if (edges[retvalfind].f0 < f0)
+			{
+				edges[retvalfind].f1 = f0;
+			}
+			else
+			{
+				edges[retvalfind].f1 = edges[retvalfind].f0;
+				edges[retvalfind].f0 = f0;
+			}
+			DEBUG_END;
+			return;
+		}
+
+		if (edges[retvalfind].f0 == INT_NOT_INITIALIZED
+				&& edges[retvalfind].f1 != INT_NOT_INITIALIZED)
+		{
+			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+					"facet value #0 is empty, initializing value #0", v0, v1);
+			if (edges[retvalfind].f1 < f0)
+			{
+				edges[retvalfind].f0 = edges[retvalfind].f1;
+				edges[retvalfind].f1 = f0;
+			}
+			else
+			{
+				edges[retvalfind].f0 = f0;
+			}
+			DEBUG_END;
+			return;
+		}
+
+		if (edges[retvalfind].f0 != INT_NOT_INITIALIZED
+				&& edges[retvalfind].f1 != INT_NOT_INITIALIZED)
+		{
+			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+					"facet values are non-empty, skipping...", v0, v1);
+			DEBUG_END;
+			return;
+		}
+	}
+
+	if (numEdges >= numEdgesMax)
+	{
+		DEBUG_PRINT("Warning. List is overflow\n");
+		return;
+	}
+
+	for (int i = numEdges; i > retvalfind; --i)
+	{
+		edges[i] = edges[i - 1];
+	}
+	edges[retvalfind].v0 = v0;
+	edges[retvalfind].v1 = v1;
+	edges[retvalfind].f0 = f0;
+	edges[retvalfind].f1 = INT_NOT_INITIALIZED;
+	edges[retvalfind].id = numEdges;
+	++numEdges;
+	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edge list",
+			v0, v1);
+	DEBUG_END;
 }
 
 void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
