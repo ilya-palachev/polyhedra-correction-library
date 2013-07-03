@@ -87,8 +87,8 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 		}
 
 		if (fscanf(fd, "%lf", &currContour->plane.norm.x) != 1
-				&& fscanf(fd, "%lf", &currContour->plane.norm.y) != 1
-				&& fscanf(fd, "%lf", &currContour->plane.norm.z) != 1)
+				|| fscanf(fd, "%lf", &currContour->plane.norm.y) != 1
+				|| fscanf(fd, "%lf", &currContour->plane.norm.z) != 1)
 		{
 			ERROR_PRINT("Wrong file format, "
 					"in normal to plane for contour #%d",
@@ -124,8 +124,8 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 			}
 
 			if (fscanf(fd, "%lf", &currSide->A1.x) != 1
-					&& fscanf(fd, "%lf", &currSide->A1.y) != 1
-					&& fscanf(fd, "%lf", &currSide->A1.z) != 1)
+					|| fscanf(fd, "%lf", &currSide->A1.y) != 1
+					|| fscanf(fd, "%lf", &currSide->A1.z) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
 						"in A1 for side #%d of contour #%d",
@@ -135,8 +135,8 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 			}
 
 			if (fscanf(fd, "%lf", &currSide->A2.x) != 1
-					&& fscanf(fd, "%lf", &currSide->A2.y) != 1
-					&& fscanf(fd, "%lf", &currSide->A2.z) != 1)
+					|| fscanf(fd, "%lf", &currSide->A2.y) != 1
+					|| fscanf(fd, "%lf", &currSide->A2.z) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
 						"in A1 for side #%d of contour #%d",
