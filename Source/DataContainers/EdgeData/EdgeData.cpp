@@ -33,9 +33,27 @@ EdgeData::~EdgeData()
 	}
 }
 
-EdgeData& operator =(const EdgeData* e)
+bool EdgeData::operator ==(const EdgeData& e)
 {
-//	TODO: Implement this function.
+	if (numEdges != e.numEdges)
+	{
+		return false;
+	}
+
+	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
+	{
+		if (edges[iEdge] != e.edges[iEdge])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool EdgeData::operator !=(const EdgeData& e)
+{
+	return !(*this == e);
 }
 
 
