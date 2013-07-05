@@ -561,10 +561,10 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
 	{
 		int iVertex0, iVertex1, iFacet, iIndInFacet;
-		if (fscanf(fd, "%d", iVertex0) != 1
-				|| fscanf(fd, "%d", iVertex1) != 1
-				|| fscanf(fd, "%d", iFacet) != 1
-				|| fscanf(fd, "%d", iIndInFacet) != 1
+		if (fscanf(fd, "%d", &iVertex0) != 1
+				|| fscanf(fd, "%d", &iVertex1) != 1
+				|| fscanf(fd, "%d", &iFacet) != 1
+				|| fscanf(fd, "%d", &iIndInFacet) != 1
 				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
 		{
 			ERROR_PRINT("Wrong format, in edge #%d",
