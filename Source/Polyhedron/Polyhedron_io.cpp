@@ -495,7 +495,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 		*currFacet = Facet(iFacet, currFacet->numVertices, currFacet->plane,
 				this);
 
-		for (int iVertex = 0; iVertex < &currFacet->numVertices; ++iVertex)
+		for (int iVertex = 0; iVertex < currFacet->numVertices; ++iVertex)
 		{
 			int* currVertex = &currFacet->indVertices[iVertex];
 			if (fscanf(fd, "%d", currVertex) != 1)
