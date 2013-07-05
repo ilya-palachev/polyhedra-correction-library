@@ -35,6 +35,9 @@ public:
 
 	Edge& operator =(const Edge& orig);
 
+	bool operator ==(const Edge& e);
+	bool operator !=(const Edge& e);
+
 	//Edge_io.cpp :
 	void my_fprint(FILE* file);
 
