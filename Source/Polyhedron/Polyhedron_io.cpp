@@ -353,10 +353,10 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 //Example: MSS_MARQ_G_VS2_0.54_2012_09_18/polyhedron.dat
 /////////////////////////////////////
 
-#define STD_POLYHEDRON_FORMAT_HEADER_1 3
-#define STD_POLYHEDRON_FORMAT_HEADER_2 1
-#define STD_POLYHEDRON_FORMAT_HEADER_3 2
-#define STD_POLYHEDRON_FORMAT_HEADER_4 1
+#define STD_POLYHEDRON_FORMAT_HEADER_1 6
+#define STD_POLYHEDRON_FORMAT_HEADER_2 6
+#define STD_POLYHEDRON_FORMAT_HEADER_3 6
+#define STD_POLYHEDRON_FORMAT_HEADER_4 6
 static void _fini_fscan_default_1_2(FILE* fd, char* scannedString,
 		EdgeData* edgeData)
 {
