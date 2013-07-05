@@ -357,6 +357,25 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 #define STD_POLYHEDRON_FORMAT_HEADER_2 1
 #define STD_POLYHEDRON_FORMAT_HEADER_3 2
 #define STD_POLYHEDRON_FORMAT_HEADER_4 1
+static void _fini_fscan_default_1_2(FILE* fd, char* scannedString,
+		EdgeData* edgeData)
+{
+	if (fd)
+	{
+		fclose(fd);
+	}
+
+	if (scannedString)
+	{
+		delete[] scannedString;
+	}
+
+	if (edgeData)
+	{
+		delete edgeData;
+	}
+}
+
 void Polyhedron::fscan_default_1_2(const char *filename)
 {
 	FILE* fd = (FILE*) fopen(filename, "r");
@@ -367,17 +386,13 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 	}
 
 	char* scannedString = new char[255];
+	EdgeData* edgeData = NULL;
 	for (int i = 0; i < STD_POLYHEDRON_FORMAT_HEADER_1; ++i)
 	{
 		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong format, in header #1");
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 	}
@@ -388,35 +403,20 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 			|| fscanf(fd, "%d", &numEdges) != 1)
 	{
 		ERROR_PRINT("Wrong format, in num_vertices, num_facets, num_edgeData");
-		if (scannedString != NULL)
-		{
-			delete[] scannedString;
-			scannedString = NULL;
-		}
-		fclose(fd);
+		_fini_fscan_default_1_2(fd, scannedString, edgeData);
 		return;
 	}
 
 	vertices = new Vector3d[numVertices];
 	facets = new Facet[numFacets];
-	EdgeData* edgeData = new EdgeData;
+	edgeData = new EdgeData;
 
 	for (int i = 0; i < STD_POLYHEDRON_FORMAT_HEADER_2; ++i)
 	{
 		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong format, in header #2");
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 	}
@@ -433,17 +433,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 )
 		{
 			ERROR_PRINT("Wrong format, in vertex #%d", iVertex);
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 	}
@@ -453,17 +443,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong format, in header #3");
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 	}
@@ -478,17 +458,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 			|| fscanf(fd, "%lf", &currFacet->plane.dist) != 1)
 		{
 			ERROR_PRINT("Wrong format, in description of facet #%d", iFacet);
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 
@@ -502,17 +472,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 			{
 				ERROR_PRINT("Wrong format, in vertex #%d of facet #%d",
 						iVertex, iFacet);
-				if (scannedString != NULL)
-				{
-					delete[] scannedString;
-					scannedString = NULL;
-				}
-				if (edgeData != NULL)
-				{
-					delete edgeData;
-					edgeData = NULL;
-				}
-				fclose(fd);
+				_fini_fscan_default_1_2(fd, scannedString, edgeData);
 				return;
 			}
 		}
@@ -523,17 +483,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in cycling vertex of facet #%d",
 					iFacet);
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 	}
@@ -543,17 +493,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong format, in header #4");
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 	}
@@ -569,17 +509,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in edge #%d",
 					iEdge);
-			if (scannedString != NULL)
-			{
-				delete[] scannedString;
-				scannedString = NULL;
-			}
-			if (edgeData != NULL)
-			{
-				delete edgeData;
-				edgeData = NULL;
-			}
-			fclose(fd);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return;
 		}
 		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
@@ -594,17 +524,7 @@ void Polyhedron::fscan_default_1_2(const char *filename)
 				"edge constructor");
 	}
 
-	if (scannedString != NULL)
-	{
-		delete[] scannedString;
-		scannedString = NULL;
-	}
-	if (edgeData != NULL)
-	{
-		delete edgeData;
-		edgeData = NULL;
-	}
-	fclose(fd);
+	_fini_fscan_default_1_2(fd, scannedString, edgeData);
 }
 #undef STD_POLYHEDRON_FORMAT_HEADER_1
 #undef STD_POLYHEDRON_FORMAT_HEADER_2
