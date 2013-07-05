@@ -395,7 +395,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return false;
 		}
-		DEBUG_PRINT("scanned String == \"%s\"", scannedString);
+		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
 	}
 
 	int numEdges;
@@ -420,6 +420,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return false;
 		}
+		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
 	}
 
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
@@ -447,6 +448,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return false;
 		}
+		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
 	}
 
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
@@ -497,6 +499,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			return false;
 		}
+		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
 	}
 
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
