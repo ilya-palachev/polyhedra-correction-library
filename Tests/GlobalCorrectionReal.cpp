@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 
 	Polyhedron* polyhedron;
-	polyhedron->fscan_default_1_1(parameters.fileNamePolyhedron);
+	polyhedron->fscan_default_1_2(parameters.fileNamePolyhedron);
 	ShadeContourData* contourData;
 	contourData->fscanDefault(parameters.fileNamePolyhedron);
 
