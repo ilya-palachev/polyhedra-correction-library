@@ -524,6 +524,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
 	}
 
+	preprocessAdjacency();
 	EdgeData* edgeData2 = new EdgeData;
 	EdgeConstructor* edgeConstructor = new EdgeConstructor(this, edgeData2);
 	edgeConstructor->run(edgeData2);
