@@ -455,6 +455,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 	{
 		Facet* currFacet = &facets[iFacet];
 		if (fscanf(fd, "%d", &currFacet->numVertices) != 1
+			|| currFacet->numVertices < 0
 			|| fscanf(fd, "%lf", &currFacet->plane.norm.x) != 1
 			|| fscanf(fd, "%lf", &currFacet->plane.norm.y) != 1
 			|| fscanf(fd, "%lf", &currFacet->plane.norm.z) != 1
@@ -471,7 +472,8 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		for (int iVertex = 0; iVertex < currFacet->numVertices; ++iVertex)
 		{
 			int* currVertex = &currFacet->indVertices[iVertex];
-			if (fscanf(fd, "%d", currVertex) != 1)
+			if (fscanf(fd, "%d", currVertex) != 1
+					|| *currVertex < 0 || *currVertex >= numVertices)
 			{
 				ERROR_PRINT("Wrong format, in vertex #%d of facet #%d",
 						iVertex, iFacet);
@@ -505,9 +507,13 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 	{
 		int iVertex0, iVertex1, iFacet, iIndInFacet;
 		if (fscanf(fd, "%d", &iVertex0) != 1
+				|| iVertex0 < 0 || iVertex0 > numVertices
 				|| fscanf(fd, "%d", &iVertex1) != 1
+				|| iVertex1 < 0 || iVertex1 > numVertices
 				|| fscanf(fd, "%d", &iFacet) != 1
+				|| iFacet < 0 || iFacet > numFacets
 				|| fscanf(fd, "%d", &iIndInFacet) != 1
+				|| iIndInFacet < 0 || iIndInFacet >= facets[iFacet].numVertices
 				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
 		{
 			ERROR_PRINT("Wrong format, in edge #%d",

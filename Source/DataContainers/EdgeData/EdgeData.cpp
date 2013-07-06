@@ -91,7 +91,7 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 				&& edges[retvalfind].f1 == INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
-					"facet value #1 is empty, initializing value #0", v0, v1);
+					"facet value #1 is empty, initializing value #1", v0, v1);
 			if (edges[retvalfind].f0 < f0)
 			{
 				edges[retvalfind].f1 = f0;
