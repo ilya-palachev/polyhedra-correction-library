@@ -410,7 +410,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 
 	vertices = new Vector3d[numVertices];
 	facets = new Facet[numFacets];
-	edgeData = new EdgeData;
+	edgeData = new EdgeData(numEdges);
 
 	for (int i = 0; i < STD_POLYHEDRON_FORMAT_HEADER_2; ++i)
 	{
@@ -524,7 +524,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 	if (*edgeData != *edgeData2)
 	{
 		ERROR_PRINT("Scanned edge data is not equal to obtained by standard"
-				"edge constructor");
+				" edge constructor");
 		_fini_fscan_default_1_2(fd, scannedString, edgeData);
 		return false;
 	}
