@@ -429,9 +429,9 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		Vector3d* currVertex = &vertices[iVertex];
 		if (fscanf(fd, "%d", &iVertexScanned) != 1
 				|| iVertexScanned != iVertex
-				|| fscanf(fd, "%lf", &currVertex->x)
-				|| fscanf(fd, "%lf", &currVertex->y)
-				|| fscanf(fd, "%lf", &currVertex->z)
+				|| fscanf(fd, "%lf", &currVertex->x) != 1
+				|| fscanf(fd, "%lf", &currVertex->y) != 1
+				|| fscanf(fd, "%lf", &currVertex->z) != 1
 )
 		{
 			ERROR_PRINT("Wrong format, in vertex #%d", iVertex);
