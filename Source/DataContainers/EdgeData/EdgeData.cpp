@@ -61,7 +61,12 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge (%d, %d) to the edge list", v0, v1);
-
+	if (v0 < 0 || v1 < 0 || f0 < 0)
+	{
+		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
+				v0, v1, f0);
+		return;
+	}
 	if (v0 > v1)
 	{
 		int tmp = v0;
@@ -153,6 +158,12 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge (%d, %d) to the edge list", v0, v1);
+	if (v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0)
+	{
+		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
+				v0, v1, f0, f1);
+		return;
+	}
 
 	if (v0 > v1)
 	{
