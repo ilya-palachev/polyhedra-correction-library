@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	Polyhedron* polyhedron;
+	Polyhedron* polyhedron = new Polyhedron();
 	if (!polyhedron->fscan_default_1_2(parameters.fileNamePolyhedron))
 		return EXIT_FAILURE;
 	ShadeContourData* contourData;
@@ -39,6 +39,11 @@ int main(int argc, char** argv)
 			parameters.deltaGardientStep};
 	polyhedron->correctGlobal(contourData, &gsParameters);
 
+	if (polyhedron != NULL)
+	{
+		delete polyhedron;
+		polyhedron = NULL;
+	}
 	return EXIT_SUCCESS;
 }
 
