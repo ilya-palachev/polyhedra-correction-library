@@ -26,11 +26,15 @@ EdgeData::EdgeData(int numEdgesMax) :
 
 EdgeData::~EdgeData()
 {
+	DEBUG_START;
+	DEBUG_PRINT(COLOUR_RED "Attention!!! edgeData is being deleted now!"
+			COLOUR_NORM);
 	if (edges != NULL)
 	{
 		delete[] edges;
 		edges = NULL;
 	}
+	DEBUG_END;
 }
 
 bool EdgeData::operator ==(const EdgeData& e)
