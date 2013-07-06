@@ -481,8 +481,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		}
 
 		int iVertexCycling;
-		if (fscanf(fd, "(%d)", &iVertexCycling) != 1
-				|| iVertexCycling != currFacet->indVertices[0])
+		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong format, in cycling vertex of facet #%d",
 					iFacet);
