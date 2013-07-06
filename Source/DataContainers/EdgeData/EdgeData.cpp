@@ -69,6 +69,7 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
 				v0, v1, f0);
+		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0));
 		return;
 	}
 	if (v0 > v1)
@@ -166,6 +167,7 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
 				v0, v1, f0, f1);
+		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0));
 		return;
 	}
 
