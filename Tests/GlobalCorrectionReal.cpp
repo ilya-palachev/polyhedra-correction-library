@@ -32,7 +32,8 @@ int main(int argc, char** argv)
 	if (!polyhedron->fscan_default_1_2(parameters.fileNamePolyhedron))
 		return EXIT_FAILURE;
 	ShadeContourData* contourData;
-	contourData->fscanDefault(parameters.fileNamePolyhedron);
+	if (!contourData->fscanDefault(parameters.fileNamePolyhedron))
+		return EXIT_FAILURE;
 
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
