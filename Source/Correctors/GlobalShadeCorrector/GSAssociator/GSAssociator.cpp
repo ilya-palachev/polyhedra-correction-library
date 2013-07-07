@@ -43,11 +43,13 @@ GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
 
 GSAssociator::~GSAssociator()
 {
+	DEBUG_START;
 	if (bufDouble)
 	{
 		delete[] bufDouble;
 		bufDouble = NULL;
 	}
+	DEBUG_END;
 }
 
 void GSAssociator::preinit()
@@ -56,6 +58,8 @@ void GSAssociator::preinit()
 	int numSidesMax = 0;
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
+		DEBUG_PRINT("contourData->contours[%d].ns = %d", iContour,
+				contourData->contours[iContour].ns);
 		int numSidesCurr = contourData->contours[iContour].ns;
 		if (numSidesCurr > numSidesMax)
 			numSidesMax = numSidesCurr;
@@ -127,18 +131,6 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 	DEBUG_END;
 }
 
-void changeVertex(Polyhedron* p, int position, Vector3d vec)
-{
-	if (position >= p->numVertices)
-	{
-		ERROR_PRINT("Cannot set %d-th vertex, because number of vertices",
-				position);
-		ERROR_PRINT("is bounded with %d", p->numVertices);
-		return;
-	}
-	p->vertices[position] = vec;
-}
-
 int GSAssociator::init()
 {
 	DEBUG_START;
@@ -157,10 +149,10 @@ int GSAssociator::init()
 	int numVerticesAdded = 0;
 	for (int iSide = 0; iSide < numSides; ++iSide)
 	{
-		changeVertex(polyhedronTmp, numVerticesAdded++,
-				contourData->contours[iContour].sides[iSide].A1);
-		changeVertex(polyhedronTmp, numVerticesAdded++,
-				contourData->contours[iContour].sides[iSide].A2);
+		polyhedronTmp->vertices[numVerticesAdded++] =
+				contourData->contours[iContour].sides[iSide].A1;
+		polyhedronTmp->vertices[numVerticesAdded++] =
+				contourData->contours[iContour].sides[iSide].A2;
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;
 	polyhedronTmp->my_fprint(stdout);
