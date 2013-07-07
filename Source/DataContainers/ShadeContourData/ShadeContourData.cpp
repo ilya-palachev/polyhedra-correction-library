@@ -25,7 +25,7 @@ ShadeContourData::~ShadeContourData()
 }
 
 #define STD_SC_FORMAT_HEADER_SIZE_1 2
-#define STD_SC_FORMAT_HEADER_SIZE_2 33
+#define STD_SC_FORMAT_HEADER_SIZE_2 31
 
 bool ShadeContourData::fscanDefault(char* fileNameContours)
 {
@@ -64,12 +64,14 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 			fclose(fd);
 			return false;
 		}
+		DEBUG_PRINT("scanned string : %s", scannedString);
 	}
 
 	contours = new SContour[numContours];
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		SContour* currContour = &contours[iContour];
+		currContour->id = iContour;
 
 		if (fscanf(fd, "%d", &currContour->ns) != 1)
 		{
@@ -157,7 +159,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 void ShadeContourData::fprint(FILE* file)
 {
 #ifndef NDEBUG
-	fprintf(file, "Dumping shade contour data. Number of contours: %d",
+	fprintf(file, "Dumping shade contour data. Number of contours: %d\n",
 			numContours);
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
