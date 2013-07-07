@@ -7,7 +7,6 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-const double EPSILON_FOR_DIVISION = 1e-16;
 const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
 const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE = 1e-2;
 const double MINIMAL_TRUSTED_ERROR = 1e-6;

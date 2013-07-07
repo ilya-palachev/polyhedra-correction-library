@@ -50,6 +50,8 @@ const double EPSILON_MINIMAL_MOVEMENT = 1e-32;
 
 const double DEFAULT_MAX_DELTA = 1.;
 
+const double EPSILON_FOR_DIVISION = 1e-16;
+
 class GlobalShadeCorrector: public PCorrector
 {
 protected:

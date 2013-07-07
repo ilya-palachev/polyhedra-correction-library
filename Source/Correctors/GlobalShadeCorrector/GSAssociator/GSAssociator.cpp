@@ -22,6 +22,9 @@ static double weightForAssociations(double x)
 	return x * x;
 }
 
+const double MIN_DIST_MIN = 0.1;
+const int NO_SIDE_FOUND = -1;
+
 GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
 				GlobalShadeCorrector(*corrector),
 				iContour(INT_NOT_INITIALIZED),
@@ -82,10 +85,29 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 		return;
 
 	iSideDistMin0 = findNearestPoint(v0_projected, v0_nearest);
+	if (iSideDistMin0 == NO_SIDE_FOUND)
+	{
+		DEBUG_END;
+		return;
+	}
 	iSideDistMin1 = findNearestPoint(v1_projected, v1_nearest);
+	if (iSideDistMin1 == NO_SIDE_FOUND)
+	{
+		DEBUG_END;
+		return;
+	}
 	double areaLeft = calculateArea(ORIENTATION_LEFT);
 	double areaRight = calculateArea(ORIENTATION_RIGHT);
 	double areaTotal = areaLeft + areaRight;
+
+	DEBUG_PRINT("areaLeft = %lf, areaRight = %lf, areaTotal = %lf", areaLeft,
+			areaRight, areaTotal);
+
+	if (areaTotal < EPSILON_FOR_DIVISION)
+	{
+		ERROR_PRINT("Too small shade contour, total area = %le", areaTotal);
+		return;
+	}
 
 	bool criteriaLeft = (areaLeft < EPSILON_MIN_AREA_ABS)
 			|| (areaLeft / areaTotal < EPSILON_MIN_AREA_REL);
@@ -93,8 +115,6 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 	bool criteriaRight = (areaRight < EPSILON_MIN_AREA_ABS)
 			|| (areaRight / areaTotal < EPSILON_MIN_AREA_REL);
 
-	DEBUG_PRINT("areaLeft = %lf, areaRight = %lf, areaTotal = %lf", areaLeft,
-			areaRight, areaTotal);
 	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft,
 			criteriaRight);
 
@@ -296,7 +316,12 @@ int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest)
 			v_nearest = v_nearestCurr;
 		}
 	}
-	ASSERT(distMin < 0.1);
+	if (distMin < 0.1)
+	{
+		DEBUG_PRINT("Edge projection is to far from contours border. "
+				"Skipping...");
+		return NO_SIDE_FOUND;
+	}
 	DEBUG_END;
 	return iSideDistMin;
 }
