@@ -27,14 +27,14 @@ ShadeContourData::~ShadeContourData()
 #define STD_SC_FORMAT_HEADER_SIZE_1 1
 #define STD_SC_FORMAT_HEADER_SIZE_2 4
 
-void ShadeContourData::fscanDefault(char* fileNameContours)
+bool ShadeContourData::fscanDefault(char* fileNameContours)
 {
 	FILE* fd = (FILE*) fopen(fileNameContours, "r");
 
 	if (!fd)
 	{
 		ERROR_PRINT("Failed to open file %s", fileNameContours);
-		return;
+		return false;
 	}
 
 	char* scannedString = new char[255];
@@ -44,7 +44,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 		{
 			ERROR_PRINT("Wrong file format, in header #1");
 			fclose(fd);
-			return;
+			return false;
 		}
 	}
 
@@ -52,7 +52,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 	{
 		ERROR_PRINT("Wrong file format, in number of contours");
 		fclose(fd);
-		return;
+		return false;
 	}
 
 	for (int i = 0; i < STD_SC_FORMAT_HEADER_SIZE_2; ++i)
@@ -61,7 +61,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 		{
 			ERROR_PRINT("Wrong file format, in header #2");
 			fclose(fd);
-			return;
+			return false;
 		}
 	}
 
@@ -73,7 +73,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 			ERROR_PRINT("Wrong file format, in empty line before contour #%d",
 					iContour);
 			fclose(fd);
-			return;
+			return false;
 		}
 
 		SContour* currContour = &contours[iContour];
@@ -83,7 +83,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 			ERROR_PRINT("Wrong file format, number of sides for contour #%d",
 					iContour);
 			fclose(fd);
-			return;
+			return false;
 		}
 
 		if (fscanf(fd, "%lf", &currContour->plane.norm.x) != 1
@@ -94,7 +94,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 					"in normal to plane for contour #%d",
 					iContour);
 			fclose(fd);
-			return;
+			return false;
 		}
 
 		currContour->plane.dist = 0.;
@@ -111,7 +111,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 						"in confidence of side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
-				return;
+				return false;
 			}
 
 			if (fscanf(fd, "%d", &currSide->type) != 1)
@@ -120,7 +120,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 						"in type of side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
-				return;
+				return false;
 			}
 
 			if (fscanf(fd, "%lf", &currSide->A1.x) != 1
@@ -131,7 +131,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 						"in A1 for side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
-				return;
+				return false;
 			}
 
 			if (fscanf(fd, "%lf", &currSide->A2.x) != 1
@@ -142,7 +142,7 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 						"in A1 for side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
-				return;
+				return false;
 			}
 		}
 	}
@@ -153,6 +153,8 @@ void ShadeContourData::fscanDefault(char* fileNameContours)
 		delete[] scannedString;
 		scannedString = NULL;
 	}
+
+	return true;
 }
 
 #undef STD_SC_FORMAT_HEADER_SIZE_1

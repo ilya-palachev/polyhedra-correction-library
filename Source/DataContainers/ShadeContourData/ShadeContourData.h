@@ -20,7 +20,7 @@ public:
 	ShadeContourData(const Polyhedron* p);
 	~ShadeContourData();
 
-	void fscanDefault(char* fileNameContours);
+	bool fscanDefault(char* fileNameContours);
 };
 
 #endif /* SHADECONTOURDATA_H_ */
