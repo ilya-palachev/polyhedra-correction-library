@@ -24,8 +24,8 @@ ShadeContourData::~ShadeContourData()
 	}
 }
 
-#define STD_SC_FORMAT_HEADER_SIZE_1 1
-#define STD_SC_FORMAT_HEADER_SIZE_2 4
+#define STD_SC_FORMAT_HEADER_SIZE_1 2
+#define STD_SC_FORMAT_HEADER_SIZE_2 33
 
 bool ShadeContourData::fscanDefault(char* fileNameContours)
 {
@@ -46,6 +46,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 			fclose(fd);
 			return false;
 		}
+		DEBUG_PRINT("scanned string : %s", scannedString);
 	}
 
 	if (fscanf(fd, "%d", &numContours) != 1)
@@ -68,14 +69,6 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 	contours = new SContour[numContours];
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
-		if (fscanf(fd, "%s", scannedString) != 0)
-		{
-			ERROR_PRINT("Wrong file format, in empty line before contour #%d",
-					iContour);
-			fclose(fd);
-			return false;
-		}
-
 		SContour* currContour = &contours[iContour];
 
 		if (fscanf(fd, "%d", &currContour->ns) != 1)
@@ -154,8 +147,21 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 		scannedString = NULL;
 	}
 
+	fprint(stdout);
 	return true;
 }
 
 #undef STD_SC_FORMAT_HEADER_SIZE_1
 #undef STD_SC_FORMAT_HEADER_SIZE_2
+
+void ShadeContourData::fprint(FILE* file)
+{
+#ifndef NDEBUG
+	fprintf(file, "Dumping shade contour data. Number of contours: %d",
+			numContours);
+	for (int iContour = 0; iContour < numContours; ++iContour)
+	{
+		contours[iContour].my_fprint(file);
+	}
+#endif
+}

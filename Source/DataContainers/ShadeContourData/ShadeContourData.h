@@ -21,6 +21,8 @@ public:
 	~ShadeContourData();
 
 	bool fscanDefault(char* fileNameContours);
+
+	void fprint(FILE* file);
 };
 
 #endif /* SHADECONTOURDATA_H_ */
