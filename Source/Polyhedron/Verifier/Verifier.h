@@ -23,11 +23,15 @@ private:
 	int countOuterConsectionsFacet(int fid);
 	int countOuterConsectionsEdge(int id0, int id1);
 	int countOuterConsectionsPair(int id0, int id1, int fid);
+
+	bool checkOneEdge(Edge* edge);
 public:
 	Verifier();
+	Verifier(Polyhedron* p);
 	Verifier(Polyhedron* p, bool _ifPrint);
 	~Verifier();
 	int countConsections();
+	int checkEdges(EdgeData* edgeData);
 
 };
 

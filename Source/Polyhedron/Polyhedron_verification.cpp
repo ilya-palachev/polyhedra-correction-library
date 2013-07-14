@@ -25,3 +25,11 @@ int Polyhedron::countConsections(bool ifPrint)
 	delete verifier;
 	return numConsections;
 }
+
+int Polyhedron::checkEdges(EdgeData* edgeData)
+{
+	Verifier* verifier = new Verifier(this);
+	int numEdgesDestructed = verifier->checkEdges(edgeData);
+	delete verifier;
+	return numEdgesDestructed;
+}

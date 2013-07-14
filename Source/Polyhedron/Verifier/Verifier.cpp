@@ -13,6 +13,12 @@ Verifier::Verifier() :
 {
 }
 
+Verifier::Verifier(Polyhedron* p) :
+		polyhedron(p),
+		ifPrint(true)
+{
+}
+
 Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
 		polyhedron(p),
 		ifPrint(_ifPrint)
@@ -418,3 +424,82 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 	}
 }
 
+int Verifier::checkEdges(EdgeData* edgeData)
+{
+	int numEdgesDesctructed = 0;
+	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
+	{
+		Edge* edge = &edgeData->edges[iEdge];
+		if (!checkOneEdge(edge))
+			++numEdgesDesctructed;
+	}
+	return numEdgesDesctructed;
+}
+
+bool Verifier::checkOneEdge(Edge* edge)
+{
+	Plane pi0 = polyhedron->facets[edge->f0].plane;
+	Plane pi1 = polyhedron->facets[edge->f1].plane;
+
+	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
+	int* incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
+	int f2;
+	for (int iFacet = 0; iFacet < numIncidentFacets;)
+	{
+		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
+
+		if ( (incidentFacets[iFacet] == edge->f0 &&
+				incidentFacets[iFacetNext] == edge->f1) ||
+				(incidentFacets[iFacet] == edge->f1 &&
+				incidentFacets[iFacetNext] == edge->f0) )
+		{
+			f2 = (numIncidentFacets + iFacetNext + 1) % numIncidentFacets;
+			break;
+		}
+		iFacet = iFacetNext;
+	}
+	Plane pi2 = polyhedron->facets[f2].plane;
+
+	numIncidentFacets = polyhedron->vertexInfos[edge->v1].numFacets;
+	incidentFacets = polyhedron->vertexInfos[edge->v1].indFacets;
+	int f3;
+	for (int iFacet = 0; iFacet < numIncidentFacets;)
+	{
+		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
+
+		if ( (incidentFacets[iFacet] == edge->f0 &&
+				incidentFacets[iFacetNext] == edge->f1) ||
+				(incidentFacets[iFacet] == edge->f1 &&
+				incidentFacets[iFacetNext] == edge->f0) )
+		{
+			f3 = (numIncidentFacets + iFacetNext + 1) % numIncidentFacets;
+			break;
+		}
+		iFacet = iFacetNext;
+	}
+	Plane pi3 = polyhedron->facets[f3].plane;
+
+	Vector3d A2; /* intersection of pi0, pi1, pi2 */
+	intersection(pi0, pi1, pi2, A2);
+	bool if_A2_under_pi3 = pi3 % A2 < 0;
+
+	Vector3d A3; /* intersection of pi0, pi1, pi3 */
+	intersection(pi0, pi1, pi3, A3);
+	bool if_A3_under_pi2 = pi2 % A3 < 0;
+
+	if (!if_A2_under_pi3)
+	{
+		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
+				" is higher than facet %d ",
+				edge->v0, edge->f0, edge->f1, f2, f3);
+	}
+
+	if (!if_A3_under_pi2)
+	{
+		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
+				" is higher than facet %d ",
+				edge->v1, edge->f0, edge->f1, f3, f2);
+	}
+
+	return if_A2_under_pi3 && if_A3_under_pi2;
+}

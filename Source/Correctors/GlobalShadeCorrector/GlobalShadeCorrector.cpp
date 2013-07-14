@@ -204,15 +204,25 @@ GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 
 	while (error > parameters.epsLoopStop)
 	{
-		DEBUG_PRINT(COLOUR_GREEN "Iteration %d : begin\n" COLOUR_NORM,
+		MAIN_PRINT(COLOUR_GREEN "Iteration %d : begin\n" COLOUR_NORM,
 				numIterations);
 
+#ifndef NDEBUG
 		char* fileName = new char[255];
 		sprintf(fileName, "./poly-data-out/correction-of-cube/cube%d.txt",
 				numIterations);
 
 		polyhedron->my_fprint(fileName);
 		delete[] fileName;
+#endif
+
+#ifdef DO_EDGES_CHECK
+		if (polyhedron->checkEdges(edgeData) > 0)
+		{
+			DEBUG_PRINT("checkEdges test failed, breaking...");
+			break;
+		}
+#endif
 
 		runCorrectionIteration();
 
