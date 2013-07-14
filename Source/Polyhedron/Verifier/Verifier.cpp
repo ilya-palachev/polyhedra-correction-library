@@ -431,7 +431,10 @@ int Verifier::checkEdges(EdgeData* edgeData)
 	{
 		Edge* edge = &edgeData->edges[iEdge];
 		if (!checkOneEdge(edge))
+		{
 			++numEdgesDesctructed;
+			break;
+		}
 	}
 	return numEdgesDesctructed;
 }
@@ -441,6 +444,9 @@ bool Verifier::checkOneEdge(Edge* edge)
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
 			edge->f0, edge->f1);
+	double dist = sqrt(qmod(polyhedron->vertices[edge->v0] -
+			polyhedron->vertices[edge->v1]));
+	DEBUG_PRINT("Distance between vertices = %lf", dist);
 
 	Plane pi0 = polyhedron->facets[edge->f0].plane;
 	Plane pi1 = polyhedron->facets[edge->f1].plane;
