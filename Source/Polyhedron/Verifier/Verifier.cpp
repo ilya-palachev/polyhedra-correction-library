@@ -457,7 +457,8 @@ bool Verifier::checkOneEdge(Edge* edge)
 				(incidentFacets[iFacet] == edge->f1 &&
 				incidentFacets[iFacetNext] == edge->f0) )
 		{
-			f2 = (numIncidentFacets + iFacetNext + 1) % numIncidentFacets;
+			f2 = incidentFacets[(numIncidentFacets + iFacetNext + 1)
+			                    % numIncidentFacets];
 			break;
 		}
 		iFacet = iFacetNext;
@@ -476,7 +477,8 @@ bool Verifier::checkOneEdge(Edge* edge)
 				(incidentFacets[iFacet] == edge->f1 &&
 				incidentFacets[iFacetNext] == edge->f0) )
 		{
-			f3 = (numIncidentFacets + iFacetNext + 1) % numIncidentFacets;
+			f3 = incidentFacets[(numIncidentFacets + iFacetNext + 1)
+			                    % numIncidentFacets];
 			break;
 		}
 		iFacet = iFacetNext;
@@ -497,11 +499,23 @@ bool Verifier::checkOneEdge(Edge* edge)
 				" is higher than facet %d ",
 				edge->v0, edge->f0, edge->f1, f2, f3);
 	}
+	else
+	{
+		DEBUG_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
+				" is lower than facet %d ",
+				edge->v0, edge->f0, edge->f1, f2, f3);
+	}
 
 	if (!if_A3_under_pi2)
 	{
 		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
 				" is higher than facet %d ",
+				edge->v1, edge->f0, edge->f1, f3, f2);
+	}
+	else
+	{
+		DEBUG_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
+				" is lower than facet %d ",
 				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
 
