@@ -34,5 +34,19 @@ target_link_libraries(pcl
    vector3d
 )
 
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	set(cat_config ${CMAKE_SOURCE_DIR}/Scripts/cat_config.sh)
+	set(debug_exceptions_config "${CMAKE_SOURCE_DIR}/config/debug_exceptions.conf")
+	set(debug_exceptions "")
+	exec_program(${cat_config} ARGS ${debug_exceptions_config} OUTPUT_VARIABLE debug_exceptions)
+
+	message("Debug exceptions:")
+	foreach(souce_file ${debug_exceptions})
+		set(souce_file "${CMAKE_SOURCE_DIR}/${souce_file}")
+		message("   ${souce_file}")
+		set_source_files_properties(${souce_file} PROPERTIES COMPILE_FLAGS -UNDEBUG)
+	endforeach()
+endif ()
+
 add_subdirectory(Tests)
 
