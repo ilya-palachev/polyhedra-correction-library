@@ -438,6 +438,10 @@ int Verifier::checkEdges(EdgeData* edgeData)
 
 bool Verifier::checkOneEdge(Edge* edge)
 {
+	DEBUG_START;
+	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
+			edge->f0, edge->f1);
+
 	Plane pi0 = polyhedron->facets[edge->f0].plane;
 	Plane pi1 = polyhedron->facets[edge->f1].plane;
 
@@ -501,5 +505,6 @@ bool Verifier::checkOneEdge(Edge* edge)
 				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
 
+	DEBUG_END;
 	return if_A2_under_pi3 && if_A3_under_pi2;
 }
