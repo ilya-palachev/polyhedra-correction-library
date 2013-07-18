@@ -88,18 +88,21 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 	if (init() != EXIT_SUCCESS)
 		return;
 
-	iSideDistMin0 = findNearestPoint(v0_projected, v0_nearest);
-	if (iSideDistMin0 == NO_SIDE_FOUND)
+	double distMin0;
+	iSideDistMin0 = findNearestPoint(v0_projected, v0_nearest, distMin0);
+
+	double distMin1;
+	iSideDistMin1 = findNearestPoint(v1_projected, v1_nearest, distMin1);
+
+	double edgeProjectionLength = sqrt(qmod(v0_projected - v1_projected));
+	if (distMin0 + distMin1 > edgeProjectionLength)
 	{
+		DEBUG_PRINT("Edge is too far from contour's border: %lf + %lf > %lf",
+				distMin0, distMin1, edgeProjectionLength);
 		DEBUG_END;
 		return;
 	}
-	iSideDistMin1 = findNearestPoint(v1_projected, v1_nearest);
-	if (iSideDistMin1 == NO_SIDE_FOUND)
-	{
-		DEBUG_END;
-		return;
-	}
+
 	double areaLeft = calculateArea(ORIENTATION_LEFT);
 	double areaRight = calculateArea(ORIENTATION_RIGHT);
 	double areaTotal = areaLeft + areaRight;
@@ -282,12 +285,12 @@ void GSAssociator::projectEdge()
 	DEBUG_END;
 }
 
-int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest)
+int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest,
+		double& distMin)
 {
 	DEBUG_START;
 	SideOfContour* sides = contourData->contours[iContour].sides;
 	int numSides = contourData->contours[iContour].ns;
-	double distMin;
 	Vector3d v_nearestCurr;
 	int iSideDistMin;
 
@@ -307,12 +310,6 @@ int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest)
 			distMin = distCurr;
 			v_nearest = v_nearestCurr;
 		}
-	}
-	if (distMin < 0.1)
-	{
-		DEBUG_PRINT("Edge projection is to far from contours border. "
-				"Skipping...");
-		return NO_SIDE_FOUND;
 	}
 	DEBUG_END;
 	return iSideDistMin;
@@ -626,5 +623,7 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 double GSAssociator::calculateWeight()
 {
 	double visibility = calculateVisibility();
-	return weightForAssociations(visibility);
+	double weight = weightForAssociations(visibility);
+	DEBUG_PRINT("visibility/weight = %lf / %lf", visibility, weight);
+	return weight;
 }
