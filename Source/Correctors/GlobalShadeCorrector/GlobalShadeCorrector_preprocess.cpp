@@ -37,10 +37,12 @@ void GlobalShadeCorrector::preprocessAssociations()
 			}
 		}
 	}
+#ifndef NDEBUG
 	/* Print found associations : */
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
 		edgeData->edges[iEdge].my_fprint(stdout);
 	}
+#endif /* NDEBUG */
 	DEBUG_END;
 }

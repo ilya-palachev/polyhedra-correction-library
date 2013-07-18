@@ -46,9 +46,11 @@ void EdgeConstructor::run(EdgeData* &edgeData)
 		edgeData->edges[iEdge].id = iEdge;
 	}
 
+#ifndef NDEBUG
 	for (int i = 0; i < edgeData->numEdges; ++i)
 	{
 		edgeData->edges[i].my_fprint(stdout);
 	}
+#endif /* NDEBUG */
 	DEBUG_END;
 }
