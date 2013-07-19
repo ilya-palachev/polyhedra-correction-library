@@ -47,6 +47,10 @@ int main(int argc, char** argv)
 	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
+	polyhedron->fprint_ply_scale(1000.,
+				"poly-data-out/globalCorrection-moved.ply",
+				"globalCorrection");
+
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
