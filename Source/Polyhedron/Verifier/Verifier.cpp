@@ -433,7 +433,6 @@ int Verifier::checkEdges(EdgeData* edgeData)
 		if (!checkOneEdge(edge))
 		{
 			++numEdgesDesctructed;
-			break;
 		}
 	}
 	return numEdgesDesctructed;
@@ -524,6 +523,11 @@ bool Verifier::checkOneEdge(Edge* edge)
 				" is lower than facet %d ",
 				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
+
+	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
+		polyhedron->vertices[edge->v0] = A2;
+	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v1);
+		polyhedron->vertices[edge->v1] = A3;
 
 	DEBUG_END;
 	return if_A2_under_pi3 && if_A3_under_pi2;
