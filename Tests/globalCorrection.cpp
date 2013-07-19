@@ -36,6 +36,11 @@ int main(int argc, char** argv)
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 	Polyhedron* polyhedron = makePolyhedron(parameters.figure);
+
+	polyhedron->fprint_ply_scale(1000.,
+			"poly-data-out/globalCorrection-before.ply",
+			"globalCorrection");
+
 	ShadeContourData* contourData = new ShadeContourData(polyhedron);
 	ShadeContourConstructor* scConstructor = new ShadeContourConstructor(
 			polyhedron, contourData);
@@ -46,6 +51,10 @@ int main(int argc, char** argv)
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
 	polyhedron->correctGlobal(contourData, &gsParameters);
+
+	polyhedron->fprint_ply_scale(1000.,
+			"poly-data-out/globalCorrection-after.ply",
+			"globalCorrection");
 
 	return EXIT_SUCCESS;
 }
