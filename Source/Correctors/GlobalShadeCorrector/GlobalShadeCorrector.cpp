@@ -385,6 +385,14 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 {
 	list<int>::iterator iterNotAssociated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
+
+#ifndef NDEBUG
+	/* For calculating L1, L2 and C norms of gradient */
+	double norm_L1 = 0.;
+	double norm_L2 = 0.;
+	double norm_C = 0.;
+#endif /* NDEBUG */
+
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		if (*iterNotAssociated == iFacet)
@@ -402,7 +410,31 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 		deltaPlane.dist *= delta;
 		polyhedron->facets[iFacet].plane.norm -= deltaPlane.norm;
 		polyhedron->facets[iFacet].plane.dist -= deltaPlane.dist;
+
+#ifndef NDEBUG
+		/* Calculate L1, L2 and C norms of gradient */
+		double abs_a = fabs(deltaPlane.norm.x);
+		double abs_b = fabs(deltaPlane.norm.y);
+		double abs_c = fabs(deltaPlane.norm.z);
+		double abs_d = fabs(deltaPlane.dist);
+
+		norm_L1 += abs_a + abs_b + abs_c + abs_d;
+		norm_L2 += abs_a * abs_a + abs_b * abs_b + abs_c * abs_c +
+				abs_d * abs_d;
+		norm_C = abs_a > norm_C ? abs_a : norm_C;
+		norm_C = abs_b > norm_C ? abs_b : norm_C;
+		norm_C = abs_c > norm_C ? abs_c : norm_C;
+#endif /* NDEBUG */
 	}
+#ifndef NDEBUG
+	norm_L2 = sqrt(norm_L2);
+
+	/* Print L1, L2 and C norms of gradient*/
+	DEBUG_PRINT("NORMS of GRADIENT:");
+	DEBUG_PRINT("\tL1 norm :\t%lf", norm_L1);
+	DEBUG_PRINT("\tL2 norm :\t%lf", norm_L2);
+	DEBUG_PRINT("\tC  norm :\t%lf", norm_C);
+#endif /* NDEBUG */
 }
 
 double GlobalShadeCorrector::calculateFunctional(double delta)
