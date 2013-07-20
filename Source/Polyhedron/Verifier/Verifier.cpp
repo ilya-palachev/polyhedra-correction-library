@@ -503,6 +503,7 @@ bool Verifier::checkOneEdge(Edge* edge)
 		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
 				" is higher than facet %d ",
 				edge->v0, edge->f0, edge->f1, f2, f3);
+
 	}
 	else
 	{
@@ -524,10 +525,20 @@ bool Verifier::checkOneEdge(Edge* edge)
 				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
 
+#ifndef DEBUG
+	if (!if_A2_under_pi3 || !if_A3_under_pi2)
+	{
+		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
+				polyhedron->vertices[edge->v0]));
+		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
+				distance);
+	}
+#endif
+
 	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
-		polyhedron->vertices[edge->v0] = A2;
+	polyhedron->vertices[edge->v0] = A2;
 	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v1);
-		polyhedron->vertices[edge->v1] = A3;
+	polyhedron->vertices[edge->v1] = A3;
 
 	DEBUG_END;
 	return if_A2_under_pi3 && if_A3_under_pi2;
