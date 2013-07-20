@@ -41,7 +41,13 @@ void GlobalShadeCorrector::preprocessAssociations()
 	/* Print found associations : */
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-		edgeData->edges[iEdge].my_fprint(stdout);
+		Edge* edge = &edgeData->edges[iEdge];
+		edge->my_fprint(stdout);
+
+		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
+				polyhedron->vertices[edge->v0]));
+		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
+				distance);
 	}
 #endif /* NDEBUG */
 	DEBUG_END;
