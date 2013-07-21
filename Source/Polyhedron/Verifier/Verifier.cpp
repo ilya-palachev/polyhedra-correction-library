@@ -525,14 +525,19 @@ bool Verifier::checkOneEdge(Edge* edge)
 				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
 
-#ifndef DEBUG
-	if (!if_A2_under_pi3 || !if_A3_under_pi2)
-	{
-		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
-				polyhedron->vertices[edge->v1]));
-		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
-				distance);
-	}
+#ifndef NDEBUG
+	double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
+			polyhedron->vertices[edge->v1]));
+	DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
+			distance);
+
+	double movement0 = sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
+	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v0, edge->v0,
+			movement0);
+
+	double movement1 = sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
+	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v1, edge->v1,
+			movement1);
 #endif
 
 	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
@@ -543,3 +548,7 @@ bool Verifier::checkOneEdge(Edge* edge)
 	DEBUG_END;
 	return if_A2_under_pi3 && if_A3_under_pi2;
 }
+
+
+
+
