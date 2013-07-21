@@ -430,7 +430,7 @@ int Verifier::checkEdges(EdgeData* edgeData)
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
 		Edge* edge = &edgeData->edges[iEdge];
-		if (!checkOneEdge(edge))
+		if (!checkOneEdge(edge, edgeData))
 		{
 			++numEdgesDesctructed;
 		}
@@ -438,7 +438,7 @@ int Verifier::checkEdges(EdgeData* edgeData)
 	return numEdgesDesctructed;
 }
 
-bool Verifier::checkOneEdge(Edge* edge)
+bool Verifier::checkOneEdge(Edge* edge, EdgeData* edgeData)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
@@ -503,7 +503,6 @@ bool Verifier::checkOneEdge(Edge* edge)
 		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
 				" is higher than facet %d ",
 				edge->v0, edge->f0, edge->f1, f2, f3);
-
 	}
 	else
 	{
@@ -540,15 +539,202 @@ bool Verifier::checkOneEdge(Edge* edge)
 			movement1);
 #endif
 
-	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
-	polyhedron->vertices[edge->v0] = A2;
-	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v1);
-	polyhedron->vertices[edge->v1] = A3;
+	if (!if_A2_under_pi3 || !if_A3_under_pi2)
+	{
+		if (!reduceEdge(edge, edgeData))
+		{
+			DEBUG_END;
+			return false;
+		}
+	}
+	else
+	{
+		DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
+		polyhedron->vertices[edge->v0] = A2;
+		DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v1);
+		polyhedron->vertices[edge->v1] = A3;
+	}
 
 	DEBUG_END;
 	return if_A2_under_pi3 && if_A3_under_pi2;
 }
 
+bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
+{
+	DEBUG_START;
+	int iVertexReduced = edge->v1;
+	int iVertexStayed = edge->v0;
 
+	VertexInfo* vertexInfoReduced = polyhedron->vertexInfos[iVertexReduced];
 
+	/* Stage 1. Update data structures "Facet" for those facets that contain
+	 * "removed" vertex. */
+	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	{
+		int iPositionReduced = vertexInfoReduced[vertexInfoReduced->numFacets +
+		                                    iFacet + 1];
+		Facet* facetCurr = &polyhedron->facets[iFacet];
 
+		int iPositionPrev = (facetCurr->numVertices + iPositionReduced - 1) %
+				facetCurr->numVertices;
+		int iPositionNext = (facetCurr->numVertices + iPositionReduced + 1) %
+				facetCurr->numVertices;
+
+		/* 2 cases: */
+
+		/* 1). In case when "stayed" vertex LAYS in the current facet, delete
+		 * "removed" vertex from facet. */
+
+		/* 1a). The "stayed" vertex is EARLIER in the list of vertices than
+		 * the "reduced" vertex. */
+		if (facetCurr->indVertices[iPositionPrev] == iVertexStayed)
+		{
+			/* Let v2 be "stayed" vertex, v3 - "reduced" vertex
+			 * Let numVertices == 6.
+			 *
+			 * Before:
+			 * 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18
+			 * --------------------------------------------------------
+			 * v0 v1 v2 v3 v4 v5 v0 f0 f1 f2 f3 f4 f5 p0 p1 p2 p3 p4 p5
+			 *
+			 *                        |
+			 *                        |
+			 *                        v
+			 *
+			 * After:
+			 * 0  1  2     3  4  5  6  7     8  9  10 11 12    13 14 15
+			 * --------------------------------------------------------
+			 * v0 v1 v2    v4 v5 v0 f0 f1    f3 f4 f5 p0 p1    p3 p4 p5
+			 *
+			 *                   ^
+			 *                   |
+			 *                   |
+			 *             need to be rewrited
+			 *             if v0 is "reduced"
+			 * */
+
+			for (int i = iPositionReduced;
+					i < facetCurr->numVertices + iPositionReduced - 1; ++i)
+			{
+				facetCurr->indVertices[i] = facetCurr->indVertices[i + 1];
+			}
+
+			for (int i = facetCurr->numVertices + iPositionReduced - 1;
+					i < 2 * facetCurr->numVertices + iPositionReduced - 2; ++i)
+			{
+				facetCurr->indVertices[i] = facetCurr->indVertices[i + 2];
+			}
+
+			for (int i = 2 * facetCurr->numVertices + iPositionReduced - 2;
+					i < 3 * facetCurr->numVertices - 2; ++i)
+			{
+				facetCurr->indVertices[i] = facetCurr->indVertices[i + 3];
+			}
+
+			--facetCurr->numVertices;
+			facetCurr->indVertices[facetCurr->numVertices] =
+					facetCurr->indVertices[0];
+		}
+
+		/* 1b). The "stayed" vertex is LATER in the list of vertices than
+		 * the "reduced" vertex. */
+		else if (facetCurr->indVertices[iPositionNext] == iVertexStayed)
+		{
+			/* Let v3 be "stayed" vertex, v2 - "reduced" vertex
+			 * Let numVertices == 6.
+			 *
+			 * Before:
+			 * 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18
+			 * --------------------------------------------------------
+			 * v0 v1 v2 v3 v4 v5 v0 f0 f1 f2 f3 f4 f5 p0 p1 p2 p3 p4 p5
+			 *
+			 *                        |
+			 *                        |
+			 *                        v
+			 *
+			 * After:
+			 * 0  1     2  3  4  5  6  7     8  9  10 11 12    13 14 15
+			 * --------------------------------------------------------
+			 * v0 v1    v3 v4 v5 v0 f0 f1    f3 f4 f5 p0 p1    p3 p4 p5
+			 *
+			 *                   ^
+			 *                   |
+			 *                   |
+			 *             need to be rewrited
+			 *             if v0 is "reduced"
+			 * */
+
+			for (int i = iPositionReduced;
+					i < facetCurr->numVertices + iPositionReduced; ++i)
+			{
+				facetCurr->indVertices[i] = facetCurr->indVertices[i + 1];
+			}
+
+			for (int i = facetCurr->numVertices + iPositionReduced;
+					i < 2 * facetCurr->numVertices + iPositionReduced - 1; ++i)
+			{
+				facetCurr->indVertices[i] = facetCurr->indVertices[i + 2];
+			}
+
+			for (int i = 2 * facetCurr->numVertices + iPositionReduced - 1;
+					i < 3 * facetCurr->numVertices - 2; ++i)
+			{
+				facetCurr->indVertices[i] = facetCurr->indVertices[i + 3];
+			}
+
+			--facetCurr->numVertices;
+			facetCurr->indVertices[facetCurr->numVertices] =
+					facetCurr->indVertices[0];
+		}
+
+		/* 2). In case when "stayed" vertex DOES NOT LAY in the current facet,
+		 * replace "reduced" vertex with "stayed" vertex. */
+		else
+		{
+			facetCurr->indVertices[iPositionReduced] = iVertexStayed;
+		}
+	}
+
+	/* Stage 2. Update data structures "Edge" for those facets that contain
+	 * "removed" vertex. */
+	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	{
+		int iVertexNeighbour =
+				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
+				                             iFacet + 1];
+		if (iVertexNeighbour != iVertexStayed)
+		{
+			int iEdgeUpdated = edgeData->findEdge(iVertexReduced,
+					iVertexNeighbour);
+			if (edgeData->edges[iEdgeUpdated].v0 == iVertexReduced &&
+					edgeData->edges[iEdgeUpdated].v1 == iVertexNeighbour)
+			{
+				edgeData->edges[iEdgeUpdated].v0 = iVertexStayed;
+			}
+			else if (edgeData->edges[iEdgeUpdated].v0 == iVertexNeighbour &&
+					edgeData->edges[iEdgeUpdated].v1 == iVertexReduced)
+			{
+				edgeData->edges[iEdgeUpdated].v1 = iVertexStayed;
+			}
+			else
+			{
+				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
+						iVertexReduced, iVertexNeighbour);
+				return false;
+			}
+		}
+	}
+
+	/* Stage 3. Rebuild data structure "VertexInfo" for all vertices
+	 * which are neighbours of the "reduced" vertex. */
+	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	{
+		int iVertexNeighbour =
+				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
+				                             iFacet + 1];
+		polyhedron->vertexInfos[iVertexNeighbour].preprocess();
+	}
+
+	DEBUG_END;
+	return true;
+}
