@@ -565,13 +565,14 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 	int iVertexReduced = edge->v1;
 	int iVertexStayed = edge->v0;
 
-	VertexInfo* vertexInfoReduced = polyhedron->vertexInfos[iVertexReduced];
+	VertexInfo* vertexInfoReduced = &polyhedron->vertexInfos[iVertexReduced];
 
 	/* Stage 1. Update data structures "Facet" for those facets that contain
 	 * "removed" vertex. */
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
-		int iPositionReduced = vertexInfoReduced[vertexInfoReduced->numFacets +
+		int iPositionReduced =
+				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
 		                                    iFacet + 1];
 		Facet* facetCurr = &polyhedron->facets[iFacet];
 
