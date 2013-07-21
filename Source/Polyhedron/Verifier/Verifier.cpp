@@ -529,7 +529,7 @@ bool Verifier::checkOneEdge(Edge* edge)
 	if (!if_A2_under_pi3 || !if_A3_under_pi2)
 	{
 		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
-				polyhedron->vertices[edge->v0]));
+				polyhedron->vertices[edge->v1]));
 		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
 				distance);
 	}
