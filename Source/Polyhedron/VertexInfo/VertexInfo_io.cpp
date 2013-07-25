@@ -2,14 +2,17 @@
 
 void VertexInfo::fprint_my_format(FILE* file)
 {
+#ifndef NDEBUG
 	fprintf(file, "%d ", numFacets);
 	for (int j = 0; j < 3 * numFacets + 1; ++j)
 		fprintf(file, " %d", indFacets[j]);
 	fprintf(file, "\n");
+#endif
 }
 
 void VertexInfo::my_fprint_all(FILE* file)
 {
+#ifndef NDEBUG
 	int i;
 	fprintf(file, "\n------------ VertexInfo %d: ------------\n", id);
 //	fprintf(file, "id = %d\nnf = %d\n", id, nf);
@@ -30,4 +33,5 @@ void VertexInfo::my_fprint_all(FILE* file)
 
 	if (parentPolyhedron == NULL)
 		fprintf(file, "Warning! poly == NULL !\n");
+#endif
 }
