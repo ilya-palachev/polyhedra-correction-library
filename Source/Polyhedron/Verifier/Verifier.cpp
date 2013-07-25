@@ -564,17 +564,25 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 	DEBUG_START;
 	int iVertexReduced = edge->v1;
 	int iVertexStayed = edge->v0;
+	DEBUG_PRINT("Reduced edge: %d", iVertexReduced);
+	DEBUG_PRINT(" Stayed edge: %d", iVertexStayed);
 
 	VertexInfo* vertexInfoReduced = &polyhedron->vertexInfos[iVertexReduced];
 
+	vertexInfoReduced->my_fprint_all(stderr);
+
 	/* Stage 1. Update data structures "Facet" for those facets that contain
 	 * "removed" vertex. */
+	DEBUG_PRINT("Stage 1. Updating structures \"Facet\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
+		int iFacetCurrent = vertexInfoReduced->indFacets[iFacet];
+		DEBUG_PRINT("\tUpdating facet #%d.", iFacetCurrent);
+
 		int iPositionReduced =
 				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
 		                                    iFacet + 1];
-		Facet* facetCurr = &polyhedron->facets[iFacet];
+		Facet* facetCurr = &polyhedron->facets[iFacetCurrent];
 
 		int iPositionPrev = (facetCurr->numVertices + iPositionReduced - 1) %
 				facetCurr->numVertices;
@@ -590,6 +598,8 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 		 * the "reduced" vertex. */
 		if (facetCurr->indVertices[iPositionPrev] == iVertexStayed)
 		{
+			DEBUG_PRINT("Case 1a: \"stayed\" vertex lays in facet, "
+					"it's earlier than reduced one");
 			/* Let v2 be "stayed" vertex, v3 - "reduced" vertex
 			 * Let numVertices == 6.
 			 *
@@ -641,6 +651,8 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 		 * the "reduced" vertex. */
 		else if (facetCurr->indVertices[iPositionNext] == iVertexStayed)
 		{
+			DEBUG_PRINT("Case 1b: \"stayed\" vertex lays in facet, "
+					"it's later than reduced one");
 			/* Let v3 be "stayed" vertex, v2 - "reduced" vertex
 			 * Let numVertices == 6.
 			 *
@@ -692,21 +704,25 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 		 * replace "reduced" vertex with "stayed" vertex. */
 		else
 		{
+			DEBUG_PRINT("Case 1a: \"stayed\" vertex does not lay in facet");
 			facetCurr->indVertices[iPositionReduced] = iVertexStayed;
 		}
 	}
 
 	/* Stage 2. Update data structures "Edge" for those facets that contain
 	 * "removed" vertex. */
+	DEBUG_PRINT("Stage 2. Updating structures \"Edge\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iVertexNeighbour =
 				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
 				                             iFacet + 1];
+		DEBUG_PRINT("\tUpdating edge [%d, %d]", iVertexReduced,
+				iVertexNeighbour);
+		int iEdgeUpdated = edgeData->findEdge(iVertexReduced,
+							iVertexNeighbour);
 		if (iVertexNeighbour != iVertexStayed)
 		{
-			int iEdgeUpdated = edgeData->findEdge(iVertexReduced,
-					iVertexNeighbour);
 			if (edgeData->edges[iEdgeUpdated].v0 == iVertexReduced &&
 					edgeData->edges[iEdgeUpdated].v1 == iVertexNeighbour)
 			{
@@ -721,18 +737,42 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 			{
 				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
 						iVertexReduced, iVertexNeighbour);
+				DEBUG_PRINT("   Found edge: [%d, %d]",
+						edgeData->edges[iEdgeUpdated].v0,
+						edgeData->edges[iEdgeUpdated].v1);
+				DEBUG_PRINT("Previous edge: [%d, %d]",
+						edgeData->edges[iEdgeUpdated - 1].v0,
+						edgeData->edges[iEdgeUpdated - 1].v1);
+				DEBUG_PRINT("    Next edge: [%d, %d]",
+						edgeData->edges[iEdgeUpdated + 1].v0,
+						edgeData->edges[iEdgeUpdated + 1].v1);
+
+				DEBUG_PRINT("Printing edge data:");
+				for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
+				{
+					DEBUG_PRINT("Edge #%d: [%d, %d]", iEdge,
+							edgeData->edges[iEdge].v0, edgeData->edges[iEdge].v1);
+				}
+				DEBUG_END;
 				return false;
 			}
+		}
+		else
+		{
+			DEBUG_PRINT("\tThis edge must be deleted at all.");
+			edgeData->edges[iEdgeUpdated].assocList.clear();
 		}
 	}
 
 	/* Stage 3. Rebuild data structure "VertexInfo" for all vertices
 	 * which are neighbours of the "reduced" vertex. */
+	DEBUG_PRINT("Stage 3. Updating structures \"VertexInfo\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iVertexNeighbour =
 				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
 				                             iFacet + 1];
+		DEBUG_PRINT("\tUpdating vertexInfo #%d", iVertexNeighbour);
 		polyhedron->vertexInfos[iVertexNeighbour].preprocess();
 	}
 
