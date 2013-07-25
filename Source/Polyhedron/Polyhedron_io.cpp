@@ -503,39 +503,41 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
 	}
 
-	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
-	{
-		int iVertex0, iVertex1, iFacet, iIndInFacet;
-		if (fscanf(fd, "%d", &iVertex0) != 1
-				|| iVertex0 < 0 || iVertex0 > numVertices
-				|| fscanf(fd, "%d", &iVertex1) != 1
-				|| iVertex1 < 0 || iVertex1 > numVertices
-				|| fscanf(fd, "%d", &iFacet) != 1
-				|| iFacet < 0 || iFacet > numFacets
-				|| fscanf(fd, "%d", &iIndInFacet) != 1
-				|| iIndInFacet < 0 || iIndInFacet >= facets[iFacet].numVertices
-				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
-		{
-			ERROR_PRINT("Wrong format, in edge #%d",
-					iEdge);
-			_fini_fscan_default_1_2(fd, scannedString, edgeData);
-			return false;
-		}
-		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
-	}
-
+//	This scanning is commented, because usual input is incorrect.
+//
+//	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
+//	{
+//		int iVertex0, iVertex1, iFacet, iIndInFacet;
+//		if (fscanf(fd, "%d", &iVertex0) != 1
+//				|| iVertex0 < 0 || iVertex0 > numVertices
+//				|| fscanf(fd, "%d", &iVertex1) != 1
+//				|| iVertex1 < 0 || iVertex1 > numVertices
+//				|| fscanf(fd, "%d", &iFacet) != 1
+//				|| iFacet < 0 || iFacet > numFacets
+//				|| fscanf(fd, "%d", &iIndInFacet) != 1
+//				|| iIndInFacet < 0 || iIndInFacet >= facets[iFacet].numVertices
+//				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
+//		{
+//			ERROR_PRINT("Wrong format, in edge #%d",
+//					iEdge);
+//			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+//			return false;
+//		}
+//		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
+//	}
+//
 	preprocessAdjacency();
-	EdgeData* edgeData2 = new EdgeData;
-	EdgeConstructor* edgeConstructor = new EdgeConstructor(this, edgeData2);
-	edgeConstructor->run(edgeData2);
-	if (*edgeData != *edgeData2)
-	{
-		ERROR_PRINT("Scanned edge data is not equal to obtained by standard"
-				" edge constructor");
-		_fini_fscan_default_1_2(fd, scannedString, edgeData);
-		return false;
-	}
-
+//	EdgeData* edgeData2 = new EdgeData;
+//	EdgeConstructor* edgeConstructor = new EdgeConstructor(this, edgeData2);
+//	edgeConstructor->run(edgeData2);
+//	if (*edgeData != *edgeData2)
+//	{
+//		ERROR_PRINT("Scanned edge data is not equal to obtained by standard"
+//				" edge constructor");
+//		_fini_fscan_default_1_2(fd, scannedString, edgeData);
+//		return false;
+//	}
+//
 	_fini_fscan_default_1_2(fd, scannedString, edgeData);
 	return true;
 }
