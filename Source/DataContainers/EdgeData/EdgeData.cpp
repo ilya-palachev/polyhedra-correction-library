@@ -216,6 +216,7 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 
 int EdgeData::findEdge(int v0, int v1)
 {
+	DEBUG_START;
 	if (v0 > v1)
 	{
 		int tmp = v0;
@@ -233,6 +234,7 @@ int EdgeData::findEdge(int v0, int v1)
 		int mid = (first + last) / 2;
 		int v0_mid = edges[mid].v0;
 		int v1_mid = edges[mid].v1;
+		DEBUG_PRINT("Current edge #%d: [%d, %d]", mid, v0_mid, v1_mid);
 
 		if (v0 < v0_mid || (v0 == v0_mid && v1 <= v1_mid))
 		{
@@ -243,6 +245,7 @@ int EdgeData::findEdge(int v0, int v1)
 			first = mid + 1;
 		}
 	}
+	DEBUG_END;
 	return last;
 }
 
