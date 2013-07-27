@@ -561,14 +561,14 @@ void GlobalShadeCorrector::calculateGradient()
 		gradient[i] = 0.;
 	}
 
-	list<int>::iterator iterNotAssicated = facetsNotAssociated->begin();
+	list<int>::iterator iterNotAssocicated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		if (*iterNotAssicated == iFacet)
+		if (*iterNotAssocicated == iFacet)
 		{
-			++iterNotAssicated;
+			++iterNotAssocicated;
 			++countNotAssociated;
 			continue;
 		}
