@@ -162,7 +162,8 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 {
 	DEBUG_START;
-	DEBUG_PRINT("Trying to add edge (%d, %d) to the edge list", v0, v1);
+	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge list", v0, v1);
+	DEBUG_PRINT("\tnumEdges = %d, numEdgesMax = %d", numEdges, numEdgesMax);
 	if (v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
@@ -185,8 +186,9 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 		f1 = tmp;
 	}
 
-	int retvalfind = findEdge(v0, v1);
-	if (edges[retvalfind].v0 == v0 && edges[retvalfind].v1 == v1)
+	int iFoundPosition = findEdge(v0, v1);
+	DEBUG_PRINT("Binary search returned the value: %d", iFoundPosition);
+	if (edges[iFoundPosition].v0 == v0 && edges[iFoundPosition].v1 == v1)
 	{
 		DEBUG_PRINT("Edge (%d, %d) already presents in the list!", v0, v1);
 		DEBUG_END;
@@ -199,15 +201,15 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 		return;
 	}
 
-	for (int i = numEdges; i > retvalfind; --i)
+	for (int i = numEdges; i > iFoundPosition; --i)
 	{
 		edges[i] = edges[i - 1];
 	}
-	edges[retvalfind].v0 = v0;
-	edges[retvalfind].v1 = v1;
-	edges[retvalfind].f0 = f0;
-	edges[retvalfind].f1 = f1;
-	edges[retvalfind].id = numEdges;
+	edges[iFoundPosition].v0 = v0;
+	edges[iFoundPosition].v1 = v1;
+	edges[iFoundPosition].f0 = f0;
+	edges[iFoundPosition].f1 = f1;
+	edges[iFoundPosition].id = numEdges;
 	++numEdges;
 	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edge list",
 			v0, v1);
@@ -216,7 +218,7 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 
 int EdgeData::findEdge(int v0, int v1)
 {
-	DEBUG_START;
+//	DEBUG_START;
 	if (v0 > v1)
 	{
 		int tmp = v0;
@@ -224,28 +226,41 @@ int EdgeData::findEdge(int v0, int v1)
 		v1 = tmp;
 	}
 
-// Binary search :
-	int first = 0;		// Первый элемент в массиве
+	int iMin = 0, iMax = numEdges - 1, iMid;
 
-	int last = numEdges;		// Последний элемент в массиве
-
-	while (first < last)
+	while (iMax >= iMin)
 	{
-		int mid = (first + last) / 2;
-		int v0_mid = edges[mid].v0;
-		int v1_mid = edges[mid].v1;
-		DEBUG_PRINT("Current edge #%d: [%d, %d]", mid, v0_mid, v1_mid);
+		iMid = (iMin + iMax) / 2;
 
-		if (v0 < v0_mid || (v0 == v0_mid && v1 <= v1_mid))
+		if (edges[iMid].v0 < v0 ||
+				(edges[iMid].v0 == v0 && edges[iMid].v1 < v1))
 		{
-			last = mid;
+			iMin = iMid + 1;
+		}
+		else if (edges[iMid].v0 > v0 ||
+				(edges[iMid].v0 == v0 && edges[iMid].v1 > v1))
+		{
+			iMax = iMid - 1;
 		}
 		else
 		{
-			first = mid + 1;
+//			DEBUG_END;
+			return iMid;
 		}
 	}
-	DEBUG_END;
-	return last;
+
+	/* Actually, the condition of exit from the loop is:
+	 * [(iMin + iMax) / 2] + 1 > iMax
+	 * or
+	 * [(iMin + iMax) / 2] - 1 < iMin
+	 *
+	 * Both these conditions can be satisfied only if iMin == iMax
+	 *
+	 * Thus, iMin == iMax == iMid in the last iteration of the loop.
+	 * Therefore, we need to return iMin, because we will add
+	 * new edge [v0, v1] before it (see function addEdge). */
+
+//	DEBUG_END;
+	return iMin;
 }
 
