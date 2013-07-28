@@ -305,9 +305,10 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 		int numAssociations = 0;
 		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 		{
-			int edgeid = edgeData->findEdge(indVertices[iVertex],
+			list<Edge>::iterator edge =
+					edgeData->findEdge(indVertices[iVertex],
 					indVertices[iVertex + 1]);
-			numAssociations += edgeData->edges[edgeid].assocList.size();
+			numAssociations += edge->assocList.size();
 		}
 		if (numAssociations == 0)
 		{
@@ -320,11 +321,12 @@ double GlobalShadeCorrector::calculateFunctional()
 {
 	double sum = 0;
 
+	list<Edge>::iterator edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
 //    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
-		int f0 = edgeData->edges[iEdge].f0;
-		int f1 = edgeData->edges[iEdge].f1;
+		int f0 = edge->f0;
+		int f1 = edge->f1;
 		Plane plane0 = polyhedron->facets[f0].plane;
 		Plane plane1 = polyhedron->facets[f1].plane;
 		Plane planePrev0 = prevPlanes[f0];
@@ -332,8 +334,8 @@ double GlobalShadeCorrector::calculateFunctional()
 
 		int iAssoc = 0;
 		for (list<EdgeContourAssociation>::iterator itCont =
-				edgeData->edges[iEdge].assocList.begin();
-				itCont != edgeData->edges[iEdge].assocList.end(); ++itCont)
+				edge->assocList.begin();
+				itCont != edge->assocList.end(); ++itCont)
 		{
 //        	DEBUG_PRINT("\t%s: processing contour #%d\n", __func__, j);
 			int curContour = itCont->indContour;
@@ -376,6 +378,7 @@ double GlobalShadeCorrector::calculateFunctional()
 
 			sum += summand0 + summand1;
 		}
+		++edge;
 	}
 	return sum;
 
@@ -601,17 +604,18 @@ void GlobalShadeCorrector::calculateGradient()
 			double cn = planePrevNeighbour.norm.z;
 			double dn = planePrevNeighbour.dist;
 
-			int edgeid = edgeData->findEdge(v0, v1);
+			list<Edge>::iterator edge = edgeData->findEdge(v0, v1);
 
-			if (edgeid == -1)
+			if (! ((edge->v0 == v0 && edge->v1 == v1) ||
+					(edge->v0 == v1 && edge->v1 == v0)) )
 			{
 				ERROR_PRINT("Error! edge (%d, %d) cannot be found\n", v0, v1);
 				return;
 			}
 			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::iterator itCont =
-					edgeData->edges[edgeid].assocList.begin();
-					itCont != edgeData->edges[edgeid].assocList.end(); ++itCont)
+					edge->assocList.begin();
+					itCont != edge->assocList.end(); ++itCont)
 			{
 				int curContour = itCont->indContour;
 				int curNearestSide = itCont->indNearestSide;

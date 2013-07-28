@@ -14,19 +14,19 @@
 class EdgeData
 {
 public:
-	Edge* edges;
+	list<Edge> edges;
 	int numEdges;
 
 	EdgeData();
 	EdgeData(int numEdgesMax);
 	~EdgeData();
 
-	int findEdge(int v0, int v1);
+	list<Edge>::iterator findEdge(int v0, int v1);
 	void addEdge(int numEdgesMax, int v0, int v1, int f0, int f1);
 	void addEdge(int numEdgesMax, int v0, int v1, int f0);
 
-	bool operator ==(const EdgeData& e);
-	bool operator !=(const EdgeData& e);
+	bool operator ==(EdgeData& e);
+	bool operator !=(EdgeData& e);
 
 };
 

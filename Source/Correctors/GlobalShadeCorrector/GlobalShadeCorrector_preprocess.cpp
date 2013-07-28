@@ -31,17 +31,18 @@ void GlobalShadeCorrector::preprocessAssociations()
 			int* indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 			{
-				int iEdge = edgeData->findEdge(indVertices[iVertex],
+				list<Edge>::iterator edge =
+						edgeData->findEdge(indVertices[iVertex],
 						indVertices[iVertex + 1]);
-				associator.run(iContour, iFacet, iEdge);
+				associator.run(iContour, iFacet, edge->id);
 			}
 		}
 	}
 #ifndef NDEBUG
 	/* Print found associations : */
-	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
+	for (list<Edge>::iterator edge = edgeData->edges.begin();
+			edge != edgeData->edges.end(); ++edge)
 	{
-		Edge* edge = &edgeData->edges[iEdge];
 		edge->my_fprint(stdout);
 
 		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -

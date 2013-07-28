@@ -19,6 +19,7 @@ private:
 	int iContour;
 	int iFacet;
 	int iEdge;
+	list<Edge>::iterator edge;
 
 	Polyhedron* polyhedronTmp;
 	double* bufDouble;
@@ -56,7 +57,10 @@ public:
 	~GSAssociator();
 
 	void preinit();
-
+	void incrementEdge()
+	{
+		++edge;
+	}
 	void run(int iContourIn, int iFacetIn, int iEdgeIn);
 
 };

@@ -8,19 +8,20 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeData::EdgeData() :
-				edges(NULL),
+				edges(),
 				numEdges(0)
 {
 }
 
 EdgeData::EdgeData(int numEdgesMax) :
-				edges(new Edge[numEdgesMax]),
+				edges(),
 				numEdges(0)
 {
 	for (int iEdge = 0; iEdge < numEdgesMax; ++iEdge)
 	{
-		edges[iEdge] = Edge(INT_NOT_INITIALIZED, INT_NOT_INITIALIZED,
-				INT_NOT_INITIALIZED, INT_NOT_INITIALIZED, INT_NOT_INITIALIZED);
+		edges.push_back(Edge(INT_NOT_INITIALIZED, INT_NOT_INITIALIZED,
+				INT_NOT_INITIALIZED, INT_NOT_INITIALIZED,
+				INT_NOT_INITIALIZED));
 	}
 }
 
@@ -29,33 +30,34 @@ EdgeData::~EdgeData()
 	DEBUG_START;
 	DEBUG_PRINT(COLOUR_RED "Attention!!! edgeData is being deleted now!"
 			COLOUR_NORM);
-	if (edges != NULL)
-	{
-		delete[] edges;
-		edges = NULL;
-	}
+	edges.clear();
 	DEBUG_END;
 }
 
-bool EdgeData::operator ==(const EdgeData& e)
+bool EdgeData::operator ==(EdgeData& e)
 {
 	if (numEdges != e.numEdges)
 	{
 		return false;
 	}
 
+	list<Edge>::iterator edgeSelf = edges.begin();
+	list<Edge>::iterator edgeOther = e.edges.begin();
+
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
 	{
-		if (edges[iEdge] != e.edges[iEdge])
+		if (*edgeSelf != *edgeOther)
 		{
 			return false;
 		}
+		++edgeSelf;
+		++edgeOther;
 	}
 
 	return true;
 }
 
-bool EdgeData::operator !=(const EdgeData& e)
+bool EdgeData::operator !=(EdgeData& e)
 {
 	return !(*this == e);
 }
@@ -79,57 +81,57 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 		v1 = tmp;
 	}
 
-	int retvalfind = findEdge(v0, v1);
-	if (edges[retvalfind].v0 == v0 && edges[retvalfind].v1 == v1)
+	list<Edge>::iterator edgeFound = findEdge(v0, v1);
+	if (edgeFound->v0 == v0 && edgeFound->v1 == v1)
 	{
-		if (edges[retvalfind].f0 == INT_NOT_INITIALIZED
-				&& edges[retvalfind].f1 == INT_NOT_INITIALIZED)
+		if (edgeFound->f0 == INT_NOT_INITIALIZED
+				&& edgeFound->f1 == INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
 					"facet values are empty, initializing value #0", v0, v1);
-			edges[retvalfind].f0 = f0;
+			edgeFound->f0 = f0;
 			DEBUG_END;
 			return;
 		}
 
-		if (edges[retvalfind].f0 != INT_NOT_INITIALIZED
-				&& edges[retvalfind].f1 == INT_NOT_INITIALIZED)
+		if (edgeFound->f0 != INT_NOT_INITIALIZED
+				&& edgeFound->f1 == INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
 					"facet value #1 is empty, initializing value #1", v0, v1);
-			if (edges[retvalfind].f0 < f0)
+			if (edgeFound->f0 < f0)
 			{
-				edges[retvalfind].f1 = f0;
+				edgeFound->f1 = f0;
 			}
 			else
 			{
-				edges[retvalfind].f1 = edges[retvalfind].f0;
-				edges[retvalfind].f0 = f0;
+				edgeFound->f1 = edgeFound->f0;
+				edgeFound->f0 = f0;
 			}
 			DEBUG_END;
 			return;
 		}
 
-		if (edges[retvalfind].f0 == INT_NOT_INITIALIZED
-				&& edges[retvalfind].f1 != INT_NOT_INITIALIZED)
+		if (edgeFound->f0 == INT_NOT_INITIALIZED
+				&& edgeFound->f1 != INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
 					"facet value #0 is empty, initializing value #0", v0, v1);
-			if (edges[retvalfind].f1 < f0)
+			if (edgeFound->f1 < f0)
 			{
-				edges[retvalfind].f0 = edges[retvalfind].f1;
-				edges[retvalfind].f1 = f0;
+				edgeFound->f0 = edgeFound->f1;
+				edgeFound->f1 = f0;
 			}
 			else
 			{
-				edges[retvalfind].f0 = f0;
+				edgeFound->f0 = f0;
 			}
 			DEBUG_END;
 			return;
 		}
 
-		if (edges[retvalfind].f0 != INT_NOT_INITIALIZED
-				&& edges[retvalfind].f1 != INT_NOT_INITIALIZED)
+		if (edgeFound->f0 != INT_NOT_INITIALIZED
+				&& edgeFound->f1 != INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
 					"facet values are non-empty, skipping...", v0, v1);
@@ -144,17 +146,9 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 		return;
 	}
 
-	for (int i = numEdges; i > retvalfind; --i)
-	{
-		edges[i] = edges[i - 1];
-	}
-	edges[retvalfind].v0 = v0;
-	edges[retvalfind].v1 = v1;
-	edges[retvalfind].f0 = f0;
-	edges[retvalfind].f1 = INT_NOT_INITIALIZED;
-	edges[retvalfind].id = numEdges;
+	edges.insert(edgeFound, Edge(v0, v1, f0, INT_NOT_INITIALIZED));
 	++numEdges;
-	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edge list",
+	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edgeFound list",
 			v0, v1);
 	DEBUG_END;
 }
@@ -186,9 +180,8 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 		f1 = tmp;
 	}
 
-	int iFoundPosition = findEdge(v0, v1);
-	DEBUG_PRINT("Binary search returned the value: %d", iFoundPosition);
-	if (edges[iFoundPosition].v0 == v0 && edges[iFoundPosition].v1 == v1)
+	list<Edge>::iterator edgeFound = findEdge(v0, v1);
+	if (edgeFound->v0 == v0 && edgeFound->v1 == v1)
 	{
 		DEBUG_PRINT("Edge (%d, %d) already presents in the list!", v0, v1);
 		DEBUG_END;
@@ -201,24 +194,15 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 		return;
 	}
 
-	for (int i = numEdges; i > iFoundPosition; --i)
-	{
-		edges[i] = edges[i - 1];
-	}
-	edges[iFoundPosition].v0 = v0;
-	edges[iFoundPosition].v1 = v1;
-	edges[iFoundPosition].f0 = f0;
-	edges[iFoundPosition].f1 = f1;
-	edges[iFoundPosition].id = numEdges;
+	edges.insert(edgeFound, Edge(v0, v1, f0, f1));
 	++numEdges;
 	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edge list",
 			v0, v1);
 	DEBUG_END;
 }
 
-int EdgeData::findEdge(int v0, int v1)
+list<Edge>::iterator EdgeData::findEdge(int v0, int v1)
 {
-//	DEBUG_START;
 	if (v0 > v1)
 	{
 		int tmp = v0;
@@ -226,41 +210,8 @@ int EdgeData::findEdge(int v0, int v1)
 		v1 = tmp;
 	}
 
-	int iMin = 0, iMax = numEdges - 1, iMid;
-
-	while (iMax >= iMin)
-	{
-		iMid = (iMin + iMax) / 2;
-
-		if (edges[iMid].v0 < v0 ||
-				(edges[iMid].v0 == v0 && edges[iMid].v1 < v1))
-		{
-			iMin = iMid + 1;
-		}
-		else if (edges[iMid].v0 > v0 ||
-				(edges[iMid].v0 == v0 && edges[iMid].v1 > v1))
-		{
-			iMax = iMid - 1;
-		}
-		else
-		{
-//			DEBUG_END;
-			return iMid;
-		}
-	}
-
-	/* Actually, the condition of exit from the loop is:
-	 * [(iMin + iMax) / 2] + 1 > iMax
-	 * or
-	 * [(iMin + iMax) / 2] - 1 < iMin
-	 *
-	 * Both these conditions can be satisfied only if iMin == iMax
-	 *
-	 * Thus, iMin == iMax == iMid in the last iteration of the loop.
-	 * Therefore, we need to return iMin, because we will add
-	 * new edge [v0, v1] before it (see function addEdge). */
-
-//	DEBUG_END;
-	return iMin;
+	list<Edge>::iterator itEdge = std::find(edges.begin(), edges.end(),
+			Edge(v0, v1));
+	return itEdge;
 }
 

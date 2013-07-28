@@ -73,8 +73,6 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 		Plane planeOfProjection)
 {
 	DEBUG_START;
-	bool* ifVisibleEdges = bufferBool;
-	int* visibleEdges = bufferInt0;
 	int* visibleEdgesSorted = bufferInt1;
 
 	Vector3d nu = planeOfProjection.norm;
@@ -83,154 +81,77 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 			idOfContour, nu.x, nu.y, nu.z);
 	DEBUG_PRINT("numEdges = %d", edgeData->numEdges);
 
-	int numVisibleEdges = 0;
-	bool ifVisibleCurrEdge;
+	list<Edge> edgesVisible;
 
-	for (int iedge = 0; iedge < edgeData->numEdges; ++iedge)
+	int iEdge = 0;
+	for (list<Edge>::iterator edge = edgeData->edges.begin();
+			edge != edgeData->edges.end(); ++edge)
 	{
-		DEBUG_PRINT("\t(1st processing)Processing edge # %d (%d, %d)\n", iedge,
-				edgeData->edges[iedge].v0, edgeData->edges[iedge].v1);
-		ifVisibleCurrEdge = edgeIsVisibleOnPlane(edgeData->edges[iedge],
-				planeOfProjection);
-		DEBUG_PRINT("\t visibility checked : %s",
-				ifVisibleCurrEdge ? "visible" : "invisible");
-		numVisibleEdges += ifVisibleCurrEdge;
-		ifVisibleEdges[iedge] = ifVisibleCurrEdge;
-	}
-
-	int iedgeVisible = 0;
-	for (int iedge = 0; iedge < edgeData->numEdges; ++iedge)
-	{
-		if (ifVisibleEdges[iedge])
+		if (edgeIsVisibleOnPlane(*edge, planeOfProjection))
 		{
-			visibleEdges[iedgeVisible++] = iedge;
-			DEBUG_PRINT("visibleEdges[%d] = %d, it is (%d, %d)",
-					iedgeVisible - 1, visibleEdges[iedgeVisible - 1],
-					edgeData->edges[visibleEdges[iedgeVisible - 1]].v0,
-					edgeData->edges[visibleEdges[iedgeVisible - 1]].v1);
+			edgesVisible.push_back(*edge);
+			DEBUG_PRINT("\t visibility of edge #%d [%d, %d] "
+					"checked : visible", iEdge, edge->v0, edge->v1);
 		}
-	}
-
-	int numVisibleEdgesSorted = 0;
-	int iedgeCurr = 0;
-	visibleEdgesSorted[numVisibleEdgesSorted++] = visibleEdges[iedgeCurr];
-	int ivertexCurr = edgeData->edges[visibleEdges[iedgeCurr]].v1;
-	int numIterations = 0;
-
-	/*
-	 * We need to have sequences of sides like the following:
-	 *    a0   a1
-	 *    a1   a2
-	 *    a2   a3
-	 *    a3   a0
-	 * But if we don't ensure that a1 is always followed by a1,
-	 * and a2 with a2, and so on, there can arise the following
-	 * non-correct contours:
-	 *    a0   a1
-	 *    a1   a2
-	 *    a3   a2
-	 *    a0   a3
-	 * To avoid such situation we must remember whether to reverse
-	 * the order of vertices of the edge, during its detection.
-	 */
-	bool* ifEdgeShouldBeReversed = bufferBool;
-
-	// First edge is always not reversed:
-	ifEdgeShouldBeReversed[visibleEdgesSorted[0]] = false;
-
-	while (numVisibleEdgesSorted < numVisibleEdges)
-	{
-		DEBUG_PRINT("Searching next edge for edge # %d (%d, %d)", iedgeCurr,
-				edgeData->edges[visibleEdges[iedgeCurr]].v0,
-				edgeData->edges[visibleEdges[iedgeCurr]].v1);
-		DEBUG_PRINT("numVisibleEdgesSorted = %d", numVisibleEdgesSorted);
-		DEBUG_PRINT("numVisibleEdges = %d", numVisibleEdges);
-		DEBUG_PRINT("ivertexCurr = %d", ivertexCurr);
-		for (int iedgeNext = 0; iedgeNext < numVisibleEdges; ++iedgeNext)
+		else
 		{
-			DEBUG_PRINT("\tCandidate is # %d (%d, %d)", iedgeNext,
-					edgeData->edges[visibleEdges[iedgeNext]].v0,
-					edgeData->edges[visibleEdges[iedgeNext]].v1);
-			if (iedgeNext == iedgeCurr)
-			{
-				continue;
-			}
-			if (edgeData->edges[visibleEdges[iedgeNext]].v0 == ivertexCurr)
-			{
-				iedgeCurr = iedgeNext;
-				ivertexCurr = edgeData->edges[visibleEdges[iedgeCurr]].v1;
-				visibleEdgesSorted[numVisibleEdgesSorted] =
-						visibleEdges[iedgeCurr];
-				ifEdgeShouldBeReversed[numVisibleEdgesSorted] = false;
-				++numVisibleEdgesSorted;
-				break;
-			}
-			else if (edgeData->edges[visibleEdges[iedgeNext]].v1 == ivertexCurr)
-			{
-				iedgeCurr = iedgeNext;
-				ivertexCurr = edgeData->edges[visibleEdges[iedgeCurr]].v0;
-				visibleEdgesSorted[numVisibleEdgesSorted] =
-						visibleEdges[iedgeCurr];
-				ifEdgeShouldBeReversed[numVisibleEdgesSorted] = true;
-				++numVisibleEdgesSorted;
-				break;
-			}
+			DEBUG_PRINT("\t visibility of edge #%d [%d, %d] "
+					"checked : invisible", iEdge, edge->v0, edge->v1);
 		}
-		if (numIterations++ > numVisibleEdges * edgeData->numEdges)
-		{
-			DEBUG_PRINT("Error. Infinite loop for search...");
-			break;
-		}
+		++edge;
+		++iEdge;
 	}
 
-	for (int iedge = 0; iedge < numVisibleEdgesSorted; ++iedge)
-	{
-		DEBUG_PRINT("visibleEdgesSorted[%d] = %d (%d, %d)", iedge,
-				visibleEdgesSorted[iedge],
-				edgeData->edges[visibleEdgesSorted[iedge]].v0,
-				edgeData->edges[visibleEdgesSorted[iedge]].v1);
-	}
-
-	DEBUG_PRINT("Allocating \"outputContour\"");
 	SContour* outputContour = new SContour;
-	outputContour->id = idOfContour; // To make output more understandable
-	outputContour->sides = new SideOfContour[numVisibleEdges];
-	DEBUG_PRINT("Allocating \"sides\"");
-	outputContour->ns = numVisibleEdges;
+	outputContour->id = idOfContour;
+	outputContour->sides = new SideOfContour[edgesVisible.size()];
+	outputContour->ns = edgesVisible.size();
 	outputContour->plane = planeOfProjection;
 	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
 
-	for (int i = 0; i < numVisibleEdges; ++i)
+	list<Edge>::iterator edgeCurr = edgesVisible.begin();
+	int iVertexCurr = edgeCurr->v1;
+	for (int iSide = 0; iSide < edgesVisible.size();)
 	{
-		Vector3d A1, A2;
-		if (ifEdgeShouldBeReversed[i])
+		for (list<Edge>::iterator edgeNext = edgesVisible.begin();
+				edgeNext != edgesVisible.end(); ++edgeNext)
 		{
-			A1 =
-					polyhedron->vertices[edgeData->edges[visibleEdgesSorted[i]]
-							.v1];
-			A2 =
-					polyhedron->vertices[edgeData->edges[visibleEdgesSorted[i]]
-							.v0];
-		}
-		else
-		{
-			A1 =
-					polyhedron->vertices[edgeData->edges[visibleEdgesSorted[i]]
-							.v0];
-			A2 =
-					polyhedron->vertices[edgeData->edges[visibleEdgesSorted[i]]
-							.v1];
-		}
+			if ((edgeNext->v0 != iVertexCurr &&
+							edgeNext->v1 != iVertexCurr) ||
+					(edgeCurr->v0 == edgeNext->v0 &&
+							edgeCurr->v1 == edgeNext->v1) ||
+					(edgeCurr->v0 == edgeNext->v1 &&
+							edgeCurr->v1 == edgeNext->v0))
+			{
+				continue;
+			}
 
-		A1 = planeOfProjection.project(A1);
-		A2 = planeOfProjection.project(A2);
+			Vector3d A1, A2;
+			if (edgeNext->v0 == iVertexCurr)
+			{
+				A1 = polyhedron->vertices[edgeNext->v0];
+				A2 = polyhedron->vertices[edgeNext->v1];
+				iVertexCurr = edgeNext->v1;
+			}
+			else
+			{
+				A1 = polyhedron->vertices[edgeNext->v1];
+				A2 = polyhedron->vertices[edgeNext->v0];
+				iVertexCurr = edgeNext->v0;
+			}
+			A1 = planeOfProjection.project(A1);
+			A2 = planeOfProjection.project(A2);
 
-		sides[i].A1 = A1;
-		sides[i].A2 = A2;
-		sides[i].confidence = 1.;
-		sides[i].type = EEdgeRegular;
+			sides[iSide].A1 = A1;
+			sides[iSide].A2 = A2;
+			sides[iSide].confidence = 1.;
+			sides[iSide].type = EEdgeRegular;
+			edgeCurr = edgeNext;
+			break;
+		}
 	}
+
 	DEBUG_END;
 	return *outputContour;
 }
@@ -252,7 +173,8 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge& edge,
 			|| (sign0 < EPS_COLLINEARITY && sign1 < EPS_COLLINEARITY))
 	{
 		DEBUG_PRINT(
-				"Edge is invisible: it's covered by facets, sign0 = %le, sign1 = %le",
+				"Edge is invisible: it's covered by facets, "
+				"sign0 = %le, sign1 = %le",
 				sign0, sign1);
 		return false;
 	}
@@ -278,7 +200,8 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge& edge,
 	{
 // When only the first facets is orthogonal to the plane of projection
 		DEBUG_PRINT(
-				"\t\tOnly the first facet is orthogonal to the plane of projection");
+				"\t\tOnly the first facet is orthogonal "
+				"to the plane of projection");
 		return collinearVisibility(v0, v1, planeOfProjection, f0);
 	}
 
@@ -286,7 +209,8 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge& edge,
 	{
 // When only the second facets is orthogonal to the plane of projection
 		DEBUG_PRINT(
-				"\t\tOnly the second facets is orthogonal to the plane of projection");
+				"\t\tOnly the second facets is orthogonal "
+				"to the plane of projection");
 		return collinearVisibility(v0, v1, planeOfProjection, f1);
 	}
 }

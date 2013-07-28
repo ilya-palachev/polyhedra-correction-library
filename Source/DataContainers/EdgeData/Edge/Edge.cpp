@@ -17,6 +17,16 @@ Edge::Edge() :
 {
 }
 
+Edge::Edge(int v0_orig, int v1_orig) :
+				id(INT_NOT_INITIALIZED),
+				v0(v0_orig),
+				v1(v1_orig),
+				f0(INT_NOT_INITIALIZED),
+				f1(INT_NOT_INITIALIZED),
+				assocList()
+{
+}
+
 Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig) :
 				id(id_orig),
 				v0(v0_orig),
@@ -72,6 +82,7 @@ Edge::Edge(const Edge& orig) :
 Edge::~Edge()
 {
 	DEBUG_PRINT("Attention! edge #%d is deleting now\n", id);
+	assocList.clear();
 }
 
 Edge& Edge::operator =(const Edge& orig)

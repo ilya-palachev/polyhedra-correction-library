@@ -20,6 +20,9 @@ public:
 
 	// Edge.cpp :
 	Edge();
+
+	Edge(int v0_orig, int v1_orig);
+
 	Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig);
 
 	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig);

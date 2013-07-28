@@ -27,6 +27,9 @@ void EdgeConstructor::run(EdgeData* &edgeData)
 	numEdgesMax /= 2;
 	edgeData = new EdgeData(numEdgesMax);
 	DEBUG_PRINT("numEdgesMax = %d", numEdgesMax);
+
+	list<Edge>::iterator edge;
+
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
 		int numVerticesInFacet = polyhedron->facets[i].numVertices;
@@ -38,18 +41,30 @@ void EdgeConstructor::run(EdgeData* &edgeData)
 					index[iVertex + 1], // Second vertices
 					i, // Current facets id
 					index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
+			DEBUG_PRINT("After iteration #%d we have the "
+					"following edge data:");
+			edge = edgeData->edges.begin();
+			for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
+			{
+				DEBUG_PRINT("\t[%d, %d]", edge->v0, edge->v1);
+				++edge;
+			}
 		}
 	}
 
+	edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-		edgeData->edges[iEdge].id = iEdge;
+		edge->id = iEdge;
+		++edge;
 	}
 
 #ifndef NDEBUG
-	for (int i = 0; i < edgeData->numEdges; ++i)
+	edge = edgeData->edges.begin();
+	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-		edgeData->edges[i].my_fprint(stdout);
+		edge->my_fprint(stdout);
+		++edge;
 	}
 #endif /* NDEBUG */
 	DEBUG_END;

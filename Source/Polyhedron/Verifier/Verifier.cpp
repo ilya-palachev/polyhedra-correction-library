@@ -427,13 +427,14 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 int Verifier::checkEdges(EdgeData* edgeData)
 {
 	int numEdgesDesctructed = 0;
+	list<Edge>::iterator edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-		Edge* edge = &edgeData->edges[iEdge];
-		if (!checkOneEdge(edge, edgeData))
+		if (!checkOneEdge(&*edge, edgeData))
 		{
 			++numEdgesDesctructed;
 		}
+		++edge;
 	}
 	return numEdgesDesctructed;
 }
@@ -719,39 +720,41 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 				                             iFacet + 1];
 		DEBUG_PRINT("\tUpdating edge [%d, %d]", iVertexReduced,
 				iVertexNeighbour);
-		int iEdgeUpdated = edgeData->findEdge(iVertexReduced,
+		list<Edge>::iterator edgeUpdated = edgeData->findEdge(iVertexReduced,
 							iVertexNeighbour);
 		if (iVertexNeighbour != iVertexStayed)
 		{
-			if (edgeData->edges[iEdgeUpdated].v0 == iVertexReduced &&
-					edgeData->edges[iEdgeUpdated].v1 == iVertexNeighbour)
+			if (edgeUpdated->v0 == iVertexReduced &&
+					edgeUpdated->v1 == iVertexNeighbour)
 			{
-				edgeData->edges[iEdgeUpdated].v0 = iVertexStayed;
+				edgeUpdated->v0 = iVertexStayed;
 			}
-			else if (edgeData->edges[iEdgeUpdated].v0 == iVertexNeighbour &&
-					edgeData->edges[iEdgeUpdated].v1 == iVertexReduced)
+			else if (edgeUpdated->v0 == iVertexNeighbour &&
+					edgeUpdated->v1 == iVertexReduced)
 			{
-				edgeData->edges[iEdgeUpdated].v1 = iVertexStayed;
+				edgeUpdated->v1 = iVertexStayed;
 			}
 			else
 			{
 				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
 						iVertexReduced, iVertexNeighbour);
 				DEBUG_PRINT("   Found edge: [%d, %d]",
-						edgeData->edges[iEdgeUpdated].v0,
-						edgeData->edges[iEdgeUpdated].v1);
+						edgeUpdated->v0,
+						edgeUpdated->v1);
 				DEBUG_PRINT("Previous edge: [%d, %d]",
-						edgeData->edges[iEdgeUpdated - 1].v0,
-						edgeData->edges[iEdgeUpdated - 1].v1);
+						edgeUpdated->v0,
+						edgeUpdated->v1);
 				DEBUG_PRINT("    Next edge: [%d, %d]",
-						edgeData->edges[iEdgeUpdated + 1].v0,
-						edgeData->edges[iEdgeUpdated + 1].v1);
+						edgeUpdated->v0,
+						edgeUpdated->v1);
 
 				DEBUG_PRINT("Printing edge data:");
+				list<Edge>::iterator edgePrinted = edgeData->edges.begin();
 				for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 				{
 					DEBUG_PRINT("Edge #%d: [%d, %d]", iEdge,
-							edgeData->edges[iEdge].v0, edgeData->edges[iEdge].v1);
+							edgePrinted->v0, edgePrinted->v1);
+					++edgePrinted;
 				}
 				DEBUG_END;
 				return false;
@@ -760,7 +763,7 @@ bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
 		else
 		{
 			DEBUG_PRINT("\tThis edge must be deleted at all.");
-			edgeData->edges[iEdgeUpdated].assocList.clear();
+			edge->assocList.clear();
 		}
 	}
 
