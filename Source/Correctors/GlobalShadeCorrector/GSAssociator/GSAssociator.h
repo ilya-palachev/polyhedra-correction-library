@@ -57,10 +57,6 @@ public:
 	~GSAssociator();
 
 	void preinit();
-	void incrementEdge()
-	{
-		++edge;
-	}
 	void run(int iContourIn, int iFacetIn, int iEdgeIn);
 
 };
