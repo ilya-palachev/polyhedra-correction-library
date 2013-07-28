@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <list>
+#include <algorithm>
 #include <assert.h>
 #include <time.h>
 #include <dlfcn.h>
