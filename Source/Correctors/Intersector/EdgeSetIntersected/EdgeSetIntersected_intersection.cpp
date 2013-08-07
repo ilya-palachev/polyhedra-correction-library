@@ -6,8 +6,7 @@ void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
 	{
 		v0 = -1;
 		v1 = -1;
-		fprintf(stdout, "EdgeSet::get_edge : Unavailable id = %d, num = %d", id,
-				num);
+		ERROR_PRINT("Unavailable id = %d, num = %d", id, num);
 		return;
 	}
 	v0 = edge0[id];
@@ -21,8 +20,7 @@ void EdgeSetIntersected::get_edge(int id, int& v0, int& v1, int& id_el0, int& po
 	{
 		v0 = -1;
 		v1 = -1;
-		fprintf(stdout, "EdgeSet::get_edge : Unavailable id = %d, num = %d", id,
-				num);
+		ERROR_PRINT("Unavailable id = %d, num = %d", id, num);
 		return;
 	}
 	v0 = edge0[id];
@@ -81,7 +79,7 @@ void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_
 
 	if (num >= len)
 	{
-		fprintf(stdout, "EdgeSet::add_edge : Error. Overflow.\n");
+		ERROR_PRINT("Error. Overflow.");
 		return;
 	}
 
@@ -114,8 +112,7 @@ void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_
 		pos_edge_list1[last] = pos_el;
 		if (id_future_facet[last] != id_ff || pos_future_facet[last] != pos_ff)
 		{
-			fprintf(stdout,
-					"EdgeSet : Error. 2 different components use the same edge.\n");
+			ERROR_PRINT("Error. 2 different components use the same edge.");
 		}
 	}
 	else
@@ -146,23 +143,7 @@ void EdgeSetIntersected::test_info()
 				|| id_future_facet[i] == -1 || pos_future_facet[i] == -1)
 		{
 
-			fprintf(stdout, "EdgeSet::test_info : Error at i = %d.\n", i);
+			ERROR_PRINT("Error at i = %d.\n", i);
 		}
 	}
 }
-
-//void EdgeSet::informate_about_new_vertex(
-//		int numv,
-//		EdgeList* edge_list,
-//		FutureFacet* future_facet) {
-//	int i;
-//	for (i = 0; i < num; ++i) {
-//		edge_list[id_edge_list0[i]].
-//			informate_about_new_vertex(pos_edge_list0[i], numv + i);
-//		edge_list[id_edge_list1[i]].
-//			informate_about_new_vertex(pos_edge_list1[i], numv + i);
-//		future_facet[id_future_facet[i]].
-//			informate_about_new_vertex(pos_future_facet[i], numv + i);
-//	}
-//}
-

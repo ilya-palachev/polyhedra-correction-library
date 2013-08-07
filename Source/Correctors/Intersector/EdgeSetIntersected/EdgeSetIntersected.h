@@ -1,12 +1,12 @@
 /* 
- * File:   EdgeSet.h
+ * File:   EdgeSetIntersected.h
  * Author: ilya
  *
  * Created on 12 Ноябрь 2012 г., 11:33
  */
 
-#ifndef EDGESET_H
-#define	EDGESET_H
+#ifndef EDGESETINTERSECTED_H
+#define	EDGESETINTERSECTED_H
 
 class EdgeSetIntersected
 {
@@ -42,9 +42,9 @@ public:
 	void informate_about_new_vertex(int numv, EdgeList* edge_list,
 			FutureFacet* future_facet);
 
-	//EdgeSet_io.cpp
+	//EdgeSetIntersected_io.cpp
 	void my_fprint(FILE* file);
 };
 
-#endif	/* EDGESET_H */
+#endif	/* EDGESETINTERSECTED_H */
 

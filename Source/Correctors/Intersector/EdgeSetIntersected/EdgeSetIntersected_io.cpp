@@ -2,8 +2,9 @@
 
 void EdgeSetIntersected::my_fprint(FILE* file)
 {
+#ifndef NDEBUG
 	int i;
-	fprintf(file, "---------- EdgeSet (%d). ----------\n", num);
+	fprintf(file, "---------- EdgeSetIntersected (%d). ----------\n", num);
 	if (num > 0)
 	{
 		fprintf(file, "edge0 : ");
@@ -16,5 +17,6 @@ void EdgeSetIntersected::my_fprint(FILE* file)
 		fprintf(file, "\n");
 
 	}
+#endif
 }
 
