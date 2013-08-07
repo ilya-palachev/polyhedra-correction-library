@@ -64,8 +64,8 @@ public:
 	void get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 			int& next_f, int& next_d);
 
-	void send(EdgeSet* edge_set);
-	void send_edges(EdgeSet* edge_set);
+	void send(EdgeSetIntersected* edge_set);
+	void send_edges(EdgeSetIntersected* edge_set);
 
 	void set_poly(Polyhedron* poly_orig);
 

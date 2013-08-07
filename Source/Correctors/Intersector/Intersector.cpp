@@ -422,8 +422,8 @@ void Intersector::run(Plane iplane)
 	}
 	FutureFacet buffer_old(nume);
 	nume /= 2;
-	EdgeSet edge_set(nume);
-	EdgeSet total_edge_set(nume);
+	EdgeSetIntersected edge_set(nume);
+	EdgeSetIntersected total_edge_set(nume);
 
 	// 1. Подготовка списков ребер
 
@@ -839,8 +839,8 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	}
 	FutureFacet buffer_old(nume);
 	nume /= 2;
-	EdgeSet edge_set(nume);
-	EdgeSet total_edge_set(nume);
+	EdgeSetIntersected edge_set(nume);
+	EdgeSetIntersected total_edge_set(nume);
 
 	// 1. Подготовка списков ребер
 

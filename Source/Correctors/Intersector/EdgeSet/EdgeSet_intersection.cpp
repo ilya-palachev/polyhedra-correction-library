@@ -1,6 +1,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void EdgeSet::get_edge(int id, int& v0, int& v1)
+void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
 {
 	if (id < 0 || id > num - 1)
 	{
@@ -14,7 +14,7 @@ void EdgeSet::get_edge(int id, int& v0, int& v1)
 	v1 = edge1[id];
 }
 
-void EdgeSet::get_edge(int id, int& v0, int& v1, int& id_el0, int& pos_el0,
+void EdgeSetIntersected::get_edge(int id, int& v0, int& v1, int& id_el0, int& pos_el0,
 		int& id_el1, int& pos_el1, int& id_ff, int& pos_ff)
 {
 	if (id < 0 || id > num - 1)
@@ -35,7 +35,7 @@ void EdgeSet::get_edge(int id, int& v0, int& v1, int& id_el0, int& pos_el0,
 	pos_ff = pos_future_facet[id];
 }
 
-int EdgeSet::search_edge(int v0, int v1)
+int EdgeSetIntersected::search_edge(int v0, int v1)
 {
 
 	int tmp, first, last, mid;
@@ -73,7 +73,7 @@ int EdgeSet::search_edge(int v0, int v1)
 	}
 }
 
-void EdgeSet::add_edge(int v0, int v1, int id_el, int pos_el, int id_ff,
+void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_ff,
 		int pos_ff)
 {
 
@@ -132,12 +132,12 @@ void EdgeSet::add_edge(int v0, int v1, int id_el, int pos_el, int id_ff,
 	}
 }
 
-void EdgeSet::add_edge(int v0, int v1)
+void EdgeSetIntersected::add_edge(int v0, int v1)
 {
 	add_edge(v0, v1, -1, -1, -1, -1);
 }
 
-void EdgeSet::test_info()
+void EdgeSetIntersected::test_info()
 {
 	for (int i; i < num; ++i)
 	{

@@ -40,7 +40,7 @@ public:
 
 	//FutureFacet_intersection.cpp
 	void generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
-			EdgeSet* es);
+			EdgeSetIntersected* es);
 };
 
 #endif	/* FUTUREFACET_H */

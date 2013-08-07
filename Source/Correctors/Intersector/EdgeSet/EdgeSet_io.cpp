@@ -1,6 +1,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-void EdgeSet::my_fprint(FILE* file)
+void EdgeSetIntersected::my_fprint(FILE* file)
 {
 	int i;
 	fprintf(file, "---------- EdgeSet (%d). ----------\n", num);

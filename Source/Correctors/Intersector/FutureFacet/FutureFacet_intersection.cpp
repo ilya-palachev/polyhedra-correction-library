@@ -1,7 +1,7 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 void FutureFacet::generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
-		EdgeSet* es)
+		EdgeSetIntersected* es)
 {
 	int i, v0, v1, res_id;
 	int *index;

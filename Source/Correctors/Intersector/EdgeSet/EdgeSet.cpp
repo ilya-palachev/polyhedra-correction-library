@@ -1,6 +1,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
-EdgeSet::EdgeSet() :
+EdgeSetIntersected::EdgeSetIntersected() :
 				len(0),
 				num(0),
 				edge0(NULL),
@@ -14,7 +14,7 @@ EdgeSet::EdgeSet() :
 {
 }
 
-EdgeSet::EdgeSet(int len_orig) :
+EdgeSetIntersected::EdgeSetIntersected(int len_orig) :
 				len(len_orig),
 				num(0),
 				edge0(new int[len]),
@@ -28,7 +28,7 @@ EdgeSet::EdgeSet(int len_orig) :
 {
 }
 
-EdgeSet::EdgeSet(const EdgeSet& orig) :
+EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
 				len(orig.len),
 				num(orig.num),
 				edge0(new int[len]),
@@ -53,7 +53,7 @@ EdgeSet::EdgeSet(const EdgeSet& orig) :
 	}
 }
 
-EdgeSet::~EdgeSet()
+EdgeSetIntersected::~EdgeSetIntersected()
 {
 	if (edge0 != NULL)
 		delete[] edge0;
@@ -73,7 +73,7 @@ EdgeSet::~EdgeSet()
 		delete[] pos_future_facet;
 }
 
-EdgeSet& EdgeSet::operator =(const EdgeSet& orig)
+EdgeSetIntersected& EdgeSetIntersected::operator =(const EdgeSetIntersected& orig)
 {
 	len = orig.len;
 	num = orig.num;
@@ -118,12 +118,12 @@ EdgeSet& EdgeSet::operator =(const EdgeSet& orig)
 	return *this;
 }
 
-int EdgeSet::get_len()
+int EdgeSetIntersected::get_len()
 {
 	return len;
 }
 
-int EdgeSet::get_num()
+int EdgeSetIntersected::get_num()
 {
 	return num;
 }

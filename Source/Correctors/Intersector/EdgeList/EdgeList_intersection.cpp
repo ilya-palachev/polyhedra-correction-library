@@ -49,7 +49,7 @@ void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
 	//	this->my_fprint(stdout);
 }
 
-void EdgeList::send(EdgeSet* edge_set)
+void EdgeList::send(EdgeSetIntersected* edge_set)
 {
 	int i;
 	for (i = 0; i < num; ++i)
@@ -58,7 +58,7 @@ void EdgeList::send(EdgeSet* edge_set)
 	}
 }
 
-void EdgeList::send_edges(EdgeSet* edge_set)
+void EdgeList::send_edges(EdgeSetIntersected* edge_set)
 {
 	int i;
 	for (i = 0; i < num; ++i)

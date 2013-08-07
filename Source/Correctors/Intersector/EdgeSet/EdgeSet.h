@@ -8,7 +8,7 @@
 #ifndef EDGESET_H
 #define	EDGESET_H
 
-class EdgeSet
+class EdgeSetIntersected
 {
 private:
 	int len;
@@ -22,11 +22,11 @@ private:
 	int* id_future_facet;
 	int* pos_future_facet;
 public:
-	EdgeSet();
-	EdgeSet(int len_orig);
-	EdgeSet(const EdgeSet& orig);
-	EdgeSet& operator =(const EdgeSet& orig);
-	~EdgeSet();
+	EdgeSetIntersected();
+	EdgeSetIntersected(int len_orig);
+	EdgeSetIntersected(const EdgeSetIntersected& orig);
+	EdgeSetIntersected& operator =(const EdgeSetIntersected& orig);
+	~EdgeSetIntersected();
 
 	int get_len();
 	int get_num();
