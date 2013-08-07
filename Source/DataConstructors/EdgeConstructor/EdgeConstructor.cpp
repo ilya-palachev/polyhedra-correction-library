@@ -28,7 +28,7 @@ void EdgeConstructor::run(EdgeData* &edgeData)
 	edgeData = new EdgeData(numEdgesMax);
 	DEBUG_PRINT("numEdgesMax = %d", numEdgesMax);
 
-	list<Edge>::iterator edge;
+	EdgeSetIterator edge;
 
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
@@ -36,13 +36,12 @@ void EdgeConstructor::run(EdgeData* &edgeData)
 		int * index = polyhedron->facets[i].indVertices;
 		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex)
 		{
-			edgeData->addEdge(numEdgesMax, // Number of edges which we are going add finally
-					index[iVertex], // First vertices
+			edgeData->addEdge(index[iVertex], // First vertices
 					index[iVertex + 1], // Second vertices
 					i, // Current facets id
 					index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
 			DEBUG_PRINT("After iteration #%d we have the "
-					"following edge data:");
+					"following edge data:", edgeData->edges.size());
 			edge = edgeData->edges.begin();
 			for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 			{

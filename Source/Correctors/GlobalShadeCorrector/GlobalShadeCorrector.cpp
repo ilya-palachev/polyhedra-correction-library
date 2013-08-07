@@ -305,10 +305,13 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 		int numAssociations = 0;
 		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 		{
-			list<Edge>::iterator edge =
+			EdgeSetIterator edge =
 					edgeData->findEdge(indVertices[iVertex],
 					indVertices[iVertex + 1]);
-			numAssociations += edge->assocList.size();
+			if (edge != edgeData->edges.end())
+			{
+				numAssociations += edge->assocList.size();
+			}
 		}
 		if (numAssociations == 0)
 		{
@@ -321,7 +324,7 @@ double GlobalShadeCorrector::calculateFunctional()
 {
 	double sum = 0;
 
-	list<Edge>::iterator edge = edgeData->edges.begin();
+	EdgeSetIterator edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
 //    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
@@ -604,10 +607,9 @@ void GlobalShadeCorrector::calculateGradient()
 			double cn = planePrevNeighbour.norm.z;
 			double dn = planePrevNeighbour.dist;
 
-			list<Edge>::iterator edge = edgeData->findEdge(v0, v1);
+			EdgeSetIterator edge = edgeData->findEdge(v0, v1);
 
-			if (! ((edge->v0 == v0 && edge->v1 == v1) ||
-					(edge->v0 == v1 && edge->v1 == v0)) )
+			if (edge == edgeData->edges.end())
 			{
 				ERROR_PRINT("Error! edge (%d, %d) cannot be found\n", v0, v1);
 				return;

@@ -84,7 +84,7 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 	list<Edge> edgesVisible;
 
 	int iEdge = 0;
-	for (list<Edge>::iterator edge = edgeData->edges.begin();
+	for (EdgeSetIterator edge = edgeData->edges.begin();
 			edge != edgeData->edges.end(); ++edge)
 	{
 		if (edgeIsVisibleOnPlane(*edge, planeOfProjection))
@@ -110,11 +110,11 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
 
-	list<Edge>::iterator edgeCurr = edgesVisible.begin();
+	EdgeSetIterator edgeCurr = edgesVisible.begin();
 	int iVertexCurr = edgeCurr->v1;
 	for (int iSide = 0; iSide < edgesVisible.size();)
 	{
-		for (list<Edge>::iterator edgeNext = edgesVisible.begin();
+		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
 		{
 			if ((edgeNext->v0 != iVertexCurr &&
@@ -156,7 +156,7 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 	return *outputContour;
 }
 
-bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge& edge,
+bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		Plane planeOfProjection)
 {
 	DEBUG_START;

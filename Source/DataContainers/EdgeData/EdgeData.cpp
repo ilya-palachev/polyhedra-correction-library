@@ -17,12 +17,6 @@ EdgeData::EdgeData(int numEdgesMax) :
 				edges(),
 				numEdges(0)
 {
-	for (int iEdge = 0; iEdge < numEdgesMax; ++iEdge)
-	{
-		edges.push_back(Edge(INT_NOT_INITIALIZED, INT_NOT_INITIALIZED,
-				INT_NOT_INITIALIZED, INT_NOT_INITIALIZED,
-				INT_NOT_INITIALIZED));
-	}
 }
 
 EdgeData::~EdgeData()
@@ -41,8 +35,8 @@ bool EdgeData::operator ==(EdgeData& e)
 		return false;
 	}
 
-	list<Edge>::iterator edgeSelf = edges.begin();
-	list<Edge>::iterator edgeOther = e.edges.begin();
+	EdgeSetIterator edgeSelf = edges.begin();
+	EdgeSetIterator edgeOther = e.edges.begin();
 
 	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
 	{
@@ -63,10 +57,10 @@ bool EdgeData::operator !=(EdgeData& e)
 }
 
 
-void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
+void EdgeData::addEdge(int v0, int v1, int f0)
 {
 	DEBUG_START;
-	DEBUG_PRINT("Trying to add edge (%d, %d) to the edge list", v0, v1);
+	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge list", v0, v1);
 	if (v0 < 0 || v1 < 0 || f0 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
@@ -81,23 +75,20 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 		v1 = tmp;
 	}
 
-	list<Edge>::iterator edgeFound = findEdge(v0, v1);
-	if (edgeFound->v0 == v0 && edgeFound->v1 == v1)
+	EdgeSetIterator edgeFound = findEdge(v0, v1);
+	if (edgeFound != edges.end())
 	{
 		if (edgeFound->f0 == INT_NOT_INITIALIZED
 				&& edgeFound->f1 == INT_NOT_INITIALIZED)
 		{
-			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+			DEBUG_PRINT("Edge [%d, %d] already presents in the list,"
 					"facet values are empty, initializing value #0", v0, v1);
 			edgeFound->f0 = f0;
-			DEBUG_END;
-			return;
 		}
-
-		if (edgeFound->f0 != INT_NOT_INITIALIZED
+		else if (edgeFound->f0 != INT_NOT_INITIALIZED
 				&& edgeFound->f1 == INT_NOT_INITIALIZED)
 		{
-			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+			DEBUG_PRINT("Edge [%d, %d] already presents in the list,"
 					"facet value #1 is empty, initializing value #1", v0, v1);
 			if (edgeFound->f0 < f0)
 			{
@@ -108,14 +99,11 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 				edgeFound->f1 = edgeFound->f0;
 				edgeFound->f0 = f0;
 			}
-			DEBUG_END;
-			return;
 		}
-
-		if (edgeFound->f0 == INT_NOT_INITIALIZED
+		else if (edgeFound->f0 == INT_NOT_INITIALIZED
 				&& edgeFound->f1 != INT_NOT_INITIALIZED)
 		{
-			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+			DEBUG_PRINT("Edge [%d, %d] already presents in the list,"
 					"facet value #0 is empty, initializing value #0", v0, v1);
 			if (edgeFound->f1 < f0)
 			{
@@ -126,38 +114,30 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0)
 			{
 				edgeFound->f0 = f0;
 			}
-			DEBUG_END;
-			return;
 		}
-
-		if (edgeFound->f0 != INT_NOT_INITIALIZED
+		else if (edgeFound->f0 != INT_NOT_INITIALIZED
 				&& edgeFound->f1 != INT_NOT_INITIALIZED)
 		{
-			DEBUG_PRINT("Edge (%d, %d) already presents in the list,"
+			DEBUG_PRINT("Edge [%d, %d] already presents in the list,"
 					"facet values are non-empty, skipping...", v0, v1);
-			DEBUG_END;
-			return;
 		}
 	}
-
-	if (numEdges >= numEdgesMax)
+	else
 	{
-		DEBUG_PRINT("Warning. List is overflow\n");
-		return;
+		edges.insert(Edge(v0, v1, f0, INT_NOT_INITIALIZED));
 	}
+	numEdges = edges.size();
 
-	edges.insert(edgeFound, Edge(v0, v1, f0, INT_NOT_INITIALIZED));
-	++numEdges;
-	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edgeFound list",
+	DEBUG_PRINT("Edge [%d, %d] has been successfully added to the edgeFound list",
 			v0, v1);
 	DEBUG_END;
 }
 
-void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
+void EdgeData::addEdge(int v0, int v1, int f0, int f1)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge list", v0, v1);
-	DEBUG_PRINT("\tnumEdges = %d, numEdgesMax = %d", numEdges, numEdgesMax);
+	DEBUG_PRINT("\tnumEdges = %d", numEdges);
 	if (v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
@@ -180,29 +160,18 @@ void EdgeData::addEdge(int numEdgesMax, int v0, int v1, int f0, int f1)
 		f1 = tmp;
 	}
 
-	list<Edge>::iterator edgeFound = findEdge(v0, v1);
-	if (edgeFound->v0 == v0 && edgeFound->v1 == v1)
-	{
-		DEBUG_PRINT("Edge (%d, %d) already presents in the list!", v0, v1);
-		DEBUG_END;
-		return;
-	}
+	Edge* edgeNew = new Edge(v0, v1, f0, f1);
+	edges.insert(*edgeNew);
+	DEBUG_PRINT("Edge [%d, %d] has been successfully added to "
+					"the edge list", v0, v1);
+	numEdges = edges.size();
 
-	if (numEdges >= numEdgesMax)
-	{
-		DEBUG_PRINT("Warning. List is overflow\n");
-		return;
-	}
-
-	edges.insert(edgeFound, Edge(v0, v1, f0, f1));
-	++numEdges;
-	DEBUG_PRINT("Edge (%d, %d) has been successfully added to the edge list",
-			v0, v1);
 	DEBUG_END;
 }
 
-list<Edge>::iterator EdgeData::findEdge(int v0, int v1)
+EdgeSetIterator EdgeData::findEdge(int v0, int v1)
 {
+	DEBUG_START;
 	if (v0 > v1)
 	{
 		int tmp = v0;
@@ -210,8 +179,10 @@ list<Edge>::iterator EdgeData::findEdge(int v0, int v1)
 		v1 = tmp;
 	}
 
-	list<Edge>::iterator itEdge = std::find(edges.begin(), edges.end(),
-			Edge(v0, v1));
+	EdgeSetIterator itEdge = edges.find(Edge(v0, v1));
+	DEBUG_PRINT("Found edge: [%d, %d]", itEdge->v0, itEdge->v1);
+
+	DEBUG_END;
 	return itEdge;
 }
 

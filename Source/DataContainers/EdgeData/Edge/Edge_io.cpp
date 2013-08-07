@@ -2,7 +2,7 @@
 
 const double THRESHOLD_ESSENTIAL_ASSOCIATION = 0.1;
 
-void Edge::my_fprint(FILE* file)
+void Edge::my_fprint(FILE* file) const
 {
 #ifndef NDEBUG
 	fprintf(file, COLOUR_YELLOW "Printing content of edge #%d" COLOUR_WHITE,

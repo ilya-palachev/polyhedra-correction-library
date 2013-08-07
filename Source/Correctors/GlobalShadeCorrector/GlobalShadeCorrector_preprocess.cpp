@@ -31,7 +31,7 @@ void GlobalShadeCorrector::preprocessAssociations()
 			int* indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 			{
-				list<Edge>::iterator edge =
+				EdgeSetIterator edge =
 						edgeData->findEdge(indVertices[iVertex],
 						indVertices[iVertex + 1]);
 				associator.run(iContour, iFacet, edge->id);
@@ -40,11 +40,10 @@ void GlobalShadeCorrector::preprocessAssociations()
 	}
 #ifndef NDEBUG
 	/* Print found associations : */
-	for (list<Edge>::iterator edge = edgeData->edges.begin();
+	for (EdgeSetIterator edge = edgeData->edges.begin();
 			edge != edgeData->edges.end(); ++edge)
 	{
 		edge->my_fprint(stdout);
-
 		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
 				polyhedron->vertices[edge->v1]));
 		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,

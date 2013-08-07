@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <list>
+#include <set>
 #include <algorithm>
 #include <assert.h>
 #include <time.h>
@@ -30,8 +31,9 @@ class Facet;
 class VertexInfo;
 class EdgeList;
 class FutureFacet;
-class EdgeSet;
+class EdgeSetIntersected;
 class Edge;
+class EdgeComparison;
 class SContour;
 class SideOfContour;
 
@@ -82,9 +84,9 @@ class SortedSetOfPairs;
 #include "Polyhedron/Verifier/Verifier.h"
 
 #include "DataContainers/PData/PData.h"
-#include "DataContainers/EdgeData/EdgeData.h"
 #include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
 #include "DataContainers/EdgeData/Edge/Edge.h"
+#include "DataContainers/EdgeData/EdgeData.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"

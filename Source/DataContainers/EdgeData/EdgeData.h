@@ -8,22 +8,22 @@
 #ifndef EDGEDATA_H_
 #define EDGEDATA_H_
 
-/*
- *
- */
+typedef set<Edge, EdgeComparison> EdgeSet;
+typedef set<Edge, EdgeComparison>::iterator EdgeSetIterator;
+
 class EdgeData
 {
 public:
-	list<Edge> edges;
+	EdgeSet edges;
 	int numEdges;
 
 	EdgeData();
 	EdgeData(int numEdgesMax);
 	~EdgeData();
 
-	list<Edge>::iterator findEdge(int v0, int v1);
-	void addEdge(int numEdgesMax, int v0, int v1, int f0, int f1);
-	void addEdge(int numEdgesMax, int v0, int v1, int f0);
+	EdgeSetIterator findEdge(int v0, int v1);
+	void addEdge(int v0, int v1, int f0, int f1);
+	void addEdge(int v0, int v1, int f0);
 
 	bool operator ==(EdgeData& e);
 	bool operator !=(EdgeData& e);

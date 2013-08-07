@@ -42,10 +42,20 @@ public:
 	bool operator !=(const Edge& e);
 
 	//Edge_io.cpp :
-	void my_fprint(FILE* file);
+	void my_fprint(FILE* file) const;
 
 private:
 
+};
+
+class EdgeComparison
+{
+public:
+	inline bool operator() (Edge edge0, Edge edge1)
+	{
+		return edge0.v0 < edge1.v0 ||
+				(edge0.v0 == edge1.v0 && edge0.v1 < edge1.v1);
+	}
 };
 
 #endif	/* EDGE_H */

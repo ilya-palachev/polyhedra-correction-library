@@ -19,7 +19,7 @@ private:
 	int iContour;
 	int iFacet;
 	int iEdge;
-	list<Edge>::iterator edge;
+	EdgeSetIterator edge;
 
 	Polyhedron* polyhedronTmp;
 	double* bufDouble;
