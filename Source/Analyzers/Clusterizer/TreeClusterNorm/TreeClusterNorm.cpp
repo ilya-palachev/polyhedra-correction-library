@@ -30,16 +30,12 @@ void TreeClusterNorm::fprint(FILE* file)
 	root->fprint(file, 0);
 }
 
-//void TreeClusterNorm::fprint_dendrogamma(FILE* file) {
-//    root->fprint(file, 0);
-//}
-
 void TreeClusterNorm::fprint_dendrogamma_lev(FILE* file)
 {
 	for (int i = 0; i < 4; i++)
 	{
 		root->fprint_dendrogramma_lev(file, 0, i);
-		fprintf(file, "\n");
+		REGULAR_PRINT(file, "\n");
 	}
 	root->cluster->fprint(stdout);
 

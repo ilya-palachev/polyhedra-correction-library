@@ -27,7 +27,7 @@ void SortedDouble::add(double x)
 
 	if (num >= len)
 	{
-		printf("Error.OVERULL!!!\n");
+		ERROR_PRINT("Error. Overflow!!!\n");
 		return;
 	}
 

@@ -33,7 +33,7 @@ SContour::SContour(const SContour& orig) :
 SContour::~SContour()
 {
 
-	printf("Attention! shade contour %d is being deleted now...\n", this->id);
+	DEBUG_PRINT("Attention! shade contour %d is being deleted now...\n", this->id);
 
 	if (sides != NULL)
 	{

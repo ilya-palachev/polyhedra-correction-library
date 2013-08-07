@@ -4,12 +4,12 @@ void Facet::preprocess_free()
 {
 	if (numVertices <= 0)
 	{
-		printf("\tError. nv = %d\n", numVertices);
+		ERROR_PRINT("\tError. nv = %d\n", numVertices);
 		return;
 	}
 	if (indVertices == NULL)
 	{
-		printf("\tError. index == NULL\n");
+		ERROR_PRINT("\tError. index == NULL\n");
 		return;
 	}
 	for (int i = numVertices + 1; i < 3 * numVertices + 1; ++i)
@@ -24,7 +24,6 @@ void Facet::preprocess()
 {
 	int i, v0, v1;
 
-	//	this->my_print_all();
 	for (i = 0; i < numVertices; ++i)
 	{
 		v0 = indVertices[i];
@@ -52,9 +51,7 @@ void Facet::preprocess_edge(int v0, int v1, int v0_id)
 	}
 	if (pos == -1)
 	{
-		printf(
-				"preprocess_edge : Error. Edge (%d %d) cannot be found anywhere\n",
-				v0, v1);
+		ERROR_PRINT("Error. Edge (%d %d) cannot be found anywhere\n", v0, v1);
 	}
 }
 

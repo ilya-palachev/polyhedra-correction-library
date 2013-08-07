@@ -123,11 +123,8 @@ void EdgeList::set_id_v_new(int id_v)
 
 void EdgeList::set_isUsed(bool val)
 {
-#ifdef DEBUG
-//	fprintf(stdout,
-//			"EdgeList[%d].isUsed[%d] = %d\n",
-//			id, pointer, val);
-#endif
+	DEBUG_PRINT("EdgeList[%d].isUsed[%d] = %d\n",
+			id, pointer, val);
 	isUsed[pointer] = val;
 }
 
@@ -135,15 +132,11 @@ void EdgeList::set_pointer(int val)
 {
 	if (val < 0 || val > num - 1)
 	{
-		fprintf(stdout, "EdgeList::set_pointer : Error. num = %d, val = %d",
-				num, val);
+		ERROR_PRINT("Error. num = %d, val = %d", num, val);
 		return;
 	}
-#ifdef DEBUG
-//	fprintf(stdout,
-//			"EdgeList[%d].set_pointer(%d)\n",
-//			id, val);
-#endif
+	DEBUG_PRINT("EdgeList[%d].set_pointer(%d)\n",
+			id, val);
 	pointer = val;
 }
 

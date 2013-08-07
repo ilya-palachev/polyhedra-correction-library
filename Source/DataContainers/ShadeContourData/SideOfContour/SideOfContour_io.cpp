@@ -2,11 +2,10 @@
 
 void SideOfContour::my_fprint(FILE* file)
 {
-#ifndef NDEBUG
-	fprintf(file, "Printing content of side of contour\n");
-	fprintf(file, "confidence = %lf (number from 0 to 1)\n", confidence);
-	fprintf(file, "edge type = %d (that means the following:\n", type);
-	fprintf(file,
+	REGULAR_PRINT(file, "Printing content of side of contour\n");
+	REGULAR_PRINT(file, "confidence = %lf (number from 0 to 1)\n", confidence);
+	REGULAR_PRINT(file, "edge type = %d (that means the following:\n", type);
+	REGULAR_PRINT(file,
 			"// Unknown / not calculated\n"
 					"EEdgeRegular     = 0 -- Regular edges, regular confidence\n"
 					"EEdgeDummy       = 1 -- Dummy edge, not existing in reality\n"
@@ -17,15 +16,12 @@ void SideOfContour::my_fprint(FILE* file)
 					"                        which define a vertex (e.g. in the culet)\n"
 					"EEdgeGlare       = 5 -- Low confidence because of photo glare\n\n");
 
-	fprintf(file, "A1 = (%lf, %lf, %lf)\n", A1.x, A1.y, A1.z);
-	fprintf(file, "A2 = (%lf, %lf, %lf)\n", A2.x, A2.y, A2.z);
-#endif
+	REGULAR_PRINT(file, "A1 = (%lf, %lf, %lf)\n", A1.x, A1.y, A1.z);
+	REGULAR_PRINT(file, "A2 = (%lf, %lf, %lf)\n", A2.x, A2.y, A2.z);
 }
 
 void SideOfContour::my_fprint_short(FILE* file)
 {
-#ifndef NDEBUG
-	fprintf(file, "%lf\t%d\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\n", confidence, type,
+	REGULAR_PRINT(file, "%lf\t%d\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\n", confidence, type,
 			A1.x, A1.y, A1.z, A2.x, A2.y, A2.z);
-#endif
 }

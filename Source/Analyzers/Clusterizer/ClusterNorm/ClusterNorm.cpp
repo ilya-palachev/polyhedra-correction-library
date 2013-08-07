@@ -22,15 +22,13 @@ double ClusterNorm::area()
 	double cluster_area = 0.;
 	double areaOneFacet;
 
-//    printf("\n");
 	for (int i = 0; i < num; i++)
 	{
 		areaOneFacet = poly->areaOfFacet(indexFacet[i]);
-//        printf("areaOneFacet = %lf\n", areaOneFacet);       
+        DEBUG_PRINT("areaOneFacet = %lf\n", areaOneFacet);
 		cluster_area += areaOneFacet;
 
 	}
-	//printf(" %lf ", cluster_area);
 	return cluster_area;
 }
 
@@ -96,16 +94,15 @@ ClusterNorm& ClusterNorm::operator +=(ClusterNorm& cluster1)
 
 	int* newIndexFacet;
 
-	//printf("operator+=   : cluster0 = {");
-	printf("cluster0 = {");
+	REGULAR_PRINT(stderr, "cluster0 = {");
 
 	this->fprint(stdout);
 
-	printf("}, cluster1 = {");
+	REGULAR_PRINT(stderr, "}, cluster1 = {");
 
 	cluster1.fprint(stdout);
 
-	printf("}\n");
+	REGULAR_PRINT(stderr, "}\n");
 
 	newNum = this->num + cluster1.num;
 	newNumMax = this->numMax + cluster1.numMax;
@@ -123,20 +120,19 @@ ClusterNorm& ClusterNorm::operator +=(ClusterNorm& cluster1)
 		++j;
 	}
 
-//    printf("newIndexFacet = {");
-//    for (i = 0; i < newNum - 1; ++i) {
-//        printf("%d, ", newIndexFacet[i]);
-//    }
-//    printf("%d}\n", newIndexFacet[newNum - 1]);
+	REGULAR_PRINT(stderr, "newIndexFacet = {");
+    for (i = 0; i < newNum - 1; ++i) {
+        DEBUG_PRINT("%d, ", newIndexFacet[i]);
+    }
+    REGULAR_PRINT(stderr, "%d}\n", newIndexFacet[newNum - 1]);
 
 	newSpherePoint = MassCentre(newNum, newIndexFacet, poly);
 
 	*this = ClusterNorm(newNum, newNumMax, newSpherePoint, newIndexFacet, poly);
 
-//    printf("newCluster: = {");
-//    this->fprint(stdout);
-//    printf("}\n");
-//    
+	REGULAR_PRINT(stderr, "newCluster: = {");
+    this->fprint(stdout);
+    REGULAR_PRINT(stderr, "}\n");
 
 	return *this;
 
@@ -165,30 +161,22 @@ ClusterNorm& ClusterNorm::operator =(const ClusterNorm& orig)
 
 double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1)
 {
-//    printf("\tcluster0.P = (%lf, %lf, %lf)\n", 
-//            cluster0.P.vector.x,
-//            cluster0.P.vector.y,
-//            cluster0.P.vector.z);
-//    printf("\tcluster1.P = (%lf, %lf, %lf)\n", 
-//            cluster1.P.vector.x,
-//            cluster1.P.vector.y,
-//            cluster1.P.vector.z);
 	return distSpherePoint(cluster0.P, cluster1.P);
 }
 
 void ClusterNorm::fprint(FILE* file)
 {
-//    fprintf(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y, P.vector.z);
+    REGULAR_PRINT(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y, P.vector.z);
 
 	if (num < 1)
 		return;
 	for (int i = 0; i < num; ++i)
 	{
-		fprintf(file, "%d, ", indexFacet[i]);
+		REGULAR_PRINT(file, "%d, ", indexFacet[i]);
 	}
 
 	double a = area();
-	fprintf(file, "; area = %lf", a);
+	REGULAR_PRINT(file, "; area = %lf", a);
 }
 
 void ClusterNorm::setColor(char red, char green, char blue)

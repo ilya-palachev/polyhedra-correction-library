@@ -80,8 +80,8 @@ void FutureFacet::add_edge(int v0, int v1, int src_f)
 {
 	if (nv >= len)
 	{
-		fprintf(stdout, "FutureFacet::add_edge : Error. nv >= len  ");
-		fprintf(stdout, "v0 = %d, v1 = %d, src_f = %d\n", v0, v1, src_f);
+		ERROR_PRINT("Error. nv >= len  ");
+		ERROR_PRINT("v0 = %d, v1 = %d, src_f = %d\n", v0, v1, src_f);
 		return;
 	}
 	edge0[nv] = v0;

@@ -8,7 +8,7 @@ Polyhedron::Polyhedron() :
 				vertexInfos(NULL)
 {
 	DEBUG_START;
-	fprintf(stdout, "Creating empty polyhedron...\n");
+	DEBUG_PRINT("Creating empty polyhedron...\n");
 	DEBUG_END;
 }
 
@@ -36,7 +36,7 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 				vertexInfos(NULL)
 {
 	DEBUG_START;
-	fprintf(stdout, "Creating polyhedron by coping...\n");
+	DEBUG_PRINT("Creating polyhedron by coping...\n");
 
 	for (int i = 0; i < numVertices; ++i)
 		vertices[i] = vertex_orig[i];
@@ -108,7 +108,7 @@ void Polyhedron::delete_empty_facets()
 	{
 		if (facets[i].numVertices < 3)
 		{
-			printf("===Facet %d is empty...\n", i);
+			DEBUG_PRINT("===Facet %d is empty...\n", i);
 			for (j = i; j < numFacets - 1; ++j)
 			{
 				facets[j] = facets[j + 1];

@@ -158,12 +158,10 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 
 void ShadeContourData::fprint(FILE* file)
 {
-#ifndef NDEBUG
-	fprintf(file, "Dumping shade contour data. Number of contours: %d\n",
+	REGULAR_PRINT(file, "Dumping shade contour data. Number of contours: %d\n",
 			numContours);
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		contours[iContour].my_fprint(file);
 	}
-#endif
 }

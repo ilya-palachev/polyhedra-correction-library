@@ -19,10 +19,7 @@ void FutureFacet::generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
 			res_id = es->search_edge(v0, v1);
 			if (res_id < 0)
 			{
-				fprintf(stdout,
-						"FutureFacet::generate_facet : Error. \
-						Cannot find edge %d %d in edge set\n",
-						v0, v1);
+				ERROR_PRINT("Cannot find edge %d %d in edge set", v0, v1);
 				res_id = -1;
 			}
 			else

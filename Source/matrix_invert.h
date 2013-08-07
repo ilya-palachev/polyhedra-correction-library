@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "DebugPrint.h"
 
 #define eps 1e-32
 
@@ -126,7 +127,7 @@ int mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
 
 	if (numCol0 != numStr1)
 	{
-		printf("mult: Error. Multiplication unavailable.\n");
+		ERROR_PRINT("Error. Multiplication unavailable.");
 		return 1;
 	}
 
@@ -188,8 +189,6 @@ int mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
 					* Mat1[numCol1 * t + numCol1 - 1];
 		Res[numStr0 * numCol1 - 1] = s00;
 	}
-	//printf("mult: result:\n");
-	//print(Res, numStr0, numCol1);
 	return 0;
 }
 
@@ -201,7 +200,7 @@ int sub_mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
 
 	if (numCol0 != numStr1)
 	{
-		printf("mult: Error. Multiplication unavailable.\n");
+		ERROR_PRINT("Error. Multiplication unavailable.");
 		return 1;
 	}
 
@@ -263,8 +262,6 @@ int sub_mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
 					* Mat1[numCol1 * t + numCol1 - 1];
 		Res[numStr0 * numCol1 - 1] -= s00;
 	}
-	//printf("sub_mult: result:\n");
-	//print(Res, numStr0, numCol1);
 	return 0;
 }
 

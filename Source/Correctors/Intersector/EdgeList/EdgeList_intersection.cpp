@@ -9,7 +9,7 @@ void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
 		double sm)
 {
 #ifdef DEBUG1
-	fprintf(stdout, "add_edge(v0 = %d, v1 = %d, next_f = %d, next_d = %d, \
+	DEBUG_PRINT("add_edge(v0 = %d, v1 = %d, next_f = %d, next_d = %d, \
 			sm = %lf)\n", v0, v1, next_f, next_d, sm);
 #endif
 
@@ -92,9 +92,7 @@ void EdgeList::search_and_set_info(int v0, int v1, int next_d, int next_f)
 			return;
 		}
 	}
-	fprintf(stdout,
-			"EdgeList::search_and_set_info : Error. Edge (%d, %d) not found...\n",
-			v0, v1);
+	ERROR_PRINT("Error. Edge (%d, %d) not found...", v0, v1);
 	return;
 }
 
@@ -182,7 +180,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 
 	if (num < 1 && fabs(err) <= 0.0000000000000001)
 	{
-		fprintf(stdout, "\t\t --- SPECIAL FACET ---\n\n");
+		DEBUG_PRINT("\t\t --- SPECIAL FACET ---\n\n");
 
 		sign0 = poly->signum(poly->vertices[v0], iplane);
 		sign1 = poly->signum(poly->vertices[v1], iplane);
@@ -192,8 +190,8 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 			id1 = poly->facets[next_f].find_vertex(v1);
 			if (id0 == -1 || id1 == -1)
 			{
-				fprintf(stdout,
-						"\tError: cannot find vertexes %d (%d) and %d (%d) facet %d.\n",
+				ERROR_PRINT("\tError: cannot find vertexes %d (%d) "
+						"and %d (%d) facet %d.\n",
 						v0, id0, v1, id1, next_f);
 				return;
 			}
@@ -236,8 +234,8 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 			}
 			else
 			{
-				fprintf(stdout,
-						"Error. Cannot define the direction. sign(%d) = %d, sign(%d) = %d, drctn = %d\n",
+				ERROR_PRINT("Error. Cannot define the direction.");
+				ERROR_PRINT("sign(%d) = %d, sign(%d) = %d, drctn = %d",
 						v0, sign0, v1, sign1, next_d);
 				return;
 			}
@@ -259,7 +257,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 		}
 		v1 = v0;
 #ifdef DEBUG1
-		fprintf(stdout, "\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n",
+		DEBUG_PRINT("\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n",
 				v0, v1, next_f);
 #endif
 
@@ -267,7 +265,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 	}
 	else if (num < 1)
 	{
-		fprintf(stdout, "Error. num < 1,  err = %.16lf, if = %d\n", err,
+		ERROR_PRINT("Error. num < 1,  err = %.16lf, if = %d\n", err,
 				fabs(err) < 1e-16);
 		return;
 	}
@@ -278,16 +276,14 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 		v1 = tmp;
 	}
 #ifdef DEBUG1
-	fprintf(stdout,
-			"EdgeList::get_next_edge %d\n",
+	DEBUG_PRINT("EdgeList::get_next_edge %d\n",
 			id);
 	//        this->my_fprint(stdout);
 #endif
 	for (i = 0; i < num; ++i)
 	{
 		//#ifdef DEBUG1
-		//        fprintf(stdout,
-		//                "   edge0[%d] = %d, edge1[%d] = %d\n",
+		//        DEBUG_PRINT("   edge0[%d] = %d, edge1[%d] = %d\n",
 		//                i, edge0[i], i, edge1[i]);
 		//#endif
 		if (edge0[i] == v0 && edge1[i] == v1)
@@ -327,7 +323,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 				next_d = next_direction[i];
 			isUsed[i_next] = true;
 #ifdef DEBUG1
-			fprintf(stdout, "\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n",
+			DEBUG_PRINT("\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n",
 					v0, v1, next_f);
 #endif
 

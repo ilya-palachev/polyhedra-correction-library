@@ -29,15 +29,12 @@ TreeClusterNormNode::~TreeClusterNormNode()
 void TreeClusterNormNode::fprint(FILE* file, int level)
 {
 
-//    if (level > 10)
-//        return;
-
 	for (int i = 0; i < level; ++i)
 	{
-		fprintf(file, " ");
+		REGULAR_PRINT(file, " ");
 	}
 	cluster->fprint(file);
-	fprintf(file, "\n");
+	REGULAR_PRINT(file, "\n");
 	if (child0 != NULL)
 	{
 		child0->fprint(file, level + 1);
@@ -47,34 +44,6 @@ void TreeClusterNormNode::fprint(FILE* file, int level)
 		child1->fprint(file, level + 1);
 	}
 }
-
-//void TreeClusterNormNode::fprint_dendrogramma(FILE* file, int level) {
-//    
-//    int numLeft  = child0->cluster->num;
-//    int numRight = child1->cluster->num;
-//    
-//    
-//    fprintf(file, "|___");
-//    for (int i = 1; i < numLeft; ++i) {
-//        fprintf(file, "____");
-//    }
-//    for (int i = 0; i < numRight; ++i) {
-//        fprintf(file, "    ");
-//    }
-//    
-//
-//    for (int i = 0; i < level; ++i) {
-//        fprintf(file, " ");
-//    }
-//    cluster->fprint(file);
-//    fprintf(file, "\n");
-//    if (child0 != NULL) {
-//        child0->fprint(file, level + 1);
-//    }
-//    if (child1 != NULL) {
-//        child1->fprint(file, level + 1);
-//    }
-//}
 
 void TreeClusterNormNode::fprint_dendrogramma_lev(FILE* file, int level,
 		int fix)
@@ -89,14 +58,14 @@ void TreeClusterNormNode::fprint_dendrogramma_lev(FILE* file, int level,
 
 	if (level == fix)
 	{
-		fprintf(file, "|___");
+		REGULAR_PRINT(file, "|___");
 		for (int i = 1; i < numLeft; ++i)
 		{
-			fprintf(file, "____");
+			REGULAR_PRINT(file, "____");
 		}
 		for (int i = 0; i < numRight; ++i)
 		{
-			fprintf(file, "    ");
+			REGULAR_PRINT(file, "    ");
 		}
 	}
 	else

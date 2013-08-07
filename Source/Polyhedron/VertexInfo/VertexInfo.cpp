@@ -19,11 +19,11 @@ VertexInfo::VertexInfo(const int id_orig, const int nf_orig,
 
 	if (!index_orig)
 	{
-		fprintf(stdout, "VertexInfo::VertexInfo. Error. index1 = NULL\n");
+		ERROR_PRINT("Error. index1 = NULL\n");
 	}
 	if (nf_orig < 3)
 	{
-		fprintf(stdout, "VertexInfo::VertexInfo. Error. nf1 < 3\n");
+		ERROR_PRINT("Error. nf1 < 3\n");
 	}
 	indFacets = new int[3 * numFacets + 1];
 	for (int i = 0; i < 3 * numFacets + 1; ++i)

@@ -28,16 +28,13 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	rgb[1] = 100;
 	rgb[2] = 100;
 
-//	if (!poly) {
-//		fprintf(stdout, "Facet::Facet. Error. poly = NULL");
-//	}
 	if (!index_orig)
 	{
-		fprintf(stdout, "Facet::Facet. Error. index_orig = NULL");
+		ERROR_PRINT("Error. index_orig = NULL");
 	}
 	if (nv_orig < 3)
 	{
-		fprintf(stdout, "Facet::Facet. Error. nv_orig < 3");
+		ERROR_PRINT("Error. nv_orig < 3");
 	}
 	indVertices = new int[3 * numVertices + 1];
 	if (ifLong)
@@ -94,9 +91,7 @@ Facet& Facet::operator =(const Facet& facet1)
 
 Facet::~Facet()
 {
-#ifdef DEBUG1
-	fprintf(stdout, "Deleting facet[%d]", id);
-#endif
+	DEBUG_PRINT("Deleting facet[%d]", id);
 	if (indVertices != NULL)
 		delete[] indVertices;
 }
@@ -235,9 +230,7 @@ void Facet::find_next_facet(int v, int& fid_next)
         if (i == numVertices)
         {
                 fid_next = -1;
-                ERROR_PRINT(
-                                "Facet::find_next_facet : Error. Cannot find vertex %d at facet %d",
-                                v, id);
+                ERROR_PRINT("Error. Cannot find vertex %d at facet %d", v, id);
                 return;
         }
         fid_next = indVertices[numVertices + 1 + i];

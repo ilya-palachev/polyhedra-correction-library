@@ -279,10 +279,10 @@ void print_matrix(FILE* file, int n, int m, double* A)
 {
 	int i, j;
 
-	fprintf(file, "\n");
+	REGULAR_PRINT(file, "\n");
 	for (i = 0; i < m; ++i)
-		fprintf(file, "--");
-	fprintf(file, "\n");
+		REGULAR_PRINT(file, "--");
+	REGULAR_PRINT(file, "\n");
 
 	for (i = 0; i < n; ++i)
 	{
@@ -291,43 +291,43 @@ void print_matrix(FILE* file, int n, int m, double* A)
 			if (fabs(A[i * n + j]) >= 1e-16)
 			{
 				if (fabs(A[i * n + j]) < 9.5)
-					fprintf(file, "%1.0lf ", fabs(A[i * n + j]));
+					REGULAR_PRINT(file, "%1.0lf ", fabs(A[i * n + j]));
 				else
-					fprintf(file, "# ");
+					REGULAR_PRINT(file, "# ");
 			}
 			else
-				fprintf(file, "  ");
+				REGULAR_PRINT(file, "  ");
 		}
-		fprintf(file, "|\n");
+		REGULAR_PRINT(file, "|\n");
 	}
 	for (i = 0; i < m; ++i)
-		fprintf(file, "--");
-	fprintf(file, "\n");
+		REGULAR_PRINT(file, "--");
+	REGULAR_PRINT(file, "\n");
 }
 
 void print_matrix_bool(FILE* file, int n, int m, bool* A)
 {
 	int i, j;
 
-	fprintf(file, "\n");
+	REGULAR_PRINT(file, "\n");
 	for (i = 0; i < m; ++i)
-		fprintf(file, "--");
-	fprintf(file, "\n");
+		REGULAR_PRINT(file, "--");
+	REGULAR_PRINT(file, "\n");
 
 	for (i = 0; i < n; ++i)
 	{
 		for (j = 0; j < m; ++j)
 		{
 			if (A[i * m + j])
-				fprintf(file, "1 ");
+				REGULAR_PRINT(file, "1 ");
 			else
-				fprintf(file, "  ");
+				REGULAR_PRINT(file, "  ");
 		}
-		fprintf(file, "|\n");
+		REGULAR_PRINT(file, "|\n");
 	}
 	for (i = 0; i < m; ++i)
-		fprintf(file, "--");
-	fprintf(file, "\n");
+		REGULAR_PRINT(file, "--");
+	REGULAR_PRINT(file, "\n");
 }
 
 void print_vector(int n, double* v)

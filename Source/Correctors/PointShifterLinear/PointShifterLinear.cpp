@@ -321,8 +321,6 @@ void PointShifterLinear::moveVerticesGlobal()
 
 void PointShifterLinear::runLocal(int id, Vector3d delta)
 {
-	//    printf(".");
-
 	int step, i;
 	double err, err_eps;
 	double norm;
