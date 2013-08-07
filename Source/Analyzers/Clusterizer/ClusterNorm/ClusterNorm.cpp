@@ -15,10 +15,13 @@ ClusterNorm::ClusterNorm() :
 				indexFacet(NULL),
 				poly(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 double ClusterNorm::area()
 {
+	DEBUG_START;
 	double cluster_area = 0.;
 	double areaOneFacet;
 
@@ -29,6 +32,7 @@ double ClusterNorm::area()
 		cluster_area += areaOneFacet;
 
 	}
+	DEBUG_END;
 	return cluster_area;
 }
 
@@ -40,6 +44,7 @@ ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 				indexFacet(new int[orig.numMax]),
 				poly(orig.poly)
 {
+	DEBUG_START;
 	for (int i = 0; i < num; ++i)
 	{
 		indexFacet[i] = orig.indexFacet[i];
@@ -49,6 +54,7 @@ ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 	{
 		poly->facets[i] = orig.poly->facets[i];
 	}
+	DEBUG_END;
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
@@ -59,6 +65,8 @@ ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 				indexFacet(new int[numMax_orig]),
 				poly(poly_orig)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
@@ -69,24 +77,28 @@ ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 				indexFacet(new int[numMax_orig]),
 				poly(poly_orig)
 {
+	DEBUG_START;
 	for (int i = 0; i < num; ++i)
 	{
 		indexFacet[i] = indexFacet_orig[i];
 	}
+	DEBUG_END;
 }
 
 ClusterNorm::~ClusterNorm()
 {
+	DEBUG_START;
 	if (indexFacet != NULL)
 	{
 		delete[] indexFacet;
 		indexFacet = NULL;
 	}
+	DEBUG_END;
 }
 
 ClusterNorm& ClusterNorm::operator +=(ClusterNorm& cluster1)
 {
-
+	DEBUG_START;
 	int i, j;
 	int newNum, newNumMax;
 
@@ -134,12 +146,13 @@ ClusterNorm& ClusterNorm::operator +=(ClusterNorm& cluster1)
     this->fprint(stdout);
     REGULAR_PRINT(stderr, "}\n");
 
+    DEBUG_END;
 	return *this;
-
 }
 
 ClusterNorm& ClusterNorm::operator =(const ClusterNorm& orig)
 {
+	DEBUG_START;
 	num = orig.num;
 	numMax = orig.numMax;
 	P = orig.P;
@@ -156,16 +169,20 @@ ClusterNorm& ClusterNorm::operator =(const ClusterNorm& orig)
 	{
 		indexFacet[i] = orig.indexFacet[i];
 	}
+	DEBUG_START;
 	return *this;
 }
 
 double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1)
 {
+	DEBUG_START;
+	DEBUG_END;
 	return distSpherePoint(cluster0.P, cluster1.P);
 }
 
 void ClusterNorm::fprint(FILE* file)
 {
+	DEBUG_START;
     REGULAR_PRINT(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y, P.vector.z);
 
 	if (num < 1)
@@ -177,12 +194,15 @@ void ClusterNorm::fprint(FILE* file)
 
 	double a = area();
 	REGULAR_PRINT(file, "; area = %lf", a);
+	DEBUG_END;
 }
 
 void ClusterNorm::setColor(char red, char green, char blue)
 {
+	DEBUG_START;
 	for (int i = 0; i < num; ++i)
 	{
 		poly->facets[indexFacet[i]].set_rgb(red, green, blue);
 	}
+	DEBUG_END;
 }

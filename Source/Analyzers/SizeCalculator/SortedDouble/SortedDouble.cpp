@@ -11,17 +11,22 @@ SortedDouble::SortedDouble(int Len) :
 				len(Len),
 				num(0)
 {
+	DEBUG_START;
 	array = new double[len];
+	DEBUG_END;
 }
 
 SortedDouble::~SortedDouble()
 {
+	DEBUG_START;
 	if (array != NULL)
 		delete[] array;
+	DEBUG_END;
 }
 
 void SortedDouble::add(double x)
 {
+	DEBUG_START;
 
 	int first, last, mid;
 
@@ -48,10 +53,14 @@ void SortedDouble::add(double x)
 	}
 	insert_double(array, num, last, x);
 	++num;
+
+	DEBUG_END;
 }
 
 double SortedDouble::calclulate()
 {
+	DEBUG_START;
+
 	int i;
 	double s;
 
@@ -63,5 +72,7 @@ double SortedDouble::calclulate()
 		else
 			s += array[i];
 	}
+
+	DEBUG_END;
 	return s;
 }

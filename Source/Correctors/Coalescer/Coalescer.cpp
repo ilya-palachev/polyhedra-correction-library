@@ -14,6 +14,8 @@ Coalescer::Coalescer() :
 		plane(),
 		coalescedFacet()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Coalescer::Coalescer(Polyhedron* p) :
@@ -21,14 +23,20 @@ Coalescer::Coalescer(Polyhedron* p) :
 		plane(),
 		coalescedFacet()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Coalescer::~Coalescer()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void Coalescer::run(int fid0, int fid1)
 {
+	DEBUG_START;
+
 	int nv;
 
 	if (fid0 == fid1)
@@ -72,10 +80,13 @@ void Coalescer::run(int fid0, int fid1)
 	DEBUG_PRINT("=========    Грани %d и %d объединены !!!   =========", fid0,
 			fid1);
 	DEBUG_PRINT("=====================================================");
+
+	DEBUG_END;
 }
 
 void Coalescer::run(int n, int* fid)
 {
+	DEBUG_START;
 
 	int i;
 	int nv;
@@ -123,11 +134,15 @@ void Coalescer::run(int n, int* fid)
 	DEBUG_PRINT(" и %d ", fid[n - 1]);
 	DEBUG_PRINT("объединены !!!   =========");
 	DEBUG_PRINT("=====================================================");
+
+	DEBUG_END;
 }
 
 
 int Coalescer::buildIndex(int fid0, int fid1)
 {
+	DEBUG_START;
+
 	int nv;
 
 	int i, j;
@@ -147,10 +162,12 @@ int Coalescer::buildIndex(int fid0, int fid1)
 			break;
 	if (i == nv1)
 	{
-		DEBUG_PRINT(
+		ERROR_PRINT(
 				"join_facets : Error. Facets %d and %d have no common vertexes",
 				fid0, fid1);
 		nv = -1;
+
+		DEBUG_END;
 		return 0;
 	}
 
@@ -229,11 +246,14 @@ int Coalescer::buildIndex(int fid0, int fid1)
 	if (index != NULL)
 		delete[] index;
 
+	DEBUG_END;
 	return nv;
 }
 
 int Coalescer::buildIndex(int n, int* fid)
 {
+	DEBUG_START;
+
 	int nv;
 
 	int i, j, *index, *nfind, nnv, nv_safe;
@@ -375,11 +395,14 @@ int Coalescer::buildIndex(int n, int* fid)
 	if (del != NULL)
 		delete[] del;
 
+	DEBUG_END;
 	return nv;
 }
 
 void Coalescer::calculatePlane(int fid0, int fid1)
 {
+	DEBUG_START;
+
 	int *index, nv;
 
 	coalescedFacet.my_fprint_all(stdout);
@@ -398,10 +421,13 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 	}
 	DEBUG_PRINT("Calculated plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0",
 			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+
+	DEBUG_END;
 }
 
 void Coalescer::calculatePlane(int n, int* fid)
 {
+	DEBUG_START;
 
 	int *index, nv;
 	int ninvert, i;
@@ -450,10 +476,13 @@ void Coalescer::calculatePlane(int n, int* fid)
 				plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	}
 
+	DEBUG_END;
 }
 
 void Coalescer::rise(int fid0)
 {
+	DEBUG_START;
+
 	int i;
 	int nv, *index, *sign_vertex;
 	int ndown;
@@ -520,8 +549,9 @@ void Coalescer::rise(int fid0)
 
 		if (imin == -1)
 		{
-			DEBUG_PRINT(
+			ERROR_PRINT(
 					"join_facets_rise : Ошибка. Не удалось найти вершину (imin = -1)");
+			DEBUG_END;
 			return;
 		}
 
@@ -532,7 +562,8 @@ void Coalescer::rise(int fid0)
 
 		if (polyhedron->test_structure() > 0)
 		{
-			DEBUG_PRINT("Не пройден тест на структуру!");
+			ERROR_PRINT("Не пройден тест на структуру!");
+			DEBUG_END;
 			return;
 		}
 
@@ -565,10 +596,13 @@ void Coalescer::rise(int fid0)
 		delete[] sign_vertex;
 	if (file_name_out != NULL)
 		delete[] file_name_out;
+
+	DEBUG_END;
 }
 
 int Coalescer::riseFind(int fid0)
 {
+	DEBUG_START;
 	int imin;
 
 	int i;
@@ -656,11 +690,14 @@ int Coalescer::riseFind(int fid0)
 		}
 	}
 
+	DEBUG_END;
 	return imin;
 }
 
 double Coalescer::riseFindStep(int fid0, int i)
 {
+	DEBUG_START;
+
 	double d;
 
 	int nv, *index;
@@ -748,11 +785,15 @@ double Coalescer::riseFindStep(int fid0, int i)
 		polyhedron->facets[fl1].my_fprint_all(stdout);
 		polyhedron->facets[fr1].my_fprint_all(stdout);
 	}
+
+	DEBUG_END;
 	return d;
 }
 
 void Coalescer::risePoint(int fid0, int imin)
 {
+	DEBUG_START;
+
 	int nv, *index;
 	int fl2, fl1, fr1, fr2;
 	int irep;
@@ -1231,18 +1272,24 @@ void Coalescer::risePoint(int fid0, int imin)
 			polyhedron->vertices[index[imin]] = v2;
 		}
 	}
+
+	DEBUG_END;
 }
 
 void Coalescer::deleteVertexInPolyhedron(int v)
 {
+	DEBUG_START;
 	DEBUG_PRINT("Vertex #%d is being deleted from polyhedron now.", v);
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 		polyhedron->facets[i].delete_vertex(v);
+	DEBUG_END;
 }
 
 
 int Coalescer::appendVertex(Vector3d& vec)
 {
+	DEBUG_START;
+
 	Vector3d* vertex1;
 	vertex1 = new Vector3d[polyhedron->numVertices + 1];
 	for (int i = 0; i < polyhedron->numVertices; ++i)
@@ -1252,11 +1299,15 @@ int Coalescer::appendVertex(Vector3d& vec)
 		delete[] polyhedron->vertices;
 	polyhedron->vertices = vertex1;
 	++polyhedron->numVertices;
+
+	DEBUG_END;
 	return polyhedron->numVertices - 1;
 }
 
 void Coalescer::leastSquaresMethod(int nv, int *vertex_list, Plane *plane)
 {
+	DEBUG_START;
+
 	int i, id;
 	double *x, *y, *z, a, b, c, d;
 
@@ -1285,11 +1336,15 @@ void Coalescer::leastSquaresMethod(int nv, int *vertex_list, Plane *plane)
 		delete[] y;
 	if (z != NULL)
 		delete[] z;
+
+	DEBUG_END;
 }
 
 void Coalescer::leastSquaresMethodWeighted(int nv, int *vertex_list,
 		Plane *plane)
 {
+	DEBUG_START;
+
 	int i, id, i_prev, i_next, id0, id1;
 	double *x, *y, *z, a, b, c, d;
 	double *l, *w;
@@ -1340,4 +1395,6 @@ void Coalescer::leastSquaresMethodWeighted(int nv, int *vertex_list,
 		delete[] l;
 	if (z != NULL)
 		delete[] w;
+
+	DEBUG_END;
 }

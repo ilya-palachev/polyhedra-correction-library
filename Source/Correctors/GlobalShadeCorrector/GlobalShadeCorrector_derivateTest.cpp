@@ -16,11 +16,14 @@ const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
 
 void GlobalShadeCorrector::derivativeTest_all()
 {
+	DEBUG_START;
 	derivativeTest_1();
+	DEBUG_END;
 }
 
 void GlobalShadeCorrector::derivativeTest_1()
 {
+	DEBUG_START;
 	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated->begin();
 	int iCountNotAssociated = 0;
 
@@ -75,20 +78,24 @@ void GlobalShadeCorrector::derivativeTest_1()
 			ASSERT(!makeAssertion);
 		}
 	}
+	DEBUG_END;
 }
 
 double GlobalShadeCorrector::calculateFunctionalDerivative_1(int iFacet,
 		int iCoefficient)
 {
+	DEBUG_START;
 	if (iFacet < 0 || iFacet >= polyhedron->numFacets)
 	{
 		ERROR_PRINT("Error. iFacet = %d is out of bounds", iFacet);
+		DEBUG_END;
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
 	if (iCoefficient < 0 || iCoefficient >= 4)
 	{
 		ERROR_PRINT("Error. iCoefficient = %d is out of bounds", iCoefficient);
+		DEBUG_END;
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
@@ -117,6 +124,7 @@ double GlobalShadeCorrector::calculateFunctionalDerivative_1(int iFacet,
 	double funcValueLeft = 0.5 * calculateFunctional();
 	*changedValue = changedValuePrev;
 
+	DEBUG_END;
 	return 0.5 * DEFAULT_DERIVATIVE_STEP_RECIPROCAL
 			* (funcValueRight - funcValueLeft);
 }

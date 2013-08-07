@@ -12,6 +12,8 @@ MatrixDistNorm::MatrixDistNorm() :
 				matrix(NULL),
 				ifStay(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
@@ -20,8 +22,10 @@ MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
 				matrix(new double[nMax_orig * nMax_orig]),
 				ifStay(new bool[nMax_orig])
 {
+	DEBUG_START;
 	for (int i = 0; i < nMax_orig; ++i)
 		ifStay[i] = true;
+	DEBUG_END;
 }
 
 MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
@@ -30,6 +34,7 @@ MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
 				matrix(new double[orig.nMax * orig.nMax]),
 				ifStay(new bool[orig.nMax])
 {
+	DEBUG_START;
 	for (int i = 0; i < nMax * nMax; ++i)
 	{
 		matrix[i] = orig.matrix[i];
@@ -38,10 +43,12 @@ MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
 	{
 		ifStay[i] = orig.ifStay[i];
 	}
+	DEBUG_END;
 }
 
 MatrixDistNorm::~MatrixDistNorm()
 {
+	DEBUG_START;
 	if (matrix != NULL)
 	{
 		delete[] matrix;
@@ -52,11 +59,12 @@ MatrixDistNorm::~MatrixDistNorm()
 		delete[] ifStay;
 		ifStay = NULL;
 	}
+	DEBUG_END;
 }
 
 void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
 {
-
+	DEBUG_START;
 	if (m > nMax)
 	{
 		ERROR_PRINT("Error. m > nMax\n");
@@ -80,10 +88,12 @@ void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
 	{
 		ifStay[i] = true;
 	}
+	DEBUG_END;
 }
 
 double MatrixDistNorm::findMin(int& imin, int& jmin)
 {
+	DEBUG_START;
 	double min, distance;
 	bool ifAnyMinFound = false;
 	for (int i = 0; i < n; ++i)
@@ -103,12 +113,13 @@ double MatrixDistNorm::findMin(int& imin, int& jmin)
 			}
 		}
 	}
+	DEBUG_END;
 	return min;
 }
 
 void MatrixDistNorm::rebuild(int imin, int jmin, TreeClusterNormNode* nodeArray)
 {
-
+	DEBUG_START;
 	double distance;
 
 	DEBUG_PRINT("rebuild : imin = %d, jmin = %d\n", imin, jmin);
@@ -123,12 +134,12 @@ void MatrixDistNorm::rebuild(int imin, int jmin, TreeClusterNormNode* nodeArray)
 		matrix[i * n + imin] = distance;
 		matrix[imin * n + i] = distance;
 	}
-
+	DEBUG_END;
 }
 
 void MatrixDistNorm::fprint_clusters(FILE* file, TreeClusterNormNode* nodeArray)
 {
-
+	DEBUG_START;
 	for (int i = 0; i < n; ++i)
 	{
 		if (ifStay[i] == true)
@@ -138,12 +149,13 @@ void MatrixDistNorm::fprint_clusters(FILE* file, TreeClusterNormNode* nodeArray)
 			REGULAR_PRINT(file, "}\n");
 		}
 	}
+	DEBUG_END;
 }
 
 void MatrixDistNorm::fprint_clusters2(FILE* file,
 		TreeClusterNormNode* nodeArray)
 {
-
+	DEBUG_START;
 	int numcl = 0;
 	double allarea = 0;
 	for (int i = 0; i < n; ++i)
@@ -164,13 +176,14 @@ void MatrixDistNorm::fprint_clusters2(FILE* file,
 		REGULAR_PRINT(file, "}\n");
 		//        }
 	}
-	REGULAR_PRINT(file, "allarea = %lf\n", allarea);
+	REGULAR_PRINT(file, "all area = %lf\n", allarea);
+	DEBUG_END;
 }
 
 double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
 		TreeClusterNormNode* nodeArray2)
 {
-
+	DEBUG_START;
 	int numcl = 0;
 	double area1 = 0;
 	double area2 = 0;
@@ -193,12 +206,13 @@ double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
 		norm += area1;
 		REGULAR_PRINT(file, "}\n");
 	}
+	DEBUG_END;
 	return norm / numcl;
 }
 
 void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
 {
-
+	DEBUG_START;
 	int numcl = 0;
 	for (int i = 0; i < n; ++i)
 	{
@@ -349,11 +363,12 @@ void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
 			nodeArray[i].cluster->setColor(red, green, blue);
 		}
 	}
+	DEBUG_END;
 }
 
 void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
 {
-
+	DEBUG_START;
 	int numcl = 0;
 	for (int i = 0; i < n; ++i)
 	{
@@ -501,11 +516,12 @@ void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
 
 		nodeArray[i].cluster->setColor(red, green, blue);
 	}
+	DEBUG_END;
 }
 
 void MatrixDistNorm::fprint(FILE* file)
 {
-
+	DEBUG_START;
 	REGULAR_PRINT(file, "MatrixDistNorm : \n\n");
 
 	for (int i = 0; i < n; ++i)
@@ -519,10 +535,12 @@ void MatrixDistNorm::fprint(FILE* file)
 			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n", i, j, matrix[i * n + j]);
 		}
 	}
+	DEBUG_END;
 }
 
 void MatrixDistNorm::fprint_ifStay(FILE* file)
 {
+	DEBUG_START;
 	for (int i = 0; i < n; ++i)
 	{
 		if (i < 100)
@@ -541,5 +559,6 @@ void MatrixDistNorm::fprint_ifStay(FILE* file)
 		REGULAR_PRINT(file, "\\;\\;\\;%d", ifStay[i]);
 	}
 	REGULAR_PRINT(file, "\n");
+	DEBUG_END;
 }
 

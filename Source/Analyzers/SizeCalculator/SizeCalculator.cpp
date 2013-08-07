@@ -10,19 +10,26 @@
 SizeCalculator::SizeCalculator() :
 		PAnalyzer()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 SizeCalculator::SizeCalculator(Polyhedron* p) :
 		PAnalyzer(p)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 SizeCalculator::~SizeCalculator()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 double SizeCalculator::calculate_J11(int N)
 {
+	DEBUG_START;
 
 	int k, l;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -52,11 +59,14 @@ double SizeCalculator::calculate_J11(int N)
 				DEBUG_PRINT("integral[%d, %d] = %lf\n", k, l, integral);
 		}
 	}
+
+	DEBUG_END;
 	return s;
 }
 
 double SizeCalculator::consection_x(double y, double z)
 {
+	DEBUG_START;
 
 	int i;
 	double x;
@@ -74,11 +84,15 @@ double SizeCalculator::consection_x(double y, double z)
 			SD.add(x);
 		}
 	}
+
+	DEBUG_END;
 	return SD.calclulate();
 }
 
 double SizeCalculator::volume()
 {
+	DEBUG_START;
+
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -105,11 +119,15 @@ double SizeCalculator::volume()
 			sum += loc;
 		}
 	}
+
+	DEBUG_END;
 	return sum;
 }
 
 double SizeCalculator::areaOfSurface()
 {
+	DEBUG_START;
+
 	int i, j, *index, nv;
 	Vector3d A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -138,17 +156,22 @@ double SizeCalculator::areaOfSurface()
 		}
 		sum_poly += sum_facet;
 	}
+
+	DEBUG_END;
 	return sum_poly;
 }
 
 double SizeCalculator::areaOfFacet(int iFacet)
 {
+	DEBUG_START;
+	DEBUG_END;
 	return polyhedron->facets[iFacet].area();
 }
 
 void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 		double& Jyz, double& Jxz)
 {
+	DEBUG_START;
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -285,10 +308,13 @@ void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 
 		}
 	}
+	DEBUG_END;
 }
 
 void SizeCalculator::get_center(double& xc, double& yc, double& zc)
 {
+	DEBUG_START;
+
 	int i, j, *index, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -360,11 +386,15 @@ void SizeCalculator::get_center(double& xc, double& yc, double& zc)
 	xc /= sum;
 	yc /= sum;
 	zc /= sum;
+
+	DEBUG_END;
 }
 
 void SizeCalculator::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
 		Vector3d& v1, Vector3d& v2)
 {
+	DEBUG_START;
+
 	double **JJ, **v, *l;
 
 	JJ = new double*[3];
@@ -411,4 +441,6 @@ void SizeCalculator::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
 	delete[] v[2];
 	delete[] v;
 	delete[] l;
+
+	DEBUG_END;
 }

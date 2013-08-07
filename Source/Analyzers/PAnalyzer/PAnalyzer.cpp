@@ -10,14 +10,20 @@
 PAnalyzer::PAnalyzer() :
 		polyhedron()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PAnalyzer::PAnalyzer(Polyhedron* p) :
 		polyhedron(p)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PAnalyzer::~PAnalyzer()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 

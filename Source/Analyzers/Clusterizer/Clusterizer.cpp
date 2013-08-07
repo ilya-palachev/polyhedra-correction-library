@@ -14,6 +14,8 @@ Clusterizer::Clusterizer() :
 		inc(),
 		dist()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Clusterizer::Clusterizer(Polyhedron* p) :
@@ -23,10 +25,13 @@ Clusterizer::Clusterizer(Polyhedron* p) :
 		inc(new bool[polyhedron->numFacets * polyhedron->numFacets]),
 		dist(new double[polyhedron->numFacets * polyhedron->numFacets])
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Clusterizer::~Clusterizer()
 {
+	DEBUG_START;
 	if (dist != NULL)
 	{
 		delete[] dist;
@@ -50,11 +55,12 @@ Clusterizer::~Clusterizer()
 		delete[] cluster;
 		cluster = NULL;
 	}
+	DEBUG_END;
 }
 
 int Clusterizer::clusterize(double p)
 {
-
+	DEBUG_START;
 	int i, j, nv, *index, fid;
 	double sin_alpha, alpha;
 
@@ -108,11 +114,13 @@ int Clusterizer::clusterize(double p)
 		}
 	}
 
+	DEBUG_END;
 	return ncluster;
 }
 
 void fire(int l, int* A, int* cluster, SortedSetOfPairs& ssop, int depth)
 {
+	DEBUG_START;
 
 	int k, i;
 	for (i = 0; i < depth; ++i)
@@ -130,10 +138,12 @@ void fire(int l, int* A, int* cluster, SortedSetOfPairs& ssop, int depth)
 			fire(i, A, cluster, ssop, depth + 1);
 		}
 	}
+	DEBUG_END;
 }
 
 void Clusterizer::clusterize2(double p)
 {
+	DEBUG_START;
 
 	int i, j, nv, *index, fid;
 	double sin_alpha, alpha;
@@ -204,18 +214,17 @@ void Clusterizer::clusterize2(double p)
 		if (cluster[i] != i)
 			DEBUG_PRINT("cluster[%d] = %d\n", i, cluster[i]);
 	}
+	DEBUG_END;
 }
 
 const double LIMIT_FOR_CLUSTERIZATION = 0.5;
 
 TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 {
-
-//    my_fprint(stdout);
+	DEBUG_START;
 
 	int* newIndex;
 	SpherePoint spherePoint;
-//    ClusterNorm newCluster;
 
 	TreeClusterNormNode* nodeArray;
 	TreeClusterNormNode* newChild0;
@@ -284,12 +293,8 @@ TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 		nodeArray[id0].child0 = newChild0;
 		nodeArray[id0].child1 = newChild1;
 
-//        for (int j = id1; j < numFacets - i - 1; ++j) {
-//            nodeArray[j] = nodeArray[j + 1];
-//        }
 
 		matrix.rebuild(id0, id1, nodeArray);
-//        matrix.fprint(stdout);
 	}
 
 	matrix.fprint_clusters(stdout, nodeArray);
@@ -305,31 +310,28 @@ TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 	tree = new TreeClusterNorm;
 	*tree = TreeClusterNorm(nodeArray);
 
-//    tree->fprint(stdout);
+    tree->fprint(stdout);
+    DEBUG_END;
 	return *tree;
 }
 
 void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 		MatrixDistNorm& matrix)
 {
-//    my_fprint(stdout);
 
 	int* newIndex;
 	SpherePoint spherePoint;
-//    ClusterNorm newCluster;
 
-//    TreeClusterNormNode* nodeArray;
 	TreeClusterNormNode* newChild0;
 	TreeClusterNormNode* newChild1;
 
 	ClusterNorm* newCluster;
 
-	//nodeArray = new TreeClusterNormNode[numFacets];
 	newIndex = new int[1];
 
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
-//        DEBUG_PRINT("norm[%d] = %lf\n", i, sqrt(qmod(facet[i].plane.norm)) );
+        DEBUG_PRINT("norm[%d] = %lf\n", i, sqrt(qmod(facet[i].plane.norm)) );
 		spherePoint = SpherePoint(polyhedron->facets[i].plane.norm);
 		newIndex[0] = i;
 		newCluster = new ClusterNorm;
@@ -337,18 +339,17 @@ void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 
 		nodeArray[i].cluster = newCluster;
 
-//        nodeArray[i].fprint(stdout, 0);
+        nodeArray[i].fprint(stdout, 0);
 	}
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
-//        nodeArray[i].fprint(stdout, 0);
+        nodeArray[i].fprint(stdout, 0);
 	}
 
-//    MatrixDistNorm matrix(numFacets);
 
 	matrix.build(polyhedron->numFacets, nodeArray);
-//    matrix.fprint(stdout);
-//    matrix.fprint_clusters(stdout, nodeArray);
+    matrix.fprint(stdout);
+    matrix.fprint_clusters(stdout, nodeArray);
 
 	int id0, id1;
 	for (int i = 0; i < polyhedron->numFacets - 1; ++i)
@@ -366,10 +367,10 @@ void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 		if (distance_id0_id1 > LIMIT_FOR_CLUSTERIZATION)
 			break;
 #endif
-		//  DEBUG_PRINT("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n", id0, id1, distance_id0_id1);
+		  DEBUG_PRINT("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n", id0, id1, distance_id0_id1);
 		DEBUG_PRINT("id0 = %d, id1 = %d, distance(id0, id1) = %lf\n", id0, id1,
 				distance_id0_id1);
-//        matrix.fprint(stdout);
+        matrix.fprint(stdout);
 
 		newChild0 = new TreeClusterNormNode;
 		*newChild0 = nodeArray[id0];
@@ -385,35 +386,19 @@ void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 		nodeArray[id0].child0 = newChild0;
 		nodeArray[id0].child1 = newChild1;
 
-//        for (int j = id1; j < numFacets - i - 1; ++j) {
-//            nodeArray[j] = nodeArray[j + 1];
-//        }
-
 		matrix.rebuild(id0, id1, nodeArray);
-		//     matrix.fprint(stdout);
+		matrix.fprint(stdout);
 	}
 
 	matrix.fprint_clusters(stdout, nodeArray);
-//    matrix.setColors(nodeArray);
-
-//    int numClust = 0;
-//    for (int i = 0; i < matrix.n; ++i)
-//        if (matrix.ifStay[i])
-//            ++numClust;
-//    DEBUG_PRINT("numClust = %d", numClust);
-
-//    TreeClusterNorm* tree;
-//    tree = new TreeClusterNorm;
-//    *tree = TreeClusterNorm(nodeArray);
-
-//    tree->fprint(stdout);
-//    return *tree;
+	DEBUG_END;
 }
 
 void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 		MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
 		MatrixDistNorm& matrix_out)
 {
+	DEBUG_START;
 	int numCluster = 0;
 	for (int i = 0; i < matrix_in.n; ++i)
 	{
@@ -489,6 +474,7 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 	{
 		matrix_out.ifStay[i] = false;
 	}
+	DEBUG_END;
 }
 
 

@@ -19,6 +19,8 @@ static double distVertexEdge(
 
 static double weightForAssociations(double x)
 {
+	DEBUG_START;
+	DEBUG_END;
 	return x * x;
 }
 
@@ -40,6 +42,8 @@ GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
 				iSideDistMin0(INT_NOT_INITIALIZED),
 				iSideDistMin1(INT_NOT_INITIALIZED)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 GSAssociator::~GSAssociator()
@@ -115,6 +119,7 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 	if (areaTotal < EPSILON_FOR_DIVISION)
 	{
 		ERROR_PRINT("Too small shade contour, total area = %le", areaTotal);
+		DEBUG_END;
 		return;
 	}
 
@@ -142,15 +147,24 @@ int GSAssociator::init()
 {
 	DEBUG_START;
 	if (checkVisibility() != EXIT_SUCCESS)
+	{
+		DEBUG_END;
 		return EXIT_FAILURE;
+	}
 
 	if (checkAlreadyAdded() != EXIT_SUCCESS)
+	{
+		DEBUG_END;
 		return EXIT_FAILURE;
+	}
 
 	projectEdge();
 
 	if (checkExtinction() != EXIT_SUCCESS)
+	{
+		DEBUG_END;
 		return EXIT_FAILURE;
+	}
 
 	int numSides = contourData->contours[iContour].ns;
 	int numVerticesAdded = 0;
@@ -185,12 +199,13 @@ int GSAssociator::checkVisibility()
 		DEBUG_PRINT("\t visibility = %lf", visibility);
 		DEBUG_END;
 		return EXIT_FAILURE;
-
 	}
 }
 
 double GSAssociator::calculateVisibility()
 {
+	DEBUG_START;
+
 	int f0 = edge->f0;
 	int f1 = edge->f1;
 	Vector3d norm0 = polyhedron->facets[f0].plane.norm;
@@ -209,28 +224,33 @@ double GSAssociator::calculateVisibility()
 	double sum = beta1 + beta0;
 	double sub = beta1 - beta0;
 
+	double visibility;
+
 	if (sum >= 0.)
 	{
 		if (sub >= 0.)
 		{
-			return -beta0;
+			visibility = -beta0;
 		}
 		else
 		{
-			return -beta1;
+			visibility = -beta1;
 		}
 	}
 	else
 	{
 		if (sub >= 0.)
 		{
-			return beta1;
+			visibility = beta1;
 		}
 		else
 		{
-			return beta0;
+			visibility = beta0;
 		}
 	}
+
+	DEBUG_END;
+	return visibility;
 }
 
 int GSAssociator::checkAlreadyAdded()
@@ -246,6 +266,7 @@ int GSAssociator::checkAlreadyAdded()
 	{
 		DEBUG_PRINT("Edge %d already has association with contour # %d", iEdge,
 				iContour);
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 	DEBUG_END;
@@ -262,6 +283,7 @@ int GSAssociator::checkExtinction()
 		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting",
 				iEdge, iVertex0, iVertex1);
 		DEBUG_PRINT("on the plane of projection of contour # %d", iContour);
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 	DEBUG_END;
@@ -624,8 +646,10 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 
 double GSAssociator::calculateWeight()
 {
+	DEBUG_START;
 	double visibility = calculateVisibility();
 	double weight = weightForAssociations(visibility);
 	DEBUG_PRINT("visibility/weight = %lf / %lf", visibility, weight);
+	DEBUG_END;
 	return weight;
 }

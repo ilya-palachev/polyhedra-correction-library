@@ -24,6 +24,8 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				prevPlanes(NULL),
 				dim(0)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
@@ -42,10 +44,13 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				prevPlanes(NULL),
 				dim(0)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
+	DEBUG_START;
 	if (gradient != NULL)
 	{
 		delete[] gradient;
@@ -66,10 +71,12 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 		delete facetsNotAssociated;
 		facetsNotAssociated = NULL;
 	}
+	DEBUG_END;
 }
 
 void GlobalShadeCorrector::runCorrection()
 {
+	DEBUG_START;
 	if (parameters.methodName != METHOD_ALL)
 	{
 		runCorrectionDo();
@@ -152,16 +159,19 @@ void GlobalShadeCorrector::runCorrection()
 			status = NULL;
 		}
 	}
+	DEBUG_END;
 }
 
 GSCorrectorStatus GlobalShadeCorrector::repairAndRun(MethodCorrector method,
 		Plane* planesInitial)
 {
+	DEBUG_START;
 	for (int iPlane = 0; iPlane < polyhedron->numFacets; ++iPlane)
 	{
 		polyhedron->facets[iPlane].plane = planesInitial[iPlane];
 	}
 	parameters.methodName = method;
+	DEBUG_END;
 	return runCorrectionDo();
 }
 
@@ -298,6 +308,7 @@ GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 
 void GlobalShadeCorrector::findNotAssociatedFacets()
 {
+	DEBUG_START;
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		int* indVertices = polyhedron->facets[iFacet].indVertices;
@@ -318,10 +329,12 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 			facetsNotAssociated->push_back(iFacet);
 		}
 	}
+	DEBUG_END;
 }
 
 double GlobalShadeCorrector::calculateFunctional()
 {
+	DEBUG_START;
 	double sum = 0;
 
 	EdgeSetIterator edge = edgeData->edges.begin();
@@ -383,12 +396,16 @@ double GlobalShadeCorrector::calculateFunctional()
 		}
 		++edge;
 	}
+
+	DEBUG_END;
 	return sum;
 
 }
 
 void GlobalShadeCorrector::shiftCoefficients(double delta)
 {
+	DEBUG_START;
+
 	list<int>::iterator iterNotAssociated = facetsNotAssociated->begin();
 	int countNotAssociated = 0;
 
@@ -441,13 +458,20 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 	DEBUG_PRINT("\tL2 norm :\t%lf", norm_L2);
 	DEBUG_PRINT("\tC  norm :\t%lf", norm_C);
 #endif /* NDEBUG */
+
+
+	DEBUG_END;
 }
 
 double GlobalShadeCorrector::calculateFunctional(double delta)
 {
+	DEBUG_START;
+
 	shiftCoefficients(delta);
 	double functionalValue = calculateFunctional();
 	shiftCoefficients(-delta);
+
+	DEBUG_END;
 	return functionalValue;
 }
 
@@ -456,6 +480,8 @@ const double INTERVAL_PRECISION = 1e-10;
 
 double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 {
+	DEBUG_START;
+
 	double leftBound = 0.;
 	double rightBound = deltaMax;
 	double leftChecker = rightBound - GOLDEN_RATIO_RECIPROCAL *
@@ -487,16 +513,22 @@ double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 					(rightBound - leftBound);
 		}
 	}
+
+	DEBUG_END;
 	return leftBound;
 }
 
 double GlobalShadeCorrector::calculateGradientNorm()
 {
+	DEBUG_START;
+
 	double norm = 0.;
 	for (int iDimension = 0; iDimension < dim; ++iDimension)
 	{
 		norm += gradient[iDimension] * gradient[iDimension];
 	}
+
+	DEBUG_END;
 	return norm;
 }
 
