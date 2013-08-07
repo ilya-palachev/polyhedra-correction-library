@@ -101,7 +101,7 @@ class SortedSetOfPairs;
 #include "Correctors/Intersector/FacetIntersector.h"
 #include "Correctors/Intersector/EdgeList/EdgeList.h"
 #include "Correctors/Intersector/FutureFacet/FutureFacet.h"
-#include "Correctors/Intersector/EdgeSet/EdgeSet.h"
+#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
 #include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
 #include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
 #include "Correctors/Coalescer/Coalescer.h"
