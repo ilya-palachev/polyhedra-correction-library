@@ -81,7 +81,6 @@ class SortedSetOfPairs;
 #include "Polyhedron/SpecificPolyhedrons/Pyramid.h"
 #include "Polyhedron/SpecificPolyhedrons/Prism.h"
 #include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
-#include "Polyhedron/Verifier/Verifier.h"
 
 #include "DataContainers/PData/PData.h"
 #include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
@@ -90,6 +89,8 @@ class SortedSetOfPairs;
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+
+#include "Polyhedron/Verifier/Verifier.h"
 
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"

@@ -24,14 +24,14 @@ private:
 	int countOuterConsectionsEdge(int id0, int id1);
 	int countOuterConsectionsPair(int id0, int id1, int fid);
 
-	/* Check whether the edge is not destruted. Returns "true" if it is not
+	/* Check whether the edge is not destructed. Returns "true" if it is not
 	 * destructed. */
-	bool checkOneEdge(Edge* edge, EdgeData* edgeData);
+	bool checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData);
 
 	/* Reduce one edge (for case when the edge is destructed).
 	 * We need to verify following structures: VertexInfo,
 	 * Facet, EdgeData, Edge for correctness. */
-	bool reduceEdge(Edge* edge, EdgeData* edgeData);
+	bool reduceEdge(EdgeSetIterator edge, EdgeData* edgeData);
 public:
 	Verifier();
 	Verifier(Polyhedron* p);

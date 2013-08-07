@@ -81,7 +81,7 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 			idOfContour, nu.x, nu.y, nu.z);
 	DEBUG_PRINT("numEdges = %d", edgeData->numEdges);
 
-	list<Edge> edgesVisible;
+	EdgeSet edgesVisible;
 
 	int iEdge = 0;
 	for (EdgeSetIterator edge = edgeData->edges.begin();
@@ -89,7 +89,7 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 	{
 		if (edgeIsVisibleOnPlane(*edge, planeOfProjection))
 		{
-			edgesVisible.push_back(*edge);
+			edgesVisible.insert(*edge);
 			DEBUG_PRINT("\t visibility of edge #%d [%d, %d] "
 					"checked : visible", iEdge, edge->v0, edge->v1);
 		}

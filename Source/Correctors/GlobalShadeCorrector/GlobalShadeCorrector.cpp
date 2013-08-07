@@ -336,7 +336,7 @@ double GlobalShadeCorrector::calculateFunctional()
 		Plane planePrev1 = prevPlanes[f1];
 
 		int iAssoc = 0;
-		for (list<EdgeContourAssociation>::iterator itCont =
+		for (list<EdgeContourAssociation>::const_iterator itCont =
 				edge->assocList.begin();
 				itCont != edge->assocList.end(); ++itCont)
 		{
@@ -615,7 +615,7 @@ void GlobalShadeCorrector::calculateGradient()
 				return;
 			}
 			int iAssociation = 0;
-			for (list<EdgeContourAssociation>::iterator itCont =
+			for (list<EdgeContourAssociation>::const_iterator itCont =
 					edge->assocList.begin();
 					itCont != edge->assocList.end(); ++itCont)
 			{

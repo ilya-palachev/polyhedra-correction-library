@@ -97,12 +97,12 @@ Edge& Edge::operator =(const Edge& orig)
 	return *this;
 }
 
-bool Edge::operator ==(const Edge& e)
+bool Edge::operator ==(const Edge& e) const
 {
 	return (v0 == e.v0) && (v1 == e.v1) && (f0 == e.f0) && (f1 == e.f1);
 }
 
-bool Edge::operator != (const Edge& e)
+bool Edge::operator != (const Edge& e) const
 {
 	return !(*this == e);
 }

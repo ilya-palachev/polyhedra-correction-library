@@ -238,9 +238,8 @@ int GSAssociator::checkAlreadyAdded()
 	DEBUG_START;
 // Check whether this association has been already added to the list
 	int numAlreadyPushedAssocs = edge->assocList.size();
-	list<EdgeContourAssociation>::iterator lastCont = edge->assocList.end();
-	--lastCont;
-	int iContourLastInList = lastCont->indContour;
+	EdgeContourAssociation lastCont = edge->assocList.back();
+	int iContourLastInList = lastCont.indContour;
 	DEBUG_PRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
 			iContourLastInList, numAlreadyPushedAssocs);
 	if (numAlreadyPushedAssocs != 0 && iContourLastInList == iContour)

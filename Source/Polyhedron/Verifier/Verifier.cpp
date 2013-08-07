@@ -430,7 +430,7 @@ int Verifier::checkEdges(EdgeData* edgeData)
 	EdgeSetIterator edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-		if (!checkOneEdge(&*edge, edgeData))
+		if (!checkOneEdge(edge, edgeData))
 		{
 			++numEdgesDesctructed;
 		}
@@ -439,7 +439,7 @@ int Verifier::checkEdges(EdgeData* edgeData)
 	return numEdgesDesctructed;
 }
 
-bool Verifier::checkOneEdge(Edge* edge, EdgeData* edgeData)
+bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
@@ -560,7 +560,7 @@ bool Verifier::checkOneEdge(Edge* edge, EdgeData* edgeData)
 	return if_A2_under_pi3 && if_A3_under_pi2;
 }
 
-bool Verifier::reduceEdge(Edge* edge, EdgeData* edgeData)
+bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 {
 	DEBUG_START;
 	int iVertexReduced = edge->v1;

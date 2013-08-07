@@ -10,13 +10,13 @@
 class Edge
 {
 public:
-	int id;
-	int v0;
-	int v1;
-	int f0;
-	int f1;
+	mutable int id;
+	mutable int v0;
+	mutable int v1;
+	mutable int f0;
+	mutable int f1;
 
-	list<EdgeContourAssociation> assocList;
+	mutable list<EdgeContourAssociation> assocList;
 
 	// Edge.cpp :
 	Edge();
@@ -38,8 +38,8 @@ public:
 
 	Edge& operator =(const Edge& orig);
 
-	bool operator ==(const Edge& e);
-	bool operator !=(const Edge& e);
+	bool operator ==(const Edge& e) const;
+	bool operator !=(const Edge& e) const;
 
 	//Edge_io.cpp :
 	void my_fprint(FILE* file) const;
