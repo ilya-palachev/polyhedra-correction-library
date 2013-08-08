@@ -810,7 +810,14 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
 				                             iFacet + 1];
 		DEBUG_PRINT("\tUpdating vertexInfo #%d", iVertexNeighbour);
+		DEBUG_PRINT("\tBefore:");
+		polyhedron->vertexInfos[iVertexNeighbour].my_fprint_all(stdout);
+
 		polyhedron->vertexInfos[iVertexNeighbour].preprocess();
+
+		DEBUG_PRINT("\tAfter:");
+		polyhedron->vertexInfos[iVertexNeighbour].my_fprint_all(stdout);
+
 	}
 
 	DEBUG_END;
