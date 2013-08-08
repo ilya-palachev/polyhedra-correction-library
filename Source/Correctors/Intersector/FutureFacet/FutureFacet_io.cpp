@@ -2,6 +2,7 @@
 
 void FutureFacet::my_fprint(FILE* file)
 {
+	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "\n\n---------- FutureFacet %d. ----------\n", id);
 	if (nv > 0)
@@ -19,4 +20,5 @@ void FutureFacet::my_fprint(FILE* file)
 		}
 		REGULAR_PRINT(file, "\n");
 	}
+	DEBUG_END;
 }

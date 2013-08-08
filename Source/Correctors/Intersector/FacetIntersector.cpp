@@ -11,26 +11,36 @@ FacetIntersector::FacetIntersector() :
 		Intersector(),
 		facet(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 FacetIntersector::FacetIntersector(Polyhedron* p, Facet* f) :
 		Intersector(p),
 		facet(f)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 FacetIntersector::FacetIntersector(Intersector* i, Facet* f) :
 		Intersector(*i),
 		facet(f)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 FacetIntersector::~FacetIntersector()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 int FacetIntersector::signum(int i, Plane plane)
 {
+	DEBUG_START;
+	DEBUG_END;
 	return facet->parentPolyhedron->signum(
 			facet->parentPolyhedron->vertices[facet->indVertices[i]],
 			plane);
@@ -38,6 +48,7 @@ int FacetIntersector::signum(int i, Plane plane)
 
 bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)
 {
+	DEBUG_START;
 
 	int i;
 	int nintrsct;
@@ -62,11 +73,15 @@ bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)
 	}
 	if (fabs(err) < 1e-16)
 	{
+		DEBUG_END;
 		return false;
 //        return true; //2012-03-10
 	}
 	if (facet->id == -1)
+	{
+		DEBUG_END;
 		return false;
+	}
 
 	EdgeList* el = &(edgeLists[facet->id]);
 	FutureFacet curr_component(2 * polyhedron->numVertices);
@@ -87,10 +102,12 @@ bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)
 		}
 		if (sign_curr == 1)
 		{
+			DEBUG_END;
 			return true;
 		}
 		else
 		{
+			DEBUG_END;
 			return false;
 		}
 	}
@@ -201,6 +218,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)
 		}
 	}
 	el->null_isUsed();
+	DEBUG_END;
 	return false;
 
 }

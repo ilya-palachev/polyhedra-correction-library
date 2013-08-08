@@ -3,6 +3,7 @@
 void FutureFacet::generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
 		EdgeSetIntersected* es)
 {
+	DEBUG_START;
 	int i, v0, v1, res_id;
 	int *index;
 
@@ -32,4 +33,5 @@ void FutureFacet::generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
 	facet = Facet(fid, nv, iplane, index, NULL, false);
 	if (index != NULL)
 		delete[] index;
+	DEBUG_END;
 }

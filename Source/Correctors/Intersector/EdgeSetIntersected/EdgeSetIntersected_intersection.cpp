@@ -2,6 +2,7 @@
 
 void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
 {
+	DEBUG_START;
 	if (id < 0 || id > num - 1)
 	{
 		v0 = -1;
@@ -11,11 +12,13 @@ void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
 	}
 	v0 = edge0[id];
 	v1 = edge1[id];
+	DEBUG_END;
 }
 
 void EdgeSetIntersected::get_edge(int id, int& v0, int& v1, int& id_el0, int& pos_el0,
 		int& id_el1, int& pos_el1, int& id_ff, int& pos_ff)
 {
+	DEBUG_START;
 	if (id < 0 || id > num - 1)
 	{
 		v0 = -1;
@@ -31,10 +34,12 @@ void EdgeSetIntersected::get_edge(int id, int& v0, int& v1, int& id_el0, int& po
 	pos_el1 = pos_edge_list1[id];
 	id_ff = id_future_facet[id];
 	pos_ff = pos_future_facet[id];
+	DEBUG_END;
 }
 
 int EdgeSetIntersected::search_edge(int v0, int v1)
 {
+	DEBUG_START;
 
 	int tmp, first, last, mid;
 
@@ -63,10 +68,12 @@ int EdgeSetIntersected::search_edge(int v0, int v1)
 
 	if (edge0[last] == v0 && edge1[last] == v1)
 	{
+		DEBUG_END;
 		return last;
 	}
 	else
 	{
+		DEBUG_END;
 		return -1;
 	}
 }
@@ -74,12 +81,14 @@ int EdgeSetIntersected::search_edge(int v0, int v1)
 void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_ff,
 		int pos_ff)
 {
+	DEBUG_START;
 
 	int tmp, first, last, mid;
 
 	if (num >= len)
 	{
 		ERROR_PRINT("Error. Overflow.");
+		DEBUG_END;
 		return;
 	}
 
@@ -127,15 +136,19 @@ void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_
 		insert_int(pos_future_facet, num, last, pos_ff);
 		++num;
 	}
+	DEBUG_END;
 }
 
 void EdgeSetIntersected::add_edge(int v0, int v1)
 {
+	DEBUG_START;
 	add_edge(v0, v1, -1, -1, -1, -1);
+	DEBUG_END;
 }
 
 void EdgeSetIntersected::test_info()
 {
+	DEBUG_START;
 	for (int i; i < num; ++i)
 	{
 		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1
@@ -146,4 +159,5 @@ void EdgeSetIntersected::test_info()
 			ERROR_PRINT("Error at i = %d.\n", i);
 		}
 	}
+	DEBUG_END;
 }

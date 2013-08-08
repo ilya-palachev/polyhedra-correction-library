@@ -2,6 +2,7 @@
 
 void EdgeSetIntersected::my_fprint(FILE* file)
 {
+	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "---------- EdgeSetIntersected (%d). ----------\n", num);
 	if (num > 0)
@@ -15,5 +16,6 @@ void EdgeSetIntersected::my_fprint(FILE* file)
 			REGULAR_PRINT(file, "%d ", edge1[i]);
 		REGULAR_PRINT(file, "\n");
 	}
+	DEBUG_END;
 }
 

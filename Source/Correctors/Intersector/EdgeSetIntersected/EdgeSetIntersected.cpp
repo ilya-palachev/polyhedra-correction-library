@@ -12,6 +12,8 @@ EdgeSetIntersected::EdgeSetIntersected() :
 				id_future_facet(NULL),
 				pos_future_facet(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeSetIntersected::EdgeSetIntersected(int len_orig) :
@@ -26,6 +28,8 @@ EdgeSetIntersected::EdgeSetIntersected(int len_orig) :
 				id_future_facet(new int[len]),
 				pos_future_facet(new int[len])
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
@@ -40,6 +44,7 @@ EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
 				id_future_facet(new int[len]),
 				pos_future_facet(new int[len])
 {
+	DEBUG_START;
 	for (int i; i < num; ++i)
 	{
 		edge0[i] = orig.edge0[i];
@@ -51,10 +56,12 @@ EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
 		id_future_facet[i] = orig.id_future_facet[i];
 		pos_future_facet[i] = orig.pos_future_facet[i];
 	}
+	DEBUG_END;
 }
 
 EdgeSetIntersected::~EdgeSetIntersected()
 {
+	DEBUG_START;
 	if (edge0 != NULL)
 		delete[] edge0;
 	if (edge1 != NULL)
@@ -71,10 +78,12 @@ EdgeSetIntersected::~EdgeSetIntersected()
 		delete[] id_future_facet;
 	if (pos_future_facet != NULL)
 		delete[] pos_future_facet;
+	DEBUG_END;
 }
 
 EdgeSetIntersected& EdgeSetIntersected::operator =(const EdgeSetIntersected& orig)
 {
+	DEBUG_START;
 	len = orig.len;
 	num = orig.num;
 
@@ -115,16 +124,21 @@ EdgeSetIntersected& EdgeSetIntersected::operator =(const EdgeSetIntersected& ori
 		id_future_facet[i] = orig.id_future_facet[i];
 		pos_future_facet[i] = orig.pos_future_facet[i];
 	}
+	DEBUG_END;
 	return *this;
 }
 
 int EdgeSetIntersected::get_len()
 {
+	DEBUG_START;
+	DEBUG_END;
 	return len;
 }
 
 int EdgeSetIntersected::get_num()
 {
+	DEBUG_START;
+	DEBUG_END;
 	return num;
 }
 

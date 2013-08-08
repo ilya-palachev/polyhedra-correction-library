@@ -9,10 +9,13 @@ FutureFacet::FutureFacet() :
 				src_facet(NULL),
 				id_v_new(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 FutureFacet::~FutureFacet()
 {
+	DEBUG_START;
 	if (edge0 != NULL)
 	{
 		delete[] edge0;
@@ -33,6 +36,7 @@ FutureFacet::~FutureFacet()
 		delete[] id_v_new;
 		id_v_new = NULL;
 	}
+	DEBUG_END;
 }
 
 FutureFacet::FutureFacet(int len_orig) :
@@ -44,6 +48,8 @@ FutureFacet::FutureFacet(int len_orig) :
 				src_facet(new int[len]),
 				id_v_new(new int[len])
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 FutureFacet::FutureFacet(const FutureFacet& orig) :
@@ -51,7 +57,7 @@ FutureFacet::FutureFacet(const FutureFacet& orig) :
 				len(orig.len),
 				nv(orig.nv)
 {
-
+	DEBUG_START;
 	int i;
 	if (len > 0)
 	{
@@ -74,24 +80,29 @@ FutureFacet::FutureFacet(const FutureFacet& orig) :
 		edge1 = NULL;
 		src_facet = NULL;
 	}
+	DEBUG_END;
 }
 
 void FutureFacet::add_edge(int v0, int v1, int src_f)
 {
+	DEBUG_START;
 	if (nv >= len)
 	{
 		ERROR_PRINT("Error. nv >= len  ");
 		ERROR_PRINT("v0 = %d, v1 = %d, src_f = %d\n", v0, v1, src_f);
+		DEBUG_END;
 		return;
 	}
 	edge0[nv] = v0;
 	edge1[nv] = v1;
 	src_facet[nv] = src_f;
 	++nv;
+	DEBUG_END;
 }
 
 FutureFacet& FutureFacet::operator =(const FutureFacet& orig)
 {
+	DEBUG_START;
 	int i;
 	id = orig.id;
 	len = orig.len;
@@ -117,11 +128,13 @@ FutureFacet& FutureFacet::operator =(const FutureFacet& orig)
 		edge1 = NULL;
 		src_facet = NULL;
 	}
+	DEBUG_END;
 	return *this;
 }
 
 FutureFacet& FutureFacet::operator +=(const FutureFacet& v)
 {
+	DEBUG_START;
 	int i, *edge0_new, *edge1_new, *src_facet_new, *id_v_new_new;
 	if (v.nv > 0)
 	{
@@ -173,21 +186,27 @@ FutureFacet& FutureFacet::operator +=(const FutureFacet& v)
 			nv += v.nv;
 		}
 	}
+	DEBUG_END;
 	return *this;
 }
 
 void FutureFacet::free()
 {
+	DEBUG_START;
 	nv = 0;
+	DEBUG_END;
 }
 
 int FutureFacet::get_nv()
 {
+	DEBUG_START;
+	DEBUG_END;
 	return nv;
 }
 
 void FutureFacet::get_edge(int pos, int& v0, int& v1, int& src_f, int& id_v)
 {
+	DEBUG_START;
 	if (pos < 0 || pos >= nv)
 	{
 		v0 = v1 = src_f = id_v = -1;
@@ -197,9 +216,12 @@ void FutureFacet::get_edge(int pos, int& v0, int& v1, int& src_f, int& id_v)
 	v1 = edge1[pos];
 	src_f = src_facet[pos];
 	id_v = id_v_new[pos];
+	DEBUG_END;
 }
 
 void FutureFacet::set_id(int val)
 {
+	DEBUG_START;
 	id = val;
+	DEBUG_END;
 }

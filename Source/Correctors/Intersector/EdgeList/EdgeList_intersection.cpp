@@ -2,16 +2,17 @@
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm)
 {
+	DEBUG_START;
 	add_edge(v0, v1, i0, i1, -1, -2, sm);
+	DEBUG_END;
 }
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
 		double sm)
 {
-#ifdef DEBUG1
+	DEBUG_START;
 	DEBUG_PRINT("add_edge(v0 = %d, v1 = %d, next_f = %d, next_d = %d, \
 			sm = %lf)\n", v0, v1, next_f, next_d, sm);
-#endif
 
 	if (v0 > v1)
 	{
@@ -46,36 +47,43 @@ void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
 	insert_bool(isUsed, num, last, false);
 
 	++num;
-	//	this->my_fprint(stdout);
+	DEBUG_END;
 }
 
 void EdgeList::send(EdgeSetIntersected* edge_set)
 {
+	DEBUG_START;
 	int i;
 	for (i = 0; i < num; ++i)
 	{
 		edge_set->add_edge(edge0[i], edge1[i]);
 	}
+	DEBUG_END;
 }
 
 void EdgeList::send_edges(EdgeSetIntersected* edge_set)
 {
+	DEBUG_START;
 	int i;
 	for (i = 0; i < num; ++i)
 	{
 		if (edge0[i] != edge1[i])
 			edge_set->add_edge(edge0[i], edge1[i]);
 	}
+	DEBUG_END;
 }
 
 void EdgeList::set_curr_info(int next_d, int next_f)
 {
+	DEBUG_START;
 	next_direction[pointer] = next_d;
 	next_facet[pointer] = next_f;
+	DEBUG_END;
 }
 
 void EdgeList::search_and_set_info(int v0, int v1, int next_d, int next_f)
 {
+	DEBUG_START;
 	int i, tmp;
 	if (v0 > v1)
 	{
@@ -89,19 +97,23 @@ void EdgeList::search_and_set_info(int v0, int v1, int next_d, int next_f)
 		{
 			next_direction[i] = next_d;
 			next_facet[i] = next_f;
+			DEBUG_END;
 			return;
 		}
 	}
 	ERROR_PRINT("Error. Edge (%d, %d) not found...", v0, v1);
+	DEBUG_END;
 	return;
 }
 
 void EdgeList::null_isUsed()
 {
+	DEBUG_START;
 	for (int i = 0; i < num; ++i)
 	{
 		isUsed[i] = false;
 	}
+	DEBUG_END;
 }
 
 //bool EdgeList::get_first_edge(int& v0, int& v1) {
@@ -124,6 +136,8 @@ void EdgeList::null_isUsed()
 
 void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d)
 {
+	DEBUG_START;
+
 	if (num < 1)
 	{
 		v0 = v1 = -1;
@@ -139,6 +153,7 @@ void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d)
 			v1 = edge1[i];
 			next_f = next_facet[i];
 			next_d = next_direction[i];
+			DEBUG_END;
 			return;
 		}
 	}
@@ -148,6 +163,7 @@ void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d)
 	v1 = edge1[0];
 	next_f = next_facet[0];
 	next_d = -1;
+	DEBUG_END;
 }
 
 void EdgeList::get_first_edge(int& v0, int& v1)
@@ -159,6 +175,7 @@ void EdgeList::get_first_edge(int& v0, int& v1)
 void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 		int& next_f, int& next_d)
 {
+	DEBUG_START;
 	int i, tmp, i_next;
 	int id0;
 	int id1;
@@ -193,6 +210,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 				ERROR_PRINT("\tError: cannot find vertexes %d (%d) "
 						"and %d (%d) facet %d.\n",
 						v0, id0, v1, id1, next_f);
+				DEBUG_END;
 				return;
 			}
 			nv = poly->facets[next_f].numVertices;
@@ -237,6 +255,7 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 				ERROR_PRINT("Error. Cannot define the direction.");
 				ERROR_PRINT("sign(%d) = %d, sign(%d) = %d, drctn = %d",
 						v0, sign0, v1, sign1, next_d);
+				DEBUG_END;
 				return;
 			}
 
@@ -261,12 +280,14 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 				v0, v1, next_f);
 #endif
 
+		DEBUG_END;
 		return;
 	}
 	else if (num < 1)
 	{
 		ERROR_PRINT("Error. num < 1,  err = %.16lf, if = %d\n", err,
 				fabs(err) < 1e-16);
+		DEBUG_END;
 		return;
 	}
 	if (v0 > v1)
@@ -327,28 +348,35 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 					v0, v1, next_f);
 #endif
 
+			DEBUG_END;
 			return;
 		}
 	}
 	//	set_pointer(0);
 	v0 = v1 = next_f = -1;
 	next_d = -2;
+	DEBUG_END;
 }
 
 void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& next_f,
 		int& next_d)
 {
+	DEBUG_START;
 	int i0, i1;
 	get_next_edge(iplane, v0, v1, i0, i1, next_f, next_d);
+	DEBUG_END;
 }
 
 int EdgeList::get_pointer()
 {
+	DEBUG_START;
+	DEBUG_END;
 	return pointer;
 }
 
 void EdgeList::set_isUsed(int v0, int v1, bool val)
 {
+	DEBUG_START;
 	int i;
 
 	for (i = 0; i < num; ++i)
@@ -359,9 +387,12 @@ void EdgeList::set_isUsed(int v0, int v1, bool val)
 			break;
 		}
 	}
+	DEBUG_END;
 }
 
 void EdgeList::set_poly(Polyhedron* poly_orig)
 {
+	DEBUG_START;
 	poly = poly_orig;
+	DEBUG_END;
 }

@@ -16,6 +16,8 @@ EdgeList::EdgeList() :
 				isUsed(NULL),
 				poly(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeList::EdgeList(int id_orig, int len_orig, Polyhedron* poly_orig) :
@@ -34,10 +36,13 @@ EdgeList::EdgeList(int id_orig, int len_orig, Polyhedron* poly_orig) :
 				isUsed(new bool[len]),
 				poly(poly_orig)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeList::~EdgeList()
 {
+	DEBUG_START;
 	if (edge0 != NULL)
 		delete[] edge0;
 	if (edge1 != NULL)
@@ -56,10 +61,12 @@ EdgeList::~EdgeList()
 		delete[] id_v_new;
 	if (isUsed != NULL)
 		delete[] isUsed;
+	DEBUG_END;
 }
 
 EdgeList& EdgeList::operator =(const EdgeList& orig)
 {
+	DEBUG_START;
 	int i;
 
 	id = orig.id;
@@ -108,28 +115,36 @@ EdgeList& EdgeList::operator =(const EdgeList& orig)
 		id_v_new[i] = orig.id_v_new[i];
 		isUsed[i] = orig.isUsed[i];
 	}
+	DEBUG_END;
 	return *this;
 }
 
 int EdgeList::get_num()
 {
+	DEBUG_START;
+	DEBUG_END;
 	return num;
 }
 
 void EdgeList::set_id_v_new(int id_v)
 {
+	DEBUG_START;
 	id_v_new[pointer] = id_v;
+	DEBUG_END;
 }
 
 void EdgeList::set_isUsed(bool val)
 {
+	DEBUG_START;
 	DEBUG_PRINT("EdgeList[%d].isUsed[%d] = %d\n",
 			id, pointer, val);
 	isUsed[pointer] = val;
+	DEBUG_END;
 }
 
 void EdgeList::set_pointer(int val)
 {
+	DEBUG_START;
 	if (val < 0 || val > num - 1)
 	{
 		ERROR_PRINT("Error. num = %d, val = %d", num, val);
@@ -138,15 +153,20 @@ void EdgeList::set_pointer(int val)
 	DEBUG_PRINT("EdgeList[%d].set_pointer(%d)\n",
 			id, val);
 	pointer = val;
+	DEBUG_END;
 }
 
 void EdgeList::goto_header()
 {
+	DEBUG_START;
 	set_pointer(0);
+	DEBUG_END;
 }
 
 void EdgeList::go_forward()
 {
+	DEBUG_START;
 	set_pointer(pointer + 1);
+	DEBUG_END;
 }
 

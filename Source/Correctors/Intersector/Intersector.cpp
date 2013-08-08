@@ -10,39 +10,51 @@
 Intersector::Intersector() :
 		PCorrector()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Intersector::Intersector(Polyhedron* input) :
 		PCorrector(input)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Intersector::~Intersector()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void my_fprint_Vector3d(Vector3d& v, FILE* file)
 {
+	DEBUG_START;
 	REGULAR_PRINT(file, "(%lf, %lf, %lf)\n", v.x, v.y, v.z);
+	DEBUG_END;
 }
 
 bool Intersector::intersectFacet(Facet* facet, Plane iplane, FutureFacet& ff,
 		int& n_components)
 {
+	DEBUG_START;
 	FacetIntersector* facetIntersector = new FacetIntersector(this, facet);
 	bool ret = facetIntersector->run(iplane, ff, n_components);
 	delete facetIntersector;
+	DEBUG_END;
 	return ret;
 }
 
 static void min3scalar(double s, double& s0, double& s1, double &s2, int i, int& i0,
 		int& i1, int& i2)
 {
+	DEBUG_START;
 
 	if (i0 == -1)
 	{
 		s0 = s;
 		i0 = i;
+		DEBUG_END;
 		return;
 	}
 	if (i1 == -1)
@@ -59,6 +71,7 @@ static void min3scalar(double s, double& s0, double& s1, double &s2, int i, int&
 			s1 = s;
 			i1 = i;
 		}
+		DEBUG_END;
 		return;
 	}
 	if (i2 == -1)
@@ -84,6 +97,7 @@ static void min3scalar(double s, double& s0, double& s1, double &s2, int i, int&
 			s2 = s;
 			i2 = i;
 		}
+		DEBUG_END;
 		return;
 	}
 	if (s < s0)
@@ -107,16 +121,20 @@ static void min3scalar(double s, double& s0, double& s1, double &s2, int i, int&
 		s2 = s;
 		i2 = i;
 	}
+	DEBUG_END;
 }
 
 static int sign(int i0, int i1, int i2)
 {
+	DEBUG_START;
 	bool num_inv = (i0 > i1) + (i0 > i2) + (i1 > i2);
+	DEBUG_END;
 	return 1 - 2 * num_inv;
 }
 
 int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 {
+	DEBUG_START;
 	int n_intrsct;
 	int i, i_next, i_prev;
 	int sign_curr, sign_next, sign_prev;
@@ -177,6 +195,7 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 		}
 		DEBUG_PRINT("");
 
+		DEBUG_END;
 		return 0;
 	}
 
@@ -234,6 +253,7 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 	//висячие вершины
 	if (n_intrsct == 0)
 	{
+		DEBUG_END;
 		return 0;
 	}
 
@@ -367,11 +387,13 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 		i_next = (i_next + i_step + facet->numVertices) % facet->numVertices;
 	}
 
+	DEBUG_END;
 	return n_intrsct;
 }
 
 void Intersector::run(Plane iplane)
 {
+	DEBUG_START;
 
 	int i, j, k, j_begin;
 	int nume;
@@ -503,7 +525,8 @@ void Intersector::run(Plane iplane)
 			buffer_new.add_edge(v0, v1, fid);
 			if (buffer_new.get_nv() >= nume)
 			{
-				DEBUG_PRINT("Error. Stack overflow  in buffer_new");
+				ERROR_PRINT("Error. Stack overflow  in buffer_new");
+				DEBUG_END;
 				return;
 			}
 
@@ -526,7 +549,8 @@ void Intersector::run(Plane iplane)
 
 			if (v0 == -1 || v1 == -1)
 			{
-				DEBUG_PRINT("Warning. v0 = %d, v1 = %d", v0, v1);
+				ERROR_PRINT("Warning. v0 = %d, v1 = %d", v0, v1);
+				DEBUG_END;
 				return;
 			}
 
@@ -777,10 +801,13 @@ void Intersector::run(Plane iplane)
 	if (ifMultiComponent != NULL)
 		delete[] ifMultiComponent;
 
+	DEBUG_END;
+
 }
 
 void Intersector::runCoalesceMode(Plane iplane, int jfid)
 {
+	DEBUG_START;
 
 	int i, j, k, j_begin;
 	int nume;
@@ -1013,6 +1040,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 			if (v0 == -1 || v1 == -1)
 			{
 				ERROR_PRINT("Warning. v0 = %d, v1 = %d\n", v0, v1);
+				DEBUG_END;
 				return;
 			}
 
@@ -1261,4 +1289,5 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	if (ifMultiComponent != NULL)
 		delete[] ifMultiComponent;
 
+	DEBUG_END;
 }

@@ -2,6 +2,7 @@
 
 void EdgeList::my_fprint(FILE* file)
 {
+	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "\n\n---------- EdgeList %d. ----------\n", id);
 	REGULAR_PRINT(file, "num = %d\n", num);
@@ -50,4 +51,5 @@ void EdgeList::my_fprint(FILE* file)
 		}
 		REGULAR_PRINT(file, "\n");
 	}
+	DEBUG_END;
 }
