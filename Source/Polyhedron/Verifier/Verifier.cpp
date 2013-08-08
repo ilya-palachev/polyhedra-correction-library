@@ -426,6 +426,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 
 int Verifier::checkEdges(EdgeData* edgeData)
 {
+	DEBUG_START;
 	int numEdgesDesctructed = 0;
 	EdgeSetIterator edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
@@ -436,6 +437,7 @@ int Verifier::checkEdges(EdgeData* edgeData)
 		}
 		++edge;
 	}
+	DEBUG_END;
 	return numEdgesDesctructed;
 }
 
@@ -451,12 +453,18 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 	Plane pi0 = polyhedron->facets[edge->f0].plane;
 	Plane pi1 = polyhedron->facets[edge->f1].plane;
 
+	/* Searching for facet f2 which is clockwise after f0 and f1 in the list
+	 * of facets incident to the vertex edge->v0. */
+	DEBUG_PRINT("Searching for facet f2.");
 	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
 	int* incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
-	int f2;
+	int f2 = INT_NOT_INITIALIZED;
 	for (int iFacet = 0; iFacet < numIncidentFacets;)
 	{
 		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
+		DEBUG_PRINT("incidentFacets[%d] = %d, incidentFacets[%d] = %d",
+						iFacet, incidentFacets[iFacet], iFacetNext,
+						incidentFacets[iFacetNext]);
 
 		if ( (incidentFacets[iFacet] == edge->f0 &&
 				incidentFacets[iFacetNext] == edge->f1) ||
@@ -469,14 +477,28 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 		}
 		iFacet = iFacetNext;
 	}
+	ASSERT(f2 != INT_NOT_INITIALIZED);
+	if (f2 == INT_NOT_INITIALIZED)
+	{
+		ERROR_PRINT("Failed to find facet f2.");
+		DEBUG_END;
+		return false;
+	}
+	DEBUG_PRINT("Succeeded to find f2 = %d", f2);
 	Plane pi2 = polyhedron->facets[f2].plane;
 
+	/* Searching for facet f3 which is clockwise after f0 and f1 in the list
+	 * of facets incident to the vertex edge->v1. */
+	DEBUG_PRINT("Searching for facet f3.");
 	numIncidentFacets = polyhedron->vertexInfos[edge->v1].numFacets;
 	incidentFacets = polyhedron->vertexInfos[edge->v1].indFacets;
-	int f3;
+	int f3 = INT_NOT_INITIALIZED;
 	for (int iFacet = 0; iFacet < numIncidentFacets;)
 	{
 		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
+		DEBUG_PRINT("incidentFacets[%d] = %d, incidentFacets[%d] = %d",
+				iFacet, incidentFacets[iFacet], iFacetNext,
+				incidentFacets[iFacetNext]);
 
 		if ( (incidentFacets[iFacet] == edge->f0 &&
 				incidentFacets[iFacetNext] == edge->f1) ||
@@ -489,6 +511,14 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 		}
 		iFacet = iFacetNext;
 	}
+	ASSERT(f3 != INT_NOT_INITIALIZED);
+	if (f3 == INT_NOT_INITIALIZED)
+	{
+		ERROR_PRINT("Failed to find facet f3.");
+		DEBUG_END;
+		return false;
+	}
+	DEBUG_PRINT("Succeeded to find f3 = %d", f3);
 	Plane pi3 = polyhedron->facets[f3].plane;
 
 	Vector3d A2; /* intersection of pi0, pi1, pi2 */
