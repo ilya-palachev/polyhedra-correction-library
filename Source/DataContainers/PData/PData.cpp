@@ -9,9 +9,13 @@
 
 PData::PData(const Polyhedron* polyhedron)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PData::~PData()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 

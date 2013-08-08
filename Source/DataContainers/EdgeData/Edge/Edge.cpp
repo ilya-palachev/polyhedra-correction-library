@@ -15,6 +15,8 @@ Edge::Edge() :
 				f1(-1),
 				assocList()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::Edge(int v0_orig, int v1_orig) :
@@ -25,6 +27,8 @@ Edge::Edge(int v0_orig, int v1_orig) :
 				f1(INT_NOT_INITIALIZED),
 				assocList()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig) :
@@ -35,6 +39,8 @@ Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig) :
 				f1(f1_orig),
 				assocList()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig) :
@@ -45,6 +51,8 @@ Edge::Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig) :
 				f1(f1_orig),
 				assocList()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
@@ -56,6 +64,8 @@ Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
 				f1(f1_orig),
 				assocList(assocList_orig)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig,
@@ -67,6 +77,8 @@ Edge::Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig,
 				f1(f1_orig),
 				assocList(assocList_orig)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::Edge(const Edge& orig) :
@@ -77,16 +89,21 @@ Edge::Edge(const Edge& orig) :
 				f1(orig.f1),
 				assocList(orig.assocList)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 Edge::~Edge()
 {
+	DEBUG_START;
 	DEBUG_PRINT("Attention! edge #%d is deleting now\n", id);
 	assocList.clear();
+	DEBUG_END;
 }
 
 Edge& Edge::operator =(const Edge& orig)
 {
+	DEBUG_START;
 	id = orig.id;
 	v0 = orig.v0;
 	v1 = orig.v1;
@@ -94,15 +111,20 @@ Edge& Edge::operator =(const Edge& orig)
 	f1 = orig.f1;
 	assocList = orig.assocList;
 
+	DEBUG_END;
 	return *this;
 }
 
 bool Edge::operator ==(const Edge& e) const
 {
+	DEBUG_START;
+	DEBUG_END;
 	return (v0 == e.v0) && (v1 == e.v1) && (f0 == e.f0) && (f1 == e.f1);
 }
 
 bool Edge::operator != (const Edge& e) const
 {
+	DEBUG_START;
+	DEBUG_END;
 	return !(*this == e);
 }

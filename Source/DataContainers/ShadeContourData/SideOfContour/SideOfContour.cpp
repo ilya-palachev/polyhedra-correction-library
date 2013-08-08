@@ -13,6 +13,8 @@ SideOfContour::SideOfContour() :
 				A1(Vector3d(0, 0, 0)),
 				A2(Vector3d(0, 0, 0))
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 SideOfContour::SideOfContour(const SideOfContour& orig) :
@@ -21,9 +23,13 @@ SideOfContour::SideOfContour(const SideOfContour& orig) :
 				A1(orig.A1),
 				A2(orig.A2)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 SideOfContour::~SideOfContour()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 

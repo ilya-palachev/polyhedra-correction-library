@@ -27,6 +27,8 @@ PointShifterLinear::PointShifterLinear() :
 		B(),
 		K()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PointShifterLinear::PointShifterLinear(Polyhedron* p) :
@@ -42,10 +44,13 @@ PointShifterLinear::PointShifterLinear(Polyhedron* p) :
 		B(new double[3]),
 		K()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PointShifterLinear::~PointShifterLinear()
 {
+	DEBUG_START;
 	if (x != NULL)
 	{
 		delete[] x;
@@ -86,10 +91,12 @@ PointShifterLinear::~PointShifterLinear()
 		delete[] B;
 		B = NULL;
 	}
+	DEBUG_END;
 }
 
 void PointShifterLinear::runGlobal(int id, Vector3d delta)
 {
+	DEBUG_START;
 	int step, i;
 	double err, err_eps;
 	double norm;
@@ -130,6 +137,7 @@ void PointShifterLinear::runGlobal(int id, Vector3d delta)
 			if (step > MAX_STEPS)
 			{
 				DEBUG_PRINT("Too much steps...");
+				DEBUG_END;
 				return;
 			}
 			//            } while (err > err_eps);
@@ -166,15 +174,18 @@ void PointShifterLinear::runGlobal(int id, Vector3d delta)
 		if (step > MAX_STEPS)
 		{
 			DEBUG_PRINT("Too much steps...");
+			DEBUG_END;
 			return;
 		}
 		K = norm / err;
 	}while (err > 1e-10);
 #endif
+	DEBUG_END;
 }
 
 double PointShifterLinear::calculateError()
 {
+	DEBUG_START;
 	int i, j, nv, *index;
 	double err, a, b, c, d, x, y, z, locerr;
 	err = 0.;
@@ -201,12 +212,13 @@ double PointShifterLinear::calculateError()
 		DEBUG_PRINT("error[%d] = %lf\n", j, locerr);
 	}
 
+	DEBUG_END;
 	return err;
-
 }
 
 double PointShifterLinear::calculateDeform()
 {
+	DEBUG_START;
 	int i;
 	double deform, xx, yy, zz;
 	deform = 0.;
@@ -219,12 +231,13 @@ double PointShifterLinear::calculateDeform()
 		deform += (yy - yold[i]) * (yy - yold[i]);
 		deform += (zz - zold[i]) * (zz - zold[i]);
 	}
+	DEBUG_END;
 	return deform;
-
 }
 
 void PointShifterLinear::moveFacets()
 {
+	DEBUG_START;
 	int i, j, nv, *index;
 	double a0, b0, c0, d0;
 	double a, b, c, d;
@@ -257,10 +270,12 @@ void PointShifterLinear::moveFacets()
 		polyhedron->facets[j].plane.norm.z = c;
 		polyhedron->facets[j].plane.dist = d;
 	}
+	DEBUG_END;
 }
 
 void PointShifterLinear::moveVerticesGlobal()
 {
+	DEBUG_START;
 	int i, j, nf, *index;
 	double a, b, c, d;
 	double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
@@ -315,12 +330,13 @@ void PointShifterLinear::moveVerticesGlobal()
 		polyhedron->vertices[i].x = B[0];
 		polyhedron->vertices[i].y = B[1];
 		polyhedron->vertices[i].z = B[2];
-
 	}
+	DEBUG_END;
 }
 
 void PointShifterLinear::runLocal(int id, Vector3d delta)
 {
+	DEBUG_START;
 	int step, i;
 	double err, err_eps;
 	double norm;
@@ -372,6 +388,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 			if (step > MAX_STEPS)
 			{
 				DEBUG_PRINT("Too much steps...");
+				DEBUG_END;
 				return;
 			}
 		} while (err > err_eps);
@@ -427,6 +444,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 		if (step > MAX_STEPS)
 		{
 			DEBUG_PRINT("Too much steps...");
+			DEBUG_END;
 			return;
 		}
 		K = norm / err;
@@ -434,10 +452,12 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 #endif
 
 	polyhedron->delete_empty_facets();
+	DEBUG_END;
 }
 
 void PointShifterLinear::moveVerticesLocal()
 {
+	DEBUG_START;
     int i, j, nf, *index;
     double a, b, c, d;
     double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
@@ -502,11 +522,14 @@ void PointShifterLinear::moveVerticesLocal()
             polyhedron->vertices[i].z = B[2];
 
     }
+
+    DEBUG_END;
 }
 
 void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
 		int& num_steps, double& norm_sum)
 {
+	DEBUG_START;
 
 	int step, i;
 	double err, err_eps;
@@ -544,6 +567,7 @@ void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
 				if (step > MAX_STEPS)
 				{
 					DEBUG_PRINT("Too much steps...\n");
+					DEBUG_END;
 					return;
 				}
 			} while (err > err_eps);
@@ -571,6 +595,7 @@ void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
 			if (step > MAX_STEPS)
 			{
 				DEBUG_PRINT("Too much steps...\n");
+				DEBUG_END;
 				return;
 			}
 			K = norm / err;
@@ -584,10 +609,12 @@ void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
 
 	DEBUG_PRINT("vertex[%d] = (%lf, %lf, %lf)\n", id, polyhedron->vertices[id].x, polyhedron->vertices[id].y,
 			polyhedron->vertices[id].z);
+	DEBUG_END;
 }
 
 void PointShifterLinear::runPartial(int id, Vector3d delta, int num)
 {
+	DEBUG_START;
 	int i;
 	double coeff;
 	Vector3d delta_step;
@@ -605,4 +632,5 @@ void PointShifterLinear::runPartial(int id, Vector3d delta, int num)
 			runGlobal(id, delta_step);
 		}
 	}
+	DEBUG_END;
 }

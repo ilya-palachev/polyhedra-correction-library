@@ -16,10 +16,13 @@ ShadeContourConstructor::ShadeContourConstructor(Polyhedron* p,
 				bufferInt1(NULL),
 				edgeData(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 ShadeContourConstructor::~ShadeContourConstructor()
 {
+	DEBUG_START;
 	if (bufferBool != NULL)
 	{
 		delete[] bufferBool;
@@ -35,6 +38,7 @@ ShadeContourConstructor::~ShadeContourConstructor()
 		delete[] bufferInt1;
 		bufferInt1 = NULL;
 	}
+	DEBUG_END;
 }
 
 void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
@@ -176,6 +180,7 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 				"Edge is invisible: it's covered by facets, "
 				"sign0 = %le, sign1 = %le",
 				sign0, sign1);
+		DEBUG_END;
 		return false;
 	}
 
@@ -186,6 +191,7 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 	{
 // Regular case. Nothing is orthogonal.
 		DEBUG_PRINT("\t\tRegular case. Nothing is orthogonal.");
+		DEBUG_END;
 		return true;
 	}
 
@@ -193,6 +199,7 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 	{
 // When the edge is orthogonal to the plane of projection
 		DEBUG_PRINT("\t\tThe edge is orthogonal to the plane of projection");
+		DEBUG_END;
 		return false;
 	}
 
@@ -202,6 +209,7 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		DEBUG_PRINT(
 				"\t\tOnly the first facet is orthogonal "
 				"to the plane of projection");
+		DEBUG_END;
 		return collinearVisibility(v0, v1, planeOfProjection, f0);
 	}
 
@@ -211,6 +219,7 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		DEBUG_PRINT(
 				"\t\tOnly the second facets is orthogonal "
 				"to the plane of projection");
+		DEBUG_END;
 		return collinearVisibility(v0, v1, planeOfProjection, f1);
 	}
 }
@@ -277,10 +286,11 @@ bool ShadeContourConstructor::collinearVisibility(int v0processed,
 			// -- eliminate the edge from the buffer
 			DEBUG_PRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max,
 					v1Max, v0, v1);
+			DEBUG_END;
 			return curEdge * mainEdge > 0;
 		}
 	}
-	DEBUG_PRINT("Error. Edge (%d, %d) cannot be found in facets %d",
+	ERROR_PRINT("Error. Edge (%d, %d) cannot be found in facets %d",
 			v0processed, v1processed, ifacet);
 	DEBUG_END;
 	return false;

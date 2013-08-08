@@ -12,16 +12,20 @@ ShadeContourData::ShadeContourData(const Polyhedron* p) :
 				numContours(0),
 				contours(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 ShadeContourData::~ShadeContourData()
 {
+	DEBUG_START;
 	DEBUG_PRINT("Shade contour data is being deleted now!");
 	if (contours != NULL)
 	{
 		delete[] contours;
 		contours = NULL;
 	}
+	DEBUG_END;
 }
 
 #define STD_SC_FORMAT_HEADER_SIZE_1 2
@@ -29,11 +33,13 @@ ShadeContourData::~ShadeContourData()
 
 bool ShadeContourData::fscanDefault(char* fileNameContours)
 {
+	DEBUG_START;
 	FILE* fd = (FILE*) fopen(fileNameContours, "r");
 
 	if (!fd)
 	{
 		ERROR_PRINT("Failed to open file %s", fileNameContours);
+		DEBUG_END;
 		return false;
 	}
 
@@ -44,6 +50,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 		{
 			ERROR_PRINT("Wrong file format, in header #1");
 			fclose(fd);
+			DEBUG_END;
 			return false;
 		}
 		DEBUG_PRINT("scanned string : %s", scannedString);
@@ -53,6 +60,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 	{
 		ERROR_PRINT("Wrong file format, in number of contours");
 		fclose(fd);
+		DEBUG_END;
 		return false;
 	}
 
@@ -62,6 +70,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 		{
 			ERROR_PRINT("Wrong file format, in header #2");
 			fclose(fd);
+			DEBUG_END;
 			return false;
 		}
 		DEBUG_PRINT("scanned string : %s", scannedString);
@@ -78,6 +87,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 			ERROR_PRINT("Wrong file format, number of sides for contour #%d",
 					iContour);
 			fclose(fd);
+			DEBUG_END;
 			return false;
 		}
 
@@ -89,6 +99,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 					"in normal to plane for contour #%d",
 					iContour);
 			fclose(fd);
+			DEBUG_END;
 			return false;
 		}
 
@@ -106,6 +117,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 						"in confidence of side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
+				DEBUG_END;
 				return false;
 			}
 
@@ -115,6 +127,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 						"in type of side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
+				DEBUG_END;
 				return false;
 			}
 
@@ -126,6 +139,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 						"in A1 for side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
+				DEBUG_END;
 				return false;
 			}
 
@@ -137,6 +151,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 						"in A1 for side #%d of contour #%d",
 						iSide, iContour);
 				fclose(fd);
+				DEBUG_END;
 				return false;
 			}
 		}
@@ -150,6 +165,7 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 	}
 
 	fprint(stdout);
+	DEBUG_END;
 	return true;
 }
 
@@ -158,10 +174,12 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 
 void ShadeContourData::fprint(FILE* file)
 {
+	DEBUG_START;
 	REGULAR_PRINT(file, "Dumping shade contour data. Number of contours: %d\n",
 			numContours);
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		contours[iContour].my_fprint(file);
 	}
+	DEBUG_END;
 }

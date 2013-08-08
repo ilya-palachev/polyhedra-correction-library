@@ -12,42 +12,50 @@
 VertexGrouper::VertexGrouper() :
 		PCorrector()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 VertexGrouper::VertexGrouper(Polyhedron* p) :
 		PCorrector(p)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 VertexGrouper::~VertexGrouper()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 
 void swap(int& i, int& j)
 {
+	DEBUG_START;
 	int tmp = i;
 	i = j;
 	j = tmp;
+	DEBUG_END;
 }
 
 int VertexGrouper::run(int id)
 {
+	DEBUG_START;
 	int count;
-#ifdef TCPRINT
-//    DEBUG_PRINT("Begin join_points...\n");
-#endif
+    DEBUG_PRINT("Begin join_points...\n");
 
 	count = 0;
 	count += groupInner();
-#ifdef TCPRINT
-//    DEBUG_PRINT("Total: %d consections found\n", count);
-#endif
+    DEBUG_PRINT("Total: %d intersections found\n", count);
+
+    DEBUG_END;
 	return count;
 }
 
 int VertexGrouper::groupInner()
 {
+	DEBUG_START;
 	int i, count;
 
 	double *A, *b;
@@ -62,10 +70,9 @@ int VertexGrouper::groupInner()
 	{
 		count += groupInnerFacet(i, A, b, vertex_old);
 	}
-#ifdef TCPRINT
 	if (count > 0)
-	DEBUG_PRINT("\tTotal: %d inner consections found\n", count);
-#endif
+	DEBUG_PRINT("\tTotal: %d inner intersections found\n", count);
+
 	if (A != NULL)
 		delete[] A;
 	if (b != NULL)
@@ -73,12 +80,14 @@ int VertexGrouper::groupInner()
 	if (vertex_old != NULL)
 		delete[] vertex_old;
 
+	DEBUG_END;
 	return count;
 }
 
 int VertexGrouper::groupInnerFacet(int fid, double* A, double* b,
 		Vector3d* vertex_old)
 {
+	DEBUG_START;
 
 	int i, nv, *index, count;
 	Vector3d v;
@@ -107,22 +116,20 @@ int VertexGrouper::groupInnerFacet(int fid, double* A, double* b,
 				index[(i + 1) % nv], index[(i + 2) % nv], index[(i + 3) % nv],
 				A, b);
 	}
-#ifdef TCPRINT
 	if (count > 0)
-	DEBUG_PRINT("\t\tIn facet %d: %d inner consections found\n", fid, count);
-#endif
-//    if (count > 0)
-//        facet[fid].my_fprint(stdout);
+		DEBUG_PRINT("\t\tIn facet %d: %d inner intersections found\n", fid, count);
 	for (i = 0; i < nv; ++i)
 	{
 		polyhedron->vertices[index[i]] = vertex_old[i];
 	}
+	DEBUG_END;
 	return count;
 }
 
 int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 		int id2, int id3, double* A, double* b)
 {
+	DEBUG_START;
 
 	// fid - identificator of the facet
 	// (id0, id1) - first edge
@@ -139,17 +146,15 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 			|| id2 >= polyhedron->numVertices
 			|| id3 >= polyhedron->numVertices)
 	{
-#ifdef TCPRINT
-		DEBUG_PRINT("\t\t\tjoin_points_inner_pair: Error. incorrect input\n");
-#endif
+		ERROR_PRINT("Error. incorrect input\n");
+		DEBUG_END;
 		return 0;
 	}
 
 	if ((id0 == id3 && id1 == id2) || (id0 == id2 && id1 == id3))
 	{
-#ifdef TCPRINT
-		DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
-#endif
+		ERROR_PRINT("(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
+		DEBUG_END;
 		return 2;
 	}
 
@@ -161,10 +166,9 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 				&& (polyhedron->vertices[id1] - polyhedron->vertices[id0])
 						* (polyhedron->vertices[id3] - polyhedron->vertices[id2]) < 0)
 		{
-#ifdef TCPRINT
-			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
+			ERROR_PRINT("\t\t\t(%d, %d) and (%d, %d) intersect untrivially\n",
 					id0, id1, id2, id3);
-#endif
+			DEBUG_END;
 			return 2;
 		}
 		else
@@ -181,10 +185,9 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 				&& (polyhedron->vertices[id1] - polyhedron->vertices[id0])
 						* (polyhedron->vertices[id3] - polyhedron->vertices[id2]) > 0)
 		{
-#ifdef TCPRINT
-			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
+			ERROR_PRINT("\t\t\t(%d, %d) and (%d, %d) intersect untrivially\n",
 					id0, id1, id2, id3);
-#endif
+			DEBUG_END;
 			return 2;
 		}
 		else
@@ -197,6 +200,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 			(polyhedron->vertices[id1] - polyhedron->vertices[id0])
 					% (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL)
 	{
+		DEBUG_END;
 		return 0;
 	}
 
@@ -255,14 +259,14 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 
 	if (Gauss_string(2, A, b) == 0)
 	{
+		DEBUG_END;
 		return 0;
 	}
 
 	if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.)
 	{
-#ifdef TCPRINT
 		DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
-#endif
+
 		//В этом случае будем объединять вершины...
 		double dist = sqrt(qmod(polyhedron->vertices[id1] - polyhedron->vertices[id2]));
 		DEBUG_PRINT(
@@ -301,9 +305,13 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 		DEBUG_PRINT("Слияние завершено\n");
 		polyhedron->delete_empty_facets();
 		polyhedron->preprocessAdjacency();
+		DEBUG_END;
 		return 1;
 	}
 	else
+	{
+		DEBUG_END;
 		return 0;
+	}
 }
 

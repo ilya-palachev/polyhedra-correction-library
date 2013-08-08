@@ -14,6 +14,8 @@ SContour::SContour() :
 				poly(NULL),
 				sides(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 SContour::SContour(const SContour& orig) :
@@ -23,15 +25,18 @@ SContour::SContour(const SContour& orig) :
 				poly(orig.poly),
 				sides()
 {
+	DEBUG_START;
 	sides = new SideOfContour[ns + 1];
 	for (int i = 0; i < ns; ++i)
 	{
 		sides[i] = orig.sides[i];
 	}
+	DEBUG_END;
 }
 
 SContour::~SContour()
 {
+	DEBUG_START;
 
 	DEBUG_PRINT("Attention! shade contour %d is being deleted now...\n", this->id);
 
@@ -40,10 +45,12 @@ SContour::~SContour()
 		delete[] sides;
 		sides = NULL;
 	}
+	DEBUG_END;
 }
 
 SContour& SContour::operator =(const SContour& scontour)
 {
+	DEBUG_START;
 	id = scontour.id;
 	ns = scontour.ns;
 	plane = scontour.plane;
@@ -62,6 +69,7 @@ SContour& SContour::operator =(const SContour& scontour)
 		sides[iSide] = scontour.sides[iSide];
 	}
 
+	DEBUG_END;
 	return *this;
 }
 

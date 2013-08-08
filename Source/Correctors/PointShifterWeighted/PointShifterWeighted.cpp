@@ -29,6 +29,8 @@ PointShifterWeighted::PointShifterWeighted() :
 		tmp2(),
 		tmp3()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PointShifterWeighted::PointShifterWeighted(Polyhedron* p) :
@@ -43,6 +45,7 @@ PointShifterWeighted::PointShifterWeighted(Polyhedron* p) :
 				tmp2(),
 				tmp3()
 {
+	DEBUG_START;
 	x = new double[n];
 	tmp0 = new double[n];
 	tmp1 = new double[n];
@@ -56,10 +59,12 @@ PointShifterWeighted::PointShifterWeighted(Polyhedron* p) :
 	for (int i = 0; i < polyhedron->numVertices; ++i)
 		for (int j = 0; j < polyhedron->numFacets; ++j)
 			khi[i * polyhedron->numFacets + j] = (polyhedron->facets[j].find_vertex(i) != -1);
+	DEBUG_END;
 }
 
 PointShifterWeighted::~PointShifterWeighted()
 {
+	DEBUG_START;
 	if (x != NULL)
 	{
 		delete[] x;
@@ -105,6 +110,7 @@ PointShifterWeighted::~PointShifterWeighted()
 		delete[] khi;
 		khi = NULL;
 	}
+	DEBUG_END;
 }
 
 #define nx(i) (3 * ((i) - ((i) > id)))
@@ -127,6 +133,7 @@ PointShifterWeighted::~PointShifterWeighted()
 
 void PointShifterWeighted::run(int id, Vector3d delta)
 {
+	DEBUG_START;
 	int i, j, step;
 	double err, err_new, gamma;
 	bool success;
@@ -187,6 +194,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		if (!success)
 		{
 			DEBUG_PRINT("Stoping deform...\n");
+			DEBUG_END;
 			return;
 		}
 		for (i = 0; i < n; ++i)
@@ -248,10 +256,12 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 	}
 
 	DEBUG_PRINT("End of deform_w\n");
+	DEBUG_END;
 }
 
 void PointShifterWeighted::calculateFunctional()
 {
+	DEBUG_START;
 	int i, j;
 	double sx, sy, sz;
 	double sa, sb, sc, sd;
@@ -337,10 +347,12 @@ void PointShifterWeighted::calculateFunctional()
 		fx[nc(j)] = 2 * c(j)+ 2 * K * sc;
 		fx[nd(j)] = 2 * d(j)+ 2 * K * sd;
 	}
+	DEBUG_END;
 }
 
 void PointShifterWeighted::calculateFuncitonalDerivative()
 {
+	DEBUG_START;
 	int i, j;
 	double ieps = 0.5 / EPS_DERIVATE;
 	double *swap0, *swap1;
@@ -365,5 +377,6 @@ void PointShifterWeighted::calculateFuncitonalDerivative()
 		for (i = 0; i < n; ++i)
 			A[i * n + j] = (tmp2[i] - tmp3[i]) * ieps;
 	}
+	DEBUG_END;
 }
 

@@ -10,10 +10,14 @@
 EdgeConstructor::EdgeConstructor(Polyhedron* p, EdgeData* e) :
 				PDataConstructor(p)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeConstructor::~EdgeConstructor()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void EdgeConstructor::run(EdgeData* &edgeData)

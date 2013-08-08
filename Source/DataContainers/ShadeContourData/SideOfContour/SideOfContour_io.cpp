@@ -2,6 +2,7 @@
 
 void SideOfContour::my_fprint(FILE* file)
 {
+	DEBUG_START;
 	REGULAR_PRINT(file, "Printing content of side of contour\n");
 	REGULAR_PRINT(file, "confidence = %lf (number from 0 to 1)\n", confidence);
 	REGULAR_PRINT(file, "edge type = %d (that means the following:\n", type);
@@ -18,10 +19,13 @@ void SideOfContour::my_fprint(FILE* file)
 
 	REGULAR_PRINT(file, "A1 = (%lf, %lf, %lf)\n", A1.x, A1.y, A1.z);
 	REGULAR_PRINT(file, "A2 = (%lf, %lf, %lf)\n", A2.x, A2.y, A2.z);
+	DEBUG_END;
 }
 
 void SideOfContour::my_fprint_short(FILE* file)
 {
+	DEBUG_START;
 	REGULAR_PRINT(file, "%lf\t%d\t(%lf,%lf,%lf)\t(%lf,%lf,%lf)\n", confidence, type,
 			A1.x, A1.y, A1.z, A2.x, A2.y, A2.z);
+	DEBUG_END;
 }

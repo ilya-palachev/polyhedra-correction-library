@@ -19,6 +19,8 @@ PointShifter::PointShifter() :
 		tmp2(),
 		tmp3()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PointShifter::PointShifter(Polyhedron* p) :
@@ -33,6 +35,7 @@ PointShifter::PointShifter(Polyhedron* p) :
 		tmp2(),
 		tmp3()
 {
+	DEBUG_START;
 	n = 0;
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
@@ -60,10 +63,12 @@ PointShifter::PointShifter(Polyhedron* p) :
 	{
 		DEBUG_PRINT("sum[%d] = %d", i, sum[i]);
 	}
+	DEBUG_END;
 }
 
 PointShifter::~PointShifter()
 {
+	DEBUG_START;
 	if (x != NULL)
 	{
 		delete[] x;
@@ -109,6 +114,7 @@ PointShifter::~PointShifter()
 		delete[] tmp3;
 		tmp3 = NULL;
 	}
+	DEBUG_END;
 }
 
 #define eps 1.
@@ -145,6 +151,7 @@ void print_vector(int n, double* v);
 
 void PointShifter::run(int id, Vector3d delta)
 {
+	DEBUG_START;
 	int i, step;
 	double err, err_new, gamma;
 	bool success;
@@ -201,6 +208,7 @@ void PointShifter::run(int id, Vector3d delta)
 		if (!success)
 		{
 			DEBUG_PRINT("Stoping deform...");
+			DEBUG_END;
 			return;
 		}
 		for (i = 0; i < n; ++i)
@@ -259,10 +267,12 @@ void PointShifter::run(int id, Vector3d delta)
 					a * xx + b * yy + c * zz + d);
 		}
 	}
+	DEBUG_END;
 }
 
 double norm_vector(int n, double* a)
 {
+	DEBUG_START;
 	int i;
 	double max, tmp;
 	max = 0.;
@@ -272,11 +282,13 @@ double norm_vector(int n, double* a)
 		if (tmp > max)
 			max = tmp;
 	}
+	DEBUG_END;
 	return max;
 }
 
 void print_matrix(FILE* file, int n, int m, double* A)
 {
+	DEBUG_START;
 	int i, j;
 
 	REGULAR_PRINT(file, "\n");
@@ -303,10 +315,12 @@ void print_matrix(FILE* file, int n, int m, double* A)
 	for (i = 0; i < m; ++i)
 		REGULAR_PRINT(file, "--");
 	REGULAR_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void print_matrix_bool(FILE* file, int n, int m, bool* A)
 {
+	DEBUG_START;
 	int i, j;
 
 	REGULAR_PRINT(file, "\n");
@@ -328,18 +342,22 @@ void print_matrix_bool(FILE* file, int n, int m, bool* A)
 	for (i = 0; i < m; ++i)
 		REGULAR_PRINT(file, "--");
 	REGULAR_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void print_vector(int n, double* v)
 {
+	DEBUG_START;
 	int i;
 	for (i = 0; i < n; ++i)
 		DEBUG_PRINT("\t%lf", v[i]);
+	DEBUG_END;
 }
 
 
 void PointShifter::calculateFunctional()
 {
+	DEBUG_START;
 	int i, j, k, p, m;
 	int *index, nv, nf;
 	Plane plane;
@@ -425,10 +443,12 @@ void PointShifter::calculateFunctional()
 		}
 		k += 4;
 	}
+	DEBUG_END;
 }
 
 void PointShifter::calculateFunctionalDerivative()
 {
+	DEBUG_START;
 	int i, j, k, p, m;
 	int *index, nv, nf;
 	Plane plane;
@@ -532,10 +552,12 @@ void PointShifter::calculateFunctionalDerivative()
 		}
 		k += 4;
 	}
+	DEBUG_END;
 }
 
 void PointShifter::calculateFunctionalDerivative2()
 {
+	DEBUG_START;
 	int i, j;
 	double ieps = 0.5 / EPS_DERIVATE;
 	double *swap0, *swap1;
@@ -562,4 +584,5 @@ void PointShifter::calculateFunctionalDerivative2()
 		x = swap0;
 		fx = swap1;
 	}
+	DEBUG_END;
 }

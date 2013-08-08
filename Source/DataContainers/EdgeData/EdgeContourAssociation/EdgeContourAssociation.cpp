@@ -13,6 +13,8 @@ EdgeContourAssociation::EdgeContourAssociation() :
 				ifProperDirection(false),
 				weight(0.)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeContourAssociation::EdgeContourAssociation(int indContour_orig,
@@ -23,6 +25,8 @@ EdgeContourAssociation::EdgeContourAssociation(int indContour_orig,
 				ifProperDirection(ifProperDirection_orig),
 				weight(weight_orig)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeContourAssociation::EdgeContourAssociation(int indContour_orig) :
@@ -31,6 +35,8 @@ EdgeContourAssociation::EdgeContourAssociation(int indContour_orig) :
 				ifProperDirection(false),
 				weight(0.)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeContourAssociation::EdgeContourAssociation(
@@ -40,9 +46,13 @@ EdgeContourAssociation::EdgeContourAssociation(
 				ifProperDirection(orig.ifProperDirection),
 				weight(orig.weight)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeContourAssociation::~EdgeContourAssociation()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 

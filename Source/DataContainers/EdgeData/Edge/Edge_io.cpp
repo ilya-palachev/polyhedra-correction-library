@@ -4,6 +4,7 @@ const double THRESHOLD_ESSENTIAL_ASSOCIATION = 0.1;
 
 void Edge::my_fprint(FILE* file) const
 {
+	DEBUG_START;
 	REGULAR_PRINT(file, COLOUR_YELLOW "Printing content of edge #%d" COLOUR_WHITE,
 			id);
 	REGULAR_PRINT(file, "\tid = %d (id of the edge)\n", id);
@@ -34,4 +35,5 @@ void Edge::my_fprint(FILE* file) const
 	}
 	REGULAR_PRINT(file, "\t number of essential contours: %d (weight >= 0.1)\n",
 			numContoursEssential);
+	DEBUG_END;
 }

@@ -11,12 +11,16 @@ EdgeData::EdgeData() :
 				edges(),
 				numEdges(0)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeData::EdgeData(int numEdgesMax) :
 				edges(),
 				numEdges(0)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 EdgeData::~EdgeData()
@@ -30,8 +34,10 @@ EdgeData::~EdgeData()
 
 bool EdgeData::operator ==(EdgeData& e)
 {
+	DEBUG_START;
 	if (numEdges != e.numEdges)
 	{
+		DEBUG_END;
 		return false;
 	}
 
@@ -42,17 +48,21 @@ bool EdgeData::operator ==(EdgeData& e)
 	{
 		if (*edgeSelf != *edgeOther)
 		{
+			DEBUG_END;
 			return false;
 		}
 		++edgeSelf;
 		++edgeOther;
 	}
 
+	DEBUG_END;
 	return true;
 }
 
 bool EdgeData::operator !=(EdgeData& e)
 {
+	DEBUG_START;
+	DEBUG_END;
 	return !(*this == e);
 }
 
@@ -66,6 +76,7 @@ void EdgeData::addEdge(int v0, int v1, int f0)
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
 				v0, v1, f0);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0));
+		DEBUG_END;
 		return;
 	}
 	if (v0 > v1)

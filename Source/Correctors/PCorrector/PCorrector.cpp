@@ -10,14 +10,20 @@
 PCorrector::PCorrector() :
 				polyhedron(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PCorrector::PCorrector(Polyhedron* input) :
 				polyhedron(input)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 PCorrector::~PCorrector()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
