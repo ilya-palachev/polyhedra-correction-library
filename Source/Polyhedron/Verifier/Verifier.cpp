@@ -631,6 +631,9 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 		                                    iFacet + 1];
 		Facet* facetCurr = &polyhedron->facets[iFacetCurrent];
 
+		DEBUG_PRINT("\t before:");
+		facetCurr->my_fprint_all(stderr);
+
 		int iPositionPrev = (facetCurr->numVertices + iPositionReduced - 1) %
 				facetCurr->numVertices;
 		int iPositionNext = (facetCurr->numVertices + iPositionReduced + 1) %
@@ -754,6 +757,8 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 			DEBUG_PRINT("Case 1a: \"stayed\" vertex does not lay in facet");
 			facetCurr->indVertices[iPositionReduced] = iVertexStayed;
 		}
+		DEBUG_PRINT("\t after:");
+		facetCurr->my_fprint_all(stderr);
 	}
 
 	/* Stage 2. Update data structures "Edge" for those facets that contain
