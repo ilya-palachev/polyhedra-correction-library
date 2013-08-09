@@ -459,6 +459,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
 	int* incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
 	int f2 = INT_NOT_INITIALIZED;
+	int iFacetIteration = 0;
 	for (int iFacet = 0; iFacet < numIncidentFacets;)
 	{
 		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
@@ -476,6 +477,13 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 			break;
 		}
 		iFacet = iFacetNext;
+		ASSERT(iFacetIteration <= numIncidentFacets);
+		if (iFacetIteration > numIncidentFacets)
+		{
+			ERROR_PRINT("Endless loop occurred!");
+			return false;
+		}
+		++iFacetIteration;
 	}
 	ASSERT(f2 != INT_NOT_INITIALIZED);
 	if (f2 == INT_NOT_INITIALIZED)
@@ -493,6 +501,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 	numIncidentFacets = polyhedron->vertexInfos[edge->v1].numFacets;
 	incidentFacets = polyhedron->vertexInfos[edge->v1].indFacets;
 	int f3 = INT_NOT_INITIALIZED;
+	iFacetIteration = 0;
 	for (int iFacet = 0; iFacet < numIncidentFacets;)
 	{
 		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
@@ -510,6 +519,13 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 			break;
 		}
 		iFacet = iFacetNext;
+		ASSERT(iFacetIteration <= numIncidentFacets);
+		if (iFacetIteration > numIncidentFacets)
+		{
+			ERROR_PRINT("Endless loop occurred!");
+			return false;
+		}
+		++iFacetIteration;
 	}
 	ASSERT(f3 != INT_NOT_INITIALIZED);
 	if (f3 == INT_NOT_INITIALIZED)
