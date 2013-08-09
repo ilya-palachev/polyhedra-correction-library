@@ -4,11 +4,14 @@ void test_cube_cutted();
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	test_cube_cutted();
+	DEBUG_END;
 }
 
 void test_cube_cutted()
 {
+	DEBUG_START;
 	Plane iplane;
 
 	Polyhedron* poly = new CubeCutted();
@@ -35,5 +38,6 @@ void test_cube_cutted()
 	poly->fprint_ply_scale(1e3, "../poly-data-out/cube_cutted_0x0y1z_3.ply",
 			"poly");
 	delete poly;
+	DEBUG_END;
 }
 

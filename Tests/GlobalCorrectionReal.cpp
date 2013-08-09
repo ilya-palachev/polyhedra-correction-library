@@ -23,17 +23,27 @@ MethodCorrector parse_methodName(char* methodNameInput);
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	TestParameters parameters;
 
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
+	{
+		DEBUG_END;
 		return EXIT_FAILURE;
+	}
 
 	Polyhedron* polyhedron = new Polyhedron();
 	if (!polyhedron->fscan_default_1_2(parameters.fileNamePolyhedron))
+	{
+		DEBUG_END;
 		return EXIT_FAILURE;
+	}
 	ShadeContourData* contourData = new ShadeContourData(polyhedron);
 	if (!contourData->fscanDefault(parameters.fileNameShadeContours))
+	{
+		DEBUG_END;
 		return EXIT_FAILURE;
+	}
 
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
@@ -50,11 +60,13 @@ int main(int argc, char** argv)
 		delete polyhedron;
 		polyhedron = NULL;
 	}
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
 void printUsage()
 {
+	DEBUG_START;
 	printf(
 			"Usage: \n"
 					"./globalCorrectionReal <file with polyhedron> "
@@ -63,14 +75,17 @@ void printUsage()
 	printf("\nPossible methods: gd (gradient descent), "
 			"gdf (gradient descent - fast),"
 			"cg (conjugate gradient).\n");
+	DEBUG_END;
 }
 
 int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 {
+	DEBUG_START;
 	if (argc != 6)
 	{
 		ERROR_PRINT("Wrong number of arguments!");
 		printUsage();
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 	parameters.fileNamePolyhedron = new char[255];
@@ -89,6 +104,7 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	{
 		ERROR_PRINT("Incorrect input!");
 		printUsage();
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 
@@ -98,29 +114,36 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 		method = NULL;
 	}
 
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
 MethodCorrector parse_methodName(char* methodNameInput)
 {
+	DEBUG_START;
 	if (strcmp(methodNameInput, "gd") == 0)
 	{
+		DEBUG_END;
 		return METHOD_GRADIENT_DESCENT;
 	}
 	else if (strcmp(methodNameInput, "gdf") == 0)
 	{
+		DEBUG_END;
 		return METHOD_GRADIENT_DESCENT_FAST;
 	}
 	else if (strcmp(methodNameInput, "cg") == 0)
 	{
+		DEBUG_END;
 		return METHOD_CONJUGATE_GRADIENT;
 	}
 	else if (strcmp(methodNameInput, "all") == 0)
 	{
+		DEBUG_END;
 		return METHOD_ALL;
 	}
 	else
 	{
+		DEBUG_END;
 		return METHOD_UNKNOWN;
 	}
 }

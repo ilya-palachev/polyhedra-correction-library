@@ -4,12 +4,14 @@ void test_join_facets(const char* name, int type, int fid0, int fid1);
 
 int main(int argc, char** argv)
 {
-
+	DEBUG_START;
 	test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
+	DEBUG_END;
 }
 
 void test_join_facets(const char* name, int type, int fid0, int fid1)
 {
+	DEBUG_START;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Plane iplane;
 	Polyhedron poly;
@@ -44,6 +46,7 @@ void test_join_facets(const char* name, int type, int fid0, int fid1)
 			delete[] file_name_in;
 		if (file_name_out != NULL)
 			delete[] file_name_out;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -78,4 +81,5 @@ void test_join_facets(const char* name, int type, int fid0, int fid1)
 		delete[] file_name_out0;
 	if (file_name_out != NULL)
 		delete[] file_name_out;
+	DEBUG_END;
 }

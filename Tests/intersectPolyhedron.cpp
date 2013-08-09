@@ -4,6 +4,7 @@ void test(const char* name, int type, double a, double b, double c, double d);
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	test("poly-small", 0, 0., 0., 1., 3.);
 	test("poly-med", 0, 0., 0., 1., 1.);
 
@@ -24,10 +25,12 @@ int main(int argc, char** argv)
 	c = normal.z;
 	d = -origin * normal;
 	test("poly-big", 0, a, b, c, d);
+	DEBUG_END;
 }
 
 void test(const char* name, int type, double a, double b, double c, double d)
 {
+	DEBUG_START;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Plane iplane;
 	Polyhedron poly;
@@ -54,8 +57,11 @@ void test(const char* name, int type, double a, double b, double c, double d)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		if (file_name_out0 != NULL)
+			delete[] file_name_out0;
 		if (file_name_out != NULL)
 			delete[] file_name_out;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -89,5 +95,6 @@ void test(const char* name, int type, double a, double b, double c, double d)
 		delete[] file_name_out0;
 	if (file_name_out != NULL)
 		delete[] file_name_out;
+	DEBUG_END;
 }
 

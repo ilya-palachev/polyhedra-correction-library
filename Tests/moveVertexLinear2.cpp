@@ -4,6 +4,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta);
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	test_deform_linear("poly-small", 0, 0, Vector3d(-1e-1, 1e-1, 1e-1));
 	test_deform_linear("poly-small", 0, 1, Vector3d(-1e-1, 1e-1, 1e-1));
 	test_deform_linear("poly-small", 0, 2, Vector3d(-1e-1, 1e-1, 1e-1));
@@ -15,10 +16,12 @@ int main(int argc, char** argv)
 	test_deform_linear("poly-small", 0, 7, Vector3d(-1e-1, 1e-1, 1e-1));
 	test_deform_linear("poly-small", 0, 8, Vector3d(-1e-1, 1e-1, 1e-1));
 	test_deform_linear("poly-small", 0, 9, Vector3d(-1e-1, 1e-1, 1e-1));
+	DEBUG_END;
 }
 
 void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 {
+	DEBUG_START;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
@@ -56,6 +59,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 			delete[] file_name_in;
 		if (file_name_out != NULL)
 			delete[] file_name_out;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -105,5 +109,6 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	if (file_name_out != NULL)
 		delete[] file_name_out;
 
+	DEBUG_END;
 }
 

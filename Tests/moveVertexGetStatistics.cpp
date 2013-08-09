@@ -5,6 +5,7 @@ void get_statistics_deform_linear_test(const char* name, int type);
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	get_statistics_deform_linear_test("poly-small", 0);
 
 	get_statistics_deform_linear("poly-small", 0);
@@ -12,6 +13,7 @@ int main(int argc, char** argv)
 	get_statistics_deform_linear("poly-big", 0);
 	get_statistics_deform_linear("polyhedron-2010-11-25", 2);
 	get_statistics_deform_linear("polyhedron-2010-12-19", 2);
+	DEBUG_END;
 }
 
 #define num_len 10
@@ -20,6 +22,7 @@ int main(int argc, char** argv)
 
 void get_statistics_deform_linear(const char* name, int type)
 {
+	DEBUG_START;
 
 	int i_len, i_vertex, numv, i, count;
 	double dist, norm, a, b, c, d, part, norm0;
@@ -50,6 +53,7 @@ void get_statistics_deform_linear(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -124,10 +128,12 @@ void get_statistics_deform_linear(const char* name, int type)
 		//        poly1.preprocess_polyhedron();
 	}
 
+	DEBUG_END;
 }
 
 void get_statistics_deform_linear_test(const char* name, int type)
 {
+	DEBUG_START;
 
 	int i_vertex, numv, i;
 	double dist, norm, a, b, c, d;
@@ -161,6 +167,7 @@ void get_statistics_deform_linear_test(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -200,5 +207,5 @@ void get_statistics_deform_linear_test(const char* name, int type)
 		}
 
 	}
-
+	DEBUG_END;
 }

@@ -31,6 +31,7 @@ inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	TestParameters parameters;
 
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
@@ -60,11 +61,13 @@ int main(int argc, char** argv)
 			"poly-data-out/globalCorrection-after.ply",
 			"globalCorrection");
 
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
 void printUsage()
 {
+	DEBUG_START;
 	printf(
 			"Usage: \n"
 					"./globalCorrection <figure name> <method> <number_of_contours> "
@@ -74,10 +77,12 @@ void printUsage()
 	printf("\nPossible methods: gd (gradient descent), "
 				"gdf (gradient descent - fast),"
 				"cg (conjugate gradient).\n");
+	DEBUG_END;
 }
 
 int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 {
+	DEBUG_START;
 
 	if (argc != 9)
 	{
@@ -105,6 +110,7 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	{
 		ERROR_PRINT("Incorrect input!");
 		printUsage();
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 	if (figure)
@@ -119,78 +125,99 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 		method = NULL;
 	}
 
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
 NameFigure parse_figureName(char* figureNameInput)
 {
+	DEBUG_START;
+	NameFigure ret;
 	if (strcmp(figureNameInput, "cube") == 0)
 	{
-		return FIGURE_CUBE;
+		ret = FIGURE_CUBE;
 	}
 	else if (strcmp(figureNameInput, "pyramid") == 0)
 	{
-		return FIGURE_PYRAMID;
+		ret = FIGURE_PYRAMID;
 	}
 	else if (strcmp(figureNameInput, "prism") == 0)
 	{
-		return FIGURE_PRISM;
+		ret = FIGURE_PRISM;
 	}
 	else if (strcmp(figureNameInput, "cube-cutted") == 0)
 	{
-		return FIGURE_CUBE_CUTTED;
+		ret = FIGURE_CUBE_CUTTED;
 	}
 	else
 	{
-		return FIGURE_UNKNOWN;
+		ret = FIGURE_UNKNOWN;
 	}
+
+	DEBUG_END;
+	return ret;
 }
 
 MethodCorrector parse_methodName(char* methodNameInput)
 {
+	DEBUG_START;
+	MethodCorrector ret;
 	if (strcmp(methodNameInput, "gd") == 0)
 	{
-		return METHOD_GRADIENT_DESCENT;
+		ret = METHOD_GRADIENT_DESCENT;
 	}
 	else if (strcmp(methodNameInput, "gdf") == 0)
 	{
-		return METHOD_GRADIENT_DESCENT_FAST;
+		ret = METHOD_GRADIENT_DESCENT_FAST;
 	}
 	else if (strcmp(methodNameInput, "cg") == 0)
 	{
-		return METHOD_CONJUGATE_GRADIENT;
+		ret = METHOD_CONJUGATE_GRADIENT;
 	}
 	else if (strcmp(methodNameInput, "all") == 0)
 	{
-		return METHOD_ALL;
+		ret = METHOD_ALL;
 	}
 	else
 	{
-		return METHOD_UNKNOWN;
+		ret = METHOD_UNKNOWN;
 	}
+
+	DEBUG_END;
+	return ret;
 }
 
 Polyhedron* makePolyhedron(NameFigure figureParsed)
 {
+	DEBUG_START;
+	Polyhedron* ret;
 	switch (figureParsed)
 	{
 	case FIGURE_CUBE:
-		return new Cube(1., 0., 0., 0.);
+		ret = new Cube(1., 0., 0., 0.);
+		break;
 	case FIGURE_PYRAMID:
-		return new Pyramid(3, 1., 1.);
+		ret = new Pyramid(3, 1., 1.);
+		break;
 	case FIGURE_PRISM:
-		return new Prism(3, 1., 1.);
+		ret = new Prism(3, 1., 1.);
+		break;
 	case FIGURE_CUBE_CUTTED:
-		return new CubeCutted();
+		ret = new CubeCutted();
+		break;
 	default:
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
-		return NULL;
+		ret = NULL;
+		break;
 	}
+	DEBUG_END;
+	return ret;
 }
 
 static double genRandomDouble(double maxDelta)
 {
+	DEBUG_START;
 	srand((unsigned) time(0));
 	int randomInteger = rand();
 	double randomDouble = randomInteger;
@@ -200,12 +227,14 @@ static double genRandomDouble(double maxDelta)
 
 	randomDouble *= maxDelta;
 
+	DEBUG_END;
 	return randomDouble;
 }
 
 inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 		int ifacet)
 {
+	DEBUG_START;
 	Plane& plane = polyhedron->facets[ifacet].plane;
 	plane.norm.x += genRandomDouble(maxMoveDelta);
 	plane.norm.y += genRandomDouble(maxMoveDelta);
@@ -214,4 +243,5 @@ inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
 	double newNorm = sqrt(qmod(plane.norm));
 	plane.norm.norm(1.);
 	plane.dist /= newNorm;
+	DEBUG_END;
 }

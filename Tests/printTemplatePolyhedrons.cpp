@@ -4,11 +4,14 @@ void test_figures();
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	test_figures();
+	DEBUG_END;
 }
 
 void test_figures()
 {
+	DEBUG_START;
 	char *curr_time, *file_name;
 
 	file_name = new char[255];
@@ -60,6 +63,6 @@ void test_figures()
 #endif
 	delete poly;
 
-	DEBUG_PRINT("End!");
+	DEBUG_END;
 }
 

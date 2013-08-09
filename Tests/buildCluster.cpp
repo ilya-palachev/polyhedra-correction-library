@@ -24,6 +24,7 @@ void test_BuildClaster();
 
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 
 //    test_J11("poly-small", 0);
 	//  test_BuildTreeNorm("poly-small", 0);
@@ -64,11 +65,13 @@ int main(int argc, char** argv)
 //    s.poly_cube(2,0,0,0);
 //    g = s.volume();
 //    cout<<g<<endl;
+	DEBUG_END;
 	return 0;
 }
 
 void test_Jtwo(const char* name1, const char* name2, int type)
 {
+	DEBUG_START;
 
 	Polyhedron poly1;
 	Polyhedron poly2;
@@ -109,6 +112,7 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 			delete[] file_name2;
 			file_name2 = NULL;
 		}
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -185,10 +189,12 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 		delete[] file_name2;
 		file_name2 = NULL;
 	}
+	DEBUG_END;
 }
 
 void test_J11(const char* name, int type)
 {
+	DEBUG_START;
 	double vol;
 
 	Polyhedron poly;
@@ -216,6 +222,7 @@ void test_J11(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -261,10 +268,12 @@ void test_J11(const char* name, int type)
 	if (file_name_out != NULL)
 		delete[] file_name_out;
 
+	DEBUG_END;
 }
 
 void test_cluster(const char* name, int type)
 {
+	DEBUG_START;
 	double vol;
 
 	Polyhedron poly;
@@ -288,6 +297,7 @@ void test_cluster(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -307,10 +317,12 @@ void test_cluster(const char* name, int type)
 	if (file_name_in != NULL)
 		delete[] file_name_in;
 
+	DEBUG_END;
 }
 
 void test_viev(const char* name, int type)
 {
+	DEBUG_START;
 	double vol;
 
 	Polyhedron poly;
@@ -334,6 +346,7 @@ void test_viev(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -346,6 +359,7 @@ void test_viev(const char* name, int type)
 	if (file_name_in != NULL)
 		delete[] file_name_in;
 
+	DEBUG_END;
 }
 
 #define num_len 10
@@ -354,6 +368,7 @@ void test_viev(const char* name, int type)
 
 void get_statistics_deform_linear(const char* name, int type)
 {
+	DEBUG_START;
 
 	int i_len, i_vertex, numv, i, count;
 	double dist, norm, a, b, c, d, part, norm0;
@@ -384,6 +399,7 @@ void get_statistics_deform_linear(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -458,10 +474,13 @@ void get_statistics_deform_linear(const char* name, int type)
 //        poly1.preprocess_polyhedron();
 	}
 
+	DEBUG_END;
 }
 
 void test_deform(const char* name, int type, int id, Vector3d delta)
 {
+	DEBUG_START;
+
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
@@ -498,6 +517,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 			delete[] file_name_in;
 		if (file_name_out != NULL)
 			delete[] file_name_out;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -533,10 +553,13 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	if (file_name_out != NULL)
 		delete[] file_name_out;
 
+	DEBUG_END;
 }
 
 void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 {
+	DEBUG_START;
+
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
@@ -574,6 +597,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 			delete[] file_name_in;
 		if (file_name_out != NULL)
 			delete[] file_name_out;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -611,11 +635,13 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	if (file_name_out != NULL)
 		delete[] file_name_out;
 
+	DEBUG_END;
 }
 
 double norm_J(double Jxx, double Jyy, double Jzz, double Jxy, double Jyz,
 		double Jxz)
 {
+	DEBUG_START;
 	double st, nd, rd;
 	st = fabs(Jxx) + fabs(Jxy) + fabs(Jxz);
 	nd = fabs(Jxy) + fabs(Jyy) + fabs(Jyz);
@@ -625,11 +651,13 @@ double norm_J(double Jxx, double Jyy, double Jzz, double Jxy, double Jyz,
 		nd = max;
 	if (rd > max)
 		rd = max;
+	DEBUG_END;
 	return max;
 }
 
 void test_BuildClaster()
 {
+	DEBUG_START;
 	Polyhedron poly1;
 	Polyhedron poly2;
 	Polyhedron poly3;
@@ -735,10 +763,12 @@ void test_BuildClaster()
 	if (name != NULL)
 		delete[] name;
 
+	DEBUG_END;
 }
 
 void test_BuildTreeNorm(const char* name, int type)
 {
+	DEBUG_START;
 	Polyhedron poly;
 
 	char *file_name_in;
@@ -764,6 +794,7 @@ void test_BuildTreeNorm(const char* name, int type)
 	default:
 		if (file_name_in != NULL)
 			delete[] file_name_in;
+		DEBUG_END;
 		return;
 		break;
 	}
@@ -781,5 +812,6 @@ void test_BuildTreeNorm(const char* name, int type)
 		delete[] file_name_in;
 	if (file_name_out != NULL)
 		delete[] file_name_out;
+	DEBUG_END;
 }
 
