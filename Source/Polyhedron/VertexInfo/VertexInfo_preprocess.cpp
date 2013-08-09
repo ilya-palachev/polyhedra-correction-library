@@ -32,12 +32,25 @@ void VertexInfo::preprocess()
 		++numFacets;
 		pos_curr = pos_next;
 		fid_curr = fid_next;
+
+		DEBUG_PRINT("\t Facet currently visited be preprocessor: %d",
+				fid_curr);
+		parentPolyhedron->facets[fid_curr].my_fprint_all(stderr);
+
 		parentPolyhedron->facets[fid_curr].get_next_facet(pos_curr, pos_next,
 				fid_next, v_curr);
 		if (pos_next == -1 || fid_next == -1)
 		{
-			ERROR_PRINT("VertxInfo::preprocess : Error. Cannot find v%d in f%d\n",
+			ERROR_PRINT("Error. Cannot find v%d in f%d\n",
 					v_curr, fid_curr);
+			DEBUG_END;
+			return;
+		}
+
+		ASSERT(numFacets <= parentPolyhedron->numFacets);
+		if (numFacets > parentPolyhedron->numFacets)
+		{
+			ERROR_PRINT("Endless loop occurred!");
 			DEBUG_END;
 			return;
 		}
