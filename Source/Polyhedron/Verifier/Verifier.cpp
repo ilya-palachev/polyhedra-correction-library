@@ -611,8 +611,8 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 	DEBUG_START;
 	int iVertexReduced = edge->v1;
 	int iVertexStayed = edge->v0;
-	DEBUG_PRINT("Reduced edge: %d", iVertexReduced);
-	DEBUG_PRINT(" Stayed edge: %d", iVertexStayed);
+	DEBUG_PRINT("Reduced vertex: %d", iVertexReduced);
+	DEBUG_PRINT(" Stayed vertex: %d", iVertexStayed);
 
 	VertexInfo* vertexInfoReduced = &polyhedron->vertexInfos[iVertexReduced];
 
@@ -627,12 +627,17 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 		DEBUG_PRINT("\tUpdating facet #%d.", iFacetCurrent);
 
 		int iPositionReduced =
-				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
+				vertexInfoReduced->indFacets[2 * vertexInfoReduced->numFacets +
 		                                    iFacet + 1];
 		Facet* facetCurr = &polyhedron->facets[iFacetCurrent];
 
 		DEBUG_PRINT("\t before:");
 		facetCurr->my_fprint_all(stderr);
+
+		DEBUG_PRINT("facetCurr->indVertices[iPositionReduced = %d] = %d",
+				iPositionReduced, facetCurr->indVertices[iPositionReduced]);
+		DEBUG_PRINT("iVertexReduced = %d", iVertexReduced);
+		ASSERT(facetCurr->indVertices[iPositionReduced] == iVertexReduced);
 
 		int iPositionPrev = (facetCurr->numVertices + iPositionReduced - 1) %
 				facetCurr->numVertices;
