@@ -41,7 +41,7 @@
 			WHEREARG, ##__VA_ARGS__)
 
 #define ALWAYS_PRINT(_file, _fmt, ...)  \
-	FILE_PRINT(_file, COLOUR_NORM _fmt, ##__VA_ARGS__)
+	FILE_PRINT(_file, _fmt, ##__VA_ARGS__)
 
 #define ERROR_PRINT(_fmt, ...)  \
 	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
