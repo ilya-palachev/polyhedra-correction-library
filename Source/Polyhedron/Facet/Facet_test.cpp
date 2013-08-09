@@ -2,6 +2,7 @@
 
 bool Facet::test_self_intersection()
 {
+	DEBUG_START;
 	int i, j;
 	double s;
 	Vector3d vi0, vi1, vj0, vj1, tmp0, tmp1;
@@ -12,6 +13,7 @@ bool Facet::test_self_intersection()
 		for (j = 0; j < numVertices; ++j)
 		{
 			if (j == i)
+				DEBUG_END;
 				continue;
 			vj0 = parentPolyhedron->vertices[indVertices[j]];
 			vj1 = parentPolyhedron->vertices[indVertices[j + 1]];
@@ -19,8 +21,10 @@ bool Facet::test_self_intersection()
 			tmp1 = (vi1 - vi0) % (vj1 - vi0);
 			s = tmp0 * tmp1;
 			if (s < 0)
+				DEBUG_END;
 				return true;
 		}
 	}
+	DEBUG_END;
 	return false;
 }

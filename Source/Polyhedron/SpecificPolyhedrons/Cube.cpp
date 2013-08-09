@@ -12,7 +12,9 @@ Cube::Cube() :
 		height(0.),
 		center(Vector3d(0., 0.,  0.))
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Cube::Cube(double h) :
@@ -20,7 +22,9 @@ Cube::Cube(double h) :
 		height(h),
 		center(Vector3d(0., 0., 0.))
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Cube::Cube(double h, double x, double y, double z) :
@@ -28,7 +32,9 @@ Cube::Cube(double h, double x, double y, double z) :
 		height(h),
 		center(Vector3d(x, y, z))
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Cube::Cube(double h, Vector3d c) :
@@ -36,11 +42,15 @@ Cube::Cube(double h, Vector3d c) :
 		height(h),
 		center(c)
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Cube::~Cube()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void Cube::init()

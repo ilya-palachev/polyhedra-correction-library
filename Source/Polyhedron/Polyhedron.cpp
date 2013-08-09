@@ -63,15 +63,21 @@ const double EPS_SIGNUM = 1e-15;
 
 int Polyhedron::signum(Vector3d point, Plane plane)
 {
+	DEBUG_START;
 	double d = plane % point;
 	if (fabs(d) < EPS_SIGNUM)
+	{
+		DEBUG_END;
 		return 0;
+	}
+	DEBUG_END;
 	return d > 0 ? 1 : (d < 0 ? -1 : 0);
 }
 
 void Polyhedron::get_boundary(double& xmin, double& xmax, double& ymin,
 		double& ymax, double& zmin, double& zmax)
 {
+	DEBUG_START;
 	int i;
 	double tmp;
 
@@ -99,10 +105,12 @@ void Polyhedron::get_boundary(double& xmin, double& xmax, double& ymin,
 		if (tmp < zmin)
 			zmin = tmp;
 	}
+	DEBUG_END;
 }
 
 void Polyhedron::delete_empty_facets()
 {
+	DEBUG_START;
 	int i, j;
 	for (i = 0; i < numFacets; ++i)
 	{
@@ -118,4 +126,5 @@ void Polyhedron::delete_empty_facets()
 			--numFacets;
 		}
 	}
+	DEBUG_END;
 }

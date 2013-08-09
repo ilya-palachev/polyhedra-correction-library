@@ -9,6 +9,7 @@
 
 void Facet::test_pair_neighbours()
 {
+	DEBUG_START;
 	int i, j;
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -25,11 +26,12 @@ void Facet::test_pair_neighbours()
 		}
 
 	}
+	DEBUG_END;
 }
 
 int Facet::test_structure()
 {
-
+	DEBUG_START;
 	int i, facet, pos, nnv;
 
 	for (i = 0; i < numVertices; ++i)
@@ -43,6 +45,7 @@ int Facet::test_structure()
 					indVertices[i], facet);
 			parentPolyhedron->facets[facet].my_fprint_all(stdout);
 			this->my_fprint_all(stdout);
+			DEBUG_END;
 			return 1;
 		}
 		indVertices[2 * numVertices + 1] = pos;
@@ -55,9 +58,11 @@ int Facet::test_structure()
 					indVertices[i], facet);
 			parentPolyhedron->facets[facet].my_fprint_all(stdout);
 			this->my_fprint_all(stdout);
+			DEBUG_END;
 			return 1;
 		}
 		parentPolyhedron->facets[facet].indVertices[2 * nnv + 1 + pos] = i;
 	}
+	DEBUG_END;
 	return 0;
 }

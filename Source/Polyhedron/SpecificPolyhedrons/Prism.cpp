@@ -13,7 +13,9 @@ Prism::Prism() :
 		height(0.),
 		radius(0.)
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Prism::Prism(int nv, double h, double r) :
@@ -22,11 +24,15 @@ Prism::Prism(int nv, double h, double r) :
 		height(h),
 		radius(r)
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Prism::~Prism()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void Prism::init()

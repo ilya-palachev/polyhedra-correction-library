@@ -2,20 +2,24 @@
 
 void Polyhedron::my_fprint(const char* filename)
 {
+	DEBUG_START;
 
 	FILE* file;
 	file = (FILE*) fopen(filename, "w");
 	if (!file)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n", filename);
+		DEBUG_END;
 		return;
 	}
 	this->my_fprint(file);
 	fclose(file);
+	DEBUG_END;
 }
 
 void Polyhedron::my_fprint(FILE* file)
 {
+	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "Polyhedron:\n");
 	REGULAR_PRINT(file, "numv = %d\nnumf = %d\n", numVertices, numFacets);
@@ -29,6 +33,7 @@ void Polyhedron::my_fprint(FILE* file)
 		for (i = 0; i < numVertices; ++i)
 			vertexInfos[i].my_fprint_all(file);
 	}
+	DEBUG_END;
 }
 
 /////////////////////////////////////
@@ -44,6 +49,7 @@ void Polyhedron::my_fprint(FILE* file)
 
 void Polyhedron::fscan_default_0(const char *filename)
 {
+	DEBUG_START;
 	int i, j, nv, *index;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
@@ -53,6 +59,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 	if (!file)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",	filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -60,6 +67,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -76,6 +84,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 			ERROR_PRINT("Error. Invalid file. v %d\n", i);
 			DEBUG_PRINT("xx = %f, yy = %f, zz = %f\n", xx, yy, zz);
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		vertices[i].x = xx;
@@ -90,6 +99,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file. f %d\n", i);
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -100,6 +110,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 			{
 				ERROR_PRINT("Error. Invalid file. f%d v%d\n", i, j);
 				fclose(file);
+				DEBUG_END;
 				return;
 			}
 		}
@@ -107,6 +118,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 		delete[] index;
 	}
 	fclose(file);
+	DEBUG_END;
 }
 
 /////////////////////////////////////
@@ -122,6 +134,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 
 void Polyhedron::fscan_default_1(const char *filename)
 {
+	DEBUG_START;
 	int i, j, nv, *index, ii;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
@@ -131,6 +144,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 	if (!file)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n", filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -138,6 +152,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -154,6 +169,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		vertices[ii].x = xx;
@@ -169,6 +185,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -179,6 +196,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
+				DEBUG_END;
 				return;
 			}
 		}
@@ -186,6 +204,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 		delete[] index;
 	}
 	fclose(file);
+	DEBUG_END;
 }
 
 /////////////////////////////////////
@@ -206,6 +225,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 
 void Polyhedron::fscan_default_1_1(const char *filename)
 {
+	DEBUG_START;
 	int i, j, nv, *index, ii;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
@@ -218,6 +238,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 	tmp = new char[255];
@@ -226,6 +247,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 
@@ -233,6 +255,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -240,6 +263,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -247,6 +271,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	{
 		ERROR_PRINT("Polyhedron::fscan_defualt_1_1. Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -263,6 +288,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		vertices[ii].x = xx;
@@ -274,6 +300,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -286,6 +313,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -296,6 +324,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
+				DEBUG_END;
 				return;
 			}
 		}
@@ -304,6 +333,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 	}
 	delete[] tmp;
 	fclose(file);
+	DEBUG_END;
 }
 
 /////////////////////////////////////
@@ -337,6 +367,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 static void _fini_fscan_default_1_2(FILE* fd, char* scannedString,
 		EdgeData* edgeData)
 {
+	DEBUG_START;
 	if (fd)
 	{
 		fclose(fd);
@@ -351,14 +382,17 @@ static void _fini_fscan_default_1_2(FILE* fd, char* scannedString,
 	{
 		delete edgeData;
 	}
+	DEBUG_END;
 }
 
 bool Polyhedron::fscan_default_1_2(const char *filename)
 {
+	DEBUG_START;
 	FILE* fd = (FILE*) fopen(filename, "r");
 	if (!fd)
 	{
 		ERROR_PRINT("Failed to open file %s", filename);
+		DEBUG_END;
 		return false;
 	}
 
@@ -370,6 +404,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in header #1");
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
@@ -382,6 +417,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 	{
 		ERROR_PRINT("Wrong format, in num_vertices, num_facets, num_edgeData");
 		_fini_fscan_default_1_2(fd, scannedString, edgeData);
+		DEBUG_END;
 		return false;
 	}
 
@@ -395,6 +431,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in header #2");
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
@@ -413,6 +450,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in vertex #%d", iVertex);
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 	}
@@ -423,6 +461,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in header #3");
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
@@ -440,6 +479,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in description of facet #%d", iFacet);
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 
@@ -455,6 +495,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 				ERROR_PRINT("Wrong format, in vertex #%d of facet #%d",
 						iVertex, iFacet);
 				_fini_fscan_default_1_2(fd, scannedString, edgeData);
+				DEBUG_END;
 				return false;
 			}
 		}
@@ -465,6 +506,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 			ERROR_PRINT("Wrong format, in cycling vertex of facet #%d",
 					iFacet);
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 	}
@@ -475,47 +517,62 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		{
 			ERROR_PRINT("Wrong format, in header #4");
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
 			return false;
 		}
 		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
 	}
 
-//	This scanning is commented, because usual input is incorrect.
-//
-//	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
-//	{
-//		int iVertex0, iVertex1, iFacet, iIndInFacet;
-//		if (fscanf(fd, "%d", &iVertex0) != 1
-//				|| iVertex0 < 0 || iVertex0 > numVertices
-//				|| fscanf(fd, "%d", &iVertex1) != 1
-//				|| iVertex1 < 0 || iVertex1 > numVertices
-//				|| fscanf(fd, "%d", &iFacet) != 1
-//				|| iFacet < 0 || iFacet > numFacets
-//				|| fscanf(fd, "%d", &iIndInFacet) != 1
-//				|| iIndInFacet < 0 || iIndInFacet >= facets[iFacet].numVertices
-//				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
-//		{
-//			ERROR_PRINT("Wrong format, in edge #%d",
-//					iEdge);
-//			_fini_fscan_default_1_2(fd, scannedString, edgeData);
-//			return false;
-//		}
-//		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
-//	}
-//
+	/* By default edges are not scanned from file,
+	 * because it has been found that they are sorted in a wrong way
+	 * for some given files. */
+#ifdef SCAN_EDGES_FROM_FILE
+#undef SCAN_EDGES_FROM_FILE
+#endif
+#ifdef SCAN_EDGES_FROM_FILE
+
+	This scanning is commented, because usual input is incorrect.
+
+	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
+	{
+		int iVertex0, iVertex1, iFacet, iIndInFacet;
+		if (fscanf(fd, "%d", &iVertex0) != 1
+				|| iVertex0 < 0 || iVertex0 > numVertices
+				|| fscanf(fd, "%d", &iVertex1) != 1
+				|| iVertex1 < 0 || iVertex1 > numVertices
+				|| fscanf(fd, "%d", &iFacet) != 1
+				|| iFacet < 0 || iFacet > numFacets
+				|| fscanf(fd, "%d", &iIndInFacet) != 1
+				|| iIndInFacet < 0 || iIndInFacet >= facets[iFacet].numVertices
+				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
+		{
+			ERROR_PRINT("Wrong format, in edge #%d",
+					iEdge);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
+			return false;
+		}
+		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
+	}
+
 	preprocessAdjacency();
-//	EdgeData* edgeData2 = new EdgeData;
-//	EdgeConstructor* edgeConstructor = new EdgeConstructor(this, edgeData2);
-//	edgeConstructor->run(edgeData2);
-//	if (*edgeData != *edgeData2)
-//	{
-//		ERROR_PRINT("Scanned edge data is not equal to obtained by standard"
-//				" edge constructor");
-//		_fini_fscan_default_1_2(fd, scannedString, edgeData);
-//		return false;
-//	}
-//
+	EdgeData* edgeData2 = new EdgeData;
+	EdgeConstructor* edgeConstructor = new EdgeConstructor(this, edgeData2);
+	edgeConstructor->run(edgeData2);
+	if (*edgeData != *edgeData2)
+	{
+		ERROR_PRINT("Scanned edge data is not equal to obtained by standard"
+				" edge constructor");
+		_fini_fscan_default_1_2(fd, scannedString, edgeData);
+		DEBUG_END;
+		return false;
+	}
+#else
+	preprocessAdjacency();
+#endif
+
 	_fini_fscan_default_1_2(fd, scannedString, edgeData);
+	DEBUG_END;
 	return true;
 }
 #undef STD_POLYHEDRON_FORMAT_HEADER_1
@@ -538,6 +595,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 
 void Polyhedron::fscan_my_format(const char *filename)
 {
+	DEBUG_START;
 	int i, j, nv, nf, *index;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
@@ -548,6 +606,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -555,6 +614,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -570,6 +630,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		vertices[i].x = xx;
@@ -584,6 +645,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
@@ -594,6 +656,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
+				DEBUG_END;
 				return;
 			}
 		}
@@ -606,6 +669,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		index = new int[2 * nf + 1];
@@ -615,6 +679,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
+				DEBUG_END;
 				return;
 			}
 		}
@@ -622,6 +687,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 		delete[] index;
 	}
 	fclose(file);
+	DEBUG_END;
 }
 
 /////////////////////////////////////
@@ -646,6 +712,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 
 void Polyhedron::fscan_ply(const char *filename)
 {
+	DEBUG_START;
 	int i, j, numv, numf, nv, *index;
 	double xx, yy, zz;
 	char* tmp;
@@ -657,6 +724,7 @@ void Polyhedron::fscan_ply(const char *filename)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -666,6 +734,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 
@@ -673,6 +742,7 @@ void Polyhedron::fscan_ply(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 	numv = nv;
@@ -682,6 +752,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 
@@ -689,6 +760,7 @@ void Polyhedron::fscan_ply(const char *filename)
 	{
 		ERROR_PRINT("Error. Invalid file\n");
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 	numf = nv;
@@ -703,6 +775,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		vertices[i].x = xx;
@@ -715,6 +788,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		{
 			ERROR_PRINT("Error. Invalid file\n");
 			fclose(file);
+			DEBUG_END;
 			return;
 		}
 		index = new int[3 * nv + 1];
@@ -724,6 +798,7 @@ void Polyhedron::fscan_ply(const char *filename)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
+				DEBUG_END;
 				return;
 			}
 		}
@@ -734,15 +809,18 @@ void Polyhedron::fscan_ply(const char *filename)
 	}
 	fclose(file);
 	delete[] tmp;
+	DEBUG_END;
 }
 
 void Polyhedron::fprint_default_0(const char *filename)
 {
+	DEBUG_START;
 	FILE* file = (FILE*) fopen(filename, "w");
 	if (!file)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -755,16 +833,19 @@ void Polyhedron::fprint_default_0(const char *filename)
 		facets[i].fprint_default_0(file);
 
 	fclose(file);
+	DEBUG_END;
 }
 
 void Polyhedron::fprint_default_1(const char *filename)
 {
+	DEBUG_START;
 	FILE* file = (FILE*) fopen(filename, "w");
 	if (!file)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -776,16 +857,19 @@ void Polyhedron::fprint_default_1(const char *filename)
 	for (int i = 0; i < numFacets; ++i)
 		facets[i].fprint_default_1(file);
 	fclose(file);
+	DEBUG_END;
 }
 
 void Polyhedron::fprint_my_format(const char *filename)
 {
+	DEBUG_START;
 	FILE* file = (FILE*) fopen(filename, "w");
 	if (!file)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
 		fclose(file);
+		DEBUG_END;
 		return;
 	}
 
@@ -801,11 +885,13 @@ void Polyhedron::fprint_my_format(const char *filename)
 		vertexInfos[i].fprint_my_format(file);
 
 	fclose(file);
+	DEBUG_END;
 }
 
 void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 //comment must have 1 word
 {
+	DEBUG_START;
 	char* comment_w;
 
 	FILE* file = (FILE*) fopen(filename, "w");
@@ -813,6 +899,7 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -846,12 +933,14 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	for (int i = 0; i < numFacets; ++i)
 		facets[i].fprint_ply_vertex(file);
 	fclose(file);
+	DEBUG_END;
 }
 
 void Polyhedron::fprint_ply_scale(double scale, const char *filename,
 		const char *comment)
 //comment must have 1 word
 {
+	DEBUG_START;
 	long int vx, vy, vz;
 	char* comment_w;
 
@@ -862,6 +951,7 @@ void Polyhedron::fprint_ply_scale(double scale, const char *filename,
 	{
 		ERROR_PRINT("Error. Cannot open file %s\n",
 				filename);
+		DEBUG_END;
 		return;
 	}
 
@@ -900,5 +990,6 @@ void Polyhedron::fprint_ply_scale(double scale, const char *filename,
 	for (int i = 0; i < numFacets; ++i)
 		facets[i].fprint_ply_scale(file);
 	fclose(file);
+	DEBUG_END;
 }
 

@@ -2,15 +2,18 @@
 
 void Facet::my_fprint(FILE* file)
 {
+	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "Facet %d: ", id);
 	for (i = 0; i < numVertices; ++i)
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
 	REGULAR_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void Facet::my_fprint_all(FILE* file)
 {
+	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "\n------------ Facet %d: ------------\n", id);
 	REGULAR_PRINT(file, "id = %d\n nv = %d\n", id, numVertices);
@@ -47,37 +50,45 @@ void Facet::my_fprint_all(FILE* file)
 		}
 	}
 	test_pair_neighbours();
+	DEBUG_END;
 }
 
 void Facet::fprint_default_0(FILE* file)
 {
+	DEBUG_START;
 	ALWAYS_PRINT(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices, plane.norm.x,
 			plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void Facet::fprint_default_1(FILE* file)
 {
+	DEBUG_START;
 	ALWAYS_PRINT(file, "%d %d %.16lf %.16lf %.16lf %.16lf", id, numVertices,
 			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void Facet::fprint_my_format(FILE* file)
 {
+	DEBUG_START;
 	ALWAYS_PRINT(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices, plane.norm.x,
 			plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < 3 * numVertices + 1; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void Facet::fprint_ply_vertex(FILE* file)
 {
+	DEBUG_START;
 	int v_id;
 	for (int j = 0; j < numVertices; ++j)
 	{
@@ -88,20 +99,25 @@ void Facet::fprint_ply_vertex(FILE* file)
 				parentPolyhedron->vertices[v_id].z, plane.norm.x, plane.norm.y,
 				plane.norm.z);
 	}
+	DEBUG_END;
 }
 
 void Facet::fprint_ply_index(FILE* file)
 {
+	DEBUG_START;
 	ALWAYS_PRINT(file, "%d", numVertices);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
+	DEBUG_END;
 }
 
 void Facet::fprint_ply_scale(FILE* file)
 {
+	DEBUG_START;
 	ALWAYS_PRINT(file, "%d", numVertices);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, " %d %d %d\n", rgb[0], rgb[1], rgb[2]);
+	DEBUG_END;
 }

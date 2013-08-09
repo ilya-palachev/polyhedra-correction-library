@@ -2,16 +2,20 @@
 
 void Polyhedron::shiftPoint(int id, Vector3d delta)
 {
+	DEBUG_START;
 	PointShifter* pShifter = new PointShifter(this);
 	pShifter->run(id, delta);
 	delete pShifter;
+	DEBUG_END;
 }
 
 void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
 {
+	DEBUG_START;
 	PointShifterWeighted* pShifter = new PointShifterWeighted(this);
 	pShifter->run(id, delta);
 	delete pShifter;
+	DEBUG_END;
 }
 
 #define EPSILON 1e-7
@@ -22,36 +26,45 @@ void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
 //Данная функция отвечает за глобальную минимизацию (т. е. минимизируется отклонение в целом)
 void Polyhedron::shiftPointLinearGlobal(int id, Vector3d delta)
 {
+	DEBUG_START;
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runGlobal(id, delta);
 	delete pShifter;
+	DEBUG_END;
 }
 
 //Данная функция отвечает за локальную минимизацию (т. е. минимизируется отклонение на шаге)
 void Polyhedron::shiftPointLinearLocal(int id, Vector3d delta)
 {
+	DEBUG_START;
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runLocal(id, delta);
 	delete pShifter;
+	DEBUG_END;
 }
 
 void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
 		int& num_steps, double& norm_sum)
 {
+	DEBUG_START;
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runTest(id, delta, mode, num_steps, norm_sum);
 	delete pShifter;
+	DEBUG_END;
 }
 
 void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 {
+	DEBUG_START;
 	PointShifterLinear* pShifter = new PointShifterLinear(this);
 	pShifter->runPartial(id, delta, num);
 	delete pShifter;
+	DEBUG_END;
 }
 
 double Polyhedron::distToNearestNeighbour(int id)
 {
+	DEBUG_START;
 	int i, nf, *index;
 	double dist, min_dist;
 
@@ -64,11 +77,13 @@ double Polyhedron::distToNearestNeighbour(int id)
 		if (i == 0 || dist < min_dist)
 			min_dist = dist;
 	}
+	DEBUG_END;
 	return min_dist;
 }
 
 void Polyhedron::copyCoordinates(Polyhedron& orig)
 {
+	DEBUG_START;
 	int i;
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -78,6 +93,7 @@ void Polyhedron::copyCoordinates(Polyhedron& orig)
 	{
 		facets[i].plane = orig.facets[i].plane;
 	}
+	DEBUG_END;
 }
 
 

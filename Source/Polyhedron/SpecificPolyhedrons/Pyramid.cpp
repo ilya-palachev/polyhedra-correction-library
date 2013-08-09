@@ -13,7 +13,9 @@ Pyramid::Pyramid() :
 		height(0.),
 		radius(0.)
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Pyramid::Pyramid(int nv, double h, double r) :
@@ -22,11 +24,15 @@ Pyramid::Pyramid(int nv, double h, double r) :
 		height(h),
 		radius(r)
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 Pyramid::~Pyramid()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void Pyramid::init()

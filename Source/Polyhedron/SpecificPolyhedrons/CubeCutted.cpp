@@ -10,11 +10,15 @@
 CubeCutted::CubeCutted() :
 		Polyhedron()
 {
+	DEBUG_START;
 	init();
+	DEBUG_END;
 }
 
 CubeCutted::~CubeCutted()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void CubeCutted::init()

@@ -2,6 +2,7 @@
 
 bool Facet::consect_x(double y, double z, double& x)
 {
+	DEBUG_START;
 
 	int i;
 	double u, delta, alpha, sum;
@@ -48,5 +49,6 @@ bool Facet::consect_x(double y, double z, double& x)
 		return true;
 	}
 
+	DEBUG_END;
 }
 
