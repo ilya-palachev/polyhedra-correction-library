@@ -35,10 +35,17 @@ void VertexInfo::preprocess()
 
 		DEBUG_PRINT("\t Facet currently visited be preprocessor: %d",
 				fid_curr);
-		parentPolyhedron->facets[fid_curr].my_fprint_all(stderr);
+
+		DEBUG_PRINT("\t Jumping from facet #%d, position %d (vertex #%d)",
+				fid_curr, pos_curr, v_curr);
 
 		parentPolyhedron->facets[fid_curr].get_next_facet(pos_curr, pos_next,
 				fid_next, v_curr);
+
+		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)",
+				fid_next, pos_next, v_curr);
+		parentPolyhedron->facets[fid_curr].my_fprint_all(stderr);
+
 		if (pos_next == -1 || fid_next == -1)
 		{
 			ERROR_PRINT("Error. Cannot find v%d in f%d\n",
