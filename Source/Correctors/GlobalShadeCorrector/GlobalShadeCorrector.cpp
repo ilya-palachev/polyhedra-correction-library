@@ -644,6 +644,7 @@ void GlobalShadeCorrector::calculateGradient()
 			if (edge == edgeData->edges.end())
 			{
 				ERROR_PRINT("Error! edge (%d, %d) cannot be found\n", v0, v1);
+				ASSERT(edge != edgeData->edges.end());
 				return;
 			}
 			int iAssociation = 0;
