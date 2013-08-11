@@ -481,6 +481,8 @@ int Verifier::checkEdges(EdgeData* edgeData)
 	return numEdgesDesctructed;
 }
 
+#define DO_EDGES_REDUCTION
+
 bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 {
 	DEBUG_START;
@@ -628,21 +630,19 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 			movement1);
 #endif
 
+#ifdef DO_EDGES_REDUCTION
 	if (!if_A2_under_pi3 || !if_A3_under_pi2)
 	{
-		if (!reduceEdge(edge, edgeData))
-		{
-			DEBUG_END;
-			return false;
-		}
+		bool returnValue = reduceEdge(edge, edgeData);
+		DEBUG_END;
+		return returnValue;
 	}
-	else
-	{
-		DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
-		polyhedron->vertices[edge->v0] = A2;
-		DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v1);
-		polyhedron->vertices[edge->v1] = A3;
-	}
+#endif
+
+	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v0);
+	polyhedron->vertices[edge->v0] = A2;
+	DEBUG_PRINT("Recalculating the position of vertex # %d", edge->v1);
+	polyhedron->vertices[edge->v1] = A3;
 
 	DEBUG_END;
 	return if_A2_under_pi3 && if_A3_under_pi2;
