@@ -190,8 +190,10 @@ EdgeSetIterator EdgeData::findEdge(int v0, int v1)
 		v1 = tmp;
 	}
 
-	EdgeSetIterator itEdge = edges.find(Edge(v0, v1));
+	Edge* edgeTmp = new Edge(v0, v1);
+	EdgeSetIterator itEdge = edges.find(*edgeTmp);
 	DEBUG_PRINT("Found edge: [%d, %d]", itEdge->v0, itEdge->v1);
+	delete edgeTmp;
 
 	DEBUG_END;
 	return itEdge;
