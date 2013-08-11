@@ -641,7 +641,8 @@ void GlobalShadeCorrector::calculateGradient()
 
 			EdgeSetIterator edge = edgeData->findEdge(v0, v1);
 
-			DEBUG_PRINT("Found edge: [%d, %d]", edge->v0, edge->v1);
+			DEBUG_PRINT("Searching edge: [%d, %d] ; Found edge: [%d, %d]",
+					v0, v1, edge->v0, edge->v1);
 
 			if (edge == edgeData->edges.end())
 			{
@@ -650,13 +651,22 @@ void GlobalShadeCorrector::calculateGradient()
 				EdgeSetIterator edgeDumped = edgeData->edges.begin();
 				for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 				{
-					DEBUG_PRINT("[%d, %d]", edgeDumped->v0, edgeDumped->v1);
+					if ((edgeDumped->v0 == v0 && edgeDumped->v1 == v1) ||
+							(edgeDumped->v0 == v1 && edgeDumped->v1 == v0))
+					{
+						DEBUG_PRINT("It presents: [%d, %d]",
+								edgeDumped->v0, edgeDumped->v1);
+					}
 					++edgeDumped;
 				}
 
 				ASSERT(edge != edgeData->edges.end());
 				return;
 			}
+
+			ASSERT((edge->v0 == v0 && edge->v1 == v1) ||
+					(edge->v0 == v1 && edge->v1 == v0));
+
 			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::const_iterator itCont =
 					edge->assocList.begin();
