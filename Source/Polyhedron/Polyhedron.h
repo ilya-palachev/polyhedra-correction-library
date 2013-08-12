@@ -3,6 +3,7 @@
 
 const int INT_NOT_INITIALIZED = -RAND_MAX;
 const double EPS_COLLINEARITY = 1e-14;
+const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
 
 class Polyhedron
 {

@@ -12,7 +12,6 @@ const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE = 1e-2;
 const double MINIMAL_TRUSTED_ERROR = 1e-6;
 const double DEFAULT_DERIVATIVE_STEP = 1e-8;
 const double DEFAULT_DERIVATIVE_STEP_RECIPROCAL = 1e+8;
-const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
 
 void GlobalShadeCorrector::derivativeTest_all()
 {
