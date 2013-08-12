@@ -52,11 +52,11 @@ void Facet::my_fprint_all(FILE* file)
 
 	if (parentPolyhedron == NULL)
 	{
-		DEBUG_PRINT(file, "Warning! parentPolyhedron == NULL !\n");
+		DEBUG_PRINT("Warning! parentPolyhedron == NULL !\n");
 	}
 	else if (parentPolyhedron->vertices == NULL)
 	{
-		DEBUG_PRINT(file, "Warning! parentPolyhedron->vertices == NULL !\n");
+		DEBUG_PRINT("Warning! parentPolyhedron->vertices == NULL !\n");
 	}
 	else
 	{
