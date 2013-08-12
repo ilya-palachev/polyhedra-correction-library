@@ -963,7 +963,8 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
 		else
 		{
 			DEBUG_PRINT("\tThis edge must be deleted at all.");
-			edgeUpdated->assocList.clear();
+			edgeData->edges.erase(edgeUpdated);
+			--edgeData->numEdges;
 		}
 	}
 
