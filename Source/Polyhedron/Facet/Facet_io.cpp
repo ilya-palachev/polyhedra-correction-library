@@ -5,6 +5,12 @@ void Facet::my_fprint(FILE* file)
 	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "Facet %d: ", id);
+	if (indVertices == NULL && numVertices > 0)
+	{
+		ERROR_PRINT("Incorrect configuration of facet.");
+		DEBUG_END;
+		return;
+	}
 	for (i = 0; i < numVertices; ++i)
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
 	REGULAR_PRINT(file, "\n");
@@ -23,6 +29,13 @@ void Facet::my_fprint_all(FILE* file)
 			"plane : (%.2lf) * x + (%.2lf) * y + (%.2lf) * z + (%.2lf) = 0.)\n",
 			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 
+	if (indVertices == NULL && numVertices > 0)
+	{
+		ERROR_PRINT("Incorrect configuration of facet.");
+		DEBUG_END;
+		return;
+	}
+
 	REGULAR_PRINT(file, "index :       ");
 	for (i = 0; i < numVertices; ++i)
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
@@ -38,13 +51,25 @@ void Facet::my_fprint_all(FILE* file)
 	REGULAR_PRINT(file, "\nrgb = (%d, %d, %d)\n", rgb[0], rgb[1], rgb[2]);
 
 	if (parentPolyhedron == NULL)
-		REGULAR_PRINT(file, "Warning! poly == NULL !\n");
+	{
+		DEBUG_PRINT(file, "Warning! parentPolyhedron == NULL !\n");
+	}
+	else if (parentPolyhedron->vertices == NULL)
+	{
+		DEBUG_PRINT(file, "Warning! parentPolyhedron->vertices == NULL !\n");
+	}
 	else
 	{
 		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 		{
 			int ind = indVertices[iVertex];
-			Vector3d vector = parentPolyhedron->vertices[indVertices[iVertex]];
+			if (ind >= parentPolyhedron->numVertices || ind < 0)
+			{
+				DEBUG_PRINT("Invalid index of vertex in facet #%d", id);
+				DEBUG_END;
+				return;
+			}
+			Vector3d vector = parentPolyhedron->vertices[ind];
 			REGULAR_PRINT(file, "vertices[%d] = (%lf, %lf, %lf)\n", ind, vector.x,
 					vector.y, vector.z);
 		}
