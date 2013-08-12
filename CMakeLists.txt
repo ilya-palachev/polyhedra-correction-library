@@ -34,11 +34,15 @@ target_link_libraries(pcl
    vector3d
 )
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	set(cat_config ${CMAKE_SOURCE_DIR}/Scripts/cat_config.sh)
 	set(debug_exceptions_config "${CMAKE_SOURCE_DIR}/config/debug_exceptions.conf")
 	set(debug_exceptions "")
 	exec_program(${cat_config} ARGS ${debug_exceptions_config} OUTPUT_VARIABLE debug_exceptions)
+
+	# For "Release" mode macro NDEBUG is defined by default, but for Debug mode
+	# we need to enable it manually
+	add_definitions("-DNDEBUG")
 
 	message("Debug exceptions:")
 	foreach(souce_file ${debug_exceptions})
@@ -46,6 +50,11 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
 		message("   ${souce_file}")
 		set_source_files_properties(${souce_file} PROPERTIES COMPILE_FLAGS -UNDEBUG)
 	endforeach()
+	
+elseif (${CMAKE_BUILD_TYPE} STREQUAL "DebugVerbose")
+	set (CMAKE_BUILD_TYPE "Debug")
+
+	message("In DebugVerbose mode all files are built without macro NDEBUG defined")
 endif ()
 
 add_subdirectory(Tests)
