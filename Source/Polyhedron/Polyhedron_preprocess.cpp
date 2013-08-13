@@ -21,6 +21,10 @@ void Polyhedron::preprocessAdjacency()
 	}
 
 	DEBUG_PRINT("VertexInfos preprocessing");
+	if (vertexInfos != NULL)
+	{
+		delete[] vertexInfos;
+	}
 	vertexInfos = new VertexInfo[numVertices];
 	for (i = 0; i < numVertices; ++i)
 	{
