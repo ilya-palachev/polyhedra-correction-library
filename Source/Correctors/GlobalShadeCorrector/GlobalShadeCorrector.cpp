@@ -22,7 +22,8 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				iMinimizedDimension(0),
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
-				dim(0)
+				dim(0),
+				associator(new GSAssociator(this))
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -42,7 +43,8 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				iMinimizedDimension(0),
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
-				dim(0)
+				dim(0),
+				associator(new GSAssociator(this))
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -70,6 +72,11 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 	{
 		delete facetsNotAssociated;
 		facetsNotAssociated = NULL;
+	}
+	if (associator != NULL)
+	{
+		delete associator;
+		associator = NULL;
 	}
 	DEBUG_END;
 }

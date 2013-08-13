@@ -99,6 +99,13 @@ private:
 	/* Number of dimensions of space where the functional is minimized. */
 	int dim;
 
+	/* Object of type GSAssociator is needed here because it's deletion causes
+	 * the deletion of its parent object, i. e. GlobalShadeCorrector. This
+	 * deletes the list facetNotAssociated.
+	 *
+	 * This issue has been found by the use of Valgrind (Memcheck) tool. */
+	GSAssociator* associator;
+
 	void preprocess();
 	void preprocessAssociations();
 

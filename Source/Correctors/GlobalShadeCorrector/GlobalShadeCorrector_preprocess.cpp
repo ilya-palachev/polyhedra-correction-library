@@ -20,8 +20,7 @@ void GlobalShadeCorrector::preprocess()
 void GlobalShadeCorrector::preprocessAssociations()
 {
 	DEBUG_START;
-	GSAssociator associator(this);
-	associator.preinit();
+	associator->preinit();
 
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
@@ -34,7 +33,7 @@ void GlobalShadeCorrector::preprocessAssociations()
 				EdgeSetIterator edge =
 						edgeData->findEdge(indVertices[iVertex],
 						indVertices[iVertex + 1]);
-				associator.run(iContour, iFacet, edge->id);
+				associator->run(iContour, iFacet, edge->id);
 			}
 		}
 	}
