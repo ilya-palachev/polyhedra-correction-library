@@ -425,7 +425,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 
 	vertices = new Vector3d[numVertices];
 	facets = new Facet[numFacets];
-	edgeData = new EdgeData(numEdges);
+	edgeData = new EdgeData();
 
 	for (int i = 0; i < STD_POLYHEDRON_FORMAT_HEADER_2; ++i)
 	{

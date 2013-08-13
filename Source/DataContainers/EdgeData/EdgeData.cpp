@@ -15,14 +15,6 @@ EdgeData::EdgeData() :
 	DEBUG_END;
 }
 
-EdgeData::EdgeData(int numEdgesMax) :
-				edges(),
-				numEdges(0)
-{
-	DEBUG_START;
-	DEBUG_END;
-}
-
 EdgeData::~EdgeData()
 {
 	DEBUG_START;

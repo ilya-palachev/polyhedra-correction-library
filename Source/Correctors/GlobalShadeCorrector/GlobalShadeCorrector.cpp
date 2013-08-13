@@ -77,6 +77,11 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 		delete associator;
 		associator = NULL;
 	}
+	if (!edgeData->edges.empty())
+	{
+		edgeData->edges.clear();
+		edgeData = NULL;
+	}
 	DEBUG_END;
 }
 
