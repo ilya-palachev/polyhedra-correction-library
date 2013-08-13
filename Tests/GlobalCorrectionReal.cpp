@@ -73,6 +73,12 @@ int main(int argc, char** argv)
 		parameters.fileNameShadeContours = NULL;
 	}
 
+	if (contourData != NULL)
+	{
+		delete[] contourData;
+		contourData = NULL;
+	}
+
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }
