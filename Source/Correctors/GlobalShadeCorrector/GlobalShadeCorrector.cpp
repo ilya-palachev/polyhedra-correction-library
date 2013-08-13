@@ -53,6 +53,11 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
 	DEBUG_START;
+	if (facetsNotAssociated != NULL)
+	{
+		delete facetsNotAssociated;
+		facetsNotAssociated = NULL;
+	}
 	if (gradient != NULL)
 	{
 		delete[] gradient;
