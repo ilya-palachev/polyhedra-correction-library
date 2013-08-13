@@ -169,6 +169,17 @@ bool intersection(const Plane & plane1, const Plane & plane2,
 	point.x = b[0];
 	point.y = b[1];
 	point.z = b[2];
+
+	if (A != NULL)
+	{
+		delete[] A;
+		A = NULL;
+	}
+	if (b != NULL)
+	{
+		delete[] b;
+		b = NULL;
+	}
 	return ret;
 }
 
