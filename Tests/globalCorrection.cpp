@@ -106,13 +106,6 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	parameters.figure = parse_figureName(figure);
 	parameters.method = parse_methodName(method);
 
-	if (!ifCorrectInput)
-	{
-		ERROR_PRINT("Incorrect input!");
-		printUsage();
-		DEBUG_END;
-		return EXIT_FAILURE;
-	}
 	if (figure)
 	{
 		delete[] figure;
@@ -123,6 +116,14 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	{
 		delete[] method;
 		method = NULL;
+	}
+
+	if (!ifCorrectInput)
+	{
+		ERROR_PRINT("Incorrect input!");
+		printUsage();
+		DEBUG_END;
+		return EXIT_FAILURE;
 	}
 
 	DEBUG_END;

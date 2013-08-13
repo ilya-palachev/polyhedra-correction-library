@@ -60,6 +60,19 @@ int main(int argc, char** argv)
 		delete polyhedron;
 		polyhedron = NULL;
 	}
+
+	if (parameters.fileNamePolyhedron != NULL)
+	{
+		delete[] parameters.fileNamePolyhedron;
+		parameters.fileNamePolyhedron = NULL;
+	}
+
+	if (parameters.fileNameShadeContours != NULL)
+	{
+		delete[] parameters.fileNameShadeContours;
+		parameters.fileNameShadeContours = NULL;
+	}
+
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }
@@ -100,18 +113,17 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 
 	parameters.method = parse_methodName(method);
 
+	if (method)
+	{
+		delete[] method;
+		method = NULL;
+	}
 	if (!ifCorrectInput)
 	{
 		ERROR_PRINT("Incorrect input!");
 		printUsage();
 		DEBUG_END;
 		return EXIT_FAILURE;
-	}
-
-	if (method)
-	{
-		delete[] method;
-		method = NULL;
 	}
 
 	DEBUG_END;
