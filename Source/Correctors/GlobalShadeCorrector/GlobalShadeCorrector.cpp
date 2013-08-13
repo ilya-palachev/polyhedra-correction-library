@@ -23,7 +23,7 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0),
-				associator(new GSAssociator(this))
+				associator(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -44,7 +44,7 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0),
-				associator(new GSAssociator(this))
+				associator(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;

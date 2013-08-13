@@ -20,6 +20,7 @@ void GlobalShadeCorrector::preprocess()
 void GlobalShadeCorrector::preprocessAssociations()
 {
 	DEBUG_START;
+	associator = new GSAssociator(this);
 	associator->preinit();
 
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
