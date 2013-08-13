@@ -23,7 +23,8 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0),
-				associator(NULL)
+				associator(NULL),
+				ifDeleted(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -44,7 +45,8 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0),
-				associator(NULL)
+				associator(),
+				ifDeleted(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -53,35 +55,56 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 GlobalShadeCorrector::~GlobalShadeCorrector()
 {
 	DEBUG_START;
-	if (!facetsNotAssociated->empty())
+
+	DEBUG_PRINT("ifDeleted = %d", ifDeleted);
+	if (!ifDeleted)
 	{
-		facetsNotAssociated->clear();
+		/* The workaround. */
+		ifDeleted = true;
+
+		if (!facetsNotAssociated->empty())
+		{
+			DEBUG_PRINT("Deleting facetsNotAssociated");
+			facetsNotAssociated->clear();
+		}
+		if (gradient != NULL)
+		{
+			DEBUG_PRINT("Deleting gradient");
+			delete[] gradient;
+			gradient = NULL;
+		}
+		if (gradientPrevious != NULL)
+		{
+			DEBUG_PRINT("Deleting gradientPrevious");
+			delete[] gradientPrevious;
+			gradientPrevious = NULL;
+		}
+		if (prevPlanes != NULL)
+		{
+			DEBUG_PRINT("Deleting prevPlanes");
+			delete[] prevPlanes;
+			prevPlanes = NULL;
+		}
+		if (!edgeData->edges.empty())
+		{
+			DEBUG_PRINT("Deleting edgeData");
+			edgeData->edges.clear();
+			edgeData = NULL;
+		}
+		if (contourData != NULL)
+		{
+			DEBUG_PRINT("Deleting contourData");
+			delete contourData;
+			contourData = NULL;
+		}
+		if (associator != NULL)
+		{
+			DEBUG_PRINT("Deleting associator");
+			delete associator;
+			associator = NULL;
+		}
 	}
-	if (gradient != NULL)
-	{
-		delete[] gradient;
-		gradient = NULL;
-	}
-	if (gradientPrevious != NULL)
-	{
-		delete[] gradientPrevious;
-		gradientPrevious = NULL;
-	}
-	if (prevPlanes != NULL)
-	{
-		delete[] prevPlanes;
-		prevPlanes = NULL;
-	}
-	if (associator != NULL)
-	{
-		delete associator;
-		associator = NULL;
-	}
-	if (!edgeData->edges.empty())
-	{
-		edgeData->edges.clear();
-		edgeData = NULL;
-	}
+
 	DEBUG_END;
 }
 

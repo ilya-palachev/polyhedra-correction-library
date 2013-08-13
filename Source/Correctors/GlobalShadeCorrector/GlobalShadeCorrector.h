@@ -106,6 +106,11 @@ private:
 	 * This issue has been found by the use of Valgrind (Memcheck) tool. */
 	GSAssociator* associator;
 
+	/* To provide a workaround for multiple valgrind issues related with
+	 * calling dtor of this class from derived class GSAssiciator, we decided
+	 * to have a variable preventing this class from being deleted twice. */
+	bool ifDeleted;
+
 	void preprocess();
 	void preprocessAssociations();
 

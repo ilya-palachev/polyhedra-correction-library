@@ -24,6 +24,7 @@ ShadeContourData::~ShadeContourData()
 	{
 		delete[] contours;
 		contours = NULL;
+		numContours = 0;
 	}
 	DEBUG_END;
 }
