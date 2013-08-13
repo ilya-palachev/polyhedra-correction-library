@@ -68,11 +68,6 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 		delete[] prevPlanes;
 		prevPlanes = NULL;
 	}
-	if (facetsNotAssociated != NULL)
-	{
-		delete facetsNotAssociated;
-		facetsNotAssociated = NULL;
-	}
 	if (associator != NULL)
 	{
 		delete associator;
