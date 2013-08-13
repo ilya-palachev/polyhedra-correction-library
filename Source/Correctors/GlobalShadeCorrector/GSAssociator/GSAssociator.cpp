@@ -516,11 +516,11 @@ void GSAssociator::add(Orientation orientation)
 				iContour, iEdge);
 		DEBUG_PRINT("\tadding side # %d", iSide);
 		// Create new association
-		EdgeContourAssociation* assocForCurrentEdge =
-				new EdgeContourAssociation(iContour, iSide, ifDirectionIsProper,
+		EdgeContourAssociation assocForCurrentEdge =
+				EdgeContourAssociation(iContour, iSide, ifDirectionIsProper,
 						weight);
 		// Push it to the list
-		edge->assocList.push_back(*assocForCurrentEdge);
+		edge->assocList.push_back(assocForCurrentEdge);
 	}
 	DEBUG_PRINT("Addition done");
 	DEBUG_END;
