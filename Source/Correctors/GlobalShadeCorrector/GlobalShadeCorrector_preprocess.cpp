@@ -13,6 +13,7 @@ void GlobalShadeCorrector::preprocess()
 	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron,
 			edgeData);
 	edgeConstructor->run(edgeData);
+	delete edgeConstructor;
 	preprocessAssociations();
 	DEBUG_END;
 }
