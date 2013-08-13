@@ -49,6 +49,13 @@ GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
 GSAssociator::~GSAssociator()
 {
 	DEBUG_START;
+
+	if (polyhedronTmp)
+	{
+		delete polyhedronTmp;
+		polyhedronTmp = NULL;
+	}
+
 	if (bufDouble)
 	{
 		delete[] bufDouble;
