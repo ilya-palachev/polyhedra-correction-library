@@ -21,6 +21,12 @@ endforeach()
 list(REMOVE_DUPLICATES INCLUDE_DIRS_all)
 include_directories(${INCLUDE_DIRS_all})
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+	set(COMMON_FLAGS "-std=c++11")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
+endif()
+
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
 add_library(lsm SHARED ${SOURCE_lsm})

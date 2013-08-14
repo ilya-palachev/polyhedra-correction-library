@@ -719,7 +719,7 @@ void GlobalShadeCorrector::calculateGradient()
 						- planePrevNeighbour.norm) * planeOfProjection.norm);
 
 				double gamma_ij = enumerator / denominator;
-				ASSERT(!isnan(gamma_ij));
+				ASSERT(!(fabs(denominator) < EPS_MIN_DOUBLE));
 
 				Vector3d A_ij1 = sides[curNearestSide].A1;
 				Vector3d A_ij2 = sides[curNearestSide].A2;
