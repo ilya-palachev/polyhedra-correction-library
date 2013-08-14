@@ -19,7 +19,7 @@ private:
 	int* bufferInt0;
 	int* bufferInt1;
 
-	EdgeData* edgeData;
+	EdgeDataPtr edgeData;
 
 	SContour& createContour(int idOfContour, Plane planeOfProjection);
 	bool edgeIsVisibleOnPlane(Edge edge, Plane planeOfProjection);

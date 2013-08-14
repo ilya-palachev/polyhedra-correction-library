@@ -75,6 +75,9 @@ class SortedDouble;
 class Clusterizer;
 class SortedSetOfPairs;
 
+typedef std::shared_ptr<EdgeData> EdgeDataPtr;
+typedef std::shared_ptr<list<int>> IntList;
+
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"

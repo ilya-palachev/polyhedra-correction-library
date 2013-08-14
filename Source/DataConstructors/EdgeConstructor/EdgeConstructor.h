@@ -14,9 +14,9 @@
 class EdgeConstructor : public PDataConstructor
 {
 public:
-	EdgeConstructor(Polyhedron* p, EdgeData* e);
+	EdgeConstructor(Polyhedron* p);
 	~EdgeConstructor();
-	void run(EdgeData* &edgeData);
+	void run(EdgeDataPtr edgeData);
 };
 
 #endif /* EDGECONSTRUCTOR_H_ */

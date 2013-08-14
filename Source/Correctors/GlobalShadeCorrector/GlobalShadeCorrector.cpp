@@ -14,7 +14,6 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				parameters(
 				{ METHOD_CORRECTOR_DEFAULT, EPS_LOOP_STOP_DEFAULT,
 	DELTA_GRADIENT_STEP_DEFAULT}),
-				facetsNotAssociated(NULL),
 				gradient(NULL),
 				gradientPrevious(NULL),
 				gradientNorm(0.),
@@ -32,10 +31,9 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 		ShadeContourData* scd, GSCorrectorParameters* _parameters) :
 				PCorrector(p),
-				edgeData(NULL),
+				edgeData(),
 				contourData(scd),
 				parameters(*_parameters),
-				facetsNotAssociated(new list<int>),
 				gradient(NULL),
 				gradientPrevious(NULL),
 				gradientNorm(0.),
@@ -47,6 +45,7 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				associator()
 {
 	DEBUG_START;
+	facetsNotAssociated.reset(new list<int>);
 	DEBUG_END;
 }
 
@@ -77,12 +76,6 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 		delete[] prevPlanes;
 		prevPlanes = NULL;
 	}
-	if (!edgeData->edges.empty())
-	{
-		DEBUG_PRINT("Deleting edgeData");
-		edgeData->edges.clear();
-		edgeData = NULL;
-	}
 	if (associator != NULL)
 	{
 		DEBUG_PRINT("Deleting associator");
@@ -90,7 +83,6 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 		associator = NULL;
 	}
 
-	DEBUG_PRINT("Deleting contourData, num = %d", contourData->numContours);
 	DEBUG_END;
 }
 

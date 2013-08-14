@@ -104,7 +104,7 @@ public:
 	// Polyhedron_verification.cpp
 	int test_structure();
 	int countConsections(bool ifPrint);
-	int checkEdges(EdgeData* edgeData);
+	int checkEdges(EdgeDataPtr edgeData);
 };
 
 #endif	/* POLYHEDRON_CLASS_H */

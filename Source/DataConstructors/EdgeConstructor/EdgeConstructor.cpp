@@ -7,7 +7,7 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-EdgeConstructor::EdgeConstructor(Polyhedron* p, EdgeData* e) :
+EdgeConstructor::EdgeConstructor(Polyhedron* p) :
 				PDataConstructor(p)
 {
 	DEBUG_START;
@@ -20,17 +20,9 @@ EdgeConstructor::~EdgeConstructor()
 	DEBUG_END;
 }
 
-void EdgeConstructor::run(EdgeData* &edgeData)
+void EdgeConstructor::run(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
-
-	if (edgeData != NULL)
-	{
-		delete[] edgeData;
-		edgeData = NULL;
-	}
-
-	edgeData = new EdgeData();
 
 	EdgeSetIterator edge;
 

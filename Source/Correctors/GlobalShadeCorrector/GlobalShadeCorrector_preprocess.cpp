@@ -10,8 +10,8 @@
 void GlobalShadeCorrector::preprocess()
 {
 	DEBUG_START;
-	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron,
-			edgeData);
+	edgeData.reset(new EdgeData());
+	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron);
 	edgeConstructor->run(edgeData);
 	delete edgeConstructor;
 	preprocessAssociations();

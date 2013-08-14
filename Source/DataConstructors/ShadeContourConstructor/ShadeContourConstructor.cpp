@@ -45,8 +45,7 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 {
 	DEBUG_START;
 	polyhedron->preprocessAdjacency();
-	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron,
-			edgeData);
+	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron);
 	edgeConstructor->run(edgeData);
 
 	DEBUG_PRINT("Allocating 3 arrays of length %d", edgeData->numEdges);

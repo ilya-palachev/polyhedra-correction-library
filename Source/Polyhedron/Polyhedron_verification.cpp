@@ -30,7 +30,7 @@ int Polyhedron::countConsections(bool ifPrint)
 	return numConsections;
 }
 
-int Polyhedron::checkEdges(EdgeData* edgeData)
+int Polyhedron::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 	Verifier* verifier = new Verifier(this);

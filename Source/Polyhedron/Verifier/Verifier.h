@@ -26,12 +26,12 @@ private:
 
 	/* Check whether the edge is not destructed. Returns "true" if it is not
 	 * destructed. */
-	bool checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData);
+	bool checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData);
 
 	/* Reduce one edge (for case when the edge is destructed).
 	 * We need to verify following structures: VertexInfo,
 	 * Facet, EdgeData, Edge for correctness. */
-	bool reduceEdge(EdgeSetIterator edge, EdgeData* edgeData);
+	bool reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData);
 public:
 	Verifier();
 	Verifier(Polyhedron* p);
@@ -42,7 +42,7 @@ public:
 	int countConsections();
 
 	/* Count the number of destructed edges of the polyhedron. */
-	int checkEdges(EdgeData* edgeData);
+	int checkEdges(EdgeDataPtr edgeData);
 
 };
 

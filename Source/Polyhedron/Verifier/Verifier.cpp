@@ -464,7 +464,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 	}
 }
 
-int Verifier::checkEdges(EdgeData* edgeData)
+int Verifier::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 	int numEdgesDesctructed = 0;
@@ -483,7 +483,7 @@ int Verifier::checkEdges(EdgeData* edgeData)
 
 #define DO_EDGES_REDUCTION
 
-bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
+bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
@@ -648,7 +648,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeData* edgeData)
 	return if_A2_under_pi3 && if_A3_under_pi2;
 }
 
-bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeData* edgeData)
+bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 	int iVertexReduced = edge->v1;

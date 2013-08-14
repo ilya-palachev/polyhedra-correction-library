@@ -57,7 +57,7 @@ const double EPSILON_FOR_DIVISION = 1e-16;
 class GlobalShadeCorrector: public PCorrector
 {
 protected:
-	EdgeData* edgeData;
+	EdgeDataPtr edgeData;
 	ShadeContourDataPtr contourData;
 
 private:
@@ -68,7 +68,7 @@ private:
 	/* In all algorithms we process only those facets which have some
 	 * associations with contours. This list is used to store
 	 * not-associated facets. */
-	list<int>* facetsNotAssociated;
+	IntList facetsNotAssociated;
 
 	/* Array for storing current values of gradient - used in all gradient
 	 * methods. */
