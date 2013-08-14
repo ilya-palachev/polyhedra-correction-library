@@ -68,7 +68,7 @@ private:
 	/* In all algorithms we process only those facets which have some
 	 * associations with contours. This list is used to store
 	 * not-associated facets. */
-	IntList facetsNotAssociated;
+	list<int> facetsNotAssociated;
 
 	/* Array for storing current values of gradient - used in all gradient
 	 * methods. */

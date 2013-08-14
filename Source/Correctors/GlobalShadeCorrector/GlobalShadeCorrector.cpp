@@ -14,6 +14,7 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				parameters(
 				{ METHOD_CORRECTOR_DEFAULT, EPS_LOOP_STOP_DEFAULT,
 	DELTA_GRADIENT_STEP_DEFAULT}),
+				facetsNotAssociated(),
 				gradient(NULL),
 				gradientPrevious(NULL),
 				gradientNorm(0.),
@@ -34,6 +35,7 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				edgeData(),
 				contourData(scd),
 				parameters(*_parameters),
+				facetsNotAssociated(),
 				gradient(NULL),
 				gradientPrevious(NULL),
 				gradientNorm(0.),
@@ -45,7 +47,6 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				associator()
 {
 	DEBUG_START;
-	facetsNotAssociated.reset(new list<int>);
 	DEBUG_END;
 }
 
@@ -53,10 +54,10 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 {
 	DEBUG_START;
 
-	if (!facetsNotAssociated->empty())
+	if (!facetsNotAssociated.empty())
 	{
 		DEBUG_PRINT("Deleting facetsNotAssociated");
-		facetsNotAssociated->clear();
+		facetsNotAssociated.clear();
 	}
 	if (gradient != NULL)
 	{
@@ -194,13 +195,13 @@ GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 	findNotAssociatedFacets();
 #ifndef NDEBUG
 	DEBUG_PRINT("The following facets have no associations:");
-	for (list<int>::iterator iter = facetsNotAssociated->begin();
-			iter != facetsNotAssociated->end(); ++iter)
+	for (list<int>::iterator iter = facetsNotAssociated.begin();
+			iter != facetsNotAssociated.end(); ++iter)
 	{
 		DEBUG_PRINT("%d", *iter);
 	}
 #endif
-	int numFacetsNotAssociated = facetsNotAssociated->size();
+	int numFacetsNotAssociated = facetsNotAssociated.size();
 	dim = (polyhedron->numFacets - numFacetsNotAssociated) * 5;
 
 	gradient = new double[dim];
@@ -338,7 +339,7 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 		}
 		if (numAssociations == 0)
 		{
-			facetsNotAssociated->push_back(iFacet);
+			facetsNotAssociated.push_back(iFacet);
 		}
 	}
 	DEBUG_END;
@@ -418,7 +419,7 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 {
 	DEBUG_START;
 
-	list<int>::iterator iterNotAssociated = facetsNotAssociated->begin();
+	list<int>::iterator iterNotAssociated = facetsNotAssociated.begin();
 	int countNotAssociated = 0;
 
 #ifndef NDEBUG
@@ -611,7 +612,7 @@ void GlobalShadeCorrector::calculateGradient()
 		gradient[i] = 0.;
 	}
 
-	list<int>::iterator iterNotAssocicated = facetsNotAssociated->begin();
+	list<int>::iterator iterNotAssocicated = facetsNotAssociated.begin();
 	int countNotAssociated = 0;
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)

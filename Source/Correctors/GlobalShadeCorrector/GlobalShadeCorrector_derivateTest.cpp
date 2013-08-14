@@ -23,7 +23,7 @@ void GlobalShadeCorrector::derivativeTest_all()
 void GlobalShadeCorrector::derivativeTest_1()
 {
 	DEBUG_START;
-	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated->begin();
+	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated.begin();
 	int iCountNotAssociated = 0;
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
