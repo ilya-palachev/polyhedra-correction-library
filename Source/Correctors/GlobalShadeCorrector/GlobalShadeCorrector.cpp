@@ -23,8 +23,7 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0),
-				associator(NULL),
-				ifDeleted(false)
+				associator(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -45,8 +44,7 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				iMinimizationLevel(0),
 				prevPlanes(NULL),
 				dim(0),
-				associator(),
-				ifDeleted(false)
+				associator()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -56,55 +54,43 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 {
 	DEBUG_START;
 
-	DEBUG_PRINT("ifDeleted = %d", ifDeleted);
-	if (!ifDeleted)
+	if (!facetsNotAssociated->empty())
 	{
-		/* The workaround. */
-		ifDeleted = true;
-
-		if (!facetsNotAssociated->empty())
-		{
-			DEBUG_PRINT("Deleting facetsNotAssociated");
-			facetsNotAssociated->clear();
-		}
-		if (gradient != NULL)
-		{
-			DEBUG_PRINT("Deleting gradient");
-			delete[] gradient;
-			gradient = NULL;
-		}
-		if (gradientPrevious != NULL)
-		{
-			DEBUG_PRINT("Deleting gradientPrevious");
-			delete[] gradientPrevious;
-			gradientPrevious = NULL;
-		}
-		if (prevPlanes != NULL)
-		{
-			DEBUG_PRINT("Deleting prevPlanes");
-			delete[] prevPlanes;
-			prevPlanes = NULL;
-		}
-		if (!edgeData->edges.empty())
-		{
-			DEBUG_PRINT("Deleting edgeData");
-			edgeData->edges.clear();
-			edgeData = NULL;
-		}
-		if (contourData != NULL)
-		{
-			DEBUG_PRINT("Deleting contourData");
-			delete contourData;
-			contourData = NULL;
-		}
-		if (associator != NULL)
-		{
-			DEBUG_PRINT("Deleting associator");
-			delete associator;
-			associator = NULL;
-		}
+		DEBUG_PRINT("Deleting facetsNotAssociated");
+		facetsNotAssociated->clear();
+	}
+	if (gradient != NULL)
+	{
+		DEBUG_PRINT("Deleting gradient");
+		delete[] gradient;
+		gradient = NULL;
+	}
+	if (gradientPrevious != NULL)
+	{
+		DEBUG_PRINT("Deleting gradientPrevious");
+		delete[] gradientPrevious;
+		gradientPrevious = NULL;
+	}
+	if (prevPlanes != NULL)
+	{
+		DEBUG_PRINT("Deleting prevPlanes");
+		delete[] prevPlanes;
+		prevPlanes = NULL;
+	}
+	if (!edgeData->edges.empty())
+	{
+		DEBUG_PRINT("Deleting edgeData");
+		edgeData->edges.clear();
+		edgeData = NULL;
+	}
+	if (associator != NULL)
+	{
+		DEBUG_PRINT("Deleting associator");
+		delete associator;
+		associator = NULL;
 	}
 
+	DEBUG_PRINT("Deleting contourData, num = %d", contourData->numContours);
 	DEBUG_END;
 }
 

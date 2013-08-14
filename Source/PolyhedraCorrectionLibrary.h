@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <time.h>
 #include <dlfcn.h>
+#include <memory>
 
 #include "Vector3d.h"
 #include "list_squares_method.h"
