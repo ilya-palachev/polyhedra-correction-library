@@ -57,7 +57,7 @@ public:
 	~GSAssociator();
 
 	void preinit();
-	void run(int iContourIn, int iFacetIn, int iEdgeIn);
+	void run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn);
 
 };
 

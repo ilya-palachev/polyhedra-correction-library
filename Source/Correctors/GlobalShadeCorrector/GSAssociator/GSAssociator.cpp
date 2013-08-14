@@ -80,26 +80,34 @@ void GSAssociator::preinit()
 	int numFacetsTmp = 3;
 	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp);
 	bufDouble = new double[numSidesMax + 1];
-	edge = edgeData->edges.begin();
 	DEBUG_END;
 }
 
 const double EPSILON_MIN_AREA_ABS = 1e-3;
 const double EPSILON_MIN_AREA_REL = 0.2;
 
-void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
+void GSAssociator::run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn)
 {
 	DEBUG_START;
 
 	iContour = iContourIn;
 	iFacet = iFacetIn;
-	iEdge = iEdgeIn;
+	iEdge = edgeIn->id;
+	edge = edgeIn;
 
 	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour,
 			iFacet, iEdge);
 
+#ifndef NDEBUG
+	DEBUG_PRINT("\t Current edge:");
+	edge->my_fprint(stderr);
+#endif
+
 	if (init() != EXIT_SUCCESS)
+	{
+		DEBUG_END;
 		return;
+	}
 
 	double distMin0;
 	iSideDistMin0 = findNearestPoint(v0_projected, v0_nearest, distMin0);
@@ -146,7 +154,6 @@ void GSAssociator::run(int iContourIn, int iFacetIn, int iEdgeIn)
 		add(orientation);
 	}
 
-	++edge;
 	DEBUG_END;
 }
 

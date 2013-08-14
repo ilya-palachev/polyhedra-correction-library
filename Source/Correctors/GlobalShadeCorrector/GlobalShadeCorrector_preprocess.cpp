@@ -35,7 +35,7 @@ void GlobalShadeCorrector::preprocessAssociations()
 				EdgeSetIterator edge =
 						edgeData->findEdge(indVertices[iVertex],
 						indVertices[iVertex + 1]);
-				associator->run(iContour, iFacet, edge->id);
+				associator->run(iContour, iFacet, edge);
 			}
 		}
 	}
