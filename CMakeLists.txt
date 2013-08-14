@@ -23,9 +23,7 @@ include_directories(${INCLUDE_DIRS_all})
 
 if (CMAKE_COMPILER_IS_GNUCXX)
 	set(COMMON_FLAGS "-std=c++11")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
-endif()
+endif ()
 
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
@@ -40,15 +38,16 @@ target_link_libraries(pcl
    vector3d
 )
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
+	set(CMAKE_BUILD_TYPE "Release")
+	set(COMMON_FLAGS "${COMMON_FLAGS} -g")
+endif ()
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
 	set(cat_config ${CMAKE_SOURCE_DIR}/Scripts/cat_config.sh)
 	set(debug_exceptions_config "${CMAKE_SOURCE_DIR}/config/debug_exceptions.conf")
 	set(debug_exceptions "")
 	exec_program(${cat_config} ARGS ${debug_exceptions_config} OUTPUT_VARIABLE debug_exceptions)
-
-	# For "Release" mode macro NDEBUG is defined by default, but for Debug mode
-	# we need to enable it manually
-	add_definitions("-DNDEBUG")
 
 	message("Debug exceptions:")
 	foreach(souce_file ${debug_exceptions})
@@ -56,12 +55,10 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Debu
 		message("   ${souce_file}")
 		set_source_files_properties(${souce_file} PROPERTIES COMPILE_FLAGS -UNDEBUG)
 	endforeach()
-	
-elseif (${CMAKE_BUILD_TYPE} STREQUAL "DebugVerbose")
-	set (CMAKE_BUILD_TYPE "Debug")
-
-	message("In DebugVerbose mode all files are built without macro NDEBUG defined")
 endif ()
+	
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
 
 add_subdirectory(Tests)
 
