@@ -163,8 +163,7 @@ void EdgeData::addEdge(int v0, int v1, int f0, int f1)
 		f1 = tmp;
 	}
 
-	Edge* edgeNew = new Edge(v0, v1, f0, f1);
-	edges.insert(*edgeNew);
+	edges.insert(Edge(v0, v1, f0, f1));
 	DEBUG_PRINT("Edge [%d, %d] has been successfully added to "
 					"the edge list", v0, v1);
 	numEdges = edges.size();
