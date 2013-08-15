@@ -77,6 +77,11 @@ void GSAssociator::preinit()
 			numSidesMax = numSidesCurr;
 	}
 	int numVerticesTmp = 2 * numSidesMax + 2;
+
+	/* FIXME: We provide 10-times bigger memory for vertices to avoid
+	 * invalid writes reported by Valgrind. */
+	numVerticesTmp *= 10;
+
 	int numFacetsTmp = 3;
 	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp);
 	bufDouble = new double[numSidesMax + 1];
