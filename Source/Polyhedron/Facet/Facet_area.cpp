@@ -39,6 +39,7 @@ double Facet::area()
 			ERROR_PRINT("  indVertices[%d] = %d",	iVertex, v0);
 			ERROR_PRINT("  indVertices[%d] = %d",	iVertex + 1, v1);
 			parentPolyhedron->my_fprint(stderr);
+			ASSERT(0);
 			DEBUG_END;
 			return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 		}

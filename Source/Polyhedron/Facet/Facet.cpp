@@ -188,6 +188,7 @@ void Facet::set_ind_vertex(int position, int value)
 		DEBUG_END;
 		return;
 	}
+	DEBUG_PRINT("setting indVertices[%d] = %d", position, value);
 	indVertices[position] = value;
 	DEBUG_END;
 }

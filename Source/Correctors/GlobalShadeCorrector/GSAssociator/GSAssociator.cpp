@@ -416,8 +416,8 @@ double GSAssociator::calculateArea(Orientation orientation)
 	DEBUG_START;
 
 	int numVerticesTmp = polyhedronTmp->numVertices;
-	const int iNearest0 = numVerticesTmp + 1;
-	const int iNearest1 = numVerticesTmp + 2;
+	const int iNearest0 = numVerticesTmp;
+	const int iNearest1 = numVerticesTmp + 1;
 
 	polyhedronTmp->vertices[iNearest0] = v0_nearest;
 	polyhedronTmp->vertices[iNearest1] = v1_nearest;
@@ -480,16 +480,20 @@ double GSAssociator::calculateArea(Orientation orientation)
 			iAdded1 = 2 * iSide + 2;
 			break;
 		}
-		iAdded0 %= numVerticesTmp;
-		iAdded1 %= numVerticesTmp;
+		iAdded0 = (numVerticesTmp + iAdded0) % numVerticesTmp;
+		iAdded1 = (numVerticesTmp + iAdded1) % numVerticesTmp;
 
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded, iAdded0);
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded + 1,
 				iAdded1);
 		iSide = (numSides + iSide + iStep) % numSides;
 	}
+
+	polyhedronTmp->numVertices += 2;
+	double area = fabs(polyhedronTmp->facets[fPart].area());
+
 	DEBUG_END;
-	return fabs(polyhedronTmp->facets[fPart].area());
+	return area;
 }
 
 void GSAssociator::add(Orientation orientation)
@@ -636,12 +640,14 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 			break;
 		}
 	}
+
 	DEBUG_PRINT("iBeginToBeAdded = %d", iBeginToBeAdded);
+	ASSERT(iBeginToBeAdded >= 0);
 
 	DEBUG_PRINT("Starting calculating iEndToBeAdded");
 	double lengthVisited = 0.;
 	int iEndToBeAdded = INT_NOT_INITIALIZED;
-	for (int iSide = iBeginToBeAdded;;
+	for (int iSide = iBeginToBeAdded; iSide != iEnd;
 			iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
 	{
 		DEBUG_PRINT("iLengthSide = %d", iLengthSide);
@@ -656,6 +662,7 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 	}
 	iEndToBeAdded = (numSides + iEndToBeAdded + iStep) % numSides;
 	DEBUG_PRINT("iEndToBeAdded = %d", iEndToBeAdded);
+	ASSERT(iEndToBeAdded >= 0);
 
 	iResultBegin = iBeginToBeAdded;
 	iResultEnd = iEndToBeAdded;
