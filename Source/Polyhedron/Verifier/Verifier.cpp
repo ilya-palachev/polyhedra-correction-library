@@ -471,11 +471,16 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 	EdgeSetIterator edge = edgeData->edges.begin();
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
+		/* FIXME: We cannot explicitly iterate "edge", because it can be erased
+		 * by reduceEdge function. */
+		EdgeSetIterator edgeNext = ++edge;
+		--edge;
+
 		if (!checkOneEdge(edge, edgeData))
 		{
 			++numEdgesDesctructed;
 		}
-		++edge;
+		edge = edgeNext;
 	}
 	DEBUG_END;
 	return numEdgesDesctructed;
