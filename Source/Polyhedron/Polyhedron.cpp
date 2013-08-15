@@ -20,8 +20,19 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
 				vertexInfos(NULL)
 {
 	DEBUG_START;
+
+	if (vertices != NULL)
+	{
+		delete[] vertices;
+	}
 	vertices = new Vector3d[numv_orig];
+
+	if (facets != NULL)
+	{
+		delete[] facets;
+	}
 	facets = new Facet[numf_orig];
+
 	DEBUG_PRINT("Creating polyhedron with numv = %d, numf = %d...\n",
 			numVertices, numFacets);
 	DEBUG_END;
@@ -31,12 +42,24 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 		Facet* facet_orig) :
 				numVertices(numv_orig),
 				numFacets(numf_orig),
-				vertices(new Vector3d[numv_orig]),
-				facets(new Facet[numf_orig]),
+				vertices(),
+				facets(),
 				vertexInfos(NULL)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Creating polyhedron by coping...\n");
+
+	if (vertices != NULL)
+	{
+		delete[] vertices;
+	}
+	vertices = new Vector3d[numv_orig];
+
+	if (facets != NULL)
+	{
+		delete[] facets;
+	}
+	facets = new Facet[numf_orig];
 
 	for (int i = 0; i < numVertices; ++i)
 		vertices[i] = vertex_orig[i];
@@ -50,11 +73,20 @@ Polyhedron::~Polyhedron()
 	DEBUG_START;
 	DEBUG_PRINT("Deleting Polyhedron...");
 	if (vertices)
+	{
 		delete[] vertices;
+		vertices = NULL;
+	}
 	if (facets)
+	{
 		delete[] facets;
+		facets = NULL;
+	}
 	if (vertexInfos)
+	{
 		delete[] vertexInfos;
+		vertexInfos = NULL;
+	}
 	DEBUG_END;
 }
 
