@@ -192,6 +192,7 @@ GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 {
 	DEBUG_START;
 	preprocess();
+	MAIN_PRINT("Preprocessing done");
 	findNotAssociatedFacets();
 #ifndef NDEBUG
 	DEBUG_PRINT("The following facets have no associations:");

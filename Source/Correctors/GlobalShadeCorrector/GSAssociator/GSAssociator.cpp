@@ -646,7 +646,7 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 
 	DEBUG_PRINT("Starting calculating iEndToBeAdded");
 	double lengthVisited = 0.;
-	int iEndToBeAdded = INT_NOT_INITIALIZED;
+	int iEndToBeAdded = (numSides + iBeginToBeAdded + iStep) % numSides;
 	for (int iSide = iBeginToBeAdded; iSide != iEnd;
 			iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
 	{
