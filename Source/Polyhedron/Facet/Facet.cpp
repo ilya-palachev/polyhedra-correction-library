@@ -39,6 +39,10 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	{
 		ERROR_PRINT("Error. nv_orig < 3");
 	}
+	if (indVertices != NULL)
+	{
+		delete[] indVertices;
+	}
 	indVertices = new int[3 * numVertices + 1];
 	if (ifLong)
 	{
@@ -58,13 +62,17 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, Polyhedron* poly_orig) :
 				id(id_orig),
 				numVertices(nv_orig),
-				indVertices(new int[3 * numVertices + 1]),
 				plane(plane_orig),
 				parentPolyhedron(poly_orig),
 				rgb(
 				{ 255, 255, 255 })
 {
 	DEBUG_START;
+	if (indVertices != NULL)
+	{
+		delete[] indVertices;
+	}
+	indVertices = new int[3 * numVertices + 1];
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
 		indVertices[iVertex] = INT_NOT_INITIALIZED;
@@ -81,8 +89,10 @@ Facet& Facet::operator =(const Facet& facet1)
 	numVertices = facet1.numVertices;
 	plane = facet1.plane;
 
-	if (indVertices)
+	if (indVertices != NULL)
+	{
 		delete[] indVertices;
+	}
 	indVertices = new int[3 * numVertices + 1];
 	for (i = 0; i < 3 * numVertices + 1; ++i)
 		indVertices[i] = facet1.indVertices[i];
@@ -102,7 +112,10 @@ Facet::~Facet()
 	DEBUG_START;
 	DEBUG_PRINT("Deleting facet[%d]", id);
 	if (indVertices != NULL)
+	{
 		delete[] indVertices;
+		indVertices = NULL;
+	}
 	DEBUG_END;
 }
 
