@@ -65,6 +65,12 @@ void VertexInfo::preprocess()
 	} while (fid_next != fid_first);
 
     DEBUG_PRINT("Total number of facets is %d\n", numFacets);
+
+    if (indFacets != NULL)
+    {
+    	delete[] indFacets;
+    }
+
 	indFacets = new int[3 * numFacets + 1];
 
     DEBUG_PRINT("3. Building the VECTOR :");
