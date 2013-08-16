@@ -39,10 +39,6 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	{
 		ERROR_PRINT("Error. nv_orig < 3");
 	}
-	if (indVertices != NULL)
-	{
-		delete[] indVertices;
-	}
 	indVertices = new int[3 * numVertices + 1];
 	if (ifLong)
 	{
@@ -68,10 +64,6 @@ Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, Polyhedron* poly_orig) 
 				{ 255, 255, 255 })
 {
 	DEBUG_START;
-	if (indVertices != NULL)
-	{
-		delete[] indVertices;
-	}
 	indVertices = new int[3 * numVertices + 1];
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
