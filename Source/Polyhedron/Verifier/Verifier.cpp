@@ -668,6 +668,9 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 
 	/* Stage 1. Update data structures "Facet" for those facets that contain
 	 * "removed" vertex. */
+	bool ifCase1aHappened = false;
+	bool ifCase1bHappened = false;
+
 	DEBUG_PRINT("Stage 1. Updating structures \"Facet\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
@@ -701,6 +704,7 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		 * the "reduced" vertex. */
 		if (facetCurr->indVertices[iPositionPrev] == iVertexStayed)
 		{
+			ifCase1aHappened = true;
 			DEBUG_PRINT("Case 1a: \"stayed\" vertex lays in facet, "
 					"it's earlier than reduced one");
 			/* Let v2 be "stayed" vertex, v3 - "reduced" vertex
@@ -790,6 +794,7 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		 * the "reduced" vertex. */
 		else if (facetCurr->indVertices[iPositionNext] == iVertexStayed)
 		{
+			ifCase1bHappened = true;
 			DEBUG_PRINT("Case 1b: \"stayed\" vertex lays in facet, "
 					"it's later than reduced one");
 			/* Let v3 be "stayed" vertex, v2 - "reduced" vertex
@@ -910,6 +915,23 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	facetsAlreadyDumped.clear();
 
 	DEBUG_PRINT("-------------- end of dumping facets");
+
+	if (!ifCase1aHappened)
+	{
+		ERROR_PRINT("case 1a never happened");
+	}
+
+	if (!ifCase1bHappened)
+	{
+		ERROR_PRINT("case 1b never happened");
+	}
+
+	ASSERT(ifCase1aHappened && ifCase1bHappened);
+	if (!ifCase1aHappened || !ifCase1bHappened)
+	{
+		DEBUG_END;
+		return false;
+	}
 
 	/* Stage 2. Update data structures "Edge" for those facets that contain
 	 * "removed" vertex. */
