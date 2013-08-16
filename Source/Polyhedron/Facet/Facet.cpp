@@ -6,7 +6,7 @@ Facet::Facet() :
 				id(-1),
 				numVertices(0),
 				plane(),
-				indVertices(new int[1]),
+				indVertices(NULL),
 				parentPolyhedron(NULL)
 {
 	DEBUG_START;
@@ -50,7 +50,7 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 		for (int i = 0; i < numVertices + 1; ++i)
 			indVertices[i] = index_orig[i];
 		for (int i = numVertices + 1; i < 3 * numVertices + 1; ++i)
-			indVertices[i] = -1;
+			indVertices[i] = INT_NOT_INITIALIZED;
 	}
 	DEBUG_END;
 }
@@ -65,7 +65,7 @@ Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, Polyhedron* poly_orig) 
 {
 	DEBUG_START;
 	indVertices = new int[3 * numVertices + 1];
-	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+	for (int iVertex = 0; iVertex < 3 * numVertices + 1; ++iVertex)
 	{
 		indVertices[iVertex] = INT_NOT_INITIALIZED;
 	}
