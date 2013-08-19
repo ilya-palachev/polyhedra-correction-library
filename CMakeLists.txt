@@ -6,12 +6,22 @@ file(GLOB_RECURSE SOURCE_gaussString          "./External/GaussString/*.cpp")
 file(GLOB_RECURSE SOURCE_lsm                  "./External/LSM/*.cpp")
 file(GLOB_RECURSE SOURCE_vector3d             "./External/Vector3d/*.cpp")
 file(GLOB_RECURSE SOURCE_pcl                  "./Source/*.cpp")
+file(GLOB_RECURSE SOURCE_gexf                 "./External/LibGEXF/*.cpp")
 
-file(GLOB_RECURSE HEADERS_pcl "./Source/*.h")
-file(GLOB_RECURSE HEADERS_external "./External/*.h")
+file(GLOB_RECURSE HEADERS_arrayOperations     "./External/ArrayOperations/*.h")
+file(GLOB_RECURSE HEADERS_gaussString         "./External/GaussString/*.h")
+file(GLOB_RECURSE HEADERS_lsm                 "./External/LSM/*.h")
+file(GLOB_RECURSE HEADERS_Vector3d            "./External/Vector3d/*.h")
+file(GLOB_RECURSE HEADERS_pcl                 "./Source/*.h")
+file(GLOB_RECURSE HEADERS_gexf                "./External/LibGEXF/*.h")
+
 set (HEADERS_all "")
+list (APPEND HEADERS_all ${HEADERS_arrayOperations})
+list (APPEND HEADERS_all ${HEADERS_gaussString})
+list (APPEND HEADERS_all ${HEADERS_lsm})
+list (APPEND HEADERS_all ${HEADERS_Vector3d})
 list (APPEND HEADERS_all ${HEADERS_pcl})
-list (APPEND HEADERS_all ${HEADERS_external})
+list (APPEND HEADERS_all ${HEADERS_gexf})
 
 set (INCLUDE_DIRS_all "")
 foreach (_headerFile ${HEADERS_all})
@@ -19,6 +29,9 @@ foreach (_headerFile ${HEADERS_all})
     list (APPEND INCLUDE_DIRS_all ${_dir})
 endforeach()
 list(REMOVE_DUPLICATES INCLUDE_DIRS_all)
+
+list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LibGEXF")
+list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
 include_directories(${INCLUDE_DIRS_all})
 
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -31,11 +44,14 @@ add_library(lsm SHARED ${SOURCE_lsm})
 add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
 
+add_subdirectory("./External/LibGEXF")
+
 target_link_libraries(pcl 
    arrayOperations 
    gaussString 
    lsm 
    vector3d
+   gexf
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
