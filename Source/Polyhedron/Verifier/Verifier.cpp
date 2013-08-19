@@ -995,6 +995,21 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		}
 	}
 
+#ifndef NDEBUG
+	/* Verify that the reduced edge has been actually removed from
+	 * edge set. */
+	EdgeSetIterator edgeRemoved = edgeData->findEdge(iVertexReduced,
+								iVertexStayed);
+	if (edgeRemoved != edgeData->edges.end())
+	{
+		ERROR_PRINT("The edge [%d, %d] has not been removed from the "
+				"set!");
+		ASSERT(0);
+		DEBUG_END;
+		return false;
+	}
+#endif
+
 	/* Stage 3. Rebuild data structure "VertexInfo" for all vertices
 	 * that lay in facets which contained the "reduced" vertex
 	 * before the reduction happened. */
