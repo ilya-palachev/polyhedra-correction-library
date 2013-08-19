@@ -38,6 +38,8 @@ int main(int argc, char** argv)
 		DEBUG_END;
 		return EXIT_FAILURE;
 	}
+	polyhedron->my_fprint(stderr);
+
 	ShadeContourData* contourData = new ShadeContourData(polyhedron);
 	if (!contourData->fscanDefault(parameters.fileNameShadeContours))
 	{
