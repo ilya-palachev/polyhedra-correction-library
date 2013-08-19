@@ -986,6 +986,11 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 				DEBUG_END;
 				return false;
 			}
+
+			/* If succeeded to find the edge, add edge with proper values and
+			 * erase the old one. */
+			edgeData->edges.insert(Edge(*edgeUpdated));
+			edgeData->edges.erase(edgeUpdated);
 		}
 		else
 		{
