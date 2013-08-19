@@ -10,7 +10,9 @@
 double Facet::area()
 {
 	DEBUG_START;
+#ifndef NDEBUG
 	my_fprint_all(stderr);
+#endif /* NDEBUG */
 
 	bool ifInitialized = test_initialization();
 	if (!ifInitialized)
@@ -23,7 +25,7 @@ double Facet::area()
 	}
 
 	Vector3d A0 = parentPolyhedron->vertices[indVertices[0]];
-	my_fprint_all(stderr);
+
 	DEBUG_PRINT("  in parent polyhedron there are %d vertices",
 			parentPolyhedron->numVertices);
 

@@ -195,7 +195,9 @@ int GSAssociator::init()
 				contourData->contours[iContour].sides[iSide].A2;
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;
+#ifndef NDEBUG
 	polyhedronTmp->my_fprint(stdout);
+#endif
 
 	DEBUG_END;
 	return EXIT_SUCCESS;

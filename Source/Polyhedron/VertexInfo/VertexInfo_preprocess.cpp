@@ -44,7 +44,10 @@ void VertexInfo::preprocess()
 
 		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)",
 				fid_next, pos_next, v_curr);
+
+#ifndef NDEBUG
 		parentPolyhedron->facets[fid_curr].my_fprint_all(stderr);
+#endif /* NDEBUG */
 
 		if (pos_next == -1 || fid_next == -1)
 		{
