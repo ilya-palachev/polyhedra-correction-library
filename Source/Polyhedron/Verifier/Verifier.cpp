@@ -888,33 +888,38 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		facetCurr->my_fprint_all(stderr);
 	}
 
+#ifndef NDEBUG
 	DEBUG_PRINT("-------------- After stage 1 we have the following");
 	DEBUG_PRINT("               configuration of facets:");
 
-	set<int> facetsAlreadyDumped;
+	set<int> facetsDumped;
+
+	vertexInfoReduced->my_fprint_all(stderr);
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iFacetCurrent = vertexInfoReduced->indFacets[iFacet];
-		Facet* facetCurr = &polyhedron->facets[iFacetCurrent];
-		facetCurr->my_fprint_all(stderr);
-		facetsAlreadyDumped.insert(iFacetCurrent);
+		facetsDumped.insert(iFacetCurrent);
 	}
 
+	vertexInfoStayed->my_fprint_all(stderr);
 	for (int iFacet = 0; iFacet < vertexInfoStayed->numFacets; ++iFacet)
 	{
 		int iFacetCurrent = vertexInfoStayed->indFacets[iFacet];
-		if (facetsAlreadyDumped.find(iFacetCurrent) !=
-				facetsAlreadyDumped.end())
-		{
-			continue;
-		}
-		Facet* facetCurr = &polyhedron->facets[iFacetCurrent];
-		facetCurr->my_fprint_all(stderr);
-		facetsAlreadyDumped.insert(iFacetCurrent);
+		facetsDumped.insert(iFacetCurrent);
 	}
-	facetsAlreadyDumped.clear();
+
+	for (set<int>::iterator itFacet = facetsDumped.begin();
+			itFacet != facetsDumped.end(); ++itFacet)
+	{
+		Facet* facetCurr = &polyhedron->facets[*itFacet];
+		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
+		facetCurr->my_fprint_all(stderr);
+	}
+
+	facetsDumped.clear();
 
 	DEBUG_PRINT("-------------- end of dumping facets");
+#endif
 
 	if (!ifCase1aHappened)
 	{
