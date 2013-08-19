@@ -1,0 +1,12 @@
+TODO LIST
+
+Major:
+
+   * dynamic support
+   * hyperarchical graphs support
+   * phylogenic graphs support
+   * list-string storage optimization (values replaced by corresponding idx) (LATER)
+   * memory optimization (strings replaced by their real type like int) ; create a wrapper to access data? (LATER)
+
+Minor:
+   * Logger class for info(), warn() and err() messages

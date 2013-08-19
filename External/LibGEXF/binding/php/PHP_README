@@ -1,0 +1,43 @@
+README: PHP BINDING WITH SWIG
+
+
+FOR DEVELOPERS
+--------------
+If you plan to contribute to the libgexf library, you will need to install SWIG (swig-1.3.40)
+to generate a new libgexf_wrap.cpp wrapper each time you will modify the libgexf.i interface file.
+Note that earlier releases like swig 1.3.40 will *not* work since we use a special dependency in
+the libgexf.i interface, only available on the latest release of swig.
+
+Manual PHP binding with swig on Linux:
+   $ swig -c++ -php -fvirtual -o libgexf_wrap.cpp libgexf.i
+   $ gcc `php-config --includes` -fPIC -c libgexf_wrap.cpp ../../gexf.cpp ${OTHER_CPP_FILES} -I/usr/include/libxml2
+   $ g++ -shared -lxml2 libgexf_wrap.o gexf.o ${OTHER_O_FILES} -o libgexf.so
+
+Automated PHP binding with swig on Linux:
+   $ ./build.sh
+
+
+USAGE
+-----
+  * enable dl() by editing php.ini with these settings:
+    - safe_mode = off
+    - enable_dl = On
+  * copy runme.php and libgexf.php in a webserver dir
+  * set this directory writable for Apache
+  * copy libgexf.so in the php extension directory (extension_dir value in php.ini)
+  * execute runme.php
+
+Important: 
+  * dl() has been deprecated as of PHP 5.3.0 and removed as of PHP 6.0.0.
+  * Enabling dynamic library loading creates a giant security hole in the server. Please do NOT use it in production.
+  * Directly load the libgexf extension from the php.ini to avoid this issue (remove the loading mechanism from the libgexf.php file).
+  * See http://php.net/manual/en/function.dl.php
+
+TEST
+----
+
+
+
+SWIG+PHP DOCUMENTATION
+----------------------
+see http://www.swig.org/Doc1.3/Php.html

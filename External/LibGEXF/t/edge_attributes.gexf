@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gephi.org/gexf/1.1draft"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.gephi.org/gexf/1.1draft
+                             http://gephi.org/gexf/1.1draft.xsd"
+      version="1.1">
+  <meta lastmodifieddate="2009-03-20">
+    <creator>Gephi.org</creator>
+    <description>A Web graph file</description>
+  </meta>
+  <graph defaultedgetype="directed">
+    <attributes class="edge">
+        <attribute id="0" title="test" type="boolean">
+        <default>true</default>
+      </attribute>
+    </attributes>
+    <nodes>
+      <node id="0" label="Gephi"/>
+      <node id="1" label="Gephi2"/>
+    </nodes>
+    <edges>
+      <edge id="0" source="0" target="1">
+        <attvalues>
+          <attvalue for="0" value="false"/>
+        </attvalues>
+      </edge>
+      <edge id="1" source="1" target="0">
+      </edge>
+    </edges>
+  </graph>
+</gexf>
+

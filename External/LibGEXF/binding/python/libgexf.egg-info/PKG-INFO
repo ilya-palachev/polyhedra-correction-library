@@ -1,0 +1,17 @@
+Metadata-Version: 1.0
+Name: libgexf
+Version: 0.1.0
+Summary: Toolkit library for GEXF file format.
+Home-page: http://gephi.org
+Author: Sebastien Heymann
+Author-email: sebastien.heymann@gephi.org
+License: MIT Licence
+Description: une description en un paragraphe (abstract)
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: Free for non-commercial use
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
