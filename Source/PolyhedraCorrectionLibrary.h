@@ -1,24 +1,36 @@
+
+/* Includes. */
+
+/* Standard includes: */
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>
+#include <assert.h>
+#include <dlfcn.h>
+#include <time.h>
+
+/* Standard Template Library includes: */
 #include <list>
 #include <set>
 #include <algorithm>
-#include <assert.h>
-#include <time.h>
-#include <dlfcn.h>
 #include <memory>
+using namespace std;
 
+/* Includes from external libraries: */
+#include <libgexf.h>
+using namespace libgexf;
+
+
+/* Includes from auxiliary external libraries (built-in): */
 #include "Vector3d.h"
 #include "list_squares_method.h"
 #include "Vector3d.h"
 #include "array_operations.h"
 #include "Gauss_string.h"
 
-using namespace std;
-
 typedef struct _GSCorrectorParameters GSCorrectorParameters;
+
 
 class Polyhedron;
 
@@ -75,6 +87,8 @@ class SortedDouble;
 class Clusterizer;
 class SortedSetOfPairs;
 
+class GraphDumperGEXF;
+
 typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 
 #include "Polyhedron/Polyhedron.h"
@@ -123,6 +137,8 @@ typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 #include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
 #include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 #include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+
+#include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
