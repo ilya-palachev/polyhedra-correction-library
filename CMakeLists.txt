@@ -52,6 +52,7 @@ target_link_libraries(pcl
    lsm 
    vector3d
    gexf
+   xml2
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
