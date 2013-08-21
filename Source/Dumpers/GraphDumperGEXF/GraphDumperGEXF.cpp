@@ -38,29 +38,29 @@ void GraphDumperGEXF::addEdge(Edge* edge)
 
 	string v0 = to_string(edge->v0);
 	string v1 = to_string(edge->v1);
-	string id = to_string(graph->getNodeCount());
+	string id = to_string(graph->getEdgeCount());
 
 	if (!graph->containsEdge(v0, v1))
 	{
 		if (!graph->containsNode(v0))
 		{
-			DEBUG_PRINT("Adding node %s to the gexf graph.", edge->v0);
+			DEBUG_PRINT("Adding node %d to the gexf graph.", edge->v0);
 			graph->addNode(v0);
 		}
 
 		if (!graph->containsNode(v1))
 		{
-			DEBUG_PRINT("Adding node %s to the gexf graph.", edge->v1);
+			DEBUG_PRINT("Adding node %d to the gexf graph.", edge->v1);
 			graph->addNode(v1);
 		}
 
-		DEBUG_PRINT("Adding edge [%s, %s] to the gexf graph.", edge->v0,
-				edge->v1);
+		DEBUG_PRINT("Adding edge [%d, %d] with id = %d to the gexf graph.",
+				edge->v0, edge->v1, graph->getNodeCount());
 		graph->addEdge(id, v0, v1);
 	}
 	else
 	{
-		DEBUG_PRINT("Edge [%s, %s] already presents in to the gexf graph.",
+		DEBUG_PRINT("Edge [%d, %d] already presents in to the gexf graph.",
 				edge->v0, edge->v1);
 	}
 
