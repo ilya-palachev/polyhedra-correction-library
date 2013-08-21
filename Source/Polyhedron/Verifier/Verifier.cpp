@@ -710,6 +710,8 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			/* Let v2 be "stayed" vertex, v3 - "reduced" vertex
 			 * Let numVertices == 6.
 			 *
+			 * In this case iPositionReduced == 3, iPositionPrev == 2
+			 *
 			 * Before:
 			 * 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18
 			 * --------------------------------------------------------
@@ -732,18 +734,18 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			 * */
 
 			for (int i = iPositionReduced;
-					i < facetCurr->numVertices + iPositionReduced - 1; ++i)
+					i < facetCurr->numVertices + iPositionPrev; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 1];
 			}
 
-			for (int i = facetCurr->numVertices + iPositionReduced - 1;
-					i < 2 * facetCurr->numVertices + iPositionReduced - 2; ++i)
+			for (int i = facetCurr->numVertices + iPositionPrev;
+					i < 2 * facetCurr->numVertices + iPositionPrev - 1; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 2];
 			}
 
-			for (int i = 2 * facetCurr->numVertices + iPositionReduced - 2;
+			for (int i = 2 * facetCurr->numVertices + iPositionPrev - 1;
 					i < 3 * facetCurr->numVertices - 2; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 3];
@@ -797,6 +799,8 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 					"it's later than reduced one");
 			/* Let v3 be "stayed" vertex, v2 - "reduced" vertex
 			 * Let numVertices == 6.
+			 *
+			 * In this case iPositionReduced == 2, iPositionNext == 3
 			 *
 			 * Before:
 			 * 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18
