@@ -908,18 +908,23 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		facetsDumped.insert(iFacetCurrent);
 	}
 
+	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
+
 	for (set<int>::iterator itFacet = facetsDumped.begin();
 			itFacet != facetsDumped.end(); ++itFacet)
 	{
 		Facet* facetCurr = &polyhedron->facets[*itFacet];
 		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
 		facetCurr->my_fprint_all(stderr);
+
+		graphDumper->collect(facetCurr);
 	}
+	graphDumper->dump("poly-data-out/facets_dump.gexf");
 
 	facetsDumped.clear();
 
 	DEBUG_PRINT("-------------- end of dumping facets");
-#endif
+#endif /* NDEBUG */
 
 	if (!ifCase1aHappened)
 	{
