@@ -1,10 +1,32 @@
 #ifndef POLYHEDRON_CLASS_H
 #define	 POLYHEDRON_CLASS_H
 
+/* Some common constants used by different methods. */
+
+/* During the array initialization, not initialized fields are assigned to this
+ * value (for debugging purposes). */
 const int INT_NOT_INITIALIZED = -RAND_MAX;
+
+/* We assume that 2 planes or 2 lines are colinear if the angle between them is
+ * less than this value. */
 const double EPS_COLLINEARITY = 1e-14;
+
+/* This value is returned by functions which return double variable in case of
+ * failure. */
 const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
+
+/* Minimal double number. */
 const double EPS_MIN_DOUBLE = 1e-16;
+
+
+
+/* Main class that contains polyhedron implementation.
+ *
+ * All methods that change, correct it, etc are done outside this class. This
+ * is done to avoid the c++ anti-pattern "huge class".
+ *
+ * Thus we have separate class for every method that does some big change or
+ * correction of polyhedron. */
 
 class Polyhedron
 {
