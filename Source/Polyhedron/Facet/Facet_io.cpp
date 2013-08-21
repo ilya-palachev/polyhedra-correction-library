@@ -39,6 +39,11 @@ void Facet::my_fprint_all(FILE* file)
 	REGULAR_PRINT(file, "index :       ");
 	for (i = 0; i < numVertices; ++i)
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
+	REGULAR_PRINT(file, "(%d)", indVertices[numVertices]);
+
+	/* For debugging purposes we assert when the cycling vertex is not equal to
+	 * the first vertex. */
+	ASSERT(indVertices[numVertices] == indVertices[0]);
 
 	REGULAR_PRINT(file, "\nnext facets : ");
 	for (i = numVertices + 1; i < 2 * numVertices + 1; ++i)
