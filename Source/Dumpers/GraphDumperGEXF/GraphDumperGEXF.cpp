@@ -40,18 +40,22 @@ void GraphDumperGEXF::addEdge(Edge* edge)
 	string v1 = to_string(edge->v1);
 	string id = to_string(graph->getEdgeCount());
 
+	libgexf::Data& data = gexf->getData();
+
 	if (!graph->containsEdge(v0, v1))
 	{
 		if (!graph->containsNode(v0))
 		{
 			DEBUG_PRINT("Adding node %d to the gexf graph.", edge->v0);
 			graph->addNode(v0);
+			data.setNodeLabel(v0, v0);
 		}
 
 		if (!graph->containsNode(v1))
 		{
 			DEBUG_PRINT("Adding node %d to the gexf graph.", edge->v1);
 			graph->addNode(v1);
+			data.setNodeLabel(v1, v1);
 		}
 
 		DEBUG_PRINT("Adding edge [%d, %d] with id = %d to the gexf graph.",
@@ -71,6 +75,8 @@ void GraphDumperGEXF::collect(Facet* facet)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Collecting facet #%d to gexf graph.", facet->id);
+
+	facet->my_fprint_all(stderr);
 
 	for (int iVertex = 0; iVertex < facet->numVertices; ++iVertex)
 	{
