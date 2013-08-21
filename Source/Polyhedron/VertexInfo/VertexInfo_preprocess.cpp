@@ -42,6 +42,12 @@ void VertexInfo::preprocess()
 		parentPolyhedron->facets[fid_curr].get_next_facet(pos_curr, pos_next,
 				fid_next, v_curr);
 
+		/* This assertion has been added for debugging purposes, because
+		 * sometimes wrong transformations of polyhedron cause the
+		 * incorrectness of data inside facet arrays. */
+		ASSERT(parentPolyhedron->facets[fid_curr].indVertices[pos_curr] ==
+				parentPolyhedron->facets[fid_next].indVertices[pos_next]);
+
 		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)",
 				fid_next, pos_next, v_curr);
 
