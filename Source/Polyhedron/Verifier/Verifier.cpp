@@ -750,8 +750,6 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			}
 
 			--facetCurr->numVertices;
-			facetCurr->indVertices[facetCurr->numVertices] =
-					facetCurr->indVertices[0];
 
 			/* In this case information in facets f3, f4, ...
 			 * about the position of vertices v3, v4, ...
@@ -840,8 +838,6 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			}
 
 			--facetCurr->numVertices;
-			facetCurr->indVertices[facetCurr->numVertices] =
-					facetCurr->indVertices[0];
 
 			/* In this case information in facets f3, f4, ...
 			 * about the position of vertices v3, v4, ...
@@ -884,6 +880,11 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			DEBUG_PRINT("Case 1a: \"stayed\" vertex does not lay in facet");
 			facetCurr->indVertices[iPositionReduced] = iVertexStayed;
 		}
+
+		/* Cycling vertex needs to be rewritten after the updating. */
+		facetCurr->indVertices[facetCurr->numVertices] =
+				facetCurr->indVertices[0];
+
 		DEBUG_PRINT("\t after:");
 		facetCurr->my_fprint_all(stderr);
 	}
