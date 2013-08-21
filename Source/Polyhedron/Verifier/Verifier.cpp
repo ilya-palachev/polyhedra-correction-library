@@ -670,12 +670,15 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	 * "removed" vertex. */
 	bool ifCase1aHappened = false;
 	bool ifCase1bHappened = false;
+	set<int> facetsUpdated;
 
 	DEBUG_PRINT("Stage 1. Updating structures \"Facet\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iFacetCurrent = vertexInfoReduced->indFacets[iFacet];
 		DEBUG_PRINT("\tUpdating facet #%d.", iFacetCurrent);
+
+		facetsUpdated.insert(iFacetCurrent);
 
 		int iPositionReduced =
 				vertexInfoReduced->indFacets[2 * vertexInfoReduced->numFacets +
@@ -752,42 +755,6 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			}
 
 			--facetCurr->numVertices;
-
-			/* In this case information in facets f3, f4, ...
-			 * about the position of vertices v3, v4, ...
-			 * (v3 will be replaced with v2 there) will become
-			 * incorrect. To fix this we need to change this information
-			 * from here. */
-
-			DEBUG_PRINT("  Begin of cycle: %d", facetCurr->numVertices - 1);
-			DEBUG_PRINT("  End of cycle: %d", iPositionPrev);
-
-			for (int i = 0; i < facetCurr->numVertices; ++i)
-			{
-				int iPrev = (facetCurr->numVertices + i - 1) %
-						facetCurr->numVertices;
-
-				int iFacetIncorrect =
-						facetCurr->indVertices[iPrev + 1 +
-						                       facetCurr->numVertices];
-				int iPosOfIncorrectVertex =
-						facetCurr->indVertices[iPrev + 1 +
-						                       2 * facetCurr->numVertices];
-				Facet* facetIncorrect = &polyhedron->facets[iFacetIncorrect];
-
-				iPosOfIncorrectVertex = (facetIncorrect->numVertices +
-						iPosOfIncorrectVertex - 1) %
-								facetIncorrect->numVertices;
-
-				facetIncorrect->indVertices[iPosOfIncorrectVertex + 1 + 2 *
-				                            facetIncorrect->numVertices] = i;
-
-				DEBUG_PRINT("Correcting information about position in facet");
-				DEBUG_PRINT(" #%d for vertex #%d (which is at position %d)",
-						iFacetIncorrect, facetCurr->indVertices[i],
-						iPosOfIncorrectVertex);
-				DEBUG_PRINT(" to value %d", i);
-			}
 		}
 
 		/* 1b). The "stayed" vertex is LATER in the list of vertices than
@@ -842,39 +809,6 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 			}
 
 			--facetCurr->numVertices;
-
-			/* In this case information in facets f3, f4, ...
-			 * about the position of vertices v3, v4, ...
-			 * (v2 will be replaced with v3 there) will become
-			 * incorrect. To fix this we need to change this information
-			 * from here. */
-
-			for (int i = 0; i < facetCurr->numVertices; ++i)
-			{
-				int iPrev = (facetCurr->numVertices + i - 1) %
-						facetCurr->numVertices;
-
-				int iFacetIncorrect =
-						facetCurr->indVertices[iPrev + 1 +
-						                       facetCurr->numVertices];
-				int iPosOfIncorrectVertex =
-						facetCurr->indVertices[iPrev + 1 +
-						                       2 * facetCurr->numVertices];
-				Facet* facetIncorrect = &polyhedron->facets[iFacetIncorrect];
-
-				iPosOfIncorrectVertex = (facetIncorrect->numVertices +
-						iPosOfIncorrectVertex - 1) %
-								facetIncorrect->numVertices;
-
-				facetIncorrect->indVertices[iPosOfIncorrectVertex + 1 + 2 *
-				                            facetIncorrect->numVertices] = i;
-
-				DEBUG_PRINT("Correcting information about position in facet");
-				DEBUG_PRINT(" #%d for vertex #%d (which is at position %d)",
-						iFacetIncorrect, facetCurr->indVertices[i],
-						iPosOfIncorrectVertex);
-				DEBUG_PRINT(" to value %d", i);
-			}
 		}
 
 		/* 2). In case when "stayed" vertex DOES NOT LAY in the current facet,
@@ -892,45 +826,10 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		DEBUG_PRINT("\t after:");
 		facetCurr->my_fprint_all(stderr);
 	}
-
-#ifndef NDEBUG
-	DEBUG_PRINT("-------------- After stage 1 we have the following");
-	DEBUG_PRINT("               configuration of facets:");
-
-	set<int> facetsDumped;
-
-	vertexInfoReduced->my_fprint_all(stderr);
-	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
-	{
-		int iFacetCurrent = vertexInfoReduced->indFacets[iFacet];
-		facetsDumped.insert(iFacetCurrent);
-	}
-
-	vertexInfoStayed->my_fprint_all(stderr);
-	for (int iFacet = 0; iFacet < vertexInfoStayed->numFacets; ++iFacet)
-	{
-		int iFacetCurrent = vertexInfoStayed->indFacets[iFacet];
-		facetsDumped.insert(iFacetCurrent);
-	}
-
-	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
-
-	for (set<int>::iterator itFacet = facetsDumped.begin();
-			itFacet != facetsDumped.end(); ++itFacet)
-	{
-		Facet* facetCurr = &polyhedron->facets[*itFacet];
-		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
-		facetCurr->my_fprint_all(stderr);
-
-		graphDumper->collect(facetCurr);
-	}
-	graphDumper->dump("poly-data-out/facets_dump.gexf");
-
-	facetsDumped.clear();
-
-	DEBUG_PRINT("-------------- end of dumping facets");
-#endif /* NDEBUG */
-
+	
+	/* For debugging purposes we have added the checking of the fact that 
+	 * cases 1a and 1b have really happened. */
+	
 	if (!ifCase1aHappened)
 	{
 		ERROR_PRINT("case 1a never happened");
@@ -948,9 +847,65 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 		return false;
 	}
 
-	/* Stage 2. Update data structures "Edge" for those facets that contain
+	/* Stage 2. We need to re-preprocess updated facets and their neighbors, since the 
+	 * positions of vertices change because of the removement of the reduced 
+	 * vertex. */
+	
+	DEBUG_PRINT("Stage 2. Re-preprocess all neighbors of updated facets");
+
+	set<int> facetsPreprocessed;
+	/* 1). Add set "facetsUpdated" to set "facetsPreprocessed". */
+	facetsPreprocessed.insert(facetsUpdated.begin(), facetsUpdated.end());
+		
+	/* 2). Add neighbors of facets inside set "facetsUpdated" to set
+	 * "facetsPreprocessed". */
+	for (set<int>::iterator itFacetUpdated = facetsUpdated.begin();
+			itFacetUpdated != facetsUpdated.end(); ++itFacetUpdated)
+	{
+		Facet* facetUpdated = &polyhedron->facets[*itFacetUpdated];
+		for (int i = 0; i < facetUpdated->numVertices; ++i)
+		{
+			facetsPreprocessed.insert(
+					facetUpdated->indVertices[facetUpdated->numVertices
+					                          + 1 + i]);
+		}
+	}
+	
+	/* 3). Re-process all facets collected to the set "facetsPreprocessed". */
+	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+			itFacet != facetsPreprocessed.end(); ++itFacet)
+	{
+		polyhedron->facets[*itFacet].preprocess();
+	}
+	
+
+#ifndef NDEBUG
+	DEBUG_PRINT("-------------- After stage 1 we have the following");
+	DEBUG_PRINT("               configuration of facets:");
+	
+	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
+
+	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+			itFacet != facetsPreprocessed.end(); ++itFacet)
+	{
+		Facet* facetCurr = &polyhedron->facets[*itFacet];
+		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
+		facetCurr->my_fprint_all(stderr);
+
+		graphDumper->collect(facetCurr);
+	}
+	graphDumper->dump("poly-data-out/facets_dump.gexf");
+
+	facetsPreprocessed.clear();
+
+	DEBUG_PRINT("-------------- end of dumping facets");
+#endif /* NDEBUG */
+
+
+
+	/* Stage 3. Update data structures "Edge" for those facets that contain
 	 * "removed" vertex. */
-	DEBUG_PRINT("Stage 2. Updating structures \"Edge\".");
+	DEBUG_PRINT("Stage 3. Updating structures \"Edge\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iVertexNeighbour =
@@ -1030,10 +985,10 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	}
 #endif
 
-	/* Stage 3. Rebuild data structure "VertexInfo" for all vertices
+	/* Stage 4. Rebuild data structure "VertexInfo" for all vertices
 	 * that lay in facets which contained the "reduced" vertex
 	 * before the reduction happened. */
-	DEBUG_PRINT("Stage 3. Updating structures \"VertexInfo\".");
+	DEBUG_PRINT("Stage 4. Updating structures \"VertexInfo\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iFacetCurr = vertexInfoReduced->indFacets[iFacet];
