@@ -429,7 +429,6 @@ bool EdgeReducer::updateVertexInfos()
 {
 	DEBUG_START;
 
-
 	DEBUG_PRINT("Stage 4. Updating structures \"VertexInfo\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
@@ -446,6 +445,15 @@ bool EdgeReducer::updateVertexInfos()
 
 			DEBUG_PRINT("\tAfter:");
 			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
+
+			if (polyhedron->vertexInfos[iVertexCurrent].numFacets < 3)
+			{
+				ERROR_PRINT("Too small number of incident facets was found for"
+						"vertex #%d", iVertexCurrent);
+				ASSERT(0);
+				DEBUG_END;
+				return false;
+			}
 		}
 	}
 
