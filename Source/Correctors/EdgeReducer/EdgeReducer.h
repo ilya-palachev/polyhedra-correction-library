@@ -10,12 +10,16 @@
 
 class EdgeReducer: public PCorrector
 {
+private:
+	EdgeDataPtr edgeData;
+	EdgeSetIterator edge;
+
 public:
 	EdgeReducer();
 	EdgeReducer(Polyhedron* p);
 	~EdgeReducer();
 
-	bool run(EdgeSetIterator edge, EdgeDataPtr edgeData);
+	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData);
 };
 
 #endif /* EDGEREDUCER_H_ */

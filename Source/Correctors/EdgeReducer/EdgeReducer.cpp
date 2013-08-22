@@ -27,9 +27,12 @@ EdgeReducer::~EdgeReducer()
 	DEBUG_END;
 }
 
-bool EdgeReducer::run(EdgeSetIterator edge, EdgeDataPtr edgeData)
+bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
 {
 	DEBUG_START;
+
+	edge = _edge;
+	edgeData = _edgeData;
 
 	int iVertexReduced = edge->v1;
 	int iVertexStayed = edge->v0;
