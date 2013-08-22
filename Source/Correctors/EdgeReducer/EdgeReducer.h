@@ -20,6 +20,7 @@ private:
 	VertexInfo* vertexInfoStayed;
 	set<int> facetsUpdated;
 
+	void init();
 	bool updateFacets();
 	bool rePreprocessFacets();
 	bool updateEdges();

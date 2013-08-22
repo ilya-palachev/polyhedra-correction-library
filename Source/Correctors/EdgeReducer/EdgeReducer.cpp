@@ -34,15 +34,7 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
 	edge = _edge;
 	edgeData = _edgeData;
 
-	iVertexReduced = edge->v1;
-	iVertexStayed = edge->v0;
-	DEBUG_PRINT("Reduced vertex: %d", iVertexReduced);
-	DEBUG_PRINT(" Stayed vertex: %d", iVertexStayed);
-
-	vertexInfoReduced = &polyhedron->vertexInfos[iVertexReduced];
-	vertexInfoStayed  = &polyhedron->vertexInfos[iVertexStayed];
-
-	vertexInfoReduced->my_fprint_all(stderr);
+	init();
 
 	/* Stage 1. */
 	if (!updateFacets())
@@ -76,6 +68,19 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
 	return true;
 }
 
+/* Initialize commonly used members. */
+void EdgeReducer::init()
+{
+	iVertexReduced = edge->v1;
+	iVertexStayed = edge->v0;
+	DEBUG_PRINT("Reduced vertex: %d", iVertexReduced);
+	DEBUG_PRINT(" Stayed vertex: %d", iVertexStayed);
+
+	vertexInfoReduced = &polyhedron->vertexInfos[iVertexReduced];
+	vertexInfoStayed  = &polyhedron->vertexInfos[iVertexStayed];
+
+	vertexInfoReduced->my_fprint_all(stderr);
+}
 
 /* Stage 1. Update data structures "Facet" for those facets that contain
  * "removed" vertex. */
