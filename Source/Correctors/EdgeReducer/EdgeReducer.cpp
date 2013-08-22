@@ -58,87 +58,14 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
 		return false;
 	}
 
-	/* Stage 3. Update data structures "Edge" for those facets that contain
-	 * "removed" vertex. */
-	DEBUG_PRINT("Stage 3. Updating structures \"Edge\".");
-	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	/* Stage 3. */
+	if (!updateEdges())
 	{
-		int iVertexNeighbour =
-				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
-				                             iFacet + 1];
-		DEBUG_PRINT("\tUpdating edge [%d, %d]", iVertexReduced,
-				iVertexNeighbour);
-		EdgeSetIterator edgeUpdated = edgeData->findEdge(iVertexReduced,
-							iVertexNeighbour);
-		if (edgeUpdated == edgeData->edges.end())
-		{
-			continue;
-		}
-		if (iVertexNeighbour != iVertexStayed)
-		{
-			if (edgeUpdated->v0 == iVertexReduced &&
-					edgeUpdated->v1 == iVertexNeighbour)
-			{
-				edgeUpdated->v0 = iVertexStayed;
-			}
-			else if (edgeUpdated->v0 == iVertexNeighbour &&
-					edgeUpdated->v1 == iVertexReduced)
-			{
-				edgeUpdated->v1 = iVertexStayed;
-			}
-			else
-			{
-				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
-						iVertexReduced, iVertexNeighbour);
-				DEBUG_PRINT("   Found edge: [%d, %d]",
-						edgeUpdated->v0,
-						edgeUpdated->v1);
-				DEBUG_PRINT("Previous edge: [%d, %d]",
-						edgeUpdated->v0,
-						edgeUpdated->v1);
-				DEBUG_PRINT("    Next edge: [%d, %d]",
-						edgeUpdated->v0,
-						edgeUpdated->v1);
-
-				DEBUG_PRINT("Printing edge data:");
-				EdgeSetIterator edgePrinted = edgeData->edges.begin();
-				for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
-				{
-					DEBUG_PRINT("Edge #%d: [%d, %d]", iEdge,
-							edgePrinted->v0, edgePrinted->v1);
-					++edgePrinted;
-				}
-				DEBUG_END;
-				return false;
-			}
-
-			/* If succeeded to find the edge, add edge with proper values and
-			 * erase the old one. */
-			edgeData->edges.insert(Edge(*edgeUpdated));
-			edgeData->edges.erase(edgeUpdated);
-		}
-		else
-		{
-			DEBUG_PRINT("\tThis edge must be deleted at all.");
-			edgeData->edges.erase(edgeUpdated);
-			--edgeData->numEdges;
-		}
-	}
-
-#ifndef NDEBUG
-	/* Verify that the reduced edge has been actually removed from
-	 * edge set. */
-	EdgeSetIterator edgeRemoved = edgeData->findEdge(iVertexReduced,
-								iVertexStayed);
-	if (edgeRemoved != edgeData->edges.end())
-	{
-		ERROR_PRINT("The edge [%d, %d] has not been removed from the "
-				"set!");
-		ASSERT(0);
 		DEBUG_END;
 		return false;
 	}
-#endif
+
+
 
 	/* Stage 4. Rebuild data structure "VertexInfo" for all vertices
 	 * that lay in facets which contained the "reduced" vertex
@@ -350,8 +277,8 @@ bool EdgeReducer::updateFacets()
 		return false;
 	}
 
-	return true;
 	DEBUG_END;
+	return true;
 }
 
 bool EdgeReducer::rePreprocessFacets()
@@ -412,5 +339,94 @@ bool EdgeReducer::rePreprocessFacets()
 	DEBUG_PRINT("-------------- end of dumping facets");
 #endif /* NDEBUG */
 
+	return true;
 	DEBUG_END;
+}
+
+bool EdgeReducer::updateEdges()
+{
+	/* Stage 3. Update data structures "Edge" for those facets that contain
+	 * "removed" vertex. */
+	DEBUG_PRINT("Stage 3. Updating structures \"Edge\".");
+	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	{
+		int iVertexNeighbour =
+				vertexInfoReduced->indFacets[vertexInfoReduced->numFacets +
+				                             iFacet + 1];
+		DEBUG_PRINT("\tUpdating edge [%d, %d]", iVertexReduced,
+				iVertexNeighbour);
+		EdgeSetIterator edgeUpdated = edgeData->findEdge(iVertexReduced,
+							iVertexNeighbour);
+		if (edgeUpdated == edgeData->edges.end())
+		{
+			continue;
+		}
+		if (iVertexNeighbour != iVertexStayed)
+		{
+			if (edgeUpdated->v0 == iVertexReduced &&
+					edgeUpdated->v1 == iVertexNeighbour)
+			{
+				edgeUpdated->v0 = iVertexStayed;
+			}
+			else if (edgeUpdated->v0 == iVertexNeighbour &&
+					edgeUpdated->v1 == iVertexReduced)
+			{
+				edgeUpdated->v1 = iVertexStayed;
+			}
+			else
+			{
+				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
+						iVertexReduced, iVertexNeighbour);
+				DEBUG_PRINT("   Found edge: [%d, %d]",
+						edgeUpdated->v0,
+						edgeUpdated->v1);
+				DEBUG_PRINT("Previous edge: [%d, %d]",
+						edgeUpdated->v0,
+						edgeUpdated->v1);
+				DEBUG_PRINT("    Next edge: [%d, %d]",
+						edgeUpdated->v0,
+						edgeUpdated->v1);
+
+				DEBUG_PRINT("Printing edge data:");
+				EdgeSetIterator edgePrinted = edgeData->edges.begin();
+				for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
+				{
+					DEBUG_PRINT("Edge #%d: [%d, %d]", iEdge,
+							edgePrinted->v0, edgePrinted->v1);
+					++edgePrinted;
+				}
+				DEBUG_END;
+				return false;
+			}
+
+			/* If succeeded to find the edge, add edge with proper values and
+			 * erase the old one. */
+			edgeData->edges.insert(Edge(*edgeUpdated));
+			edgeData->edges.erase(edgeUpdated);
+		}
+		else
+		{
+			DEBUG_PRINT("\tThis edge must be deleted at all.");
+			edgeData->edges.erase(edgeUpdated);
+			--edgeData->numEdges;
+		}
+	}
+
+#ifndef NDEBUG
+	/* Verify that the reduced edge has been actually removed from
+	 * edge set. */
+	EdgeSetIterator edgeRemoved = edgeData->findEdge(iVertexReduced,
+								iVertexStayed);
+	if (edgeRemoved != edgeData->edges.end())
+	{
+		ERROR_PRINT("The edge [%d, %d] has not been removed from the "
+				"set!");
+		ASSERT(0);
+		DEBUG_END;
+		return false;
+	}
+#endif
+
+	DEBUG_END;
+	return true;
 }

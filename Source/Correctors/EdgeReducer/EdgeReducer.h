@@ -22,6 +22,7 @@ private:
 
 	bool updateFacets();
 	bool rePreprocessFacets();
+	bool updateEdges();
 
 public:
 	EdgeReducer();
