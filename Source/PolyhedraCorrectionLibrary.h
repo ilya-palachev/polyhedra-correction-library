@@ -79,6 +79,8 @@ class PointShifter;
 class PointShifterWeighted;
 class PointShifterLinear;
 
+class EdgeReducer;
+
 class Verifier;
 
 class PAnalyzer;
@@ -107,11 +109,10 @@ typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
 
-#include "Polyhedron/Verifier/Verifier.h"
-
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
 #include "DataConstructors/ShadeContourConstructor/ShadeContourConstructor.h"
+
 
 #include "Correctors/PCorrector/PCorrector.h"
 #include "Correctors/Intersector/Intersector.h"
@@ -126,6 +127,9 @@ typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 #include "Correctors/PointShifter/PointShifter.h"
 #include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
 #include "Correctors/PointShifterLinear/PointShifterLinear.h"
+
+#include "Correctors/EdgeReducer/EdgeReducer.h"
+#include "Polyhedron/Verifier/Verifier.h"
 
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
