@@ -65,28 +65,11 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
 		return false;
 	}
 
-
-
-	/* Stage 4. Rebuild data structure "VertexInfo" for all vertices
-	 * that lay in facets which contained the "reduced" vertex
-	 * before the reduction happened. */
-	DEBUG_PRINT("Stage 4. Updating structures \"VertexInfo\".");
-	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	/* Stage 4. */
+	if (!updateVertexInfos())
 	{
-		int iFacetCurr = vertexInfoReduced->indFacets[iFacet];
-		Facet* facetCurr = &polyhedron->facets[iFacetCurr];
-		for (int iVertex = 0; iVertex < facetCurr->numVertices; ++iVertex)
-		{
-			int iVertexCurrent = facetCurr->indVertices[iVertex];
-			DEBUG_PRINT("\tUpdating vertexInfo #%d", iVertexCurrent);
-			DEBUG_PRINT("\tBefore:");
-			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
-
-			polyhedron->vertexInfos[iVertexCurrent].preprocess();
-
-			DEBUG_PRINT("\tAfter:");
-			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
-		}
+		DEBUG_END;
+		return false;
 	}
 
 	DEBUG_END;
@@ -281,13 +264,13 @@ bool EdgeReducer::updateFacets()
 	return true;
 }
 
+
+/* Stage 2. We need to re-preprocess updated facets and their neighbors, since the
+ * positions of vertices change because of the removement of the reduced
+ * vertex. */
 bool EdgeReducer::rePreprocessFacets()
 {
 	DEBUG_START;
-
-	/* Stage 2. We need to re-preprocess updated facets and their neighbors, since the
-	 * positions of vertices change because of the removement of the reduced
-	 * vertex. */
 
 	DEBUG_PRINT("Stage 2. Re-preprocess all neighbors of updated facets");
 
@@ -343,10 +326,12 @@ bool EdgeReducer::rePreprocessFacets()
 	DEBUG_END;
 }
 
+
+/* Stage 3. Update data structures "Edge" for those facets that contain
+ * "removed" vertex. */
 bool EdgeReducer::updateEdges()
 {
-	/* Stage 3. Update data structures "Edge" for those facets that contain
-	 * "removed" vertex. */
+
 	DEBUG_PRINT("Stage 3. Updating structures \"Edge\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
@@ -426,6 +411,38 @@ bool EdgeReducer::updateEdges()
 		return false;
 	}
 #endif
+
+	DEBUG_END;
+	return true;
+}
+
+
+/* Stage 4. Rebuild data structure "VertexInfo" for all vertices
+ * that lay in facets which contained the "reduced" vertex
+ * before the reduction happened. */
+bool EdgeReducer::updateVertexInfos()
+{
+	DEBUG_START;
+
+
+	DEBUG_PRINT("Stage 4. Updating structures \"VertexInfo\".");
+	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
+	{
+		int iFacetCurr = vertexInfoReduced->indFacets[iFacet];
+		Facet* facetCurr = &polyhedron->facets[iFacetCurr];
+		for (int iVertex = 0; iVertex < facetCurr->numVertices; ++iVertex)
+		{
+			int iVertexCurrent = facetCurr->indVertices[iVertex];
+			DEBUG_PRINT("\tUpdating vertexInfo #%d", iVertexCurrent);
+			DEBUG_PRINT("\tBefore:");
+			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
+
+			polyhedron->vertexInfos[iVertexCurrent].preprocess();
+
+			DEBUG_PRINT("\tAfter:");
+			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
+		}
+	}
 
 	DEBUG_END;
 	return true;

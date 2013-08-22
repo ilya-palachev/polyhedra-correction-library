@@ -23,6 +23,7 @@ private:
 	bool updateFacets();
 	bool rePreprocessFacets();
 	bool updateEdges();
+	bool updateVertexInfos();
 
 public:
 	EdgeReducer();
