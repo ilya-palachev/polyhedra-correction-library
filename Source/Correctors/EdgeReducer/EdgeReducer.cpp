@@ -220,6 +220,7 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
  * "removed" vertex. */
 bool EdgeReducer::updateFacets()
 {
+	DEBUG_START;
 	bool ifCase1aHappened = false;
 	bool ifCase1bHappened = false;
 
@@ -397,5 +398,8 @@ bool EdgeReducer::updateFacets()
 		DEBUG_END;
 		return false;
 	}
+
+	return true;
+	DEBUG_END;
 }
 
