@@ -51,61 +51,12 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
 		return false;
 	}
 
-	/* Stage 2. We need to re-preprocess updated facets and their neighbors, since the
-	 * positions of vertices change because of the removement of the reduced
-	 * vertex. */
-
-	DEBUG_PRINT("Stage 2. Re-preprocess all neighbors of updated facets");
-
-	set<int> facetsPreprocessed;
-	/* 1). Add set "facetsUpdated" to set "facetsPreprocessed". */
-	facetsPreprocessed.insert(facetsUpdated.begin(), facetsUpdated.end());
-
-	/* 2). Add neighbors of facets inside set "facetsUpdated" to set
-	 * "facetsPreprocessed". */
-	for (set<int>::iterator itFacetUpdated = facetsUpdated.begin();
-			itFacetUpdated != facetsUpdated.end(); ++itFacetUpdated)
+	/* Stage 2. */
+	if (!rePreprocessFacets())
 	{
-		Facet* facetUpdated = &polyhedron->facets[*itFacetUpdated];
-		for (int i = 0; i < facetUpdated->numVertices; ++i)
-		{
-			facetsPreprocessed.insert(
-					facetUpdated->indVertices[facetUpdated->numVertices
-					                          + 1 + i]);
-		}
+		DEBUG_END;
+		return false;
 	}
-
-	/* 3). Re-process all facets collected to the set "facetsPreprocessed". */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
-			itFacet != facetsPreprocessed.end(); ++itFacet)
-	{
-		polyhedron->facets[*itFacet].preprocess();
-	}
-
-
-#ifndef NDEBUG
-	DEBUG_PRINT("-------------- After stage 1 we have the following");
-	DEBUG_PRINT("               configuration of facets:");
-
-	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
-
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
-			itFacet != facetsPreprocessed.end(); ++itFacet)
-	{
-		Facet* facetCurr = &polyhedron->facets[*itFacet];
-		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
-		facetCurr->my_fprint_all(stderr);
-
-		graphDumper->collect(facetCurr);
-	}
-	graphDumper->dump("poly-data-out/facets_dump.gexf");
-
-	facetsPreprocessed.clear();
-
-	DEBUG_PRINT("-------------- end of dumping facets");
-#endif /* NDEBUG */
-
-
 
 	/* Stage 3. Update data structures "Edge" for those facets that contain
 	 * "removed" vertex. */
@@ -403,3 +354,63 @@ bool EdgeReducer::updateFacets()
 	DEBUG_END;
 }
 
+bool EdgeReducer::rePreprocessFacets()
+{
+	DEBUG_START;
+
+	/* Stage 2. We need to re-preprocess updated facets and their neighbors, since the
+	 * positions of vertices change because of the removement of the reduced
+	 * vertex. */
+
+	DEBUG_PRINT("Stage 2. Re-preprocess all neighbors of updated facets");
+
+	set<int> facetsPreprocessed;
+	/* 1). Add set "facetsUpdated" to set "facetsPreprocessed". */
+	facetsPreprocessed.insert(facetsUpdated.begin(), facetsUpdated.end());
+
+	/* 2). Add neighbors of facets inside set "facetsUpdated" to set
+	 * "facetsPreprocessed". */
+	for (set<int>::iterator itFacetUpdated = facetsUpdated.begin();
+			itFacetUpdated != facetsUpdated.end(); ++itFacetUpdated)
+	{
+		Facet* facetUpdated = &polyhedron->facets[*itFacetUpdated];
+		for (int i = 0; i < facetUpdated->numVertices; ++i)
+		{
+			facetsPreprocessed.insert(
+					facetUpdated->indVertices[facetUpdated->numVertices
+					                          + 1 + i]);
+		}
+	}
+
+	/* 3). Re-process all facets collected to the set "facetsPreprocessed". */
+	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+			itFacet != facetsPreprocessed.end(); ++itFacet)
+	{
+		polyhedron->facets[*itFacet].preprocess();
+	}
+
+
+#ifndef NDEBUG
+	DEBUG_PRINT("-------------- After stage 1 we have the following");
+	DEBUG_PRINT("               configuration of facets:");
+
+	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
+
+	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+			itFacet != facetsPreprocessed.end(); ++itFacet)
+	{
+		Facet* facetCurr = &polyhedron->facets[*itFacet];
+		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
+		facetCurr->my_fprint_all(stderr);
+
+		graphDumper->collect(facetCurr);
+	}
+	graphDumper->dump("poly-data-out/facets_dump.gexf");
+
+	facetsPreprocessed.clear();
+
+	DEBUG_PRINT("-------------- end of dumping facets");
+#endif /* NDEBUG */
+
+	DEBUG_END;
+}

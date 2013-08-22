@@ -21,6 +21,7 @@ private:
 	set<int> facetsUpdated;
 
 	bool updateFacets();
+	bool rePreprocessFacets();
 
 public:
 	EdgeReducer();
