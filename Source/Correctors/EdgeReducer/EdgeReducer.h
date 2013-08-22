@@ -14,6 +14,14 @@ private:
 	EdgeDataPtr edgeData;
 	EdgeSetIterator edge;
 
+	int iVertexReduced;
+	int iVertexStayed;
+	VertexInfo* vertexInfoReduced;
+	VertexInfo* vertexInfoStayed;
+	set<int> facetsUpdated;
+
+	bool updateFacets();
+
 public:
 	EdgeReducer();
 	EdgeReducer(Polyhedron* p);
