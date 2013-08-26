@@ -103,11 +103,19 @@ Facet::~Facet()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Deleting facet[%d]", id);
+	clear();
+	DEBUG_END;
+}
+
+void Facet::clear()
+{
+	DEBUG_START;
 	if (indVertices != NULL)
 	{
 		delete[] indVertices;
 		indVertices = NULL;
 	}
+	numVertices = 0;
 	DEBUG_END;
 }
 

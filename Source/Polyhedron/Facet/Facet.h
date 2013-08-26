@@ -26,6 +26,8 @@ public:
 			Polyhedron* poly_orig);
 	Facet& operator =(const Facet& facet1);
 	~Facet();
+	void clear();
+
 	bool test_initialization();
 
 	int get_id();
