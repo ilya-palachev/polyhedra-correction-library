@@ -313,6 +313,9 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] =
 			iPosition0;
 
+	/* Clear current facet. */
+	facet->clear();
+
 	DEBUG_END;
 }
 
@@ -562,6 +565,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 
 	ASSERT(facet0->indVertices[iPosition0] == iVertex);
 	facet0->remove(iPosition0);
+
 	ASSERT(facet1->indVertices[iPosition1] == iVertex);
 	facet1->remove(iPosition1);
 
