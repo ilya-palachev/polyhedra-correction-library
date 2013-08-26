@@ -531,6 +531,7 @@ bool EdgeReducer::updateVertexInfos()
 void EdgeReducer::cutDegeneratedVertex(int iVertex)
 {
 	DEBUG_START;
+	DEBUG_PRINT("Removing vetrexInfo #%d", iVertex);
 	VertexInfo* vertexInfo = &polyhedron->vertexInfos[iVertex];
 
 	/* Assume that the vertex is incident to exactly 2 facets. */
@@ -539,15 +540,29 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	int iFacet0 = vertexInfo->indFacets[0];
 	int iFacet1 = vertexInfo->indFacets[1];
 	int iVertex0 = vertexInfo->indFacets[3];
-	int iVetrex1 = vertexInfo->indFacets[4];
+	int iVertex1 = vertexInfo->indFacets[4];
 	int iPosition0 = vertexInfo->indFacets[5];
 	int iPosition1 = vertexInfo->indFacets[6];
 
 	Facet* facet0 = &polyhedron->facets[iFacet0];
 	Facet* facet1 = &polyhedron->facets[iFacet1];
 
+	facet0->my_fprint_all(stderr);
+	facet1->my_fprint_all(stderr);
+
 	/* 1). Remove cut vertex out from both facets. */
+	DEBUG_PRINT("iPosition0 = %d", iPosition0);
+	DEBUG_PRINT("iVertex0 = %d", iVertex0);
+	DEBUG_PRINT("facet0->indVertices[%d] = %d", iPosition0,
+			facet0->indVertices[iPosition0]);
+	DEBUG_PRINT("iPosition1 = %d", iPosition1);
+	DEBUG_PRINT("iVertex1 = %d", iVertex1);
+	DEBUG_PRINT("facet1->indVertices[%d] = %d", iPosition1,
+			facet1->indVertices[iPosition1]);
+
+	ASSERT(facet0->indVertices[iPosition0] == iVertex);
 	facet0->remove(iPosition0);
+	ASSERT(facet1->indVertices[iPosition1] == iVertex);
 	facet1->remove(iPosition1);
 
 	/* 2). Add all the neighbors of facets to the list. */
