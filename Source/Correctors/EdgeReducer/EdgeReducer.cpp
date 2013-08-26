@@ -507,11 +507,16 @@ bool EdgeReducer::updateVertexInfos()
 			}
 #endif /* NDEBUG */
 
+			/* Sometimes, when the facet has been degenerated, the vertex
+			 * incident to it can degenerate, too. In this case we must remove
+			 * it from all incident facets.
+			 *
+			 * In old terminology it has been called "hanging vertices". */
 			if (polyhedron->vertexInfos[iVertexCurrent].numFacets < 3)
 			{
-				ERROR_PRINT("Too small number of incident facets was found for"
-						"vertex #%d", iVertexCurrent);
-				ASSERT(0);
+				DEBUG_PRINT("Too small number of incident facets was found for"
+						" vertex #%d => it will be reduced.", iVertexCurrent);
+				cutDegeneratedVertex(iVertexCurrent);
 				DEBUG_END;
 				return false;
 			}
@@ -520,4 +525,52 @@ bool EdgeReducer::updateVertexInfos()
 
 	DEBUG_END;
 	return true;
+}
+
+/* The routine for cutting degenerated vertices. */
+void EdgeReducer::cutDegeneratedVertex(int iVertex)
+{
+	DEBUG_START;
+	VertexInfo* vertexInfo = &polyhedron->vertexInfos[iVertex];
+
+	/* Assume that the vertex is incident to exactly 2 facets. */
+	ASSERT(vetrexInfo->numFacets == 2);
+
+	int iFacet0 = vertexInfo->indFacets[0];
+	int iFacet1 = vertexInfo->indFacets[1];
+	int iVertex0 = vertexInfo->indFacets[3];
+	int iVetrex1 = vertexInfo->indFacets[4];
+	int iPosition0 = vertexInfo->indFacets[5];
+	int iPosition1 = vertexInfo->indFacets[6];
+
+	Facet* facet0 = &polyhedron->facets[iFacet0];
+	Facet* facet1 = &polyhedron->facets[iFacet1];
+
+	/* 1). Remove cut vertex out from both facets. */
+	facet0->remove(iPosition0);
+	facet1->remove(iPosition1);
+
+	/* 2). Add all the neighbors of facets to the list. */
+	set<int> facetsPreprocessed;
+	for (int i = 0; i < facet0->numVertices; ++i)
+	{
+		facetsPreprocessed.insert(
+				facet0->indVertices[facet0->numVertices
+				                    + 1 + i]);
+	}
+	for (int i = 0; i < facet1->numVertices; ++i)
+	{
+		facetsPreprocessed.insert(
+				facet0->indVertices[facet1->numVertices
+				                    + 1 + i]);
+	}
+
+	/* 3). Re-preprocess all the facets in the list. */
+	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+			itFacet != facetsPreprocessed.end(); ++itFacet)
+	{
+		polyhedron->facets[*itFacet].preprocess();
+	}
+
+	DEBUG_END;
 }

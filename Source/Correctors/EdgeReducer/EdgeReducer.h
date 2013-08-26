@@ -26,6 +26,7 @@ private:
 	bool rePreprocessFacets();
 	bool updateEdges();
 	bool updateVertexInfos();
+	void cutDegeneratedVertex(int iVertex);
 
 public:
 	EdgeReducer();
