@@ -534,7 +534,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	VertexInfo* vertexInfo = &polyhedron->vertexInfos[iVertex];
 
 	/* Assume that the vertex is incident to exactly 2 facets. */
-	ASSERT(vetrexInfo->numFacets == 2);
+	ASSERT(vertexInfo->numFacets == 2);
 
 	int iFacet0 = vertexInfo->indFacets[0];
 	int iFacet1 = vertexInfo->indFacets[1];
@@ -552,6 +552,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 
 	/* 2). Add all the neighbors of facets to the list. */
 	set<int> facetsPreprocessed;
+	facetsPreprocessed.insert(iFacet0);
+	facetsPreprocessed.insert(iFacet1);
 	for (int i = 0; i < facet0->numVertices; ++i)
 	{
 		facetsPreprocessed.insert(
@@ -569,6 +571,9 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
+		DEBUG_PRINT("Re-preprocessing facet #%d", *itFacet);
+		polyhedron->facets[*itFacet].my_fprint_all(stderr);
+
 		polyhedron->facets[*itFacet].preprocess();
 	}
 
