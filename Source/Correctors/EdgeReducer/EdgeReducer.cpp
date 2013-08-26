@@ -308,7 +308,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	/* Transmit the information about "facet0" from "facet" to "facet1". */
 	int iPositionChanged1 = (facet1->numVertices + iPosition1 - 1)
-			* facet1->numVertices;
+			% facet1->numVertices;
 	facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1] = iFacet1;
 	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] =
 			iPosition0;
