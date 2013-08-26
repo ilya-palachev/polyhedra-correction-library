@@ -80,6 +80,17 @@ void EdgeReducer::init()
 	vertexInfoStayed  = &polyhedron->vertexInfos[iVertexStayed];
 
 	vertexInfoReduced->my_fprint_all(stderr);
+
+#ifndef NDEBUG
+	/* [Added for debugging purposes, to detect an error of memory write.]
+	 * Check that all facets have proper ids. */
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		DEBUG_PRINT("polyhedron->facets[%d].id == %d", iFacet,
+				polyhedron->facets[iFacet].id);
+		ASSERT(polyhedron->facets[iFacet].id == iFacet);
+	}
+#endif /* NDEBUG */
 }
 
 /* Stage 1. Update data structures "Facet" for those facets that contain
@@ -244,6 +255,17 @@ bool EdgeReducer::updateFacets()
 		DEBUG_PRINT("\t after:");
 		facetCurr->my_fprint_all(stderr);
 
+#ifndef NDEBUG
+		/* [Added for debugging purposes, to detect an error of memory write.]
+		 * Check that all facets have proper ids. */
+		for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+		{
+			DEBUG_PRINT("polyhedron->facets[%d].id == %d", iFacet,
+					polyhedron->facets[iFacet].id);
+			ASSERT(polyhedron->facets[iFacet].id == iFacet);
+		}
+#endif /* NDEBUG */
+
 		/* If after the updating the number of vertices incident to current
 		 * facet is less than 3, we reduce the degenerated facet by
 		 * transmitting the information about neighbors contained in this
@@ -316,6 +338,17 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	/* Clear current facet. */
 	facet->clear();
 
+#ifndef NDEBUG
+	/* [Added for debugging purposes, to detect an error of memory write.]
+	 * Check that all facets have proper ids. */
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		DEBUG_PRINT("polyhedron->facets[%d].id == %d", iFacet,
+				polyhedron->facets[iFacet].id);
+		ASSERT(polyhedron->facets[iFacet].id == iFacet);
+	}
+#endif /* NDEBUG */
+
 	DEBUG_END;
 }
 
@@ -380,6 +413,17 @@ bool EdgeReducer::rePreprocessFacets()
 	facetsPreprocessed.clear();
 
 	DEBUG_PRINT("-------------- end of dumping facets");
+#endif /* NDEBUG */
+
+#ifndef NDEBUG
+	/* [Added for debugging purposes, to detect an error of memory write.]
+	 * Check that all facets have proper ids. */
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		DEBUG_PRINT("polyhedron->facets[%d].id == %d", iFacet,
+				polyhedron->facets[iFacet].id);
+		ASSERT(polyhedron->facets[iFacet].id == iFacet);
+	}
 #endif /* NDEBUG */
 
 	return true;
@@ -525,9 +569,18 @@ bool EdgeReducer::updateVertexInfos()
 				DEBUG_PRINT("Too small number of incident facets was found for"
 						" vertex #%d => it will be reduced.", iVertexCurrent);
 				cutDegeneratedVertex(iVertexCurrent);
-				DEBUG_END;
-				return false;
 			}
+
+#ifndef NDEBUG
+			/* [Added for debugging purposes, to detect an error of memory write.]
+			 * Check that all facets have proper ids. */
+			for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+			{
+				DEBUG_PRINT("polyhedron->facets[%d].id == %d", iFacet,
+						polyhedron->facets[iFacet].id);
+				ASSERT(polyhedron->facets[iFacet].id == iFacet);
+			}
+#endif /* NDEBUG */
 		}
 	}
 
