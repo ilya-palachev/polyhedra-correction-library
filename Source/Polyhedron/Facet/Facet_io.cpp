@@ -36,6 +36,13 @@ void Facet::my_fprint_all(FILE* file)
 		return;
 	}
 
+	if (numVertices == 0)
+	{
+		REGULAR_PRINT(file, "Facet is empty.\n");
+		DEBUG_END;
+		return;
+	}
+
 	REGULAR_PRINT(file, "index :       ");
 	for (i = 0; i < numVertices; ++i)
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
