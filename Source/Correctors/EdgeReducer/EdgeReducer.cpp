@@ -446,6 +446,20 @@ bool EdgeReducer::updateVertexInfos()
 			DEBUG_PRINT("\tAfter:");
 			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
 
+#ifndef NDEBUG
+			for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+			{
+				int iPositionFound =
+						polyhedron->facets[iFacet].find_vertex(iVertexCurrent);
+				if (iPositionFound != -1)
+				{
+					DEBUG_PRINT("Vertex #%d has been found in facet #%d at "
+							"position %d", iVertexCurrent, iFacet,
+							iPositionFound);
+				}
+			}
+#endif /* NDEBUG */
+
 			if (polyhedron->vertexInfos[iVertexCurrent].numFacets < 3)
 			{
 				ERROR_PRINT("Too small number of incident facets was found for"
