@@ -351,6 +351,11 @@ bool EdgeReducer::rePreprocessFacets()
 	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
+		DEBUG_PRINT("*itFacet = %d", *itFacet);
+		DEBUG_PRINT("polyhedron->facets[%d].id = %d", *itFacet,
+				polyhedron->facets[*itFacet].id);
+		ASSERT(polyhedron->facets[*itFacet].id == *itFacet);
+
 		polyhedron->facets[*itFacet].preprocess();
 	}
 
@@ -591,6 +596,12 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("Re-preprocessing facet #%d", *itFacet);
+
+		DEBUG_PRINT("*itFacet = %d", *itFacet);
+		DEBUG_PRINT("polyhedron->facets[%d].id = %d", *itFacet,
+				polyhedron->facets[*itFacet].id);
+		ASSERT(polyhedron->facets[*itFacet].id == *itFacet);
+
 		polyhedron->facets[*itFacet].my_fprint_all(stderr);
 
 		polyhedron->facets[*itFacet].preprocess();
