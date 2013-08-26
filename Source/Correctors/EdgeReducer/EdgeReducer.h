@@ -22,6 +22,7 @@ private:
 
 	void init();
 	bool updateFacets();
+	void cutDegeneratedFacet(int iFacet);
 	bool rePreprocessFacets();
 	bool updateEdges();
 	bool updateVertexInfos();

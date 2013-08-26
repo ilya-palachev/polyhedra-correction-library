@@ -243,6 +243,16 @@ bool EdgeReducer::updateFacets()
 
 		DEBUG_PRINT("\t after:");
 		facetCurr->my_fprint_all(stderr);
+
+		/* If after the updating the number of vertices incident to current
+		 * facet is less than 3, we reduce the degenerated facet by
+		 * transmitting the information about neighbors contained in this
+		 * facet. */
+		if (facetCurr->numVertices < 3)
+		{
+			DEBUG_PRINT("Facet #%d is degenerated => will be reduced. ");
+			cutDegeneratedFacet(iFacetCurrent);
+		}
 	}
 
 	/* For debugging purposes we have added the checking of the fact that
@@ -267,6 +277,43 @@ bool EdgeReducer::updateFacets()
 
 	DEBUG_END;
 	return true;
+}
+
+/* The routine for cutting the degenerated facet. */
+void EdgeReducer::cutDegeneratedFacet(int iFacet)
+{
+	DEBUG_START;
+	Facet* facet = &polyhedron->facets[iFacet];
+
+	/* Assume that we remove vertices one-by-one. This will provide this
+	 * statement. */
+	ASSERT(facet->numVertices == 2);
+
+	int iVertex0 = facet->indVertices[0];
+	int iVertex1 = facet->indVertices[1];
+	int iFacet0 = facet->indVertices[3];
+	int iFacet1 = facet->indVertices[4];
+	int iPosition0 = facet->indVertices[5];
+	int iPosition1 = facet->indVertices[6];
+
+	Facet* facet0 = &polyhedron->facets[iFacet0];
+	Facet* facet1 = &polyhedron->facets[iFacet1];
+
+	/* Transmit the information about "facet1" from "facet" to "facet0". */
+	int iPositionChanged0 = (facet0->numVertices + iPosition0 - 1)
+			% facet0->numVertices;
+	facet0->indVertices[facet0->numVertices + 1 + iPositionChanged0] = iFacet1;
+	facet0->indVertices[2 * facet0->numVertices + 1 + iPositionChanged0] =
+			iPosition1;
+
+	/* Transmit the information about "facet0" from "facet" to "facet1". */
+	int iPositionChanged1 = (facet1->numVertices + iPosition1 - 1)
+			* facet1->numVertices;
+	facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1] = iFacet1;
+	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] =
+			iPosition0;
+
+	DEBUG_END;
 }
 
 
