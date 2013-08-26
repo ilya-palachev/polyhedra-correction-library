@@ -640,7 +640,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	for (int i = 0; i < facet1->numVertices; ++i)
 	{
 		facetsPreprocessed.insert(
-				facet0->indVertices[facet1->numVertices
+				facet1->indVertices[facet1->numVertices
 				                    + 1 + i]);
 	}
 
