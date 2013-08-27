@@ -486,6 +486,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 
+	edgesWS = new EdgesWorkingSets;
 	edgesWS->edgesErased = new set<pair<int, int>>;
 	edgesWS->edgesAdded  = new set<pair<int, int>>;
 	edgesWS->edgesEdited = new set<pair<int, int>>;
