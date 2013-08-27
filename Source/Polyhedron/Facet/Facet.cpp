@@ -377,6 +377,9 @@ void Facet::remove(int pos)
 		indVertices[i] = indVertices[i + 3];
 	}
 	--numVertices;
+
+	indVertices[numVertices] = indVertices[0];
+
 	this->my_fprint_all(stdout);
 	test_pair_neighbours();
 	DEBUG_PRINT("}}}");
