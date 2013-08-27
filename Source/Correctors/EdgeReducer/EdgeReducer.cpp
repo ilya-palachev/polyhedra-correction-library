@@ -598,5 +598,36 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 		polyhedron->facets[*itFacet].preprocess();
 	}
 
+	/* 4). Remove 2 corresponding edges from the edge set and add one proper
+	 * edge. */
+	EdgeSetIterator edge0 = edgeData->findEdge(iVertex, iVertex0);
+	ASSERT(edge0 != edgeData->edges.end());
+
+	EdgeSetIterator edge1 = edgeData->findEdge(iVertex, iVertex1);
+	ASSERT(edge1 != edgeData->edges.end());
+
+	pair<EdgeSetIterator, bool> returnValue =
+			edgeData->addEdge(iVertex0, iVertex1, iFacet0, iFacet1);
+	EdgeSetIterator edge = returnValue.first;
+	ASSERT(edge != edgeData->edges.end());
+
+	/* Information about associations is accumulated from removed edges to new
+	 * one.
+	 *
+	 * FIXME: In case when edge "edge" already exists in the set, we need to
+	 * merge the lists of associations, because otherwise we will get some
+	 * associations more than one time.
+	 * */
+	edge->assocList.insert(edge->assocList.end(), edge0->assocList.begin(),
+			edge0->assocList.end());
+	edge->assocList.insert(edge->assocList.end(), edge1->assocList.begin(),
+			edge1->assocList.end());
+	ASSERT(edge->assocList.size() == edge0->assocList.size() +
+			edge1->assocList.size());
+
+	edgeData->edges.erase(edge0);
+	edgeData->edges.erase(edge1);
+	--edgeData->numEdges;
+
 	DEBUG_END;
 }
