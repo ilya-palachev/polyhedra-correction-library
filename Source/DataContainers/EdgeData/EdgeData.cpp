@@ -59,17 +59,20 @@ bool EdgeData::operator !=(EdgeData& e)
 }
 
 
-void EdgeData::addEdge(int v0, int v1, int f0)
+pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge list", v0, v1);
+	pair<EdgeSetIterator, bool> returnValue;
+
 	if (v0 < 0 || v1 < 0 || f0 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
 				v0, v1, f0);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0));
+		returnValue = pair<EdgeSetIterator, bool> (edges.end(), false);
 		DEBUG_END;
-		return;
+		return returnValue;
 	}
 	if (v0 > v1)
 	{
@@ -124,29 +127,34 @@ void EdgeData::addEdge(int v0, int v1, int f0)
 			DEBUG_PRINT("Edge [%d, %d] already presents in the list,"
 					"facet values are non-empty, skipping...", v0, v1);
 		}
+		returnValue = pair<EdgeSetIterator, bool> (edgeFound, false);
 	}
 	else
 	{
-		edges.insert(Edge(v0, v1, f0, INT_NOT_INITIALIZED));
+		returnValue = edges.insert(Edge(v0, v1, f0, INT_NOT_INITIALIZED));
 	}
 	numEdges = edges.size();
 
 	DEBUG_PRINT("Edge [%d, %d] has been successfully added to the edgeFound list",
 			v0, v1);
 	DEBUG_END;
+	return returnValue;
 }
 
-void EdgeData::addEdge(int v0, int v1, int f0, int f1)
+pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge list", v0, v1);
+	pair<EdgeSetIterator, bool> returnValue;
+
 	DEBUG_PRINT("\tnumEdges = %d", numEdges);
 	if (v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
 				v0, v1, f0, f1);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0));
-		return;
+		returnValue = pair<EdgeSetIterator, bool> (edges.end(), false);
+		return returnValue;
 	}
 
 	if (v0 > v1)
@@ -163,12 +171,13 @@ void EdgeData::addEdge(int v0, int v1, int f0, int f1)
 		f1 = tmp;
 	}
 
-	edges.insert(Edge(v0, v1, f0, f1));
+	returnValue = edges.insert(Edge(v0, v1, f0, f1));
 	DEBUG_PRINT("Edge [%d, %d] has been successfully added to "
 					"the edge list", v0, v1);
 	numEdges = edges.size();
 
 	DEBUG_END;
+	return returnValue;
 }
 
 EdgeSetIterator EdgeData::findEdge(int v0, int v1)
