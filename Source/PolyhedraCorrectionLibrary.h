@@ -13,6 +13,7 @@
 /* Standard Template Library includes: */
 #include <list>
 #include <set>
+#include <queue>
 #include <algorithm>
 #include <memory>
 using namespace std;

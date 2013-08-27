@@ -9,7 +9,8 @@
 
 Verifier::Verifier() :
 		polyhedron(),
-		ifPrint(false)
+		ifPrint(false),
+		edgesWS(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -17,7 +18,8 @@ Verifier::Verifier() :
 
 Verifier::Verifier(Polyhedron* p) :
 		polyhedron(p),
-		ifPrint(true)
+		ifPrint(true),
+		edgesWS(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -25,7 +27,8 @@ Verifier::Verifier(Polyhedron* p) :
 
 Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
 		polyhedron(p),
-		ifPrint(_ifPrint)
+		ifPrint(_ifPrint),
+		edgesWS(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -34,6 +37,21 @@ Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
 Verifier::~Verifier()
 {
 	DEBUG_START;
+	if (edgesWS != NULL)
+	{
+		if (edgesWS->edgesErased != NULL)
+		{
+			delete edgesWS->edgesErased;
+		}
+		if (edgesWS->edgesAdded != NULL)
+		{
+			delete edgesWS->edgesAdded;
+		}
+		if (edgesWS->edgesEdited != NULL)
+		{
+			delete edgesWS->edgesEdited;
+		}
+	}
 	DEBUG_END;
 }
 
@@ -467,21 +485,57 @@ int Verifier::countOuterConsectionsPair(int id0, int id1,
 int Verifier::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
-	int numEdgesDesctructed = 0;
-	EdgeSetIterator edge = edgeData->edges.begin();
-	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
+
+	edgesWS->edgesErased = new set<pair<int, int>>;
+	edgesWS->edgesAdded  = new set<pair<int, int>>;
+	edgesWS->edgesEdited = new set<pair<int, int>>;
+
+	queue<pair<int, int>> edgesQueue;
+	for (EdgeSetIterator edge = edgeData->edges.begin();
+			edge != edgeData->edges.end(); ++edge)
 	{
-		/* FIXME: We cannot explicitly iterate "edge", because it can be erased
-		 * by reduceEdge function. */
-		EdgeSetIterator edgeNext = ++edge;
-		--edge;
+		edgesQueue.push(pair<int, int> (edge->v0, edge->v1));
+	}
+
+	int numEdgesDesctructed = 0;
+
+	while (!edgesQueue.empty())
+	{
+		pair<int, int> vertexPair = edgesQueue.front();
+
+		EdgeSetIterator edge = edgeData->findEdge(vertexPair.first,
+				vertexPair.second);
+
+		if (edge == edgeData->edges.end())
+		{
+			/* That means that the edge has been erased from the set. */
+			continue;
+		}
 
 		if (!checkOneEdge(edge, edgeData))
 		{
 			++numEdgesDesctructed;
 		}
-		edge = edgeNext;
+
+		/* Push working sets of added and edited edges to the queue of checked
+		 * edges. */
+		for (set<pair<int, int>>::iterator itPair =
+				edgesWS->edgesAdded->begin();
+				itPair != edgesWS->edgesAdded->end(); ++itPair)
+		{
+			edgesQueue.push(*itPair);
+		}
+
+		for (set<pair<int, int>>::iterator itPair =
+				edgesWS->edgesEdited->begin();
+				itPair != edgesWS->edgesEdited->end(); ++itPair)
+		{
+			edgesQueue.push(*itPair);
+		}
+
+		edgesQueue.pop();
 	}
+
 	DEBUG_END;
 	return numEdgesDesctructed;
 }
@@ -657,8 +711,8 @@ bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 	EdgeReducer* edgeReducer = new EdgeReducer(polyhedron);
-	bool returnValue = edgeReducer->run(edge, edgeData);
+	bool returnValue = edgeReducer->run(edge, edgeData, edgesWS);
 	delete edgeReducer;
-	return returnValue;
 	DEBUG_END;
+	return returnValue;
 }

@@ -13,6 +13,7 @@ class Verifier
 private:
 	Polyhedron* polyhedron;
 	bool ifPrint;
+	EdgesWorkingSets* edgesWS;
 
 	int countInnerConsections();
 	int countInnerConsectionsFacet(int fid, double* A,

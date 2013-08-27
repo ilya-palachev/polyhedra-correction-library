@@ -27,12 +27,14 @@ EdgeReducer::~EdgeReducer()
 	DEBUG_END;
 }
 
-bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData)
+bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
+		EdgesWorkingSets* _edgesWS)
 {
 	DEBUG_START;
 
 	edge = _edge;
 	edgeData = _edgeData;
+	edgesWS = _edgesWS;
 
 	init();
 
@@ -446,12 +448,16 @@ bool EdgeReducer::updateEdges()
 
 			/* If succeeded to find the edge, add edge with proper values and
 			 * erase the old one. */
+			edgesWS->edgesEdited->insert(pair<int, int> (edgeUpdated->v0,
+					edgeUpdated->v1));
 			edgeData->edges.insert(Edge(*edgeUpdated));
 			edgeData->edges.erase(edgeUpdated);
 		}
 		else
 		{
 			DEBUG_PRINT("\tThis edge must be deleted at all.");
+			edgesWS->edgesErased->insert(pair<int, int> (edgeUpdated->v0,
+					edgeUpdated->v1));
 			edgeData->edges.erase(edgeUpdated);
 			--edgeData->numEdges;
 		}
@@ -608,8 +614,9 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 
 	pair<EdgeSetIterator, bool> returnValue =
 			edgeData->addEdge(iVertex0, iVertex1, iFacet0, iFacet1);
-	EdgeSetIterator edge = returnValue.first;
-	ASSERT(edge != edgeData->edges.end());
+	EdgeSetIterator edgeNew = returnValue.first;
+	ASSERT(edgeNew != edgeData->edges.end());
+	edgesWS->edgesAdded->insert(pair<int, int> (edgeNew->v0, edgeNew->v1));
 
 	/* Information about associations is accumulated from removed edges to new
 	 * one.
@@ -618,15 +625,19 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	 * merge the lists of associations, because otherwise we will get some
 	 * associations more than one time.
 	 * */
-	edge->assocList.insert(edge->assocList.end(), edge0->assocList.begin(),
-			edge0->assocList.end());
-	edge->assocList.insert(edge->assocList.end(), edge1->assocList.begin(),
-			edge1->assocList.end());
-	ASSERT(edge->assocList.size() == edge0->assocList.size() +
+	edgeNew->assocList.insert(edgeNew->assocList.end(),
+			edge0->assocList.begin(), edge0->assocList.end());
+	edgeNew->assocList.insert(edgeNew->assocList.end(),
+			edge1->assocList.begin(), edge1->assocList.end());
+	ASSERT(edgeNew->assocList.size() == edge0->assocList.size() +
 			edge1->assocList.size());
 
+	edgesWS->edgesErased->insert(pair<int, int> (edge0->v0, edge0->v1));
 	edgeData->edges.erase(edge0);
+
+	edgesWS->edgesErased->insert(pair<int, int> (edge1->v0, edge1->v1));
 	edgeData->edges.erase(edge1);
+
 	--edgeData->numEdges;
 
 	DEBUG_END;

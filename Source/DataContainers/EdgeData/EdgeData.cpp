@@ -132,6 +132,13 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 	else
 	{
 		returnValue = edges.insert(Edge(v0, v1, f0, INT_NOT_INITIALIZED));
+
+		/* If we have added new edge to the set, set its id to the number of edges
+		 * in the edge data. */
+		if (returnValue.second)
+		{
+			returnValue.first->id = numEdges;
+		}
 	}
 	numEdges = edges.size();
 
@@ -175,6 +182,13 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
 	DEBUG_PRINT("Edge [%d, %d] has been successfully added to "
 					"the edge list", v0, v1);
 	numEdges = edges.size();
+
+	/* If we have added new edge to the set, set its id to the number of edges
+	 * in the edge data. */
+	if (returnValue.second)
+	{
+		returnValue.first->id = numEdges;
+	}
 
 	DEBUG_END;
 	return returnValue;

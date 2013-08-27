@@ -8,6 +8,16 @@
 #ifndef EDGEREDUCER_H_
 #define EDGEREDUCER_H_
 
+typedef set<pair<int, int>>* IntPairPtr;
+
+struct _EdgesWorkingSets
+{
+	IntPairPtr edgesErased;
+	IntPairPtr edgesAdded;
+	IntPairPtr edgesEdited;
+};
+typedef _EdgesWorkingSets EdgesWorkingSets;
+
 class EdgeReducer: public PCorrector
 {
 private:
@@ -19,6 +29,8 @@ private:
 	VertexInfo* vertexInfoReduced;
 	VertexInfo* vertexInfoStayed;
 	set<int> facetsUpdated;
+
+	EdgesWorkingSets* edgesWS;
 
 	void init();
 	bool updateFacets();
@@ -33,7 +45,8 @@ public:
 	EdgeReducer(Polyhedron* p);
 	~EdgeReducer();
 
-	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData);
+	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
+			EdgesWorkingSets* _edgesWS);
 };
 
 #endif /* EDGEREDUCER_H_ */
