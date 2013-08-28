@@ -442,29 +442,21 @@ bool EdgeReducer::updateEdges()
 		}
 		if (iVertexNeighbour != iVertexStayed)
 		{
-			if (edgeUpdated->v0 == iVertexReduced &&
-					edgeUpdated->v1 == iVertexNeighbour)
+			Edge edgeNew(*edgeUpdated);
+			if (edgeNew.v0 == iVertexReduced &&
+					edgeNew.v1 == iVertexNeighbour)
 			{
-				edgeUpdated->v0 = iVertexStayed;
+				edgeNew.v0 = iVertexStayed;
 			}
-			else if (edgeUpdated->v0 == iVertexNeighbour &&
-					edgeUpdated->v1 == iVertexReduced)
+			else if (edgeNew.v0 == iVertexNeighbour &&
+					edgeNew.v1 == iVertexReduced)
 			{
-				edgeUpdated->v1 = iVertexStayed;
+				edgeNew.v1 = iVertexStayed;
 			}
 			else
 			{
 				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
 						iVertexReduced, iVertexNeighbour);
-				DEBUG_PRINT("   Found edge: [%d, %d]",
-						edgeUpdated->v0,
-						edgeUpdated->v1);
-				DEBUG_PRINT("Previous edge: [%d, %d]",
-						edgeUpdated->v0,
-						edgeUpdated->v1);
-				DEBUG_PRINT("    Next edge: [%d, %d]",
-						edgeUpdated->v0,
-						edgeUpdated->v1);
 
 				DEBUG_PRINT("Printing edge data:");
 				EdgeSetIterator edgePrinted = edgeData->edges.begin();
@@ -480,10 +472,17 @@ bool EdgeReducer::updateEdges()
 
 			/* If succeeded to find the edge, add edge with proper values and
 			 * erase the old one. */
-			edgesWS->edgesEdited->insert(pair<int, int> (edgeUpdated->v0,
-					edgeUpdated->v1));
-			edgeData->edges.insert(Edge(*edgeUpdated));
+			edgesWS->edgesEdited->insert(pair<int, int> (edgeNew.v0,
+								edgeNew.v1));
+
+			DEBUG_PRINT("Erasing edge [%d, %d] and inserting edge [%d, %d]",
+					edgeUpdated->v0, edgeUpdated->v1, edgeNew.v0, edgeNew.v1);
 			edgeData->edges.erase(edgeUpdated);
+			edgeData->addEdge(edgeNew);
+
+
+			ASSERT(edgeData->findEdge(edgeNew.v0, edgeNew.v1) !=
+					edgeData->edges.end());
 		}
 		else
 		{
@@ -690,6 +689,7 @@ bool EdgeReducer::verifyEdgeData()
 			{
 				ERROR_PRINT("Failed to find edge [%d, %d] in edge data",
 						v0, v1);
+				facet->my_fprint_all(stderr);
 				ASSERT(0);
 				return false;
 			}
