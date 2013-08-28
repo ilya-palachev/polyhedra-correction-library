@@ -252,7 +252,8 @@ bool EdgeReducer::updateFacets()
 		 * facet. */
 		if (facetCurr->numVertices < 3)
 		{
-			DEBUG_PRINT("Facet #%d is degenerated => will be reduced. ");
+			DEBUG_PRINT("Facet #%d is degenerated => will be reduced. ",
+					iFacetCurrent);
 			cutDegeneratedFacet(iFacetCurrent);
 		}
 	}
@@ -317,6 +318,30 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	/* Clear current facet. */
 	facet->clear();
+
+	/* Update information about incident facets in edge
+	 * [iVertex0, iVertex1]. */
+	EdgeSetIterator edgeUpdated = edgeData->findEdge(iVertex0, iVertex1);
+
+	if (edgeUpdated == edgeData->edges.end())
+	{
+		ERROR_PRINT("Failed to find edge [%d, %d] in edge data.", iVertex0,
+				iVertex1);
+		ASSERT(0);
+		DEBUG_END;
+		return;
+	}
+
+	if (iFacet0 < iFacet1)
+	{
+		edgeUpdated->f0 = iFacet0;
+		edgeUpdated->f1 = iFacet1;
+	}
+	else
+	{
+		edgeUpdated->f0 = iFacet1;
+		edgeUpdated->f1 = iFacet0;
+	}
 
 	DEBUG_END;
 }
