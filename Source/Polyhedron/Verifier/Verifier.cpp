@@ -500,9 +500,15 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 	int numEdgesDesctructed = 0;
 
+	int iIteration = 0;
+
 	while (!edgesQueue.empty())
 	{
+		DEBUG_PRINT("Iteration %d - start. Number of edges is queue = %d",
+				iIteration, edgesQueue.size());
 		pair<int, int> vertexPair = edgesQueue.front();
+		DEBUG_PRINT("Processed edge: [%d, %d]", vertexPair.first,
+				vertexPair.second);
 
 		EdgeSetIterator edge = edgeData->findEdge(vertexPair.first,
 				vertexPair.second);
@@ -510,13 +516,20 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 		if (edge == edgeData->edges.end())
 		{
 			/* That means that the edge has been erased from the set. */
+			DEBUG_PRINT("Edge not found, skipping...");
 			continue;
 		}
 
+		DEBUG_PRINT("Calling checkOneEdge function.");
 		if (!checkOneEdge(edge, edgeData))
 		{
+			DEBUG_PRINT(" - returned false");
 			++numEdgesDesctructed;
 		}
+
+		DEBUG_PRINT("edges added   : %d");
+		DEBUG_PRINT("edges edited  : %d");
+		DEBUG_PRINT("edges removed : %d");
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */
@@ -535,6 +548,8 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 		}
 
 		edgesQueue.pop();
+		DEBUG_PRINT("Iteration %d - end. Number of edges is queue = %d",
+				iIteration, edgesQueue.size());
 	}
 
 	DEBUG_END;
