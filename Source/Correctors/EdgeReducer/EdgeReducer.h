@@ -38,7 +38,7 @@ private:
 	bool rePreprocessFacets();
 	bool updateEdges();
 	bool updateVertexInfos();
-	void cutDegeneratedVertex(int iVertex);
+	void cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue);
 
 	bool verifyEdgeData();
 

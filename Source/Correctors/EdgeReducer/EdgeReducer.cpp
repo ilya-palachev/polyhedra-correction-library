@@ -522,10 +522,26 @@ bool EdgeReducer::updateVertexInfos()
 	DEBUG_START;
 
 	DEBUG_PRINT("Stage 4. Updating structures \"VertexInfo\".");
+
+	/* 1). Create a queue and push indices of all facets incident to reduced vertex
+	 * into it. */
+	queue<int> facetsQueue;
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iFacetCurr = vertexInfoReduced->indFacets[iFacet];
+		facetsQueue.push(iFacetCurr);
+	}
+
+	/* 2). While queue is not empty, process each facet in it.
+	 * New indices can be added in facets by routine "cutDegeneratedVertex"
+	 * in case when less than 3 vertices are left in some facet after removal
+	 * after calling routine "Facet::clear". */
+	while (!facetsQueue.empty())
+	{
+		int iFacetCurr = facetsQueue.front();
+		facetsQueue.pop();
 		Facet* facetCurr = &polyhedron->facets[iFacetCurr];
+
 		for (int iVertex = 0; iVertex < facetCurr->numVertices; ++iVertex)
 		{
 			int iVertexCurrent = facetCurr->indVertices[iVertex];
@@ -546,7 +562,7 @@ bool EdgeReducer::updateVertexInfos()
 				if (iPositionFound != -1)
 				{
 					DEBUG_PRINT("Vertex #%d has been found in facet #%d at "
-							"position %d", iVertexCurrent, iFacet,
+							"position %d", iVertexCurrent, iFacetCurr,
 							iPositionFound);
 				}
 			}
@@ -561,7 +577,7 @@ bool EdgeReducer::updateVertexInfos()
 			{
 				DEBUG_PRINT("Too small number of incident facets was found for"
 						" vertex #%d => it will be reduced.", iVertexCurrent);
-				cutDegeneratedVertex(iVertexCurrent);
+				cutDegeneratedVertex(iVertexCurrent, facetsQueue);
 			}
 		}
 	}
@@ -571,7 +587,7 @@ bool EdgeReducer::updateVertexInfos()
 }
 
 /* The routine for cutting degenerated vertices. */
-void EdgeReducer::cutDegeneratedVertex(int iVertex)
+void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Removing vetrexInfo #%d", iVertex);
@@ -605,9 +621,23 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 
 	ASSERT(facet0->indVertices[iPosition0] == iVertex);
 	facet0->remove(iPosition0);
+	if (facet0->numVertices < 3)
+	{
+		ASSERT(facet0->numVertices == 2);
+		facetsQueue.push(facet0->indVertices[3]);
+		facetsQueue.push(facet0->indVertices[4]);
+		cutDegeneratedFacet(facet0->id);
+	}
 
 	ASSERT(facet1->indVertices[iPosition1] == iVertex);
 	facet1->remove(iPosition1);
+	if (facet1->numVertices < 3)
+	{
+		ASSERT(facet1->numVertices == 2);
+		facetsQueue.push(facet1->indVertices[3]);
+		facetsQueue.push(facet1->indVertices[4]);
+		cutDegeneratedFacet(facet1->id);
+	}
 
 	/* 2). Add all the neighbors of facets to the list. */
 	set<int> facetsPreprocessed;
