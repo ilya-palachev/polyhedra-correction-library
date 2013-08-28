@@ -656,12 +656,14 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	 * merge the lists of associations, because otherwise we will get some
 	 * associations more than one time.
 	 * */
+	int numAssociationsBefore = edgeNew->assocList.size();
+
 	edgeNew->assocList.insert(edgeNew->assocList.end(),
 			edge0->assocList.begin(), edge0->assocList.end());
 	edgeNew->assocList.insert(edgeNew->assocList.end(),
 			edge1->assocList.begin(), edge1->assocList.end());
-	ASSERT(edgeNew->assocList.size() == edge0->assocList.size() +
-			edge1->assocList.size());
+	ASSERT(edgeNew->assocList.size() == numAssociationsBefore +
+			edge0->assocList.size() + edge1->assocList.size());
 
 	edgesWS->edgesErased->insert(pair<int, int> (edge0->v0, edge0->v1));
 	edgeData->edges.erase(edge0);
