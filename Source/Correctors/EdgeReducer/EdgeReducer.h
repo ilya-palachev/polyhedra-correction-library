@@ -40,6 +40,8 @@ private:
 	bool updateVertexInfos();
 	void cutDegeneratedVertex(int iVertex);
 
+	bool verifyEdgeData();
+
 public:
 	EdgeReducer();
 	EdgeReducer(Polyhedron* p);

@@ -66,6 +66,13 @@ bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
 		return false;
 	}
 
+	/* Verification of edge data. */
+	if (!verifyEdgeData())
+	{
+		DEBUG_END;
+		return false;
+	}
+
 	DEBUG_END;
 	return true;
 }
@@ -666,4 +673,28 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex)
 	--edgeData->numEdges;
 
 	DEBUG_END;
+}
+
+bool EdgeReducer::verifyEdgeData()
+{
+	DEBUG_START;
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		Facet* facet = &polyhedron->facets[iFacet];
+		for (int iVertex = 0; iVertex < facet->numVertices; ++iVertex)
+		{
+			int v0 = facet->indVertices[iVertex];
+			int v1 = facet->indVertices[iVertex + 1];
+			EdgeSetIterator edgeFound = edgeData->findEdge(v0, v1);
+			if (edgeFound == edgeData->edges.end())
+			{
+				ERROR_PRINT("Failed to find edge [%d, %d] in edge data",
+						v0, v1);
+				ASSERT(0);
+				return false;
+			}
+		}
+	}
+	DEBUG_END;
+	return true;
 }
