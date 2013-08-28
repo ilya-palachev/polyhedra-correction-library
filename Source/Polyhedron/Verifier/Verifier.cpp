@@ -517,6 +517,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 		{
 			/* That means that the edge has been erased from the set. */
 			DEBUG_PRINT("Edge not found, skipping...");
+			edgesQueue.pop();
 			continue;
 		}
 
