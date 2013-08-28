@@ -547,6 +547,11 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 			edgesQueue.push(*itPair);
 		}
 
+		/* Clear working sets of edges. */
+		edgesWS->edgesAdded->clear();
+		edgesWS->edgesEdited->clear();
+		edgesWS->edgesErased->clear();
+
 		edgesQueue.pop();
 		DEBUG_PRINT("Iteration %d - end. Number of edges is queue = %d",
 				iIteration, edgesQueue.size());
