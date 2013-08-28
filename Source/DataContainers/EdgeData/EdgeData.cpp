@@ -194,6 +194,21 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
 	return returnValue;
 }
 
+pair<EdgeSetIterator, bool> EdgeData::addEdge(Edge& edge)
+{
+	DEBUG_START;
+	pair<EdgeSetIterator, bool> returnValue = addEdge(edge.v0, edge.v1,
+			edge.f0, edge.f1);
+
+	/* Append associations to the edge in set. */
+	EdgeSetIterator edgeInSet = returnValue.first;
+	edgeInSet->assocList.insert(edgeInSet->assocList.end(),
+			edge.assocList.begin(), edge.assocList.end());
+
+	return returnValue;
+	DEBUG_END;
+}
+
 EdgeSetIterator EdgeData::findEdge(int v0, int v1)
 {
 	DEBUG_START;
