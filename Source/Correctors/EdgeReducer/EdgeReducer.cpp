@@ -560,20 +560,19 @@ bool EdgeReducer::updateEdges()
 		}
 	}
 
-#ifndef NDEBUG
-	/* Verify that the reduced edge has been actually removed from
-	 * edge set. */
+	/* Ensure that the reduced edge has been actually removed from
+	 * the edge set. */
 	EdgeSetIterator edgeRemoved = edgeData->findEdge(iVertexReduced,
 								iVertexStayed);
 	if (edgeRemoved != edgeData->edges.end())
 	{
-		ERROR_PRINT("The edge [%d, %d] has not been removed from the "
+		DEBUG_PRINT("The edge [%d, %d] has not been removed from the "
 				"set!");
-		ASSERT(0);
-		DEBUG_END;
-		return false;
+		edgesWS->edgesErased->insert(pair<int, int> (edgeRemoved->v0,
+				edgeRemoved->v1));
+		edgeData->edges.erase(edgeRemoved);
+		--edgeData->numEdges;
 	}
-#endif
 
 	DEBUG_END;
 	return true;
