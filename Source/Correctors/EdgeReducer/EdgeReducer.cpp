@@ -562,7 +562,7 @@ bool EdgeReducer::updateVertexInfos()
 				if (iPositionFound != -1)
 				{
 					DEBUG_PRINT("Vertex #%d has been found in facet #%d at "
-							"position %d", iVertexCurrent, iFacetCurr,
+							"position %d", iVertexCurrent, iFacet,
 							iPositionFound);
 				}
 			}

@@ -33,7 +33,7 @@ void VertexInfo::preprocess()
 		pos_curr = pos_next;
 		fid_curr = fid_next;
 
-		DEBUG_PRINT("\t Facet currently visited be preprocessor: %d",
+		DEBUG_PRINT("\t Facet currently visited by preprocessor: %d",
 				fid_curr);
 
 		DEBUG_PRINT("\t Jumping from facet #%d, position %d (vertex #%d)",
