@@ -14,7 +14,10 @@ int Polyhedron::test_structure()
 	res = 0;
 	for (i = 0; i < numFacets; ++i)
 	{
-		res += facets[i].test_structure();
+		if (!facets[i].verifyIncidenceStructure())
+		{
+			++res;
+		}
 	}
 	DEBUG_END;
 	return res;

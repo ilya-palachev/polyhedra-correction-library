@@ -91,7 +91,7 @@ public:
 	double area();
 
 	// Facet_verification.cpp
-	int test_structure();
+	bool verifyIncidenceStructure();
 	void test_pair_neighbours();
 
 };
