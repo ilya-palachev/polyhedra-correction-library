@@ -310,6 +310,10 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	 * statement. */
 	ASSERT(facet->numVertices == 2);
 
+	/* Workaround: we need to re-prepocess current facet here, since the
+	 * information about inicidence srtucture can be obsoloete at this time. */
+	facet->preprocess();
+
 	int iVertex0 = facet->indVertices[0];
 	int iVertex1 = facet->indVertices[1];
 	int iFacet0 = facet->indVertices[3];
@@ -320,8 +324,25 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	Facet* facet0 = &polyhedron->facets[iFacet0];
 	Facet* facet1 = &polyhedron->facets[iFacet1];
 
-	ASSERT(facet0->indVertices[iPosition0] == iVertex0);
-	ASSERT(facet1->indVertices[iPosition0] == iVertex1);
+	if (facet0->indVertices[iPosition0] != iVertex0)
+	{
+		ERROR_PRINT("facet0->indVertices[%d] = %d != %d", iPosition0,
+				facet0->indVertices[iPosition0], iVertex0);
+		facet0->my_fprint_all(stderr);
+		ASSERT(0);
+		DEBUG_END;
+		return;
+	}
+
+	if (facet1->indVertices[iPosition1] != iVertex1)
+	{
+		ERROR_PRINT("facet1->indVertices[%d] = %d != %d", iPosition1,
+				facet1->indVertices[iPosition1], iVertex1);
+		facet1->my_fprint_all(stderr);
+		ASSERT(0);
+		DEBUG_END;
+		return;
+	}
 
 	/* Transmit the information about "facet1" from "facet" to "facet0". */
 	int iPositionChanged0 = (facet0->numVertices + iPosition0 - 1)
