@@ -293,7 +293,9 @@ bool EdgeReducer::updateFacets()
 void EdgeReducer::cutDegeneratedFacet(int iFacet)
 {
 	DEBUG_START;
+	DEBUG_PRINT("Cutting facet #%d", iFacet);
 	Facet* facet = &polyhedron->facets[iFacet];
+	facet->my_fprint_all(stderr);
 
 	/* Assume that we remove vertices one-by-one. This will provide this
 	 * statement. */
@@ -309,19 +311,47 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	Facet* facet0 = &polyhedron->facets[iFacet0];
 	Facet* facet1 = &polyhedron->facets[iFacet1];
 
+	ASSERT(facet0->test_structure() == 0);
+	ASSERT(facet1->test_structure() == 0);
+
 	/* Transmit the information about "facet1" from "facet" to "facet0". */
 	int iPositionChanged0 = (facet0->numVertices + iPosition0 - 1)
 			% facet0->numVertices;
+
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet0,
+			facet0->numVertices + 1 + iPositionChanged0,
+			facet0->indVertices[facet0->numVertices + 1 + iPositionChanged0],
+			iFacet1);
 	facet0->indVertices[facet0->numVertices + 1 + iPositionChanged0] = iFacet1;
+
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet0,
+			2 * facet0->numVertices + 1 + iPositionChanged0,
+			facet0->indVertices[2 * facet0->numVertices + 1 +
+			                    iPositionChanged0],
+			iPosition1);
 	facet0->indVertices[2 * facet0->numVertices + 1 + iPositionChanged0] =
 			iPosition1;
 
 	/* Transmit the information about "facet0" from "facet" to "facet1". */
 	int iPositionChanged1 = (facet1->numVertices + iPosition1 - 1)
 			% facet1->numVertices;
-	facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1] = iFacet1;
+
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet1,
+			facet1->numVertices + 1 + iPositionChanged1,
+			facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1],
+			iFacet0);
+	facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1] = iFacet0;
+
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet1,
+			2 * facet1->numVertices + 1 + iPositionChanged1,
+			facet1->indVertices[2 * facet1->numVertices + 1 +
+			                    iPositionChanged1],
+			                    iPosition0);
 	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] =
 			iPosition0;
+
+	ASSERT(facet0->test_structure() == 0);
+	ASSERT(facet1->test_structure() == 0);
 
 	/* Clear current facet. */
 	facet->clear();
@@ -339,6 +369,9 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 		return;
 	}
 
+	DEBUG_PRINT("Changing edge [%d, %d] facets from f0 = %d, f1 = %d",
+			edgeUpdated->v0, edgeUpdated->v1, edgeUpdated->f0, edgeUpdated->f1);
+
 	if (iFacet0 < iFacet1)
 	{
 		edgeUpdated->f0 = iFacet0;
@@ -349,6 +382,9 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 		edgeUpdated->f0 = iFacet1;
 		edgeUpdated->f1 = iFacet0;
 	}
+
+	DEBUG_PRINT("Changing edge [%d, %d] facets to   f0 = %d, f1 = %d",
+			edgeUpdated->v0, edgeUpdated->v1, edgeUpdated->f0, edgeUpdated->f1);
 
 	DEBUG_END;
 }
@@ -619,6 +655,9 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	DEBUG_PRINT("facet1->indVertices[%d] = %d", iPosition1,
 			facet1->indVertices[iPosition1]);
 
+	ASSERT(facet0->test_structure() == 0);
+	ASSERT(facet1->test_structure() == 0);
+
 	ASSERT(facet0->indVertices[iPosition0] == iVertex);
 	facet0->remove(iPosition0);
 	if (facet0->numVertices < 3)
@@ -638,6 +677,9 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 		facetsQueue.push(facet1->indVertices[4]);
 		cutDegeneratedFacet(facet1->id);
 	}
+
+	ASSERT(facet0->test_structure() == 0);
+	ASSERT(facet1->test_structure() == 0);
 
 	/* 2). Add all the neighbors of facets to the list. */
 	set<int> facetsPreprocessed;
