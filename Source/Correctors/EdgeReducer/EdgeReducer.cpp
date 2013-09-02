@@ -740,6 +740,13 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	set<int> facetsPreprocessed;
 	facetsPreprocessed.insert(iFacet0);
 	facetsPreprocessed.insert(iFacet1);
+
+	/* Since we have deleted a vertex from these facets,
+	 * we need to update information about positions of vertices contained
+	 * in vertexInfo's for all incident vertices of "facet0" and "facet1". */
+	facetsQueue.push(iFacet0);
+	facetsQueue.push(iFacet1);
+
 	for (int i = 0; i < facet0->numVertices; ++i)
 	{
 		facetsPreprocessed.insert(
