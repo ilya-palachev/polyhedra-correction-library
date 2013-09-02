@@ -544,7 +544,32 @@ bool EdgeReducer::updateEdges()
 			DEBUG_PRINT("Erasing edge [%d, %d] and inserting edge [%d, %d]",
 					edgeUpdated->v0, edgeUpdated->v1, edgeNew.v0, edgeNew.v1);
 			edgeData->edges.erase(edgeUpdated);
-			edgeData->addEdge(edgeNew);
+			pair<EdgeSetIterator, bool> addResult = edgeData->addEdge(edgeNew);
+			EdgeSetIterator edgeAdded = addResult.first;
+
+			/* These 2 assertions are added to check the validity of
+			 * information about incident facets. */
+			if (edgeAdded->f0 < 0 || edgeAdded->f0 >= polyhedron->numFacets)
+			{
+				ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
+						"happened during processing the edge #%d = [%d, %d]",
+						edgeAdded->f0, polyhedron->numFacets, edgeAdded->id,
+						edgeAdded->f0, edgeAdded->f1);
+				ASSERT(0);
+				DEBUG_END;
+				return false;
+			}
+
+			if (edgeAdded->f1 < 0 || edgeAdded->f1 >= polyhedron->numFacets)
+			{
+				ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
+						"happened during processing the edge #%d = [%d, %d]",
+						edgeAdded->f1, polyhedron->numFacets, edgeAdded->id,
+						edgeAdded->f0, edgeAdded->f1);
+				ASSERT(0);
+				DEBUG_END;
+				return false;
+			}
 
 
 			ASSERT(edgeData->findEdge(edgeNew.v0, edgeNew.v1) !=
@@ -753,6 +778,30 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	EdgeSetIterator edgeNew = returnValue.first;
 	ASSERT(edgeNew != edgeData->edges.end());
 	edgesWS->edgesAdded->insert(pair<int, int> (edgeNew->v0, edgeNew->v1));
+
+	/* These 2 assertions are added to check the validity of
+	 * information about incident facets. */
+	if (edgeNew->f0 < 0 || edgeNew->f0 >= polyhedron->numFacets)
+	{
+		ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
+				"happened during processing the edge #%d = [%d, %d]",
+				edgeNew->f0, polyhedron->numFacets, edgeNew->id,
+				edgeNew->f0, edgeNew->f1);
+		ASSERT(0);
+		DEBUG_END;
+		return;
+	}
+
+	if (edgeNew->f1 < 0 || edgeNew->f1 >= polyhedron->numFacets)
+	{
+		ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
+				"happened during processing the edge #%d = [%d, %d]",
+				edgeNew->f1, polyhedron->numFacets, edgeNew->id,
+				edgeNew->f0, edgeNew->f1);
+		ASSERT(0);
+		DEBUG_END;
+		return;
+	}
 
 	/* Information about associations is accumulated from removed edges to new
 	 * one.
