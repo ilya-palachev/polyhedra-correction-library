@@ -65,6 +65,10 @@ private:
 	/* Basic parameters of algorithm. */
 	GSCorrectorParameters parameters;
 
+	/* For opportunity of partial correction, we store a list with facet id's
+	 * that are to be corrected. */
+	list<int> facetsCorrected;
+
 	/* In all algorithms we process only those facets which have some
 	 * associations with contours. This list is used to store
 	 * not-associated facets. */
@@ -134,8 +138,10 @@ public:
 	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd,
 		GSCorrectorParameters* _parameters);
 	virtual ~GlobalShadeCorrector();
+	void setFacetsCorrected(list<int> _facetsCorrected);
 
 	void runCorrection();
+
 };
 
 #endif /* GLOBALSHADECORRECTOR_H_ */

@@ -47,6 +47,15 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				associator()
 {
 	DEBUG_START;
+
+	/* By default, before beginning the algorithm we set the list of corrected
+	 * facets to full list, so the default correction mode is correction of all
+	 * facets. */
+	for (int iFacet; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		facetsCorrected.push_back(iFacet);
+	}
+
 	DEBUG_END;
 }
 
@@ -58,6 +67,11 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 	{
 		DEBUG_PRINT("Deleting facetsNotAssociated");
 		facetsNotAssociated.clear();
+	}
+	if (!facetsCorrected.empty())
+	{
+		DEBUG_PRINT("Deleting facetsCorrected");
+		facetsCorrected.clear();
 	}
 	if (gradient != NULL)
 	{
@@ -84,6 +98,13 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 		associator = NULL;
 	}
 
+	DEBUG_END;
+}
+
+void GlobalShadeCorrector::setFacetsCorrected(list<int> _facetsCorrected)
+{
+	DEBUG_START;
+	facetsCorrected = _facetsCorrected;
 	DEBUG_END;
 }
 
