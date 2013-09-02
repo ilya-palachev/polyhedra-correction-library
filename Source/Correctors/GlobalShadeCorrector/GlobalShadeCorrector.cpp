@@ -352,11 +352,13 @@ double GlobalShadeCorrector::calculateFunctional()
 	double sum = 0;
 
 	EdgeSetIterator edge = edgeData->edges.begin();
+	ASSERT(edgeData->numEdges == edgeData->edges.size());
+
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
-    	DEBUG_PRINT("Processing edge #%d (%d) = [%d, %d] with info f0 = %d, "
-    			"f1 = %d", iEdge, edge->id, edge->v0, edge->v1, edge->f0,
-    			edge->f1);
+//    	DEBUG_PRINT("Processing edge #%d (%d) = [%d, %d] with info f0 = %d, "
+//    			"f1 = %d", iEdge, edge->id, edge->v0, edge->v1, edge->f0,
+//    			edge->f1);
 		int f0 = edge->f0;
 		int f1 = edge->f1;
 

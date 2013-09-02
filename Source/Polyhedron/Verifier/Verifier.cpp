@@ -506,6 +506,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 	{
 		DEBUG_PRINT("Iteration %d - start. Number of edges is queue = %d",
 				iIteration++, edgesQueue.size());
+
 		pair<int, int> vertexPair = edgesQueue.front();
 		DEBUG_PRINT("Processed edge: [%d, %d]", vertexPair.first,
 				vertexPair.second);
@@ -555,6 +556,10 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 		edgesQueue.pop();
 	}
+
+	/* FIXME: Workaround. Actually set edgeData->numEdges here to guarantee
+	 * its proper usage further. */
+	edgeData->numEdges = edgeData->edges.size();
 
 	DEBUG_END;
 	return numEdgesDesctructed;
