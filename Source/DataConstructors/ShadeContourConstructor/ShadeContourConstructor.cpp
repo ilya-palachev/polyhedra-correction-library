@@ -115,7 +115,7 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 
 	EdgeSetIterator edgeCurr = edgesVisible.begin();
 	int iVertexCurr = edgeCurr->v1;
-	for (int iSide = 0; iSide < edgesVisible.size();)
+	for (int iSide = 0; iSide < edgesVisible.size(); ++iSide)
 	{
 		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
