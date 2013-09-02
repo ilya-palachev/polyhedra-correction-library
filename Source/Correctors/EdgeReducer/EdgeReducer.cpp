@@ -552,9 +552,11 @@ bool EdgeReducer::updateEdges()
 			if (edgeAdded->f0 < 0 || edgeAdded->f0 >= polyhedron->numFacets)
 			{
 				ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
-						"happened during processing the edge #%d = [%d, %d]",
+						"happened during processing the edge #%d = [%d, %d] "
+						"with info f0 = %d, f1 = %d",
 						edgeAdded->f0, polyhedron->numFacets, edgeAdded->id,
-						edgeAdded->f0, edgeAdded->f1);
+						edgeAdded->v0, edgeAdded->v1, edgeAdded->f0,
+						edgeAdded->f1);
 				ASSERT(0);
 				DEBUG_END;
 				return false;
@@ -563,9 +565,11 @@ bool EdgeReducer::updateEdges()
 			if (edgeAdded->f1 < 0 || edgeAdded->f1 >= polyhedron->numFacets)
 			{
 				ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
-						"happened during processing the edge #%d = [%d, %d]",
+						"happened during processing the edge #%d = [%d, %d] "
+						"with info f0 = %d, f1 = %d",
 						edgeAdded->f1, polyhedron->numFacets, edgeAdded->id,
-						edgeAdded->f0, edgeAdded->f1);
+						edgeAdded->v0, edgeAdded->v1, edgeAdded->f0,
+						edgeAdded->f1);
 				ASSERT(0);
 				DEBUG_END;
 				return false;
@@ -784,9 +788,10 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	if (edgeNew->f0 < 0 || edgeNew->f0 >= polyhedron->numFacets)
 	{
 		ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
-				"happened during processing the edge #%d = [%d, %d]",
+				"happened during processing the edge #%d = [%d, %d] "
+				"with info f0 = %d, f1 = %d",
 				edgeNew->f0, polyhedron->numFacets, edgeNew->id,
-				edgeNew->f0, edgeNew->f1);
+				edgeNew->v0, edgeNew->v1, edgeNew->f0, edgeNew->f1);
 		ASSERT(0);
 		DEBUG_END;
 		return;
@@ -795,9 +800,10 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	if (edgeNew->f1 < 0 || edgeNew->f1 >= polyhedron->numFacets)
 	{
 		ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
-				"happened during processing the edge #%d = [%d, %d]",
+				"happened during processing the edge #%d = [%d, %d] "
+				"with info f0 = %d, f1 = %d",
 				edgeNew->f1, polyhedron->numFacets, edgeNew->id,
-				edgeNew->f0, edgeNew->f1);
+				edgeNew->v0, edgeNew->v1, edgeNew->f0, edgeNew->f1);
 		ASSERT(0);
 		DEBUG_END;
 		return;
