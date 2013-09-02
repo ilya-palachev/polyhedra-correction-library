@@ -14,7 +14,7 @@ ShadeContourConstructor::ShadeContourConstructor(Polyhedron* p,
 				bufferBool(NULL),
 				bufferInt0(NULL),
 				bufferInt1(NULL),
-				edgeData(NULL)
+				edgeData(new EdgeData())
 {
 	DEBUG_START;
 	DEBUG_END;
