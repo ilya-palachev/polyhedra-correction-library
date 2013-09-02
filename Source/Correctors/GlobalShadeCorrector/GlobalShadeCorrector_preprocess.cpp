@@ -26,8 +26,10 @@ void GlobalShadeCorrector::preprocessAssociations()
 
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
-		for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+		for (list<int>::iterator itFacet = facetsCorrected.begin();
+				itFacet != facetsCorrected.end(); ++itFacet)
 		{
+			int iFacet = *itFacet;
 			int numVerticesFacet = polyhedron->facets[iFacet].numVertices;
 			int* indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)

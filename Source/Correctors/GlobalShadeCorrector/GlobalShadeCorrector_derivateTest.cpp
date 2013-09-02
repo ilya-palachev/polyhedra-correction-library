@@ -26,15 +26,19 @@ void GlobalShadeCorrector::derivativeTest_1()
 	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated.begin();
 	int iCountNotAssociated = 0;
 
-	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	int iFacetLocal = 0;
+	for (list<int>::iterator itFacet = facetsCorrected.begin();
+			itFacet != facetsCorrected.end(); ++itFacet, ++iFacetLocal)
 	{
+		int iFacet = *itFacet;
+
 		if (iFacet == *iIteratorNotAssociated)
 		{
 			++iIteratorNotAssociated;
 			++iCountNotAssociated;
 			continue;
 		}
-		int iFacetShifted = iFacet - iCountNotAssociated;
+		int iFacetShifted = iFacetLocal - iCountNotAssociated;
 
 		for (int iCoefficient = 0; iCoefficient < 4; ++iCoefficient)
 		{
