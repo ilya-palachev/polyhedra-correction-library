@@ -357,6 +357,27 @@ double GlobalShadeCorrector::calculateFunctional()
 //    	DEBUG_PRINT("%s: processing edge #%d\n", __func__, i);
 		int f0 = edge->f0;
 		int f1 = edge->f1;
+
+		if (f0 < 0 || f0 >= polyhedron->numFacets)
+		{
+			ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
+					"happened during processing the edge #%d = [%d, %d]", f0,
+					polyhedron->numFacets, iEdge, f0, f1);
+			ASSERT(0);
+			DEBUG_END;
+			return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+		}
+
+		if (f1 < 0 || f1 >= polyhedron->numFacets)
+		{
+			ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
+					"happened during processing the edge #%d = [%d, %d]", f1,
+					polyhedron->numFacets, iEdge, f0, f1);
+			ASSERT(0);
+			DEBUG_END;
+			return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+		}
+
 		Plane plane0 = polyhedron->facets[f0].plane;
 		Plane plane1 = polyhedron->facets[f1].plane;
 		Plane planePrev0 = prevPlanes[f0];
