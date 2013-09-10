@@ -73,3 +73,51 @@ SContour& SContour::operator =(const SContour& scontour)
 	return *this;
 }
 
+bool SContour::operator ==(const SContour& scontour) const
+{
+	DEBUG_START;
+
+	if (id != scontour.id)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	if (ns != scontour.ns)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	if (plane != scontour.plane)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	if (poly != scontour.poly)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	for (int iSide = 0; iSide < ns; ++iSide)
+	{
+		if (sides[iSide] != scontour.sides[iSide])
+		{
+			DEBUG_END;
+			return false;
+		}
+	}
+
+	DEBUG_END;
+	return true;
+}
+
+bool SContour::operator !=(const SContour& scontour) const
+{
+	DEBUG_START;
+	bool returnValue = !(*this == scontour);
+	DEBUG_END;
+	return returnValue;
+}

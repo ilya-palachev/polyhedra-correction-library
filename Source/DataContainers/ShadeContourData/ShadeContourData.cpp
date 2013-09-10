@@ -29,9 +29,6 @@ ShadeContourData::~ShadeContourData()
 	DEBUG_END;
 }
 
-#define STD_SC_FORMAT_HEADER_SIZE_1 2
-#define STD_SC_FORMAT_HEADER_SIZE_2 31
-
 bool ShadeContourData::fscanDefault(char* fileNameContours)
 {
 	DEBUG_START;
@@ -43,6 +40,18 @@ bool ShadeContourData::fscanDefault(char* fileNameContours)
 		DEBUG_END;
 		return false;
 	}
+
+	bool fscanReturnValue = fscanDefault(fd);
+	DEBUG_END;
+	return fscanReturnValue;
+}
+
+#define STD_SC_FORMAT_HEADER_SIZE_1 2
+#define STD_SC_FORMAT_HEADER_SIZE_2 31
+
+bool ShadeContourData::fscanDefault(FILE* fd)
+{
+	DEBUG_START;
 
 	char* scannedString = new char[255];
 	for (int i = 0; i < STD_SC_FORMAT_HEADER_SIZE_1; ++i)
@@ -183,4 +192,40 @@ void ShadeContourData::fprint(FILE* file)
 		contours[iContour].my_fprint(file);
 	}
 	DEBUG_END;
+}
+
+void ShadeContourData::fprintDefault(FILE* file)
+{
+	DEBUG_START;
+
+	DEBUG_END;
+}
+
+bool ShadeContourData::operator ==(const ShadeContourData& contourData) const
+{
+	DEBUG_START;
+	if (numContours != contourData.numContours)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	for (int iContour = 0; iContour < numContours; ++iContour)
+	{
+		if (contours[iContour] != contourData.contours[iContour])
+		{
+			DEBUG_END;
+			return false;
+		}
+	}
+	DEBUG_END;
+	return true;
+}
+
+bool ShadeContourData::operator !=(const ShadeContourData& contourData) const
+{
+	DEBUG_START;
+	bool returnValue = !(*this == contourData);
+	DEBUG_END;
+	return returnValue;
 }

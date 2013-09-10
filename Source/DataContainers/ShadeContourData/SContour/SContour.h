@@ -32,6 +32,9 @@ public:
 
 	SContour& operator =(const SContour& scontour);
 
+	bool operator ==(const SContour& scontour) const;
+	bool operator !=(const SContour& scontour) const;
+
 	// SContour_io.cpp :
 
 	void my_fprint(FILE* file);

@@ -36,6 +36,9 @@ public:
 	SideOfContour(const SideOfContour& orig);
 	virtual ~SideOfContour();
 
+	bool operator ==(const SideOfContour& side) const;
+	bool operator !=(const SideOfContour& side) const;
+
 	// SideOfContour_io.cpp :
 	void my_fprint(FILE* file);
 	void my_fprint_short(FILE* file);

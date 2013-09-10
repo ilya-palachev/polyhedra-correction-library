@@ -33,3 +33,42 @@ SideOfContour::~SideOfContour()
 	DEBUG_END;
 }
 
+bool SideOfContour::operator ==(const SideOfContour& side) const
+{
+	DEBUG_START;
+
+	if (fabs(confidence - side.confidence) > EPS_MIN_DOUBLE)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	if (type != side.type)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	if (A1 != side.A1)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	if (A2 != side.A2)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	DEBUG_END;
+	return true;
+}
+
+bool SideOfContour::operator !=(const SideOfContour& side) const
+{
+	DEBUG_START;
+	bool returnValue = !(*this == side);
+	DEBUG_END;
+	return returnValue;
+}

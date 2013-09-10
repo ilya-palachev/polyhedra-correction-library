@@ -18,8 +18,14 @@ public:
 	~ShadeContourData();
 
 	bool fscanDefault(char* fileNameContours);
+	bool fscanDefault(FILE* file);
 
 	void fprint(FILE* file);
+	void fprintDefault(FILE* file);
+
+	bool operator ==(const ShadeContourData& contourData) const;
+	bool operator !=(const ShadeContourData& contourData) const;
+
 };
 
 typedef std::shared_ptr<ShadeContourData> ShadeContourDataPtr;
