@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	Polyhedron* polyhedron = new Polyhedron();
+	shared_ptr<Polyhedron> polyhedron(new Polyhedron());
 	if (!polyhedron->fscan_default_1_2(parameters.fileNamePolyhedron))
 	{
 		DEBUG_END;
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	}
 	polyhedron->my_fprint(stderr);
 
-	ShadeContourData* contourData = new ShadeContourData(polyhedron);
+	shared_ptr<ShadeContourData> contourData(new ShadeContourData(polyhedron));
 	if (!contourData->fscanDefault(parameters.fileNameShadeContours))
 	{
 		DEBUG_END;
@@ -56,12 +56,6 @@ int main(int argc, char** argv)
 	polyhedron->correctGlobal(contourData, &gsParameters);
 
 	polyhedron->fprint_ply_scale(1000., "poly-data-out/after.ply", "after");
-
-	if (polyhedron != NULL)
-	{
-		delete polyhedron;
-		polyhedron = NULL;
-	}
 
 	if (parameters.fileNamePolyhedron != NULL)
 	{

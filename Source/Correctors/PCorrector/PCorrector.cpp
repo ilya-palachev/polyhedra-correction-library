@@ -14,10 +14,18 @@ PCorrector::PCorrector() :
 	DEBUG_END;
 }
 
-PCorrector::PCorrector(Polyhedron* input) :
-				polyhedron(input)
+PCorrector::PCorrector(shared_ptr<Polyhedron> p) :
+				polyhedron(p)
 {
 	DEBUG_START;
+	DEBUG_END;
+}
+
+PCorrector::PCorrector(Polyhedron* p) :
+				polyhedron()
+{
+	DEBUG_START;
+	polyhedron.reset(p);
 	DEBUG_END;
 }
 

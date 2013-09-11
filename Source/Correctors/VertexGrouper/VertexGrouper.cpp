@@ -16,6 +16,13 @@ VertexGrouper::VertexGrouper() :
 	DEBUG_END;
 }
 
+VertexGrouper::VertexGrouper(shared_ptr<Polyhedron> p) :
+		PCorrector(p)
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
 VertexGrouper::VertexGrouper(Polyhedron* p) :
 		PCorrector(p)
 {

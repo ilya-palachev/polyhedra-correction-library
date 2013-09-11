@@ -17,7 +17,7 @@ private:
 
 public:
 	FacetIntersector();
-	FacetIntersector(Polyhedron* p, Facet* f);
+	FacetIntersector(shared_ptr<Polyhedron> p, Facet* f);
 	FacetIntersector(Intersector* i, Facet* f);
 	~FacetIntersector();
 

@@ -7,7 +7,7 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-void Polyhedron::correctGlobal(ShadeContourData* contourData,
+void Polyhedron::correctGlobal(shared_ptr<ShadeContourData> contourData,
 		GSCorrectorParameters* parameters)
 {
 	DEBUG_START;

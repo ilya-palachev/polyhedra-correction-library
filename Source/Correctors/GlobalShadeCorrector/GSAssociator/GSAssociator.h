@@ -21,7 +21,7 @@ private:
 	int iEdge;
 	EdgeSetIterator edge;
 
-	Polyhedron* polyhedronTmp;
+	shared_ptr<Polyhedron> polyhedronTmp;
 	double* bufDouble;
 
 	Vector3d v0_projected;

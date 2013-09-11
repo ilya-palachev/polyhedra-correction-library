@@ -22,12 +22,18 @@ struct TestParameters
 };
 
 void printUsage();
+
 NameFigure parse_figureName(char* figureNameInput);
+
 MethodCorrector parse_methodName(char* methodNameInput);
+
 int parse_commandLine(int argc, char** argv, TestParameters& parameters);
+
 Polyhedron* makePolyhedron(NameFigure figureParsed);
-inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
-		int ifacet);
+
+inline void moveFacetRandom(shared_ptr<Polyhedron> polyhedron,
+		double maxMoveDelta, int ifacet);
+
 
 int main(int argc, char** argv)
 {
@@ -36,15 +42,17 @@ int main(int argc, char** argv)
 
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	Polyhedron* polyhedron = makePolyhedron(parameters.figure);
+
+	shared_ptr<Polyhedron> polyhedron(new Polyhedron());
+	polyhedron.reset(makePolyhedron(parameters.figure));
 
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-before.ply",
 			"globalCorrection");
 
-	ShadeContourData* contourData = new ShadeContourData(polyhedron);
-	ShadeContourConstructor* scConstructor = new ShadeContourConstructor(
-			polyhedron, contourData);
+	shared_ptr<ShadeContourData> contourData(new ShadeContourData(polyhedron));
+	shared_ptr<ShadeContourConstructor> scConstructor(new ShadeContourConstructor(
+			polyhedron, contourData));
 	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
@@ -232,7 +240,7 @@ static double genRandomDouble(double maxDelta)
 	return randomDouble;
 }
 
-inline void moveFacetRandom(Polyhedron* polyhedron, double maxMoveDelta,
+inline void moveFacetRandom(shared_ptr<Polyhedron> polyhedron, double maxMoveDelta,
 		int ifacet)
 {
 	DEBUG_START;

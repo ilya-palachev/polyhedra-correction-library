@@ -7,8 +7,8 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-ShadeContourConstructor::ShadeContourConstructor(Polyhedron* p,
-		ShadeContourData* d) :
+ShadeContourConstructor::ShadeContourConstructor(shared_ptr<Polyhedron> p,
+		shared_ptr<ShadeContourData> d) :
 				PDataConstructor(p),
 				data(d),
 				bufferBool(NULL),
@@ -69,6 +69,8 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 
 		data->contours[iContour] = createContour(iContour, planeOfProjection);
 	}
+
+	delete edgeConstructor;
 	DEBUG_END;
 }
 

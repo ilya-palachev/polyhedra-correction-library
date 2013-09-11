@@ -27,8 +27,11 @@ private:
 	void calculateFunctionalDerivative();
 	void calculateFunctionalDerivative2();
 
+	void init();
+
 public:
 	PointShifter();
+	PointShifter(shared_ptr<Polyhedron> p);
 	PointShifter(Polyhedron* p);
 	~PointShifter();
 

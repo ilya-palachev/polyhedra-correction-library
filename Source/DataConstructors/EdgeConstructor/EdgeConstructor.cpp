@@ -7,7 +7,7 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-EdgeConstructor::EdgeConstructor(Polyhedron* p) :
+EdgeConstructor::EdgeConstructor(shared_ptr<Polyhedron> p) :
 				PDataConstructor(p)
 {
 	DEBUG_START;

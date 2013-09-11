@@ -390,7 +390,7 @@ void EdgeList::set_isUsed(int v0, int v1, bool val)
 	DEBUG_END;
 }
 
-void EdgeList::set_poly(Polyhedron* poly_orig)
+void EdgeList::set_poly(shared_ptr<Polyhedron> poly_orig)
 {
 	DEBUG_START;
 	poly = poly_orig;

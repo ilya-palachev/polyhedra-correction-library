@@ -11,7 +11,7 @@
 class Verifier
 {
 private:
-	Polyhedron* polyhedron;
+	shared_ptr<Polyhedron> polyhedron;
 	bool ifPrint;
 	EdgesWorkingSets* edgesWS;
 
@@ -35,8 +35,11 @@ private:
 	bool reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData);
 public:
 	Verifier();
+	Verifier(shared_ptr<Polyhedron> p);
 	Verifier(Polyhedron* p);
+	Verifier(shared_ptr<Polyhedron> p, bool _ifPrint);
 	Verifier(Polyhedron* p, bool _ifPrint);
+
 	~Verifier();
 
 	/* Count the number of self-consections in the polyhedron. */

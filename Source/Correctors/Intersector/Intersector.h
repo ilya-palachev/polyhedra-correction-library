@@ -20,7 +20,8 @@ private:
 	int prepareEdgeList(Facet* facet, Plane iplane);
 public:
 	Intersector();
-	Intersector(Polyhedron* input);
+	Intersector(shared_ptr<Polyhedron> p);
+	Intersector(Polyhedron* p);
 	~Intersector();
 	void run(Plane iplane);
 	void runCoalesceMode(Plane iplane, int jfid);

@@ -31,6 +31,24 @@ PointShifterLinear::PointShifterLinear() :
 	DEBUG_END;
 }
 
+PointShifterLinear::PointShifterLinear(shared_ptr<Polyhedron> p) :
+		PCorrector(p),
+		id(),
+		x(new double[polyhedron->numVertices]),
+		y(new double[polyhedron->numVertices]),
+		z(new double[polyhedron->numVertices]),
+		xold(new double[polyhedron->numVertices]),
+		yold(new double[polyhedron->numVertices]),
+		zold(new double[polyhedron->numVertices]),
+		A(new double[9]),
+		B(new double[3]),
+		K()
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
+
 PointShifterLinear::PointShifterLinear(Polyhedron* p) :
 		PCorrector(p),
 		id(),

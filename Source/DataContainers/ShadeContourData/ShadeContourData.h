@@ -14,7 +14,7 @@ public:
 	int numContours;
 	SContour* contours;
 
-	ShadeContourData(const Polyhedron* p);
+	ShadeContourData(shared_ptr<Polyhedron> p);
 	~ShadeContourData();
 
 	bool fscanDefault(const char* fileNameContours);

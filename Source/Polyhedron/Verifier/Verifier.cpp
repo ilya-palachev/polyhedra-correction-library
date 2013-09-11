@@ -16,9 +16,28 @@ Verifier::Verifier() :
 	DEBUG_END;
 }
 
-Verifier::Verifier(Polyhedron* p) :
+Verifier::Verifier(shared_ptr<Polyhedron> p) :
 		polyhedron(p),
 		ifPrint(true),
+		edgesWS(NULL)
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
+Verifier::Verifier(Polyhedron* p) :
+		polyhedron(),
+		ifPrint(true),
+		edgesWS(NULL)
+{
+	DEBUG_START;
+	polyhedron.reset(p);
+	DEBUG_END;
+}
+
+Verifier::Verifier(shared_ptr<Polyhedron> p, bool _ifPrint) :
+		polyhedron(p),
+		ifPrint(_ifPrint),
 		edgesWS(NULL)
 {
 	DEBUG_START;
@@ -31,6 +50,7 @@ Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
 		edgesWS(NULL)
 {
 	DEBUG_START;
+	polyhedron.reset(p);
 	DEBUG_END;
 }
 

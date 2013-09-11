@@ -7,7 +7,8 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-PData::PData(const Polyhedron* polyhedron)
+PData::PData(shared_ptr<Polyhedron> p) :
+		polyhedron(p)
 {
 	DEBUG_START;
 	DEBUG_END;

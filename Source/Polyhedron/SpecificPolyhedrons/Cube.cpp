@@ -87,7 +87,7 @@ void Cube::init()
 		int nv = facets[ifacet].numVertices = 4;
 		facets[ifacet].indVertices = new int[3 * nv + 1];
 		facets[ifacet].id = ifacet;
-		facets[ifacet].parentPolyhedron = this;
+		facets[ifacet].parentPolyhedron.reset(this);
 	}
 
 	facets[0].indVertices[0] = 0;
@@ -128,7 +128,7 @@ void Cube::init()
 
 	for (int i = 0; i < numFacets; ++i)
 	{
-		facets[i].parentPolyhedron = this;
+		facets[i].parentPolyhedron.reset(this);
 	}
 	DEBUG_END;
 }

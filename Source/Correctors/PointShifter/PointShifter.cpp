@@ -23,6 +23,23 @@ PointShifter::PointShifter() :
 	DEBUG_END;
 }
 
+PointShifter::PointShifter(shared_ptr<Polyhedron> p) :
+		PCorrector(p),
+		x(),
+		x1(),
+		fx(),
+		A(),
+		sum(),
+		tmp0(),
+		tmp1(),
+		tmp2(),
+		tmp3()
+{
+	DEBUG_START;
+	init();
+	DEBUG_END;
+}
+
 PointShifter::PointShifter(Polyhedron* p) :
 		PCorrector(p),
 		x(),
@@ -34,6 +51,13 @@ PointShifter::PointShifter(Polyhedron* p) :
 		tmp1(),
 		tmp2(),
 		tmp3()
+{
+	DEBUG_START;
+	init();
+	DEBUG_END;
+}
+
+void PointShifter::init()
 {
 	DEBUG_START;
 	n = 0;

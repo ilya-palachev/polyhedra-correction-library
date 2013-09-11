@@ -7,7 +7,7 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-ShadeContourData::ShadeContourData(const Polyhedron* p) :
+ShadeContourData::ShadeContourData(shared_ptr<Polyhedron> p) :
 				PData(p),
 				numContours(0),
 				contours(NULL)

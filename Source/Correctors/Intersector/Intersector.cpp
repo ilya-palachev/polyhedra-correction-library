@@ -14,8 +14,15 @@ Intersector::Intersector() :
 	DEBUG_END;
 }
 
-Intersector::Intersector(Polyhedron* input) :
-		PCorrector(input)
+Intersector::Intersector(shared_ptr<Polyhedron> p) :
+		PCorrector(p)
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
+Intersector::Intersector(Polyhedron* p) :
+		PCorrector(p)
 {
 	DEBUG_START;
 	DEBUG_END;

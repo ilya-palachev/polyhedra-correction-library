@@ -20,7 +20,8 @@ EdgeList::EdgeList() :
 	DEBUG_END;
 }
 
-EdgeList::EdgeList(int id_orig, int len_orig, Polyhedron* poly_orig) :
+EdgeList::EdgeList(int id_orig, int len_orig,
+		shared_ptr<Polyhedron> poly_orig) :
 				id(id_orig),
 				len(len_orig),
 				num(0),

@@ -14,16 +14,27 @@ public:
 	int numVertices;
 	Plane plane;
 	int* indVertices;
-	Polyhedron* parentPolyhedron;
+	shared_ptr<Polyhedron> parentPolyhedron;
 	unsigned char rgb[3];
+
+	void init_full(const int* index_orig, const bool ifLong);
+	void init_empty();
 
 public:
 	// Facet.cpp
 	Facet();
+
+	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
+			const int* index_orig, shared_ptr<Polyhedron> poly_orig,
+			const bool ifLong);
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 			const int* index_orig, Polyhedron* poly_orig, const bool ifLong);
+
+	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
+			shared_ptr<Polyhedron> poly_orig);
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 			Polyhedron* poly_orig);
+
 	Facet& operator =(const Facet& facet1);
 	~Facet();
 	void clear();
@@ -40,7 +51,7 @@ public:
 			int& v_curr);
 
 	void set_id(int id1);
-	void set_poly(Polyhedron* poly_new);
+	void set_poly(shared_ptr<Polyhedron> poly_new);
 	void set_rgb(char red, char gray, char blue);
 	void set_ind_vertex(int position, int value);
 

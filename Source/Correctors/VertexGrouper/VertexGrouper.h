@@ -22,6 +22,7 @@ private:
 			int id3, double* A, double* b);
 public:
 	VertexGrouper();
+	VertexGrouper(shared_ptr<Polyhedron> p);
 	VertexGrouper(Polyhedron* p);
 	~VertexGrouper();
 	int run(int _id);

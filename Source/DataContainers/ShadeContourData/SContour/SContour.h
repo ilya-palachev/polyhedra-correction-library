@@ -19,7 +19,7 @@ public:
 				 // so in its equation a*x + b*y + c*z + d = 0
 				 // coefficient d = 0
 
-	Polyhedron* poly; // Pointer to parent polyhedon which given contour
+	shared_ptr<Polyhedron> poly; // Pointer to parent polyhedon which given contour
 					  // is the part of.
 
 	SideOfContour* sides; // Array of contour sides

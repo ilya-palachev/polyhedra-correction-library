@@ -14,7 +14,7 @@ EdgeReducer::EdgeReducer() :
 	DEBUG_END;
 }
 
-EdgeReducer::EdgeReducer(Polyhedron* p) :
+EdgeReducer::EdgeReducer(shared_ptr<Polyhedron> p) :
 		PCorrector(p)
 {
 	DEBUG_START;

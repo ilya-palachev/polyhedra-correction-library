@@ -26,8 +26,11 @@ private:
 
 	void calculateFunctional();
 	void calculateFuncitonalDerivative();
+
+	void init();
 public:
 	PointShifterWeighted();
+	PointShifterWeighted(shared_ptr<Polyhedron> p);
 	PointShifterWeighted(Polyhedron* p);
 	~PointShifterWeighted();
 

@@ -17,13 +17,35 @@ Facet::Facet() :
 }
 
 Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-		const int* index_orig, Polyhedron* poly_orig = NULL, const bool ifLong =
-				false) :
+		const int* index_orig, shared_ptr<Polyhedron> poly_orig = NULL,
+		const bool ifLong = false) :
 
 				id(id_orig),
 				numVertices(nv_orig),
 				plane(plane_orig),
 				parentPolyhedron(poly_orig)
+{
+	DEBUG_START;
+	init_full(index_orig, ifLong);
+	DEBUG_END;
+}
+
+Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
+		const int* index_orig, Polyhedron* poly_orig = NULL,
+		const bool ifLong = false) :
+
+				id(id_orig),
+				numVertices(nv_orig),
+				plane(plane_orig),
+				parentPolyhedron()
+{
+	DEBUG_START;
+	parentPolyhedron.reset(poly_orig);
+	init_full(index_orig, ifLong);
+	DEBUG_END;
+}
+
+void Facet::init_full(const int* index_orig, const bool ifLong)
 {
 	DEBUG_START;
 
@@ -35,7 +57,7 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	{
 		ERROR_PRINT("Error. index_orig = NULL");
 	}
-	if (nv_orig < 3)
+	if (numVertices < 3)
 	{
 		ERROR_PRINT("Error. nv_orig < 3");
 	}
@@ -55,11 +77,32 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	DEBUG_END;
 }
 
-Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, Polyhedron* poly_orig) :
+Facet::Facet(int id_orig, int nv_orig, Plane plane_orig,
+		shared_ptr<Polyhedron> poly_orig) :
 				id(id_orig),
 				numVertices(nv_orig),
 				plane(plane_orig),
 				parentPolyhedron(poly_orig)
+{
+	DEBUG_START;
+	init_empty();
+	DEBUG_END;
+}
+
+Facet::Facet(int id_orig, int nv_orig, Plane plane_orig,
+		Polyhedron* poly_orig) :
+				id(id_orig),
+				numVertices(nv_orig),
+				plane(plane_orig),
+				parentPolyhedron()
+{
+	DEBUG_START;
+	parentPolyhedron.reset(poly_orig);
+	init_empty();
+	DEBUG_END;
+}
+
+void Facet::init_empty()
 {
 	DEBUG_START;
 	rgb[0] = rgb[1] = rgb[2] = 255;
@@ -175,7 +218,7 @@ void Facet::set_id(int id1)
 	DEBUG_END;
 }
 
-void Facet::set_poly(Polyhedron* poly_new)
+void Facet::set_poly(shared_ptr<Polyhedron> poly_new)
 {
 	DEBUG_START;
 	parentPolyhedron = poly_new;

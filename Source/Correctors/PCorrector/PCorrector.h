@@ -14,10 +14,11 @@
 class PCorrector
 {
 public:
-	Polyhedron* polyhedron;
+	shared_ptr<Polyhedron> polyhedron;
 
 	PCorrector();
-	PCorrector(Polyhedron* input);
+	PCorrector(shared_ptr<Polyhedron> p);
+	PCorrector(Polyhedron* p);
 	virtual ~PCorrector();
 };
 

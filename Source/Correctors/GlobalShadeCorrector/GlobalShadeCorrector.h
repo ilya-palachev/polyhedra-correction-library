@@ -133,10 +133,14 @@ private:
 	GSCorrectorStatus repairAndRun(MethodCorrector method,
 			Plane* planesInitial);
 	GSCorrectorStatus runCorrectionDo();
+
+	void init();
 public:
 	GlobalShadeCorrector();
-	GlobalShadeCorrector(Polyhedron* p, ShadeContourData* scd,
+	GlobalShadeCorrector(shared_ptr<Polyhedron> p, ShadeContourDataPtr scd,
 		GSCorrectorParameters* _parameters);
+	GlobalShadeCorrector(Polyhedron* p, ShadeContourDataPtr scd,
+				GSCorrectorParameters* _parameters);
 	virtual ~GlobalShadeCorrector();
 	void setFacetsCorrected(list<int> _facetsCorrected);
 

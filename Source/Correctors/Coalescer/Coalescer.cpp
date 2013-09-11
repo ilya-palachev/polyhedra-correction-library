@@ -18,6 +18,15 @@ Coalescer::Coalescer() :
 	DEBUG_END;
 }
 
+Coalescer::Coalescer(shared_ptr<Polyhedron> p) :
+		PCorrector(p),
+		plane(),
+		coalescedFacet()
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
 Coalescer::Coalescer(Polyhedron* p) :
 		PCorrector(p),
 		plane(),

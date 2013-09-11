@@ -14,8 +14,8 @@
 class PData
 {
 public:
-	Polyhedron* polyhedron;
-	PData(const Polyhedron* polyhedron);
+	shared_ptr<Polyhedron> polyhedron;
+	PData(shared_ptr<Polyhedron> p);
 	virtual ~PData();
 };
 

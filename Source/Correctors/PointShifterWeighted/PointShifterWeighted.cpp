@@ -33,6 +33,23 @@ PointShifterWeighted::PointShifterWeighted() :
 	DEBUG_END;
 }
 
+PointShifterWeighted::PointShifterWeighted(shared_ptr<Polyhedron> p) :
+				PCorrector(p),
+				x(),
+				x1(),
+				fx(),
+				A(),
+				khi(),
+				tmp0(),
+				tmp1(),
+				tmp2(),
+				tmp3()
+{
+	DEBUG_START;
+	init();
+	DEBUG_END;
+}
+
 PointShifterWeighted::PointShifterWeighted(Polyhedron* p) :
 				PCorrector(p),
 				x(),
@@ -44,6 +61,13 @@ PointShifterWeighted::PointShifterWeighted(Polyhedron* p) :
 				tmp1(),
 				tmp2(),
 				tmp3()
+{
+	DEBUG_START;
+	init();
+	DEBUG_END;
+}
+
+void PointShifterWeighted::init()
 {
 	DEBUG_START;
 	x = new double[n];

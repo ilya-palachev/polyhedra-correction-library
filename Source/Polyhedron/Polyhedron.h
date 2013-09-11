@@ -120,7 +120,7 @@ public:
 			MatrixDistNorm& matrix_out);
 
 	// Polyhedron_correction.cpp
-	void correctGlobal(ShadeContourData* contourData,
+	void correctGlobal(shared_ptr<ShadeContourData> contourData,
 			GSCorrectorParameters* parameters);
 
 	// Polyhedron_verification.cpp

@@ -29,8 +29,8 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 	DEBUG_END;
 }
 
-GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
-		ShadeContourData* scd, GSCorrectorParameters* _parameters) :
+GlobalShadeCorrector::GlobalShadeCorrector(shared_ptr<Polyhedron> p,
+		ShadeContourDataPtr scd, GSCorrectorParameters* _parameters) :
 				PCorrector(p),
 				edgeData(),
 				contourData(scd),
@@ -45,6 +45,35 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 				prevPlanes(NULL),
 				dim(0),
 				associator()
+{
+	DEBUG_START;
+	init();
+	DEBUG_END;
+}
+
+GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
+		ShadeContourDataPtr scd, GSCorrectorParameters* _parameters) :
+				PCorrector(p),
+				edgeData(),
+				contourData(scd),
+				parameters(*_parameters),
+				facetsNotAssociated(),
+				gradient(NULL),
+				gradientPrevious(NULL),
+				gradientNorm(0.),
+				gradientNormPrevious(0.),
+				iMinimizedDimension(0),
+				iMinimizationLevel(0),
+				prevPlanes(NULL),
+				dim(0),
+				associator()
+{
+	DEBUG_START;
+	init();
+	DEBUG_END;
+}
+
+void GlobalShadeCorrector::init()
 {
 	DEBUG_START;
 

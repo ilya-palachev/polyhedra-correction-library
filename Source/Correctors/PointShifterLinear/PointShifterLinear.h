@@ -39,6 +39,7 @@ private:
 	void moveVerticesLocal();
 public:
 	PointShifterLinear();
+	PointShifterLinear(shared_ptr<Polyhedron> p);
 	PointShifterLinear(Polyhedron* p);
 	~PointShifterLinear();
 

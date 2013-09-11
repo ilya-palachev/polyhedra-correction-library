@@ -44,7 +44,7 @@ private:
 
 public:
 	EdgeReducer();
-	EdgeReducer(Polyhedron* p);
+	EdgeReducer(shared_ptr<Polyhedron> p);
 	~EdgeReducer();
 
 	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,

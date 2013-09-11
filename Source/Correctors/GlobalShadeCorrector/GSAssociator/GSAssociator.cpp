@@ -49,13 +49,6 @@ GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
 GSAssociator::~GSAssociator()
 {
 	DEBUG_START;
-
-	if (polyhedronTmp)
-	{
-		delete polyhedronTmp;
-		polyhedronTmp = NULL;
-	}
-
 	if (bufDouble)
 	{
 		delete[] bufDouble;
@@ -83,7 +76,7 @@ void GSAssociator::preinit()
 	numVerticesTmp *= 10;
 
 	int numFacetsTmp = 3;
-	polyhedronTmp = new Polyhedron(numVerticesTmp, numFacetsTmp);
+	polyhedronTmp.reset(new Polyhedron(numVerticesTmp, numFacetsTmp));
 	bufDouble = new double[numSidesMax + 1];
 	DEBUG_END;
 }

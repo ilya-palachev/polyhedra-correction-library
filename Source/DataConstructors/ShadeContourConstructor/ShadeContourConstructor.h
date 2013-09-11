@@ -14,7 +14,7 @@
 class ShadeContourConstructor: public PDataConstructor
 {
 private:
-	ShadeContourData* data;
+	shared_ptr<ShadeContourData> data;
 	bool* bufferBool;
 	int* bufferInt0;
 	int* bufferInt1;
@@ -27,7 +27,8 @@ private:
 			Plane planeOfProjection, int ifacet);
 
 public:
-	ShadeContourConstructor(Polyhedron* p, ShadeContourData* d);
+	ShadeContourConstructor(shared_ptr<Polyhedron> p,
+			shared_ptr<ShadeContourData> d);
 	~ShadeContourConstructor();
 	void run(int numContoursNeeded, double firstAngle);
 };

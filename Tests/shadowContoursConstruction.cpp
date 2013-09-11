@@ -20,11 +20,12 @@ int main(int argc, char** argv)
 	DEBUG_START;
 
 	/* Create a cube with side 1 and with center in the O = (0, 0, 0). */
-	Polyhedron* polyhedron = new Cube(1., 0., 0., 0.);
+	std::shared_ptr<Polyhedron> polyhedron(new Cube(1., 0., 0., 0.));
 
-	ShadeContourData* contourData = new ShadeContourData(polyhedron);
-	ShadeContourConstructor* scConstructor = new ShadeContourConstructor(
-			polyhedron, contourData);
+	std::shared_ptr<ShadeContourData> contourData(new
+			ShadeContourData(polyhedron));
+	std::shared_ptr<ShadeContourConstructor> scConstructor(new
+			ShadeContourConstructor(polyhedron, contourData));
 	scConstructor->run(NUM_CONTOURS, SHIFT_ANGLE_FIRST);
 
 	/* In case when environmental variable
@@ -39,11 +40,14 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		ShadeContourData* contourDataOriginal = new ShadeContourData(polyhedron);
-		bool ifScanSucceeded = contourDataOriginal->fscanDefault(nameFileOriginal);
+		std::shared_ptr<ShadeContourData> contourDataOriginal(new
+				ShadeContourData(polyhedron));
+		bool ifScanSucceeded =
+				contourDataOriginal->fscanDefault(nameFileOriginal);
 		if (!ifScanSucceeded)
 		{
-			ERROR_PRINT("Failed to scan contour data from file %s", nameFileOriginal);
+			ERROR_PRINT("Failed to scan contour data from file %s",
+					nameFileOriginal);
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
@@ -55,12 +59,7 @@ int main(int argc, char** argv)
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
-		delete contourDataOriginal;
 	}
-
-	delete polyhedron;
-	delete contourData;
-	delete scConstructor;
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
