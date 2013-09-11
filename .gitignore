@@ -1,5 +1,5 @@
 *.o
-BuildPolyhedron
+Build*
 poly-data-out
 .cproject
 .project
