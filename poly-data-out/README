@@ -1,0 +1,4 @@
+This directory is used by different parts of library to store dumps of 
+polyhedron after processing.
+
+Please, do not delete it!
