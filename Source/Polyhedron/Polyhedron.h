@@ -28,7 +28,7 @@ const double EPS_MIN_DOUBLE = 1e-16;
  * Thus we have separate class for every method that does some big change or
  * correction of polyhedron. */
 
-class Polyhedron
+class Polyhedron : public std::enable_shared_from_this<Polyhedron>
 {
 public:
 	int numVertices;

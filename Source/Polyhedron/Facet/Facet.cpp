@@ -30,21 +30,6 @@ Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 	DEBUG_END;
 }
 
-Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-		const int* index_orig, Polyhedron* poly_orig = NULL,
-		const bool ifLong = false) :
-
-				id(id_orig),
-				numVertices(nv_orig),
-				plane(plane_orig),
-				parentPolyhedron()
-{
-	DEBUG_START;
-	parentPolyhedron.reset(poly_orig);
-	init_full(index_orig, ifLong);
-	DEBUG_END;
-}
-
 void Facet::init_full(const int* index_orig, const bool ifLong)
 {
 	DEBUG_START;
@@ -85,19 +70,6 @@ Facet::Facet(int id_orig, int nv_orig, Plane plane_orig,
 				parentPolyhedron(poly_orig)
 {
 	DEBUG_START;
-	init_empty();
-	DEBUG_END;
-}
-
-Facet::Facet(int id_orig, int nv_orig, Plane plane_orig,
-		Polyhedron* poly_orig) :
-				id(id_orig),
-				numVertices(nv_orig),
-				plane(plane_orig),
-				parentPolyhedron()
-{
-	DEBUG_START;
-	parentPolyhedron.reset(poly_orig);
 	init_empty();
 	DEBUG_END;
 }

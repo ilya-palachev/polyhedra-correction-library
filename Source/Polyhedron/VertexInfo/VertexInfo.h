@@ -15,14 +15,14 @@ public:
 	int numFacets;
 	Vector3d vector;
 	int* indFacets;
-	Polyhedron* parentPolyhedron;
+	shared_ptr<Polyhedron> parentPolyhedron;
 
 public:
 	VertexInfo();
 	VertexInfo(const int id_orig, const int nf_orig, const Vector3d vector_orig,
-			const int* index_orig, Polyhedron* poly_orig);
+			const int* index_orig, shared_ptr<Polyhedron> poly_orig);
 	VertexInfo(const int id_orig, const Vector3d vector_orig,
-			Polyhedron* poly_orig);
+			shared_ptr<Polyhedron> poly_orig);
 
 	VertexInfo& operator =(const VertexInfo& orig);
 	~VertexInfo();

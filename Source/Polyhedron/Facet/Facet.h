@@ -27,13 +27,9 @@ public:
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 			const int* index_orig, shared_ptr<Polyhedron> poly_orig,
 			const bool ifLong);
-	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			const int* index_orig, Polyhedron* poly_orig, const bool ifLong);
 
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
 			shared_ptr<Polyhedron> poly_orig);
-	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			Polyhedron* poly_orig);
 
 	Facet& operator =(const Facet& facet1);
 	~Facet();

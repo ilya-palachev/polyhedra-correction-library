@@ -10,7 +10,7 @@ VertexInfo::VertexInfo() :
 
 VertexInfo::VertexInfo(const int id_orig, const int nf_orig,
 		const Vector3d vector_orig, const int* index_orig,
-		Polyhedron* poly_orig) :
+		shared_ptr<Polyhedron> poly_orig) :
 				id(id_orig),
 				numFacets(nf_orig),
 				vector(vector_orig),
@@ -31,7 +31,7 @@ VertexInfo::VertexInfo(const int id_orig, const int nf_orig,
 }
 
 VertexInfo::VertexInfo(const int id_orig, const Vector3d vector_orig,
-		Polyhedron* poly_orig) :
+		shared_ptr<Polyhedron> poly_orig) :
 				id(id_orig),
 				numFacets(0),
 				vector(vector_orig),
