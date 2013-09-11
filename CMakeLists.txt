@@ -34,9 +34,7 @@ list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LibGEXF")
 list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
 include_directories(${INCLUDE_DIRS_all})
 
-if (CMAKE_COMPILER_IS_GNUCXX)
-	set(COMMON_FLAGS "-std=c++11")
-endif ()
+set(COMMON_FLAGS "-std=c++11")
 
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
