@@ -59,11 +59,10 @@ Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, Polyhedron* poly_orig) 
 				id(id_orig),
 				numVertices(nv_orig),
 				plane(plane_orig),
-				parentPolyhedron(poly_orig),
-				rgb(
-				{ 255, 255, 255 })
+				parentPolyhedron(poly_orig)
 {
 	DEBUG_START;
+	rgb[0] = rgb[1] = rgb[2] = 255;
 	indVertices = new int[3 * numVertices + 1];
 	for (int iVertex = 0; iVertex < 3 * numVertices + 1; ++iVertex)
 	{

@@ -14,7 +14,7 @@ void Edge::my_fprint(FILE* file) const
 			"edge)\n", f0);
 	REGULAR_PRINT(file, "\tf1 = %d (second facet including this"
 			"edge)\n", f1);
-	REGULAR_PRINT(file, "\tnumc = %d (number of contours, from which this"
+	REGULAR_PRINT(file, "\tnumc = %ld (number of contours, from which this"
 			"edge is visible)\n", assocList.size());
 	REGULAR_PRINT(file, "\tThese are that contours:\n");
 	REGULAR_PRINT(file,

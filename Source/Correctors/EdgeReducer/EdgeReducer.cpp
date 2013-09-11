@@ -596,7 +596,7 @@ bool EdgeReducer::updateEdges()
 	if (edgeRemoved != edgeData->edges.end())
 	{
 		DEBUG_PRINT("The edge [%d, %d] has not been removed from the "
-				"set!");
+				"set!", edgeRemoved->v0, edgeRemoved->v1);
 		edgesWS->edgesErased->insert(pair<int, int> (edgeRemoved->v0,
 				edgeRemoved->v1));
 		edgeData->edges.erase(edgeRemoved);

@@ -46,7 +46,7 @@ public:
 	void collect(Facet* facet);
 
 	/* Dump already collected graph data to the file. */
-	void dump(char* fileName);
+	void dump(const char* fileName);
 };
 
 #endif /* GRAPHDUMPERGEXF_H_ */

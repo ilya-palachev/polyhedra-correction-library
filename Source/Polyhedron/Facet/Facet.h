@@ -15,7 +15,7 @@ public:
 	Plane plane;
 	int* indVertices;
 	Polyhedron* parentPolyhedron;
-	char rgb[3];
+	unsigned char rgb[3];
 
 public:
 	// Facet.cpp

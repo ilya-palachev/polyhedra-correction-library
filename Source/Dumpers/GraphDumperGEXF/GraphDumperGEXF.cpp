@@ -99,7 +99,7 @@ void GraphDumperGEXF::collect(Facet* facet)
 	DEBUG_END;
 }
 
-void GraphDumperGEXF::dump(char* fileName)
+void GraphDumperGEXF::dump(const char* fileName)
 {
 	DEBUG_START;
 
