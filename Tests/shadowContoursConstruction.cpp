@@ -30,16 +30,17 @@ int main(int argc, char** argv)
 	/* In case when environmental variable
 	 * "SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN" is defined, do printing of
 	 * contour data instead of reading it. */
-	if (strlen(getenv("SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN")) > 0)
+	char* firstRun = getenv("SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN");
+	if ( firstRun != NULL && sizeof(firstRun) > 0)
 	{
+		DEBUG_PRINT("firstRun = %s", firstRun);
 		FILE* fileOriginal = (FILE*) fopen(nameFileOriginal, "w");
 		contourData->fprintDefault(fileOriginal);
 	}
 	else
 	{
-		FILE* fileOriginal = (FILE*) fopen(nameFileOriginal, "r");
 		ShadeContourData* contourDataOriginal = new ShadeContourData(polyhedron);
-		bool ifScanSucceeded = contourDataOriginal->fscanDefault(fileOriginal);
+		bool ifScanSucceeded = contourDataOriginal->fscanDefault(nameFileOriginal);
 		if (!ifScanSucceeded)
 		{
 			ERROR_PRINT("Failed to scan contour data from file %s", nameFileOriginal);
@@ -54,8 +55,12 @@ int main(int argc, char** argv)
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
+		delete contourDataOriginal;
 	}
 
+	delete polyhedron;
+	delete contourData;
+	delete scConstructor;
 
 	DEBUG_END;
 	return EXIT_SUCCESS;

@@ -29,7 +29,7 @@ ShadeContourData::~ShadeContourData()
 	DEBUG_END;
 }
 
-bool ShadeContourData::fscanDefault(char* fileNameContours)
+bool ShadeContourData::fscanDefault(const char* fileNameContours)
 {
 	DEBUG_START;
 	FILE* fd = (FILE*) fopen(fileNameContours, "r");
