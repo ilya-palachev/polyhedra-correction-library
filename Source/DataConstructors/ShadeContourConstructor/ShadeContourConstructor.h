@@ -21,7 +21,8 @@ private:
 
 	EdgeDataPtr edgeData;
 
-	SContour& createContour(int idOfContour, Plane planeOfProjection);
+	void createContour(int idOfContour, Plane planeOfProjection,
+			SContour* outputContour);
 	bool edgeIsVisibleOnPlane(Edge edge, Plane planeOfProjection);
 	bool collinearVisibility(int v0processed, int v1processed,
 			Plane planeOfProjection, int ifacet);

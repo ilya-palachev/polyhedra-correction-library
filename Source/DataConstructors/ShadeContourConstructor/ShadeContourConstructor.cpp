@@ -67,15 +67,15 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 		Vector3d nu = Vector3d(cos(angle), sin(angle), 0);
 		Plane planeOfProjection = Plane(nu, 0);
 
-		data->contours[iContour] = createContour(iContour, planeOfProjection);
+		createContour(iContour, planeOfProjection, &data->contours[iContour]);
 	}
 
 	delete edgeConstructor;
 	DEBUG_END;
 }
 
-SContour& ShadeContourConstructor::createContour(int idOfContour,
-		Plane planeOfProjection)
+void ShadeContourConstructor::createContour(int idOfContour,
+		Plane planeOfProjection, SContour* outputContour)
 {
 	DEBUG_START;
 	int* visibleEdgesSorted = bufferInt1;
@@ -107,7 +107,6 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 		++iEdge;
 	}
 
-	SContour* outputContour = new SContour;
 	outputContour->id = idOfContour;
 	outputContour->sides = new SideOfContour[edgesVisible.size()];
 	outputContour->ns = edgesVisible.size();
@@ -158,7 +157,6 @@ SContour& ShadeContourConstructor::createContour(int idOfContour,
 	}
 
 	DEBUG_END;
-	return *outputContour;
 }
 
 bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
