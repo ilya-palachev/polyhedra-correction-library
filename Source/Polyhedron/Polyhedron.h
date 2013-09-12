@@ -38,6 +38,12 @@ public:
 	Facet* facets;
 	VertexInfo* vertexInfos;
 
+protected:
+	inline shared_ptr<Polyhedron> get_ptr()
+	{
+		return shared_from_this();
+	}
+
 public:
 
 	//Polyhedron.cpp

@@ -28,7 +28,7 @@ void Polyhedron::preprocessAdjacency()
 	vertexInfos = new VertexInfo[numVertices];
 	for (i = 0; i < numVertices; ++i)
 	{
-		vertexInfos[i] = VertexInfo(i, vertices[i], &(*this));
+		vertexInfos[i] = VertexInfo(i, vertices[i], get_ptr());
 		vertexInfos[i].preprocess();
 	}
 	DEBUG_END;

@@ -115,8 +115,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 				return;
 			}
 		}
-		facets[i] = Facet(i, nv, plane, index,
-				std::make_shared<Polyhedron>(shared_from_this()), false);
+		facets[i] = Facet(i, nv, plane, index, get_ptr(), false);
 		delete[] index;
 	}
 	fclose(file);
@@ -203,8 +202,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 				return;
 			}
 		}
-		facets[ii] = Facet(ii, nv, plane, index,
-				std::make_shared<Polyhedron>(shared_from_this()), false);
+		facets[ii] = Facet(ii, nv, plane, index, get_ptr(), false);
 		delete[] index;
 	}
 	fclose(file);
@@ -332,8 +330,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 				return;
 			}
 		}
-		facets[ii] = Facet(ii, nv, plane, index,
-				std::make_shared<Polyhedron>(shared_from_this()), false);
+		facets[ii] = Facet(ii, nv, plane, index, get_ptr(), false);
 		delete[] index;
 	}
 	fclose(file);
@@ -489,7 +486,7 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 		}
 
 		*currFacet = Facet(iFacet, currFacet->numVertices, currFacet->plane,
-				std::make_shared<Polyhedron>(shared_from_this()));
+				get_ptr());
 
 		for (int iVertex = 0; iVertex < currFacet->numVertices; ++iVertex)
 		{
@@ -562,8 +559,8 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 
 	preprocessAdjacency();
 	EdgeData* edgeData2 = new EdgeData;
-	EdgeConstructor* edgeConstructor = new EdgeConstructor(
-			std::make_shared<Polyhedron>(shared_from_this()), edgeData2);
+	EdgeConstructor* edgeConstructor = new EdgeConstructor(get_ptr(),
+			edgeData2);
 	edgeConstructor->run(edgeData2);
 	if (*edgeData != *edgeData2)
 	{
@@ -681,8 +678,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 				return;
 			}
 		}
-		facets[i] = Facet(i, nv, plane, index,
-				std::make_shared<Polyhedron>(shared_from_this()), false);
+		facets[i] = Facet(i, nv, plane, index, get_ptr(), false);
 		delete[] index;
 	}
 	for (i = 0; i < numVertices; ++i)
@@ -706,8 +702,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 				return;
 			}
 		}
-		vertexInfos[i] = VertexInfo(i, nf, vertices[i], index,
-				std::make_shared<Polyhedron>(shared_from_this()));
+		vertexInfos[i] = VertexInfo(i, nf, vertices[i], index, get_ptr());
 		delete[] index;
 	}
 	fclose(file);
@@ -835,8 +830,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		}
 		plane = Plane(vertices[index[0]], vertices[index[1]],
 				vertices[index[2]]);
-		facets[i] = Facet(i, nv, plane, index,
-				std::make_shared<Polyhedron>(shared_from_this()), false);
+		facets[i] = Facet(i, nv, plane, index, get_ptr(), false);
 		delete[] index;
 	}
 	fclose(file);

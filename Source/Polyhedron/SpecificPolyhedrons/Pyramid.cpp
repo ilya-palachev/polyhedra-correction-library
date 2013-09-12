@@ -59,7 +59,7 @@ void Pyramid::init()
 		index[2] = (i + 1) % numVerticesBase;
 		Plane plane = Plane(vertices[index[0]], vertices[index[1]],
 				vertices[index[2]]);
-		facets[i] = Facet(i, 3, plane, index, this, false);
+		facets[i] = Facet(i, 3, plane, index, get_ptr(), false);
 	}
 
 	index = new int[numVerticesBase];
@@ -69,7 +69,7 @@ void Pyramid::init()
 
 	Plane plane = Plane(Vector3d(0., 0., -1.), 0.);
 	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
-			index, this, false);
+			index, get_ptr(), false);
 
 	if (index)
 		delete[] index;

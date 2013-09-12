@@ -63,7 +63,7 @@ void Prism::init()
 		index[3] = index[0] + numVerticesBase;
 		plane = Plane(vertices[index[0]], vertices[index[1]],
 				vertices[index[2]]);
-		facets[i] = Facet(i, 4, plane, index, this, false);
+		facets[i] = Facet(i, 4, plane, index, get_ptr(), false);
 	}
 
 	index = new int[numVerticesBase];
@@ -73,14 +73,14 @@ void Prism::init()
 
 	plane = Plane(Vector3d(0., 0., -1.), 0.);
 	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
-			index, this, false);
+			index, get_ptr(), false);
 
 	for (int i = 0; i < numVerticesBase; ++i)
 		index[i] = i + numVerticesBase;
 
 	plane = Plane(Vector3d(0., 0., 1.), -height);
 	facets[numVerticesBase + 1] = Facet(numVerticesBase + 1, numVerticesBase,
-			plane, index, this, false);
+			plane, index, get_ptr(), false);
 
 	numVertices = 2 * numVerticesBase;
 	numFacets = numVerticesBase + 2;
