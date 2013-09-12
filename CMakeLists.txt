@@ -8,6 +8,8 @@ file(GLOB_RECURSE SOURCE_vector3d             "./External/Vector3d/*.cpp")
 file(GLOB_RECURSE SOURCE_pcl                  "./Source/*.cpp")
 file(GLOB_RECURSE SOURCE_gexf                 "./External/LibGEXF/*.cpp")
 
+file(GLOB_RECURSE SOURCE_tests                "./Tests/*.cpp")
+
 file(GLOB_RECURSE HEADERS_arrayOperations     "./External/ArrayOperations/*.h")
 file(GLOB_RECURSE HEADERS_gaussString         "./External/GaussString/*.h")
 file(GLOB_RECURSE HEADERS_lsm                 "./External/LSM/*.h")
@@ -53,6 +55,13 @@ target_link_libraries(pcl
    xml2
 )
 
+foreach(test_source_file ${SOURCE_tests})
+	get_filename_component(executable_name ${test_source_file} NAME_WE)
+	message("Adding executable ${executable_name}")
+	add_executable(${executable_name} ${test_source_file})
+	target_link_libraries(${executable_name} pcl gaussString)
+endforeach()
+
 if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
 	set(CMAKE_BUILD_TYPE "Release")
 	set(COMMON_FLAGS "${COMMON_FLAGS} -g")
@@ -74,8 +83,6 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Valg
 		set_source_files_properties(${souce_file} PROPERTIES COMPILE_FLAGS -UNDEBUG)
 	endforeach()
 endif ()
-	
-add_subdirectory(Tests)
 
 # add custom target distclean
 # cleans and removes cmake generated files etc.
