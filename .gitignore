@@ -4,3 +4,5 @@ poly-data-out
 .cproject
 .project
 .checkers
+.settings
+.externalToolBuilders
