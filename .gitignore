@@ -1,9 +1,30 @@
+#  This file contains the description of files that should not be conrolled by
+# Git version control system. Any changes in these files or directories and 
+# their contents will not be detected by Git.
+
+#  Please, add regular expressions for each specific IDE files if you open
+# given project in them locally.
+
+
+
+# Building directories and files:
 *.o
+*.so
+*.a
 Build*
+build
+
+# Directory with output from polyhedral algorithms:
 poly-data-out
+
+# Eclipse setting files:
 .cproject
 .project
 .checkers
 .settings
 .externalToolBuilders
 .directory
+
+# KDelevelop setting files:
+*kdev4*
+
