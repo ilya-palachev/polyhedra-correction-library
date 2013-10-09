@@ -573,6 +573,15 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 	int iBegin = iSideDistMin1;
 	int iEnd = (numSides + iSideDistMin0 + iStep) % numSides;
 
+	if (iBegin == iEnd)
+	{
+		/* (???) This is done to fix the case when association is trivial. */
+		iResultBegin = iBegin;
+		iResultEnd = iEnd;
+		DEBUG_END;
+		return;
+	}
+
 	double* lengthSide = bufDouble;
 
 	DEBUG_PRINT("Starting calculating length of chain");
