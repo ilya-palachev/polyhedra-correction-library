@@ -11,10 +11,10 @@
 class PAnalyzer
 {
 protected:
-	Polyhedron* polyhedron;
+	shared_ptr<Polyhedron> polyhedron;
 public:
 	PAnalyzer();
-	PAnalyzer(Polyhedron* p);
+	PAnalyzer(shared_ptr<Polyhedron> p);
 	virtual ~PAnalyzer();
 };
 

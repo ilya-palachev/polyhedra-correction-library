@@ -72,6 +72,7 @@ Verifier::~Verifier()
 			delete edgesWS->edgesEdited;
 		}
 	}
+	DEBUG_PRINT("Polyhedron use_count = %ld", polyhedron.use_count());
 	DEBUG_END;
 }
 

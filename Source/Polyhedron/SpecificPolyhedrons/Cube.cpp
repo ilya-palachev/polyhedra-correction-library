@@ -127,7 +127,7 @@ void Cube::init()
 
 	for (int i = 0; i < numFacets; ++i)
 	{
-		facets[i].parentPolyhedron.reset(this);
+		facets[i].set_poly(get_ptr());
 	}
 	DEBUG_END;
 }

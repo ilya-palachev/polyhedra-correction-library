@@ -3,7 +3,7 @@
 void Polyhedron::shiftPoint(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifter* pShifter = new PointShifter(this);
+	PointShifter* pShifter = new PointShifter(get_ptr());
 	pShifter->run(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -12,7 +12,7 @@ void Polyhedron::shiftPoint(int id, Vector3d delta)
 void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifterWeighted* pShifter = new PointShifterWeighted(this);
+	PointShifterWeighted* pShifter = new PointShifterWeighted(get_ptr());
 	pShifter->run(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -27,7 +27,7 @@ void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
 void Polyhedron::shiftPointLinearGlobal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runGlobal(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -37,7 +37,7 @@ void Polyhedron::shiftPointLinearGlobal(int id, Vector3d delta)
 void Polyhedron::shiftPointLinearLocal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runLocal(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -47,7 +47,7 @@ void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
 		int& num_steps, double& norm_sum)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runTest(id, delta, mode, num_steps, norm_sum);
 	delete pShifter;
 	DEBUG_END;
@@ -56,7 +56,7 @@ void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
 void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runPartial(id, delta, num);
 	delete pShifter;
 	DEBUG_END;

@@ -14,7 +14,7 @@ SizeCalculator::SizeCalculator() :
 	DEBUG_END;
 }
 
-SizeCalculator::SizeCalculator(Polyhedron* p) :
+SizeCalculator::SizeCalculator(shared_ptr<Polyhedron> p) :
 		PAnalyzer(p)
 {
 	DEBUG_START;

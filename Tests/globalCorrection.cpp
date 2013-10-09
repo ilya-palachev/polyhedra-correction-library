@@ -29,7 +29,7 @@ MethodCorrector parse_methodName(char* methodNameInput);
 
 int parse_commandLine(int argc, char** argv, TestParameters& parameters);
 
-Polyhedron* makePolyhedron(NameFigure figureParsed);
+shared_ptr<Polyhedron> makePolyhedron(NameFigure figureParsed);
 
 inline void moveFacetRandom(shared_ptr<Polyhedron> polyhedron,
 		double maxMoveDelta, int ifacet);
@@ -43,8 +43,7 @@ int main(int argc, char** argv)
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	shared_ptr<Polyhedron> polyhedron(new Polyhedron());
-	polyhedron.reset(makePolyhedron(parameters.figure));
+	shared_ptr<Polyhedron> polyhedron(makePolyhedron(parameters.figure));
 
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-before.ply",
@@ -68,6 +67,10 @@ int main(int argc, char** argv)
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-after.ply",
 			"globalCorrection");
+
+	DEBUG_PRINT("Polyhedron's use count: %ld", polyhedron.use_count());
+	polyhedron.reset();
+	DEBUG_PRINT("Polyhedron's use count: %ld (after reset)", polyhedron.use_count());
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
@@ -196,32 +199,46 @@ MethodCorrector parse_methodName(char* methodNameInput)
 	return ret;
 }
 
-Polyhedron* makePolyhedron(NameFigure figureParsed)
+shared_ptr<Polyhedron> makePolyhedron(NameFigure figureParsed)
 {
 	DEBUG_START;
-	Polyhedron* ret;
 	switch (figureParsed)
 	{
 	case FIGURE_CUBE:
-		ret = new Cube(1., 0., 0., 0.);
+	{
+		shared_ptr<Polyhedron> ret(new Cube(1., 0., 0., 0.));
+		DEBUG_END;
+		return ret;
+	}
 		break;
 	case FIGURE_PYRAMID:
-		ret = new Pyramid(3, 1., 1.);
+	{
+		shared_ptr<Polyhedron> ret(new Pyramid(3, 1., 1.));
+		DEBUG_END;
+		return ret;
+	}
 		break;
 	case FIGURE_PRISM:
-		ret = new Prism(3, 1., 1.);
+	{
+		shared_ptr<Polyhedron> ret(new Prism(3, 1., 1.));
+		DEBUG_END;
+		return ret;
+	}
 		break;
 	case FIGURE_CUBE_CUTTED:
-		ret = new CubeCutted();
+	{
+		shared_ptr<Polyhedron> ret(new CubeCutted());
+		DEBUG_END;
+		return ret;
+	}
 		break;
 	default:
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
-		ret = NULL;
 		break;
 	}
 	DEBUG_END;
-	return ret;
+	return NULL;
 }
 
 static double genRandomDouble(double maxDelta)

@@ -14,7 +14,7 @@ PAnalyzer::PAnalyzer() :
 	DEBUG_END;
 }
 
-PAnalyzer::PAnalyzer(Polyhedron* p) :
+PAnalyzer::PAnalyzer(shared_ptr<Polyhedron> p) :
 		polyhedron(p)
 {
 	DEBUG_START;

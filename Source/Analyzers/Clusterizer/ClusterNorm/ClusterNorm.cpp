@@ -49,16 +49,11 @@ ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 	{
 		indexFacet[i] = orig.indexFacet[i];
 	}
-	poly = new Polyhedron;
-	for (int i = 0; i < num; ++i)
-	{
-		poly->facets[i] = orig.poly->facets[i];
-	}
 	DEBUG_END;
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-		Polyhedron* poly_orig) :
+		shared_ptr<Polyhedron> poly_orig) :
 				num(num_orig),
 				numMax(numMax_orig),
 				P(P_orig),
@@ -70,7 +65,7 @@ ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-		int* indexFacet_orig, Polyhedron* poly_orig) :
+		int* indexFacet_orig, shared_ptr<Polyhedron> poly_orig) :
 				num(num_orig),
 				numMax(numMax_orig),
 				P(P_orig),

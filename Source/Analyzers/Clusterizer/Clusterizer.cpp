@@ -14,7 +14,7 @@ Clusterizer::Clusterizer() :
 	DEBUG_END;
 }
 
-Clusterizer::Clusterizer(Polyhedron* p) :
+Clusterizer::Clusterizer(shared_ptr<Polyhedron> p) :
 		PAnalyzer(p), cluster(new int[polyhedron->numFacets]), A(
 				new int[polyhedron->numFacets]), inc(
 				new bool[polyhedron->numFacets * polyhedron->numFacets]), dist(

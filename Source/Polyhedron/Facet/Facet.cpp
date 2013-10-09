@@ -117,8 +117,6 @@ Facet::~Facet()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Deleting facet[%d]", id);
-	DEBUG_PRINT("use count of parentPolyhedron: %ld",
-			parentPolyhedron.use_count());
 	clear();
 	DEBUG_END;
 }
@@ -132,6 +130,10 @@ void Facet::clear()
 		indVertices = NULL;
 	}
 	numVertices = 0;
+	/* Destructors of Facet and Polyhedron begin recursively call each other.
+	 * Currently i don't know how to fix this. Thus this assignment to NULL is
+	 * added.*/
+	parentPolyhedron = NULL;
 	DEBUG_END;
 }
 

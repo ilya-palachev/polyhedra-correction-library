@@ -16,7 +16,7 @@ private:
 
 public:
 	SizeCalculator();
-	SizeCalculator(Polyhedron* p);
+	SizeCalculator(shared_ptr<Polyhedron> p);
 	~SizeCalculator();
 
 	double calculate_J11(int N);

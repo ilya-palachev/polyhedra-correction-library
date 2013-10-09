@@ -18,7 +18,7 @@ private:
 
 public:
 	Clusterizer();
-	Clusterizer(Polyhedron* p);
+	Clusterizer(shared_ptr<Polyhedron> p);
 	~Clusterizer();
 	int clusterize(double p);
 	void clusterize2(double p);

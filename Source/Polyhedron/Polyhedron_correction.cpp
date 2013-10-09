@@ -12,7 +12,7 @@ void Polyhedron::correctGlobal(shared_ptr<ShadeContourData> contourData,
 {
 	DEBUG_START;
 	preprocessAdjacency();
-	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(this,
+	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(get_ptr(),
 			contourData, parameters);
 	gsCorrector->runCorrection();
 	delete gsCorrector;

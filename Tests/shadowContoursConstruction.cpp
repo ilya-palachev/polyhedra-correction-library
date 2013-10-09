@@ -51,12 +51,6 @@ int main(int argc, char** argv)
 			ERROR_PRINT("Failed to scan contour data from file %s",
 					nameFileOriginal);
 			DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
-			for (int iFacet = 0; iFacet < cube->numFacets; ++iFacet)
-			{
-				cube->facets[iFacet].parentPolyhedron.reset();
-				DEBUG_PRINT("polyhedron use count: %ld after reseting", cube.use_count());
-			}
-			DEBUG_PRINT("polyhedron use count: %ld after reseting", cube.use_count());
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
