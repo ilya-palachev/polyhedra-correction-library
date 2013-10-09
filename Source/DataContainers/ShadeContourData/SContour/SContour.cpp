@@ -39,6 +39,7 @@ SContour::~SContour()
 	DEBUG_START;
 
 	DEBUG_PRINT("Attention! shade contour %d is being deleted now...\n", this->id);
+	DEBUG_PRINT("polyhedron use count: %ld", poly.use_count());
 
 	if (sides != NULL)
 	{

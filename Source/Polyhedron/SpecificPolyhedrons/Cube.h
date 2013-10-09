@@ -20,7 +20,7 @@ public:
 	Cube(double h);
 	Cube(double h, double x, double y, double z);
 	Cube(double h, Vector3d c);
-	~Cube();
+	virtual ~Cube();
 };
 
 #endif /* CUBE_H_ */

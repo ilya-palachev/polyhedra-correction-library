@@ -53,7 +53,7 @@ public:
 			Facet* facet_orig);
 	Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 			Facet* facet_orig, VertexInfo* vertexinfo);
-	~Polyhedron();
+	virtual ~Polyhedron();
 
 	void get_boundary(double& xmin, double& xmax, double& ymin, double& ymax,
 			double& zmin, double& zmax);

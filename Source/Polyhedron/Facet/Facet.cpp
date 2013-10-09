@@ -117,6 +117,8 @@ Facet::~Facet()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Deleting facet[%d]", id);
+	DEBUG_PRINT("use count of parentPolyhedron: %ld",
+			parentPolyhedron.use_count());
 	clear();
 	DEBUG_END;
 }

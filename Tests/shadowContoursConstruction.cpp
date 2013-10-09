@@ -20,12 +20,12 @@ int main(int argc, char** argv)
 	DEBUG_START;
 
 	/* Create a cube with side 1 and with center in the O = (0, 0, 0). */
-	std::shared_ptr<Polyhedron> polyhedron(new Cube(1., 0., 0., 0.));
+	shared_ptr<Polyhedron> cube(new Cube(1., 0., 0., 0.));
 
-	std::shared_ptr<ShadeContourData> contourData(new
-			ShadeContourData(polyhedron));
-	std::shared_ptr<ShadeContourConstructor> scConstructor(new
-			ShadeContourConstructor(polyhedron, contourData));
+	shared_ptr<ShadeContourData> contourData(new
+			ShadeContourData(cube));
+	shared_ptr<ShadeContourConstructor> scConstructor(new
+			ShadeContourConstructor(cube, contourData));
 	scConstructor->run(NUM_CONTOURS, SHIFT_ANGLE_FIRST);
 
 	/* In case when environmental variable
@@ -40,14 +40,23 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		std::shared_ptr<ShadeContourData> contourDataOriginal(new
-				ShadeContourData(polyhedron));
+		DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
+
+		shared_ptr<ShadeContourData> contourDataOriginal(new
+				ShadeContourData(cube));
 		bool ifScanSucceeded =
 				contourDataOriginal->fscanDefault(nameFileOriginal);
 		if (!ifScanSucceeded)
 		{
 			ERROR_PRINT("Failed to scan contour data from file %s",
 					nameFileOriginal);
+			DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
+			for (int iFacet = 0; iFacet < cube->numFacets; ++iFacet)
+			{
+				cube->facets[iFacet].parentPolyhedron.reset();
+				DEBUG_PRINT("polyhedron use count: %ld after reseting", cube.use_count());
+			}
+			DEBUG_PRINT("polyhedron use count: %ld after reseting", cube.use_count());
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
@@ -56,11 +65,13 @@ int main(int argc, char** argv)
 		{
 			ERROR_PRINT("Inequality found during comparison of obtained "
 					"contour data with original one.");
+			DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
 	}
 
+	DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }
