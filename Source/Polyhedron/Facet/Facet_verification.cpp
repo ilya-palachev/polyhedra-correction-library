@@ -45,7 +45,7 @@ bool Facet::verifyIncidenceStructure()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Verifying information about incidence structure contained in "
-			"facet #%d");
+			"facet #%d", id);
 
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{

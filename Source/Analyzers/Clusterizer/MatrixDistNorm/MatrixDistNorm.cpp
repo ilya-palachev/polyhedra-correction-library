@@ -7,20 +7,15 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 MatrixDistNorm::MatrixDistNorm() :
-				n(0),
-				nMax(0),
-				matrix(NULL),
-				ifStay(NULL)
+		n(0), nMax(0), matrix(NULL), ifStay(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
-				n(0),
-				nMax(nMax_orig),
-				matrix(new double[nMax_orig * nMax_orig]),
-				ifStay(new bool[nMax_orig])
+		n(0), nMax(nMax_orig), matrix(new double[nMax_orig * nMax_orig]), ifStay(
+				new bool[nMax_orig])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax_orig; ++i)
@@ -29,10 +24,8 @@ MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
 }
 
 MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
-				n(orig.n),
-				nMax(orig.nMax),
-				matrix(new double[orig.nMax * orig.nMax]),
-				ifStay(new bool[orig.nMax])
+		n(orig.n), nMax(orig.nMax), matrix(new double[orig.nMax * orig.nMax]), ifStay(
+				new bool[orig.nMax])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax * nMax; ++i)
@@ -198,13 +191,13 @@ double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
 
 	for (int i = 0; i < numcl; ++i)
 	{
-		REGULAR_PRINT(file, "cluster%d = {",i);
+		REGULAR_PRINT(stdout, "cluster%d = {", i);
 		area1 = nodeArray1[i].cluster->area();
 		area2 = nodeArray2[i].cluster->area();
 		area1 -= area2;
 		area1 *= area1;
 		norm += area1;
-		REGULAR_PRINT(file, "}\n");
+		REGULAR_PRINT(stdout, "}\n");
 	}
 	DEBUG_END;
 	return norm / numcl;
@@ -532,7 +525,8 @@ void MatrixDistNorm::fprint(FILE* file)
 	{
 		for (int j = i + 1; j < n; ++j)
 		{
-			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n", i, j, matrix[i * n + j]);
+			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n",
+					i, j, matrix[i * n + j]);
 		}
 	}
 	DEBUG_END;

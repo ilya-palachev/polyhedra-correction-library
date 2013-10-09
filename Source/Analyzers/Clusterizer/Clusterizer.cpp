@@ -8,22 +8,17 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 Clusterizer::Clusterizer() :
-		PAnalyzer(),
-		cluster(),
-		A(),
-		inc(),
-		dist()
+		PAnalyzer(), cluster(), A(), inc(), dist()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 Clusterizer::Clusterizer(Polyhedron* p) :
-		PAnalyzer(p),
-		cluster(new int[polyhedron->numFacets]),
-		A(new int[polyhedron->numFacets]),
-		inc(new bool[polyhedron->numFacets * polyhedron->numFacets]),
-		dist(new double[polyhedron->numFacets * polyhedron->numFacets])
+		PAnalyzer(p), cluster(new int[polyhedron->numFacets]), A(
+				new int[polyhedron->numFacets]), inc(
+				new bool[polyhedron->numFacets * polyhedron->numFacets]), dist(
+				new double[polyhedron->numFacets * polyhedron->numFacets])
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -83,7 +78,8 @@ int Clusterizer::clusterize(double p)
 			sin_alpha = sqrt(qmod(n0 % n1) / (qmod(n0) * qmod(n1)));
 			alpha = asin(sin_alpha);
 			alpha = fabs(alpha);
-			if (i * polyhedron->numFacets + fid >= polyhedron->numFacets * polyhedron->numFacets)
+			if (i * polyhedron->numFacets + fid
+					>= polyhedron->numFacets * polyhedron->numFacets)
 				DEBUG_PRINT("Warning!!!\n");
 			dist[i * polyhedron->numFacets + fid] = alpha;
 		}
@@ -261,10 +257,13 @@ TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 	int id0, id1;
 	for (int i = 0; i < polyhedron->numFacets - 1; ++i)
 	{
-		DEBUG_PRINT("---------------------------------------------------------\n");
-		DEBUG_PRINT("-----------------------    %d    ------------------------\n",
+		DEBUG_PRINT(
+				"---------------------------------------------------------\n");
+		DEBUG_PRINT(
+				"-----------------------    %d    ------------------------\n",
 				i);
-		DEBUG_PRINT("---------------------------------------------------------\n");
+		DEBUG_PRINT(
+				"---------------------------------------------------------\n");
 
 		matrix.fprint_ifStay(stdout);
 
@@ -275,8 +274,8 @@ TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 			break;
 #endif
 		//  DEBUG_PRINT("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n", id0, id1, distance_id0_id1);
-		DEBUG_PRINT("id0 = %d, id1 = %d, distance(id0, id1) = %lf\n", id0, id1,
-				distance_id0_id1);
+		DEBUG_PRINT("id0 = %d, id1 = %d, distance(id0, id1) = %lf\n",
+				id0, id1, distance_id0_id1);
 //        matrix.fprint(stdout);
 
 		newChild0 = new TreeClusterNormNode;
@@ -292,7 +291,6 @@ TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 		nodeArray[id0].cluster = newCluster;
 		nodeArray[id0].child0 = newChild0;
 		nodeArray[id0].child1 = newChild1;
-
 
 		matrix.rebuild(id0, id1, nodeArray);
 	}
@@ -310,8 +308,8 @@ TreeClusterNorm& Clusterizer::build_TreeClusterNorm()
 	tree = new TreeClusterNorm;
 	*tree = TreeClusterNorm(nodeArray);
 
-    tree->fprint(stdout);
-    DEBUG_END;
+	tree->fprint(stdout);
+	DEBUG_END;
 	return *tree;
 }
 
@@ -331,7 +329,8 @@ void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
-        DEBUG_PRINT("norm[%d] = %lf\n", i, sqrt(qmod(facet[i].plane.norm)) );
+		DEBUG_PRINT("norm[%d] = %lf\n",
+				i, sqrt(qmod(polyhedron->facets[i].plane.norm)));
 		spherePoint = SpherePoint(polyhedron->facets[i].plane.norm);
 		newIndex[0] = i;
 		newCluster = new ClusterNorm;
@@ -339,25 +338,27 @@ void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 
 		nodeArray[i].cluster = newCluster;
 
-        nodeArray[i].fprint(stdout, 0);
+		nodeArray[i].fprint(stdout, 0);
 	}
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
-        nodeArray[i].fprint(stdout, 0);
+		nodeArray[i].fprint(stdout, 0);
 	}
 
-
 	matrix.build(polyhedron->numFacets, nodeArray);
-    matrix.fprint(stdout);
-    matrix.fprint_clusters(stdout, nodeArray);
+	matrix.fprint(stdout);
+	matrix.fprint_clusters(stdout, nodeArray);
 
 	int id0, id1;
 	for (int i = 0; i < polyhedron->numFacets - 1; ++i)
 	{
-		DEBUG_PRINT("---------------------------------------------------------\n");
-		DEBUG_PRINT("-----------------------    %d    ------------------------\n",
+		DEBUG_PRINT(
+				"---------------------------------------------------------\n");
+		DEBUG_PRINT(
+				"-----------------------    %d    ------------------------\n",
 				i);
-		DEBUG_PRINT("---------------------------------------------------------\n");
+		DEBUG_PRINT(
+				"---------------------------------------------------------\n");
 
 		//matrix.fprint_ifStay(stdout);
 
@@ -367,10 +368,11 @@ void Clusterizer::giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 		if (distance_id0_id1 > LIMIT_FOR_CLUSTERIZATION)
 			break;
 #endif
-		  DEBUG_PRINT("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n", id0, id1, distance_id0_id1);
-		DEBUG_PRINT("id0 = %d, id1 = %d, distance(id0, id1) = %lf\n", id0, id1,
-				distance_id0_id1);
-        matrix.fprint(stdout);
+		DEBUG_PRINT("min_id0 = %d, min_id1 = %d, distance(id0, id1) = %lf\n",
+				id0, id1, distance_id0_id1);
+		DEBUG_PRINT("id0 = %d, id1 = %d, distance(id0, id1) = %lf\n",
+				id0, id1, distance_id0_id1);
+		matrix.fprint(stdout);
 
 		newChild0 = new TreeClusterNormNode;
 		*newChild0 = nodeArray[id0];
@@ -425,14 +427,15 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 
 	for (int i = 0; i < polyhedron->numFacets; i++)
 	{
-        DEBUG_PRINT("Trying to find nearest cluster for facet %d\n", i);
+		DEBUG_PRINT("Trying to find nearest cluster for facet %d\n", i);
 
 		SpherePoint FacetNorm(polyhedron->facets[i].plane.norm);
 		double minDistPoint = 1000000;
 		position = -1;
 		for (int j = 0; j < numCluster; j++)
 		{
-			double tmpdist = distSpherePoint(FacetNorm, nodeArray_in[j].cluster->P);
+			double tmpdist = distSpherePoint(FacetNorm,
+					nodeArray_in[j].cluster->P);
 			if (tmpdist < minDistPoint)
 			{
 				minDistPoint = tmpdist;
@@ -446,13 +449,13 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 		newCluster = new ClusterNorm;
 		*newCluster = ClusterNorm(1, 1, spherePoint, newIndex, polyhedron);
 
-        DEBUG_PRINT("Local cluster : ");
-        newCluster->fprint(stdout);
-        DEBUG_PRINT("\n");
+		DEBUG_PRINT("Local cluster : ");
+		newCluster->fprint(stdout);
+		DEBUG_PRINT("\n");
 
-        DEBUG_PRINT("Previous state of cluster : ");
-        nodeArray_out[position].cluster->fprint(stdout);
-        DEBUG_PRINT("\n");
+		DEBUG_PRINT("Previous state of cluster : ");
+		nodeArray_out[position].cluster->fprint(stdout);
+		DEBUG_PRINT("\n");
 
 		if (nodeArray_out[position].cluster->num == 0)
 		{
@@ -462,7 +465,7 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 		{
 			*(nodeArray_out[position].cluster) += *newCluster;
 		}
-        DEBUG_PRINT("End of step %d\n", i);
+		DEBUG_PRINT("End of step %d\n", i);
 
 	}
 
@@ -476,5 +479,4 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 	}
 	DEBUG_END;
 }
-
 

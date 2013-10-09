@@ -37,7 +37,7 @@ void EdgeConstructor::run(EdgeDataPtr edgeData)
 					i, // Current facets id
 					index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
 			DEBUG_PRINT("After iteration #%d we have the "
-					"following edge data:", edgeData->edges.size());
+					"following edge data:", (int) edgeData->edges.size());
 			edge = edgeData->edges.begin();
 			for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 			{
