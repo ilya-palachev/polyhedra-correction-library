@@ -219,6 +219,9 @@ void Facet::set_ind_vertex(int position, int value)
 	}
 	DEBUG_PRINT("setting indVertices[%d] = %d", position, value);
 	indVertices[position] = value;
+	/* Previous assignment can break the cycling vertex. Thus we need to repair
+	 * it. */
+	indVertices[numVertices] = indVertices[0];
 	DEBUG_END;
 }
 
