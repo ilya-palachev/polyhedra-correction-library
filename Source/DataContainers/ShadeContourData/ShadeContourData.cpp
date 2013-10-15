@@ -131,7 +131,7 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 				return false;
 			}
 
-			if (fscanf(fd, "%d", &currSide->type) != 1)
+			if (fscanf(fd, "%d", (int*)&currSide->type) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
 						"in type of side #%d of contour #%d",

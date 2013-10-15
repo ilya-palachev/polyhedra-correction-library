@@ -47,7 +47,7 @@ void GlobalShadeCorrector::derivativeTest_1()
 			double valueFromGradient =
 					gradient[4 * iFacetShifted + iCoefficient];
 
-			bool makeAssertion = false;
+			DEBUG_VARIABLE bool makeAssertion = false;
 
 			DEBUG_PRINT(
 					"value from derivative test: %le, value from gradient: %le",

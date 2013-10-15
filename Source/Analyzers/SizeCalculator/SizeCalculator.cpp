@@ -130,7 +130,6 @@ double SizeCalculator::areaOfSurface()
 
 	int i, j, *index, nv;
 	Vector3d A0, A1, A2;
-	double xmin, xmax, ymin, ymax, zmin, zmax;
 	double sum_poly = 0, loc, sum_facet;
 
 	Vector3d normal;
@@ -176,7 +175,7 @@ void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 
-	double sum, detJ;
+	double detJ;
 
 	double Jx, Jy, Jz;
 	double Jxy_loc, Jyz_loc, Jxz_loc;
@@ -193,7 +192,6 @@ void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 	y0 = B.y;
 	z0 = B.z;
 
-	sum = 0.;
 	Jxx = 0.;
 	Jyy = 0.;
 	Jzz = 0.;

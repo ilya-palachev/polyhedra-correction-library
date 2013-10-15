@@ -45,7 +45,7 @@ EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
 				pos_future_facet(new int[len])
 {
 	DEBUG_START;
-	for (int i; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		edge0[i] = orig.edge0[i];
 		edge1[i] = orig.edge1[i];
@@ -113,7 +113,7 @@ EdgeSetIntersected& EdgeSetIntersected::operator =(const EdgeSetIntersected& ori
 	id_future_facet = new int[len];
 	pos_future_facet = new int[len];
 
-	for (int i; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		edge0[i] = orig.edge0[i];
 		edge1[i] = orig.edge1[i];

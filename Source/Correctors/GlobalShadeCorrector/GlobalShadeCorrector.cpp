@@ -77,10 +77,12 @@ void GlobalShadeCorrector::init()
 {
 	DEBUG_START;
 
-	/* By default, before beginning the algorithm we set the list of corrected
+	/*
+	 * By default, before beginning the algorithm we set the list of corrected
 	 * facets to full list, so the default correction mode is correction of all
-	 * facets. */
-	for (int iFacet; iFacet < polyhedron->numFacets; ++iFacet)
+	 * facets.
+	 */
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		facetsCorrected.push_back(iFacet);
 	}
@@ -448,7 +450,6 @@ double GlobalShadeCorrector::calculateFunctional()
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
-		int iAssoc = 0;
 		for (list<EdgeContourAssociation>::const_iterator itCont =
 				edge->assocList.begin();
 				itCont != edge->assocList.end(); ++itCont)
@@ -775,7 +776,6 @@ void GlobalShadeCorrector::calculateGradient()
 			ASSERT((edge->v0 == v0 && edge->v1 == v1) ||
 					(edge->v0 == v1 && edge->v1 == v0));
 
-			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::const_iterator itCont =
 					edge->assocList.begin();
 					itCont != edge->assocList.end(); ++itCont)

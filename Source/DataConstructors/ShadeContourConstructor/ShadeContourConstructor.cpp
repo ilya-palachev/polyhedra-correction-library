@@ -78,9 +78,8 @@ void ShadeContourConstructor::createContour(int idOfContour,
 		Plane planeOfProjection, SContour* outputContour)
 {
 	DEBUG_START;
-	int* visibleEdgesSorted = bufferInt1;
 
-	Vector3d nu = planeOfProjection.norm;
+	DEBUG_VARIABLE Vector3d nu = planeOfProjection.norm;
 
 	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n",
 			idOfContour, nu.x, nu.y, nu.z);
@@ -114,10 +113,11 @@ void ShadeContourConstructor::createContour(int idOfContour,
 	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
 
-	EdgeSetIterator edgeCurr = edgesVisible.begin();
-	int iVertexCurr = edgeCurr->v1;
-	for (int iSide = 0; iSide < edgesVisible.size(); ++iSide)
+	int iSide = 0;
+	for (EdgeSetIterator edgeCurr = edgesVisible.begin();
+		 edgeCurr != edgesVisible.end(); ++edgeCurr, ++iSide)
 	{
+		int iVertexCurr = edgeCurr->v1;
 		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
 		{

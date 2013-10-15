@@ -201,7 +201,7 @@ void Facet::set_poly(shared_ptr<Polyhedron> poly_new)
 	DEBUG_END;
 }
 
-void Facet::set_rgb(char red, char gray, char blue)
+void Facet::set_rgb(unsigned char red, unsigned char gray, unsigned char blue)
 {
 	DEBUG_START;
 	rgb[0] = red;

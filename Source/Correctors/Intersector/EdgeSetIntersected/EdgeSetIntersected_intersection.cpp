@@ -149,7 +149,7 @@ void EdgeSetIntersected::add_edge(int v0, int v1)
 void EdgeSetIntersected::test_info()
 {
 	DEBUG_START;
-	for (int i; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1
 				|| id_edge_list1[i] == -1 || pos_edge_list1[i] == -1

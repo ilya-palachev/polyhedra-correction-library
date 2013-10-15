@@ -48,7 +48,7 @@ public:
 
 	void set_id(int id1);
 	void set_poly(shared_ptr<Polyhedron> poly_new);
-	void set_rgb(char red, char gray, char blue);
+	void set_rgb(unsigned char red, unsigned char gray, unsigned char blue);
 	void set_ind_vertex(int position, int value);
 
 	int signum(int i, Plane plane);

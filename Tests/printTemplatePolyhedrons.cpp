@@ -12,13 +12,12 @@ int main(int argc, char** argv)
 void test_figures()
 {
 	DEBUG_START;
-	char *curr_time, *file_name;
+	char *file_name;
 
 	file_name = new char[255];
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
-	curr_time = asctime(timeinfo);
 
 	Polyhedron* poly;
 

@@ -816,15 +816,14 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 		return;
 	}
 
-	/* Information about associations is accumulated from removed edges to new
+	/*
+	 * Information about associations is accumulated from removed edges to new
 	 * one.
 	 *
 	 * FIXME: In case when edge "edge" already exists in the set, we need to
 	 * merge the lists of associations, because otherwise we will get some
 	 * associations more than one time.
-	 * */
-	int numAssociationsBefore = edgeNew->assocList.size();
-
+	 */
 	edgeNew->assocList.insert(edgeNew->assocList.end(),
 			edge0->assocList.begin(), edge0->assocList.end());
 	edgeNew->assocList.insert(edgeNew->assocList.end(),

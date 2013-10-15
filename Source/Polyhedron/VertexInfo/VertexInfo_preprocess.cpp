@@ -3,27 +3,28 @@
 void VertexInfo::preprocess()
 {
 	DEBUG_START;
-	int i;
-	int pos_curr;
-	int pos_next;
-	int v_curr;
-	int fid_first;
-	int fid_curr;
-	int fid_next;
+	int pos_curr = -1;
+	int pos_next = -1;
+	int v_curr = -1;
+	int fid_first = -1;
+	int fid_curr = -1;
+	int fid_next = -1;
 
     DEBUG_PRINT("1. Searching first facet : ");
-	for (i = 0; i < parentPolyhedron->numFacets; ++i)
+	for (int i = 0; i < parentPolyhedron->numFacets; ++i)
 	{
 		pos_next = parentPolyhedron->facets[i].preprocess_search_vertex(id,
 				v_curr);
 		if (pos_next != -1)
+		{
+			fid_first = fid_next = i;
 			break;
+		}
 	}
 	if (pos_next == -1)
 	{
 		return;
 	}
-	fid_first = fid_next = i;
 
     DEBUG_PRINT("2. Counting the number of facets : ");
 	numFacets = 0;
@@ -86,7 +87,7 @@ void VertexInfo::preprocess()
 	pos_next = parentPolyhedron->facets[fid_first].preprocess_search_vertex(id,
 			v_curr);
 	fid_next = fid_first;
-	for (i = 0; i < numFacets; ++i)
+	for (int i = 0; i < numFacets; ++i)
 	{
 		pos_curr = pos_next;
 		fid_curr = fid_next;

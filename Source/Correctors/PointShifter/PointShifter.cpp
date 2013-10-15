@@ -176,24 +176,22 @@ void print_vector(int n, double* v);
 void PointShifter::run(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int i, step;
 	double err, err_new, gamma;
 	bool success;
 
 	int auto_step;
 
-	double xx, yy, zz;
-	double a, b, c, d;
-	int nv, *index;
+	DEBUG_VARIABLE double xx, yy, zz;
+	DEBUG_VARIABLE double a, b, c, d;
 	for (int j = 0; j < polyhedron->numFacets; ++j)
 	{
 		a = polyhedron->facets[j].plane.norm.x;
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		index = polyhedron->facets[j].indVertices;
-		nv = polyhedron->facets[j].numVertices;
-		for (i = 0; i < nv; ++i)
+		int* index = polyhedron->facets[j].indVertices;
+		int nv = polyhedron->facets[j].numVertices;
+		for (int i = 0; i < nv; ++i)
 		{
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;
@@ -205,14 +203,13 @@ void PointShifter::run(int id, Vector3d delta)
 
 	polyhedron->vertices[id] = polyhedron->vertices[id] + delta;
 
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		x[i] = 0.;
 	}
 	calculateFunctional();
 	err = norm_vector(n, fx);
 
-	step = 0;
 	while (err > EPSILON)
 	{
 		calculateFunctionalDerivative2();
@@ -235,7 +232,7 @@ void PointShifter::run(int id, Vector3d delta)
 			DEBUG_END;
 			return;
 		}
-		for (i = 0; i < n; ++i)
+		for (int i = 0; i < n; ++i)
 		{
 			x1[i] = fx[i];
 		}
@@ -251,14 +248,14 @@ void PointShifter::run(int id, Vector3d delta)
 			++auto_step;
 			DEBUG_PRINT("%d ", auto_step);
 
-			for (i = 0; i < n; ++i)
+			for (int i = 0; i < n; ++i)
 				x[i] += gamma * x1[i];
 			calculateFunctional();
 			err_new = norm_vector(n, fx);
 		} while (err_new > err);
 	}
 
-	for (i = 0; i < polyhedron->numVertices; ++i)
+	for (int i = 0; i < polyhedron->numVertices; ++i)
 	{
 		if (i == id)
 			continue;
@@ -266,7 +263,7 @@ void PointShifter::run(int id, Vector3d delta)
 		polyhedron->vertices[i].y += y(i);
 		polyhedron->vertices[i].z += z(i);
 	}
-	for (i = 0; i < polyhedron->numFacets; ++i)
+	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
 		polyhedron->facets[i].plane.norm.x += a(i);
 		polyhedron->facets[i].plane.norm.y += b(i);
@@ -280,9 +277,9 @@ void PointShifter::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		index = polyhedron->facets[j].indVertices;
-		nv = polyhedron->facets[j].numVertices;
-		for (i = 0; i < nv; ++i)
+		int* index = polyhedron->facets[j].indVertices;
+		int nv = polyhedron->facets[j].numVertices;
+		for (int i = 0; i < nv; ++i)
 		{
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;

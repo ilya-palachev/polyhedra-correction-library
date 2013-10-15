@@ -7,15 +7,15 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 MatrixDistNorm::MatrixDistNorm() :
-		n(0), nMax(0), matrix(NULL), ifStay(NULL)
+		nMax(0), n(0), matrix(NULL), ifStay(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
-		n(0), nMax(nMax_orig), matrix(new double[nMax_orig * nMax_orig]), ifStay(
-				new bool[nMax_orig])
+		nMax(nMax_orig), n(0), matrix(new double[nMax_orig * nMax_orig]),
+		ifStay(new bool[nMax_orig])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax_orig; ++i)
@@ -24,8 +24,8 @@ MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
 }
 
 MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
-		n(orig.n), nMax(orig.nMax), matrix(new double[orig.nMax * orig.nMax]), ifStay(
-				new bool[orig.nMax])
+		nMax(orig.nMax), n(orig.n), matrix(new double[orig.nMax * orig.nMax]),
+		ifStay(new bool[orig.nMax])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax * nMax; ++i)
@@ -87,7 +87,7 @@ void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
 double MatrixDistNorm::findMin(int& imin, int& jmin)
 {
 	DEBUG_START;
-	double min, distance;
+	double min = 0., distance = 0.;
 	bool ifAnyMinFound = false;
 	for (int i = 0; i < n; ++i)
 	{
@@ -216,7 +216,7 @@ void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
 	}
 
 	int j;
-	char red, green, blue;
+	unsigned char red, green, blue;
 
 	for (int i = 0; i < numcl; ++i)
 	{
@@ -372,7 +372,7 @@ void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
 	}
 
 	int j;
-	char red, green, blue;
+	unsigned char red, green, blue;
 
 	for (int i = 0; i < numcl; ++i)
 	{

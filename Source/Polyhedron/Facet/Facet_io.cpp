@@ -81,9 +81,9 @@ void Facet::my_fprint_all(FILE* file)
 				DEBUG_END;
 				return;
 			}
-			Vector3d vector = parentPolyhedron->vertices[ind];
-			REGULAR_PRINT(file, "vertices[%d] = (%lf, %lf, %lf)\n", ind, vector.x,
-					vector.y, vector.z);
+			DEBUG_VARIABLE Vector3d vector = parentPolyhedron->vertices[ind];
+			REGULAR_PRINT(file, "vertices[%d] = (%lf, %lf, %lf)\n", ind,
+						  vector.x, vector.y, vector.z);
 		}
 	}
 	test_pair_neighbours();

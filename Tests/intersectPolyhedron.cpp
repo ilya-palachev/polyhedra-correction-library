@@ -35,7 +35,7 @@ void test(const char* name, int type, double a, double b, double c, double d)
 	Plane iplane;
 	Polyhedron poly;
 
-	char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+	char *file_name_in, *file_name_out0, *file_name_out;
 	file_name_in = new char[255];
 	file_name_out0 = new char[255];
 	file_name_out = new char[255];
@@ -80,7 +80,6 @@ void test(const char* name, int type, double a, double b, double c, double d)
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
-	curr_time = asctime(timeinfo);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d.ply", name,
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,

@@ -187,12 +187,11 @@ void ClusterNorm::fprint(FILE* file)
 		REGULAR_PRINT(file, "%d, ", indexFacet[i]);
 	}
 
-	double a = area();
-	REGULAR_PRINT(file, "; area = %lf", a);
+	REGULAR_PRINT(file, "; area = %lf", area());
 	DEBUG_END;
 }
 
-void ClusterNorm::setColor(char red, char green, char blue)
+void ClusterNorm::setColor(unsigned char red, char green, char blue)
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)

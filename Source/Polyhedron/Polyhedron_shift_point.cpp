@@ -65,12 +65,12 @@ void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 double Polyhedron::distToNearestNeighbour(int id)
 {
 	DEBUG_START;
-	int i, nf, *index;
-	double dist, min_dist;
+	double dist = RAND_MAX;
+	double min_dist = RAND_MAX;
 
-	nf = vertexInfos[id].numFacets;
-	index = vertexInfos[id].indFacets;
-	for (i = 0; i < nf; ++i)
+	int nf = vertexInfos[id].numFacets;
+	int* index = vertexInfos[id].indFacets;
+	for (int i = 0; i < nf; ++i)
 	{
 		dist = qmod(vertices[id] - vertices[index[nf + 1 + i]]);
 		dist = sqrt(dist);

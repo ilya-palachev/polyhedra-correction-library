@@ -521,7 +521,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 	int numEdgesDesctructed = 0;
 
-	int iIteration = 0;
+	DEBUG_VARIABLE int iIteration = 0;
 
 	while (!edgesQueue.empty())
 	{
@@ -593,7 +593,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
 			edge->f0, edge->f1);
-	double dist = sqrt(qmod(polyhedron->vertices[edge->v0] -
+	DEBUG_VARIABLE double dist = sqrt(qmod(polyhedron->vertices[edge->v0] -
 			polyhedron->vertices[edge->v1]));
 	DEBUG_PRINT("Distance between vertices = %lf", dist);
 

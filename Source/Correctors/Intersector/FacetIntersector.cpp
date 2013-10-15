@@ -57,7 +57,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)
 	int v0, v1;
 	int next_f, next_d;
 	int i_curr, i_next, i_prev;
-	int sign_curr, sign_next, sign_prev;
+	int sign_curr = 0, sign_next, sign_prev;
 	int sign0;
 	int i_step;
 

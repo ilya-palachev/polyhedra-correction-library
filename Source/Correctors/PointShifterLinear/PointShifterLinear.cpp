@@ -115,9 +115,9 @@ PointShifterLinear::~PointShifterLinear()
 void PointShifterLinear::runGlobal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int step, i;
-	double err, err_eps;
-	double norm;
+	int step = 0, i = 0;
+	double err = 0., err_eps = 0.;
+	DEBUG_VARIABLE double norm = 0.;
 
 	polyhedron->vertices[id] += delta;
 
@@ -355,9 +355,9 @@ void PointShifterLinear::moveVerticesGlobal()
 void PointShifterLinear::runLocal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int step, i;
-	double err, err_eps;
-	double norm;
+	int step = 0, i = 0;
+	double err = 0., err_eps = 0.;
+	DEBUG_VARIABLE double norm = 0.;
 	int ncons_curr, ncons_prev;
 
 	//    delta += vertex[id]; //Сохраняем положение деформированной точки

@@ -525,7 +525,7 @@ void Coalescer::rise(int fid0)
 			++ndown;
 	}
 
-	int ndown_total = 0, nup_total;
+	int ndown_total = 0, DEBUG_VARIABLE nup_total = 0;
 	for (i = 0; i < polyhedron->numVertices; ++i)
 	{
 		sign = polyhedron->signum(polyhedron->vertices[i], plane);
@@ -618,7 +618,7 @@ int Coalescer::riseFind(int fid0)
 	int nv, *index;
 	int fr1, fr2;
 
-	double d, dmin;
+	double d = 0., dmin = 0.;
 	int pos, tmp;
 
 	Plane plane;

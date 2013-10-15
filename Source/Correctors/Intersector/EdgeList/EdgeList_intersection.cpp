@@ -176,12 +176,12 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 		int& next_f, int& next_d)
 {
 	DEBUG_START;
-	int i, tmp, i_next;
+	int i, tmp, i_next = -1;
 	int id0;
 	int id1;
 	int sign0;
 	int sign1;
-	int incr;
+	int incr = 1;
 	int nv;
 	Plane plane;
 	plane = poly->facets[next_f].plane;

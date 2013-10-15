@@ -275,10 +275,11 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 		DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
 
 		//В этом случае будем объединять вершины...
-		double dist = sqrt(qmod(polyhedron->vertices[id1] - polyhedron->vertices[id2]));
+		DEBUG_VARIABLE double dist = sqrt(qmod(polyhedron->vertices[id1] -
+				polyhedron->vertices[id2]));
 		DEBUG_PRINT(
-				"Принято решение сливать вершины %d и %d, расстояние между которыми равно %lf\n",
-				id1, id2, dist);
+				"Принято решение сливать вершины %d и %d, расстояние между "
+				"которыми равно %lf\n", id1, id2, dist);
 		if (id2 == idSavedVertex)
 		{
 			swap(id1, id2);

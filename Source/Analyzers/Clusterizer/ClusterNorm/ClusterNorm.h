@@ -31,7 +31,7 @@ public:
 	~ClusterNorm();
 
 	void fprint(FILE* file);
-	void setColor(char red, char green, char blue);
+	void setColor(unsigned char red, char green, char blue);
 
 private:
 
