@@ -1,8 +1,20 @@
-/*
- * PointShifter.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 20.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -176,24 +188,22 @@ void print_vector(int n, double* v);
 void PointShifter::run(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int i, step;
 	double err, err_new, gamma;
 	bool success;
 
 	int auto_step;
 
-	double xx, yy, zz;
-	double a, b, c, d;
-	int nv, *index;
+	DEBUG_VARIABLE double xx, yy, zz;
+	DEBUG_VARIABLE double a, b, c, d;
 	for (int j = 0; j < polyhedron->numFacets; ++j)
 	{
 		a = polyhedron->facets[j].plane.norm.x;
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		index = polyhedron->facets[j].indVertices;
-		nv = polyhedron->facets[j].numVertices;
-		for (i = 0; i < nv; ++i)
+		int* index = polyhedron->facets[j].indVertices;
+		int nv = polyhedron->facets[j].numVertices;
+		for (int i = 0; i < nv; ++i)
 		{
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;
@@ -205,14 +215,13 @@ void PointShifter::run(int id, Vector3d delta)
 
 	polyhedron->vertices[id] = polyhedron->vertices[id] + delta;
 
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		x[i] = 0.;
 	}
 	calculateFunctional();
 	err = norm_vector(n, fx);
 
-	step = 0;
 	while (err > EPSILON)
 	{
 		calculateFunctionalDerivative2();
@@ -235,7 +244,7 @@ void PointShifter::run(int id, Vector3d delta)
 			DEBUG_END;
 			return;
 		}
-		for (i = 0; i < n; ++i)
+		for (int i = 0; i < n; ++i)
 		{
 			x1[i] = fx[i];
 		}
@@ -251,14 +260,14 @@ void PointShifter::run(int id, Vector3d delta)
 			++auto_step;
 			DEBUG_PRINT("%d ", auto_step);
 
-			for (i = 0; i < n; ++i)
+			for (int i = 0; i < n; ++i)
 				x[i] += gamma * x1[i];
 			calculateFunctional();
 			err_new = norm_vector(n, fx);
 		} while (err_new > err);
 	}
 
-	for (i = 0; i < polyhedron->numVertices; ++i)
+	for (int i = 0; i < polyhedron->numVertices; ++i)
 	{
 		if (i == id)
 			continue;
@@ -266,7 +275,7 @@ void PointShifter::run(int id, Vector3d delta)
 		polyhedron->vertices[i].y += y(i);
 		polyhedron->vertices[i].z += z(i);
 	}
-	for (i = 0; i < polyhedron->numFacets; ++i)
+	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
 		polyhedron->facets[i].plane.norm.x += a(i);
 		polyhedron->facets[i].plane.norm.y += b(i);
@@ -280,9 +289,9 @@ void PointShifter::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		index = polyhedron->facets[j].indVertices;
-		nv = polyhedron->facets[j].numVertices;
-		for (i = 0; i < nv; ++i)
+		int* index = polyhedron->facets[j].indVertices;
+		int nv = polyhedron->facets[j].numVertices;
+		for (int i = 0; i < nv; ++i)
 		{
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;

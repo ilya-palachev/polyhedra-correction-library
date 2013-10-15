@@ -1,8 +1,20 @@
-/*
- * EdgeConstructor.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 05.06.2013
- *      Author: iliya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -37,7 +49,7 @@ void EdgeConstructor::run(EdgeDataPtr edgeData)
 					i, // Current facets id
 					index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
 			DEBUG_PRINT("After iteration #%d we have the "
-					"following edge data:", edgeData->edges.size());
+					"following edge data:", (int) edgeData->edges.size());
 			edge = edgeData->edges.begin();
 			for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 			{

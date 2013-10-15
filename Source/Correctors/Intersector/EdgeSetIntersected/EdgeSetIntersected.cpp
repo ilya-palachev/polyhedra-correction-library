@@ -1,3 +1,22 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 EdgeSetIntersected::EdgeSetIntersected() :
@@ -45,7 +64,7 @@ EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
 				pos_future_facet(new int[len])
 {
 	DEBUG_START;
-	for (int i; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		edge0[i] = orig.edge0[i];
 		edge1[i] = orig.edge1[i];
@@ -113,7 +132,7 @@ EdgeSetIntersected& EdgeSetIntersected::operator =(const EdgeSetIntersected& ori
 	id_future_facet = new int[len];
 	pos_future_facet = new int[len];
 
-	for (int i; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		edge0[i] = orig.edge0[i];
 		edge1[i] = orig.edge1[i];

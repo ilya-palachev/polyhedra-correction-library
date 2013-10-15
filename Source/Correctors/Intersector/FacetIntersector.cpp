@@ -1,8 +1,20 @@
-/*
- * FacetIntersector.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 18.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -57,7 +69,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)
 	int v0, v1;
 	int next_f, next_d;
 	int i_curr, i_next, i_prev;
-	int sign_curr, sign_next, sign_prev;
+	int sign_curr = 0, sign_next, sign_prev;
 	int sign0;
 	int i_step;
 

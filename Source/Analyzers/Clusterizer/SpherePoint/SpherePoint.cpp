@@ -1,9 +1,24 @@
 /* 
- * File:   SpherePoint.cpp
- * Author: nk
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
  * 
- * Created on 1 Май 2012 г., 12:39
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+
 
 #include "PolyhedraCorrectionLibrary.h"
 
@@ -102,7 +117,7 @@ SpherePoint& MassCentre(int n, SpherePoint* points, SpherePoint& newSpherePoint)
 	return newSpherePoint;
 }
 
-SpherePoint& MassCentre(int n, int* indexFacet, Polyhedron* poly)
+SpherePoint& MassCentre(int n, int* indexFacet, shared_ptr<Polyhedron> poly)
 {
 	DEBUG_START;
 	SpherePoint newSpherePoint;

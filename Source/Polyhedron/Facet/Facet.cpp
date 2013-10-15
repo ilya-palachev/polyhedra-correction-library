@@ -1,3 +1,22 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 #define DEFAULT_NV 1000
@@ -130,6 +149,10 @@ void Facet::clear()
 		indVertices = NULL;
 	}
 	numVertices = 0;
+	/* Destructors of Facet and Polyhedron begin recursively call each other.
+	 * Currently i don't know how to fix this. Thus this assignment to NULL is
+	 * added.*/
+	parentPolyhedron = NULL;
 	DEBUG_END;
 }
 
@@ -197,7 +220,7 @@ void Facet::set_poly(shared_ptr<Polyhedron> poly_new)
 	DEBUG_END;
 }
 
-void Facet::set_rgb(char red, char gray, char blue)
+void Facet::set_rgb(unsigned char red, unsigned char gray, unsigned char blue)
 {
 	DEBUG_START;
 	rgb[0] = red;
@@ -217,6 +240,9 @@ void Facet::set_ind_vertex(int position, int value)
 	}
 	DEBUG_PRINT("setting indVertices[%d] = %d", position, value);
 	indVertices[position] = value;
+	/* Previous assignment can break the cycling vertex. Thus we need to repair
+	 * it. */
+	indVertices[numVertices] = indVertices[0];
 	DEBUG_END;
 }
 

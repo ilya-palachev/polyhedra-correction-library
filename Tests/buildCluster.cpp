@@ -1,9 +1,20 @@
-/*
- * buildCluster.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- * Created on:  01.05.2012
- *     Author:  Kaligin Nikolai <nkaligin@yandex.ru>
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -127,10 +138,10 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 	double l01, l11, l21;
 	double l02, l12, l22;
 
-	double v1 = poly1.volume();
-	double v2 = poly1.volume();
-	double s1 = poly2.areaOfSurface();
-	double s2 = poly2.areaOfSurface();
+	DEBUG_VARIABLE double v1 = poly1.volume();
+	DEBUG_VARIABLE double v2 = poly1.volume();
+	DEBUG_VARIABLE double s1 = poly2.areaOfSurface();
+	DEBUG_VARIABLE double s2 = poly2.areaOfSurface();
 
 	Vector3d v01;
 	Vector3d v11;
@@ -195,7 +206,7 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 void test_J11(const char* name, int type)
 {
 	DEBUG_START;
-	double vol;
+	DEBUG_VARIABLE double vol;
 
 	Polyhedron poly;
 
@@ -274,7 +285,7 @@ void test_J11(const char* name, int type)
 void test_cluster(const char* name, int type)
 {
 	DEBUG_START;
-	double vol;
+	DEBUG_VARIABLE double vol;
 
 	Polyhedron poly;
 
@@ -304,12 +315,10 @@ void test_cluster(const char* name, int type)
 
 	poly.preprocessAdjacency();
 
-	int i, ncluster;
-	double p;
-	p = EPSILON;
-//    for (i = 0; i < 20; ++i) {
-//        ncluster = poly.clusterisation(p);
-//        printf("p = %le, \tncalster = %d\n", p, ncluster);
+	double p = EPSILON;
+//    for (int i = 0; i < 20; ++i) {
+//        int ncluster = poly.clusterisation(p);
+//        DEBUG_PRINT("p = %le, \tncalster = %d\n", p, ncluster);
 //        p *= 10.;
 //    }
 
@@ -323,7 +332,7 @@ void test_cluster(const char* name, int type)
 void test_viev(const char* name, int type)
 {
 	DEBUG_START;
-	double vol;
+	DEBUG_VARIABLE double vol;
 
 	Polyhedron poly;
 
@@ -484,7 +493,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
-	char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+	char *file_name_in, *file_name_out0, *file_name_out;
 
 	fprintf(stdout, "******************************************************\n");
 	fprintf(stdout, "********************   Deformation    ****************\n");
@@ -536,7 +545,6 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
-	curr_time = asctime(timeinfo);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
 			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
@@ -563,7 +571,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	Polyhedron poly;
 
-	char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+	char *file_name_in, *file_name_out0, *file_name_out;
 
 	fprintf(stdout, "******************************************************\n");
 	fprintf(stdout,
@@ -618,7 +626,6 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
-	curr_time = asctime(timeinfo);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
 			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,

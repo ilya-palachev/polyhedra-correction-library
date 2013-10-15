@@ -1,26 +1,36 @@
 /* 
- * File:   MatrixDistNorm.cpp
- * Author: nk
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
  * 
- * Created on 1 Май 2012 г., 12:44
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+
 #include "PolyhedraCorrectionLibrary.h"
 
 MatrixDistNorm::MatrixDistNorm() :
-				n(0),
-				nMax(0),
-				matrix(NULL),
-				ifStay(NULL)
+		nMax(0), n(0), matrix(NULL), ifStay(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
-				n(0),
-				nMax(nMax_orig),
-				matrix(new double[nMax_orig * nMax_orig]),
-				ifStay(new bool[nMax_orig])
+		nMax(nMax_orig), n(0), matrix(new double[nMax_orig * nMax_orig]),
+		ifStay(new bool[nMax_orig])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax_orig; ++i)
@@ -29,10 +39,8 @@ MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
 }
 
 MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
-				n(orig.n),
-				nMax(orig.nMax),
-				matrix(new double[orig.nMax * orig.nMax]),
-				ifStay(new bool[orig.nMax])
+		nMax(orig.nMax), n(orig.n), matrix(new double[orig.nMax * orig.nMax]),
+		ifStay(new bool[orig.nMax])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax * nMax; ++i)
@@ -94,7 +102,7 @@ void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
 double MatrixDistNorm::findMin(int& imin, int& jmin)
 {
 	DEBUG_START;
-	double min, distance;
+	double min = 0., distance = 0.;
 	bool ifAnyMinFound = false;
 	for (int i = 0; i < n; ++i)
 	{
@@ -198,13 +206,13 @@ double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
 
 	for (int i = 0; i < numcl; ++i)
 	{
-		REGULAR_PRINT(file, "cluster%d = {",i);
+		REGULAR_PRINT(stdout, "cluster%d = {", i);
 		area1 = nodeArray1[i].cluster->area();
 		area2 = nodeArray2[i].cluster->area();
 		area1 -= area2;
 		area1 *= area1;
 		norm += area1;
-		REGULAR_PRINT(file, "}\n");
+		REGULAR_PRINT(stdout, "}\n");
 	}
 	DEBUG_END;
 	return norm / numcl;
@@ -223,7 +231,7 @@ void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
 	}
 
 	int j;
-	char red, green, blue;
+	unsigned char red, green, blue;
 
 	for (int i = 0; i < numcl; ++i)
 	{
@@ -379,7 +387,7 @@ void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
 	}
 
 	int j;
-	char red, green, blue;
+	unsigned char red, green, blue;
 
 	for (int i = 0; i < numcl; ++i)
 	{
@@ -532,7 +540,8 @@ void MatrixDistNorm::fprint(FILE* file)
 	{
 		for (int j = i + 1; j < n; ++j)
 		{
-			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n", i, j, matrix[i * n + j]);
+			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n",
+					i, j, matrix[i * n + j]);
 		}
 	}
 	DEBUG_END;

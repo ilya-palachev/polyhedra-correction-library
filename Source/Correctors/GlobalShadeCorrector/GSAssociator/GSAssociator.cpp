@@ -1,8 +1,20 @@
-/*
- * GSAssociator.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 12.05.2013
- *      Author: iliya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -295,8 +307,8 @@ int GSAssociator::checkAlreadyAdded()
 int GSAssociator::checkExtinction()
 {
 	DEBUG_START;
-	int iVertex0 = edge->v0;
-	int iVertex1 = edge->v1;
+	DEBUG_VARIABLE int iVertex0 = edge->v0;
+	DEBUG_VARIABLE int iVertex1 = edge->v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS)
 	{
 		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting",
@@ -335,7 +347,7 @@ int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest,
 	SideOfContour* sides = contourData->contours[iContour].sides;
 	int numSides = contourData->contours[iContour].ns;
 	Vector3d v_nearestCurr;
-	int iSideDistMin;
+	int iSideDistMin = -1;
 
 	for (int iSide = 0; iSide < numSides; ++iSide)
 	{
@@ -422,11 +434,11 @@ double GSAssociator::calculateArea(Orientation orientation)
 	polyhedronTmp->vertices[iNearest0] = v0_nearest;
 	polyhedronTmp->vertices[iNearest1] = v1_nearest;
 
-	facetPart fPart;
+	facetPart fPart = FACET_LEFT;
 	int numSides = contourData->contours[iContour].ns;
 	int numVerticesFacet = 0;
-	int numPairsToBeAdded;
-	int iStep;
+	int numPairsToBeAdded = 0;
+	int iStep = 1;
 
 	int numLeft = (numSides + iSideDistMin1 - iSideDistMin0) % numSides;
 
@@ -444,6 +456,9 @@ double GSAssociator::calculateArea(Orientation orientation)
 		iStep = 1;
 		numPairsToBeAdded = numSides - numLeft + 1;
 		break;
+	default:
+		ASSERT(0);
+		break;
 	}
 
 	numVerticesFacet = 2 * numPairsToBeAdded;
@@ -455,7 +470,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 	polyhedronTmp->facets[fPart].set_ind_vertex(1, iNearest1);
 
 	int iBegin = iSideDistMin1;
-	int iEnd = iSideDistMin0;
+	DEBUG_VARIABLE int iEnd = iSideDistMin0;
 
 	DEBUG_PRINT("iStep = %d", iStep);
 	DEBUG_PRINT("iBegin = %d", iBegin);
@@ -468,7 +483,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 
 	for (int iPairsAdded = 1; iPairsAdded < numPairsToBeAdded; ++iPairsAdded)
 	{
-		int iAdded0, iAdded1;
+		int iAdded0 = 0, iAdded1 = 0;
 		switch (orientation)
 		{
 		case ORIENTATION_LEFT:
@@ -478,6 +493,9 @@ double GSAssociator::calculateArea(Orientation orientation)
 		case ORIENTATION_RIGHT:
 			iAdded0 = 2 * iSide + 1;
 			iAdded1 = 2 * iSide + 2;
+			break;
+		default:
+			ASSERT(0);
 			break;
 		}
 		iAdded0 = (numVerticesTmp + iAdded0) % numVerticesTmp;
@@ -500,7 +518,7 @@ void GSAssociator::add(Orientation orientation)
 {
 	DEBUG_START;
 
-	int iStep;
+	int iStep = 1;
 	switch (orientation)
 	{
 	case ORIENTATION_LEFT:
@@ -510,6 +528,9 @@ void GSAssociator::add(Orientation orientation)
 	case ORIENTATION_RIGHT:
 		iStep = 1;
 		DEBUG_PRINT("ORIENTATION_RIGHT");
+		break;
+	default:
+		ASSERT(0);
 		break;
 	}
 	int numSides = contourData->contours[iContour].ns;
@@ -552,8 +573,8 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 	int numSides = contourData->contours[iContour].ns;
 	SideOfContour* sides = contourData->contours[iContour].sides;
 
-	int iStep;
-	int numSidesProcessed;
+	int iStep = 1;
+	DEBUG_VARIABLE int numSidesProcessed;
 	switch (orientation)
 	{
 	case ORIENTATION_LEFT:
@@ -568,10 +589,22 @@ void GSAssociator::findBounds(Orientation orientation, int& iResultBegin,
 				% numSides;
 		DEBUG_PRINT("ORIENTATION_RIGHT");
 		break;
+	default:
+		ASSERT(0);
+		break;
 	}
 
 	int iBegin = iSideDistMin1;
 	int iEnd = (numSides + iSideDistMin0 + iStep) % numSides;
+
+	if (iBegin == iEnd)
+	{
+		/* (???) This is done to fix the case when association is trivial. */
+		iResultBegin = iBegin;
+		iResultEnd = iEnd;
+		DEBUG_END;
+		return;
+	}
 
 	double* lengthSide = bufDouble;
 

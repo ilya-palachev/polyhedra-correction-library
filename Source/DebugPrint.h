@@ -1,3 +1,22 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef DEBUGPRINT_H
 #define DEBUGPRINT_H
 
@@ -22,32 +41,40 @@
 #define FILE_PRINT(_file, ...)       fprintf(_file, ##__VA_ARGS__)
 
 #ifndef NDEBUG
-#		define DEBUG_PRINT(_fmt, ...)  \
-	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
-			WHEREARG, ##__VA_ARGS__)
+#		define DEBUG_PRINT(...)  \
+	STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
+	STDERR_PRINT(__VA_ARGS__); \
+	STDERR_PRINT("\n");
 #		define REGULAR_PRINT(_file, _fmt, ...)  \
 	FILE_PRINT(_file, COLOUR_NORM _fmt, ##__VA_ARGS__)
 #		define DEBUG_START DEBUG_PRINT("Start")
 #		define DEBUG_END DEBUG_PRINT("End")
+
 #else
-#		define DEBUG_PRINT(_fmt, ...)
-#		define REGULAR_PRINT(_fmt, ...)
+#		define DEBUG_PRINT(...)
+#		define REGULAR_PRINT(...)
 #		define DEBUG_START
 #		define DEBUG_END
 #endif
 
-#define MAIN_PRINT(_fmt, ...)  \
-	STDERR_PRINT(COLOUR_NORM WHERESTR _fmt "\n", \
-			WHEREARG, ##__VA_ARGS__)
+#define MAIN_PRINT(...)  \
+	STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
+	STDERR_PRINT(__VA_ARGS__); \
+	STDERR_PRINT("\n" COLOUR_NORM);
 
-#define ALWAYS_PRINT(_file, _fmt, ...)  \
-	FILE_PRINT(_file, _fmt, ##__VA_ARGS__)
+#define ALWAYS_PRINT(_file, ...)  \
+	FILE_PRINT(_file, __VA_ARGS__)
 
-#define ERROR_PRINT(_fmt, ...)  \
-	STDERR_PRINT(COLOUR_RED WHERESTR _fmt "\n" COLOUR_NORM, \
-			WHEREARG, ##__VA_ARGS__)
+#define ERROR_PRINT(...)  \
+	STDERR_PRINT(COLOUR_RED WHERESTR, WHEREARG); \
+	STDERR_PRINT(__VA_ARGS__); \
+	STDERR_PRINT("\n" COLOUR_NORM);
 
-#define PRINT(_fmt, ...)  \
-	STDERR_PRINT(COLOUR_NORM _fmt COLOUR_NORM, ##__VA_ARGS__)
+#define PRINT(...)  \
+	STDERR_PRINT(COLOUR_NORM); \
+	STDERR_PRINT(__VA_ARGS__); \
+	STDERR_PRINT("\n" COLOUR_NORM);
+
+#		define DEBUG_VARIABLE __attribute__ ((unused))
 
 #endif //DEBUGPRINT_H

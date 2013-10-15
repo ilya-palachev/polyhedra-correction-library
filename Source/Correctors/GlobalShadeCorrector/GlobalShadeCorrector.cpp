@@ -1,8 +1,20 @@
-/*
- * GlobalShadeCorrector.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 12.05.2013
- *      Author: iliya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -77,10 +89,12 @@ void GlobalShadeCorrector::init()
 {
 	DEBUG_START;
 
-	/* By default, before beginning the algorithm we set the list of corrected
+	/*
+	 * By default, before beginning the algorithm we set the list of corrected
 	 * facets to full list, so the default correction mode is correction of all
-	 * facets. */
-	for (int iFacet; iFacet < polyhedron->numFacets; ++iFacet)
+	 * facets.
+	 */
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		facetsCorrected.push_back(iFacet);
 	}
@@ -448,7 +462,6 @@ double GlobalShadeCorrector::calculateFunctional()
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
-		int iAssoc = 0;
 		for (list<EdgeContourAssociation>::const_iterator itCont =
 				edge->assocList.begin();
 				itCont != edge->assocList.end(); ++itCont)
@@ -775,7 +788,6 @@ void GlobalShadeCorrector::calculateGradient()
 			ASSERT((edge->v0 == v0 && edge->v1 == v1) ||
 					(edge->v0 == v1 && edge->v1 == v0));
 
-			int iAssociation = 0;
 			for (list<EdgeContourAssociation>::const_iterator itCont =
 					edge->assocList.begin();
 					itCont != edge->assocList.end(); ++itCont)

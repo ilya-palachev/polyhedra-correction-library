@@ -1,8 +1,20 @@
-/*
- * PointShifterLinear.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 20.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -115,9 +127,9 @@ PointShifterLinear::~PointShifterLinear()
 void PointShifterLinear::runGlobal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int step, i;
-	double err, err_eps;
-	double norm;
+	int step = 0, i = 0;
+	double err = 0., err_eps = 0.;
+	DEBUG_VARIABLE double norm = 0.;
 
 	polyhedron->vertices[id] += delta;
 
@@ -355,9 +367,9 @@ void PointShifterLinear::moveVerticesGlobal()
 void PointShifterLinear::runLocal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int step, i;
-	double err, err_eps;
-	double norm;
+	int step = 0, i = 0;
+	double err = 0., err_eps = 0.;
+	DEBUG_VARIABLE double norm = 0.;
 	int ncons_curr, ncons_prev;
 
 	//    delta += vertex[id]; //Сохраняем положение деформированной точки

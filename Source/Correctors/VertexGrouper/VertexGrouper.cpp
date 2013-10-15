@@ -1,8 +1,20 @@
-/*
- * VertexGrouper.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 21.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -275,10 +287,11 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1,
 		DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
 
 		//В этом случае будем объединять вершины...
-		double dist = sqrt(qmod(polyhedron->vertices[id1] - polyhedron->vertices[id2]));
+		DEBUG_VARIABLE double dist = sqrt(qmod(polyhedron->vertices[id1] -
+				polyhedron->vertices[id2]));
 		DEBUG_PRINT(
-				"Принято решение сливать вершины %d и %d, расстояние между которыми равно %lf\n",
-				id1, id2, dist);
+				"Принято решение сливать вершины %d и %d, расстояние между "
+				"которыми равно %lf\n", id1, id2, dist);
 		if (id2 == idSavedVertex)
 		{
 			swap(id1, id2);

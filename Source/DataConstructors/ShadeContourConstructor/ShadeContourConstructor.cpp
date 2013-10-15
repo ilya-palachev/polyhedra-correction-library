@@ -1,8 +1,20 @@
-/*
- * ShadeContourConstructor.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 17.05.2013
- *      Author: iliya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -78,9 +90,8 @@ void ShadeContourConstructor::createContour(int idOfContour,
 		Plane planeOfProjection, SContour* outputContour)
 {
 	DEBUG_START;
-	int* visibleEdgesSorted = bufferInt1;
 
-	Vector3d nu = planeOfProjection.norm;
+	DEBUG_VARIABLE Vector3d nu = planeOfProjection.norm;
 
 	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n",
 			idOfContour, nu.x, nu.y, nu.z);
@@ -114,10 +125,11 @@ void ShadeContourConstructor::createContour(int idOfContour,
 	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
 
-	EdgeSetIterator edgeCurr = edgesVisible.begin();
-	int iVertexCurr = edgeCurr->v1;
-	for (int iSide = 0; iSide < edgesVisible.size(); ++iSide)
+	int iSide = 0;
+	for (EdgeSetIterator edgeCurr = edgesVisible.begin();
+		 edgeCurr != edgesVisible.end(); ++edgeCurr, ++iSide)
 	{
+		int iVertexCurr = edgeCurr->v1;
 		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
 		{

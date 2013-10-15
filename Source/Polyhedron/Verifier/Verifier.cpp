@@ -1,8 +1,20 @@
-/*
- * Verifier.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 21.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -72,6 +84,7 @@ Verifier::~Verifier()
 			delete edgesWS->edgesEdited;
 		}
 	}
+	DEBUG_PRINT("Polyhedron use_count = %ld", polyhedron.use_count());
 	DEBUG_END;
 }
 
@@ -520,7 +533,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 	int numEdgesDesctructed = 0;
 
-	int iIteration = 0;
+	DEBUG_VARIABLE int iIteration = 0;
 
 	while (!edgesQueue.empty())
 	{
@@ -592,7 +605,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
 			edge->f0, edge->f1);
-	double dist = sqrt(qmod(polyhedron->vertices[edge->v0] -
+	DEBUG_VARIABLE double dist = sqrt(qmod(polyhedron->vertices[edge->v0] -
 			polyhedron->vertices[edge->v1]));
 	DEBUG_PRINT("Distance between vertices = %lf", dist);
 

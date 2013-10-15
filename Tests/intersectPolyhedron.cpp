@@ -1,3 +1,22 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 void test(const char* name, int type, double a, double b, double c, double d);
@@ -35,7 +54,7 @@ void test(const char* name, int type, double a, double b, double c, double d)
 	Plane iplane;
 	Polyhedron poly;
 
-	char *curr_time, *file_name_in, *file_name_out0, *file_name_out;
+	char *file_name_in, *file_name_out0, *file_name_out;
 	file_name_in = new char[255];
 	file_name_out0 = new char[255];
 	file_name_out = new char[255];
@@ -80,7 +99,6 @@ void test(const char* name, int type, double a, double b, double c, double d)
 
 	time_t seconds = time(NULL);
 	tm* timeinfo = localtime(&seconds);
-	curr_time = asctime(timeinfo);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d.ply", name,
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,

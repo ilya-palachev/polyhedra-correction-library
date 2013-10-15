@@ -1,8 +1,20 @@
-/*
- * Intersector.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 18.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -52,7 +64,7 @@ bool Intersector::intersectFacet(Facet* facet, Plane iplane, FutureFacet& ff,
 	return ret;
 }
 
-static void min3scalar(double s, double& s0, double& s1, double &s2, int i, int& i0,
+static void min3scalar(double s, double& s0, double& s1, double& s2, int i, int& i0,
 		int& i1, int& i2)
 {
 	DEBUG_START;
@@ -148,7 +160,7 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 	double scalar;
 
 	int i0, i1, i2;
-	double s0, s1, s2;
+	double s0 = 0., s1 = 0., s2 = 0.;
 
 	int i_step, i_curr, i_help;
 	int up_down, in_out;
@@ -456,7 +468,9 @@ void Intersector::run(Plane iplane)
 
 	// 1. Подготовка списков ребер
 
-	int n_0 = 0, n_2 = 0, n_big = 0;
+	DEBUG_VARIABLE int n_0 = 0;
+	DEBUG_VARIABLE int n_2 = 0;
+	DEBUG_VARIABLE int n_big = 0;
 
 	total_edges = 0;
 	for (i = 0; i < polyhedron->numFacets; ++i)
@@ -484,9 +498,7 @@ void Intersector::run(Plane iplane)
 		num_edges[i] = res;
 		edgeLists[i].set_poly(polyhedron);
 	}
-#ifndef NDEBUG
 	DEBUG_PRINT("n_2 = %d, n_0 = %d, n_big = %d", n_2, n_0, n_big);
-#endif
 	total_edges = total_edge_set.get_num();
 
 	// 2. Нахождение компонент сечения
@@ -579,15 +591,12 @@ void Intersector::run(Plane iplane)
 			future_facet_new[i].add_edge(v0, v1, fid);
 		}
 	}
-	//	scanf("%d", &i);
 
-#ifdef OUTPUT
 	DEBUG_PRINT("%d new polyhedron->facets : ", num_components_new);
 	for (i = 0; i < num_components_new; ++i)
 	{
 		future_facet_new[i].my_fprint(stdout);
 	}
-#endif
 
 	//4. Нахождение компонент рассечения старых граней
 	DEBUG_PRINT("4. Нахождение компонент рассечения старых граней");

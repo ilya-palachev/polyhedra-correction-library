@@ -1,8 +1,20 @@
-/*
- * ShadeContourData.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 17.05.2013
- *      Author: iliya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -131,7 +143,7 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 				return false;
 			}
 
-			if (fscanf(fd, "%d", &currSide->type) != 1)
+			if (fscanf(fd, "%d", (int*)&currSide->type) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
 						"in type of side #%d of contour #%d",

@@ -1,3 +1,22 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm)
@@ -176,12 +195,12 @@ void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
 		int& next_f, int& next_d)
 {
 	DEBUG_START;
-	int i, tmp, i_next;
+	int i, tmp, i_next = -1;
 	int id0;
 	int id1;
 	int sign0;
 	int sign1;
-	int incr;
+	int incr = 1;
 	int nv;
 	Plane plane;
 	plane = poly->facets[next_f].plane;

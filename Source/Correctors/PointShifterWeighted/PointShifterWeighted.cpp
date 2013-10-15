@@ -1,8 +1,20 @@
-/*
- * PointShifterWeighted.cpp
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- *  Created on: 20.06.2013
- *      Author: ilya
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "PolyhedraCorrectionLibrary.h"
@@ -158,14 +170,14 @@ PointShifterWeighted::~PointShifterWeighted()
 void PointShifterWeighted::run(int id, Vector3d delta)
 {
 	DEBUG_START;
-	int i, j, step;
+	DEBUG_VARIABLE int step;
 	double err, err_new, gamma;
 	bool success;
 
 	int auto_step;
 
-	double xx, yy, zz;
-	double a, b, c, d;
+	DEBUG_VARIABLE double xx, yy, zz;
+	DEBUG_VARIABLE double a, b, c, d;
 	int nv, *index;
 	for (int j = 0; j < polyhedron->numFacets; ++j)
 	{
@@ -175,7 +187,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		d = polyhedron->facets[j].plane.dist;
 		index = polyhedron->facets[j].indVertices;
 		nv = polyhedron->facets[j].numVertices;
-		for (i = 0; i < nv; ++i)
+		for (int i = 0; i < nv; ++i)
 		{
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;
@@ -191,7 +203,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 
 	print_matrix_bool(stdout, polyhedron->numVertices, polyhedron->numFacets, khi);
 
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		x[i] = 0.;
 	}
@@ -221,7 +233,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 			DEBUG_END;
 			return;
 		}
-		for (i = 0; i < n; ++i)
+		for (int i = 0; i < n; ++i)
 		{
 			x1[i] = fx[i];
 		}
@@ -237,7 +249,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 			++auto_step;
 			DEBUG_PRINT("%d ", auto_step);
 
-			for (i = 0; i < n; ++i)
+			for (int i = 0; i < n; ++i)
 				x[i] += gamma * x1[i];
 			calculateFunctional();
 			err_new = norm_vector(n, fx);
@@ -245,7 +257,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		DEBUG_PRINT("\n");
 	}
 
-	for (i = 0; i < polyhedron->numVertices; ++i)
+	for (int i = 0; i < polyhedron->numVertices; ++i)
 	{
 		if (i == id)
 			continue;
@@ -253,7 +265,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		polyhedron->vertices[i].y += y(i);
 		polyhedron->vertices[i].z += z(i);
 	}
-	for (i = 0; i < polyhedron->numFacets; ++i)
+	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
 		polyhedron->facets[i].plane.norm.x += a(i);
 		polyhedron->facets[i].plane.norm.y += b(i);
@@ -269,7 +281,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		d = polyhedron->facets[j].plane.dist;
 		index = polyhedron->facets[j].indVertices;
 		nv = polyhedron->facets[j].numVertices;
-		for (i = 0; i < nv; ++i)
+		for (int i = 0; i < nv; ++i)
 		{
 			xx = polyhedron->vertices[index[i]].x;
 			yy = polyhedron->vertices[index[i]].y;
@@ -379,7 +391,6 @@ void PointShifterWeighted::calculateFuncitonalDerivative()
 	DEBUG_START;
 	int i, j;
 	double ieps = 0.5 / EPS_DERIVATE;
-	double *swap0, *swap1;
 
 	for (j = 0; j < n; ++j)
 	{
@@ -390,8 +401,6 @@ void PointShifterWeighted::calculateFuncitonalDerivative()
 		}
 		tmp0[j] += EPS_DERIVATE;
 		tmp1[j] -= EPS_DERIVATE;
-		swap0 = x;
-		swap1 = fx;
 		x = tmp0;
 		fx = tmp2;
 		calculateFunctional();

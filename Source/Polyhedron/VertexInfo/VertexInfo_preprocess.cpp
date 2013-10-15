@@ -1,29 +1,49 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 void VertexInfo::preprocess()
 {
 	DEBUG_START;
-	int i;
-	int pos_curr;
-	int pos_next;
-	int v_curr;
-	int fid_first;
-	int fid_curr;
-	int fid_next;
+	int pos_curr = -1;
+	int pos_next = -1;
+	int v_curr = -1;
+	int fid_first = -1;
+	int fid_curr = -1;
+	int fid_next = -1;
 
     DEBUG_PRINT("1. Searching first facet : ");
-	for (i = 0; i < parentPolyhedron->numFacets; ++i)
+	for (int i = 0; i < parentPolyhedron->numFacets; ++i)
 	{
 		pos_next = parentPolyhedron->facets[i].preprocess_search_vertex(id,
 				v_curr);
 		if (pos_next != -1)
+		{
+			fid_first = fid_next = i;
 			break;
+		}
 	}
 	if (pos_next == -1)
 	{
 		return;
 	}
-	fid_first = fid_next = i;
 
     DEBUG_PRINT("2. Counting the number of facets : ");
 	numFacets = 0;
@@ -86,7 +106,7 @@ void VertexInfo::preprocess()
 	pos_next = parentPolyhedron->facets[fid_first].preprocess_search_vertex(id,
 			v_curr);
 	fid_next = fid_first;
-	for (i = 0; i < numFacets; ++i)
+	for (int i = 0; i < numFacets; ++i)
 	{
 		pos_curr = pos_next;
 		fid_curr = fid_next;

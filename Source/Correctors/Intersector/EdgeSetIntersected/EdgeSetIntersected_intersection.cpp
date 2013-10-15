@@ -1,3 +1,22 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
@@ -149,7 +168,7 @@ void EdgeSetIntersected::add_edge(int v0, int v1)
 void EdgeSetIntersected::test_info()
 {
 	DEBUG_START;
-	for (int i; i < num; ++i)
+	for (int i = 0; i < num; ++i)
 	{
 		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1
 				|| id_edge_list1[i] == -1 || pos_edge_list1[i] == -1

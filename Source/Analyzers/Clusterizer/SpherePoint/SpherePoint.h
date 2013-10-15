@@ -1,9 +1,21 @@
-/*
- * SpherePoint.h
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
+ * 
+ * This file is part of Polyhedra Correction Library.
  *
- * Created on:  01.05.2012
- *     Author:  Kaligin Nikolai <nkaligin@yandex.ru>
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SPHEREPOINT_H
@@ -28,7 +40,7 @@ public:
 
 double distSpherePoint(SpherePoint& point0, SpherePoint& point1);
 
-SpherePoint& MassCentre(int n, int* indexFacet, Polyhedron* poly);
+SpherePoint& MassCentre(int n, int* indexFacet, shared_ptr<Polyhedron> poly);
 SpherePoint& MassCentre(int n, SpherePoint* points);
 
 #endif /* SPHEREPOINT_H */

@@ -1,9 +1,28 @@
+/* 
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * 
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 void Polyhedron::shiftPoint(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifter* pShifter = new PointShifter(this);
+	PointShifter* pShifter = new PointShifter(get_ptr());
 	pShifter->run(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -12,7 +31,7 @@ void Polyhedron::shiftPoint(int id, Vector3d delta)
 void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifterWeighted* pShifter = new PointShifterWeighted(this);
+	PointShifterWeighted* pShifter = new PointShifterWeighted(get_ptr());
 	pShifter->run(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -27,7 +46,7 @@ void Polyhedron::shiftPointWeighted(int id, Vector3d delta)
 void Polyhedron::shiftPointLinearGlobal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runGlobal(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -37,7 +56,7 @@ void Polyhedron::shiftPointLinearGlobal(int id, Vector3d delta)
 void Polyhedron::shiftPointLinearLocal(int id, Vector3d delta)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runLocal(id, delta);
 	delete pShifter;
 	DEBUG_END;
@@ -47,7 +66,7 @@ void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
 		int& num_steps, double& norm_sum)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runTest(id, delta, mode, num_steps, norm_sum);
 	delete pShifter;
 	DEBUG_END;
@@ -56,7 +75,7 @@ void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
 void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 {
 	DEBUG_START;
-	PointShifterLinear* pShifter = new PointShifterLinear(this);
+	PointShifterLinear* pShifter = new PointShifterLinear(get_ptr());
 	pShifter->runPartial(id, delta, num);
 	delete pShifter;
 	DEBUG_END;
@@ -65,12 +84,12 @@ void Polyhedron::shiftPointLinearPartial(int id, Vector3d delta, int num)
 double Polyhedron::distToNearestNeighbour(int id)
 {
 	DEBUG_START;
-	int i, nf, *index;
-	double dist, min_dist;
+	double dist = RAND_MAX;
+	double min_dist = RAND_MAX;
 
-	nf = vertexInfos[id].numFacets;
-	index = vertexInfos[id].indFacets;
-	for (i = 0; i < nf; ++i)
+	int nf = vertexInfos[id].numFacets;
+	int* index = vertexInfos[id].indFacets;
+	for (int i = 0; i < nf; ++i)
 	{
 		dist = qmod(vertices[id] - vertices[index[nf + 1 + i]]);
 		dist = sqrt(dist);

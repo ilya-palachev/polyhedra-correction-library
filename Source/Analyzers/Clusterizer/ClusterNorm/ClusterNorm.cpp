@@ -1,9 +1,23 @@
 /* 
- * File:   ClusterNorm.cpp
- * Author: nk
+ * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
  * 
- * Created on 1 Май 2012 г., 12:42
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will 
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "PolyhedraCorrectionLibrary.h"
 
 double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
@@ -49,16 +63,11 @@ ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 	{
 		indexFacet[i] = orig.indexFacet[i];
 	}
-	poly = new Polyhedron;
-	for (int i = 0; i < num; ++i)
-	{
-		poly->facets[i] = orig.poly->facets[i];
-	}
 	DEBUG_END;
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-		Polyhedron* poly_orig) :
+		shared_ptr<Polyhedron> poly_orig) :
 				num(num_orig),
 				numMax(numMax_orig),
 				P(P_orig),
@@ -70,7 +79,7 @@ ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-		int* indexFacet_orig, Polyhedron* poly_orig) :
+		int* indexFacet_orig, shared_ptr<Polyhedron> poly_orig) :
 				num(num_orig),
 				numMax(numMax_orig),
 				P(P_orig),
@@ -192,12 +201,11 @@ void ClusterNorm::fprint(FILE* file)
 		REGULAR_PRINT(file, "%d, ", indexFacet[i]);
 	}
 
-	double a = area();
-	REGULAR_PRINT(file, "; area = %lf", a);
+	REGULAR_PRINT(file, "; area = %lf", area());
 	DEBUG_END;
 }
 
-void ClusterNorm::setColor(char red, char green, char blue)
+void ClusterNorm::setColor(unsigned char red, char green, char blue)
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
