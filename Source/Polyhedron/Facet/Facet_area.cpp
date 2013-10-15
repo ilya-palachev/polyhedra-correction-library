@@ -36,33 +36,38 @@ double Facet::area()
 		return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 	}
 
-	Vector3d A0 = parentPolyhedron->vertices[indVertices[0]];
-
-	DEBUG_PRINT("  in parent polyhedron there are %d vertices",
-			parentPolyhedron->numVertices);
-
 	double areaFacet = 0.;
-	for (int iVertex = 1; iVertex < numVertices - 1; ++iVertex)
+	if (auto polyhedron = parentPolyhedron.lock())
 	{
-		int v0 = indVertices[iVertex];
-		int v1 = indVertices[iVertex + 1];
-		if (v0 >= parentPolyhedron->numVertices || v0 < 0 ||
-				v1 >= parentPolyhedron->numVertices || v1 < 0)
+		Vector3d A0 = polyhedron->vertices[indVertices[0]];
+
+		DEBUG_PRINT("  in parent polyhedron there are %d vertices",
+				polyhedron->numVertices);
+
+		for (int iVertex = 1; iVertex < numVertices - 1; ++iVertex)
 		{
-			ERROR_PRINT("Invalid data in facet indices:");
-			ERROR_PRINT("  indVertices[%d] = %d",	iVertex, v0);
-			ERROR_PRINT("  indVertices[%d] = %d",	iVertex + 1, v1);
-			parentPolyhedron->my_fprint(stderr);
-			ASSERT(0);
-			DEBUG_END;
-			return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+			int v0 = indVertices[iVertex];
+			int v1 = indVertices[iVertex + 1];
+			if (v0 >= polyhedron->numVertices || v0 < 0 ||
+					v1 >= polyhedron->numVertices || v1 < 0)
+			{
+				ERROR_PRINT("Invalid data in facet indices:");
+				ERROR_PRINT("  indVertices[%d] = %d",	iVertex, v0);
+				ERROR_PRINT("  indVertices[%d] = %d",	iVertex + 1, v1);
+				polyhedron->my_fprint(stderr);
+				ASSERT(0);
+				DEBUG_END;
+				return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
+			}
+			Vector3d A1 = polyhedron->vertices[v0] - A0;
+			Vector3d A2 = polyhedron->vertices[v1] - A0;
+			double areaTriangle = (A1 % A2) * plane.norm * 0.5;
+			DEBUG_PRINT("\tarea of triangle # %d = %lf", iVertex - 1, areaTriangle);
+			areaFacet += areaTriangle;
 		}
-		Vector3d A1 = parentPolyhedron->vertices[v0] - A0;
-		Vector3d A2 = parentPolyhedron->vertices[v1] - A0;
-		double areaTriangle = (A1 % A2) * plane.norm * 0.5;
-		DEBUG_PRINT("\tarea of triangle # %d = %lf", iVertex - 1, areaTriangle);
-		areaFacet += areaTriangle;
+
 	}
+
 
 	DEBUG_PRINT("area of facet = %lf", areaFacet);
 	DEBUG_END;

@@ -26,7 +26,7 @@ public:
 	int numVertices;
 	Plane plane;
 	int* indVertices;
-	shared_ptr<Polyhedron> parentPolyhedron;
+	weak_ptr<Polyhedron> parentPolyhedron;
 	unsigned char rgb[3];
 
 	void init_full(const int* index_orig, const bool ifLong);

@@ -25,17 +25,32 @@ bool Facet::test_self_intersection()
 	int i, j;
 	double s;
 	Vector3d vi0, vi1, vj0, vj1, tmp0, tmp1;
+	
+	Vector3d* vertices = NULL;
+	
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		vertices = polyhedron->vertices;
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired");
+		ASSERT(0 && "parentPolyhedron expired");
+		DEBUG_END;
+		return false;
+	}
+	
 	for (i = 0; i < numVertices; ++i)
 	{
-		vi0 = parentPolyhedron->vertices[indVertices[i]];
-		vi1 = parentPolyhedron->vertices[indVertices[i + 1]];
+		vi0 = vertices[indVertices[i]];
+		vi1 = vertices[indVertices[i + 1]];
 		for (j = 0; j < numVertices; ++j)
 		{
 			if (j == i)
 				DEBUG_END;
 				continue;
-			vj0 = parentPolyhedron->vertices[indVertices[j]];
-			vj1 = parentPolyhedron->vertices[indVertices[j + 1]];
+			vj0 = vertices[indVertices[j]];
+			vj1 = vertices[indVertices[j + 1]];
 			tmp0 = (vi1 - vi0) % (vj0 - vi0);
 			tmp1 = (vi1 - vi0) % (vj1 - vi0);
 			s = tmp0 * tmp1;

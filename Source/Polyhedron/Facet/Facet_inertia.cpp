@@ -27,6 +27,19 @@ bool Facet::consect_x(double y, double z, double& x)
 	double u, delta, alpha, sum;
 	Vector3d A, A0, A1, normal;
 	double a, b, c, d;
+	
+	Vector3d* vertices = NULL;
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		vertices = polyhedron->vertices;
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired");
+		ASSERT(0 && "parentPolyhedron expired");
+		DEBUG_END;
+		return false;
+	}
 
 	normal = plane.norm;
 	a = normal.x;
@@ -46,8 +59,8 @@ bool Facet::consect_x(double y, double z, double& x)
 	sum = 0.;
 	for (i = 0; i < numVertices; ++i)
 	{
-		A0 = parentPolyhedron->vertices[indVertices[i % numVertices]] - A;
-		A1 = parentPolyhedron->vertices[indVertices[(i + 1) % numVertices]] - A;
+		A0 = vertices[indVertices[i % numVertices]] - A;
+		A1 = vertices[indVertices[(i + 1) % numVertices]] - A;
 		delta = (A0 % A1) * normal;
 		delta /= sqrt(qmod(A0) * qmod(A1));
 		alpha = asin(delta);

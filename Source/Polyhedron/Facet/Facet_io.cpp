@@ -81,31 +81,31 @@ void Facet::my_fprint_all(FILE* file)
 
 	REGULAR_PRINT(file, "\nrgb = (%d, %d, %d)\n", rgb[0], rgb[1], rgb[2]);
 
-	if (parentPolyhedron == NULL)
-	{
-		DEBUG_PRINT("Warning! parentPolyhedron == NULL !\n");
-	}
-	else if (parentPolyhedron->vertices == NULL)
-	{
-		DEBUG_PRINT("Warning! parentPolyhedron->vertices == NULL !\n");
-	}
-	else
+	if (auto polyhedron = parentPolyhedron.lock())
 	{
 		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 		{
 			int ind = indVertices[iVertex];
-			if (ind >= parentPolyhedron->numVertices || ind < 0)
+			if (ind >= polyhedron->numVertices || ind < 0)
 			{
 				DEBUG_PRINT("Invalid index of vertex in facet #%d", id);
 				DEBUG_END;
 				return;
 			}
-			DEBUG_VARIABLE Vector3d vector = parentPolyhedron->vertices[ind];
+			DEBUG_VARIABLE Vector3d vector = polyhedron->vertices[ind];
 			REGULAR_PRINT(file, "vertices[%d] = (%lf, %lf, %lf)\n", ind,
-						  vector.x, vector.y, vector.z);
+							vector.x, vector.y, vector.z);
 		}
+		test_pair_neighbours();
 	}
-	test_pair_neighbours();
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired");
+		ASSERT(0 && "parentPolyhedron expired");
+		DEBUG_END;
+		return;
+	}
+	
 	DEBUG_END;
 }
 
@@ -146,13 +146,27 @@ void Facet::fprint_ply_vertex(FILE* file)
 {
 	DEBUG_START;
 	int v_id;
+	Vector3d* vertices = NULL;
+	
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		vertices = polyhedron->vertices;
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired");
+		ASSERT(0 && "parentPolyhedron expired");
+		DEBUG_END;
+		return;
+	}
+	
 	for (int j = 0; j < numVertices; ++j)
 	{
 		v_id = indVertices[j];
 		ALWAYS_PRINT(file, "%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf\n",
-				parentPolyhedron->vertices[v_id].x,
-				parentPolyhedron->vertices[v_id].y,
-				parentPolyhedron->vertices[v_id].z, plane.norm.x, plane.norm.y,
+				vertices[v_id].x,
+				vertices[v_id].y,
+				vertices[v_id].z, plane.norm.x, plane.norm.y,
 				plane.norm.z);
 	}
 	DEBUG_END;

@@ -20,7 +20,6 @@
 #include "PolyhedraCorrectionLibrary.h"
 
 Cube::Cube() :
-		Polyhedron(),
 		height(0.),
 		center(Vector3d(0., 0.,  0.))
 {
@@ -30,7 +29,6 @@ Cube::Cube() :
 }
 
 Cube::Cube(double h) :
-		Polyhedron(),
 		height(h),
 		center(Vector3d(0., 0., 0.))
 {
@@ -40,7 +38,6 @@ Cube::Cube(double h) :
 }
 
 Cube::Cube(double h, double x, double y, double z) :
-		Polyhedron(),
 		height(h),
 		center(Vector3d(x, y, z))
 {
@@ -50,7 +47,6 @@ Cube::Cube(double h, double x, double y, double z) :
 }
 
 Cube::Cube(double h, Vector3d c) :
-		Polyhedron(),
 		height(h),
 		center(c)
 {
