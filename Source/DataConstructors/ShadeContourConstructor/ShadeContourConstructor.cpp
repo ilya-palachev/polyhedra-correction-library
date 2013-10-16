@@ -14,10 +14,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "DataConstructors/ShadeContourConstructor/ShadeContourConstructor.h"
+#include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "Polyhedron/Facet/Facet.h"
 
 ShadeContourConstructor::ShadeContourConstructor(shared_ptr<Polyhedron> p,
 		shared_ptr<ShadeContourData> d) :

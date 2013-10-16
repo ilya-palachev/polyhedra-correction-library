@@ -14,10 +14,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Polyhedron/Facet/Facet.h"
 
 const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
 const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE = 1e-2;

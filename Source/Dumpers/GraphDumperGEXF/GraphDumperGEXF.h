@@ -14,11 +14,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef GRAPHDUMPERGEXF_H_
 #define GRAPHDUMPERGEXF_H_
+
+#include <libgexf.h>
+
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Facet/Facet.h"
 
 /* Class for dumping graph data obtained from facet/edge strcuture to file.
  * It should be used for debugging purposes. We need to see what

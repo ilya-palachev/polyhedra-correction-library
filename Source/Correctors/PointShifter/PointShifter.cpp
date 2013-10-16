@@ -14,10 +14,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Gauss_string.h"
+#include "Correctors/PointShifter/PointShifter.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 PointShifter::PointShifter() :
 		PCorrector(),
@@ -195,6 +201,8 @@ void PointShifter::run(int id, Vector3d delta)
 
 	DEBUG_VARIABLE double xx, yy, zz;
 	DEBUG_VARIABLE double a, b, c, d;
+	DEBUG_VARIABLE int step = 0;
+	
 	for (int j = 0; j < polyhedron->numFacets; ++j)
 	{
 		a = polyhedron->facets[j].plane.norm.x;
@@ -336,12 +344,18 @@ void print_matrix(FILE* file, int n, int m, double* A)
 			if (fabs(A[i * n + j]) >= 1e-16)
 			{
 				if (fabs(A[i * n + j]) < 9.5)
+				{
 					REGULAR_PRINT(file, "%1.0lf ", fabs(A[i * n + j]));
+				}
 				else
+				{
 					REGULAR_PRINT(file, "# ");
+				}
 			}
 			else
+			{
 				REGULAR_PRINT(file, "  ");
+			}
 		}
 		REGULAR_PRINT(file, "|\n");
 	}
@@ -366,9 +380,13 @@ void print_matrix_bool(FILE* file, int n, int m, bool* A)
 		for (j = 0; j < m; ++j)
 		{
 			if (A[i * m + j])
+			{
 				REGULAR_PRINT(file, "1 ");
+			}
 			else
+			{
 				REGULAR_PRINT(file, "  ");
+			}
 		}
 		REGULAR_PRINT(file, "|\n");
 	}

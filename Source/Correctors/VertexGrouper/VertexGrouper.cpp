@@ -14,10 +14,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Gauss_string.h"
+#include "Correctors/VertexGrouper/VertexGrouper.h"
+#include "Polyhedron/Facet/Facet.h"
 
 #define EPS_PARALLEL 1e-15
 

@@ -14,11 +14,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef GSASSOCIATOR_H_
 #define GSASSOCIATOR_H_
+
+#include <memory>
+
+#include "Vector3d.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
 
 enum Orientation
 {

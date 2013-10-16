@@ -14,11 +14,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef PANALYZER_H_
 #define PANALYZER_H_
+
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
 
 class PAnalyzer
 {

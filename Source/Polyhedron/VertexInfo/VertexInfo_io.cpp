@@ -14,16 +14,21 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 void VertexInfo::fprint_my_format(FILE* file)
 {
 	REGULAR_PRINT(file, "%d ", numFacets);
-	for (int j = 0; j < 3 * numFacets + 1; ++j)
-		REGULAR_PRINT(file, " %d", indFacets[j]);
+	for (int i = 0; i < 3 * numFacets + 1; ++i)
+	{
+		REGULAR_PRINT(file, " %d", indFacets[i]);
+	}
 	REGULAR_PRINT(file, "\n");
 }
 

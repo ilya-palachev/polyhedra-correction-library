@@ -15,10 +15,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 
 TreeClusterNormNode::TreeClusterNormNode() :
 				cluster(NULL),
@@ -26,6 +29,8 @@ TreeClusterNormNode::TreeClusterNormNode() :
 				child0(NULL),
 				child1(NULL)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 TreeClusterNormNode::TreeClusterNormNode(const TreeClusterNormNode& orig) :
@@ -34,14 +39,19 @@ TreeClusterNormNode::TreeClusterNormNode(const TreeClusterNormNode& orig) :
 				child0(orig.child0),
 				child1(orig.child1)
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 TreeClusterNormNode::~TreeClusterNormNode()
 {
+	DEBUG_START;
+	DEBUG_END;
 }
 
 void TreeClusterNormNode::fprint(FILE* file, int level)
 {
+	DEBUG_START;
 
 	for (int i = 0; i < level; ++i)
 	{
@@ -57,11 +67,14 @@ void TreeClusterNormNode::fprint(FILE* file, int level)
 	{
 		child1->fprint(file, level + 1);
 	}
+	DEBUG_END;
 }
 
 void TreeClusterNormNode::fprint_dendrogramma_lev(FILE* file, int level,
 		int fix)
 {
+	DEBUG_START;
+
 	if (level > fix)
 	{
 		return;
@@ -87,5 +100,6 @@ void TreeClusterNormNode::fprint_dendrogramma_lev(FILE* file, int level,
 		child0->fprint_dendrogramma_lev(file, level + 1, fix);
 		child1->fprint_dendrogramma_lev(file, level + 1, fix);
 	}
+	DEBUG_END;
 }
 

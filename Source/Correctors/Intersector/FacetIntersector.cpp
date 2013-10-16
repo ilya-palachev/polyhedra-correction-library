@@ -14,10 +14,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/Intersector/FacetIntersector.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
 
 FacetIntersector::FacetIntersector() :
 		Intersector(),
@@ -52,10 +58,19 @@ FacetIntersector::~FacetIntersector()
 int FacetIntersector::signum(int i, Plane plane)
 {
 	DEBUG_START;
-	DEBUG_END;
-	return facet->parentPolyhedron->signum(
-			facet->parentPolyhedron->vertices[facet->indVertices[i]],
+	if (auto polyhedron = facet->parentPolyhedron.lock())
+	{
+		DEBUG_END;
+		return polyhedron->signum(polyhedron->vertices[facet->indVertices[i]],
 			plane);
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired");
+		ASSERT(0 && "parentPolyhedron expired");
+		DEBUG_END;
+		return -RAND_MAX;
+	}
 }
 
 bool FacetIntersector::run(Plane iplane, FutureFacet& ff, int& n_components)

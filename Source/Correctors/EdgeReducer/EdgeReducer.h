@@ -14,11 +14,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef EDGEREDUCER_H_
 #define EDGEREDUCER_H_
+
+#include <set>
+#include <queue>
+
+#include "Correctors/PCorrector/PCorrector.h"
+#include "DataContainers/EdgeData/EdgeData.h"
 
 typedef set<pair<int, int>>* IntPairPtr;
 

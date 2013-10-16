@@ -14,10 +14,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "Polyhedron/Facet/Facet.h"
 
 #define DEFAULT_NV 1000
 
@@ -25,8 +29,7 @@ Facet::Facet() :
 				id(-1),
 				numVertices(0),
 				plane(),
-				indVertices(NULL),
-				parentPolyhedron(NULL)
+				indVertices(NULL)
 {
 	DEBUG_START;
 	rgb[0] = 100;
@@ -149,10 +152,6 @@ void Facet::clear()
 		indVertices = NULL;
 	}
 	numVertices = 0;
-	/* Destructors of Facet and Polyhedron begin recursively call each other.
-	 * Currently i don't know how to fix this. Thus this assignment to NULL is
-	 * added.*/
-	parentPolyhedron = NULL;
 	DEBUG_END;
 }
 
@@ -259,9 +258,18 @@ void Facet::get_next_facet(int pos_curr, int& pos_next, int& fid_next,
 int Facet::signum(int i, Plane plane)
 {
 	DEBUG_START;
-	DEBUG_END;
-	return parentPolyhedron->signum(parentPolyhedron->vertices[indVertices[i]],
-			plane);
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		DEBUG_END;
+		return polyhedron->signum(polyhedron->vertices[indVertices[i]], plane);
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired.");
+		ASSERT(0);
+		DEBUG_END;
+		return -RAND_MAX;
+	}
 }
 
 void Facet::find_and_replace_vertex(int from, int to)
@@ -430,40 +438,42 @@ void Facet::update_info()
 {
 	DEBUG_START;
 
-	int i, facet, pos, nnv;
-
 	DEBUG_PRINT("update info in facet %d", id);
 	DEBUG_PRINT("{{{");
 	this->my_fprint_all(stdout);
-
-	for (i = 0; i < numVertices; ++i)
+	
+	if (auto polyhedron = parentPolyhedron.lock())
 	{
-		facet = indVertices[numVertices + 1 + i];
-		pos = parentPolyhedron->facets[facet].find_vertex(indVertices[i]);
-		if (pos == -1)
+
+		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 		{
-			ERROR_PRINT(
-					"=======update_info: Error. Cannot find vertex %d in facet %d",
-					indVertices[i], facet);
-			parentPolyhedron->facets[facet].my_fprint_all(stdout);
-			this->my_fprint_all(stdout);
-			DEBUG_END;
-			return;
+			int iFacet = indVertices[numVertices + 1 + iVertex];
+			int pos = polyhedron->facets[iFacet].find_vertex(indVertices[iVertex]);
+			if (pos == -1)
+			{
+				ERROR_PRINT(
+						"=======update_info: Error. Cannot find vertex %d in facet %d",
+						indVertices[iVertex], iFacet);
+				polyhedron->facets[iFacet].my_fprint_all(stdout);
+				this->my_fprint_all(stdout);
+				DEBUG_END;
+				return;
+			}
+			indVertices[2 * numVertices + 1] = pos;
+			int nnv = polyhedron->facets[iFacet].numVertices;
+			pos = (pos + nnv - 1) % nnv;
+			if (polyhedron->facets[iFacet].indVertices[nnv + 1 + pos] != id)
+			{
+				ERROR_PRINT(
+						"=======update_info: Error. Wrong neighbor facet for vertex"
+						" %d in facet %d", indVertices[iVertex], iFacet);
+				polyhedron->facets[iFacet].my_fprint_all(stdout);
+				this->my_fprint_all(stdout);
+				DEBUG_END;
+				return;
+			}
+			polyhedron->facets[iFacet].indVertices[2 * nnv + 1 + pos] = iVertex;
 		}
-		indVertices[2 * numVertices + 1] = pos;
-		nnv = parentPolyhedron->facets[facet].numVertices;
-		pos = (pos + nnv - 1) % nnv;
-		if (parentPolyhedron->facets[facet].indVertices[nnv + 1 + pos] != id)
-		{
-			ERROR_PRINT(
-					"=======update_info: Error. Wrong neighbor facet for vertex %d in facet %d",
-					indVertices[i], facet);
-			parentPolyhedron->facets[facet].my_fprint_all(stdout);
-			this->my_fprint_all(stdout);
-			DEBUG_END;
-			return;
-		}
-		parentPolyhedron->facets[facet].indVertices[2 * nnv + 1 + pos] = i;
 	}
 	this->my_fprint_all(stdout);
 	test_pair_neighbours();
@@ -478,9 +488,24 @@ Vector3d& Facet::find_mass_centre()
 	double c = 1. / (double) numVertices;
 	Vector3d* v = new Vector3d(0., 0., 0.);
 	Vector3d a;
+	
+	Vector3d* vertices = NULL;
+	
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		vertices = polyhedron->vertices;
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired");
+		ASSERT(0 && "parentPolyhedron expired");
+		DEBUG_END;
+		return *v;
+	}
+	
 	for (i = 0; i < numVertices; ++i)
 	{
-		a = parentPolyhedron->vertices[indVertices[i]];
+		a = vertices[indVertices[i]];
 		*v += a;
 		DEBUG_PRINT("facet[%d].index[%d] = (%lf, %lf, %lf)", id, i, a.x, a.y, a.z);
 	}

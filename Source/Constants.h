@@ -18,22 +18,26 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PCORRECTOR_H_
-#define PCORRECTOR_H_
+#ifndef CONSTANTS_H
+#define	 CONSTANTS_H
 
-#include <memory>
+#include <cstdlib>
 
-#include "Polyhedron/Polyhedron.h"
+/* Some common constants used by different methods. */
 
-class PCorrector
-{
-public:
-	shared_ptr<Polyhedron> polyhedron;
+/* During the array initialization, not initialized fields are assigned to this
+ * value (for debugging purposes). */
+const int INT_NOT_INITIALIZED = -RAND_MAX;
 
-	PCorrector();
-	PCorrector(shared_ptr<Polyhedron> p);
-	PCorrector(Polyhedron* p);
-	virtual ~PCorrector();
-};
+/* We assume that 2 planes or 2 lines are colinear if the angle between them is
+ * less than this value. */
+const double EPS_COLLINEARITY = 1e-14;
 
-#endif /* PCORRECTOR_H_ */
+/* This value is returned by functions which return double variable in case of
+ * failure. */
+const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
+
+/* Minimal double number. */
+const double EPS_MIN_DOUBLE = 1e-16;
+
+#endif /* CONSTANTS_H */

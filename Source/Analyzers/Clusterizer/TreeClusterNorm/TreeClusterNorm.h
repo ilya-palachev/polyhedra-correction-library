@@ -15,11 +15,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef TREECLUSTERNORM_H
 #define TREECLUSTERNORM_H
+
+#include <cstdio>
+
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 
 class TreeClusterNorm
 {

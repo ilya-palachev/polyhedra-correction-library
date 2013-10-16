@@ -1,7 +1,6 @@
-#include "math.h"
-#include "Vector3d.h"
+#include <math.h>
 
-//#include "matrix_invert.h"
+#include "Vector3d.h"
 #include "Gauss_string.h"
 
 Vector3d & Vector3d::norm(double d)

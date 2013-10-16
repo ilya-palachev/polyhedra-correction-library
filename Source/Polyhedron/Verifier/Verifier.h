@@ -14,11 +14,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef VERIFIER_H_
 #define VERIFIER_H_
+
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Correctors/EdgeReducer/EdgeReducer.h"
 
 class Verifier
 {

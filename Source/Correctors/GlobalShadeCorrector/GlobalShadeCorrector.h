@@ -14,11 +14,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef GLOBALSHADECORRECTOR_H_
 #define GLOBALSHADECORRECTOR_H_
+
+#include <list>
+
+#include "Correctors/PCorrector/PCorrector.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+
+class Plane;
+class GSAssociator;
 
 #define DO_EDGES_CHECK
 

@@ -14,30 +14,34 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef POLYHEDRON_CLASS_H
 #define	 POLYHEDRON_CLASS_H
 
-/* Some common constants used by different methods. */
+#include <memory>
 
-/* During the array initialization, not initialized fields are assigned to this
- * value (for debugging purposes). */
-const int INT_NOT_INITIALIZED = -RAND_MAX;
+/*
+ * Forward declarations
+ */
+class Vector3d;
+class Plane;
+class Facet;
+class VertexInfo;
+class TreeClusterNorm;
+class TreeClusterNormNode;
+class MatrixDistNorm;
+class ShadeContourData;
+class EdgeData;
 
-/* We assume that 2 planes or 2 lines are colinear if the angle between them is
- * less than this value. */
-const double EPS_COLLINEARITY = 1e-14;
+struct _GSCorrectorParameters;
 
-/* This value is returned by functions which return double variable in case of
- * failure. */
-const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
+using namespace std;
 
-/* Minimal double number. */
-const double EPS_MIN_DOUBLE = 1e-16;
-
-
+typedef struct _GSCorrectorParameters GSCorrectorParameters;
+typedef shared_ptr<EdgeData> EdgeDataPtr;
 
 /* Main class that contains polyhedron implementation.
  *

@@ -14,10 +14,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugPrint.h"
+#include "Correctors/Intersector/Intersector.h"
+#include "Correctors/Intersector/FacetIntersector.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 Intersector::Intersector() :
 		PCorrector()
@@ -212,7 +220,6 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 			}
 
 		}
-		DEBUG_PRINT("");
 
 		DEBUG_END;
 		return 0;
@@ -662,7 +669,6 @@ void Intersector::run(Plane iplane)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 		if (!ifSaveFacet[i])
 			DEBUG_PRINT("Facet %d is deleted", i);
-	DEBUG_PRINT("");
 #endif
 
 	//6. Генерирование новых граней

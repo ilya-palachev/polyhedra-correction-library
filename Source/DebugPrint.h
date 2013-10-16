@@ -14,11 +14,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DEBUGPRINT_H
 #define DEBUGPRINT_H
+
+#include <cstdio>
 
 //#define DEBUG
 //#define DEBUG1
@@ -45,8 +48,9 @@
 	STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
 	STDERR_PRINT(__VA_ARGS__); \
 	STDERR_PRINT("\n");
-#		define REGULAR_PRINT(_file, _fmt, ...)  \
-	FILE_PRINT(_file, COLOUR_NORM _fmt, ##__VA_ARGS__)
+#		define REGULAR_PRINT(_file, ...)  \
+	FILE_PRINT(_file, COLOUR_NORM); \
+	FILE_PRINT(_file, ##__VA_ARGS__);
 #		define DEBUG_START DEBUG_PRINT("Start")
 #		define DEBUG_END DEBUG_PRINT("End")
 

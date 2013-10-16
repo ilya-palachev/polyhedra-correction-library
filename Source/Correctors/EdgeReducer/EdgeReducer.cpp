@@ -14,10 +14,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/EdgeReducer/EdgeReducer.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
 
 EdgeReducer::EdgeReducer() :
 		PCorrector()
@@ -493,9 +499,9 @@ bool EdgeReducer::rePreprocessFacets()
 #endif /* NDEBUG */
 
 	facetsPreprocessed.clear();
-
-	return true;
+	
 	DEBUG_END;
+	return true;
 }
 
 
@@ -836,11 +842,13 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	 * merge the lists of associations, because otherwise we will get some
 	 * associations more than one time.
 	 */
+	int numAssociationsBefore = edgeNew->assocList.size();
+	
 	edgeNew->assocList.insert(edgeNew->assocList.end(),
 			edge0->assocList.begin(), edge0->assocList.end());
 	edgeNew->assocList.insert(edgeNew->assocList.end(),
 			edge1->assocList.begin(), edge1->assocList.end());
-	ASSERT(edgeNew->assocList.size() == numAssociationsBefore +
+	ASSERT((unsigned) edgeNew->assocList.size() == numAssociationsBefore +
 			edge0->assocList.size() + edge1->assocList.size());
 
 	edgesWS->edgesErased->insert(pair<int, int> (edge0->v0, edge0->v1));

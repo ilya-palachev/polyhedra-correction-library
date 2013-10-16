@@ -14,10 +14,21 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Vector3d.h"
+#include "Constants.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadeContourData/SContour/SContour.h"
 
 GlobalShadeCorrector::GlobalShadeCorrector() :
 				PCorrector(),
@@ -425,7 +436,7 @@ double GlobalShadeCorrector::calculateFunctional()
 	double sum = 0;
 
 	EdgeSetIterator edge = edgeData->edges.begin();
-	ASSERT(edgeData->numEdges == edgeData->edges.size());
+	ASSERT((unsigned) edgeData->numEdges == edgeData->edges.size());
 
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{

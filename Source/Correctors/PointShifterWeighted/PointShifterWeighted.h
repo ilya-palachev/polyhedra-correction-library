@@ -14,11 +14,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef POINTSHIFTERWEIGHTED_H_
 #define POINTSHIFTERWEIGHTED_H_
+
+#include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
 
 class PointShifterWeighted: public PCorrector
 {

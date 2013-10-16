@@ -14,10 +14,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
 
 void FutureFacet::generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
 		EdgeSetIntersected* es)

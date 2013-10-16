@@ -14,10 +14,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/Facet/Facet.h"
 
 void Facet::preprocess_free()
 {
@@ -60,14 +63,25 @@ void Facet::preprocess()
 void Facet::preprocess_edge(int v0, int v1, int v0_id)
 {
 	DEBUG_START;
-	int i, pos;
+	int pos = -1;
+	int numFacets = 0;
+	Facet* facets = NULL;
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		numFacets = polyhedron->numFacets;
+		facets = polyhedron->facets;
+	}
+	else
+	{
+		ERROR_PRINT("parentPolyhedron expired.");
+		ASSERT(0);
+	}
 
-	pos = -1;
-	for (i = 0; i < parentPolyhedron->numFacets; ++i)
+	for (int i = 0; i < numFacets; ++i)
 	{
 		if (i == id)
 			continue;
-		pos = parentPolyhedron->facets[i].preprocess_search_edge(v1, v0);
+		pos = facets[i].preprocess_search_edge(v1, v0);
 		if (pos != -1)
 		{
 			indVertices[v0_id + numVertices + 1] = i;

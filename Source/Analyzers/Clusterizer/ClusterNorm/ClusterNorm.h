@@ -1,10 +1,3 @@
-/*
- * ClusterNorm.h
- *
- * Created on:  01.05.2012
- *     Author:  Kaligin Nikolai <nkaligin@yandex.ru>
- */
-
 /* 
  * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
  * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
@@ -22,11 +15,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef CLUSTERNORM_H
 #define CLUSTERNORM_H
+
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+#include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
+
+using namespace std;
 
 class ClusterNorm
 {

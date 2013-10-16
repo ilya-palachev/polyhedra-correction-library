@@ -14,10 +14,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "list_squares_method.h"
+#include "Correctors/Coalescer/Coalescer.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 #define EPS_PARALL 1e-16
 
@@ -245,7 +252,6 @@ int Coalescer::buildIndex(int fid0, int fid1)
 		is[index[i]] = true;
 		DEBUG_PRINT("%d ", index[i]);
 	}
-	DEBUG_PRINT("");
 
 	for (i = 0; i < nv0; ++i)
 		if (!is[index0[i]])
@@ -309,12 +315,10 @@ int Coalescer::buildIndex(int n, int* fid)
 		{
 			DEBUG_PRINT("\t%d", polyhedron->facets[fid[i]].indVertices[j]);
 		}
-		DEBUG_PRINT("");
 		for (j = 0; j < nnv; ++j)
 		{
 			DEBUG_PRINT("\t%d", nfind[polyhedron->facets[fid[i]].indVertices[j]]);
 		}
-		DEBUG_PRINT("");
 		polyhedron->facets[fid[i]].my_fprint_all(stdout);
 	}
 
@@ -374,7 +378,6 @@ int Coalescer::buildIndex(int n, int* fid)
 		v = polyhedron->facets[fid[i]].indVertices[j];
 		DEBUG_PRINT("v = %d", v);
 	} while (v != v_first);
-	DEBUG_PRINT("");
 	--nv;
 
 	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index, polyhedron, true);
@@ -681,7 +684,6 @@ int Coalescer::riseFind(int fid0)
 //            continue;
 		}
 		//конец написанного 2012-03-31
-		DEBUG_PRINT("");
 	}
 
 	imin = -1;
@@ -792,7 +794,6 @@ double Coalescer::riseFindStep(int fid0, int i)
 	if (polyhedron->facets[fr1].numVertices < 4)
 		d2 = -1;
 	DEBUG_PRINT("\td2 = %lf", d2);
-	DEBUG_PRINT("");
 
 	d = (d1 < d2) ? d1 : d2;
 	if (d1 < 0 && d2 > 0)

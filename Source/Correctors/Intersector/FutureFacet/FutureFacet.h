@@ -14,11 +14,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef FUTUREFACET_H
 #define	FUTUREFACET_H
+
+#include <cstdio>
+
+#include "Vector3d.h"
+#include "Polyhedron/Facet/Facet.h"
+
+class EdgeSetIntersected;
 
 class FutureFacet
 {

@@ -14,11 +14,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef FACETINTERSECTOR_H_
 #define FACETINTERSECTOR_H_
+
+#include "Correctors/Intersector/Intersector.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+
+class Facet;
 
 class FacetIntersector: public Intersector
 {

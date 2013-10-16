@@ -14,11 +14,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SHADECONTOURDATA_H_
 #define SHADECONTOURDATA_H_
+
+#include "DataContainers/PData/PData.h"
+
+class SContour;
 
 class ShadeContourData : public PData
 {

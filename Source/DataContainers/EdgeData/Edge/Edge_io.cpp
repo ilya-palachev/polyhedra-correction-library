@@ -14,10 +14,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/EdgeData/Edge/Edge.h"
 
 const double THRESHOLD_ESSENTIAL_ASSOCIATION = 0.1;
 
@@ -34,7 +37,7 @@ void Edge::my_fprint(FILE* file) const
 	REGULAR_PRINT(file, "\tf1 = %d (second facet including this"
 			"edge)\n", f1);
 	REGULAR_PRINT(file, "\tnumc = %ld (number of contours, from which this"
-			"edge is visible)\n", assocList.size());
+			"edge is visible)\n", (long int) assocList.size());
 	REGULAR_PRINT(file, "\tThese are that contours:\n");
 	REGULAR_PRINT(file,
 			"\ti\t|\tid of contour\t|\tnearest side\t|\tdirection\t|\tweight\n");

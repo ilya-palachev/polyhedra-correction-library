@@ -14,13 +14,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef VERTEXGROUPER_H_
 #define VERTEXGROUPER_H_
 
-#include "PCorrector.h"
+#include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
 
 class VertexGrouper: public PCorrector
 {

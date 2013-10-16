@@ -14,10 +14,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Vector3d.h"
+#include "array_operations.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
+#include "Polyhedron/Facet/Facet.h"
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm)
 {

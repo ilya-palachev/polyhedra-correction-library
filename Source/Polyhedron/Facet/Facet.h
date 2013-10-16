@@ -14,11 +14,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef FACET_H
 #define	FACET_H
+
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
 
 class Facet {
 public:
@@ -26,7 +32,7 @@ public:
 	int numVertices;
 	Plane plane;
 	int* indVertices;
-	shared_ptr<Polyhedron> parentPolyhedron;
+	weak_ptr<Polyhedron> parentPolyhedron;
 	unsigned char rgb[3];
 
 	void init_full(const int* index_orig, const bool ifLong);

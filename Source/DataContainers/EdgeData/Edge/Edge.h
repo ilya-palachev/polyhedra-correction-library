@@ -14,11 +14,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef EDGE_H
 #define	EDGE_H
+
+#include <list>
+#include <cstdio>
+
+#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
+
+using namespace std;
 
 class Edge
 {

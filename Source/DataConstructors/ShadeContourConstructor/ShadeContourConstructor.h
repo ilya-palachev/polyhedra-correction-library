@@ -14,15 +14,20 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef SHADECONTOURCONSTRUCTOR_H_
 #define SHADECONTOURCONSTRUCTOR_H_
 
-/*
- *
- */
+#include "Vector3d.h"
+#include "DataConstructors/PDataConstructor/PDataConstructor.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+
+class SContour;
+
 class ShadeContourConstructor: public PDataConstructor
 {
 private:

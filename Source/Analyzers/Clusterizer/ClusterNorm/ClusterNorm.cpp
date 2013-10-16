@@ -15,10 +15,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
+#include "Polyhedron/Facet/Facet.h"
 
 double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
 

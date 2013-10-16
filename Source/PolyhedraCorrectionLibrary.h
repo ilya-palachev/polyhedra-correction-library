@@ -14,7 +14,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 /* Includes. */
@@ -47,9 +48,6 @@ using namespace libgexf;
 #include "Vector3d.h"
 #include "array_operations.h"
 #include "Gauss_string.h"
-
-typedef struct _GSCorrectorParameters GSCorrectorParameters;
-
 
 class Polyhedron;
 
@@ -110,7 +108,6 @@ class SortedSetOfPairs;
 
 class GraphDumperGEXF;
 
-typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
