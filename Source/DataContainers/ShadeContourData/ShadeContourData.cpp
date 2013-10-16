@@ -18,7 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadeContourData/SContour/SContour.h"
 
 ShadeContourData::ShadeContourData(shared_ptr<Polyhedron> p) :
 				PData(p),

@@ -19,7 +19,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
 
 TreeClusterNorm::TreeClusterNorm() :
 				root(NULL)

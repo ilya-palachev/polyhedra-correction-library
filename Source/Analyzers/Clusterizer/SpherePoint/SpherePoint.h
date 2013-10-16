@@ -22,6 +22,11 @@
 #ifndef SPHEREPOINT_H
 #define SPHEREPOINT_H
 
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
+
 class SpherePoint
 {
 public:

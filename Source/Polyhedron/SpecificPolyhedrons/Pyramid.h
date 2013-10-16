@@ -21,6 +21,10 @@
 #ifndef PYRAMID_H_
 #define PYRAMID_H_
 
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class Pyramid: public Polyhedron {
 private:
 	int numVerticesBase;

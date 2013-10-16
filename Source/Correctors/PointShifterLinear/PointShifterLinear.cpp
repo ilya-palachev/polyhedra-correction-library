@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Gauss_string.h"
+#include "list_squares_method.h"
+#include "Correctors/PointShifterLinear/PointShifterLinear.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 #define EPSILON 1e-7
 //#define DEFORM_SCALE //Этот макрос определяет, каким методом производить деформацию:

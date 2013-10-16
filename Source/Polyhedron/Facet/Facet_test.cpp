@@ -18,7 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/Facet/Facet.h"
 
 bool Facet::test_self_intersection()
 {

@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/SpecificPolyhedrons/Pyramid.h"
+#include "Polyhedron/Facet/Facet.h"
+
 
 Pyramid::Pyramid() :
 		Polyhedron(),

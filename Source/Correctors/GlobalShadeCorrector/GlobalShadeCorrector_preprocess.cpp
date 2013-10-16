@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
+#include "Polyhedron/Facet/Facet.h"
 
 void GlobalShadeCorrector::preprocess()
 {

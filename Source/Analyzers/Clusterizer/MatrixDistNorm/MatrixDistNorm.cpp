@@ -19,8 +19,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
+#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
 
 MatrixDistNorm::MatrixDistNorm() :
 		nMax(0), n(0), matrix(NULL), ifStay(NULL)

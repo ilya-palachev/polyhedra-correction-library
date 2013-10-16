@@ -21,6 +21,11 @@
 #ifndef GRAPHDUMPERGEXF_H_
 #define GRAPHDUMPERGEXF_H_
 
+#include <libgexf.h>
+
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Facet/Facet.h"
+
 /* Class for dumping graph data obtained from facet/edge strcuture to file.
  * It should be used for debugging purposes. We need to see what
  * has been done by the algorithm with current facet.

@@ -18,7 +18,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Vector3d.h"
+#include "Constants.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadeContourData/SContour/SContour.h"
 
 GlobalShadeCorrector::GlobalShadeCorrector() :
 				PCorrector(),

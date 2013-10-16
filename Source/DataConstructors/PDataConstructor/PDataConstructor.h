@@ -21,9 +21,10 @@
 #ifndef PDATACONSTRUCTOR_H_
 #define PDATACONSTRUCTOR_H_
 
-/*
- *
- */
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class PDataConstructor
 {
 public:

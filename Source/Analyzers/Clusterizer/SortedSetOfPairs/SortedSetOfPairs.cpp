@@ -19,7 +19,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cstdlib>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "array_operations.h"
+#include "Analyzers/Clusterizer/SortedSetOfPairs/SortedSetOfPairs.h"
 
 SortedSetOfPairs::SortedSetOfPairs(int Len)
 {

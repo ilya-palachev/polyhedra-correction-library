@@ -18,7 +18,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Gauss_string.h"
+#include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 double norm_vector(int n, double* a);
 

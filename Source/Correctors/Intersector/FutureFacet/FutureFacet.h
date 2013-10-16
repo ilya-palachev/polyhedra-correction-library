@@ -21,6 +21,13 @@
 #ifndef FUTUREFACET_H
 #define	FUTUREFACET_H
 
+#include <cstdio>
+
+#include "Vector3d.h"
+#include "Polyhedron/Facet/Facet.h"
+
+class EdgeSetIntersected;
+
 class FutureFacet
 {
 private:

@@ -21,6 +21,9 @@
 #ifndef SIDEOFCONTOUR_H
 #define	SIDEOFCONTOUR_H
 
+#include "cstdio"
+#include "Vector3d.h"
+
 // Following "enum" is inherited from Octonus:
 
 enum EEdgeType

@@ -21,6 +21,9 @@
 #ifndef POINTSHIFTERWEIGHTED_H_
 #define POINTSHIFTERWEIGHTED_H_
 
+#include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
+
 class PointShifterWeighted: public PCorrector
 {
 private:

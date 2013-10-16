@@ -21,6 +21,9 @@
 #ifndef POINTSHIFTERLINEAR_H_
 #define POINTSHIFTERLINEAR_H_
 
+#include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
+
 class PointShifterLinear: public PCorrector
 {
 private:

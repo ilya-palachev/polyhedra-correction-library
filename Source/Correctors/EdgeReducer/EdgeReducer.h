@@ -21,6 +21,12 @@
 #ifndef EDGEREDUCER_H_
 #define EDGEREDUCER_H_
 
+#include <set>
+#include <queue>
+
+#include "Correctors/PCorrector/PCorrector.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+
 typedef set<pair<int, int>>* IntPairPtr;
 
 struct _EdgesWorkingSets

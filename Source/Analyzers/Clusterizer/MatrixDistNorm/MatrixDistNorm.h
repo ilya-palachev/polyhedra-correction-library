@@ -22,6 +22,10 @@
 #ifndef MATRIXDISTNORM_H
 #define MATRIXDISTNORM_H
 
+#include <cstdio>
+
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
+
 class MatrixDistNorm
 {
 public:

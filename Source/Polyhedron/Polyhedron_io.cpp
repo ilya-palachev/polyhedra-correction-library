@@ -18,7 +18,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "DataContainers/EdgeData/EdgeData.h"
 
 void Polyhedron::my_fprint(const char* filename)
 {

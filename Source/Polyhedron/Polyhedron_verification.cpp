@@ -18,7 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Verifier/Verifier.h"
+#include "Polyhedron/Facet/Facet.h"
 
 int Polyhedron::test_structure()
 {

@@ -21,6 +21,13 @@
 #ifndef GSASSOCIATOR_H_
 #define GSASSOCIATOR_H_
 
+#include <memory>
+
+#include "Vector3d.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+
 enum Orientation
 {
 	ORIENTATION_LEFT, ORIENTATION_RIGHT

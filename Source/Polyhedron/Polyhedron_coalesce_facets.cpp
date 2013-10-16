@@ -18,7 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Correctors/Coalescer/Coalescer.h"
 
 #define EPS_PARALL 1e-16
 #define MAX_MIN_DIST 1e+1

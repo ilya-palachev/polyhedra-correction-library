@@ -18,7 +18,16 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "Polyhedron/Facet/Facet.h"
 
 const double ASSOCIATOR_MIN_PORTION_REL = 0.1;
 const double EPS_SAME_POINTS = 1e-16;

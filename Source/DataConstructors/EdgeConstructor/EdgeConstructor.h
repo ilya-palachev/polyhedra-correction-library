@@ -21,9 +21,8 @@
 #ifndef EDGECONSTRUCTOR_H_
 #define EDGECONSTRUCTOR_H_
 
-/*
- *
- */
+#include "DataConstructors/PDataConstructor/PDataConstructor.h"
+
 class EdgeConstructor : public PDataConstructor
 {
 public:

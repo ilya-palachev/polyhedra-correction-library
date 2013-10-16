@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "list_squares_method.h"
+#include "Correctors/Coalescer/Coalescer.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 #define EPS_PARALL 1e-16
 

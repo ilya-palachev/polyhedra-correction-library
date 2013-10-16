@@ -18,7 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "Constants.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/EdgeData/EdgeData.h"
 
 EdgeData::EdgeData() :
 				edges(),

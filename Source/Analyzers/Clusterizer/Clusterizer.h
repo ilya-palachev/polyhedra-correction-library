@@ -22,6 +22,14 @@
 #ifndef CLUSTERIZER_H_
 #define CLUSTERIZER_H_
 
+#include <memory>
+
+#include "Analyzers/PAnalyzer/PAnalyzer.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
+#include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+#include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
+
 class Clusterizer: public PAnalyzer
 {
 private:

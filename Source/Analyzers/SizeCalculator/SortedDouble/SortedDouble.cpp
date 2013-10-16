@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cstdlib>
+#include <cstdio>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "array_operations.h"
+#include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 
 SortedDouble::SortedDouble(int Len) :
 				len(Len),

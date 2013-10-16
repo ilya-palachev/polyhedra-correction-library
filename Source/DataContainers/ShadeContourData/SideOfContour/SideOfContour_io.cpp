@@ -18,7 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
 
 void SideOfContour::my_fprint(FILE* file)
 {

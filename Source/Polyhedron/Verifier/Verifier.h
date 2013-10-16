@@ -21,6 +21,13 @@
 #ifndef VERIFIER_H_
 #define VERIFIER_H_
 
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Correctors/EdgeReducer/EdgeReducer.h"
+
 class Verifier
 {
 private:

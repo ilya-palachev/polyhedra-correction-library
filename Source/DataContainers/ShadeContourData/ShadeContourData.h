@@ -21,6 +21,10 @@
 #ifndef SHADECONTOURDATA_H_
 #define SHADECONTOURDATA_H_
 
+#include "DataContainers/PData/PData.h"
+
+class SContour;
+
 class ShadeContourData : public PData
 {
 public:

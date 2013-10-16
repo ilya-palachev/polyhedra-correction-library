@@ -21,6 +21,8 @@
 #ifndef SIZECALCULATOR_H_
 #define SIZECALCULATOR_H_
 
+#include "Analyzers/PAnalyzer/PAnalyzer.h"
+
 class SizeCalculator: public PAnalyzer
 {
 private:

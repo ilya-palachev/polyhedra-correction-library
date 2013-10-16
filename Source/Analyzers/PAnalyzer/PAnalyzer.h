@@ -21,6 +21,10 @@
 #ifndef PANALYZER_H_
 #define PANALYZER_H_
 
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class PAnalyzer
 {
 protected:

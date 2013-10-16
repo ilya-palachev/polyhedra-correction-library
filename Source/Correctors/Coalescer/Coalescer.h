@@ -21,6 +21,10 @@
 #ifndef COALESCER_H_
 #define COALESCER_H_
 
+#include "Vector3d.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Correctors/PCorrector/PCorrector.h"
+
 class Coalescer: public PCorrector
 {
 private:

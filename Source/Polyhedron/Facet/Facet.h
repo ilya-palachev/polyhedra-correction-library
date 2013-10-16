@@ -21,6 +21,11 @@
 #ifndef FACET_H
 #define	FACET_H
 
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
+
 class Facet {
 public:
 	int id;

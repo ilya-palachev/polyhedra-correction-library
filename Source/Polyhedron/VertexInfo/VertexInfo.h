@@ -21,6 +21,11 @@
 #ifndef VERTEXINFO_H
 #define	VERTEXINFO_H
 
+#include <memory>
+
+#include "Vector3d.h"
+#include <Polyhedron/Polyhedron.h>
+
 class VertexInfo
 {
 public:

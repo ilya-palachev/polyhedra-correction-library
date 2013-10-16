@@ -21,6 +21,11 @@
 #ifndef FACETINTERSECTOR_H_
 #define FACETINTERSECTOR_H_
 
+#include "Correctors/Intersector/Intersector.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+
+class Facet;
+
 class FacetIntersector: public Intersector
 {
 private:

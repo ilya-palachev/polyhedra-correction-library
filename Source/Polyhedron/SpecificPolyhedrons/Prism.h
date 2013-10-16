@@ -21,6 +21,10 @@
 #ifndef PRISM_H_
 #define PRISM_H_
 
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class Prism: public Polyhedron {
 private:
 	int numVerticesBase;

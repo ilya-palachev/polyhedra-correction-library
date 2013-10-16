@@ -1,10 +1,3 @@
-/*
- * ClusterNorm.h
- *
- * Created on:  01.05.2012
- *     Author:  Kaligin Nikolai <nkaligin@yandex.ru>
- */
-
 /* 
  * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
  * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
@@ -28,6 +21,13 @@
 
 #ifndef CLUSTERNORM_H
 #define CLUSTERNORM_H
+
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+#include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
+
+using namespace std;
 
 class ClusterNorm
 {

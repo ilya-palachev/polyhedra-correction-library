@@ -21,6 +21,14 @@
 #ifndef GLOBALSHADECORRECTOR_H_
 #define GLOBALSHADECORRECTOR_H_
 
+#include <list>
+
+#include "Correctors/PCorrector/PCorrector.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+
+class Plane;
+class GSAssociator;
+
 #define DO_EDGES_CHECK
 
 enum MethodCorrector

@@ -21,6 +21,10 @@
 #ifndef CUBECUTTED_H_
 #define CUBECUTTED_H_
 
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class CubeCutted: public Polyhedron {
 private:
 	void init();

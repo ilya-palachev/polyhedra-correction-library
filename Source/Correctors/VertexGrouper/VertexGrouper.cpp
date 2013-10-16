@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Gauss_string.h"
+#include "Correctors/VertexGrouper/VertexGrouper.h"
+#include "Polyhedron/Facet/Facet.h"
 
 #define EPS_PARALLEL 1e-15
 

@@ -18,7 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
 
 EdgeContourAssociation::EdgeContourAssociation() :
 				indContour(-1),

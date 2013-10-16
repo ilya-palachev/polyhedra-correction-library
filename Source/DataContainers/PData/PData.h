@@ -21,9 +21,10 @@
 #ifndef PDATA_H_
 #define PDATA_H_
 
-/*
- *
- */
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class PData
 {
 public:

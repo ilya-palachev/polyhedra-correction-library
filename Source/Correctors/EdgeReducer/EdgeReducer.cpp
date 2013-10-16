@@ -18,7 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/EdgeReducer/EdgeReducer.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 EdgeReducer::EdgeReducer() :
 		PCorrector()

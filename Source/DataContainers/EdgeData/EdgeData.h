@@ -21,6 +21,10 @@
 #ifndef EDGEDATA_H_
 #define EDGEDATA_H_
 
+#include <set>
+
+#include "DataContainers/EdgeData/Edge/Edge.h"
+
 typedef set<Edge, EdgeComparison> EdgeSet;
 typedef set<Edge, EdgeComparison>::iterator EdgeSetIterator;
 

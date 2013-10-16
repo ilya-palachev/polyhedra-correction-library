@@ -21,6 +21,14 @@
 #ifndef SCONTOUR_H
 #define	SCONTOUR_H
 
+#include <cstdio>
+
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
+#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+
 class SContour
 {
 public:

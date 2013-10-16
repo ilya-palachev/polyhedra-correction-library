@@ -18,7 +18,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Vector3d.h"
+#include "array_operations.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
+#include "Polyhedron/Facet/Facet.h"
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm)
 {

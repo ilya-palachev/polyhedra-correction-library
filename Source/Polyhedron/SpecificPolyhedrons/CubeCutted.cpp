@@ -18,7 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
+#include "Polyhedron/Facet/Facet.h"
 
 CubeCutted::CubeCutted() :
 		Polyhedron()

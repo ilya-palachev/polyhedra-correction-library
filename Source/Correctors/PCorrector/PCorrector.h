@@ -21,9 +21,10 @@
 #ifndef PCORRECTOR_H_
 #define PCORRECTOR_H_
 
-/*
- *
- */
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+
 class PCorrector
 {
 public:

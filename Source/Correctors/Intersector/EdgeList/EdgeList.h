@@ -21,6 +21,11 @@
 #ifndef EDGELIST_H
 #define	EDGELIST_H
 
+#include <memory>
+
+#include "Polyhedron/Polyhedron.h"
+#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
+
 class EdgeList
 {
 private:

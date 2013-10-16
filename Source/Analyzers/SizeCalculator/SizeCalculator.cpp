@@ -18,7 +18,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "list_squares_method.h"
+#include "Analyzers/SizeCalculator/SizeCalculator.h"
+#include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
+#include "Polyhedron/Facet/Facet.h"
 
 SizeCalculator::SizeCalculator() :
 		PAnalyzer()

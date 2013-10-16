@@ -18,7 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/Facet/Facet.h"
 
 bool Facet::consect_x(double y, double z, double& x)
 {

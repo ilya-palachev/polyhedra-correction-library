@@ -21,7 +21,8 @@
 #ifndef VERTEXGROUPER_H_
 #define VERTEXGROUPER_H_
 
-#include "PCorrector.h"
+#include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
 
 class VertexGrouper: public PCorrector
 {

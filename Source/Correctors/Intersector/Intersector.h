@@ -21,6 +21,13 @@
 #ifndef INTERSECTOR_H_
 #define INTERSECTOR_H_
 
+#include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+
+class Facet;
+class EdgeList;
+
 class Intersector: public PCorrector
 {
 protected:

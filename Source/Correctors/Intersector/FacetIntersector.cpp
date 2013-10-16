@@ -18,7 +18,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/Intersector/FacetIntersector.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
 
 FacetIntersector::FacetIntersector() :
 		Intersector(),

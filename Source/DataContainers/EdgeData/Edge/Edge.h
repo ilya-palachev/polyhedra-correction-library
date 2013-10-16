@@ -21,6 +21,13 @@
 #ifndef EDGE_H
 #define	EDGE_H
 
+#include <list>
+#include <cstdio>
+
+#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
+
+using namespace std;
+
 class Edge
 {
 public:

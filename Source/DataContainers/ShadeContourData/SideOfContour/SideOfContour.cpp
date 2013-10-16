@@ -18,7 +18,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
 
 SideOfContour::SideOfContour() :
 				confidence(0),

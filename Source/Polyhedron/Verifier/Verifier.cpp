@@ -18,7 +18,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "Gauss_string.h"
+#include "Polyhedron/Verifier/Verifier.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 Verifier::Verifier() :
 		polyhedron(),

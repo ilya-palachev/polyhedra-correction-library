@@ -21,6 +21,11 @@
 #ifndef EDGESETINTERSECTED_H
 #define	EDGESETINTERSECTED_H
 
+#include <cstdio>
+
+class EdgeList;
+class FutureFacet;
+
 class EdgeSetIntersected
 {
 private:

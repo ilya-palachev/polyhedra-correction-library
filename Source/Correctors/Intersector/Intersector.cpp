@@ -18,7 +18,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugPrint.h"
+#include "Correctors/Intersector/Intersector.h"
+#include "Correctors/Intersector/FacetIntersector.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 Intersector::Intersector() :
 		PCorrector()

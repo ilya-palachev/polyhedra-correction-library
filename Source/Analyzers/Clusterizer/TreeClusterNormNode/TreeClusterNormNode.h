@@ -22,6 +22,10 @@
 #ifndef TREECLUSTERNORMNODE_H
 #define TREECLUSTERNORMNODE_H
 
+#include <cstdio>
+
+#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
+
 class TreeClusterNormNode
 {
 public:

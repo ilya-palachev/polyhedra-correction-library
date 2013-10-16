@@ -18,7 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Facet/Facet.h"
 
 EdgeConstructor::EdgeConstructor(shared_ptr<Polyhedron> p) :
 				PDataConstructor(p)

@@ -18,7 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/EdgeData/Edge/Edge.h"
 
 const double THRESHOLD_ESSENTIAL_ASSOCIATION = 0.1;
 

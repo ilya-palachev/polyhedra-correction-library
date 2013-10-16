@@ -21,6 +21,11 @@
 #ifndef CUBE_H_
 #define CUBE_H_
 
+#include <memory>
+
+#include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
+
 class Cube : public Polyhedron
 {
 private:
@@ -37,3 +42,4 @@ public:
 };
 
 #endif /* CUBE_H_ */
+

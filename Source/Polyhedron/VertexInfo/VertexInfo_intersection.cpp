@@ -18,7 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
 
 int VertexInfo::intersection_find_next_facet(Plane iplane, int facet_id)
 {

@@ -18,7 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/SpecificPolyhedrons/Cube.h"
+#include "Polyhedron/Facet/Facet.h"
 
 Cube::Cube() :
 		height(0.),

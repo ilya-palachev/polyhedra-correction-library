@@ -21,9 +21,13 @@
 #ifndef SHADECONTOURCONSTRUCTOR_H_
 #define SHADECONTOURCONSTRUCTOR_H_
 
-/*
- *
- */
+#include "Vector3d.h"
+#include "DataConstructors/PDataConstructor/PDataConstructor.h"
+#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+
+class SContour;
+
 class ShadeContourConstructor: public PDataConstructor
 {
 private:

@@ -18,7 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "PolyhedraCorrectionLibrary.h"
+#include <cmath>
+
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/SpecificPolyhedrons/Prism.h"
+#include "Polyhedron/Facet/Facet.h"
+
 
 Prism::Prism() :
 		Polyhedron(),

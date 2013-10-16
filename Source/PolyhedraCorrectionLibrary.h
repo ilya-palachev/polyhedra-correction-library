@@ -49,9 +49,6 @@ using namespace libgexf;
 #include "array_operations.h"
 #include "Gauss_string.h"
 
-typedef struct _GSCorrectorParameters GSCorrectorParameters;
-
-
 class Polyhedron;
 
 /* Specific polyhedrons. For testing purposes. */
@@ -111,7 +108,6 @@ class SortedSetOfPairs;
 
 class GraphDumperGEXF;
 
-typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
