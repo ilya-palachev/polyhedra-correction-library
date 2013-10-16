@@ -220,7 +220,6 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 			}
 
 		}
-		DEBUG_PRINT("");
 
 		DEBUG_END;
 		return 0;
@@ -670,7 +669,6 @@ void Intersector::run(Plane iplane)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 		if (!ifSaveFacet[i])
 			DEBUG_PRINT("Facet %d is deleted", i);
-	DEBUG_PRINT("");
 #endif
 
 	//6. Генерирование новых граней

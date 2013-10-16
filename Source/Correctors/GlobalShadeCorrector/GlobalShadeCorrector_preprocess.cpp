@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"

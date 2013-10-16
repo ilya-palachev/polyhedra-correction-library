@@ -436,7 +436,7 @@ double GlobalShadeCorrector::calculateFunctional()
 	double sum = 0;
 
 	EdgeSetIterator edge = edgeData->edges.begin();
-	ASSERT(edgeData->numEdges == edgeData->edges.size());
+	ASSERT((unsigned) edgeData->numEdges == edgeData->edges.size());
 
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{

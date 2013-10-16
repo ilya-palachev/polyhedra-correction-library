@@ -201,6 +201,8 @@ void PointShifter::run(int id, Vector3d delta)
 
 	DEBUG_VARIABLE double xx, yy, zz;
 	DEBUG_VARIABLE double a, b, c, d;
+	DEBUG_VARIABLE int step = 0;
+	
 	for (int j = 0; j < polyhedron->numFacets; ++j)
 	{
 		a = polyhedron->facets[j].plane.norm.x;
@@ -342,12 +344,18 @@ void print_matrix(FILE* file, int n, int m, double* A)
 			if (fabs(A[i * n + j]) >= 1e-16)
 			{
 				if (fabs(A[i * n + j]) < 9.5)
+				{
 					REGULAR_PRINT(file, "%1.0lf ", fabs(A[i * n + j]));
+				}
 				else
+				{
 					REGULAR_PRINT(file, "# ");
+				}
 			}
 			else
+			{
 				REGULAR_PRINT(file, "  ");
+			}
 		}
 		REGULAR_PRINT(file, "|\n");
 	}
@@ -372,9 +380,13 @@ void print_matrix_bool(FILE* file, int n, int m, bool* A)
 		for (j = 0; j < m; ++j)
 		{
 			if (A[i * m + j])
+			{
 				REGULAR_PRINT(file, "1 ");
+			}
 			else
+			{
 				REGULAR_PRINT(file, "  ");
+			}
 		}
 		REGULAR_PRINT(file, "|\n");
 	}

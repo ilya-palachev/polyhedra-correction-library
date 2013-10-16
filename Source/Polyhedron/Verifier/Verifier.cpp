@@ -547,7 +547,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 	while (!edgesQueue.empty())
 	{
 		DEBUG_PRINT("Iteration %d - start. Number of edges is queue = %ld",
-				iIteration++, edgesQueue.size());
+				iIteration++, (long int) edgesQueue.size());
 
 		pair<int, int> vertexPair = edgesQueue.front();
 		DEBUG_PRINT("Processed edge: [%d, %d]", vertexPair.first,
@@ -571,9 +571,9 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 			++numEdgesDesctructed;
 		}
 
-		DEBUG_PRINT("edges added   : %ld", edgesWS->edgesAdded->size());
-		DEBUG_PRINT("edges edited  : %ld", edgesWS->edgesEdited->size());
-		DEBUG_PRINT("edges removed : %ld", edgesWS->edgesErased->size());
+		DEBUG_PRINT("edges added   : %ld", (long int) edgesWS->edgesAdded->size());
+		DEBUG_PRINT("edges edited  : %ld", (long int) edgesWS->edgesEdited->size());
+		DEBUG_PRINT("edges removed : %ld", (long int) edgesWS->edgesErased->size());
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */

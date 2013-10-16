@@ -25,8 +25,10 @@
 void VertexInfo::fprint_my_format(FILE* file)
 {
 	REGULAR_PRINT(file, "%d ", numFacets);
-	for (int j = 0; j < 3 * numFacets + 1; ++j)
-		REGULAR_PRINT(file, " %d", indFacets[j]);
+	for (int i = 0; i < 3 * numFacets + 1; ++i)
+	{
+		REGULAR_PRINT(file, " %d", indFacets[i]);
+	}
 	REGULAR_PRINT(file, "\n");
 }
 
