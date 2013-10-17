@@ -43,15 +43,41 @@ using namespace std;
 typedef struct _GSCorrectorParameters GSCorrectorParameters;
 typedef shared_ptr<EdgeData> EdgeDataPtr;
 
-/* Main class that contains polyhedron implementation.
+/*
+ * Workaround to enable opportunity of use of shared_from_this in derived
+ * classes of Polyhedron, such as Cube.
+ * 
+ * For details, see
+ * http://stackoverflow.com/questions/9374610/bad-weak-ptr-when-calling-shared-from-this-in-base-class
+ */
+template<class Derived>
+class enable_shared_from_This
+{
+public:
+	typedef shared_ptr<Derived> Ptr;
+	
+	Ptr shared_from_This()
+	{
+		return static_pointer_cast<Derived>(static_cast<Derived *>(this)->shared_from_this());
+	}
+
+	Ptr shared_from_This() const
+	{
+		return static_pointer_cast<Derived>(static_cast<Derived *>(this)->shared_from_this());
+	}
+};
+
+/*
+ * Main class that contains polyhedron implementation.
  *
  * All methods that change, correct it, etc are done outside this class. This
  * is done to avoid the c++ anti-pattern "huge class".
  *
  * Thus we have separate class for every method that does some big change or
- * correction of polyhedron. */
+ * correction of polyhedron.
+ */
 
-class Polyhedron : public std::enable_shared_from_this<Polyhedron>
+class Polyhedron : public enable_shared_from_this<Polyhedron>
 {
 public:
 	int numVertices;
@@ -76,13 +102,16 @@ public:
 			Facet* facet_orig);
 	Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 			Facet* facet_orig, VertexInfo* vertexinfo);
-	virtual ~Polyhedron();
+	
+	~Polyhedron();
 
 	void get_boundary(double& xmin, double& xmax, double& ymin, double& ymax,
 			double& zmin, double& zmax);
 
 	void delete_empty_facets();
 	int signum(Vector3d point, Plane plane);
+	
+	void set_parent_polyhedron_in_facets();
 
 	//Polyhedron_io.cpp
 	void my_fprint(const char* filename);

@@ -67,7 +67,9 @@ void Facet::my_fprint_all(FILE* file)
 
 	REGULAR_PRINT(file, "index :       ");
 	for (i = 0; i < numVertices; ++i)
+	{
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
+	}
 	REGULAR_PRINT(file, "(%d)", indVertices[numVertices]);
 
 	/* For debugging purposes we assert when the cycling vertex is not equal to
@@ -76,11 +78,15 @@ void Facet::my_fprint_all(FILE* file)
 
 	REGULAR_PRINT(file, "\nnext facets : ");
 	for (i = numVertices + 1; i < 2 * numVertices + 1; ++i)
+	{
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
+	}
 
 	REGULAR_PRINT(file, "\npositions :   ");
 	for (i = 2 * numVertices + 1; i < 3 * numVertices + 1; ++i)
+	{
 		REGULAR_PRINT(file, "%d ", indVertices[i]);
+	}
 
 	REGULAR_PRINT(file, "\nrgb = (%d, %d, %d)\n", rgb[0], rgb[1], rgb[2]);
 

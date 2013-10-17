@@ -93,6 +93,9 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 	}
 
 	delete edgeConstructor;
+	
+	data->fprint(stdout);
+	
 	DEBUG_END;
 }
 
@@ -124,7 +127,6 @@ void ShadeContourConstructor::createContour(int idOfContour,
 			DEBUG_PRINT("\t visibility of edge #%d [%d, %d] "
 					"checked : invisible", iEdge, edge->v0, edge->v1);
 		}
-		++edge;
 		++iEdge;
 	}
 
@@ -134,15 +136,22 @@ void ShadeContourConstructor::createContour(int idOfContour,
 	outputContour->plane = planeOfProjection;
 	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
+	
+	DEBUG_PRINT("Number of visible edges = %d", edgesVisible.size());
 
-	int iSide = 0;
-	for (EdgeSetIterator edgeCurr = edgesVisible.begin();
-		 edgeCurr != edgesVisible.end(); ++edgeCurr, ++iSide)
+	EdgeSetIterator edgeCurr = edgesVisible.begin();
+	int iVertexCurr = edgeCurr->v1;
+	for (int iSide = 0; iSide < (int) edgesVisible.size(); ++iSide)
 	{
-		int iVertexCurr = edgeCurr->v1;
+		bool ifEdgeNextFound = false;
+
 		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
 		{
+			DEBUG_PRINT("edgeCurr = edge #%d (i. e. [%d, %d])", edgeCurr->id,
+				edgeCurr->v0, edgeCurr->v1);
+			DEBUG_PRINT("edgeNext = edge #%d (i. e. [%d, %d])", edgeNext->id,
+				edgeNext->v0, edgeNext->v1);
 			if ((edgeNext->v0 != iVertexCurr &&
 							edgeNext->v1 != iVertexCurr) ||
 					(edgeCurr->v0 == edgeNext->v0 &&
@@ -150,18 +159,23 @@ void ShadeContourConstructor::createContour(int idOfContour,
 					(edgeCurr->v0 == edgeNext->v1 &&
 							edgeCurr->v1 == edgeNext->v0))
 			{
+				DEBUG_PRINT("Continuing...");
 				continue;
 			}
 
 			Vector3d A1, A2;
 			if (edgeNext->v0 == iVertexCurr)
 			{
+				DEBUG_PRINT("Projection of edge [%d, %d] is added to contour",
+					edgeNext->v0, edgeNext->v1);
 				A1 = polyhedron->vertices[edgeNext->v0];
 				A2 = polyhedron->vertices[edgeNext->v1];
 				iVertexCurr = edgeNext->v1;
 			}
 			else
 			{
+				DEBUG_PRINT("Projection of edge [%d, %d] is added to contour",
+					edgeNext->v1, edgeNext->v0);
 				A1 = polyhedron->vertices[edgeNext->v1];
 				A2 = polyhedron->vertices[edgeNext->v0];
 				iVertexCurr = edgeNext->v0;
@@ -169,13 +183,16 @@ void ShadeContourConstructor::createContour(int idOfContour,
 			A1 = planeOfProjection.project(A1);
 			A2 = planeOfProjection.project(A2);
 
+			DEBUG_PRINT("Setting side #%d of contour", iSide);
 			sides[iSide].A1 = A1;
 			sides[iSide].A2 = A2;
 			sides[iSide].confidence = 1.;
 			sides[iSide].type = EEdgeRegular;
 			edgeCurr = edgeNext;
+			ifEdgeNextFound = true;
 			break;
 		}
+		ASSERT_PRINT(ifEdgeNextFound, "Failed to find next edge");
 	}
 
 	DEBUG_END;

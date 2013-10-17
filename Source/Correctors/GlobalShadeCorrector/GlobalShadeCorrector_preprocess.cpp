@@ -62,6 +62,9 @@ void GlobalShadeCorrector::preprocessAssociations()
 			}
 		}
 	}
+	
+	DEBUG_PRINT("Search of assocations is ended.");
+	
 #ifndef NDEBUG
 	/* Print found associations : */
 	for (EdgeSetIterator edge = edgeData->edges.begin();

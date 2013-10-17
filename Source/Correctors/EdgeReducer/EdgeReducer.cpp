@@ -842,7 +842,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	 * merge the lists of associations, because otherwise we will get some
 	 * associations more than one time.
 	 */
-	int numAssociationsBefore = edgeNew->assocList.size();
+	DEBUG_VARIABLE int numAssociationsBefore = edgeNew->assocList.size();
 	
 	edgeNew->assocList.insert(edgeNew->assocList.end(),
 			edge0->assocList.begin(), edge0->assocList.end());
