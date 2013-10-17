@@ -93,6 +93,9 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 	}
 
 	delete edgeConstructor;
+	
+	data->fprint(stdout);
+	
 	DEBUG_END;
 }
 
