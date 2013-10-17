@@ -127,7 +127,6 @@ void ShadeContourConstructor::createContour(int idOfContour,
 			DEBUG_PRINT("\t visibility of edge #%d [%d, %d] "
 					"checked : invisible", iEdge, edge->v0, edge->v1);
 		}
-		++edge;
 		++iEdge;
 	}
 
@@ -144,6 +143,7 @@ void ShadeContourConstructor::createContour(int idOfContour,
 	int iVertexCurr = edgeCurr->v1;
 	for (int iSide = 0; iSide < (int) edgesVisible.size(); ++iSide)
 	{
+		bool ifEdgeNextFound = false;
 
 		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
@@ -188,10 +188,11 @@ void ShadeContourConstructor::createContour(int idOfContour,
 			sides[iSide].A2 = A2;
 			sides[iSide].confidence = 1.;
 			sides[iSide].type = EEdgeRegular;
-			++iSide;
 			edgeCurr = edgeNext;
+			ifEdgeNextFound = true;
 			break;
 		}
+		ASSERT_PRINT(ifEdgeNextFound, "Failed to find next edge");
 	}
 
 	DEBUG_END;
