@@ -29,4 +29,11 @@
 #define ASSERT(x)
 #endif
 
+#define ASSERT_PRINT(condition, ...) \
+	if ((!condition)) \
+	{ \
+		ERROR_PRINT(__VA_ARGS__); \
+	} \
+	assert(condition);
+
 #endif /* DEBUGASSERT_H_ */
