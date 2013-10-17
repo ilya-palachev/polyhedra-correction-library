@@ -98,7 +98,8 @@ void Cube::init()
 
 	for (int ifacet = 0; ifacet < numFacets; ++ifacet)
 	{
-		int nv = facets[ifacet].numVertices = 4;
+		int nv = 4;
+		facets[ifacet].numVertices = nv;
 		facets[ifacet].indVertices = new int[3 * nv + 1];
 		facets[ifacet].id = ifacet;
 	}
