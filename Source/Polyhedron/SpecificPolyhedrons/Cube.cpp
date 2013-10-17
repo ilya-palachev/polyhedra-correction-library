@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/SpecificPolyhedrons/Cube.h"
@@ -137,9 +139,5 @@ void Cube::init()
 	facets[5].indVertices[3] = 4;
 	facets[5].plane = Plane(Vector3d(0., -1., 0.), center.y - halfHeight);
 
-	for (int i = 0; i < numFacets; ++i)
-	{
-		facets[i].set_poly(get_ptr());
-	}
 	DEBUG_END;
 }

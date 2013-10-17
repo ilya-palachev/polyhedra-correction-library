@@ -187,3 +187,18 @@ void Polyhedron::delete_empty_facets()
 	}
 	DEBUG_END;
 }
+
+void Polyhedron::set_parent_polyhedron_in_facets()
+{
+	DEBUG_START;
+	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
+	{
+		DEBUG_PRINT("Setting parent polyhedron in facet #%d", iFacet);
+		shared_ptr<Polyhedron> this_shared = shared_from_this();
+		DEBUG_PRINT("Polyhedron use count = %ld",
+					this_shared.use_count());
+		facets[iFacet].set_poly(this_shared);
+	}
+	DEBUG_END;
+}
+

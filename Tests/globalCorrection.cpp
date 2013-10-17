@@ -64,6 +64,8 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 
 	shared_ptr<Polyhedron> polyhedron(makePolyhedron(parameters.figure));
+	
+	polyhedron->set_parent_polyhedron_in_facets();
 
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-before.ply",
@@ -226,28 +228,28 @@ shared_ptr<Polyhedron> makePolyhedron(NameFigure figureParsed)
 	{
 	case FIGURE_CUBE:
 	{
-		shared_ptr<Polyhedron> ret(new Cube(1., 0., 0., 0.));
+		shared_ptr<Polyhedron> ret = make_shared<Cube>(1., 0., 0., 0.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_PYRAMID:
 	{
-		shared_ptr<Polyhedron> ret(new Pyramid(3, 1., 1.));
+		shared_ptr<Polyhedron> ret = make_shared<Pyramid>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_PRISM:
 	{
-		shared_ptr<Polyhedron> ret(new Prism(3, 1., 1.));
+		shared_ptr<Polyhedron> ret = make_shared<Prism>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_CUBE_CUTTED:
 	{
-		shared_ptr<Polyhedron> ret(new CubeCutted());
+		shared_ptr<Polyhedron> ret = make_shared<CubeCutted>();
 		DEBUG_END;
 		return ret;
 	}
