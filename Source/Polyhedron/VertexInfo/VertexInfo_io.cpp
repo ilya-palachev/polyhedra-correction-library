@@ -51,7 +51,4 @@ void VertexInfo::my_fprint_all(FILE* file)
 	REGULAR_PRINT(file, "\npositions :     ");
 	for (i = 2 * numFacets + 1; i < 3 * numFacets + 1; ++i)
 		REGULAR_PRINT(file, "%d ", indFacets[i]);
-
-	if (parentPolyhedron == NULL)
-		REGULAR_PRINT(file, "Warning! poly == NULL !\n");
 }

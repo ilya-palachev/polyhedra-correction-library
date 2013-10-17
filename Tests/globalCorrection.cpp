@@ -91,8 +91,6 @@ int main(int argc, char** argv)
 			"globalCorrection");
 
 	DEBUG_PRINT("Polyhedron's use count: %ld", polyhedron.use_count());
-	polyhedron.reset();
-	DEBUG_PRINT("Polyhedron's use count: %ld (after reset)", polyhedron.use_count());
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
