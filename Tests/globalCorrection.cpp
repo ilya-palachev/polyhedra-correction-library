@@ -70,6 +70,8 @@ int main(int argc, char** argv)
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-before.ply",
 			"globalCorrection");
+	
+	polyhedron->printSortedByAreaFacets();
 
 	shared_ptr<ShadeContourData> contourData(new ShadeContourData(polyhedron));
 	shared_ptr<ShadeContourConstructor> scConstructor(new ShadeContourConstructor(

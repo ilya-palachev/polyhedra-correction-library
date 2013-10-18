@@ -19,6 +19,7 @@
  */
 
 #include <cmath>
+#include <set>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -26,6 +27,8 @@
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 #include "Polyhedron/Facet/Facet.h"
+
+using namespace std;
 
 SizeCalculator::SizeCalculator() :
 		PAnalyzer()
@@ -460,5 +463,35 @@ void SizeCalculator::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
 	delete[] v;
 	delete[] l;
 
+	DEBUG_END;
+}
+
+struct FacetWithArea
+{
+	Facet* facet;
+	double area;
+};
+
+void SizeCalculator::printSortedByAreaFacets(void)
+{
+	DEBUG_START;
+	auto comparer = [](struct FacetWithArea f0, struct FacetWithArea f1)
+	{
+		return f0.area < f1.area;
+	};
+	set<FacetWithArea, decltype(comparer)> facetsSorted(comparer);
+	
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		facetsSorted.insert({&polyhedron->facets[iFacet], 
+			areaOfFacet(iFacet)});
+	}
+	
+	for (auto itFacet = facetsSorted.begin(); itFacet != facetsSorted.end();
+		 ++itFacet)
+	{
+		PRINT("area of facet #%d = %lf", itFacet->facet->get_id(), itFacet->area);
+	}
+	
 	DEBUG_END;
 }

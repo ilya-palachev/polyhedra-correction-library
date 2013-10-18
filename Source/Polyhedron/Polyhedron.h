@@ -166,6 +166,7 @@ public:
 	void get_center(double& xc, double& yc, double& zc);
 	void inertia(double& l0, double& l1, double& l2, Vector3d& v0, Vector3d& v1,
 			Vector3d& v2);
+	void printSortedByAreaFacets(void);
 
 	//Polyhedron_clusterize.cpp
 	int clusterize(double p);

@@ -91,3 +91,12 @@ void Polyhedron::inertia(double& l0, double& l1, double& l2, Vector3d& v0, Vecto
 	delete sizeCalculator;
 	DEBUG_END;
 }
+
+void Polyhedron::printSortedByAreaFacets(void)
+{
+	DEBUG_START;
+	SizeCalculator* sizeCalculator = new SizeCalculator(get_ptr());
+	sizeCalculator->printSortedByAreaFacets();
+	delete sizeCalculator;
+	DEBUG_END;
+}
