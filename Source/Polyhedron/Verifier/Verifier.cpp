@@ -31,7 +31,7 @@
 Verifier::Verifier() :
 		polyhedron(),
 		ifPrint(false),
-		edgesWS(NULL)
+		edgesWS()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -40,7 +40,7 @@ Verifier::Verifier() :
 Verifier::Verifier(shared_ptr<Polyhedron> p) :
 		polyhedron(p),
 		ifPrint(true),
-		edgesWS(NULL)
+		edgesWS()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -49,7 +49,7 @@ Verifier::Verifier(shared_ptr<Polyhedron> p) :
 Verifier::Verifier(Polyhedron* p) :
 		polyhedron(),
 		ifPrint(true),
-		edgesWS(NULL)
+		edgesWS()
 {
 	DEBUG_START;
 	polyhedron.reset(p);
@@ -59,7 +59,7 @@ Verifier::Verifier(Polyhedron* p) :
 Verifier::Verifier(shared_ptr<Polyhedron> p, bool _ifPrint) :
 		polyhedron(p),
 		ifPrint(_ifPrint),
-		edgesWS(NULL)
+		edgesWS()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -68,7 +68,7 @@ Verifier::Verifier(shared_ptr<Polyhedron> p, bool _ifPrint) :
 Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
 		polyhedron(p),
 		ifPrint(_ifPrint),
-		edgesWS(NULL)
+		edgesWS()
 {
 	DEBUG_START;
 	polyhedron.reset(p);
@@ -78,21 +78,6 @@ Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
 Verifier::~Verifier()
 {
 	DEBUG_START;
-	if (edgesWS != NULL)
-	{
-		if (edgesWS->edgesErased != NULL)
-		{
-			delete edgesWS->edgesErased;
-		}
-		if (edgesWS->edgesAdded != NULL)
-		{
-			delete edgesWS->edgesAdded;
-		}
-		if (edgesWS->edgesEdited != NULL)
-		{
-			delete edgesWS->edgesEdited;
-		}
-	}
 	DEBUG_PRINT("Polyhedron use_count = %ld", polyhedron.use_count());
 	DEBUG_END;
 }
@@ -528,11 +513,6 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 
-	edgesWS = new EdgesWorkingSets;
-	edgesWS->edgesErased = new set<pair<int, int>>;
-	edgesWS->edgesAdded  = new set<pair<int, int>>;
-	edgesWS->edgesEdited = new set<pair<int, int>>;
-
 	queue<pair<int, int>> edgesQueue;
 	for (EdgeSetIterator edge = edgeData->edges.begin();
 			edge != edgeData->edges.end(); ++edge)
@@ -571,30 +551,30 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 			++numEdgesDesctructed;
 		}
 
-		DEBUG_PRINT("edges added   : %ld", (long int) edgesWS->edgesAdded->size());
-		DEBUG_PRINT("edges edited  : %ld", (long int) edgesWS->edgesEdited->size());
-		DEBUG_PRINT("edges removed : %ld", (long int) edgesWS->edgesErased->size());
+		DEBUG_PRINT("edges added   : %ld", (long int) edgesWS.edgesAdded.size());
+		DEBUG_PRINT("edges edited  : %ld", (long int) edgesWS.edgesEdited.size());
+		DEBUG_PRINT("edges removed : %ld", (long int) edgesWS.edgesErased.size());
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */
 		for (set<pair<int, int>>::iterator itPair =
-				edgesWS->edgesAdded->begin();
-				itPair != edgesWS->edgesAdded->end(); ++itPair)
+				edgesWS.edgesAdded.begin();
+				itPair != edgesWS.edgesAdded.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
 
 		for (set<pair<int, int>>::iterator itPair =
-				edgesWS->edgesEdited->begin();
-				itPair != edgesWS->edgesEdited->end(); ++itPair)
+				edgesWS.edgesEdited.begin();
+				itPair != edgesWS.edgesEdited.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
 
 		/* Clear working sets of edges. */
-		edgesWS->edgesAdded->clear();
-		edgesWS->edgesEdited->clear();
-		edgesWS->edgesErased->clear();
+		edgesWS.edgesAdded.clear();
+		edgesWS.edgesEdited.clear();
+		edgesWS.edgesErased.clear();
 
 		edgesQueue.pop();
 	}

@@ -33,7 +33,7 @@ class Verifier
 private:
 	shared_ptr<Polyhedron> polyhedron;
 	bool ifPrint;
-	EdgesWorkingSets* edgesWS;
+	EdgesWorkingSets edgesWS;
 
 	int countInnerConsections();
 	int countInnerConsectionsFacet(int fid, double* A,
