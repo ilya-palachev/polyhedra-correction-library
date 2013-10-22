@@ -24,12 +24,7 @@
 #include <list>
 
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
-
-struct FacetWithArea
-{
-	Facet* facet;
-	double area;
-};
+#include "Polyhedron/Facet/Facet.h"
 
 class SizeCalculator: public PAnalyzer
 {
