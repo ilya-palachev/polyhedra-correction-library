@@ -63,6 +63,8 @@ int main(int argc, char** argv)
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
+	
+	polyhedron->printSortedByAreaFacets();
 
 	polyhedron->fprint_ply_scale(1000., "poly-data-out/before.ply", "before");
 
@@ -168,3 +170,8 @@ MethodCorrector parse_methodName(char* methodNameInput)
 		return METHOD_UNKNOWN;
 	}
 }
+
+
+
+
+
