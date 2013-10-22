@@ -19,7 +19,9 @@
  */
 
 #include "PolyhedraCorrectionLibrary.h"
+#include <Gauss_test.h>
 
+#define TEST_PARAMETERS_NUMBER 6
 struct _TestParameters
 {
 	char* fileNamePolyhedron;
@@ -27,6 +29,7 @@ struct _TestParameters
 	MethodCorrector method;
 	double epsLoopStop;
 	double deltaGardientStep;
+	int numFacetsCorrected;
 };
 typedef struct _TestParameters TestParameters;
 
@@ -64,11 +67,23 @@ int main(int argc, char** argv)
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
 	
-	polyhedron->printSortedByAreaFacets();
+	list< FacetWithArea > listSortedFacets = 
+		polyhedron->getSortedByAreaFacets();
+		
+	list<int> facetsCorrected;
+	auto itFacet = listSortedFacets.rend();
+	++itFacet;
+	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected; ++itFacet, 
+		++iFacet)
+	{
+		DEBUG_PRINT("Adding facet %d with area %lf to be corrected", 
+			itFacet->facet->id, itFacet->area);
+		facetsCorrected.push_back(itFacet->facet->id);
+	}
 
 	polyhedron->fprint_ply_scale(1000., "poly-data-out/before.ply", "before");
 
-	polyhedron->correctGlobal(contourData, &gsParameters);
+	polyhedron->correctGlobal(contourData, &gsParameters, &facetsCorrected);
 
 	polyhedron->fprint_ply_scale(1000., "poly-data-out/after.ply", "after");
 
@@ -95,7 +110,8 @@ void printUsage()
 			"Usage: \n"
 					"./globalCorrectionReal <file with polyhedron> "
 					"<file with shade contours> <method name>"
-					"<eps max loop> <delta gradient descend>\n");
+					"<eps max loop> <delta gradient descend> <number of "
+					"corrected facets>\n");
 	printf("\nPossible methods: gd (gradient descent), "
 			"gdf (gradient descent - fast),"
 			"cg (conjugate gradient).\n");
@@ -105,7 +121,7 @@ void printUsage()
 int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 {
 	DEBUG_START;
-	if (argc != 6)
+	if (argc != TEST_PARAMETERS_NUMBER + 1)
 	{
 		ERROR_PRINT("Wrong number of arguments!");
 		printUsage();
@@ -120,7 +136,8 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 			&& sscanf(argv[2], "%s", parameters.fileNameShadeContours)
 			&& sscanf(argv[3], "%s", method)
 			&& sscanf(argv[4], "%lf", &parameters.epsLoopStop)
-			&& sscanf(argv[5], "%lf", &parameters.deltaGardientStep);
+			&& sscanf(argv[5], "%lf", &parameters.deltaGardientStep)
+			&& sscanf(argv[6], "%d", &parameters.numFacetsCorrected);
 
 	parameters.method = parse_methodName(method);
 

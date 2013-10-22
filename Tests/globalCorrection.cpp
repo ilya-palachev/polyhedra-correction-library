@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
-	polyhedron->correctGlobal(contourData, &gsParameters);
+	polyhedron->correctGlobal(contourData, &gsParameters, NULL);
 
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-after.ply",
