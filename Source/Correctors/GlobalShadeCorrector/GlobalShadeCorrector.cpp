@@ -294,10 +294,9 @@ GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 
 	DEBUG_PRINT("memory allocation done");
 
-	for (list<int>::iterator itFacet = facetsCorrected.begin();
-			itFacet != facetsCorrected.end(); ++itFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		prevPlanes[*itFacet] = polyhedron->facets[*itFacet].plane;
+		prevPlanes[iFacet] = polyhedron->facets[iFacet].plane;
 	}
 	DEBUG_PRINT("memory initialization done");
 
@@ -756,6 +755,10 @@ void GlobalShadeCorrector::calculateGradient()
 		int *index = polyhedron->facets[iFacet].indVertices;
 
 		Plane planePrevThis = prevPlanes[iFacetLocal];
+		
+		DEBUG_PRINT("planePrevThis: (%lf) x + (%lf) y + (%lf) z + (%lf) = 0",
+			planePrevThis.norm.x, planePrevThis.norm.y, planePrevThis.norm.z,
+			planePrevThis.dist);
 
 		int i_ak = 4 * iFacetShifted;
 		int i_bk = i_ak + 1;
@@ -774,6 +777,21 @@ void GlobalShadeCorrector::calculateGradient()
 			int iFacetNeighbour = index[nv + 1 + iEdge];
 
 			Plane planePrevNeighbour = prevPlanes[iFacetNeighbour];
+			
+			DEBUG_PRINT("planePrevNeighbour: "
+				"(%lf) x + (%lf) y + (%lf) z + (%lf) = 0",
+				planePrevNeighbour.norm.x, planePrevNeighbour.norm.y, 
+				planePrevNeighbour.norm.z, planePrevNeighbour.dist);
+			
+			DEBUG_PRINT("iFacetLocal = %d, iFacetNeighbour = %d", iFacetLocal,
+				iFacetNeighbour);
+			
+			DEBUG_PRINT("iEdge = %d, v0 = %d, v1 = %d", iEdge, v0, v1);
+			
+			polyhedron->facets[iFacetLocal].my_fprint_all(stderr);
+			
+			ASSERT(iFacetNeighbour != iFacetLocal);
+
 			double an = planePrevNeighbour.norm.x;
 			double bn = planePrevNeighbour.norm.y;
 			double cn = planePrevNeighbour.norm.z;
@@ -817,11 +835,17 @@ void GlobalShadeCorrector::calculateGradient()
 				SideOfContour * sides = contourData->contours[curContour].sides;
 				Plane planeOfProjection = contourData->contours[curContour]
 						.plane;
-
+				
+				DEBUG_PRINT("Processing association with contour #%d", 
+					curContour);
+				
 				double enumerator = -planePrevNeighbour.norm
 						* planeOfProjection.norm;
 				double denominator = ((planePrevThis.norm
 						- planePrevNeighbour.norm) * planeOfProjection.norm);
+				
+				DEBUG_PRINT("enumerator = %le, denominator = %le", enumerator, 
+					denominator);
 
 				double gamma_ij = enumerator / denominator;
 				ASSERT(!(fabs(denominator) < EPS_MIN_DOUBLE));
