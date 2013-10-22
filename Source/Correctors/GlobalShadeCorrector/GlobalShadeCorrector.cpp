@@ -266,8 +266,16 @@ GSCorrectorStatus GlobalShadeCorrector::repairAndRun(MethodCorrector method,
 GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 {
 	DEBUG_START;
+	
+	/*
+	 * 1. Pre-process the polyhedron.
+	 */
 	preprocess();
 	MAIN_PRINT("Preprocessing done");
+	
+	/*
+	 * 2. Find facets that have no association found for them.
+	 */
 	findNotAssociatedFacets();
 #ifndef NDEBUG
 	DEBUG_PRINT("The following facets have no associations:");
