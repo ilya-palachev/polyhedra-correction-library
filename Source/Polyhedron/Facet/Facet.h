@@ -124,6 +124,7 @@ public:
 	// Facet_verification.cpp
 	bool verifyIncidenceStructure();
 	void test_pair_neighbours();
+	bool verifyUniqueValues(void);
 
 };
 
