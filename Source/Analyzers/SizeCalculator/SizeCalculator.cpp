@@ -503,7 +503,7 @@ list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
 		listFacetsSorted.push_back(*itFacet);
 	}
 	
-	return listFacetsSorted;
 	DEBUG_END;
+	return listFacetsSorted;
 }
 
