@@ -338,6 +338,9 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	int iFacet1 = facet->indVertices[4];
 	int iPosition0 = facet->indVertices[5];
 	int iPosition1 = facet->indVertices[6];
+	
+	DEBUG_PRINT("iFacet0 = %d, iFacet1 = %d", iFacet0, iFacet1);
+	ASSERT(iFacet0 != iFacet1);
 
 	Facet* facet0 = &polyhedron->facets[iFacet0];
 	Facet* facet1 = &polyhedron->facets[iFacet1];
@@ -416,7 +419,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	DEBUG_PRINT("Changing edge [%d, %d] facets from f0 = %d, f1 = %d",
 			edgeUpdated->v0, edgeUpdated->v1, edgeUpdated->f0, edgeUpdated->f1);
-
+	
 	if (iFacet0 < iFacet1)
 	{
 		edgeUpdated->f0 = iFacet0;
