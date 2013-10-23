@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <set>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -139,7 +141,8 @@ bool Facet::verifyUniqueValues(void)
 		facets.insert(indVertices[numVertices + iVertex + 1]);
 	}
 	
-	return (vertices.size() == numVertices) && (facets.size() == numVertices);
+	return (vertices.size() == (unsigned) numVertices)
+		&& (facets.size() == (unsigned) numVertices);
 	
 	DEBUG_END;
 }
