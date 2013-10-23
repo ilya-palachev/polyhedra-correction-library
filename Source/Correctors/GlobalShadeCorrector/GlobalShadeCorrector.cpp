@@ -754,7 +754,7 @@ void GlobalShadeCorrector::calculateGradient()
 		int nv = polyhedron->facets[iFacet].numVertices;
 		int *index = polyhedron->facets[iFacet].indVertices;
 
-		Plane planePrevThis = prevPlanes[iFacetLocal];
+		Plane planePrevThis = prevPlanes[iFacet];
 		
 		DEBUG_PRINT("planePrevThis: (%lf) x + (%lf) y + (%lf) z + (%lf) = 0",
 			planePrevThis.norm.x, planePrevThis.norm.y, planePrevThis.norm.z,
@@ -783,14 +783,14 @@ void GlobalShadeCorrector::calculateGradient()
 				planePrevNeighbour.norm.x, planePrevNeighbour.norm.y, 
 				planePrevNeighbour.norm.z, planePrevNeighbour.dist);
 			
-			DEBUG_PRINT("iFacetLocal = %d, iFacetNeighbour = %d", iFacetLocal,
+			DEBUG_PRINT("iFacet = %d, iFacetNeighbour = %d", iFacet,
 				iFacetNeighbour);
 			
 			DEBUG_PRINT("iEdge = %d, v0 = %d, v1 = %d", iEdge, v0, v1);
 			
 			polyhedron->facets[iFacetLocal].my_fprint_all(stderr);
 			
-			ASSERT(iFacetNeighbour != iFacetLocal);
+			ASSERT(iFacetNeighbour != iFacet);
 
 			double an = planePrevNeighbour.norm.x;
 			double bn = planePrevNeighbour.norm.y;
