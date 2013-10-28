@@ -53,6 +53,8 @@ target_link_libraries(pcl
    vector3d
    gexf
    xml2
+   CGAL
+   gmp
 )
 
 foreach(test_source_file ${SOURCE_tests})
