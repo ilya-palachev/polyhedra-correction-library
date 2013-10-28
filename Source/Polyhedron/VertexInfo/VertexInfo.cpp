@@ -25,8 +25,7 @@
 VertexInfo::VertexInfo() :
 				id(-1),
 				numFacets(0),
-				indFacets(NULL),
-				parentPolyhedron(NULL)
+				indFacets(NULL)
 {
 }
 

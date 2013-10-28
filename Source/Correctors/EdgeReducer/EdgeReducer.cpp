@@ -46,7 +46,7 @@ EdgeReducer::~EdgeReducer()
 }
 
 bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
-		EdgesWorkingSets* _edgesWS)
+		EdgesWorkingSets& _edgesWS)
 {
 	DEBUG_START;
 
@@ -338,6 +338,9 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	int iFacet1 = facet->indVertices[4];
 	int iPosition0 = facet->indVertices[5];
 	int iPosition1 = facet->indVertices[6];
+	
+	DEBUG_PRINT("iFacet0 = %d, iFacet1 = %d", iFacet0, iFacet1);
+	ASSERT(iFacet0 != iFacet1);
 
 	Facet* facet0 = &polyhedron->facets[iFacet0];
 	Facet* facet1 = &polyhedron->facets[iFacet1];
@@ -416,7 +419,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	DEBUG_PRINT("Changing edge [%d, %d] facets from f0 = %d, f1 = %d",
 			edgeUpdated->v0, edgeUpdated->v1, edgeUpdated->f0, edgeUpdated->f1);
-
+	
 	if (iFacet0 < iFacet1)
 	{
 		edgeUpdated->f0 = iFacet0;
@@ -556,7 +559,7 @@ bool EdgeReducer::updateEdges()
 
 			/* If succeeded to find the edge, add edge with proper values and
 			 * erase the old one. */
-			edgesWS->edgesEdited->insert(pair<int, int> (edgeNew.v0,
+			edgesWS.edgesEdited.insert(pair<int, int> (edgeNew.v0,
 								edgeNew.v1));
 
 			DEBUG_PRINT("Erasing edge [%d, %d] and inserting edge [%d, %d]",
@@ -600,7 +603,7 @@ bool EdgeReducer::updateEdges()
 		else
 		{
 			DEBUG_PRINT("\tThis edge must be deleted at all.");
-			edgesWS->edgesErased->insert(pair<int, int> (edgeUpdated->v0,
+			edgesWS.edgesErased.insert(pair<int, int> (edgeUpdated->v0,
 					edgeUpdated->v1));
 			edgeData->edges.erase(edgeUpdated);
 			--edgeData->numEdges;
@@ -615,7 +618,7 @@ bool EdgeReducer::updateEdges()
 	{
 		DEBUG_PRINT("The edge [%d, %d] has not been removed from the "
 				"set!", edgeRemoved->v0, edgeRemoved->v1);
-		edgesWS->edgesErased->insert(pair<int, int> (edgeRemoved->v0,
+		edgesWS.edgesErased.insert(pair<int, int> (edgeRemoved->v0,
 				edgeRemoved->v1));
 		edgeData->edges.erase(edgeRemoved);
 		--edgeData->numEdges;
@@ -806,7 +809,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 			edgeData->addEdge(iVertex0, iVertex1, iFacet0, iFacet1);
 	EdgeSetIterator edgeNew = returnValue.first;
 	ASSERT(edgeNew != edgeData->edges.end());
-	edgesWS->edgesAdded->insert(pair<int, int> (edgeNew->v0, edgeNew->v1));
+	edgesWS.edgesAdded.insert(pair<int, int> (edgeNew->v0, edgeNew->v1));
 
 	/* These 2 assertions are added to check the validity of
 	 * information about incident facets. */
@@ -851,10 +854,10 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	ASSERT((unsigned) edgeNew->assocList.size() == numAssociationsBefore +
 			edge0->assocList.size() + edge1->assocList.size());
 
-	edgesWS->edgesErased->insert(pair<int, int> (edge0->v0, edge0->v1));
+	edgesWS.edgesErased.insert(pair<int, int> (edge0->v0, edge0->v1));
 	edgeData->edges.erase(edge0);
 
-	edgesWS->edgesErased->insert(pair<int, int> (edge1->v0, edge1->v1));
+	edgesWS.edgesErased.insert(pair<int, int> (edge1->v0, edge1->v1));
 	edgeData->edges.erase(edge1);
 
 	--edgeData->numEdges;

@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <set>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -121,4 +123,26 @@ bool Facet::verifyIncidenceStructure()
 	}
 	DEBUG_END;
 	return true;
+}
+
+bool Facet::verifyUniqueValues(void)
+{
+	DEBUG_START;
+	
+	set<int> vertices;
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+	{
+		vertices.insert(indVertices[iVertex]);
+	}
+	
+	set<int> facets;
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+	{
+		facets.insert(indVertices[numVertices + iVertex + 1]);
+	}
+	
+	return (vertices.size() == (unsigned) numVertices)
+		&& (facets.size() == (unsigned) numVertices);
+	
+	DEBUG_END;
 }

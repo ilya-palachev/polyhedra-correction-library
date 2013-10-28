@@ -24,12 +24,16 @@
 #include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
 
 void Polyhedron::correctGlobal(shared_ptr<ShadeContourData> contourData,
-		GSCorrectorParameters* parameters)
+		GSCorrectorParameters* parameters, list<int>* facetsCorrected)
 {
 	DEBUG_START;
 	preprocessAdjacency();
 	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(get_ptr(),
 			contourData, parameters);
+	if (facetsCorrected)
+	{
+		gsCorrector->setFacetsCorrected(*facetsCorrected);
+	}
 	gsCorrector->runCorrection();
 	delete gsCorrector;
 	DEBUG_END;

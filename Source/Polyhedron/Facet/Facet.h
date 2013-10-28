@@ -26,6 +26,12 @@
 #include "Vector3d.h"
 #include "Polyhedron/Polyhedron.h"
 
+struct FacetWithArea
+{
+	Facet* facet;
+	double area;
+};
+
 class Facet {
 public:
 	int id;
@@ -118,6 +124,7 @@ public:
 	// Facet_verification.cpp
 	bool verifyIncidenceStructure();
 	void test_pair_neighbours();
+	bool verifyUniqueValues(void);
 
 };
 

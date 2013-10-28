@@ -27,15 +27,13 @@
 #include "Correctors/PCorrector/PCorrector.h"
 #include "DataContainers/EdgeData/EdgeData.h"
 
-typedef set<pair<int, int>>* IntPairPtr;
-
-struct _EdgesWorkingSets
+class EdgesWorkingSets
 {
-	IntPairPtr edgesErased;
-	IntPairPtr edgesAdded;
-	IntPairPtr edgesEdited;
+public:
+	set<pair<int, int>> edgesErased;
+	set<pair<int, int>> edgesAdded;
+	set<pair<int, int>> edgesEdited;
 };
-typedef _EdgesWorkingSets EdgesWorkingSets;
 
 class EdgeReducer: public PCorrector
 {
@@ -49,7 +47,7 @@ private:
 	VertexInfo* vertexInfoStayed;
 	set<int> facetsUpdated;
 
-	EdgesWorkingSets* edgesWS;
+	EdgesWorkingSets edgesWS;
 
 	void init();
 	bool updateFacets();
@@ -67,7 +65,7 @@ public:
 	~EdgeReducer();
 
 	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
-			EdgesWorkingSets* _edgesWS);
+			EdgesWorkingSets& _edgesWS);
 };
 
 #endif /* EDGEREDUCER_H_ */

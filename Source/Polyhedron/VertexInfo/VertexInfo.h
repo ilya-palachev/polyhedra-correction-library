@@ -33,7 +33,7 @@ public:
 	int numFacets;
 	Vector3d vector;
 	int* indFacets;
-	shared_ptr<Polyhedron> parentPolyhedron;
+	weak_ptr<Polyhedron> parentPolyhedron;
 
 public:
 	VertexInfo();

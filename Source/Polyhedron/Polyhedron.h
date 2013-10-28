@@ -22,6 +22,7 @@
 #define	 POLYHEDRON_CLASS_H
 
 #include <memory>
+#include <list>
 
 /*
  * Forward declarations
@@ -166,6 +167,8 @@ public:
 	void get_center(double& xc, double& yc, double& zc);
 	void inertia(double& l0, double& l1, double& l2, Vector3d& v0, Vector3d& v1,
 			Vector3d& v2);
+	void printSortedByAreaFacets(void);
+	list< struct FacetWithArea > getSortedByAreaFacets(void);
 
 	//Polyhedron_clusterize.cpp
 	int clusterize(double p);
@@ -179,7 +182,7 @@ public:
 
 	// Polyhedron_correction.cpp
 	void correctGlobal(shared_ptr<ShadeContourData> contourData,
-			GSCorrectorParameters* parameters);
+			GSCorrectorParameters* parameters, list<int>* facetsCorrected);
 
 	// Polyhedron_verification.cpp
 	int test_structure();

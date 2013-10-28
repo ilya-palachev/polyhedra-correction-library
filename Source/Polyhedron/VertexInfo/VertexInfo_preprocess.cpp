@@ -32,11 +32,26 @@ void VertexInfo::preprocess()
 	int fid_first = -1;
 	int fid_curr = -1;
 	int fid_next = -1;
+	
+	Facet* facets = NULL;
+	int numFacetsTotal = 0;
+	
+	if (auto polyhedron = parentPolyhedron.lock())
+	{
+		facets = polyhedron->facets;
+		numFacetsTotal = polyhedron->numFacets;
+	}
+	else
+	{
+		ASSERT_PRINT(0, "parentPolyhedron expired!");
+		DEBUG_END;
+		return;
+	}
 
     DEBUG_PRINT("1. Searching first facet : ");
-	for (int i = 0; i < parentPolyhedron->numFacets; ++i)
+	for (int i = 0; i < numFacetsTotal; ++i)
 	{
-		pos_next = parentPolyhedron->facets[i].preprocess_search_vertex(id,
+		pos_next = facets[i].preprocess_search_vertex(id,
 				v_curr);
 		if (pos_next != -1)
 		{
@@ -63,20 +78,20 @@ void VertexInfo::preprocess()
 		DEBUG_PRINT("\t Jumping from facet #%d, position %d (vertex #%d)",
 				fid_curr, pos_curr, v_curr);
 
-		parentPolyhedron->facets[fid_curr].get_next_facet(pos_curr, pos_next,
+		facets[fid_curr].get_next_facet(pos_curr, pos_next,
 				fid_next, v_curr);
 
 		/* This assertion has been added for debugging purposes, because
 		 * sometimes wrong transformations of polyhedron cause the
 		 * incorrectness of data inside facet arrays. */
-		ASSERT(parentPolyhedron->facets[fid_curr].indVertices[pos_curr] ==
-				parentPolyhedron->facets[fid_next].indVertices[pos_next]);
+		ASSERT(facets[fid_curr].indVertices[pos_curr] ==
+				facets[fid_next].indVertices[pos_next]);
 
 		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)",
 				fid_next, pos_next, v_curr);
 
 #ifndef NDEBUG
-		parentPolyhedron->facets[fid_curr].my_fprint_all(stderr);
+		facets[fid_curr].my_fprint_all(stderr);
 #endif /* NDEBUG */
 
 		if (pos_next == -1 || fid_next == -1)
@@ -87,8 +102,8 @@ void VertexInfo::preprocess()
 			return;
 		}
 
-		ASSERT(numFacets <= parentPolyhedron->numFacets);
-		if (numFacets > parentPolyhedron->numFacets)
+		ASSERT(numFacets <= numFacetsTotal);
+		if (numFacets > numFacetsTotal)
 		{
 			ERROR_PRINT("Endless loop occurred!");
 			DEBUG_END;
@@ -107,7 +122,7 @@ void VertexInfo::preprocess()
 	indFacets = new int[3 * numFacets + 1];
 
     DEBUG_PRINT("3. Building the VECTOR :");
-	pos_next = parentPolyhedron->facets[fid_first].preprocess_search_vertex(id,
+	pos_next = facets[fid_first].preprocess_search_vertex(id,
 			v_curr);
 	fid_next = fid_first;
 	for (int i = 0; i < numFacets; ++i)
@@ -115,7 +130,7 @@ void VertexInfo::preprocess()
 		pos_curr = pos_next;
 		fid_curr = fid_next;
 
-		parentPolyhedron->facets[fid_curr].get_next_facet(pos_curr, pos_next,
+		facets[fid_curr].get_next_facet(pos_curr, pos_next,
 				fid_next, v_curr);
 		indFacets[i] = fid_curr;
 		indFacets[i + numFacets + 1] = v_curr;

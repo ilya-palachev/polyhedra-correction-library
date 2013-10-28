@@ -70,6 +70,8 @@ int main(int argc, char** argv)
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-before.ply",
 			"globalCorrection");
+	
+	polyhedron->printSortedByAreaFacets();
 
 	shared_ptr<ShadeContourData> contourData(new ShadeContourData(polyhedron));
 	shared_ptr<ShadeContourConstructor> scConstructor(new ShadeContourConstructor(
@@ -84,15 +86,13 @@ int main(int argc, char** argv)
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
-	polyhedron->correctGlobal(contourData, &gsParameters);
+	polyhedron->correctGlobal(contourData, &gsParameters, NULL);
 
 	polyhedron->fprint_ply_scale(1000.,
 			"poly-data-out/globalCorrection-after.ply",
 			"globalCorrection");
 
 	DEBUG_PRINT("Polyhedron's use count: %ld", polyhedron.use_count());
-	polyhedron.reset();
-	DEBUG_PRINT("Polyhedron's use count: %ld (after reset)", polyhedron.use_count());
 
 	DEBUG_END;
 	return EXIT_SUCCESS;

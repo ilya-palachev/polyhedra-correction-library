@@ -30,7 +30,7 @@
 #endif
 
 #define ASSERT_PRINT(condition, ...) \
-	if ((!condition)) \
+	if (!(condition)) \
 	{ \
 		ERROR_PRINT(__VA_ARGS__); \
 	} \
