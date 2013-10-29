@@ -51,47 +51,49 @@ struct Plane_from_facet
 
 static void print_usage(int argc, char** argv)
 {
-	printf("Usage: %s <num_of_points>\n", argv[0]);	
+	printf("Usage: %s <num_of_points>\n", argv[0]);
 }
 
 /* Return 1 if the difference is negative, otherwise 0.  */
-int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval 
-*t1)
+int timeval_subtract(struct timeval *result, struct timeval *t2,
+		struct timeval *t1)
 {
-    long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 
-1000000 * t1->tv_sec);
-    result->tv_sec = diff / 1000000;
-    result->tv_usec = diff % 1000000;
+	long int diff = (t2->tv_usec + 1000000 * t2->tv_sec)
+			- (t1->tv_usec + 1000000 * t1->tv_sec);
+	result->tv_sec = diff / 1000000;
+	result->tv_usec = diff % 1000000;
 
-    return (diff<0);
+	return (diff < 0);
 }
 
 void timeval_print(struct timeval *tv)
 {
-    char buffer[30];
-    time_t curtime;
+	char buffer[30];
+	time_t curtime;
 
-    printf("%ld.%06ld", tv->tv_sec, tv->tv_usec);
-    curtime = tv->tv_sec;
-    strftime(buffer, 30, "%m-%d-%Y  %T", localtime(&curtime));
-    printf(" = %s.%06ld\n", buffer, tv->tv_usec);
+	printf("%ld.%06ld", tv->tv_sec, tv->tv_usec);
+	curtime = tv->tv_sec;
+	strftime(buffer, 30, "%m-%d-%Y  %T", localtime(&curtime));
+	printf(" = %s.%06ld\n", buffer, tv->tv_usec);
 }
 
 int main(int argc, char** argv)
 {
 	struct timeval tvBegin, tvEnd, tvDiff;
-	
-	if (argc != 2) {
+
+	if (argc != 2)
+	{
 		print_usage(argc, argv);
 		return EXIT_FAILURE;
 	}
-	
+
 	int numPoints = 0;
-	if (sscanf(argv[1], "%d", &numPoints) != 1) {
+	if (sscanf(argv[1], "%d", &numPoints) != 1)
+	{
 		print_usage(argc, argv);
 		return EXIT_FAILURE;
 	}
-	
+
 	CGAL::Random_points_in_sphere_3<Point_3, PointCreator> gen(100.0);
 
 	// generate <numPoints> points randomly on a sphere of radius 100.0
@@ -103,22 +105,21 @@ int main(int argc, char** argv)
 	Polyhedron_3 poly;
 
 	// compute convex hull of non-collinear points
-	
-	
-    // begin
-    gettimeofday(&tvBegin, NULL);
-    timeval_print(&tvBegin);
-	
+
+	// begin
+	gettimeofday(&tvBegin, NULL);
+	timeval_print(&tvBegin);
+
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
-	
+
 	//end
-    gettimeofday(&tvEnd, NULL);
-    timeval_print(&tvEnd);
-	
+	gettimeofday(&tvEnd, NULL);
+	timeval_print(&tvEnd);
+
 	// diff
-    timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-    printf("%ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
-	
+	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
+	printf("%ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
+
 	std::cout << "The convex hull contains " << poly.size_of_vertices()
 			<< " vertices" << std::endl;
 
@@ -127,5 +128,4 @@ int main(int argc, char** argv)
 			Plane_from_facet());
 	return EXIT_SUCCESS;
 }
-
 
