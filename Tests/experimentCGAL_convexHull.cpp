@@ -18,6 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file experimentCGAL_convexHull.cpp
+ *
+ * @brief Here the functionality of static convex hull algorithm from CGAL is
+ * tested.
+ */
+
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -36,11 +43,13 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
 typedef K::Segment_3 Segment_3;
 
-// define point creator
+/** Define point creator */
 typedef K::Point_3 Point_3;
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
-//a functor computing the plane containing a triangular facet
+/**
+ * A functor computing the plane containing a triangular facet
+ */
 struct Plane_from_facet
 {
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
@@ -51,12 +60,25 @@ struct Plane_from_facet
 	}
 };
 
+/**
+ * Prints the usage of this test.
+ */
 static void print_usage(int argc, char** argv)
 {
 	printf("Usage: %s <num_of_points>\n", argv[0]);
 }
 
-/* Return 1 if the difference is negative, otherwise 0.  */
+/**
+ * Subtracts 2 timeval structures result = t2 - t1 (is used for time
+ * measurements).
+ *
+ * @param result Resulting time structure
+ * @param t2 The time structure for the end of measurement
+ * @param t1 The time structure for the begin of measurement
+ *
+ * @retvalue 1 if the difference is negative
+ * @retvalue 0 otherwise
+ */
 int timeval_subtract(struct timeval *result, struct timeval *t2,
 		struct timeval *t1)
 {
@@ -68,6 +90,11 @@ int timeval_subtract(struct timeval *result, struct timeval *t2,
 	return (diff < 0);
 }
 
+/**
+ * Prints the time from timeval structure.
+ *
+ * @param tv The timeval structure
+ */
 void timeval_print(struct timeval *tv)
 {
 	char buffer[30];
@@ -79,8 +106,16 @@ void timeval_print(struct timeval *tv)
 	printf(" = %s.%06ld\n", buffer, tv->tv_usec);
 }
 
+/**
+ * Defines the factor of points reduction, i. e. if it is = 10, then 90% of
+ * points will be reduced.
+ */
 #define FACTOR_OF_VERTICES_REDUCTION 10
 
+
+/**
+ * Performs the testing of static convex hull of CGAL.
+ */
 int main(int argc, char** argv)
 {
 	struct timeval tvBegin, tvEnd, tvDiff;
@@ -98,10 +133,12 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	CGAL::Random_points_in_sphere_3<Point_3, PointCreator> gen(100.0);
+	CGAL::Random_points_on_sphere_3<Point_3, PointCreator> gen(100.0);
 
-	// generate <num_points> points randomly on a sphere of radius 100.0
-	// and copy them to a vector
+	/*
+	 * generate <num_points> points randomly on a sphere of radius 100.0
+	 * and copy them to a vector
+	 */
 	std::vector<Point_3> points;
 	CGAL::cpp11::copy_n(gen, num_points, std::back_inserter(points));
 
@@ -117,16 +154,31 @@ int main(int argc, char** argv)
 		++i_point;
 	}
 
-	// define polyhedron to hold convex hull
+	/* define polyhedron to hold convex hull */
 	Polyhedron_3 poly;
 
-	// compute convex hull of non-collinear points
+	/* compute convex hull of non-collinear points */
 
-	// begin
+	/* begin time measurement */
 	gettimeofday(&tvBegin, NULL);
 	timeval_print(&tvBegin);
 
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
+
+	std::cout << "The convex hull contains " << poly.size_of_vertices()
+			<< " vertices" << std::endl;
+
+	/* end time measurement */
+	gettimeofday(&tvEnd, NULL);
+	timeval_print(&tvEnd);
+
+	/* calculate time difference */
+	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
+	printf("%ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
+
+	/* begin time measurement */
+	gettimeofday(&tvBegin, NULL);
+	timeval_print(&tvBegin);
 
 	for (int i_point = 0;
 			i_point < num_points - num_points / FACTOR_OF_VERTICES_REDUCTION;
@@ -141,18 +193,21 @@ int main(int argc, char** argv)
 		CGAL::convex_hull_3(points.begin(), points.end(), poly);
 	}
 
-	//end
+	/* begin time measurement */
 	gettimeofday(&tvEnd, NULL);
 	timeval_print(&tvEnd);
 
-	// diff
+	/* calculate time difference */
 	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
 	printf("%ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
 
 	std::cout << "The convex hull contains " << poly.size_of_vertices()
 			<< " vertices" << std::endl;
 
-	// assign a plane equation to each polyhedron facet using functor Plane_from_facet
+	/*
+	 * assign a plane equation to each polyhedron facet using functor
+	 * Plane_from_facet
+	 */
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
 	return EXIT_SUCCESS;
