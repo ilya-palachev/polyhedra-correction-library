@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "DebugPrint.h"
+
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
@@ -102,6 +104,18 @@ int main(int argc, char** argv)
 	// and copy them to a vector
 	std::vector<Point_3> points;
 	CGAL::cpp11::copy_n(gen, num_points, std::back_inserter(points));
+
+	int i_point = 0;
+	for (auto it_point = points.begin(); it_point != points.end(); ++it_point)
+	{
+		DEBUG_VARIABLE double x = it_point->x();
+		DEBUG_VARIABLE double y = it_point->y();
+		DEBUG_VARIABLE double z = it_point->z();
+		DEBUG_VARIABLE double norm = sqrt(x * x + y * y + z * z);
+		DEBUG_PRINT("points[%d] = (%lf, %lf, %lf), norm = %lf\n",
+				i_point, x, y, z, norm);
+		++i_point;
+	}
 
 	// define polyhedron to hold convex hull
 	Polyhedron_3 poly;
