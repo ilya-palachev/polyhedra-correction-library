@@ -77,6 +77,8 @@ void timeval_print(struct timeval *tv)
 	printf(" = %s.%06ld\n", buffer, tv->tv_usec);
 }
 
+#define FACTOR_OF_VERTICES_REDUCTION 10
+
 int main(int argc, char** argv)
 {
 	struct timeval tvBegin, tvEnd, tvDiff;
@@ -87,8 +89,8 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	int numPoints = 0;
-	if (sscanf(argv[1], "%d", &numPoints) != 1)
+	int num_points = 0;
+	if (sscanf(argv[1], "%d", &num_points) != 1)
 	{
 		print_usage(argc, argv);
 		return EXIT_FAILURE;
@@ -96,10 +98,10 @@ int main(int argc, char** argv)
 
 	CGAL::Random_points_in_sphere_3<Point_3, PointCreator> gen(100.0);
 
-	// generate <numPoints> points randomly on a sphere of radius 100.0
+	// generate <num_points> points randomly on a sphere of radius 100.0
 	// and copy them to a vector
 	std::vector<Point_3> points;
-	CGAL::cpp11::copy_n(gen, numPoints, std::back_inserter(points));
+	CGAL::cpp11::copy_n(gen, num_points, std::back_inserter(points));
 
 	// define polyhedron to hold convex hull
 	Polyhedron_3 poly;
@@ -111,6 +113,19 @@ int main(int argc, char** argv)
 	timeval_print(&tvBegin);
 
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
+
+	for (int i_point = 0;
+			i_point < num_points - num_points / FACTOR_OF_VERTICES_REDUCTION;
+			++i_point)
+	{
+		srand((unsigned) time(0));
+		int random_integer = rand();
+		auto it_point = points.begin();
+		for (int i_incr = 0; i_incr < random_integer; ++i_incr)
+			++it_point;
+		points.erase(it_point);
+		CGAL::convex_hull_3(points.begin(), points.end(), poly);
+	}
 
 	//end
 	gettimeofday(&tvEnd, NULL);
