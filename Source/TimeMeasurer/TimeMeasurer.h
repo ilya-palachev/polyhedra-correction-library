@@ -18,25 +18,77 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file TimeMeasurer.h
+ * @brief time measurer is a class used for time measurement inside tests
+ * (implementation).
+ */
+
+
 #ifndef TIMEMEASURER_H
 #define TIMEMEASURER_H
 
 #include <stack>
 #include <sys/time.h>
 
+#include "Timer.h"
+
 using namespace std;
 
+/**
+ * time measurer is a data structure of stack of timeval structures
+ * When new timer is pushed, it is placed to the stack, and its value will be
+ * printed when it will be poped out from stack.
+ */
 class TimeMeasurer
 {
 private:
-	stack<struct timeval> timers;
+
+	/**
+	 * Stack of started timers
+	 */
+	stack<Timer> timers;
+
 public:
+
+	/**
+	* Creates empty time measurer
+	*/
 	TimeMeasurer();
+
+	/**
+	* Copies exisiting time measurer to existing one
+	* 
+	* @param other time measurer to be copied.
+	*/	
 	TimeMeasurer(const TimeMeasurer& other);
-	virtual ~TimeMeasurer();
-	virtual TimeMeasurer& operator=(const TimeMeasurer& other);
-	virtual bool operator==(const TimeMeasurer& other) const;
+
+	/**
+	* Frees time measurer.
+	*/
+	~TimeMeasurer();
+
+	/**
+	* Assigns one time measurer to another.
+	* 
+	* @param other the measurer to be assigned to
+	*/	
+	TimeMeasurer& operator=(const TimeMeasurer& other);
+
+	/**
+	* Compares two TimeMeasurers.
+	* 
+	* @param other timer measurer to be compared with
+	* 
+	* @retval true if equal
+	* @retval false if unequal
+	*/	
+	bool operator==(const TimeMeasurer& other) const;
+
+
 	void push_timer();
+
+
 	void pop_timer();
 };
 
