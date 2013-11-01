@@ -57,10 +57,7 @@ TimeMeasurer::TimeMeasurer(const TimeMeasurer& other)
 TimeMeasurer::~TimeMeasurer()
 {
 	DEBUG_START;
-	while(!timers.empty())
-	{
-		timers.pop();
-	}
+	timers.clear();
 	DEBUG_END;
 }
 
@@ -78,7 +75,7 @@ TimeMeasurer& TimeMeasurer::operator=(const TimeMeasurer& other)
 }
 
 /**
- * Compares two TimeMeasurers.
+ * Compares two TimeMeasurers (equality).
  * 
  * @param other timer measurer to be compared with
  * 
@@ -89,37 +86,33 @@ bool TimeMeasurer::operator==(const TimeMeasurer& other) const
 {
 	DEBUG_START;
 	
-	bool ifEqual = true;
+	auto it_timer1 = timers.begin();
+	auto it_timer2 = other.timers.begin();
 	
-	/* Create temporary stack for storing equal nodes of stack*/
-	stack<Timer> timersTmp;
-	
-	/* Compare upper nodes of stack. */
-	while (!timers.empty())
+	while (it_timer1 != timers.end() && it_timer2 != other.timers.end())
 	{
-		Timer tv1 = timers.top();
-		Timer tv2 = other.timers.top();
-		if (tv1 != tv2)
+		if (*it_timer1 != *it_timer2)
 		{
-			ifEqual = false;
-			break;
+			DEBUG_END;
+			return false;
 		}
-		timersTmp.push(tv1);
-		timers.pop();
-		other.timers.pop();
 	}
 	
-	/* Repair stacks after comparison. */
-	while (!timersTmp.empty())
-	{
-		Timer tvRemembered = timersTmp.top();
-		timersTmp.pop();
-		timers.push(tvRemembered);
-		other.timers.push(tvRemembered);
-	}
-	
-	/* Return proper answer. */
 	DEBUG_END;
-	return ifEqual;
+	return true;
 }
 
+/**
+ * Compares two TimeMeasurers (unequality).
+ *
+ * @param other timer measurer to be compared with
+ *
+ * @retval true if equal
+ * @retval false if unequal
+ */
+bool TimeMeasurer::operator!=(const TimeMeasurer& other) const
+{
+	DEBUG_START;
+	DEBUG_END;
+	return !(*this == other);
+}

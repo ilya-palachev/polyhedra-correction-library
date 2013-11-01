@@ -28,7 +28,7 @@
 #ifndef TIMEMEASURER_H
 #define TIMEMEASURER_H
 
-#include <stack>
+#include <list>
 #include <sys/time.h>
 
 #include "Timer.h"
@@ -47,7 +47,7 @@ private:
 	/**
 	 * Stack of started timers
 	 */
-	stack<Timer> timers;
+	list<Timer> timers;
 
 public:
 
@@ -84,6 +84,16 @@ public:
 	* @retval false if unequal
 	*/	
 	bool operator==(const TimeMeasurer& other) const;
+
+	/**
+	* Compares two TimeMeasurers.
+	*
+	* @param other timer measurer to be compared with
+	*
+	* @retval true if equal
+	* @retval false if unequal
+	*/
+	bool operator!=(const TimeMeasurer& other) const;
 
 
 	void push_timer();
