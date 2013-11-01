@@ -19,10 +19,13 @@
  */
 
 /**
- * @file experimentCGAL_convexHull.cpp
+ * @file experimentCGAL_convexHullStatic.cpp
  *
  * @brief Here the functionality of static convex hull algorithm from CGAL is
  * tested.
+ * 
+ * @note This file is based on example from CGAL manual:
+ * http://doc.cgal.org/latest/Convex_hull_3/index.html#Chapter_3D_Convex_Hulls
  */
 
 #include <sys/time.h>
