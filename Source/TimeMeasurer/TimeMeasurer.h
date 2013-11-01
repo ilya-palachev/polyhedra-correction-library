@@ -101,8 +101,10 @@ public:
 	void pushTimer();
 
 	/**
-	 * Stop the last timer in the list and print calculated time for it.
-	 */
+	* Stop the last timer in the list and print calculated time for it.
+	* 
+	* @return time of last timer (in seconds, precision is microsecond)
+	*/
 	double popTimer();
 };
 
