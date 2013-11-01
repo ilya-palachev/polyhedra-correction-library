@@ -118,11 +118,13 @@ void timeval_print(struct timeval *tv)
  */
 int main(int argc, char** argv)
 {
+	DEBUG_START;
 	struct timeval tvBegin, tvEnd, tvDiff;
 
 	if (argc != 2)
 	{
 		print_usage(argc, argv);
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 
@@ -130,9 +132,11 @@ int main(int argc, char** argv)
 	if (sscanf(argv[1], "%d", &num_points) != 1)
 	{
 		print_usage(argc, argv);
+		DEBUG_END;
 		return EXIT_FAILURE;
 	}
 
+	DEBUG_PRINT("1. Creating point generator:");
 	CGAL::Random_points_on_sphere_3<Point_3, PointCreator> gen(100.0);
 
 	/*
@@ -140,6 +144,7 @@ int main(int argc, char** argv)
 	 * and copy them to a vector
 	 */
 	std::vector<Point_3> points;
+	DEBUG_PRINT("2. Generating points on sphere:");
 	CGAL::cpp11::copy_n(gen, num_points, std::back_inserter(points));
 
 	int i_point = 0;
@@ -163,6 +168,7 @@ int main(int argc, char** argv)
 	gettimeofday(&tvBegin, NULL);
 	timeval_print(&tvBegin);
 
+	DEBUG_PRINT("3. Constructing convex hull:");
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
 
 	std::cout << "The convex hull contains " << poly.size_of_vertices()
@@ -180,17 +186,21 @@ int main(int argc, char** argv)
 	gettimeofday(&tvBegin, NULL);
 	timeval_print(&tvBegin);
 
-	for (int i_point = 0;
-			i_point < num_points - num_points / FACTOR_OF_VERTICES_REDUCTION;
-			++i_point)
+	if (0)
 	{
-		srand((unsigned) time(0));
-		int random_integer = rand();
-		auto it_point = points.begin();
-		for (int i_incr = 0; i_incr < random_integer; ++i_incr)
-			++it_point;
-		points.erase(it_point);
-		CGAL::convex_hull_3(points.begin(), points.end(), poly);
+		for (int i_point = 0;
+				i_point < num_points - num_points / 
+							FACTOR_OF_VERTICES_REDUCTION;
+				++i_point)
+		{
+			srand((unsigned) time(0));
+			int random_integer = rand();
+			auto it_point = points.begin();
+			for (int i_incr = 0; i_incr < random_integer; ++i_incr)
+				++it_point;
+			points.erase(it_point);
+			CGAL::convex_hull_3(points.begin(), points.end(), poly);
+		}
 	}
 
 	/* begin time measurement */
@@ -210,6 +220,7 @@ int main(int argc, char** argv)
 	 */
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
+	DEBUG_END;
 	return EXIT_SUCCESS;
 }
 
