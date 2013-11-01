@@ -86,7 +86,6 @@ static void print_usage(int argc, char** argv)
 int main(int argc, char** argv)
 {
 	DEBUG_START;
-	struct timeval tvBegin, tvEnd, tvDiff;
 
 	if (argc != 2)
 	{
@@ -162,7 +161,7 @@ int main(int argc, char** argv)
 		CGAL::convex_hull_3(points.begin(), points.end(), poly);
 	}
 
-	/* begin time measurement */
+	/* end time measurement */
 	double timeSecond = timer.popTimer();
 	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
 
