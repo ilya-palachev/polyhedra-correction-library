@@ -116,3 +116,41 @@ bool TimeMeasurer::operator!=(const TimeMeasurer& other) const
 	DEBUG_END;
 	return !(*this == other);
 }
+
+/**
+ * Start new timer and push it to the list of timers
+ */
+void TimeMeasurer::pushTimer()
+{
+	DEBUG_START;
+
+	Timer timerNew;
+	timerNew.start();
+
+	timers.push_back(timerNew);
+
+	DEBUG_END;
+}
+
+#define MILLION 1000000
+
+/**
+ * Stop the last timer in the list and print calculated time for it.
+ */
+double TimeMeasurer::popTimer()
+{
+	DEBUG_START;
+
+	Timer timerEnd;
+	timerEnd.start();
+
+	Timer timerBegin = timers.back();
+
+	long int usecondsDiff =
+			MILLION * (timerEnd.getSeconds() - timerBegin.getSeconds())
+			+ timerEnd.getUSeconds() - timerBegin.getUSeconds();
+
+	return usecondsDiff / (double) MILLION;
+	DEBUG_END;
+}
+

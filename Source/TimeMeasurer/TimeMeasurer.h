@@ -95,11 +95,15 @@ public:
 	*/
 	bool operator!=(const TimeMeasurer& other) const;
 
+	/**
+	 * Start new timer and push it to the list of timers
+	 */
+	void pushTimer();
 
-	void push_timer();
-
-
-	void pop_timer();
+	/**
+	 * Stop the last timer in the list and print calculated time for it.
+	 */
+	double popTimer();
 };
 
 #endif // TIMEMEASURER_H
