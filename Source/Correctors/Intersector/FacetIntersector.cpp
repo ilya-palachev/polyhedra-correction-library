@@ -18,6 +18,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
 #include <cmath>
 
 #include "DebugPrint.h"
