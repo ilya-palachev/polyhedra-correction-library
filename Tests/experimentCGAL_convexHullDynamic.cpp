@@ -36,45 +36,112 @@
 #include <CGAL/algorithm.h>
 #include <list>
 
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "TimeMeasurer/TimeMeasurer.h"
+
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_3 Point_3;
 typedef CGAL::Delaunay_triangulation_3<K> Delaunay;
 typedef Delaunay::Vertex_handle Vertex_handle;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
 
-int main()
+/**
+ * Prints the usage of this test.
+ */
+static void print_usage(int argc, char** argv)
 {
+	printf("Usage: %s <num_of_points>\n", argv[0]);
+}
 
-	CGAL::Random_points_in_sphere_3<Point_3> gen(100.0);
+/**
+ * Defines the factor of points reduction, i. e. if it is = 10, then 90% of
+ * points will be reduced.
+ */
+#define FACTOR_OF_VERTICES_REDUCTION 10
+
+
+/**
+ * Performs the testing of dynamic convex hull of CGAL.
+ */
+int main(int argc, char** argv)
+{
+	DEBUG_START;
+	if (argc != 2)
+	{
+		print_usage(argc, argv);
+		DEBUG_END;
+		return EXIT_FAILURE;
+	}
+
+	int num_points = 0;
+	if (sscanf(argv[1], "%d", &num_points) != 1)
+	{
+		print_usage(argc, argv);
+		DEBUG_END;
+		return EXIT_FAILURE;
+	}
+
+	CGAL::Random_points_on_sphere_3<Point_3> gen(100.0);
 	std::list<Point_3> points;
 	
-	// generate 250 points randomly on a sphere of radius 100.0
-	// and insert them into the triangulation
-	CGAL::cpp11::copy_n(gen, 250, std::back_inserter(points) );
+	/*
+	 * generate <num_points> points randomly on a sphere of radius 100.0
+	 * and copy them to a vector
+	 */
+	CGAL::cpp11::copy_n(gen, num_points, std::back_inserter(points) );
 	
+	/* begin time measurement */
+	TimeMeasurer timer;
+	timer.pushTimer();
 	Delaunay T;
+
 	T.insert(points.begin(), points.end());
 	std::list<Vertex_handle> vertices;
 	T.incident_vertices(T.infinite_vertex(), std::back_inserter(vertices));
 	
-	std::cout << "This convex hull of the 250 points has "
-		<< vertices.size() << " points on it." << std::endl;
+	/*
+	 * copy the convex hull of points into a polyhedron and use it
+	 * to get the number of points on the convex hull
+	 */
+	Polyhedron_3 chull0;
+	CGAL::convex_hull_3_to_polyhedron_3(T,chull0);
 	
-	// remove 25 of the input points
+	std::cout << "The convex hull contains " << chull0.size_of_vertices()
+		<< " vertices" << std::endl;
+	
+	/* end time measurement */
+	double timeFirst = timer.popTimer();
+	printf("Time for initial construction of convex hull: %lf\n", timeFirst);
+	
+	/* begin time measurement */
+	timer.pushTimer();
+	
+	/* Remove 90% of points. */
+	float nReduced = (1. - 1. / (float) FACTOR_OF_VERTICES_REDUCTION) * 
+		chull0.size_of_vertices();
+		
 	std::list<Vertex_handle>::iterator v_set_it = vertices.begin();
-	for (int i = 0; i < 25; i++)
+	for (int i = 0; i < nReduced; i++)
 	{
 		T.remove(*v_set_it);
 		v_set_it++;
 	}
-	
-	//copy the convex hull of points into a polyhedron and use it
-	//to get the number of points on the convex hull
+
+	/*
+	 * copy the convex hull of points into a polyhedron and use it
+	 * to get the number of points on the convex hull
+	 */
 	Polyhedron_3 chull;
 	CGAL::convex_hull_3_to_polyhedron_3(T,chull);
 	
-	std::cout << "After removal of 25 points, there are "
-		<< chull.size_of_vertices() << " points on the convex hull." << 
-		std::endl;
+	/* end time measurement */
+	double timeSecond = timer.popTimer();
+	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
+	
+	std::cout << "The convex hull contains " << chull.size_of_vertices()
+		<< " vertices" << std::endl;
+
+	DEBUG_END;
 	return 0;
 }
