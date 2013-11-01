@@ -30,14 +30,16 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "DebugPrint.h"
-
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
 #include <vector>
+
+#include "TimeMeasurer/TimeMeasurer.h"
+#include "DebugPrint.h"
+
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
@@ -66,44 +68,6 @@ struct Plane_from_facet
 static void print_usage(int argc, char** argv)
 {
 	printf("Usage: %s <num_of_points>\n", argv[0]);
-}
-
-/**
- * Subtracts 2 timeval structures result = t2 - t1 (is used for time
- * measurements).
- *
- * @param result Resulting time structure
- * @param t2 The time structure for the end of measurement
- * @param t1 The time structure for the begin of measurement
- *
- * @retvalue 1 if the difference is negative
- * @retvalue 0 otherwise
- */
-int timeval_subtract(struct timeval *result, struct timeval *t2,
-		struct timeval *t1)
-{
-	long int diff = (t2->tv_usec + 1000000 * t2->tv_sec)
-			- (t1->tv_usec + 1000000 * t1->tv_sec);
-	result->tv_sec = diff / 1000000;
-	result->tv_usec = diff % 1000000;
-
-	return (diff < 0);
-}
-
-/**
- * Prints the time from timeval structure.
- *
- * @param tv The timeval structure
- */
-void timeval_print(struct timeval *tv)
-{
-	char buffer[30];
-	time_t curtime;
-
-	printf("%ld.%06ld", tv->tv_sec, tv->tv_usec);
-	curtime = tv->tv_sec;
-	strftime(buffer, 30, "%m-%d-%Y  %T", localtime(&curtime));
-	printf(" = %s.%06ld\n", buffer, tv->tv_usec);
 }
 
 /**
@@ -165,8 +129,8 @@ int main(int argc, char** argv)
 	/* compute convex hull of non-collinear points */
 
 	/* begin time measurement */
-	gettimeofday(&tvBegin, NULL);
-	timeval_print(&tvBegin);
+	TimeMeasurer timer;
+	timer.pushTimer();
 
 	DEBUG_PRINT("3. Constructing convex hull:");
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
@@ -175,41 +139,29 @@ int main(int argc, char** argv)
 			<< " vertices" << std::endl;
 
 	/* end time measurement */
-	gettimeofday(&tvEnd, NULL);
-	timeval_print(&tvEnd);
-
-	/* calculate time difference */
-	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-	printf("%ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
+	double timeFirst = timer.popTimer();
+	printf("Time for initial construction of convex hull: %lf\n", timeFirst);
 
 	/* begin time measurement */
-	gettimeofday(&tvBegin, NULL);
-	timeval_print(&tvBegin);
+	timer.pushTimer();
 
-	if (0)
+	for (int i_point = 0;
+			i_point < num_points - num_points / 
+						FACTOR_OF_VERTICES_REDUCTION;
+			++i_point)
 	{
-		for (int i_point = 0;
-				i_point < num_points - num_points / 
-							FACTOR_OF_VERTICES_REDUCTION;
-				++i_point)
-		{
-			srand((unsigned) time(0));
-			int random_integer = rand();
-			auto it_point = points.begin();
-			for (int i_incr = 0; i_incr < random_integer; ++i_incr)
-				++it_point;
-			points.erase(it_point);
-			CGAL::convex_hull_3(points.begin(), points.end(), poly);
-		}
+		srand((unsigned) time(0));
+		int random_integer = rand();
+		auto it_point = points.begin();
+		for (int i_incr = 0; i_incr < random_integer; ++i_incr)
+			++it_point;
+		points.erase(it_point);
+		CGAL::convex_hull_3(points.begin(), points.end(), poly);
 	}
 
 	/* begin time measurement */
-	gettimeofday(&tvEnd, NULL);
-	timeval_print(&tvEnd);
-
-	/* calculate time difference */
-	timeval_subtract(&tvDiff, &tvEnd, &tvBegin);
-	printf("%ld.%06ld\n", tvDiff.tv_sec, tvDiff.tv_usec);
+	double timeSecond = timer.popTimer();
+	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
 
 	std::cout << "The convex hull contains " << poly.size_of_vertices()
 			<< " vertices" << std::endl;
