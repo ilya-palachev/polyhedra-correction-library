@@ -36,7 +36,15 @@ list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LibGEXF")
 list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
 include_directories(${INCLUDE_DIRS_all})
 
-set(COMMON_FLAGS "-std=c++11 -Wall -Werror -pedantic")
+# Common compiler flags used for build:
+set(COMMON_FLAGS "")
+# Enable C++11:
+set(COMMON_FLAGS "${COMMON_FLAGS} -std=c++11")
+# Enable the most strict compiler errors:
+set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -pedantic")
+# Enable rounding math option (required by CGAL):
+# TODO: For ICC we need to set -fp-model here.
+set(COMMON_FLAGS "${COMMON_FLAGS} -frounding-math")
 
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
