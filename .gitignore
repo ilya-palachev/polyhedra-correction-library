@@ -18,13 +18,28 @@ build
 poly-data-out
 
 # Eclipse setting files:
-.cproject
-.project
-.checkers
-.settings
-.externalToolBuilders
-.directory
+*.cproject
+*.project
+*.checkers
+*.settings
+*.externalToolBuilders
+*.directory
 
 # KDelevelop setting files:
 *kdev4*
 
+# LaTEX automatically generated files:
+*.pdf
+*.aux
+*.log
+*.tex.backup
+*.tex~
+*.toc
+*.dvi
+
+# BibTEX automatically generated files:
+*.bbl
+*.blg
+
+# Config files:
+config/debug_exceptions.conf
