@@ -192,7 +192,10 @@ $$u_{i} = (cos \theta_{i}, sin \theta_{i})$$
 
 $$\theta_{i} = i \cdot \Delta \theta$$
 
-где $\Delta \theta = \frac{2 \pi}{M}, i = 0, \ldots, M - 1, M \leq 5$
+где $\Delta \theta = \frac{2 \pi}{M}, i = 0, \ldots, M - 1, M \leq 5$. Более
+общий случай, когда направления измерений выбираются произвольным образом,
+описывается в статье
+\cite[Lele - Kulkarni - Willsky (1992)]{journals/josaa/LeleKW92}.
 
 Ключевым понятием в статье является следующее
 
@@ -205,7 +208,7 @@ $$\theta_{i} = i \cdot \Delta \theta$$
 \end{flushleft}
 
 Основным теоретическим результатом статьи, на котором основаны все алгоритмы,
-является соедующая
+является следующая
 
 \begin{flushleft}
  \textbf{Теорема 1}. \textbf{Опорная теорема}
@@ -235,6 +238,17 @@ $$\theta_{i} = i \cdot \Delta \theta$$
   где $k = 1 / (2 cos(\frac{2 \pi}{M}))$.
 
 \end{flushleft}
+
+Таким образом, все возможные наборы $h \in \mathbb{R}^{M}$ образуют конус в
+$\mathbb{R}^{M}$.
+
+\begin{flushleft}
+ \textbf{Определение}. \textbf{Опорным конусом} размерности $M$ называется множество:
+ $$
+ C = \{h \in \mathbb{R}^{M} | h^{T} C \leq (0 \ldots 0) \}
+ $$
+\end{flushleft}
+
 
 
 \section{Предлагаемый подход}
