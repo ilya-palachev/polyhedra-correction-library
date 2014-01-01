@@ -1,5 +1,6 @@
 \documentclass[a4paper,12pt, titlepage]{article} 
-\usepackage{geometry}           % пакет для задания полей страницы командой \geometry
+% пакет для задания полей страницы командой \geometry :
+\usepackage{geometry}
 \geometry{left=3cm,right=1.5cm,top=2cm,bottom=2cm}
 \usepackage[utf8]{inputenc}
 \usepackage[english,russian]{babel}
@@ -11,7 +12,7 @@
 %\usepackage[pdftex]{graphicx}
 %\usepackage[pdftex]{graphics}
 %\usepackage{wrapfig}
-%\linespread{1.3}                % полтора интервала. Если 1.6, то два интервала
+%\linespread{1.3}               % полтора интервала. Если 1.6, то два интервала
 \pagestyle{plain}               % номерует страницы
 
 \usepackage{graphicx}
@@ -21,7 +22,8 @@
 % The following code enables back references:
 \usepackage{color} 
 \definecolor{darkgreen}{rgb}{0,.5,0} 
-\usepackage[unicode,colorlinks,filecolor=blue,citecolor=darkgreen,pagebackref]{hyperref}
+\usepackage[unicode,colorlinks,filecolor=blue,citecolor=darkgreen,pagebackref]
+{hyperref}
 
 
 %opening
@@ -243,7 +245,8 @@ $$\theta_{i} = i \cdot \Delta \theta$$
 $\mathbb{R}^{M}$.
 
 \begin{flushleft}
- \textbf{Определение}. \textbf{Опорным конусом} размерности $M$ называется множество:
+ \textbf{Определение}. \textbf{Опорным конусом} размерности $M$ называется
+ множество:
  $$
  C = \{h \in \mathbb{R}^{M} | h^{T} C \leq (0 \ldots 0) \}
  $$
