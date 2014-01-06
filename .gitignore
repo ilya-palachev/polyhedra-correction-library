@@ -6,6 +6,8 @@
 # given project in them locally.
 
 
+# Temporary files produced by Linux Test Editors:
+*.kate-swp
 
 # Building directories and files:
 *.o
