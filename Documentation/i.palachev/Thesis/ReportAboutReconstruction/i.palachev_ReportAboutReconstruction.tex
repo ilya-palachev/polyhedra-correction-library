@@ -742,6 +742,89 @@ h_{i} sin(\theta_{i + 1} - \theta_{i - 1}) +
 h_{i + 1} sin(\theta_{i} - \theta_{i - 1}) \geq 0
 $$
 
+Опорная теорема теперь записывается следующим образом:
+
+
+
+\begin{flushleft}
+ \textbf{Теорема 3.} \textbf{Обобщенная двумерная опорная теорема}.
+ Набор действительных чисел
+ $h = (h_{1}, h_{2}, \ldots, h_{M}) \in \mathfrak{R}^{M}$
+ является набором опорных чисел по направлениям вдоль углов
+ $\theta_{1} < \theta_{2} < \ldots < \theta_{M}$ тогдя и только тогда, когда
+ выполнено следующее матричное неравенство:
+
+ $$
+ C h \geq 0
+ $$
+ 
+ гдк матрица $C$ представляет собой следующее:
+
+ $$
+ \left(
+ \begin{array}{ccccccc}
+
+     -sin(\theta_{2} - \theta_{M}) &
+     sin(\theta_{1} - \theta_{M}) &
+     0 &
+     \ldots &
+     0 &
+     0 &
+     sin(\theta_{2} - \theta_{1}) \\
+
+      sin(\theta_{3} - \theta_{2}) &
+      -sin(\theta_{3} - \theta_{1}) &
+      sin(\theta_{2} - \theta_{1}) &
+      \ldots &
+      0 &
+      0 &
+      0 \\
+
+      0 &
+      sin(\theta_{4} - \theta_{3}) &
+      -sin(\theta_{4} - \theta_{2}) &
+      \ldots &
+      0 &
+      0 &
+      0 \\
+
+      \vdots &
+      \vdots &
+      \vdots &
+      \ddots &
+      \vdots &
+      \vdots &
+      \vdots \\
+
+      0 &
+      0 &
+      0 &
+      \ldots &
+      -sin(\theta_{M - 1} - \theta_{M - 3}) &
+      sin(\theta_{M - 2} - \theta_{M - 3}) &
+      0 \\
+
+      0 &
+      0 &
+      0 &
+      \ldots &
+      sin(\theta_{M} - \theta_{M - 1}) &
+      -sin(\theta_{M} - \theta_{M - 2}) &
+      sin(\theta_{M - 1} - \theta_{M - 2}) \\
+
+      sin(\theta_{M} - \theta_{M - 1})
+      0 &
+      0 &
+      \ldots &
+      0 &
+      sin(\theta_{1} - \theta_{M}) &
+      sin(\theta_{1} - \theta_{M - 1}) \\
+ \end{array}
+ \right)
+ $$
+\end{flushleft}
+
+
 \newpage
 \section{Предлагаемый подход}
 
