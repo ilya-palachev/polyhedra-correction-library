@@ -907,6 +907,24 @@ h_{\phi}(\theta_{2}), \ldots, h_{\phi}(\theta_{M})$ по углам измере
 \ldots, \phi_{N}\}$ известны, а $\alpha \in [0, 2 \pi]$ служит неизвестным
 смещением углов восстановления.
 
+Минимизируемым функционалом в данном случае является
+
+$$
+J[\alpha, h_{\phi}(\phi_{1} + \alpha), h_{\phi}(\phi_{2} + \alpha), \ldots,
+h_{\phi}(\phi_{N} + \alpha)] =
+\sum \limits_{i = 1}^{M}[h_{\phi}(\theta_{i}) - y_{i}]^{2}
+$$
+
+причем величины $h_{\phi}(\theta_{i})$ вычисляются по похожей формуле
+
+$$
+h_{\phi}(\theta_{i}) =
+\frac{sin(\phi_{R_{i}} + \alpha - \theta_{i})}{sin(\phi_{R_{i}} - \phi_{L_{i}})}
+h_{L_{i}} +
+\frac{sin(\theta_{i} - \phi_{L_{i}} - \alpha)}{sin(\phi_{R_{i}} - \phi_{L_{i})}}
+h_{R_{i}}
+$$
+
 \newpage
 \section{Предлагаемый подход}
 
