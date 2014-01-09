@@ -867,6 +867,20 @@ h_{L_{i}} +
 h_{R_{i}}
 $$
 
+Используя это соотношение, задачу минимизации можно переформулировать следующим 
+образом:
+
+$$
+\widehat{h}_{\phi} = \left(
+\begin{array}{c}
+ \widehat{h}_{\phi}(\phi_{1}) \\
+ \widehat{h}_{\phi}(\phi_{2}) \\
+ \vdots \\
+ \widehat{h}_{\phi}(\phi_{N}) \\
+\end{array}
+\right) = \operatornamewithlimits{argmin}_{C h_{\phi} \geq 0} (A h_{\phi} - 
+y)^{T} (A h_{\phi} - y)
+$$
 
 
 \newpage
