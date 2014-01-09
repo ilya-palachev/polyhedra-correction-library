@@ -6,7 +6,7 @@
 # given project in them locally.
 
 
-# Temporary files produced by Linux Test Editors:
+# Temporary files produced by Linux Text Editors:
 *.kate-swp
 
 # Building directories and files:
@@ -42,6 +42,7 @@ poly-data-out
 # BibTEX automatically generated files:
 *.bbl
 *.blg
+*.bib.backup
 
 # Config files:
 config/debug_exceptions.conf
