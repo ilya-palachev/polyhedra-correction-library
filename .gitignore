@@ -6,6 +6,9 @@
 # given project in them locally.
 
 
+# Temporary files produced by Linux Text Editors:
+*.kate-swp
+*.bak # Aspell backup files
 
 # Building directories and files:
 *.o
@@ -18,13 +21,29 @@ build
 poly-data-out
 
 # Eclipse setting files:
-.cproject
-.project
-.checkers
-.settings
-.externalToolBuilders
-.directory
+*.cproject
+*.project
+*.checkers
+*.settings
+*.externalToolBuilders
+*.directory
 
 # KDelevelop setting files:
 *kdev4*
 
+# LaTEX automatically generated files:
+*.pdf
+*.aux
+*.log
+*.tex.backup
+*.tex~
+*.toc
+*.dvi
+
+# BibTEX automatically generated files:
+*.bbl
+*.blg
+*.bib.backup
+
+# Config files:
+config/debug_exceptions.conf

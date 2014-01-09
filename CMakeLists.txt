@@ -1,6 +1,12 @@
 cmake_minimum_required (VERSION 2.8)
 project (Polyhedron-correction)
 
+# Set path for CMake
+set(CMAKE_MODULE_PATH
+    "${CMAKE_SOURCE_DIR}/cmake"
+    ${CMAKE_MODULE_PATH}
+)
+
 file(GLOB_RECURSE SOURCE_arrayOperations      "./External/ArrayOperations/*.cpp")
 file(GLOB_RECURSE SOURCE_gaussString          "./External/GaussString/*.cpp")
 file(GLOB_RECURSE SOURCE_lsm                  "./External/LSM/*.cpp")
@@ -93,6 +99,8 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Valg
 		set_source_files_properties(${souce_file} PROPERTIES COMPILE_FLAGS -UNDEBUG)
 	endforeach()
 endif ()
+
+add_subdirectory(Documentation)
 
 # add custom target distclean
 # cleans and removes cmake generated files etc.
