@@ -953,7 +953,28 @@ h_{\phi}^{*}(\phi_{N} + \alpha)]
 $$
 
 где величины $h_{\phi}^{*}(\phi_{i} + \alpha)$ доставляют минимум для
-функционала $J_{h_{\phi}}(\alpha)$.
+функционала $J_{h_{\phi}}(\alpha)$. Поэтому
+
+$$
+\frac{d J_{h_{\phi}}(\alpha)}{d \alpha} = \frac{\partial J}{\partial \alpha} +
+\sum \limits_{i = 1}^{N} \frac{\partial J}{\partial h_{\phi}(\phi_{i} + \alpha)}
+\frac{\partial h_{\phi}^{*}(\phi_{i} + \alpha) }{\partial \alpha}
+$$
+
+Здесь вычисление величины
+$\frac{\partial h_{\phi}^{*}(\phi_{i} + \alpha)}{\partial \alpha}$ представляет
+большую трудность, поскольку вычисление каждого значения
+$h_{\phi}^{*}(\phi_{i} + \alpha)$ требует решения задачи квадратичного
+программирования. Поэтому авторы приняли решение использовать в градиентном
+методе не полную, а лишь частную производную:
+
+$$
+\frac{\partial J}{\partial \alpha} [\alpha,
+h_{\phi}^{*}(\phi_{1} + \alpha), h_{\phi}^{*}(\phi_{2} + \alpha), \ldots,
+h_{\phi}^{*}(\phi_{N} + \alpha)] =
+2 \sum \limits_{i = 1}^{M}  \frac{\partial h_{\phi}(\theta_{i}) }{\partial
+\alpha} [h_{\phi}^{*}(\theta_{i}) - y(\theta_{i})]
+$$
 
 \newpage
 \section{Предлагаемый подход}
