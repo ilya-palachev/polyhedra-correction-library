@@ -1,17 +1,37 @@
-\documentclass[a4paper,12pt, titlepage]{article} 
-% пакет для задания полей страницы командой \geometry :
+
+% Copyright (c) 2009-20134 Ilya Palachev <iliyapalachev@gmail.com>
+% This document contains the report about reconstruction of convex sets.
+
+% Declare the class of document: size of paper, size of font, and etc.
+% Type of the document is "article".
+\documentclass[a4paper, 12pt, titlepage]{article} 
+
+% Package that enables setting the size of free spaces at the border of the 
+% page with the command  \geometry :
 \usepackage{geometry}
-\geometry{left=3cm,right=1.5cm,top=2cm,bottom=2cm}
+\geometry {
+   left=3cm,
+   right=1.5cm,
+   top=2cm,
+   bottom=2cm
+}
+
 \usepackage[utf8]{inputenc}
+
 \usepackage[english,russian]{babel}
+
 \usepackage{amsmath}
-%\usepackage{amsthm}
+
 %\usepackage{cmap}
+
 \usepackage{indentfirst}
+
 \usepackage{a4wide,amssymb}
+
 %\usepackage[pdftex]{graphicx}
-%\usepackage[pdftex]{graphics}
+
 %\usepackage{wrapfig}
+
 %\linespread{1.3}               % полтора интервала. Если 1.6, то два интервала
 \pagestyle{plain}               % номерует страницы
 
@@ -19,11 +39,42 @@
 \renewcommand{\topfraction}{1}
 \renewcommand{\textfraction}{0}
 
+% Package that enables usage of theorems and definition designed in a 
+% standard way.
+% http://en.wikibooks.org/wiki/LaTeX/Theorems
+\usepackage{amsthm}
+
+% The thmtools bundle is a collection of packages that is designed to provide an
+% easier interface to theorems, and to facilitate some more advanced tasks
+% http://texdoc.net/texmf-dist/doc/latex/thmtools/thmtools.pdf
+\usepackage{thmtools}
+
 % The following code enables back references:
 \usepackage{color} 
 \definecolor{darkgreen}{rgb}{0,.5,0} 
 \usepackage[unicode,colorlinks,filecolor=blue,citecolor=darkgreen,pagebackref]
 {hyperref}
+
+% Enable smart references to theorems (this was writte according to the manual 
+% of "thmtools").
+\usepackage {
+   nameref,   % for command \nameref
+   % hyperref,  % for command \autoref
+   % (Above line was commented, because hyperref has been already enabled)
+   % n.b. \Autoref is defined by thmtools
+   cleveref,  % for command \cref
+   % n.b. cleveref after! hyperref
+}
+
+% Declare the standard theorem environment that will be used throughout the
+% article.
+\declaretheorem[name=Theorem,
+   refname={theorem,theorems},
+   Refname={Theorem,Theorems}]{SmartTheorem}
+
+\declaretheorem[name=Definition,
+   refname={definition,definitions},
+   Refname={Definition,Definitions}]{SmartDefinition}
 
 
 %opening
@@ -112,13 +163,14 @@ $$h_{K}: S^{2} \to \mathbb{R}_{+}$$
 Более общее понятие включающее в себя выше указанное было введено в 1903 году
 Минковским.
 
-\begin{flushleft}
-\textbf{Определение}. Будем называть \textbf{опорной функцией} выпуклого тела
+\begin{SmartDefinition}[Опорная функция]
+\label{def/support-function}
+Будем называть \textbf{опорной функцией} выпуклого тела
 $K \subset \mathbb{R}^{n}$ следующую функцию 
 $h_{K}: \mathbb{R}^{n} \to \mathbb{R}_{+}$:
 
 $$h_{K}(u) = \max \limits_{x \in K}(x, u)$$
-\end{flushleft}
+\end{SmartDefinition}
 
 Если взять некоторую точку $u_{0}$ на единичной сфере $S^{n - 1}$, и вычислить
 в ней значение опорной функции $h_{K}(u_{0})$, то по этим данным можно
