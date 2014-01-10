@@ -44,38 +44,11 @@
 % http://en.wikibooks.org/wiki/LaTeX/Theorems
 \usepackage{amsthm}
 
-% The thmtools bundle is a collection of packages that is designed to provide an
-% easier interface to theorems, and to facilitate some more advanced tasks
-% http://texdoc.net/texmf-dist/doc/latex/thmtools/thmtools.pdf
-\usepackage{thmtools}
-
 % The following code enables back references:
 \usepackage{color} 
 \definecolor{darkgreen}{rgb}{0,.5,0} 
 \usepackage[unicode,colorlinks,filecolor=blue,citecolor=darkgreen,pagebackref]
 {hyperref}
-
-% Enable smart references to theorems (this was writte according to the manual 
-% of "thmtools").
-\usepackage {
-   nameref,   % for command \nameref
-   % hyperref,  % for command \autoref
-   % (Above line was commented, because hyperref has been already enabled)
-   % n.b. \Autoref is defined by thmtools
-   cleveref,  % for command \cref
-   % n.b. cleveref after! hyperref
-}
-
-% Declare the standard theorem environment that will be used throughout the
-% article.
-\declaretheorem[name=Theorem,
-   refname={theorem,theorems},
-   Refname={Theorem,Theorems}]{SmartTheorem}
-
-\declaretheorem[name=Definition,
-   refname={definition,definitions},
-   Refname={Definition,Definitions}]{SmartDefinition}
-
 
 %opening
 \title{Восстановление многогранника по набору его теневых контуров \\ Обзор
@@ -163,9 +136,8 @@ $$h_{K}: S^{2} \to \mathbb{R}_{+}$$
 Более общее понятие включающее в себя выше указанное было введено в 1903 году
 Минковским.
 
-\begin{SmartDefinition}[Опорная функция]
-\label{def/support-function}
-Будем называть \textbf{опорной функцией} выпуклого тела
+\begin{flushleft}
+\textbf{Определение}. Будем называть \textbf{опорной функцией} выпуклого тела
 $K \subset \mathbb{R}^{n}$ следующую функцию 
 $h_{K}: \mathbb{R}^{n} \to \mathbb{R}_{+}$:
 
