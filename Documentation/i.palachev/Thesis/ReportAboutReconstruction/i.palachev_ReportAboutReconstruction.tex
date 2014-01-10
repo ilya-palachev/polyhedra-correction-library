@@ -44,6 +44,14 @@
 % http://en.wikibooks.org/wiki/LaTeX/Theorems
 \usepackage{amsthm}
 
+% Create environment for smart definitions
+\theoremstyle{definition}
+\newtheorem{SmartDefinition}{Определение}
+
+% Create environment for smart theorems
+\theoremstyle{plain}
+\newtheorem{SmartTheorem}{Теорема}
+
 % The following code enables back references:
 \usepackage{color} 
 \definecolor{darkgreen}{rgb}{0,.5,0} 
@@ -136,12 +144,13 @@ $$h_{K}: S^{2} \to \mathbb{R}_{+}$$
 Более общее понятие включающее в себя выше указанное было введено в 1903 году
 Минковским.
 
-\begin{flushleft}
-\textbf{Определение}. Будем называть \textbf{опорной функцией} выпуклого тела
-$K \subset \mathbb{R}^{n}$ следующую функцию 
-$h_{K}: \mathbb{R}^{n} \to \mathbb{R}_{+}$:
+\begin{SmartDefinition}
+ \label{def:support-function}
+ Будем называть \textbf{опорной функцией} выпуклого тела
+ $K \subset \mathbb{R}^{n}$ следующую функцию
+ $h_{K}: \mathbb{R}^{n} \to \mathbb{R}_{+}$:
 
-$$h_{K}(u) = \max \limits_{x \in K}(x, u)$$
+ $$h_{K}(u) = \max \limits_{x \in K}(x, u)$$
 \end{SmartDefinition}
 
 Если взять некоторую точку $u_{0}$ на единичной сфере $S^{n - 1}$, и вычислить
@@ -150,11 +159,12 @@ $$h_{K}(u) = \max \limits_{x \in K}(x, u)$$
 точке $x \in K$. Такую плоскость (в контексте, когда нет информации о положении
 точки касания) принято называть опорной плоскостью.
 
-\begin{flushleft}
- \textbf{Определение}. \textbf{Опорной плоскостью} выпуклого тела $K$ по
+\begin{SmartDefinition}
+ \label{def:support-plane}
+ \textbf{Опорной плоскостью} выпуклого тела $K$ по
  направлению $u \in S^{n - 1}$ называется плоскость с нормалью $u$, расстояние
  от которой до начала координат равно $h_{K}(u)$
-\end{flushleft}
+\end{SmartDefinition}
 
 Очевидно, что опорная функция выпуклого тела обладает следующим свойством:
 
@@ -164,7 +174,12 @@ $$h_{K}(\lambda u) = \lambda h_{K}(u)$$
 функции на единичную сферу. В статье \cite{journals/jmiv/KarlKVW96} вводится
 понятие \textbf{приведенной опорной функции}:
 
-$$H_{K} (u) = h_{K} (\frac{u}{||u||})$$
+\begin{SmartDefinition}
+ \label{def:support-plane}
+ \textbf{Приведенной опорной функцией} выпуклого тела $K$ называется следующая
+функция:
+ $$H_{K} (u) = h_{K} (\frac{u}{||u||})$$
+\end{SmartDefinition}
 
 которая в действительности представляет собой расстояние от начала координат
 $\mathbb{O}$ до опорной гиперплоскости по направлению $u$.
@@ -231,13 +246,14 @@ $$\theta_{i} = i \cdot \Delta \theta$$
 
 Ключевым понятием в статье является следующее
 
-\begin{flushleft}
- \textbf{Определение}. \textbf{Набором опорных чисел}
+\begin{SmartDefinition}
+ \label{def:support-vector}
+ \textbf{Набором опорных чисел}
  $(h_{0}, h_{1}, \ldots, h_{M - 1})^{T}$выпуклого тела $K$ по заданному набору
  направлений $u_{i}, i = 0, \ldots, M - 1$ называется называется вектор в
  $\mathbb{R}^{M}$, составленный из значений опорной функции по соответствующим
  направлениям: $(h_{K}(u_{0}), h_{K}(u_{1}), \ldots, h_{K}(u_{M - 1}))^{T}$.
-\end{flushleft}
+\end{SmartDefinition}
 
 Вектор, составленный из набора опорных чисел, является по сути аналогом
 непрерывной опорной функции. Если говорить более точно, опорный вектор есть
@@ -245,50 +261,51 @@ $$\theta_{i} = i \cdot \Delta \theta$$
 непрерывная функция является опорной функцией некоторого выпуклого тела? Ответ
 на этот вопрос дает следующая теорема:
 
-\begin{flushleft}
- \textbf{Теорема 1}. \textbf{Критерий опорной функции}.
- 
+\begin{SmartTheorem}
+ \label{thm:support-function-criterion}
+ \textbf{Критерий опорной функции}.
+
  Непрерывная функция $h : \mathbb{R} \to \mathbb{R}_{+}$ является опорной
  функцией некоторого выпуклого тела тогда и только тогда, когда для всех
  $\theta \in \mathbb{R}$ выполнено следующее неравенство:
- 
+
  $$
  h''(\theta) + h(\theta) \geq 0
  $$
-\end{flushleft}
+\end{SmartTheorem}
 
 
 Основным теоретическим результатом статьи, на котором основаны все алгоритмы,
 является следующая
 
-\begin{flushleft}
- \textbf{Теорема 2}. \textbf{Опорная теорема}
+\begin{SmartTheorem}
+ \label{thm:support-function-criterion}
+ \textbf{Опорная теорема}
 
-  Набор действительных чисел $h \in \mathbb{R}^{M}, M \leq 5$ является набором
-  опорных чисел тогда и только тогда, когда
-  
-  $$h^{T} C \leq (0, \ldots, 0)$$
-  
-  где $C$ -- $M \times M$ матрица, заданная следующим образом:
-  
-  $$
-  C = 
-  \left(
-  \begin{array}{ccccccc}
-       1 &     -k &      0 & \ldots &      0 &      0 &     -k \\
-      -k &      1 &     -k & \ldots &      0 &      0 &      0 \\
-       0 &     -k &      1 & \ldots &      0 &      0 &      0 \\
-  \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
-       0 &      0 &      0 & \ldots &      1 &     -k &      0 \\
-       0 &      0 &      0 & \ldots &     -k &      1 &     -k \\
-      -k &      0 &      0 & \ldots &      0 &     -k &      1 \\
+ Набор действительных чисел $h \in \mathbb{R}^{M}, M \leq 5$ является набором
+ опорных чисел тогда и только тогда, когда
+
+ $$h^{T} C \leq (0, \ldots, 0)$$
+
+ где $C$ -- $M \times M$ матрица, заданная следующим образом:
+
+ $$
+ C = 
+ \left(
+ \begin{array}{ccccccc}
+      1 &     -k &      0 & \ldots &      0 &      0 &     -k \\
+     -k &      1 &     -k & \ldots &      0 &      0 &      0 \\
+      0 &     -k &      1 & \ldots &      0 &      0 &      0 \\
+ \vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+      0 &      0 &      0 & \ldots &      1 &     -k &      0 \\
+      0 &      0 &      0 & \ldots &     -k &      1 &     -k \\
+     -k &      0 &      0 & \ldots &      0 &     -k &      1 \\
  \end{array}
  \right)
-  $$
-  
-  где $k = 1 / (2 cos(\frac{2 \pi}{M}))$.
+ $$
 
-\end{flushleft}
+ где $k = 1 / (2 cos(\frac{2 \pi}{M}))$.
+\end{SmartTheorem}
 
 Важно также заметить сходство между условием для непрерывной опорной функции и
 условием для дискретного вектора, составленного из набора опорных чисел.
@@ -302,13 +319,13 @@ $\mathbb{R}^{M}$.
 
 \subsubsection{Опорный конус и его структура}
 
-\begin{flushleft}
- \textbf{Определение}. \textbf{Опорным конусом} размерности $M$ называется
- множество:
+\begin{SmartDefinition}
+ \label{def:support-cone}
+ \textbf{Опорным конусом} размерности $M$ называется множество:
  $$
  \mathfrak{C} = \{h \in \mathbb{R}^{M} | h^{T} C \leq (0 \ldots 0) \}
  $$
-\end{flushleft}
+\end{SmartDefinition}
 
 Дальнейшая часть статьи посвящена, собственно, нахождению такой точки 
 $h \in \mathbb{R}^{M}$ в
@@ -370,19 +387,22 @@ $\mathbb{R}^{2}$.
 
 \subsubsection{Главная цель набора опорных чисел и ее свойства}
 
-Пусть имеется некоторый фиксированный (согласованный) вектор $h$, составленный
-из набора опорных чисел. Тогда существует, вообще говоря, целое семейство
-выпуклых множеств на плоскости $\mathbb{R}^{2}$, для которых вектор $h$ является
-вектором опорных чисел. Наибольшее из из этих множеств $S_{B}$ определяется как
-пересечение полупространств, образованных опорными прямыми:
+\begin{SmartDefinition}
+ \label{def:basic-object}
+ Пусть имеется некоторый фиксированный (согласованный) вектор $h$, составленный
+ из набора опорных чисел. Тогда существует, вообще говоря, целое семейство
+ выпуклых множеств на плоскости $\mathbb{R}^{2}$, для которых вектор $h$
+ является вектором опорных чисел. Наибольшее из из этих множеств $S_{B}$ 
+ определяется как пересечение полупространств, образованных опорными прямыми:
 
-$$
-S_{B} = \{u \in \mathbb{R}^{2} |
-u^{T} (\omega_{1} \omega_{2} \ldots \omega_{M}) \leq
-(h_{1} h_{2} \ldots h_{M})\}
-$$
+ $$
+ S_{B} = \{u \in \mathbb{R}^{2} |
+ u^{T} (\omega_{1} \omega_{2} \ldots \omega_{M}) \leq
+ (h_{1} h_{2} \ldots h_{M})\}
+ $$
 
-Данное множество называется \textbf{главной целью} вектора опорных чисел $h$.
+ Данное множество называется \textbf{главной целью} вектора опорных чисел $h$.
+\end{SmartDefinition}
 
 В этом месте происходит разделение нашей задачи и той задачи, которую решают
 Prince и Willsky в своей статье. А именно, Prince и Willsky полагают, что
@@ -769,10 +789,9 @@ $$
 
 Опорная теорема теперь записывается следующим образом:
 
-
-
-\begin{flushleft}
- \textbf{Теорема 3.} \textbf{Обобщенная двумерная опорная теорема}.
+\begin{SmartTheorem}
+ \label{thm:ext-support-theorem-2d}
+ \textbf{Обобщенная двумерная опорная теорема}.
  Набор действительных чисел
  $h = (h_{1}, h_{2}, \ldots, h_{M}) \in \mathbb{R}^{M}$
  является набором опорных чисел по направлениям вдоль углов
@@ -847,7 +866,7 @@ $$
  \end{array}
  \right)
  $$
-\end{flushleft}
+\end{SmartTheorem}
 
 Данный алгоритм авторы называют NUA (от nonuniform angles).
 
