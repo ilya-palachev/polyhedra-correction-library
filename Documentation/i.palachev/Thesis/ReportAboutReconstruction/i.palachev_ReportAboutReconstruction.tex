@@ -52,6 +52,10 @@
 \theoremstyle{plain}
 \newtheorem{SmartTheorem}{Теорема}
 
+% Create environment for smart lemmas
+\theoremstyle{plain}
+\newtheorem{SmartLemma}{Лемма}
+
 % The following code enables back references:
 \usepackage{color} 
 \definecolor{darkgreen}{rgb}{0,.5,0} 
@@ -1382,6 +1386,57 @@ $\bigcap \limits_{i = 1}^{N} R(h_{i}, u_{i}) \neq \varnothing$,
  \ref{thm:support-function-criterio-ext} выполняется для каждого 
  конусно-положительного $(n + 1)$-поднабора чисел.
 \end{SmartTheorem}
+
+Далее авторы статьи с помощью идеи, которую они называют \textbf{слиянием 
+согласованности}, проводят сведение глобального критерия согласованности к 
+локальному:
+
+\begin{SmartLemma}
+ \label{lem:consistency-merging}
+ \textbf{Слияние согласованности}.
+ Пусть имеется множество из $(n + 2)$ опорных чисел $h_{i}$ по направлениям 
+ $u_{i}$ в $\mathbb{R}^{n}$ и пусть выполнены следующиу условия:
+ 
+ \begin{enumerate}
+  \item $u_{n + 1} \in cone^{+}\{u_{1}, \ldots, u_{n - 1}, u_{n + 2}\}$
+  \item $u_{n + 2} \in cone^{+}\{u_{2}, \ldots, u_{n}, u_{n + 1}\}$
+  \item $\{u_{n + 1}, u_{n + 2}\} \in cone^{+}\{u_{1}, \ldots, u_{n - 1},
+u_{n}\}$
+  \item Все три этих конуса являются полными.
+ \end{enumerate}
+
+ Тогда если наборы опорных чисел 
+ $\{h_{1}, \ldots, h_{n - 1}, h_{n + 1}, h_{n + 2}\}$ и
+ $\{h_{2}, \ldots, h_{n}, h_{n + 1}, h_{n + 2}\}$ согласованы, тогда наборы
+ $\{h_{1}, \ldots, h_{n}, h_{n + 1}\}$ и
+ $\{h_{1}, \ldots, h_{n}, h_{n + 2}\}$ также являются согласованными.
+\end{SmartLemma}
+
+Для того, чтобы конкретизировать понятие \textit{локальности}, авторы статьи
+вводят следующее определение:
+
+\begin{SmartDefinition}
+ \label{def:local-family}
+ \textbf{Локальное семейство}.
+ Пусть имеется набор $\mathit{S}$ из $m$ различных единичных векторов в
+ $\mathbb{R}^{n}$. Пусть $u_{k}$ - один из этих векторов. Тогда
+ \textbf{локальным семейством}, соответствующим вектору $u_{k}$, называется 
+ множество всех различных $(n + 1)$-поднаборов $u_{i_{1}, \ldots, 
+ i_{n}} = \{u_{k}, u_{i_{1}}, u_{i_{2}}, \ldots, u_{i_{n}}\}$ векторов из 
+ $\mathit{S}$ таких,
+ что:
+ \begin{enumerate}
+  \item $u_{k}$ является элементом этого $(n + 1)$-поднабора (это видно и по 
+  определению этого поднабора как $u_{i_{1}, \ldots, 
+ i_{n}} = \{u_{k}, u_{i_{1}}, u_{i_{2}}, \ldots, u_{i_{n}}\}$).
+  \item Полная положительная конусная оболочка векторов $\{u_{i_{1}}, 
+  u_{i_{2}}, \ldots, u_{i_{n}}\}$ содержит векторы $u_{k}, u_{i_{1}}, u_{i_{2}}, 
+  \ldots, u_{i_{n}}$ и не содержит никаких других векторов из $\mathit{S}$.
+ \end{enumerate}
+
+\end{SmartDefinition}
+
+
 
 
 
