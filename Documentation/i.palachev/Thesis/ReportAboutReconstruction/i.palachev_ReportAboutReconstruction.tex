@@ -1242,6 +1242,7 @@ $\{u_{1}, u_{2}\}$, то $\beta(u_{1}, u_{2}, u_{3}) \geq 0$, а если в
   $n + 1$ единичных векторов $u_{i}$, в котором один из векторов лежит в полном
   положительном конусе основных:
 \begin{equation}
+\label{thm:support-function-criterio-ext:condition}
  \left|\begin{array}{cc}
   h(u_{1}) & u_{1}^{T} \\
   h(u_{2}) & u_{2}^{T} \\
@@ -1264,6 +1265,7 @@ $\{u_{1}, u_{2}\}$, то $\beta(u_{1}, u_{2}, u_{3}) \geq 0$, а если в
 эквивалентно следующему:
 
 \begin{equation}
+\label{thm:support-function-criterio-ext:condition2}
  u_{n + 1}^{T}
  \left[
  \begin{array}{c}
@@ -1306,6 +1308,7 @@ $\{u_{1}, u_{2}\}$, то $\beta(u_{1}, u_{2}, u_{3}) \geq 0$, а если в
  соответствующих полупространств:
 
  \begin{equation}
+ \label{thm:discrete-consistency:condition}
   \pi(h_{i_{j}}, u_{i_{j}}) \cap \bigcap \limits_{k = 1}^{n + 1} R(h_{i_{k}}, 
   u_{i_{k}}) \neq \varnothing \;\;\; \forall j = 1, 2, \ldots, n + 1
  \end{equation}
@@ -1337,8 +1340,49 @@ $\{u_{1}, u_{2}\}$, то $\beta(u_{1}, u_{2}, u_{3}) \geq 0$, а если в
   отрицательной конусной оболочке остальных.
   \item \textbf{конусно-нейтральным} -- в противном случае.
  \end{enumerate}
-
 \end{SmartDefinition}
+
+Последний класс наборов -- конусно-нейтральный -- не представляет интереса для
+исследования, поскольку в нем условие \ref{thm:discrete-consistency:condition}
+из теоремы \ref{thm:discrete-consistency} выполняется автоматически. Более
+того, при условии что
+$\bigcap \limits_{i = 1}^{N} R(h_{i}, u_{i}) \neq \varnothing$,
+т. е. пересечение всех соответствующих опорным числам полупространств непусто,
+условие \ref{thm:discrete-consistency:condition} выполняется автоматически и 
+для конусно-отрицательных наборов.
+
+Далее, если конусно-положительный набор является невырожденным, т. е.
+соответствующая конусная оболочкаявляется \textit{полной}, то условие
+\ref{thm:discrete-consistency:condition} из теоремы
+\ref{thm:discrete-consistency} эквивалентно детерминантному условию
+\ref{thm:support-function-criterio-ext:condition} из теоремы
+\ref{thm:support-function-criterio-ext}, или эквивалентному ему матричному
+условию \ref{thm:support-function-criterio-ext:condition2}.
+
+Данные соображения используются для введения следующего критерия:
+
+\begin{SmartTheorem}
+ \label{thm:positive-cone-consistency}
+ \textbf{Конусно-положительный критерий набора опорных чисел в $\mathbb{R}^{n}$}
+ Пусть имеется набор действительных чисел $h = (h_{1}, h_{2}, \ldots, h_{N})$ по
+ направлениям $u_{1}, u_{2}, \ldots, u_{N}$. Пусть выполнены следующие 
+ условия:
+ \begin{enumerate}
+  \item Пересечение всех соответствующих полупространств непусто:
+  \begin{equation}
+   \bigcap \limits_{i = 1}^{N} R(h_{i}, u_{i}) \neq \varnothing
+  \end{equation}
+  \item Для каждого конусно-положительного $(n + 1)$-поднабора конусная оболочка
+  является полной.
+ \end{enumerate}
+
+ Тогда данный набор является набором опорных чисел некоторого выпуклого тела в 
+ $\mathbb{R}^{n}$ тогда и только тогда, когда условие 
+ \ref{thm:support-function-criterio-ext:condition} из теоремы
+ \ref{thm:support-function-criterio-ext} выполняется для каждого 
+ конусно-положительного $(n + 1)$-поднабора чисел.
+\end{SmartTheorem}
+
 
 
 
