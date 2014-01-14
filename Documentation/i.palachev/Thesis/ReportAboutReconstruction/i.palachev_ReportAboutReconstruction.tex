@@ -1530,8 +1530,35 @@ $Ch \leq 0$ должно быть использовано условие
   \{x = \alpha_{1} u_{1} + \alpha_{2} u_{2} + \alpha_{3} u_{3}
   \; | \; \alpha_{1} \geq 0, \alpha_{2} \geq 0, \alpha_{3} \geq 0\}
  \end{equation}
-
 \end{SmartDefinition}
+
+Вектор $u \in \mathbb{R}^{3}$ находится в положительном конусе, образованном 
+векторами $u_{1}, u_{2}, u_{3}$, когда он представим в следующем виде:
+
+\begin{equation}
+ u = \sum \limits_{i = 1}^{3} w_{i} u_{i}
+\end{equation}
+
+где $w = F^{-1} u \geq 0$ и $F = [u_{1}, u_{2}, u_{3}]$ - матрица, составленная 
+из векторов $u_{1}, u_{2}, u_{3}$.
+
+\begin{SmartTheorem}
+ \label{thm:criterion-gregor-rannou}
+ \textbf{Критерий набора опорных чисел в форме Gregor, Rannou}.
+ Набор $h = (h_{1}, h_{2}, \ldots, h_{N})$ действительных чисел является набором
+ опорных чисел по направлениям $u_{1}, u_{2}, \ldots, u_{N}$ тогда и только
+ тогда, когда для каждой четверки направлений
+ $\{u_{i}, u_{i_{1}}, u_{i_{2}}, u_{i_{3}}\}$,
+ для которой верно, что $u_{i} \in cone^{+}(u_{i_{1}}, u_{i_{2}}, u_{i_{3}})$,
+ причем $u_{i} = \sum \limits_{j = 1}^{3} w_{i} u_{i_{j}}$, выполняется
+ следующее соотношение:
+
+ \begin{equation}
+  \label{thm:criterion-gregor-rannou:condition}
+  h_{i} - \sum \limits_{j = 1}^{3} w_{i} h_{i_{j}} \leq 0
+ \end{equation}
+\end{SmartTheorem}
+
 
 
 
