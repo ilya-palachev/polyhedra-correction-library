@@ -7,8 +7,10 @@
 
 
 # Temporary files produced by Linux Text Editors:
+# * Kate backup files:
 *.kate-swp
-*.bak # Aspell backup files
+# * Aspell backup files:
+*.bak
 
 # Building directories and files:
 *.o
