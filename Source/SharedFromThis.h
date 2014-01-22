@@ -40,14 +40,23 @@ template<class Derived>
 class enable_shared_from_This
 {
 public:
+	/**
+	 * Member that stores a pointer to object
+	 */
 	typedef shared_ptr<Derived> Ptr;
 
+	/**
+	 * Wrapper around shared_from_this
+	 */
 	Ptr shared_from_This()
 	{
 		return static_pointer_cast<Derived>(
 				static_cast<Derived *>(this)->shared_from_this());
 	}
 
+	/**
+	 * Wrapper around shared_from_this
+	 */
 	Ptr shared_from_This() const
 	{
 		return static_pointer_cast<Derived>(

@@ -18,6 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file Polyhedron.h
+ * @brief The declaration of Polyhedron - the main class of the project.
+ */
+
 #ifndef POLYHEDRON_CLASS_H
 #define	 POLYHEDRON_CLASS_H
 
@@ -26,6 +31,8 @@
 
 /*
  * Forward declarations
+ *
+ * TODO: they should not be here.
  */
 class Vector3d;
 class Plane;
@@ -44,8 +51,8 @@ using namespace std;
 typedef struct _GSCorrectorParameters GSCorrectorParameters;
 typedef shared_ptr<EdgeData> EdgeDataPtr;
 
-/*
- * Main class that contains polyhedron implementation.
+/**
+ * The implementation of Polyhedron.
  *
  * All methods that change, correct it, etc are done outside this class. This
  * is done to avoid the c++ anti-pattern "huge class".
@@ -53,18 +60,41 @@ typedef shared_ptr<EdgeData> EdgeDataPtr;
  * Thus we have separate class for every method that does some big change or
  * correction of polyhedron.
  */
-
 class Polyhedron : public enable_shared_from_this<Polyhedron>
 {
 public:
+
+	/**
+	 * Number of vertices in the polyhedron
+	 */
 	int numVertices;
+
+	/**
+	 * Number of facets in the polyhedron
+	 */
 	int numFacets;
 
+	/**
+	 * Array of vertices
+	 */
 	Vector3d* vertices;
+
+	/**
+	 * Array of facets
+	 */
 	Facet* facets;
+
+	/**
+	 * Array of vertexinfos. Vertexinfo saves information about which facets
+	 * the vertex is contained in.
+	 */
 	VertexInfo* vertexInfos;
 
 protected:
+
+	/**
+	 * Enables "shared from this" feature.
+	 */
 	inline shared_ptr<Polyhedron> get_ptr()
 	{
 		return shared_from_this();
@@ -72,32 +102,167 @@ protected:
 
 public:
 
-	//Polyhedron.cpp
+	/*
+	 * ========================================================================
+	 * Contained in source file Polyhedron.cpp
+	 *
+	 * Constructors, destructors and commonly used functions
+	 * ========================================================================
+	 */
+
+	/**
+	 * Creates empty polyhedron.
+	 */
 	Polyhedron();
+
+	/**
+	 * Creates polyhedron with given number of vertices and facets.
+	 *
+	 * @param numv_orig The number of vertices
+	 * @param numf_orig The number of facets
+	 */
 	Polyhedron(int numv_orig, int numf_orig);
+
+	/**
+	 * Creates polyhedron with given number of vertices and facets, with fixed
+	 * arrays of vertices and facets.
+	 *
+	 * @param numv_orig		The number of vertices
+	 * @param numf_orig		The number of facets
+	 * @param vertex_orig	The array of vertices
+	 * @param facet_orig	The array of facets
+	 */
 	Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 			Facet* facet_orig);
-	Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
-			Facet* facet_orig, VertexInfo* vertexinfo);
-	
+
+	/**
+	 * Deletes the polyhedron.
+	 */
 	~Polyhedron();
 
+	/**
+	 * Finds the the coordinates of bounding box of the polyhedron.
+	 *
+	 * @param xmin	A reference where the minimal x will be stored in.
+	 * @param xmax	A reference where the maximal x will be stored in.
+	 * @param ymin	A reference where the minimal y will be stored in.
+	 * @param ymax	A reference where the maximal y will be stored in.
+	 * @param zmin	A reference where the minimal z will be stored in.
+	 * @param zmax	A reference where the maximal z will be stored in.
+	 */
 	void get_boundary(double& xmin, double& xmax, double& ymin, double& ymax,
 			double& zmin, double& zmax);
 
+	/**
+	 * Deletes facets that contain zero number of vertices. Such situation can
+	 * happen after the work of some algorithms.
+	 */
 	void delete_empty_facets();
+
+	/**
+	 * Calcualates the signum of the point relative to the plane.
+	 * @param point	The point
+	 * @param plane	The plane
+	 */
 	int signum(Vector3d point, Plane plane);
 	
+	/**
+	 * Sets the shared pointer to the parent polyhedron in all facetsof the
+	 * polyhedron.
+	 */
 	void set_parent_polyhedron_in_facets();
 
-	//Polyhedron_io.cpp
+	/*
+	 * ========================================================================
+	 * Contained in source file Polyhedron_io.cpp
+	 *
+	 * Function for reading and writing polyhedron from and to different
+	 * possible formats.
+	 * ========================================================================
+	 */
+
+	/*
+	 * TODO: Here must be only 2 functions: fscan and fprint that take the
+	 * type of file as the enum.
+	 */
+
+	/**
+	 * Writes the polyhedron to the file in internal format.
+	 * This format contained verbose output of all dumping functions for
+	 * every structure.
+	 *
+	 * @param filename	The name of file.
+	 */
 	void my_fprint(const char* filename);
+
+	/**
+	 * Writes the polyhedron to the file in internal format.
+	 * This format contained verbose output of all dumping functions for
+	 * every structure.
+	 *
+	 * @param filename	Opened file descriptor
+	 */
 	void my_fprint(FILE* file);
 
+	/**
+	 * Reads the polyhedron from the file in default format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * numv numf
+	 *
+	 * x_{i} y_{i} z_{i}
+	 *
+	 * nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 */
 	void fscan_default_0(const char* filename);
+
+	/**
+	 * Reads the polyhedron from the file in default format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * numv numf
+	 *
+	 * i x_{i} y_{i} z_{i}
+	 *
+	 * j nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 */
 	void fscan_default_1(const char* filename);
+
+	/**
+	 * Reads the polyhedron from the file in default format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * #WPolyhedron
+	 * #version 1
+	 * #dimension
+	 * numv numf
+	 * #vertices
+	 * i x_{i} y_{i} z_{i}
+	 * #facets
+	 * j nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 */
 	void fscan_default_1_1(const char* filename);
+
+	/**
+	 * Reads the polyhedron from the file in default format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * TODO: describe the format here.
+	 */
 	bool fscan_default_1_2(const char* filename);
+
 	void fscan_my_format(const char* filename);
 	void fscan_ply(const char* filename);
 	void fprint_default_0(const char* filename);
