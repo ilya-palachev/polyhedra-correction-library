@@ -45,30 +45,6 @@ typedef struct _GSCorrectorParameters GSCorrectorParameters;
 typedef shared_ptr<EdgeData> EdgeDataPtr;
 
 /*
- * Workaround to enable opportunity of use of shared_from_this in derived
- * classes of Polyhedron, such as Cube.
- *
- * For details, see
- * http://stackoverflow.com/questions/9374610/bad-weak-ptr-when-calling-shared-from-this-in-base-class
- */
-template<class Derived>
-class enable_shared_from_This
-{
-public:
-	typedef shared_ptr<Derived> Ptr;
-	
-	Ptr shared_from_This()
-	{
-		return static_pointer_cast<Derived>(static_cast<Derived *>(this)->shared_from_this());
-	}
-
-	Ptr shared_from_This() const
-	{
-		return static_pointer_cast<Derived>(static_cast<Derived *>(this)->shared_from_this());
-	}
-};
-
-/*
  * Main class that contains polyhedron implementation.
  *
  * All methods that change, correct it, etc are done outside this class. This
