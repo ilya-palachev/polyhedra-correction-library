@@ -45,7 +45,7 @@ public:
      *  \brief Copy constructor
      */
     DirectedGraph(const DirectedGraph& orig);
-    
+
     virtual ~DirectedGraph();
 
     /*!

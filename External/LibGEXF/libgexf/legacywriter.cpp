@@ -102,7 +102,7 @@ void LegacyWriter::write() {
     }
 
     this->writeGexfNode(writer);
-    
+
     /* Here we could close the elements ORDER and EXAMPLE using the
      * function xmlTextWriterEndElement, but since we do not want to
      * write any other elements, we simply call xmlTextWriterEndDocument,
@@ -265,7 +265,7 @@ void LegacyWriter::writeNodesNode(xmlTextWriterPtr writer) {
         const string label = _gexf->getData().getNodeLabel(node_id);
         this->writeNodeNode(writer, Conv::idToStr(node_id), Conv::unsignedIntToStr(new_id), label);
     }
-    
+
     /* Close the element named nodes. */
     rc = xmlTextWriterEndElement(writer);
     if (rc < 0) {
@@ -551,7 +551,7 @@ void LegacyWriter::writeAttvaluesNode(xmlTextWriterPtr writer, const ElemType ty
             this->writeAttvalueNode(writer, Conv::unsignedIntToStr(new_id), v);
         }
     }
-    
+
     /* Close the element named default. */
     rc = xmlTextWriterEndElement(writer);
     if (rc < 0) {

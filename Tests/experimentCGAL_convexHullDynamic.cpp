@@ -23,7 +23,7 @@
  *
  * @brief Here the functionality of dynamic convex hull algorithm from CGAL is
  * tested.
- * 
+ *
  * @note This file is based on example from CGAL manual:
  * http://doc.cgal.org/latest/Convex_hull_3/index.html#Chapter_3D_Convex_Hulls
  */
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 	timer.pushTimer();
 	
 	/* Remove 90% of points. */
-	float nReduced = (1. - 1. / (float) FACTOR_OF_VERTICES_REDUCTION) * 
+	float nReduced = (1. - 1. / (float) FACTOR_OF_VERTICES_REDUCTION) *
 		chull0.size_of_vertices();
 		
 	std::list<Vertex_handle>::iterator v_set_it = vertices.begin();

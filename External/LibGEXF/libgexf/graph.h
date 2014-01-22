@@ -54,7 +54,7 @@ public:
      *  \brief Copy constructor
      */
     Graph(const Graph& orig);
-    
+
     virtual ~Graph();
 
     /*!

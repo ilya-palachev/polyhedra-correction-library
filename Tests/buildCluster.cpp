@@ -1,14 +1,14 @@
-/* 
+/*
  * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
- * 
+ *
  * This file is part of Polyhedra Correction Library.
  *
- * Polyhedra Correction Library is free software: you can redistribute 
+ * Polyhedra Correction Library is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * Polyhedra Correction Library is distributed in the hope that it will 
+ * Polyhedra Correction Library is distributed in the hope that it will
  * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 	//test_viev("poly-cube", 0);
 
 //    Polyhedron s;
-//    
+//
 //    double g;
 //    s.poly_cube(2,0,0,0);
 //    g = s.volume();
@@ -156,7 +156,7 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 	poly2.inertia(l02, l12, l22, v02, v12, v22);
 
 	printf("%s\n", name1);
-	//   printf("volume = %lf, area = %lf\n", v2, s2);    
+	//   printf("volume = %lf, area = %lf\n", v2, s2);
 	//   printf("l0 = %lf, l1 = %lf, l2 = %lf\n", l01, l11, l21);
 
 	printf("\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxx1, Jxy1, Jxz1);
@@ -179,7 +179,7 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 //    printf("v0 = (%lf, %lf, %lf)\n", v02.x, v02.y, v02.z);
 //    printf("v1 = (%lf, %lf, %lf)\n", v12.x, v12.y, v12.z);
 //    printf("v2 = (%lf, %lf, %lf)\n\n", v22.x, v22.y, v22.z);
-//    
+//
 
 	Jxx1 -= Jxx2;
 	Jyy1 -= Jyy2;
@@ -260,7 +260,7 @@ void test_J11(const char* name, int type)
 
 	poly.preprocessAdjacency();
 	poly.fprint_ply_scale(1000., file_name_out, "J11");
-//    
+//
 //    double xc, yc, zc;
 
 //    poly.get_center(xc, yc, zc);
@@ -270,7 +270,7 @@ void test_J11(const char* name, int type)
 
 //    printf("center = (%lf,%lf,%lf) for %s.dat\n", xc, yc, zc,name);
 //    printf("vol = %lf\n", vol);
-	//double s = 
+	//double s =
 	//poly.clusterisation2(0.03);// .volume();
 	//poly.clusterisation2(0.001);
 	//printf("%10.50lf\n", s);

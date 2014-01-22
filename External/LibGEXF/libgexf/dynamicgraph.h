@@ -40,7 +40,7 @@ namespace libgexf {
         void setNodeEnd(const libgexf::t_id node_id, const std::string& date);
         void setEdgeEnd(const libgexf::t_id edge_id, const std::string& date);
 
-        
+
         // DynamicGraph is implemented in terms of a Graph
 
         unsigned int getDegree(const libgexf::t_id node_id, const std::string& date) const; //TODO impl getDegree

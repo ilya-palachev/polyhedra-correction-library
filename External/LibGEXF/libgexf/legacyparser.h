@@ -50,7 +50,7 @@ public:
      *  \brief Copy constructor
      */
     LegacyParser(const LegacyParser& orig);
-    
+
     virtual ~LegacyParser();
 
     void bind(libgexf::GEXF* gexf);
@@ -72,7 +72,7 @@ private:
     void processAttributeDefaultNode(xmlTextReaderPtr reader);
     void processAttvaluesNode(xmlTextReaderPtr reader);
     void processAttvalueNode(xmlTextReaderPtr reader);
-    
+
     bool isProcessableNode(xmlTextReaderPtr reader);
 private:
     enum ElemType { NODE, EDGE, ATTR_NODE, ATTR_EDGE };

@@ -1,14 +1,14 @@
-/* 
+/*
  * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
- * 
+ *
  * This file is part of Polyhedra Correction Library.
  *
- * Polyhedra Correction Library is free software: you can redistribute 
+ * Polyhedra Correction Library is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * Polyhedra Correction Library is distributed in the hope that it will 
+ * Polyhedra Correction Library is distributed in the hope that it will
  * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -471,10 +471,10 @@ void SizeCalculator::printSortedByAreaFacets(void)
 	DEBUG_START;
 
 	list< FacetWithArea > listFacetsSorted = getSortedByAreaFacets();
-	for (auto itFacet = listFacetsSorted.begin(); itFacet != 
+	for (auto itFacet = listFacetsSorted.begin(); itFacet !=
 		listFacetsSorted.end(); ++itFacet)
 	{
-		PRINT("area of facet #%d = %lf", itFacet->facet->get_id(), 
+		PRINT("area of facet #%d = %lf", itFacet->facet->get_id(),
 			itFacet->area);
 	}
 	
@@ -492,7 +492,7 @@ list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		facetsSorted.insert({&polyhedron->facets[iFacet], 
+		facetsSorted.insert({&polyhedron->facets[iFacet],
 			areaOfFacet(iFacet)});
 	}
 

@@ -217,7 +217,7 @@ void DynamicGraph::clearEdges(const libgexf::t_id node_id) {
             _edges_dates.erase(edge_id);
         }
     }
-    
+
     _graph.clearEdges(node_id);
 }
 

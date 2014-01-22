@@ -58,7 +58,7 @@ namespace libgexf {
          *  \brief Copy constructor
          */
         GEXF(const GEXF& orig);
-        
+
         virtual ~GEXF();
 
 

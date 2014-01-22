@@ -43,7 +43,7 @@ Data::Data() {
     this->init();
 }
 
-Data::Data(const Data& orig): 
+Data::Data(const Data& orig):
         _node_labels(orig._node_labels),
         _edge_labels(orig._edge_labels),
         _node_attributes(orig._node_attributes),

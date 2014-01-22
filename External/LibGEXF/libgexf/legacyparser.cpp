@@ -57,7 +57,7 @@ void LegacyParser::bind(GEXF* gexf) {
 void LegacyParser::processNode(xmlTextReaderPtr reader, const xmlChar* name) {
 //-----------------------------------------
     if( !isProcessableNode(reader) ) return;
-    
+
     if( xmlStrEqual(name, xmlCharStrdup("gexf")) == 1 ) {
         processGEXFNode(reader);
     }
@@ -177,7 +177,7 @@ void LegacyParser::processDescriptionNode(xmlTextReaderPtr reader) {
 void LegacyParser::processGraphNode(xmlTextReaderPtr reader) {
 //-----------------------------------------
     _gexf->setGraphType(GRAPH_UNDIRECTED); /* default */
-    
+
     int hasAttr = xmlTextReaderHasAttributes(reader);
     if(hasAttr == 1) {
         string mode = "static";

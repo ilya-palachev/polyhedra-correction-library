@@ -52,7 +52,7 @@ public:
      *  \brief Copy constructor
      */
     Data(const Data& orig);
-    
+
     virtual ~Data();
 
 
@@ -78,7 +78,7 @@ public:
      */
     void setNodeLabel(const libgexf::t_id node_id, const std::string& label);
 
-    
+
     /*!
      *  \brief Get edge label
      *
@@ -163,7 +163,7 @@ public:
      *  \param value : node value
      */
     void setNodeValue(const libgexf::t_id node_id, const libgexf::t_id attr_id, const std::string& value);
-    
+
     /*!
      *  \brief Set the edge value of an attribute
      *
@@ -233,7 +233,7 @@ public:
      */
     std::string getNodeAttributeDefault(const libgexf::t_id attr_id) const;
 
-    
+
     /*!
      *  \brief Get the options of an edge attribute
      *
@@ -258,7 +258,7 @@ public:
      */
     std::string getEdgeAttributeDefault(const libgexf::t_id attr_id) const;
 
-    
+
     /*!
      *  \brief Check if a node attribute has a default value
      *
@@ -346,7 +346,7 @@ public:
 private:
     std::map<t_id,std::string > _node_labels; /*!< map<node_id, label > */
     std::map<t_id,std::string > _edge_labels; /*!< map<edge_id, label > */
-    
+
     std::map<t_id,std::string > _node_attributes; /*!< map<attr_id, title > */
     std::map<t_id,t_attr_type > _node_attributes_types; /*!< map<attr_id, type > */
     std::map<t_id,std::string > _node_default_values; /*!< map<attr_id, default > */

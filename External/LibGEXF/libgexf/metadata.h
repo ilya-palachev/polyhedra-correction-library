@@ -44,7 +44,7 @@ public:
      *  \brief Copy constructor
      */
     MetaData(const MetaData& orig);
-    
+
     virtual ~MetaData();
 
     /*!
@@ -93,7 +93,7 @@ public:
     std::string getLastModifiedDate() const;
 
 
-    
+
     /*!
      *  \brief Set the GEXF version
      */

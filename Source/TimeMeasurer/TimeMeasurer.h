@@ -58,7 +58,7 @@ public:
 
 	/**
 	* Copies exisiting time measurer to existing one
-	* 
+	*
 	* @param other time measurer to be copied.
 	*/	
 	TimeMeasurer(const TimeMeasurer& other);
@@ -70,16 +70,16 @@ public:
 
 	/**
 	* Assigns one time measurer to another.
-	* 
+	*
 	* @param other the measurer to be assigned to
 	*/	
 	TimeMeasurer& operator=(const TimeMeasurer& other);
 
 	/**
 	* Compares two TimeMeasurers.
-	* 
+	*
 	* @param other timer measurer to be compared with
-	* 
+	*
 	* @retval true if equal
 	* @retval false if unequal
 	*/	
@@ -102,7 +102,7 @@ public:
 
 	/**
 	* Stop the last timer in the list and print calculated time for it.
-	* 
+	*
 	* @return time of last timer (in seconds, precision is microsecond)
 	*/
 	double popTimer();

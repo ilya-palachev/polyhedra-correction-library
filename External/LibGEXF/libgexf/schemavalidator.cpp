@@ -1,7 +1,7 @@
-/* 
+/*
  * File:   schemavalidator.cpp
  * Author: sebastien
- * 
+ *
  * Created on 31 juillet 2009, 01:19
  */
 

@@ -59,7 +59,7 @@ public:
      *  \brief Copy constructor
      */
     FileWriter(const FileWriter& orig);
-    
+
     virtual ~FileWriter();
 
 

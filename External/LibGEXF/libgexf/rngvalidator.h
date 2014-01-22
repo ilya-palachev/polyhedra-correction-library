@@ -46,7 +46,7 @@ public:
      *  \brief Copy constructor
      */
     RngValidator(const RngValidator& orig);
-    
+
     virtual ~RngValidator();
 
     /*!
@@ -54,7 +54,7 @@ public:
      *
      *  \param xml_file_pathname : path of the XML file to validate
      *  \param rng_file_pathname : path of the RNG file
-     * 
+     *
      *  \return true if valid, false otherwise
      */
     static bool run(const std::string& xml_file_pathname, const std::string& rng_file_pathname);
@@ -71,7 +71,7 @@ private:
 
     // handles errors encountered while parsing RNG schema
     static void rngErr(void* ctx, const char* const msg, xmlParserSeverities severity, xmlTextReaderLocatorPtr locator);
-    
+
     virtual void iAmAbstract() = 0;
 };
 
