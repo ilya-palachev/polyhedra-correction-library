@@ -1,3 +1,37 @@
+@book{books/BertsekasT1989,
+  author = {Bertsekas, Dimitri P. and Tsitsiklis, John N.},
+  title = {Parallel and Distributed Computation: Numerical Methods},
+  year = {1989},
+  isbn = {0-13-648700-9},
+  publisher = {Prentice-Hall, Inc.},
+  address = {Upper Saddle River, NJ, USA},
+}
+
+@article{journals/laa/BierlaireTT1995,
+  author = {M. Bierlaire and Ph.L. Toint and D. Tuyttens},
+  title = {On Iterative Algorithms for Linear Least Squares Problems With 
+  Bound Constraints},
+  journal = {Linear Algebra Appl},
+  number = {143},
+  pages={111-143},
+  year = {1991}
+}
+
+@article{journals/jasa/FisherHTW1997,
+  author = {Fisher, Nicholas I. and Hall, Peter and Turlach, Berwin A. and
+  Watson, G. S.},
+  title = {On the Estimation of a Convex Set from Noisy Data on its Support
+  Function},
+  journal = {Journal of the American Statistical Association},
+  volume = {92},
+  number = {437},
+  pages = {84-91},
+  year = {1997},
+  doi = {10.1080/01621459.1997.10473605},
+  URL = {http://www.tandfonline.com/doi/abs/10.1080/01621459.1997.10473605},
+  eprint = {http://www.tandfonline.com/doi/pdf/10.1080/01621459.1997.10473605}
+}
+
 @article{journals/pami/GardnerK09,
   added-at = {2011-11-07T00:00:00.000+0100},
   author = {Gardner, Richard J. and Kiderlen, Markus},
@@ -73,6 +107,62 @@
   url = {http://dblp.uni-trier.de/db/journals/tit/tit52.html#GoldenshlugerS06},
   volume = 52,
   year = 2006
+}
+
+@inproceedings{conf/spie/GregorR2001,
+  author = {Gregor, Jens and Rannou, Fernando},
+  title = {Least-squares framework for projection MRI reconstruction},
+  journal = {Proc. SPIE},
+  volume = {4322},
+  number = {},
+  pages = {888-898},
+  abstract = {Magnetic resonance signals that have very short relaxation times
+  are conveniently sampled in a spherical fashion. We derive a least squares
+  framework for reconstructing three-dimensional source distribution images
+  from such data. Using a finite-series approach, the image is represented as a
+  weighted sum of translated Kaiser-Bessel window functions. The Radon
+  transform thereof establishes the connection with the projection data that
+  one can obtain from the radial sampling trajectories. The resulting linear
+  system of equations is sparse, but quite large. To reduce the size of the
+  problem, we introduce focus of attention. Based on the theory of support
+  functions, this data-driven preprocessing scheme eliminates equations and
+  unknowns that merely represent the background. The image reconstruction and
+  the focus of attention both require a least squares solution to be computed.
+  We describe a projected gradient approach that facilitates a non-negativity
+  constrained version of the powerful LSQR algorithm. In order to ensure
+  reasonable execution times, the least squares computation can be distributed
+  across a network of PCs and/or workstations. We discuss how to effectively
+  parallelize the NN-LSQR algorithm. We close by presenting results from
+  experimental work that addresses both computational issues and image quality
+  using a mathematical phantom.},
+  year = {2001},
+  doi = {10.1117/12.431168},
+  URL = { http://dx.doi.org/10.1117/12.431168},
+  eprint = {}
+}
+
+@article {journals/ijist/GregorR2002,
+  author = {Gregor, Jens and Rannou, Fernando R.},
+  title = {Three-dimensional support function estimation and application for
+  projection magnetic resonance imaging},
+  journal = {International Journal of Imaging Systems and Technology},
+  volume = {12},
+  number = {1},
+  publisher = {John Wiley & Sons, Inc.},
+  issn = {1098-1098},
+  url = {http://dx.doi.org/10.1002/ima.10007},
+  doi = {10.1002/ima.10007},
+  pages = {43--50},
+  keywords = {support function, projection imaging, magnetic resonance imaging},
+  year = {2002},
+}
+
+@thesis{thesis/Greschak1985,
+  author = {John P. Greschak},
+  title = {Reconstructing convex sets},
+  type = {PhD thesis},
+  institution = {Massachusetts Institute of Technology},
+  year = {1985}
 }
 
 @article{journals/pami/HallT99,
@@ -196,6 +286,27 @@ TODO: correct the place of publishing of Lele's B. S. Thesis.
   year = 1999
 }
 
+@article{journals/acmtms/PaigeS1982,
+  author = {Paige, Christopher C. and Saunders, Michael A.},
+  title = {LSQR: An Algorithm for Sparse Linear Equations and Sparse Least
+  Squares},
+  journal = {ACM Trans. Math. Softw.},
+  issue_date = {March 1982},
+  volume = {8},
+  number = {1},
+  month = mar,
+  year = {1982},
+  issn = {0098-3500},
+  pages = {43--71},
+  numpages = {29},
+  url = {http://doi.acm.org/10.1145/355984.355989},
+  doi = {10.1145/355984.355989},
+  acmid = {355989},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+} 
+
+
 @article{journals/pami/PrinceW90,
   added-at = {2011-11-07T00:00:00.000+0100},
   author = {Prince, Jerry L. and Willsky, Alan S.},
@@ -212,4 +323,19 @@ TODO: correct the place of publishing of Lele's B. S. Thesis.
   url = {http://dblp.uni-trier.de/db/journals/pami/pami12.html#PrinceW90},
   volume = 12,
   year = 1990
+}
+
+@article{journals/mz/Rademacher22,
+  year={1922},
+  issn={0025-5874},
+  journal={Mathematische Zeitschrift},
+  volume={13},
+  number={1},
+  doi={10.1007/BF01485279},
+  title={Über eine funktionale Ungleichung in der Theorie der konvexen Körper},
+  url={http://dx.doi.org/10.1007/BF01485279},
+  publisher={Springer-Verlag},
+  author={Rademacher, Hans},
+  pages={18-27},
+  language={German}
 }
