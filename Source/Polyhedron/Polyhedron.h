@@ -176,7 +176,7 @@ public:
 	 * ========================================================================
 	 * Contained in source file Polyhedron_io.cpp
 	 *
-	 * Function for reading and writing polyhedron from and to different
+	 * Functions for reading and writing polyhedron from and to different
 	 * possible formats.
 	 * ========================================================================
 	 */
@@ -230,7 +230,7 @@ public:
 	 *
 	 * i x_{i} y_{i} z_{i}
 	 *
-	 * j nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 * j nv_{j} a_{j} b_{j} c_{j} d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
 	void fscan_default_1(const char* filename);
 
@@ -248,7 +248,7 @@ public:
 	 * #vertices
 	 * i x_{i} y_{i} z_{i}
 	 * #facets
-	 * j nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 * j nv_{j} a_{j} b_{j} c_{j} d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
 	void fscan_default_1_1(const char* filename);
 
@@ -263,36 +263,325 @@ public:
 	 */
 	bool fscan_default_1_2(const char* filename);
 
+	/**
+	 * Reads the polyhedron from the file in internal format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * numv numf
+	 *
+	 * x_{i} y_{i} z_{i}
+	 *
+	 * nv_{j} a_{j} b_{j} c_{j} \
+	 * d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{3 * nv_{j} - 1}}
+	 *
+	 * The special feature of the format is that the incidence information is
+	 * also written to the file.
+	 */
 	void fscan_my_format(const char* filename);
+
+	/**
+	 * Reads the polyhedron from the file in Stanford PLY format.
+	 *
+	 * @param filename	The name of file
+	 *
+	 * The specification of PLY format can be found at:
+	 * http://en.wikipedia.org/wiki/PLY_%28file_format%29
+	 * http://paulbourke.net/dataformats/ply/
+	 *
+	 * This version of PLY scanner in too hard-coded, since it assumes that the
+	 * length of header is 11 lines and ignores all its syntax. Actually it can
+	 * only parse one specific case of syntax.
+	 *
+	 * TODO: It will be much better to use some open-source library to parse
+	 * general PLY files (maybe RPLY).
+	 */
 	void fscan_ply(const char* filename);
+
+	/**
+	 * Writes the polyhedron to the file in default format.
+	 *
+	 * @param filename	The name of file
+	 *
+	 * Here is the format:
+	 *
+	 * numv numf
+	 *
+	 * x_{i} y_{i} z_{i}
+	 *
+	 * nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 */
 	void fprint_default_0(const char* filename);
+
+	/**
+	 * Writes the polyhedron to the file in default format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * numv numf
+	 *
+	 * i x_{i} y_{i} z_{i}
+	 *
+	 * j nv_{j} a_{j} b_{j} c_{j} d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
+	 */
 	void fprint_default_1(const char* filename);
+
+	/**
+	 * Writes the polyhedron to the file in internal format.
+	 *
+	 * @param filename	The name of file.
+	 *
+	 * Here is the format:
+	 *
+	 * numv numf
+	 *
+	 * x_{i} y_{i} z_{i}
+	 *
+	 * nv_{j} a_{j} b_{j} c_{j} \
+	 * d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{3 * nv_{j} - 1}}
+	 *
+	 * The special feature of the format is that the incidence information is
+	 * also written to the file.
+	 */
 	void fprint_my_format(const char* filename);
+
+	/**
+	 * Writes the polyhedron to the file in Stanford PLY format.
+	 *
+	 * @param filename	The name of file
+	 * @param comment	The comment to be written to the file. It must contain
+	 * only one word.
+	 *
+	 * The specification of PLY format can be found at:
+	 * http://en.wikipedia.org/wiki/PLY_%28file_format%29
+	 * http://paulbourke.net/dataformats/ply/
+	 *
+	 * TODO: It will be much better to use some open-source library to parse
+	 * general PLY files (maybe RPLY).
+	 */
 	void fprint_ply(const char *filename, const char *comment);
+
+	/**
+	 * Writes the polyhedron to the file in Stanford PLY format.
+	 * Before writing the coordinates of vertices are scaled up.
+	 *
+	 * @param scale		The scaling factor
+	 * @param filename	The name of file
+	 * @param comment	The comment to be written to the file. It must contain
+	 * only one word.
+	 *
+	 * The specification of PLY format can be found at:
+	 * http://en.wikipedia.org/wiki/PLY_%28file_format%29
+	 * http://paulbourke.net/dataformats/ply/
+	 *
+	 * TODO: It will be much better to use some open-source library to parse
+	 * general PLY files (maybe RPLY).
+	 */
 	void fprint_ply_scale(double scale, const char *filename,
 			const char *comment);
 
-	//Polyhedron_preprocess.cpp
+	/*
+	 * ========================================================================
+	 * Contained in source file Polyhedron_preprocess.cpp
+	 *
+	 * Functions for preprocessing polyhedra
+	 * ========================================================================
+	 */
+
+	/**
+	 * Constructs the information about incidence structure of the polyhedron.
+	 * The information for facet is stored in a single array and looks as
+	 * follows:
+	 *
+	 * ------------------------------------------------------------------
+	 * | v0 | v1 | .. | vn | v0 | f0 | f1 | .. | fn | p0 | p1 | .. | pn |
+	 * ------------------------------------------------------------------
+	 * \_______   _________/ ^  \________   ________/\________   _______/
+	 *         \ /           |           \ /                  \ /
+	 *          |            |            |                    |
+	 *       vertices     cycling      neighbor               positions of
+	 *                    vertex       facets                 vertices
+	 *                                 incident               in neighbor
+	 *                                 to edges               facets
+	 *
+	 * The information for vertex is stored in a single array inside vertexinfo
+	 * with the same ID and looks as follows:
+	 *
+	 * ------------------------------------------------------------------
+	 * | f0 | f1 | .. | fn | f0 | v0 | v1 | .. | vn | p0 | p1 | .. | pn |
+	 * ------------------------------------------------------------------
+	 * \_______   _________/ ^  \________   ________/\________   _______/
+	 *         \ /           |           \ /                  \ /
+	 *          |            |            |                    |
+	 *       facets       cycling      neighbor               positions of
+	 *                    facet        vertices               vertices
+	 *                                 in facets              in incident
+	 *                                                        facets
+	 */
 	void preprocessAdjacency();
 
-	//Polyhedron_intersection.cpp
+	/*
+	 * ========================================================================
+	 * Contained in source file Polyhedron_intersection.cpp
+	 *
+	 * Functions for intersecting polyhedron with the plane.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Intersects polyhedron with the plane. Can handle special cases when the
+	 * polyhedron is non-convex  and the intersection contains multiple
+	 * components.
+	 *
+	 * @param iplane	Intersecting plane
+	 */
 	void intersect(Plane iplane);
+
+	/**
+	 * Intersects polyhedron with the plane. Can handle special cases when the
+	 * polyhedron is non-convex  and the intersection contains multiple
+	 * components.
+	 *
+	 * This version is adjusted for usage via coalescer.
+	 *
+	 * @param iplane	Intersecting plane
+	 */
 	void intersectCoalesceMode(Plane iplane, int jfid);
 
-	//Polyhedron_coalesce_facets.cpp
+	/*
+	 * ========================================================================
+	 * Contained in source file Polyhedron_coalesce_facets.cpp
+	 *
+	 * Functions for intersecting polyhedron with the plane.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Coalesces 2 adjacent facets into single one.
+	 *
+	 * This function is used to fix wrongly divided facets, when one big facet
+	 * is divided into 2 smaller ones.
+	 *
+	 * @param fid0	The ID of the first facet
+	 * @param fid1	The ID of the second facet
+	 *
+	 * TODO: For code re-using it will be better call function
+	 * coalesceFacets(int n, int* fid)
+	 * with n = 2 and fid[] = {fid0, fid1}
+	 * To do this we need first verify that the result is the same as before.
+	 */
 	void coalesceFacets(int fid0, int fid1);
+
+	/**
+	 * Coalesces several adjacent facets into single one.
+	 *
+	 * This function is used to fix wrongly divided facets, when one big facet
+	 * is divided into several smaller ones.
+	 *
+	 * @param fid0	Number of facets
+	 * @param fid1	Array of IDs of facets
+	 */
 	void coalesceFacets(int n, int* fid);
 
-	//Polyhedron_shift_point.cpp
+	/*
+	 * ========================================================================
+	 * Contained in source file Polyhedron_shift_point.cpp
+	 *
+	 * Functions for shifting one vertex on the vector displacement and then
+	 * reconstructing the planarity of all facets.
+	 *
+	 * Also the are 2 functions that are used outside the coalescer. Thus, they
+	 * are here.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * the planarity of all facets.
+	 *
+	 * @param id	The ID of shifted vertex
+	 * @param delta	Displacement vector
+	 *
+	 * TODO: This algorithm is not actually working now.
+	 */
 	void shiftPoint(int id, Vector3d delta);
+
+	/**
+	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * the planarity of all facets. The minimized functional's summands are
+	 * used with weights.
+	 *
+	 * @param id	The ID of shifted vertex
+	 * @param delta	Displacement vector
+	 *
+	 * TODO: This algorithm is not actually working now.
+	 */
 	void shiftPointWeighted(int id, Vector3d delta);
+
+	/**
+	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * the planarity of all facets, the functional is linearized in order to
+	 * simplify the algorithm.
+	 *
+	 * @param id	The ID of shifted vertex
+	 * @param delta	Displacement vector
+	 */
 	void shiftPointLinearGlobal(int id, Vector3d delta);
+
+	/**
+	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * the planarity of all facets, the functional is linearized in order to
+	 * simplify the algorithm, and the displacements are calculated relatively
+	 * to the previous state.
+	 *
+	 * @param id	The ID of shifted vertex
+	 * @param delta	Displacement vector
+	 */
 	void shiftPointLinearLocal(int id, Vector3d delta);
+
+	/**
+	 * Tests global linear shifting in a big number of cases.
+	 *
+	 * @param id		The ID of shifted vertex
+	 * @param delta		Displacement vector
+	 * @param mode		Mode of shifting
+	 * @param num_steps	Reference to the number of step required by algorithm
+	 * @param norm_sum	Sum of norms of vector displacements
+	 *
+	 * TODO: mode should be enum, not integer!
+	 */
 	void shiftPointLinearTest(int id, Vector3d delta, int mode, int& num_steps,
 			double& norm_sum);
+
+	/**
+	 * Runs global linear shifting sequentially with small steps.
+	 *
+	 * This function was added to test whether the self-intersections can be
+	 * detected during the minimization.
+	 *
+	 * @param id		The ID of shifted vertex
+	 * @param delta		Displacement vector
+	 * @param num		Number of divisions of step that must be done
+	 */
 	void shiftPointLinearPartial(int id, Vector3d delta, int num);
 
+	/**
+	 * Calculates the distance to the nearest neighboring vertex to the given
+	 * vertex.
+	 *
+	 * @param id	The ID of vertex
+	 */
 	double distToNearestNeighbour(int id);
+
+	/**
+	 * Copies coordinates from one polyhedron to another (for backuping)
+	 *
+	 * @param orig	Reference to another polyhedron
+	 */
 	void copyCoordinates(Polyhedron& orig);
 
 	//Polyhedron_group_vertices.cpp
