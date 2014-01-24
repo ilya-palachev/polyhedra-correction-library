@@ -653,7 +653,7 @@ public:
 	/**
 	 * Calculates the tensor of inertia of the polyhedron.
 	 *
-	 * Tensor of intertia:
+	 * Tensor of inertia:
 	 *
 	 * --                      --
 	 * |  Jxx     Jxy     Jxz   |
@@ -824,7 +824,7 @@ public:
 	 * @param edgeData	Edge data of the polyhedron (should be constructed
 	 * previously)
 	 *
-	 * @retval	The
+	 * @retval	The number of detected self-intersections.
 	 */
 	int checkEdges(EdgeDataPtr edgeData);
 };
