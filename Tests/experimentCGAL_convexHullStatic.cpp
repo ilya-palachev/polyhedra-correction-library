@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2014 Ilya Palachev <iliyapalachev@gmail.com>
  *
  * This file is part of Polyhedra Correction Library.
  *
@@ -23,7 +23,7 @@
  *
  * @brief Here the functionality of static convex hull algorithm from CGAL is
  * tested.
- * 
+ *
  * @note This file is based on example from CGAL manual:
  * http://doc.cgal.org/latest/Convex_hull_3/index.html#Chapter_3D_Convex_Hulls
  */
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
 	timer.pushTimer();
 
 	for (int i_point = 0;
-			i_point < num_points - num_points / 
+			i_point < num_points - num_points /
 						FACTOR_OF_VERTICES_REDUCTION;
 			++i_point)
 	{

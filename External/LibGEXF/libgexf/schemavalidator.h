@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   schemavalidator.h
  * Author: sebastien
  *
@@ -25,7 +25,7 @@ public:
      *  \brief Copy constructor
      */
     SchemaValidator(const SchemaValidator& orig);
-    
+
     virtual ~SchemaValidator();
 
     /*!

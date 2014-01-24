@@ -83,7 +83,7 @@ bool RngValidator::run(const std::string& xml_file_pathname, const std::string& 
 //-----------------------------------------
 {
     // TODO handle multiple RNG files (eg viz)
-    
+
     // RELAX NG Parser Context
     xmlRelaxNGParserCtxtPtr ctxt = xmlRelaxNGNewParserCtxt(rng_file_pathname.c_str());
     xmlRelaxNGSetParserErrors(ctxt,

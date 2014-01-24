@@ -57,7 +57,7 @@ Graph::~Graph() {
 void Graph::addNode(const t_id id) {
 //-----------------------------------------
     if(_lock_flag == '1') throw ReadLockException("Write not allowed");
-    
+
     _nodes.insert(id);
 }
 
@@ -77,7 +77,7 @@ const float e_type = (float)type;
         throw invalid_argument("Invalid source node " + source_id + " for the edge "+id);
     }
     if( _nodes.find(target_id) == _nodes.end() ) {
-        
+
         throw invalid_argument("Invalid target node " + target_id + " for the edge "+id);
     }
 
@@ -132,7 +132,7 @@ const float e_type = (float)type;
             /* no edge exists between the two nodes, we create the link and update the weight if needed */
             pair<t_id,t_id> link = pair<t_id,t_id>(target_id,id);
             (it->second).insert(link);
-            
+
             if(weight > 1.0) {
                 pair<t_edge_property,t_edge_value> edge_weight = pair<t_edge_property,t_edge_value>(EDGE_WEIGHT,weight);
                 _edges_properties[id].insert(edge_weight);
@@ -347,7 +347,7 @@ set<t_id> s = set<t_id>();
             s.insert(*it); // pred_id
         }
     }
-    
+
     vector<t_id> v(s.begin(), s.end());
     s.clear();
 

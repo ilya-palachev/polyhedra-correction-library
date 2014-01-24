@@ -49,7 +49,7 @@ public:
      *  \brief Possible type of element
      */
     enum Type { NODE, EDGE };
-    
+
 public:
     /*!
      *  \brief Constructor

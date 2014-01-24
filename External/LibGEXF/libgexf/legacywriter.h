@@ -59,7 +59,7 @@ public:
      *  \brief Copy constructor
      */
     LegacyWriter(const LegacyWriter& orig);
-    
+
     virtual ~LegacyWriter();
 
 

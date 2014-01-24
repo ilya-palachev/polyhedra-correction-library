@@ -1,14 +1,14 @@
-/* 
- * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
- * 
+/*
+ * Copyright (c) 2009-2014 Ilya Palachev <iliyapalachev@gmail.com>
+ *
  * This file is part of Polyhedra Correction Library.
  *
- * Polyhedra Correction Library is free software: you can redistribute 
+ * Polyhedra Correction Library is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * Polyhedra Correction Library is distributed in the hope that it will 
+ * Polyhedra Correction Library is distributed in the hope that it will
  * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,11 +30,11 @@ enum EEdgeType
 {
 	EEdgeUnknown = -1,       // Unknown / not calculated
 	EEdgeRegular = 0,        // Regular edges, regular confidence
-	EEdgeDummy = 1,        // Dummy edge, not existing in reality 
+	EEdgeDummy = 1,        // Dummy edge, not existing in reality
 						   // (originating e.g. from a picture crop)
 	EEdgeDust = 2,       // Low confidence because of dust on stone surface
 	EEdgeCavern = 3,     // Low confidence because of cavern in the stone
-	EEdgeMaxPointErr = 4,    // The edge erroneously is lower than other edges, 
+	EEdgeMaxPointErr = 4,    // The edge erroneously is lower than other edges,
 							 // which define a vertex (e.g. in the culet)
 	EEdgeGlare = 5      // Low confidence because of photo glare
 };

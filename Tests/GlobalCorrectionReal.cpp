@@ -1,14 +1,14 @@
-/* 
- * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
- * 
+/*
+ * Copyright (c) 2009-2014 Ilya Palachev <iliyapalachev@gmail.com>
+ *
  * This file is part of Polyhedra Correction Library.
  *
- * Polyhedra Correction Library is free software: you can redistribute 
+ * Polyhedra Correction Library is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * Polyhedra Correction Library is distributed in the hope that it will 
+ * Polyhedra Correction Library is distributed in the hope that it will
  * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -67,16 +67,16 @@ int main(int argc, char** argv)
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
 	
-	list< FacetWithArea > listSortedFacets = 
+	list< FacetWithArea > listSortedFacets =
 		polyhedron->getSortedByAreaFacets();
 		
 	list<int> facetsCorrected;
 	auto itFacet = listSortedFacets.rend();
 	++itFacet;
-	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected; ++itFacet, 
+	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected; ++itFacet,
 		++iFacet)
 	{
-		DEBUG_PRINT("Adding facet %d with area %lf to be corrected", 
+		DEBUG_PRINT("Adding facet %d with area %lf to be corrected",
 			itFacet->facet->id, itFacet->area);
 		facetsCorrected.push_back(itFacet->facet->id);
 	}

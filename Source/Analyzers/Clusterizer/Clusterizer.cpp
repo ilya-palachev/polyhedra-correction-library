@@ -1,15 +1,15 @@
-/* 
- * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+/*
+ * Copyright (c) 2009-2014 Ilya Palachev <iliyapalachev@gmail.com>
  * Copyright (c) 2009-2012 Nikolai Kaligin <nkaligin@yandex.ru>
- * 
+ *
  * This file is part of Polyhedra Correction Library.
  *
- * Polyhedra Correction Library is free software: you can redistribute 
+ * Polyhedra Correction Library is free software: you can redistribute
  * it and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * Polyhedra Correction Library is distributed in the hope that it will 
+ * Polyhedra Correction Library is distributed in the hope that it will
  * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -451,7 +451,7 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 		DEBUG_PRINT("Trying to find nearest cluster for facet %d\n", i);
 
 		SpherePoint FacetNorm(polyhedron->facets[i].plane.norm);
-		double minDistPoint = 1000000;
+		double minDistPoint = RAND_MAX;
 		position = -1;
 		for (int j = 0; j < numCluster; j++)
 		{

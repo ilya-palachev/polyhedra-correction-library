@@ -44,7 +44,7 @@ public:
      *  \brief Copy constructor
      */
     UndirectedGraph(const UndirectedGraph& orig);
-    
+
     virtual ~UndirectedGraph();
 
     /*!

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2013 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2014 Ilya Palachev <iliyapalachev@gmail.com>
  *
  * This file is part of Polyhedra Correction Library.
  *
@@ -40,7 +40,7 @@ TimeMeasurer::TimeMeasurer()
 
 /**
  * Copies exisiting time measurer to existing one
- * 
+ *
  * @param other time measurer to be copied.
  */
 TimeMeasurer::TimeMeasurer(const TimeMeasurer& other)
@@ -63,7 +63,7 @@ TimeMeasurer::~TimeMeasurer()
 
 /**
  * Assigns one time measurer to another.
- * 
+ *
  * @param other the measurer to be assigned to
  */
 TimeMeasurer& TimeMeasurer::operator=(const TimeMeasurer& other)
@@ -76,9 +76,9 @@ TimeMeasurer& TimeMeasurer::operator=(const TimeMeasurer& other)
 
 /**
  * Compares two TimeMeasurers (equality).
- * 
+ *
  * @param other timer measurer to be compared with
- * 
+ *
  * @retval true if equal
  * @retval false if unequal
  */
@@ -136,7 +136,7 @@ void TimeMeasurer::pushTimer()
 
 /**
  * Stop the last timer in the list and print calculated time for it.
- * 
+ *
  * @return time of last timer (in seconds, precision is microsecond)
  */
 double TimeMeasurer::popTimer()
