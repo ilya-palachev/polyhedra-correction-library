@@ -451,7 +451,7 @@ void Clusterizer::reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 		DEBUG_PRINT("Trying to find nearest cluster for facet %d\n", i);
 
 		SpherePoint FacetNorm(polyhedron->facets[i].plane.norm);
-		double minDistPoint = 1000000;
+		double minDistPoint = RAND_MAX;
 		position = -1;
 		for (int j = 0; j < numCluster; j++)
 		{
