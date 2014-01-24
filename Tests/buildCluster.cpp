@@ -32,7 +32,7 @@ double norm_J(double Jxx1, double Jyy1, double Jzz1, double Jxy1, double Jyz1,
 		double Jxz1);
 
 void test_BuildTreeNorm(const char* name, int type);
-void test_BuildClaster();
+void test_BuildCluster();
 
 int main(int argc, char** argv)
 {
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 //    test_J11("2009_08_17_brilliant_1.27ct_lexus_400c_Wol_1", 1);
 //    test_BuildTreeNorm("2009_08_17_brilliant_1.27ct_lexus_400c_Wol_1", 1);
 
-	test_BuildClaster();
+	test_BuildCluster();
 
 //    test_J11("poly-cube x 3", 0);
 //   test_BuildTreeNorm("poly-cube x 3", 0);
@@ -663,7 +663,7 @@ double norm_J(double Jxx, double Jyy, double Jzz, double Jxy, double Jyz,
 	return max;
 }
 
-void test_BuildClaster()
+void test_BuildCluster()
 {
 	DEBUG_START;
 	Polyhedron poly1;
