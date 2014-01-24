@@ -23,8 +23,8 @@
  * @brief The declaration of Polyhedron - the main class of the project.
  */
 
-#ifndef POLYHEDRON_CLASS_H
-#define	 POLYHEDRON_CLASS_H
+#ifndef POLYHEDRON_H
+#define	 POLYHEDRON_H
 
 #include <memory>
 #include <list>
@@ -103,6 +103,14 @@ protected:
 public:
 
 	/*
+	 * The member functions of Polyhedron class are divided onto groups and
+	 * each group of functions is implemented in a separate file. Declarations
+	 * of functions of different groups are separated here by long "==="
+	 * comments.
+	 */
+
+	/*
+	 * General functions
 	 * ========================================================================
 	 * Contained in source file Polyhedron.cpp
 	 *
@@ -173,6 +181,7 @@ public:
 	void set_parent_polyhedron_in_facets();
 
 	/*
+	 * I/O operations
 	 * ========================================================================
 	 * Contained in source file Polyhedron_io.cpp
 	 *
@@ -385,6 +394,7 @@ public:
 			const char *comment);
 
 	/*
+	 * Preprocessing
 	 * ========================================================================
 	 * Contained in source file Polyhedron_preprocess.cpp
 	 *
@@ -425,6 +435,7 @@ public:
 	void preprocessAdjacency();
 
 	/*
+	 * Intersection
 	 * ========================================================================
 	 * Contained in source file Polyhedron_intersection.cpp
 	 *
@@ -488,6 +499,7 @@ public:
 	void coalesceFacets(int n, int* fid);
 
 	/*
+	 * Vertex shifting
 	 * ========================================================================
 	 * Contained in source file Polyhedron_shift_point.cpp
 	 *
@@ -580,45 +592,242 @@ public:
 	/**
 	 * Copies coordinates from one polyhedron to another (for backuping)
 	 *
-	 * @param orig	Reference to another polyhedron
+	 * @param orig	Reference to source polyhedron
 	 */
 	void copyCoordinates(Polyhedron& orig);
 
-	//Polyhedron_group_vertices.cpp
+	/*
+	 * Vertex coalescence
+	 * ========================================================================
+	 * Contained in source file Polyhedron_group_vertices.cpp
+	 *
+	 * Function for grouping vertices inside facets if the distance between
+	 * them is small.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Coalesces vertices inside facets that are closer to each other than
+	 * some fixed distance. Written as an attempt to avoid the creation of
+	 * self-intersections during the work of different correction algorithms.
+	 *
+	 * @param id	The ID of vertex that should be saved at initial state.
+	 */
 	int groupVertices(int id);
 
-	//Polyhedron_size.cpp
+	/*
+	 * Geometric measurements
+	 * ========================================================================
+	 * Contained in source file Polyhedron_size.cpp
+	 *
+	 * Functions for analyzing the geometric characteristics of the polyhedron.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Calculates the value of the main intertial number.
+	 * The algorithm uses the piecewise approximation of the integral.
+	 *
+	 * @param N	Number of pieces the segment of integration should be divided
+	 * to.
+	 */
 	double calculate_J11(int N);
+
+	/**
+	 * Calculates the volume of the polyhedron.
+	 */
 	double volume();
+
+	/**
+	 * Calculates the area of polyhedron's surface.
+	 */
 	double areaOfSurface();
+
+	/**
+	 * Calculates the area of a single facet.
+	 *
+	 * @param iFacet	The ID of facet
+	 */
 	double areaOfFacet(int iFacet);
+
+	/**
+	 * Calculates the tensor of inertia of the polyhedron.
+	 *
+	 * Tensor of intertia:
+	 *
+	 * --                      --
+	 * |  Jxx     Jxy     Jxz   |
+	 * |  Jyx     Jyy     Jyz   |
+	 * |  Jzx     Jzy     Jzz   |
+	 * --                      --
+	 * @param Jxx	Reference to Jxx
+	 * @param Jxx	Reference to Jyy
+	 * @param Jxx	Reference to Jzz
+	 * @param Jxx	Reference to Jxy = Jyx
+	 * @param Jxx	Reference to Jyz = Jzy
+	 * @param Jxx	Reference to Jxz = Jzx
+	 */
 	void J(double& Jxx, double& Jyy, double& Jzz, double& Jxy, double& Jyz,
 			double& Jxz);
+
+	/**
+	 * Calculates the mass center of the polyhedron
+	 *
+	 * @param xc	Reference to x coordinate of the center
+	 * @param yc	Reference to y coordinate of the center
+	 * @param zc	Reference to z coordinate of the center
+	 *
+	 * TODO: Return Vector3d here.
+	 */
 	void get_center(double& xc, double& yc, double& zc);
+
+	/**
+	 * Calculates the numbers of inertia and the axes of inertia of the
+	 * polyhedron.
+	 *
+	 * @param l0	Reference to 1st number of inertia (biggest one)
+	 * @param l1	Reference to 2nd number of inertia
+	 * @param l2	Reference to 3rd number of inertia (smallest one)
+	 * @param v0	Reference to 1st axis of inertia
+	 * @param v1	Reference to 2nd axis of inertia
+	 * @param v2	Reference to 3rd axis of inertia
+	 */
 	void inertia(double& l0, double& l1, double& l2, Vector3d& v0, Vector3d& v1,
 			Vector3d& v2);
+
+	/**
+	 * Prints the list of facets sorted by their area
+	 */
 	void printSortedByAreaFacets(void);
+
+	/**
+	 * Gets the list of facets sorted by their area
+	 */
 	list< struct FacetWithArea > getSortedByAreaFacets(void);
 
-	//Polyhedron_clusterize.cpp
+	/*
+	 * Clusterization
+	 * ========================================================================
+	 * Contained in source file Polyhedron_clusterize.cpp
+	 *
+	 * Functions for analyzing groups of facets that have close normal vectors.
+	 * This is done using standard algorithms of clusterization under the set
+	 * of points contained inside the surface of unit sphere.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Clusterizes facets in the metric of distances between their normal
+	 * vectors. Uses simple quadratic O(N^2) algorithm.
+	 *
+	 * @param p	The threshold of cluster distance
+	 */
 	int clusterize(double p);
+
+	/**
+	 * Clusterizes facets in the metric of distances between their normal
+	 * vectors. Uses standard algorithm of field fire.
+	 *
+	 * @param p	The threshold of cluster distance
+	 */
 	void clusterize2(double p);
+
+	/**
+	 * Builds hierarchical clusterization of the facets set.
+	 */
 	TreeClusterNorm& build_TreeClusterNorm();
+
+	/**
+	 * Builds hierarchical clusterization of the facets set.
+	 *
+	 * @param nodeArray	Pointer to the root of hierarchical tree
+	 * @param matrix	Reference to the matrix of distances between facets
+	 */
 	void giveClusterNodeArray(TreeClusterNormNode* nodeArray,
 			MatrixDistNorm& matrix);
+
+	/**
+	 * Builds hierarchical clusterization of the facets set associated with
+	 * another clusterization built previously for another polyhedron.
+	 *
+	 * @param nodeArray_in	Pointer to the root of input hierarchical tree
+	 * @param matrix_in		Reference to the input matrix of distances
+	 * @param nodeArray_out	Pointer to the root of input hierarchical tree
+	 * @param matrix_out	Reference to the output matrix of distances
+	 */
 	void reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
 			MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
 			MatrixDistNorm& matrix_out);
 
-	// Polyhedron_correction.cpp
+	/*
+	 * Global correction
+	 * ========================================================================
+	 * Contained in source file Polyhedron_correction.cpp
+	 *
+	 * Function for global correction of polyhedra.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Corrects the polyhedron globally, relative to the provided shadow
+	 * contour data. Uses plane-based functional in the primal space.
+	 *
+	 * @param contourData		Shadow contour data
+	 * @param parameters		The parameter set of the algorithm
+	 * @param facetsCorrected	The list of facets to be corrected (for partial
+	 * correction)
+	 */
 	void correctGlobal(shared_ptr<ShadeContourData> contourData,
 			GSCorrectorParameters* parameters, list<int>* facetsCorrected);
 
-	// Polyhedron_verification.cpp
+	/*
+	 * Verification
+	 * ========================================================================
+	 * Contained in source file Polyhedron_verification.cpp
+	 *
+	 * Functions for the verification of polyhedra.
+	 * ========================================================================
+	 */
+
+	/**
+	 * Verifies the incidence structure of the polyhedron.
+	 *
+	 * @retval	Number of facets in which the incidence structure is violated
+	 */
 	int test_structure();
+
+	/**
+	 * Verifies the existence of self-intersections of the polyhedron.
+	 *
+	 * @param ifPrint	Whether to print debug output
+	 *
+	 * @retval	Number of self-intersections
+	 */
 	int countConsections(bool ifPrint);
+
+	/**
+	 * Verifies the existence of self-intersections of the polyhedron using
+	 * edge-detecting approach and reduces edges where the self-intersection
+	 * has been detected.
+	 *
+	 * NOTA BENE: This function can be used in 2 different modes:
+	 *
+	 * 1. Just find self-intersections
+	 *
+	 * 2. Find self-intersections and reduce corresponding edges.
+	 *
+	 * The behavior depends on whether the macro DO_EDGES_REDUCTION is defined
+	 * or not.
+	 * TODO: It should be determined in run-time, not in compile-time. I. e.
+	 * with variable, not with a macro.
+	 *
+	 * @param edgeData	Edge data of the polyhedron (should be constructed
+	 * previously)
+	 *
+	 * @retval	The
+	 */
 	int checkEdges(EdgeDataPtr edgeData);
 };
 
-#endif	/* POLYHEDRON_CLASS_H */
+#endif	/* POLYHEDRON_H */
 
