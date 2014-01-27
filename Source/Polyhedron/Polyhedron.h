@@ -829,5 +829,7 @@ public:
 	int checkEdges(EdgeDataPtr edgeData);
 };
 
+typedef shared_ptr<Polyhedron> PolyhedronPtr;
+
 #endif	/* POLYHEDRON_H */
 

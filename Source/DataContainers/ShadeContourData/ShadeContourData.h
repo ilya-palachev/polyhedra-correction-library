@@ -31,6 +31,7 @@ public:
 	int numContours;
 	SContour* contours;
 
+	/* TODO: shade contour data can be not associated with any polyhedron! */
 	ShadeContourData(shared_ptr<Polyhedron> p);
 	~ShadeContourData();
 

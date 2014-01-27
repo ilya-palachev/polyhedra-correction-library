@@ -60,4 +60,6 @@ public:
 	void buildPlot(ShadeContourDataPtr contourData, const char* fileNamePlot);
 };
 
+typedef shared_ptr<ShadowContourClusterizer> ShadowContourClusterizerPtr;
+
 #endif /* SHADOWCONTOURCLUSTERIZER_H_ */
