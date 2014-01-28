@@ -85,8 +85,8 @@ void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
 			 * here.
 			 * 2. How to process case when A2_{i} != A1_{i + 1} correctly?
 			 */
-			fprintf(file, "%lf %lf\n", angle, contourCurr->sides->A1.z);
-			fprintf(file, "%lf %lf\n", angle, contourCurr->sides->A2.z);
+			fprintf(file, "%lf %lf\n", angle, contourCurr->sides[iSide].A1.z);
+			fprintf(file, "%lf %lf\n", angle, contourCurr->sides[iSide].A2.z);
 		}
 	}
 	DEBUG_END;
