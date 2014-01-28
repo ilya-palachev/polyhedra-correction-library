@@ -152,7 +152,7 @@ double TimeMeasurer::popTimer()
 			MILLION * (timerEnd.getSeconds() - timerBegin.getSeconds())
 			+ timerEnd.getUSeconds() - timerBegin.getUSeconds();
 
-	return usecondsDiff / (double) MILLION;
 	DEBUG_END;
+	return usecondsDiff / (double) MILLION;
 }
 

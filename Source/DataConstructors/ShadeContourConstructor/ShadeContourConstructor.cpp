@@ -137,7 +137,7 @@ void ShadeContourConstructor::createContour(int idOfContour,
 	outputContour->poly = polyhedron;
 	SideOfContour* sides = outputContour->sides;
 	
-	DEBUG_PRINT("Number of visible edges = %d", edgesVisible.size());
+	DEBUG_PRINT("Number of visible edges = %ld", edgesVisible.size());
 
 	EdgeSetIterator edgeCurr = edgesVisible.begin();
 	int iVertexCurr = edgeCurr->v1;
