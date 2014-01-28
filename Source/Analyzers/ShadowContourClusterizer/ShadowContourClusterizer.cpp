@@ -51,6 +51,21 @@ ShadowContourClusterizer::~ShadowContourClusterizer()
 	DEBUG_END;
 }
 
+static double angleModulo2PI(double angle)
+{
+	while (angle < 0)
+	{
+		angle += 2 * M_PI;
+	}
+
+	while (angle > 2 * M_PI)
+	{
+		angle -= 2 * M_PI;
+	}
+
+	return angle;
+}
+
 void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
 										 const char* fileNamePlot)
 {
@@ -68,6 +83,9 @@ void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
 	Vector3d ex(1., 0., 0.);
 	Vector3d ey(0., 1., 0.);
 
+	/* Print the header of gnuplot file. */
+	fprintf(file, "# x y\n");
+
 	/* Iterate via the array of contours. */
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
@@ -82,11 +100,17 @@ void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
 			/*
 			 * TODO:
 			 * 1. Process left and right halves of the shadow contour separately
-			 * here.
+			 * here (DONE).
 			 * 2. How to process case when A2_{i} != A1_{i + 1} correctly?
 			 */
-			fprintf(file, "%lf %lf\n", angle, contourCurr->sides[iSide].A1.z);
-			fprintf(file, "%lf %lf\n", angle, contourCurr->sides[iSide].A2.z);
+			Vector3d A1 = contourCurr->sides[iSide].A1;
+			Vector3d A2 = contourCurr->sides[iSide].A2;
+			double A1_angle = A1 * ex > 0 ? angle - M_PI : angle + M_PI;
+			double A2_angle = A2 * ex > 0 ? angle - M_PI : angle + M_PI;
+			A1_angle = angleModulo2PI(A1_angle);
+			A2_angle = angleModulo2PI(A2_angle);
+			fprintf(file, "%lf %lf\n", A1_angle, A1.z);
+			fprintf(file, "%lf %lf\n", A2_angle, A2.z);
 		}
 	}
 	DEBUG_END;
