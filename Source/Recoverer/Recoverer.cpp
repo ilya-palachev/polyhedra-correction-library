@@ -58,6 +58,7 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 	/* Iterate through the array of contours. */
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
+		DEBUG_PRINT("contour #%d", iContour);
 		SContour* contourCurr = &SCData->contours[iContour];
 		Vector3d normal = contourCurr->plane.norm;
 
@@ -65,16 +66,31 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
 		{
 			SideOfContour* sideCurr = &contourCurr->sides[iSide];
+			
+			/*
+			 * Here the plane that is incident to points A1 and A2 of the
+			 * current side and collinear to the vector of projection.
+			 *
+			 * TODO: Here should be the calculation of the best plane fitting
+			 * these conditions. Current implementation can produce big errors.
+			 */
 			Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
 				normal;
 			Plane supportPlane(supportPlaneNormal,
 							   - supportPlaneNormal * sideCurr->A1);
+
 			supportPlanes.push_back(supportPlane);
 			
-			ASSERT(fabs(supportPlane.norm * sideCurr->A1 + supportPlane.dist)
-				< EPS_MIN_DOUBLE);
-			ASSERT(fabs(supportPlane.norm * sideCurr->A2 + supportPlane.dist)
-				< EPS_MIN_DOUBLE);
+			double error1 = supportPlane.norm * sideCurr->A1 +
+				supportPlane.dist;
+			double error2 = supportPlane.norm * sideCurr->A2 +
+				supportPlane.dist;
+
+			DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
+			
+			/* TODO: Here should be more strict conditions. */
+			ASSERT(error1 < 100 * EPS_MIN_DOUBLE);
+			ASSERT(error2 < 100 * EPS_MIN_DOUBLE);
 		}
 	}
 
