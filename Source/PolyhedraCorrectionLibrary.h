@@ -157,8 +157,11 @@ class GraphDumperGEXF;
 #include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
 #include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 #include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+#include "Analyzers/ShadowContourClusterizer/ShadowContourClusterizer.h"
 
 #include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
+
+#include "Recoverer/Recoverer.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

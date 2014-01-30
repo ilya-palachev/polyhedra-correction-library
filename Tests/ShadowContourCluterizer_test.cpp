@@ -23,11 +23,9 @@
  * @brief Unit test for shadow contour clusterizer.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "Analyzers/ShadowContourClusterizer/ShadowContourClusterizer.h"
 #include <CGAL/Plane_3.h>
+
+#include "PolyhedraCorrectionLibrary.h"
 
 #define NUM_ARGS_EXPECTED 3
 
