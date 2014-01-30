@@ -39,13 +39,21 @@
 class Recoverer
 {
 private:
-	
+
 	/**
 	 * Extracts support planes from shadow contours.
 	 * 
 	 * @param SCData	Shadow contours
 	 */
 	vector<Plane> extractSupportPlanes(ShadeContourDataPtr SCData);
+
+	/**
+	 * Performs the transformation of polar duality for the given set of planes,
+	 * i. e. maps each plane as follows:
+	 *
+	 * @param planes	The vector of planes
+	 */
+	vector<Vector3d> mapPlanesToDualSpace(vector<plane> planes);
 public:
 
 	/**
