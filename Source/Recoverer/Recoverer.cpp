@@ -51,6 +51,9 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	/* 2. Map planes to dual space to obtain the set of points in it. */
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
+	/* 3. Construct convex hull in the dual space. */
+	Polyhedron_3 polyhedronDual = constructConvexHull(supportPoints);
+
 	DEBUG_END;
 	return NULL;
 }
@@ -130,4 +133,60 @@ vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
 	
 	return vectors;
 	DEBUG_END;
+}
+
+/**
+ * A functor computing the plane containing a triangular facet
+ */
+struct Plane_from_facet
+{
+	/*
+	 * Calculate the plane of facet as the plane that contains 3 sequential
+	 * points of the facet.
+	 *
+	 * TODO: It can produce big errors.
+	 * Here should be more accurate calculation of the best fitting plane
+	 * for the given set of points.
+	 */
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
+	{
+		Polyhedron_3::Halfedge_handle h = f.halfedge();
+		return Polyhedron_3::Plane_3(h->vertex()->point(),
+				h->next()->vertex()->point(), h->opposite()->vertex()->point());
+	}
+};
+
+Polyhedron_3 Recoverer::constructConvexHull (vector<Vector3d> points)
+{
+	DEBUG_START;
+	Polyhedron_3 poly;
+
+	/* Convert Vector3d objects to Point_3 objects. */
+	std::vector<Point_3> pointsCGAL;
+	for (auto &point : points)
+	{
+		Point_3 pointCGAL(point.x, point.y, point.z);
+		pointsCGAL.push_back(pointCGAL);
+
+		DEBUG_PRINT("Convert Vector3d(%lf, %lf, %lf) to Point_3(%lf, %lf, %lf)",
+					point.x, point.y, point.z,
+					pointCGAL.x(), pointCGAL.y(), pointCGAL.z());
+
+		ASSERT(fabs(point.x - pointCGAL.x()) < EPS_MIN_DOUBLE);
+		ASSERT(fabs(point.y - pointCGAL.y()) < EPS_MIN_DOUBLE);
+		ASSERT(fabs(point.z - pointCGAL.z()) < EPS_MIN_DOUBLE);
+	}
+
+	/* Use the algorithm of standard STATIC convex hull. */
+	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), poly);
+
+	/* Calculate equations of planes for each facet. */
+	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
+			Plane_from_facet());
+
+	DEBUG_PRINT("Convex hull of %ld points contains %ld extreme points.",
+		points.size(), poly.size_of_vertices());
+
+	DEBUG_END;
+	return poly;
 }
