@@ -29,22 +29,8 @@
 
 #include <vector>
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/point_generators_3.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/convex_hull_3.h>
-
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Polyhedron_3<K> Polyhedron_3;
-typedef K::Segment_3 Segment_3;
-
-/** Define point creator */
-typedef K::Point_3 Point_3;
-typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
 /**
  * Main recovering engine, based on support function estimation tuned for our

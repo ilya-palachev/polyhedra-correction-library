@@ -95,6 +95,40 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 	DEBUG_END;
 }
 
+Polyhedron::Polyhedron(Polyhedron_3 p)
+{
+	DEBUG_START;
+
+	/* Check for non-null pointer. */
+	ASSERT(p);
+
+	/* Check for non-emptiness. */
+	ASSERT(p.size_of_vertices());
+	ASSERT(p.size_of_facets());
+
+	numVertices = p.size_of_facets();
+	numFacets = p.size_of_facets();
+
+	/* Allocate memory for arrays. */
+	vertices = new Vector3d[numVertices];
+	facets = new Facet[numFacets];
+
+	/* Transform vertexes. */
+	int iVertex = 0;
+	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end(); ++vertex)
+		vertices[iVertex++] = Vector3d(vertex.x(), vertex.y(), vertex.z());
+		
+
+	int iFacet = 0;
+	for (auto plane = p.planes_begin(); plane != p.planes_end(); ++plane)
+	{
+		facets[iFacet].plane = Z
+	}
+	}		
+	}
+	DEBUG_END;
+}
+
 Polyhedron::~Polyhedron()
 {
 	DEBUG_START;
