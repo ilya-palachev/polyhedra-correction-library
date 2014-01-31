@@ -42,9 +42,14 @@ Recoverer::~Recoverer()
 Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+
+	/* 1. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
 	DEBUG_PRINT("Number of extracted support planes: %ld",
 				supportPlanes.size());
+
+	/* 2. Map planes to dual space to obtain the set of points in it. */
+	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
 	DEBUG_END;
 	return NULL;
@@ -66,7 +71,7 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
 		{
 			SideOfContour* sideCurr = &contourCurr->sides[iSide];
-			
+
 			/*
 			 * Here the plane that is incident to points A1 and A2 of the
 			 * current side and collinear to the vector of projection.
@@ -96,4 +101,33 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 
 	DEBUG_END;
 	return supportPlanes;
+}
+
+vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
+{
+	DEBUG_START;
+	vector<Vector3d> vectors;
+	
+	for (auto &plane : planes)
+	{
+		/*
+		 * The transformation of polar duality works as follows:
+		 *
+		 * (ax + by + cz + d = 0) |--> (-a/d, -b/d, -c/d)
+		 * 
+		 * and reverse.
+		 */
+		Vector3d vector = plane.norm;
+
+		/* 3 multiplications is more efficient than 3 divisions: */
+		vector *= -1. / plane.dist;
+		vectors.push_back(vector);
+
+		DEBUG_PRINT("map (%lf) x + (%lf) y + (%lf) z + (%lf) = 0  |--> "
+			"(%lf, %lf, %lf)", plane.norm.x, plane.norm.y, plane.norm.z,
+			plane.dist, vector.x, vector.y, vector.z);
+	}
+	
+	return vectors;
+	DEBUG_END;
 }

@@ -50,10 +50,12 @@ private:
 	/**
 	 * Performs the transformation of polar duality for the given set of planes,
 	 * i. e. maps each plane as follows:
+	 * 
+	 * (ax + by + cz + d = 0) |--> (-a/d, -b/d, -c/d)
 	 *
 	 * @param planes	The vector of planes
 	 */
-	vector<Vector3d> mapPlanesToDualSpace(vector<plane> planes);
+	vector<Vector3d> mapPlanesToDualSpace(vector<Plane> planes);
 public:
 
 	/**
