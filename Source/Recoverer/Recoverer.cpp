@@ -45,7 +45,7 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 
 	/* 1. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
-	DEBUG_PRINT("Number of extracted support planes: %ld",
+	DEBUG_PRINT("Number of extracted support planes: %d",
 				supportPlanes.size());
 
 	/* 2. Map planes to dual space to obtain the set of points in it. */
@@ -184,7 +184,7 @@ Polyhedron_3 Recoverer::constructConvexHull (vector<Vector3d> points)
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
 
-	DEBUG_PRINT("Convex hull of %ld points contains %ld extreme points.",
+	DEBUG_PRINT("Convex hull of %d points contains %d extreme points.",
 		points.size(), poly.size_of_vertices());
 
 	DEBUG_END;
