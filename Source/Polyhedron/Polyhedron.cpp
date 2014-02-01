@@ -99,9 +99,6 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 {
 	DEBUG_START;
 
-	/* Check for non-null pointer. */
-	ASSERT(p);
-
 	/* Check for non-emptiness. */
 	ASSERT(p.size_of_vertices());
 	ASSERT(p.size_of_facets());
@@ -116,16 +113,54 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 	/* Transform vertexes. */
 	int iVertex = 0;
 	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end(); ++vertex)
-		vertices[iVertex++] = Vector3d(vertex.x(), vertex.y(), vertex.z());
-		
-
-	int iFacet = 0;
-	for (auto plane = p.planes_begin(); plane != p.planes_end(); ++plane)
 	{
-		facets[iFacet].plane = Z
+		vertices[iVertex++] = Vector3d(
+			vertex->point().x(),
+			vertex->point().y(),
+			vertex->point().z());
 	}
-	}		
-	}
+
+	/*
+	 * Transform facets.
+	 * This algorithm is based on example kindly provided at CGAL online user
+	 * manual. See example Polyhedron/polyhedron_prog_off.cpp
+	 */
+	int iFacet = 0;
+	auto plane = p.planes_begin();
+	auto facet = p.facets_begin();
+	/* Iterate through the lists of planes and facets. */
+	do
+	{
+		/* Transform current plane. */
+		facets[iFacet].plane = Plane(Vector3d(plane->a(), plane->b(),
+			plane->c()), plane->d());
+
+		/*
+		 * Iterate through the list of halfedges incident to the curent CGAL 
+		 * facet.
+		 */
+		auto halfedge = facet->facet_begin();
+
+		/* Facets in polyhedral surfaces are at least triangles. 	*/
+		CGAL_assertion(CGAL::circulator_size(halfedge) >= 3);
+
+		facets[iFacet].numVertices = CGAL::circulator_size(halfedge);
+		facets[iFacet].indVertices =
+			new int[3 * facets[iFacet].numVertices + 1];
+		/*
+		 * TODO: It's too unsafe architecture if we do such things as setting
+		 * the size of internal array outside the API functions. Moreover, it
+		 * can cause us to write memory leaks.
+		 * indFacets and numFacets should no be public members.
+		 */
+
+		int iFacetVertex = 0;
+		do
+		{
+			facets[iFacet].indVertices[iFacetVertex++] =
+				std::distance(p.vertices_begin(), halfedge->vertex());
+		} while (++halfedge != facet->facet_begin());
+	} while (++plane != p.planes_end() && ++facet != p.facets_end());
 	DEBUG_END;
 }
 
