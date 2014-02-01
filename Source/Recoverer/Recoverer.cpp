@@ -54,6 +54,16 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	/* 3. Construct convex hull in the dual space. */
 	Polyhedron_3 polyhedronDual = constructConvexHull(supportPoints);
 
+	/* 4. Convert CGAL polyhedron to PCL polyhedron: */
+	Polyhedron polyhedronDualPCL(polyhedronDual);
+	/*
+	 * TODO: We should not use absolute paths or .. here !!!
+	 * Default output directory should be determined by environmental variable
+	 * or by a config file.
+	 */
+	polyhedronDualPCL.fprint_ply_scale(1000.,
+		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
+
 	DEBUG_END;
 	return NULL;
 }
