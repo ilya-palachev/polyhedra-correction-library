@@ -109,6 +109,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 	/* Allocate memory for arrays. */
 	vertices = new Vector3d[numVertices];
 	facets = new Facet[numFacets];
+	vertexInfos = NULL;
 
 	/* Transform vertexes. */
 	int iVertex = 0;
@@ -131,6 +132,8 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 	/* Iterate through the lists of planes and facets. */
 	do
 	{
+		facets[iFacet].id = iFacet;
+
 		/* Transform current plane. */
 		facets[iFacet].plane = Plane(Vector3d(plane->a(), plane->b(),
 			plane->c()), plane->d());
