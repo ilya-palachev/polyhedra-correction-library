@@ -42,7 +42,7 @@ private:
 
 	/**
 	 * Extracts support planes from shadow contours.
-	 * 
+	 *
 	 * @param SCData	Shadow contours
 	 */
 	vector<Plane> extractSupportPlanes(ShadeContourDataPtr SCData);
@@ -50,7 +50,7 @@ private:
 	/**
 	 * Performs the transformation of polar duality for the given set of planes,
 	 * i. e. maps each plane as follows:
-	 * 
+	 *
 	 * (ax + by + cz + d = 0) |--> (-a/d, -b/d, -c/d)
 	 *
 	 * @param planes	The vector of planes
@@ -66,7 +66,7 @@ private:
 
 	/**
 	 * Builds dual polyhedron to the given polyhedron.
-	 * 
+	 *
 	 * @param p	Initial polyhedron
 	 */
 	PolyhedronPtr buildDualPolyhedron(PolyhedronPtr p);

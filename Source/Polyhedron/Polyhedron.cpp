@@ -139,7 +139,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 			plane->c()), plane->d());
 
 		/*
-		 * Iterate through the list of halfedges incident to the curent CGAL 
+		 * Iterate through the list of halfedges incident to the curent CGAL
 		 * facet.
 		 */
 		auto halfedge = facet->facet_begin();

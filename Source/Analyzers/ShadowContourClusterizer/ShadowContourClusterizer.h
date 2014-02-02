@@ -53,7 +53,7 @@ public:
 	/*
 	 * Build the plot of all observation at all contours for visualization in
 	 * GNU Plot program.
-	 * 
+	 *
 	 * @param contourData	Shadow contour data (set of given contours)
 	 * @param fileNamePlot	The of file used as output file parsed by GNU Plot.
 	 */

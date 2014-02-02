@@ -120,7 +120,7 @@ vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
 		 * The transformation of polar duality works as follows:
 		 *
 		 * (ax + by + cz + d = 0) |--> (-a/d, -b/d, -c/d)
-		 * 
+		 *
 		 * and reverse.
 		 */
 		Vector3d vector = plane.norm;
@@ -258,7 +258,7 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	}
 
 	/*
-	 * Create dual facets using the information computed during 
+	 * Create dual facets using the information computed during
 	 * pre-processing.
 	 */
 	for (int iVertex = 0; iVertex < p->numVertices; ++iVertex)
