@@ -52,6 +52,12 @@ set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -pedantic")
 # TODO: For ICC we need to set -fp-model here.
 set(COMMON_FLAGS "${COMMON_FLAGS} -frounding-math")
 
+message("Compiler is ${CMAKE_C_COMPILER}")
+if (${CMAKE_C_COMPILER} MATCHES ".*clang")
+	message("Clang compiler detected")
+	set(COMMON_FLAGS "-Wno-error=gnu-zero-variadic-macro-arguments")
+endif()
+
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
 add_library(lsm SHARED ${SOURCE_lsm})
