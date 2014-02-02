@@ -27,6 +27,8 @@
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
+#include <VertexInfo.h>
+#include <VertexInfo.h>
 
 Recoverer::Recoverer()
 {
@@ -223,3 +225,58 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	DEBUG_END;
 	return polyhedronDualPCL;
 }
+
+PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
+{
+	DEBUG_START;
+
+	/* Preprocess the initial polyhedron. */
+	p->preprocessAdjacency();
+
+	/* Allocate dual polyhedron. */
+	PolyhedronPtr pDual(new Polyhedron());
+
+	pDual->numVertices = p->numFacets;
+	pDual->numFacets = p->numVertices;
+
+	pDual->vertices = new Vector3d[pDual->numVertices];
+	pDual->facets = new Facet[pDual->numFacets];
+
+	/* Prepare and map the vector of planes to vector of points. */
+	vector<Plane> planes;
+	for (int iFacet = 0; iFacet < p->numFacets; ++iFacet)
+	{
+		planes.push_back(p->facets[iFacet].plane);
+	}
+
+	vector<Vector3d> vertices = mapPlanesToDualSpace(planes);
+
+	int iVertex = 0;
+	for (auto &vertex : vertices)
+	{
+		pDual->vertices[iVertex++] = vertex;
+	}
+
+	/*
+	 * Create dual facets using the information computed during 
+	 * pre-processing.
+	 */
+	for (int iVertex = 0; iVertex < p->numVertices; ++iVertex)
+	{
+		Facet *facetCurr = &pDual->facets[iVertex];
+		facetCurr->numVertices = p->vertexInfos[iVertex].numFacets;
+		facetCurr->indVertices = new int[3 * facetCurr->numVertices + 1];
+		for (int iFacet = 0; iFacet < facetCurr->numVertices; ++iFacet)
+		{
+			facetCurr->indVertices[iFacet] =
+				p->vertexInfos[iVertex].indFacets[iFacet];
+		}
+	}
+
+	/* Preprocess dual polyhedron. */
+	pDual->preprocessAdjacency();
+
+	DEBUG_END;
+	return pDual;
+}
+

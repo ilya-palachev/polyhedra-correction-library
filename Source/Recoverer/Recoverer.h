@@ -56,13 +56,20 @@ private:
 	 * @param planes	The vector of planes
 	 */
 	vector<Vector3d> mapPlanesToDualSpace(vector<Plane> planes);
-	
+
 	/**
 	 * Constructs convex hull of the point set using CGAL API.
 	 *
 	 * @param points	Vector of points
 	 */
 	PolyhedronPtr constructConvexHull(vector<Vector3d>);
+
+	/**
+	 * Builds dual polyhedron to the given polyhedron.
+	 * 
+	 * @param p	Initial polyhedron
+	 */
+	PolyhedronPtr buildDualPolyhedron(PolyhedronPtr p);
 public:
 
 	/**
