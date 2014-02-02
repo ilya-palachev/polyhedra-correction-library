@@ -62,7 +62,7 @@ private:
 	 *
 	 * @param points	Vector of points
 	 */
-	Polyhedron_3 constructConvexHull(vector<Vector3d>);
+	PolyhedronPtr constructConvexHull(vector<Vector3d>);
 public:
 
 	/**

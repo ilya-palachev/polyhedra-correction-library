@@ -103,7 +103,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 	ASSERT(p.size_of_vertices());
 	ASSERT(p.size_of_facets());
 
-	numVertices = p.size_of_facets();
+	numVertices = p.size_of_vertices();
 	numFacets = p.size_of_facets();
 
 	/* Allocate memory for arrays. */
@@ -163,7 +163,16 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 			facets[iFacet].indVertices[iFacetVertex++] =
 				std::distance(p.vertices_begin(), halfedge->vertex());
 		} while (++halfedge != facet->facet_begin());
+
+		/* Add cycling vertex to avoid assertion during printing. */
+		facets[iFacet].indVertices[facets[iFacet].numVertices] =
+			facets[iFacet].indVertices[0];
+
+		/* Increment the ID of facet. */
+		++iFacet;
+
 	} while (++plane != p.planes_end() && ++facet != p.facets_end());
+
 	DEBUG_END;
 }
 

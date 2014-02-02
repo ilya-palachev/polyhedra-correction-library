@@ -26,6 +26,7 @@
 #include "Recoverer/Recoverer.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "Polyhedron/Facet/Facet.h"
 
 Recoverer::Recoverer()
 {
@@ -52,17 +53,7 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
 	/* 3. Construct convex hull in the dual space. */
-	Polyhedron_3 polyhedronDual = constructConvexHull(supportPoints);
-
-	/* 4. Convert CGAL polyhedron to PCL polyhedron: */
-	PolyhedronPtr polyhedronDualPCL(new Polyhedron(polyhedronDual));
-	/*
-	 * TODO: We should not use absolute paths or .. here !!!
-	 * Default output directory should be determined by environmental variable
-	 * or by a config file.
-	 */
-	polyhedronDualPCL->fprint_ply_scale(1000.,
-		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
+	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
 
 	DEBUG_END;
 	return NULL;
@@ -166,7 +157,7 @@ struct Plane_from_facet
 	}
 };
 
-Polyhedron_3 Recoverer::constructConvexHull (vector<Vector3d> points)
+PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 {
 	DEBUG_START;
 	Polyhedron_3 poly;
@@ -186,6 +177,16 @@ Polyhedron_3 Recoverer::constructConvexHull (vector<Vector3d> points)
 		ASSERT(fabs(point.y - pointCGAL.y()) < EPS_MIN_DOUBLE);
 		ASSERT(fabs(point.z - pointCGAL.z()) < EPS_MIN_DOUBLE);
 	}
+	DEBUG_PRINT("There are %d PCL points and %d CGAL points", points.size(),
+		pointsCGAL.size());
+	auto point = points.begin();
+	auto pointCGAL = pointsCGAL.begin();
+	do
+	{
+		ASSERT(fabs(point->x - pointCGAL->x()) < EPS_MIN_DOUBLE);
+		ASSERT(fabs(point->y - pointCGAL->y()) < EPS_MIN_DOUBLE);
+		ASSERT(fabs(point->z - pointCGAL->z()) < EPS_MIN_DOUBLE);
+	} while(++point != points.end() && ++pointCGAL != pointsCGAL.end());
 
 	/* Use the algorithm of standard STATIC convex hull. */
 	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), poly);
@@ -196,7 +197,29 @@ Polyhedron_3 Recoverer::constructConvexHull (vector<Vector3d> points)
 
 	DEBUG_PRINT("Convex hull of %d points contains %d extreme points.",
 		points.size(), poly.size_of_vertices());
+	
+	DEBUG_PRINT("Output polyhedron contains %d vertices, %d halfedges and %d "
+		"facets", poly.size_of_vertices(), poly.size_of_halfedges(),
+		poly.size_of_facets());
 
+	/* Convert CGAL polyhedron to PCL polyhedron: */
+	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
+	/*for (int iFacet = 0; iFacet < polyhedronDualPCL->numFacets; ++iFacet)
+	{
+		polyhedronDualPCL->facets[iFacet].parentPolyhedron =
+			polyhedronDualPCL->get_ptr();
+	}*/
+	polyhedronDualPCL->set_parent_polyhedron_in_facets();
+	polyhedronDualPCL->my_fprint(stdout);
+	
+	/*
+	 * TODO: We should not use absolute paths or .. here !!!
+	 * Default output directory should be determined by environmental variable
+	 * or by a config file.
+	 */
+	polyhedronDualPCL->fprint_ply_scale(1000.,
+		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
+	
 	DEBUG_END;
-	return poly;
+	return polyhedronDualPCL;
 }
