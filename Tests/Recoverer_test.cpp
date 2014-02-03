@@ -68,6 +68,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	DEBUG_END;
 }
 
+/**
+ * Prints the usage of the program.
+ */
 void printUsage(void)
 {
 	DEBUG_START;
@@ -76,6 +79,12 @@ void printUsage(void)
 	DEBUG_END;
 }
 
+/**
+ * The main function of the test.
+ * 
+ * @param argc	Standard Linux argc
+ * @param argv	Standard Linux argv
+ */
 int main(int argc, char** argv)
 {
 	DEBUG_START;
