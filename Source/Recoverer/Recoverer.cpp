@@ -57,6 +57,9 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	/* 3. Construct convex hull in the dual space. */
 	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
 
+	/* 4. Map dual polyhedron to the primal space. */
+	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
+
 	DEBUG_END;
 	return NULL;
 }
@@ -206,11 +209,7 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 
 	/* Convert CGAL polyhedron to PCL polyhedron: */
 	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
-	/*for (int iFacet = 0; iFacet < polyhedronDualPCL->numFacets; ++iFacet)
-	{
-		polyhedronDualPCL->facets[iFacet].parentPolyhedron =
-			polyhedronDualPCL->get_ptr();
-	}*/
+
 	polyhedronDualPCL->set_parent_polyhedron_in_facets();
 	polyhedronDualPCL->my_fprint(stdout);
 	
@@ -274,7 +273,11 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	}
 
 	/* Preprocess dual polyhedron. */
+	pDual->set_parent_polyhedron_in_facets();
 	pDual->preprocessAdjacency();
+	pDual->my_fprint(stdout);
+	pDual->fprint_ply_scale(1000., "../poly-data-out/poly-primal-debug.ply", 
+		"primal-polyhedron");
 
 	DEBUG_END;
 	return pDual;
