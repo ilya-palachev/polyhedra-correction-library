@@ -218,7 +218,7 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	 * Default output directory should be determined by environmental variable
 	 * or by a config file.
 	 */
-	polyhedronDualPCL->fprint_ply_scale(1000.,
+	polyhedronDualPCL->fprint_ply_scale(1000000.,
 		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
 	
 	DEBUG_END;
