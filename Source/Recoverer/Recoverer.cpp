@@ -48,8 +48,8 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 
 	/* 1. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
-	DEBUG_PRINT("Number of extracted support planes: %d",
-				supportPlanes.size());
+	DEBUG_PRINT("Number of extracted support planes: %ld",
+		(long unsigned int) supportPlanes.size());
 
 	/* 2. Map planes to dual space to obtain the set of points in it. */
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
@@ -182,8 +182,9 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 		ASSERT(fabs(point.y - pointCGAL.y()) < EPS_MIN_DOUBLE);
 		ASSERT(fabs(point.z - pointCGAL.z()) < EPS_MIN_DOUBLE);
 	}
-	DEBUG_PRINT("There are %d PCL points and %d CGAL points", points.size(),
-		pointsCGAL.size());
+	DEBUG_PRINT("There are %ld PCL points and %ld CGAL points",
+		(long unsigned int) points.size(),
+		(long unsigned int) pointsCGAL.size());
 	auto point = points.begin();
 	auto pointCGAL = pointsCGAL.begin();
 	do
@@ -200,12 +201,15 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
 
-	DEBUG_PRINT("Convex hull of %d points contains %d extreme points.",
-		points.size(), poly.size_of_vertices());
+	DEBUG_PRINT("Convex hull of %ld points contains %ld extreme points.",
+		(long unsigned int) points.size(),
+		(long unsigned int) poly.size_of_vertices());
 	
-	DEBUG_PRINT("Output polyhedron contains %d vertices, %d halfedges and %d "
-		"facets", poly.size_of_vertices(), poly.size_of_halfedges(),
-		poly.size_of_facets());
+	DEBUG_PRINT("Output polyhedron contains %ld vertices, %ld halfedges and "
+		"%ld facets",
+		(long unsigned int) poly.size_of_vertices(),
+		(long unsigned int) poly.size_of_halfedges(),
+		(long unsigned int) poly.size_of_facets());
 
 	/* Convert CGAL polyhedron to PCL polyhedron: */
 	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
