@@ -18,9 +18,55 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include "PolyhedraCorrectionLibrary.h"
 
 #define NUM_ARGS_EXPECTED 2
+
+/**
+ * Mode of recoverer testing.
+ */
+enum ModeOfRecovererTesting
+{
+	/** Test on real shadow contour data written to file. */
+	RECOVERER_REAL_TESTING,
+
+	/** Test on synthetic model based shadow contour data. */
+	RECOVERER_SYNTHETIC_TESTING
+};
+
+/**
+ * The result of command line option parsing.
+ */
+typedef struct
+{
+	/** Mode of recoverer testing. */
+	ModeOfRecovererTesting mode;
+
+	/** The string with intput data location. */
+	union input
+	{
+		/** File name with existent shadow contour data. */
+		char *fileName;
+
+		/** The name of synthetic geometric figure. */
+		char *figureName;
+	};
+} CommandLineOptions;
+
+/**
+ * Parses command line string to obtain options from it.
+ * 
+ * @param argc	Standard Linux argc
+ * @param argv	Standard Linux argv
+ */
+CommandLineOptions* parseCommandLine(int argc, char** argv)
+{
+	DEBUG_START;
+	CommandLineOptions* options = new CommandLineOptions();
+	DEBUG_END;
+}
 
 void printUsage(void)
 {
