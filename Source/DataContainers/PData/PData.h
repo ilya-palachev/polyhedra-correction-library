@@ -28,6 +28,10 @@
 class PData
 {
 public:
+	/*
+	 * TODO: Polyhedral data in practice can be associated with no polyhedron.
+	 * So we need not have a pointer to parent polyhedron here.
+	 */
 	shared_ptr<Polyhedron> polyhedron;
 	PData(shared_ptr<Polyhedron> p);
 	virtual ~PData();
