@@ -18,11 +18,20 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file Recoverer_test.cpp
+ * @brief Unit tests for Recoverer of the polyhedron.
+ */
+
 #include <unistd.h>
 
 #include "PolyhedraCorrectionLibrary.h"
 
-#define NUM_ARGS_EXPECTED 2
+/** The name of the test. */
+#define TEST_NAME			"./Recoverer_test"
+
+/** The number of command line arguments expected. */
+#define NUM_ARGS_EXPECTED	2
 
 /**
  * Mode of recoverer testing.
@@ -84,6 +93,85 @@ typedef struct
 #define GETOPT_FAILURE -1
 
 /**
+ * Unumeration that describes possible synthetic models that can be used in
+ * recoverer testing.
+ */
+enum RecovererTestModelID
+{
+	MODEL_CUBE = 0,			/**< The cube */
+	MODEL_PYRAMID = 1,		/**< The pyramid */
+	MODEL_PRISM = 2,		/**< The prism */
+	MODEL_CUBE_CUTTED = 3	/**< The cube with a whole cutted out from it */
+};
+
+/** The number of possible test models. */
+#define RECOVERER_TEST_MODELS_NUMBER	4
+
+/** Structure describing given test model. */
+typedef struct
+{
+	RecovererTestModelID id;	/**< The ID of model */
+	char *name;					/**< Name */
+	char *secription;			/**< Decription */
+} RecovererTestModel;
+
+RecovererTestModel *recovererTestModels[] =
+{
+	{
+		MODEL_CUBE,
+		"cube",
+		"Simple cube with coordinates of points +1 / -1."
+	},
+	{
+		MODEL_PYRAMID,
+		"pyramid",
+		"Triangled pyramid with ideal triangle in bottom."
+	},
+	{
+		MODEL_PRISM,
+		"prism",
+		"Triangled prism with ideal triangles in top and bottom."
+	},
+	{
+		MODEL_CUBE_CUTTED,
+		"cube_cutted",
+		"The cube with a whole cutted out from it"
+	}
+};
+
+/**
+ * Prints the usage of the program.
+ *
+ * @param argc	Standard Linux argc
+ * @param argv	Standard Linux argv
+ */
+void printUsage(int argc, char** argv)
+{
+	DEBUG_START;
+	printf("Usage:\n");
+	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.");
+	STDERR_PRINT("Usage:\n");
+	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number of "
+		"contours>]\n", TEST_NAME, OPTION_FILE_NAME, OPTION_MODEL_NAME,
+		OPTION_CONTOURS_NUMBER);
+	STDERR_PRINT("Options:\n");
+	STDERR_PRINT("\t-%c\tThe name of file with shadow contours to be "
+		"processed\n", OPTION_FILE_NAME);
+	STDERR_PRINT("\t-%c\tThe name of synthetic model to be tested on.\n",
+		OPTION_MODEL_NAME);
+	STDERR_PRINT("\t-%c\tThe number of contours to be generated from the "
+		"synthetic model\n", OPTION_CONTOURS_NUMBER);
+	STDERR_PRINT("Possible synthetic models are:\n");
+	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
+	{
+		RecovererTestModel *model = &recovererTestModels[iModel];
+		STDERR_PRINT("\t%d.\"%s\"\t- %s\n", model->id, model->name,
+			model->desciption);
+	}
+	DEBUG_END;
+}
+
+/**
  * Parses command line string to obtain options from it.
  * 
  * @param argc	Standard Linux argc
@@ -94,6 +182,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	DEBUG_START;
 	CommandLineOptions* options = new CommandLineOptions();
 	bool ifOptionF = false, ifOptionM = false, ifOptionN = false;
+	int charCurr;
 	opterr = 0;
 
 	/*
@@ -115,44 +204,64 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			options->input.figureName = optarg;
 			break;
 		case OPTION_CONTOURS_NUMBER:
-			options
+			options->numContours = atoi(optarg);
 			break;
 		case GETOPT_QUESTION:
+			switch (optopt)
+			{
+			case OPTION_FILE_NAME:
+				STDERR_PRINT("Option \"-%c\" requires an argument - the name of 
+"					"input file.", OPTION_FILE_NAME);
+				printUsage();
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+				break;
+			case OPTION_MODEL_NAME:
+				STDERR_PRINT("Option \"-%c\" requires an argument - the name of 
+"					"synthetic model to be tested.", OPTION_MODEL_NAME);
+				printUsage();
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			case OPTION_CONTOURS_NUMBER:
+				STDERR_PRINT("Option \"-%c\" requires an argument - the number "
+					"contour generated from original model (in synthetic "
+					"testing mode)", OPTION_CONTOURS_NUMBER);
+				printUsage();
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			default:
+				ASSERT(0 && "Impossible happened.");
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
 			break;
 		default:
 			ASSERT(0 && "Impossible happened.");
+			DEBUG_END;
+			exit(EXIT_FAILURE);
 			break;
 		}
 
 		/* Check that options "-f" and "-m" are not given at the same time. */
 		if (ifOptionF && ifOptionM)
 		{
-			ERROR_PRINT(stderr, "Options \"-f\" and \"-m\" cannot be given"
-				" simultaneously.");
+			STDERR_PRINT("Options \"-%s\" and \"-%c\" cannot be given"
+				" simultaneously.", OPTION_FILE_NAME, OPTION_MODEL_NAME);
 			printUsage();
+			DEBUG_END;
 			exit(EXIT_FAILURE);
 		}
 
 		/* Check that option "-n" is provided for option "-m". */
 		if ((ifOptionM && !ifOptionN) || (!ifOptionM && ifOptionN))
 		{
-			ERROR_PRINT(stderr, "Options \"-m\" and \"-n\" must be given"
-				"");
+			STDERR_PRINT("Options \"-%c\" and \"-%c\" must be given"
+				" simultaneously.", OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
 			printUsage();
+			DEBUG_END;
 			exit(EXIT_FAILURE);
 		}
 	}
-	DEBUG_END;
-}
-
-/**
- * Prints the usage of the program.
- */
-void printUsage(void)
-{
-	DEBUG_START;
-	printf("Usage:\n");
-	printf("./Recoverer_test <input file>\n");
 	DEBUG_END;
 }
 
@@ -167,7 +276,7 @@ int main(int argc, char** argv)
 	DEBUG_START;
 	if (argc != NUM_ARGS_EXPECTED)
 	{
-		ERROR_PRINT("Wrong arguments provided to program.");
+		STDERR_PRINT("Wrong arguments provided to program.");
 		printUsage();
 		DEBUG_END;
 		return EXIT_FAILURE;
