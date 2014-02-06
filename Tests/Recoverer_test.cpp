@@ -156,8 +156,8 @@ RecovererTestModel recovererTestModels[] =
 void printUsage(int argc, char** argv)
 {
 	DEBUG_START;
-	printf("Usage:\n");
-	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.", TEST_NAME);
+	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.\n\n",
+		TEST_NAME);
 	STDERR_PRINT("Usage:\n");
 	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number of "
 		"contours>]\n", TEST_NAME, OPTION_FILE_NAME, OPTION_MODEL_NAME,
@@ -184,6 +184,9 @@ void printUsage(int argc, char** argv)
  * 
  * @param argc	Standard Linux argc
  * @param argv	Standard Linux argv
+ *
+ * TODO: We need to implement some common option parser (like in busybox)
+ * to avoid such huge tons of code in test implementations.
  */
 CommandLineOptions* parseCommandLine(int argc, char** argv)
 {
@@ -192,6 +195,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionFileName = false;
 	bool ifOptionModelName = false;
 	bool ifOptionNumContours = false;
+	bool ifOptionFirstAngle = false;
 	long int charCurr;
 	opterr = 0;
 
@@ -208,10 +212,29 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		switch (charCurr)
 		{
 		case OPTION_FILE_NAME:
+			if (ifOptionFileName)
+			{
+				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
+					" time.\n", OPTION_FILE_NAME);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+
 			options->mode = RECOVERER_REAL_TESTING;
 			options->input.fileName = optarg;
+			ifOptionFileName = true;
 			break;
 		case OPTION_MODEL_NAME:
+			if (ifOptionModelName)
+			{
+				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
+					" time.\n", OPTION_MODEL_NAME);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+
 			options->mode = RECOVERER_SYNTHETIC_TESTING;
 			for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER;
 				++iModel)
@@ -219,10 +242,28 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 				if (strcmp(optarg, recovererTestModels[iModel].name) == 0)
 				{
 					options->input.model.id = (RecovererTestModelID) iModel;
+					ifOptionModelName = true;
+					break;
 				}
+			}
+			if (!ifOptionModelName)
+			{
+				STDERR_PRINT("Invalid name of model - %s\n", optarg);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
 			}
 			break;
 		case OPTION_CONTOURS_NUMBER:
+			if (ifOptionNumContours)
+			{
+				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
+					" time.\n", OPTION_CONTOURS_NUMBER);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+
 			/* Parse digital number from input argument. */
 			options->input.model.numContours =
 					strtol(optarg, &charMistaken, 10);
@@ -230,7 +271,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			/* If user gives invalid character, the charMistaken is set to it */
 			if (charMistaken)
 			{
-				STDERR_PRINT("Cannot parse number. Invalid character %s",
+				STDERR_PRINT("Cannot parse number. Invalid character %s\n",
 					charMistaken);
 				printUsage(argc, argv);
 				DEBUG_END;
@@ -240,13 +281,23 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			/* In case of underflow or overflow errno is set to ERANGE. */
 			if (errno == ERANGE)
 			{
-				STDERR_PRINT("Given number of contours is out of range");
+				STDERR_PRINT("Given number of contours is out of range\n");
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
 			}
+
+			ifOptionNumContours = true;
 			break;
 		case OPTION_FIRST_ANGLE:
+			if (ifOptionFirstAngle)
+			{
+				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
+					"time.\n", OPTION_FIRST_ANGLE);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
 			/* Parse floating-point number from input argument. */
 			options->input.model.shiftAngleFirst =
 					strtod(optarg, &charMistaken);
@@ -254,7 +305,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			/* If user gives invalid character, the charMistaken is set to it */
 			if (charMistaken)
 			{
-				STDERR_PRINT("Cannot parse number. Invalid character %s",
+				STDERR_PRINT("Cannot parse number. Invalid character %s\n",
 					charMistaken);
 				printUsage(argc, argv);
 				DEBUG_END;
@@ -264,25 +315,27 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			/* In case of underflow or overflow errno is set to ERANGE. */
 			if (errno == ERANGE)
 			{
-				STDERR_PRINT("Given value of angle is out of range");
+				STDERR_PRINT("Given value of angle is out of range\n");
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
 			}
+
+			ifOptionFirstAngle = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
 			{
 			case OPTION_FILE_NAME:
 				STDERR_PRINT("Option \"-%c\" requires an argument - the name of"
-					" input file.", OPTION_FILE_NAME);
+					" input file.\n", OPTION_FILE_NAME);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
 				break;
 			case OPTION_MODEL_NAME:
 				STDERR_PRINT("Option \"-%c\" requires an argument - the name of"
-					" synthetic model to be tested.", OPTION_MODEL_NAME);
+					" synthetic model to be tested.\n", OPTION_MODEL_NAME);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
@@ -290,7 +343,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			case OPTION_CONTOURS_NUMBER:
 				STDERR_PRINT("Option \"-%c\" requires an argument - the number "
 					"contour generated from original model (in synthetic "
-					"testing mode)", OPTION_CONTOURS_NUMBER);
+					"testing mode)\n", OPTION_CONTOURS_NUMBER);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
@@ -298,7 +351,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			case OPTION_FIRST_ANGLE:
 				STDERR_PRINT("Option \"-%c\" requires an argument -- the value "
 					"of the first angle from which the first shadow contour is "
-					"generated.", OPTION_FIRST_ANGLE);
+					"generated.\n", OPTION_FIRST_ANGLE);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
@@ -316,37 +369,38 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			exit(EXIT_FAILURE);
 			break;
 		}
-
-		/* Check that options "-f" and "-m" are not given at the same time. */
-		if (ifOptionFileName && ifOptionModelName)
-		{
-			STDERR_PRINT("Options \"-%c\" and \"-%c\" cannot be given"
-				" simultaneously.", OPTION_FILE_NAME, OPTION_MODEL_NAME);
-			printUsage(argc, argv);
-			DEBUG_END;
-			exit(EXIT_FAILURE);
-		}
-
-		/* Check that option "-n" is provided for option "-m". */
-		if ((ifOptionModelName && !ifOptionNumContours)
-			|| (!ifOptionModelName && ifOptionNumContours))
-		{
-			STDERR_PRINT("Options \"-%c\" and \"-%c\" must be given"
-				" simultaneously.", OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
-			printUsage(argc, argv);
-			DEBUG_END;
-			exit(EXIT_FAILURE);
-		}
-
-		if (!ifOptionFileName && !ifOptionModelName)
-		{
-			STDERR_PRINT("At least one of options \"-%c\" and \"-%c\" must be "
-				"specified", OPTION_FILE_NAME, OPTION_MODEL_NAME);
-			printUsage(argc, argv);
-			DEBUG_END;
-			exit(EXIT_FAILURE);
-		}
 	}
+
+	/* Check that options "-f" and "-m" are not given at the same time. */
+	if (ifOptionFileName && ifOptionModelName)
+	{
+		STDERR_PRINT("Options \"-%c\" and \"-%c\" cannot be given"
+			" simultaneously.\n", OPTION_FILE_NAME, OPTION_MODEL_NAME);
+		printUsage(argc, argv);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
+	/* Check that option "-n" is provided for option "-m". */
+	if ((ifOptionModelName && !ifOptionNumContours)
+		|| (!ifOptionModelName && ifOptionNumContours))
+	{
+		STDERR_PRINT("Options \"-%c\" and \"-%c\" must be given"
+			" simultaneously.\n", OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
+		printUsage(argc, argv);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!ifOptionFileName && !ifOptionModelName)
+	{
+		STDERR_PRINT("At least one of options \"-%c\" and \"-%c\" must be "
+			"specified.\n", OPTION_FILE_NAME, OPTION_MODEL_NAME);
+		printUsage(argc, argv);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
 	DEBUG_END;
 	return options;
 }
