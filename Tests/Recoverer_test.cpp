@@ -58,7 +58,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:"
 
 
 /** Error return value of getopt function. */
@@ -169,11 +169,13 @@ void printUsage(int argc, char** argv)
 		OPTION_MODEL_NAME);
 	STDERR_PRINT("\t-%c\tThe number of contours to be generated from the "
 		"synthetic model\n", OPTION_CONTOURS_NUMBER);
+	STDERR_PRINT("\t-%c\tThe fist angle from which the first shadow contour is "
+		"obtained\n", OPTION_FIRST_ANGLE);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
 		RecovererTestModel *model = &recovererTestModels[iModel];
-		STDERR_PRINT("\t%d.\"%s\"\t- %s\n", model->id, model->name,
+		STDERR_PRINT("\t%d.  \"%s\"\t- %s\n", model->id, model->name,
 			model->description);
 	}
 	DEBUG_END;
@@ -269,7 +271,13 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 					strtol(optarg, &charMistaken, 10);
 
 			/* If user gives invalid character, the charMistaken is set to it */
-			if (charMistaken)
+			/*
+			 * From "man strtol":
+			 *
+			 * In particular, if *nptr is not '\0' but **endptr is '\0' on
+			 * return, the entire string is valid.
+			 */
+			if (charMistaken && *charMistaken)
 			{
 				STDERR_PRINT("Cannot parse number. Invalid character %s\n",
 					charMistaken);
@@ -303,7 +311,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 					strtod(optarg, &charMistaken);
 
 			/* If user gives invalid character, the charMistaken is set to it */
-			if (charMistaken)
+			if (charMistaken && *charMistaken)
 			{
 				STDERR_PRINT("Cannot parse number. Invalid character %s\n",
 					charMistaken);
@@ -382,11 +390,12 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	}
 
 	/* Check that option "-n" is provided for option "-m". */
-	if ((ifOptionModelName && !ifOptionNumContours)
+	if ((ifOptionModelName && (!ifOptionNumContours || !ifOptionFirstAngle))
 		|| (!ifOptionModelName && ifOptionNumContours))
 	{
-		STDERR_PRINT("Options \"-%c\" and \"-%c\" must be given"
-			" simultaneously.\n", OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
+		STDERR_PRINT("Option \"-%c\" requires options \"-%c\" and \"-%c\" to be"
+			" specified.\n", OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER,
+			OPTION_FIRST_ANGLE);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -490,6 +499,9 @@ int main(int argc, char** argv)
 	{
 		/* Create polyhedron based on one of possible models. */
 		PolyhedronPtr p(makePolyhedron(options->input.model.id));
+
+		/* Set the pointer to the parent polyhedron in facets. */
+		p->set_parent_polyhedron_in_facets();
 
 		/* Create shadow contour data and associate p with it. */
 		ShadeContourDataPtr SCData(new ShadeContourData(p));
