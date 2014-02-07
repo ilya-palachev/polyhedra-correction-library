@@ -90,6 +90,17 @@ public:
 	 * measurements.
 	 */
 	Polyhedron* buildNaivePolyhedron(ShadeContourDataPtr SCData);
+
+	/**
+	 * Builds non-convex polyhedron in dual space that contains all dual images
+	 * of support planes.
+	 * It will be used for visualization to analyze the level of noise in
+	 * support planes measurements.
+	 *
+	 * @param SCData	Shadow contour data based on noisy experimental
+	 * measurements.
+	 */
+	Polyhedron* buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;
