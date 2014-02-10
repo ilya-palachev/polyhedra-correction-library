@@ -64,6 +64,45 @@ Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	return NULL;
 }
 
+Polyhedron* Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+
+	/* 1. Extract support planes from shadow contour data. */
+	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
+	DEBUG_PRINT("Number of extracted support planes: %ld",
+		(long unsigned int) supportPlanes.size());
+
+	/* 2. Map planes to dual space to obtain the set of points in it. */
+	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
+
+	/* 3. Normalize all points so that to put the to the sphere. */
+	vector<Vector3d> supportPointsNormalized;
+	supportPointsNormalized.insert(supportPointsNormalized.begin(),
+			supportPoints.begin(), supportPoints.end());
+	for (auto &v : supportPointsNormalized)
+	{
+		v.norm(1.);
+	}
+
+	/* 4. Construct convex hull in the dual space. */
+	PolyhedronPtr polyhedronDual = constructConvexHull(supportPointsNormalized);
+
+	/* 5. Restore saved coordinates of vectors. */
+	int iVertex = 0;
+	for (auto &v : supportPoints)
+	{
+		polyhedronDual->vertices[iVertex++] = v;
+	}
+
+	/* 6. Print resulting polyhedron to the file. */
+	polyhedronDual->fprint_ply_scale(1000000.,
+		"../poly-data-out/poly-dual-nonconvex-debug.ply", "dual-polyhedron");
+
+	DEBUG_END;
+	return NULL;
+}
+
 vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
