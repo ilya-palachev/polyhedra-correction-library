@@ -86,8 +86,7 @@ public:
 	 * Builds naive polyhedron using naive approach that intersect half-spaces
 	 * corresponding to support planes.
 	 *
-	 * @param SCData	Shadow contour data based on noisy experimental
-	 * measurements.
+	 * @param SCData	Shadow contour data
 	 */
 	Polyhedron* buildNaivePolyhedron(ShadeContourDataPtr SCData);
 
@@ -97,10 +96,17 @@ public:
 	 * It will be used for visualization to analyze the level of noise in
 	 * support planes measurements.
 	 *
-	 * @param SCData	Shadow contour data based on noisy experimental
-	 * measurements.
+	 * @param SCData	Shadow contour data
 	 */
 	Polyhedron* buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData);
+
+	/**
+	 * Builds polyhedron consisting of facets constructed from shadow contours
+	 * from original data. Is used for debugging purposes.
+	 *
+	 * @param SCData	Shadow contour data
+	 */
+	Polyhedron* buildContours(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;
