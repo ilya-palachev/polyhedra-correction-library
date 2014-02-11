@@ -70,7 +70,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:d"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:dc"
 
 
 /** Error return value of getopt function. */
@@ -395,14 +395,16 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 				exit(EXIT_FAILURE);
 				break;
 			default:
-				ASSERT(0 && "Impossible happened.");
+				STDERR_PRINT("Unknown option \"-%c\"\n", optopt);
+				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
 				break;
 			}
 			break;
 		default:
-			ASSERT(0 && "Impossible happened.");
+			STDERR_PRINT("Failed to parse command line.\n");
+			printUsage(argc, argv);
 			DEBUG_END;
 			exit(EXIT_FAILURE);
 			break;
