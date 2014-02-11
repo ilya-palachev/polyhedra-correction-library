@@ -108,6 +108,47 @@ Polyhedron* Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData)
 	return NULL;
 }
 
+Polyhedron* Recoverer::buildContours(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+
+	/* New polyhedron will have 1 facet for each shadow contour. */
+	int numFacets = SCData->numContours;
+
+	/* Count the total number of vertices required for polyhedron. */
+	int numVertices = 0;
+	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
+	{
+		numVertices += SCData->contours[iContour].ns;
+	}
+	PolyhedronPtr p(new Polyhedron(numVertices, numFacets));
+
+	/* Add a facet for each shadow contour. */
+	int iVertex = 0;
+	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
+	{
+		SContour* contourCurr = &SCData->contours[iContour];
+		Facet* facetNew = new Facet(iContour, contourCurr->ns,
+				contourCurr->plane, NULL);
+		p->facets[iContour] = *facetNew;
+		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
+		{
+			/* Nota Bene: here we read only 1st vertex of current side. */
+			p->vertices[iVertex] = contourCurr->sides[iSide].A1;
+			p->facets[iContour].indVertices[iSide] = iVertex;
+			++iVertex;
+		}
+	}
+	p->set_parent_polyhedron_in_facets();
+
+	/* Print resulting polyhedron to the file. */
+	p->fprint_ply_scale(1000000., "../poly-data-out/poly-contours.ply",
+		"contours");
+
+	DEBUG_END;
+	return NULL;
+}
+
 vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
