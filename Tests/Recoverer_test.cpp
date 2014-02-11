@@ -52,13 +52,19 @@
  */
 #define OPTION_FIRST_ANGLE 'a'
 
+/**
+ * Option "-d" forces forces recoverer to avoid recovering and just visualize
+ * dual non-convex polyhedron.
+ */
+#define OPTION_DUAL_NONCONVEX_POLYHEDRON 'd'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:d"
 
 
 /** Error return value of getopt function. */
@@ -110,6 +116,9 @@ typedef struct
 			double shiftAngleFirst;		/**< The value of first angle */
 		} model;
 	} input;
+
+	/** Whether to build dual non-convex polyhedron. */
+	bool ifBuildDualNonConvexPolyhedron;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -171,6 +180,8 @@ void printUsage(int argc, char** argv)
 		"synthetic model\n", OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("\t-%c\tThe fist angle from which the first shadow contour is "
 		"obtained\n", OPTION_FIRST_ANGLE);
+	STDERR_PRINT("\t-%c\tBuild only dual non-convex polyhedron.\n",
+		OPTION_DUAL_NONCONVEX_POLYHEDRON);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -206,6 +217,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	 * See http://www.gnu.org/software/libc/manual/html_node/Getopt.html
 	 * for details.
 	 */
+	options->ifBuildDualNonConvexPolyhedron = false;
 	while ((charCurr = getopt(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION))
 		!= GETOPT_FAILURE)
 	{
@@ -330,6 +342,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			ifOptionFirstAngle = true;
+			break;
+		case OPTION_DUAL_NONCONVEX_POLYHEDRON:
+			options->ifBuildDualNonConvexPolyhedron = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -463,6 +478,61 @@ PolyhedronPtr makePolyhedron(RecovererTestModelID id)
 }
 
 /**
+ * Gets real shadow contour data from file.
+ *
+ * @param options	The result of command-line parsing.
+ */
+ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
+{
+	DEBUG_START;
+
+	/* Create fake empty polyhedron. */
+	PolyhedronPtr p(new Polyhedron());
+
+	/* Create shadow contour data and associate p with it. */
+	ShadeContourDataPtr SCData(new ShadeContourData(p));
+
+	/* Read shadow contours data from file. */
+	SCData->fscanDefault(options->input.fileName);
+
+	DEBUG_END;
+	return SCData;
+}
+
+/**
+ * Generates synthetic shadow contour data.
+ *
+ * @param options	The result of command-line parsing.
+ */
+ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
+{
+	DEBUG_START;
+
+	/* Create polyhedron based on one of possible models. */
+	PolyhedronPtr p(makePolyhedron(options->input.model.id));
+
+	/* Set the pointer to the parent polyhedron in facets. */
+	p->set_parent_polyhedron_in_facets();
+
+	/* Create shadow contour data and associate p with it. */
+	ShadeContourDataPtr SCData(new ShadeContourData(p));
+
+	/*
+	 * Create shadow contour constructor and associate p and SCData with
+	 * them.
+	 */
+	ShadeContourConstructorPtr constructor(new ShadeContourConstructor(p,
+			SCData));
+
+	/* Generate shadow contours data for given model. */
+	constructor->run(options->input.model.numContours,
+			options->input.model.shiftAngleFirst);
+
+	DEBUG_END;
+	return SCData;
+}
+
+/**
  * The main function of the test.
  * 
  * @param argc	Standard Linux argc
@@ -478,48 +548,27 @@ int main(int argc, char** argv)
 	 */
 	CommandLineOptions *options = parseCommandLine(argc, argv);
 
+	ShadeContourDataPtr SCData;
+
 	if (options->mode == RECOVERER_REAL_TESTING)
 	{
-		/* Create fake empty polyhedron. */
-		PolyhedronPtr p(new Polyhedron());
-
-		/* Create shadow contour data and associate p with it. */
-		ShadeContourDataPtr SCData(new ShadeContourData(p));
-
-		/* Read shadow contours data from file. */
-		SCData->fscanDefault(options->input.fileName);
-
-		/* Create the recoverer.*/
-		RecovererPtr recoverer(new Recoverer());
-
-		/* Run naive recovering. */
-		recoverer->buildNaivePolyhedron(SCData);
+		SCData = getRealSCData(options);
 	}
 	else if (options->mode == RECOVERER_SYNTHETIC_TESTING)
 	{
-		/* Create polyhedron based on one of possible models. */
-		PolyhedronPtr p(makePolyhedron(options->input.model.id));
+		SCData = generateSyntheticSCData(options);
+	}
 
-		/* Set the pointer to the parent polyhedron in facets. */
-		p->set_parent_polyhedron_in_facets();
+	/* Create the recoverer.*/
+	RecovererPtr recoverer(new Recoverer());
 
-		/* Create shadow contour data and associate p with it. */
-		ShadeContourDataPtr SCData(new ShadeContourData(p));
-
-		/*
-		 * Create shadow contour constructor and associate p and SCData with
-		 * them.
-		 */
-		ShadeContourConstructorPtr constructor(new ShadeContourConstructor(p,
-				SCData));
-
-		/* Generate shadow contours data for given model. */
-		constructor->run(options->input.model.numContours,
-				options->input.model.shiftAngleFirst);
-
-		/* Create the recoverer.*/
-		RecovererPtr recoverer(new Recoverer());
-
+	if (options->ifBuildDualNonConvexPolyhedron)
+	{
+		/* Just build dual non-convex polyhedron. */
+		recoverer->buildDualNonConvexPolyhedron(SCData);
+	}
+	else
+	{
 		/* Run naive recovering. */
 		recoverer->buildNaivePolyhedron(SCData);
 	}
