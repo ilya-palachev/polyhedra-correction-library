@@ -53,10 +53,16 @@
 #define OPTION_FIRST_ANGLE 'a'
 
 /**
- * Option "-d" forces forces recoverer to avoid recovering and just visualize
+ * Option "-d" forces recoverer to avoid recovering and just visualize
  * dual non-convex polyhedron.
  */
 #define OPTION_DUAL_NONCONVEX_POLYHEDRON 'd'
+
+/**
+ * Option "-c" forces recoverer to build only a polyhedron consisting of
+ * facets constructed from shadow contours.
+ */
+#define OPTION_CONTOURS 'c'
 
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
@@ -119,6 +125,9 @@ typedef struct
 
 	/** Whether to build dual non-convex polyhedron. */
 	bool ifBuildDualNonConvexPolyhedron;
+
+	/** Whether to build polyhedron consisting of contours. */
+	bool ifBuildContours;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -182,6 +191,8 @@ void printUsage(int argc, char** argv)
 		"obtained\n", OPTION_FIRST_ANGLE);
 	STDERR_PRINT("\t-%c\tBuild only dual non-convex polyhedron.\n",
 		OPTION_DUAL_NONCONVEX_POLYHEDRON);
+	STDERR_PRINT("\t-%c\tBuild polyhedron consisting of shadow contours.\n",
+		OPTION_CONTOURS);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -218,6 +229,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	 * for details.
 	 */
 	options->ifBuildDualNonConvexPolyhedron = false;
+	options->ifBuildContours = false;
 	while ((charCurr = getopt(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION))
 		!= GETOPT_FAILURE)
 	{
@@ -345,6 +357,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_DUAL_NONCONVEX_POLYHEDRON:
 			options->ifBuildDualNonConvexPolyhedron = true;
+			break;
+		case OPTION_CONTOURS:
+			options->ifBuildContours = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -562,10 +577,23 @@ int main(int argc, char** argv)
 	/* Create the recoverer.*/
 	RecovererPtr recoverer(new Recoverer());
 
-	if (options->ifBuildDualNonConvexPolyhedron)
+	if (options->ifBuildContours &&
+			!options->ifBuildDualNonConvexPolyhedron)
+	{
+		/* Buid polyhedron consisting of shadow contours. */
+		recoverer->buildContours(SCData);
+	}
+	else if (!options->ifBuildContours &&
+			options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Just build dual non-convex polyhedron. */
 		recoverer->buildDualNonConvexPolyhedron(SCData);
+	}
+	else if (options->ifBuildContours &&
+			options->ifBuildDualNonConvexPolyhedron)
+	{
+		/* TODO: implement it. */
+		DEBUG_PRINT("Not implemented yet!");
 	}
 	else
 	{
