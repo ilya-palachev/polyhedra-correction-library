@@ -442,6 +442,14 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
+	if (optind != argc)
+	{
+		STDERR_PRINT("Non-option arguments are not required!\n");
+		printUsage(argc, argv);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
 	DEBUG_END;
 	return options;
 }
