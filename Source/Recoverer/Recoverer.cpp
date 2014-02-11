@@ -80,16 +80,21 @@ Polyhedron* Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData)
 	vector<Vector3d> supportPointsNormalized;
 	supportPointsNormalized.insert(supportPointsNormalized.begin(),
 			supportPoints.begin(), supportPoints.end());
+	int iVertex = 0;
 	for (auto &v : supportPointsNormalized)
 	{
+		ASSERT(v == supportPoints[iVertex++]);
 		v.norm(1.);
 	}
 
 	/* 4. Construct convex hull in the dual space. */
 	PolyhedronPtr polyhedronDual = constructConvexHull(supportPointsNormalized);
 
+	ASSERT((unsigned long int) polyhedronDual->numVertices ==
+			supportPoints.size());
+
 	/* 5. Restore saved coordinates of vectors. */
-	int iVertex = 0;
+	iVertex = 0;
 	for (auto &v : supportPoints)
 	{
 		polyhedronDual->vertices[iVertex++] = v;
