@@ -44,6 +44,8 @@ public:
 	void init_full(const int* index_orig, const bool ifLong);
 	void init_empty();
 
+	double calculateAreaAndMaybeCenter(bool ifCalculateCenter, Vector3d& center);
+
 public:
 	// Facet.cpp
 	Facet();
@@ -120,6 +122,7 @@ public:
 
 	// Facet_area.cpp
 	double area();
+	double calculateAreaAndCenter(Vector3d& center);
 
 	// Facet_verification.cpp
 	bool verifyIncidenceStructure();

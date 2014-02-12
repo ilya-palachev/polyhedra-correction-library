@@ -23,7 +23,8 @@
 #include "Constants.h"
 #include "Polyhedron/Facet/Facet.h"
 
-double Facet::area()
+double Facet::calculateAreaAndMaybeCenter(bool ifCalculateCenter,
+		Vector3d& center)
 {
 	DEBUG_START;
 #ifndef NDEBUG
@@ -41,8 +42,11 @@ double Facet::area()
 	}
 
 	double areaFacet = 0.;
+	center = Vector3d(0., 0., 0.);
+	Vector3d centerLocal(0., 0., 0.);
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
+		/* The vertex of observation is chosen as the 0th vertex. */
 		Vector3d A0 = polyhedron->vertices[indVertices[0]];
 
 		DEBUG_PRINT("  in parent polyhedron there are %d vertices",
@@ -66,14 +70,46 @@ double Facet::area()
 			Vector3d A1 = polyhedron->vertices[v0] - A0;
 			Vector3d A2 = polyhedron->vertices[v1] - A0;
 			double areaTriangle = (A1 % A2) * plane.norm * 0.5;
-			DEBUG_PRINT("\tarea of triangle # %d = %lf", iVertex - 1, areaTriangle);
+			DEBUG_PRINT("\tarea of triangle # %d = %lf", iVertex - 1,
+					areaTriangle);
+
+			/*
+			 * Here the calculation of center is done. We hope that loop
+			 * unswitching optimization in compiler will avoid run-time
+			 * condition checking in this loops and will move it outside the
+			 * loop.
+			 */
+			if (ifCalculateCenter)
+			{
+				centerLocal = (A0 + polyhedron->vertices[v0] +
+						polyhedron->vertices[v1]) / 3.;
+				center += centerLocal * areaTriangle;
+			}
 			areaFacet += areaTriangle;
 		}
 
 	}
 
-
+	if (ifCalculateCenter)
+	{
+		center /= areaFacet;
+	}
 	DEBUG_PRINT("area of facet = %lf", areaFacet);
 	DEBUG_END;
 	return areaFacet;
+}
+
+double Facet::area(void)
+{
+	DEBUG_START;
+	Vector3d centerFake;
+	DEBUG_END;
+	return calculateAreaAndMaybeCenter(false, centerFake);
+}
+
+double Facet::calculateAreaAndCenter(Vector3d center)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return calculateAreaAndMaybeCenter(true, center);
 }
