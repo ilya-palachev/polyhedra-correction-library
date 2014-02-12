@@ -18,34 +18,104 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file ShadeContourData.h
+ * @brief Declaration of class that contains array of shadow contours.
+ */
+
 #ifndef SHADECONTOURDATA_H_
 #define SHADECONTOURDATA_H_
 
 #include "DataContainers/PData/PData.h"
 
+/* Forward declaration. */
 class SContour;
 
+/**
+ * Container of shadow contour data used for polyhedral reconstruction.
+ * Usually this data is obtained from experimental measurements or from
+ * synthetic generation from simple models.
+ */
 class ShadeContourData : public PData
 {
 public:
+	/**
+	 * The number if contours.
+	 */
 	int numContours;
+
+	/**
+	 * The array that contains shadow contours.
+	 */
 	SContour* contours;
 
-	/* TODO: shade contour data can be not associated with any polyhedron! */
+	/**
+	 * Constructor that does nothing but setting parent polyhedron to the
+	 * given reference.
+	 *
+	 * @param p	The reference to the parent polyhedron
+	 *
+	 * TODO: shade contour data can be not associated with any polyhedron!
+	 */
 	ShadeContourData(shared_ptr<Polyhedron> p);
+
+	/**
+	 * Destructor for the freeing of data.
+	 */
 	~ShadeContourData();
 
+	/**
+	 * Scans shadow contour data from the file specified by its name.
+	 *
+	 * @param fileNameContours	The name of file with shadow contour data to be
+	 * read in.
+	 */
 	bool fscanDefault(const char* fileNameContours);
+
+	/**
+	 * Scans shadow contour data from the file descriptor
+	 *
+	 * @param file	File descriptor of file with shadow contour data to be read
+	 * in.
+	 *
+	 * TODO: Not implemented yet!
+	 */
 	bool fscanDefault(FILE* file);
 
+	/**
+	 * Dumps internal structures specifying shadow contour data to the given
+	 * file descriptor.
+	 *
+	 * @param file	File descriptor to be written to.
+	 */
 	void fprint(FILE* file);
+
+	/**
+	 * Writes shadow contour data to the file in standard format.
+	 *
+	 * @param file	File descriptor to be written to.
+	 */
 	void fprintDefault(FILE* file);
 
+	/**
+	 * Overloaded operator "==" for comparing of shadow contour data.
+	 *
+	 * @param contourData	Shadow contour data to be compared with.
+	 */
 	bool operator ==(const ShadeContourData& contourData) const;
+
+	/**
+	 * Overloaded operator "!=" for comparing of shadow contour data.
+	 *
+	 * @param contourData	Shadow contour data to be compared with.
+	 */
 	bool operator !=(const ShadeContourData& contourData) const;
 
 };
 
+/**
+ * Shared pointer to the shadow contour data.
+ */
 typedef std::shared_ptr<ShadeContourData> ShadeContourDataPtr;
 
 #endif /* SHADECONTOURDATA_H_ */
