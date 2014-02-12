@@ -507,3 +507,33 @@ list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
 	return listFacetsSorted;
 }
 
+Vector3d SizeCalculator::calculateFacetCenter(int iFacet)
+{
+	DEBUG_START;
+	Vector3d center;
+	DEBUG_VARIABLE double area =
+			polyhedron->facets[iFacet].calculateAreaAndCenter(center);
+	DEBUG_END;
+	return center;
+}
+
+Vector3d SizeCalculator::calculateSurfaceCenter(void)
+{
+	DEBUG_START;
+	Vector3d centerSurface(0., 0., 0.);
+	Vector3d centerFacet(0., 0., 0.);
+	double areaSurface = 0.;
+	double areaFacet = 0.;
+
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		areaFacet =
+				polyhedron->facets[iFacet].calculateAreaAndCenter(centerFacet);
+		centerSurface += areaFacet * centerFacet;
+		areaSurface += areaFacet;
+	}
+	centerSurface /= areaSurface;
+
+	DEBUG_END;
+	return centerSurface;
+}

@@ -144,6 +144,18 @@ public:
 	 * Calculates the list of facets with their areas sorted by their areas.
 	 */
 	list<struct FacetWithArea> getSortedByAreaFacets(void);
+
+	/**
+	 * Calculates the mass center of facet considered as a solid object.
+	 *
+	 * @param iFacet	The ID of the considered facet.
+	 */
+	Vector3d calculateFacetCenter(int iFacet);
+
+	/**
+	 * Calculate the mass center of the polyhedron's surface.
+	 */
+	Vector3d calculateSurfaceCenter();
 };
 
 #endif /* SIZECALCULATOR_H_ */
