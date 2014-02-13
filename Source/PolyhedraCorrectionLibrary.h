@@ -44,7 +44,7 @@ using namespace libgexf;
 
 /* Includes from auxiliary external libraries (built-in): */
 #include "Vector3d.h"
-#include "list_squares_method.h"
+#include "LeastSquaresMethod.h"
 #include "Vector3d.h"
 #include "array_operations.h"
 #include "Gauss_string.h"
@@ -157,8 +157,11 @@ class GraphDumperGEXF;
 #include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
 #include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 #include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+#include "Analyzers/ShadowContourClusterizer/ShadowContourClusterizer.h"
 
 #include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
+
+#include "Recoverer/Recoverer.h"
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"

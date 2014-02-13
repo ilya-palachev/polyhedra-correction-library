@@ -141,8 +141,7 @@ bool Facet::verifyUniqueValues(void)
 		facets.insert(indVertices[numVertices + iVertex + 1]);
 	}
 	
+	DEBUG_END;
 	return (vertices.size() == (unsigned) numVertices)
 		&& (facets.size() == (unsigned) numVertices);
-	
-	DEBUG_END;
 }

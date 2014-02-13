@@ -1042,7 +1042,7 @@ void Polyhedron::fprint_ply_scale(double scale, const char *filename,
 		vx = (long int) scale * vertices[i].x;
 		vy = (long int) scale * vertices[i].y;
 		vz = (long int) scale * vertices[i].z;
-		ALWAYS_PRINT(file, "%ld %ld %ldb\n", vx, vy, vz);
+		ALWAYS_PRINT(file, "%ld %ld %ld\n", vx, vy, vz);
 	}
 
 	for (int i = 0; i < numFacets; ++i)

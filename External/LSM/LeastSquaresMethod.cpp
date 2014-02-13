@@ -21,7 +21,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "list_squares_method.h"
+#include "LeastSquaresMethod.h"
 
 void runListSquaresMethod(int n, double * x, double * y, double * z, double& a, double& b,
 		double& c, double& d)

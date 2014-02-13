@@ -51,4 +51,6 @@ public:
 	void run(int numContoursNeeded, double firstAngle);
 };
 
+typedef std::shared_ptr<ShadeContourConstructor> ShadeContourConstructorPtr;
+
 #endif /* SHADECONTOURCONSTRUCTOR_H_ */

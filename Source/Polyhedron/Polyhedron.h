@@ -30,6 +30,25 @@
 #include <list>
 
 /*
+ * Inclusions from CGAL library.
+ * TODO: They can dramatically increase build time. How to move them out from
+ * here? Forward declarations are needed.
+ */
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/point_generators_3.h>
+#include <CGAL/algorithm.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/convex_hull_3.h>
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Polyhedron_3<K> Polyhedron_3;
+typedef K::Segment_3 Segment_3;
+
+/** Define point creator */
+typedef K::Point_3 Point_3;
+typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
+
+/*
  * Forward declarations
  *
  * TODO: they should not be here.
@@ -142,6 +161,13 @@ public:
 	 */
 	Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 			Facet* facet_orig);
+
+	/**
+	 * Converts standard CGAL polyhedron to PCL polyhedron.
+	 *
+	 * @param p	Standard CGAL polyhedron
+	 */
+	Polyhedron(Polyhedron_3 p);
 
 	/**
 	 * Deletes the polyhedron.
@@ -653,7 +679,7 @@ public:
 	/**
 	 * Calculates the tensor of inertia of the polyhedron.
 	 *
-	 * Tensor of intertia:
+	 * Tensor of inertia:
 	 *
 	 * --                      --
 	 * |  Jxx     Jxy     Jxz   |
@@ -824,10 +850,12 @@ public:
 	 * @param edgeData	Edge data of the polyhedron (should be constructed
 	 * previously)
 	 *
-	 * @retval	The
+	 * @retval	The number of detected self-intersections.
 	 */
 	int checkEdges(EdgeDataPtr edgeData);
 };
+
+typedef shared_ptr<Polyhedron> PolyhedronPtr;
 
 #endif	/* POLYHEDRON_H */
 
