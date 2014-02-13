@@ -64,13 +64,18 @@
  */
 #define OPTION_CONTOURS 'c'
 
+/**
+ * Option "-b" enables balancing of contour data before its processing.
+ */
+#define OPTION_BALANCE_DATA 'b'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:dc"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcd"
 
 
 /** Error return value of getopt function. */
@@ -128,6 +133,9 @@ typedef struct
 
 	/** Whether to build polyhedron consisting of contours. */
 	bool ifBuildContours;
+
+	/** Whether to balance contour data before processing. */
+	bool ifBalancing;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -193,6 +201,8 @@ void printUsage(int argc, char** argv)
 		OPTION_DUAL_NONCONVEX_POLYHEDRON);
 	STDERR_PRINT("\t-%c\tBuild polyhedron consisting of shadow contours.\n",
 		OPTION_CONTOURS);
+	STDERR_PRINT("\t-%c\tBalance contour data before processing.\n",
+			OPTION_BALANCE_DATA);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -230,6 +240,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	 */
 	options->ifBuildDualNonConvexPolyhedron = false;
 	options->ifBuildContours = false;
+	options->ifBalancing = false;
 	while ((charCurr = getopt(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION))
 		!= GETOPT_FAILURE)
 	{
@@ -360,6 +371,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_CONTOURS:
 			options->ifBuildContours = true;
+			break;
+		case OPTION_BALANCE_DATA:
+			options->ifBalancing = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -586,6 +600,12 @@ int main(int argc, char** argv)
 
 	/* Create the recoverer.*/
 	RecovererPtr recoverer(new Recoverer());
+
+	/* Enable balancing if required. */
+	if (options->ifBalancing)
+	{
+		recoverer->enableBalancing();
+	}
 
 	if (options->ifBuildContours &&
 			!options->ifBuildDualNonConvexPolyhedron)
