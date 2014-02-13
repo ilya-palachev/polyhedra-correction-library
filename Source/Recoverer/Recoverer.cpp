@@ -134,12 +134,6 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 {
 	DEBUG_START;
 
-	/* Balance contours if it is required. */
-	if (ifBalancing)
-	{
-		balanceAllContours(SCData);
-	}
-
 	/* New polyhedron will have 1 facet for each shadow contour. */
 	int numFacets = SCData->numContours;
 
@@ -190,10 +184,6 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 	}
 	p->set_parent_polyhedron_in_facets();
 
-	/* Print resulting polyhedron to the file. */
-	p->fprint_ply_scale(1000000., "../poly-data-out/poly-contours.ply",
-		"contours");
-
 	DEBUG_END;
 	return p;
 }
@@ -201,15 +191,41 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+
+	/* Balance contours if it is required. */
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+	}
+
+	PolyhedronPtr p = buildMaybeDualContours(true, SCData);
+
+	/* Print resulting polyhedron to the file. */
+	p->fprint_ply_scale(1000000., "../poly-data-out/poly-dual-contours.ply",
+		"contours");
+
 	DEBUG_END;
-	return buildMaybeDualContours(true, SCData);
+	return p;
 }
 
 PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+
+	/* Balance contours if it is required. */
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+	}
+
+	PolyhedronPtr p = buildMaybeDualContours(false, SCData);
+
+	/* Print resulting polyhedron to the file. */
+	p->fprint_ply_scale(1000000., "../poly-data-out/poly-contours.ply",
+		"contours");
+
 	DEBUG_END;
-	return buildMaybeDualContours(false, SCData);
+	return p;
 }
 
 vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
@@ -481,7 +497,7 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 	/* Construct polyhedron consisting of contours as facets. */
-	PolyhedronPtr p = buildContours(SCData);
+	PolyhedronPtr p = buildMaybeDualContours(false, SCData);
 
 	/* Calculate the mass center of contours. */
 	SizeCalculator* sizeCalculator = new SizeCalculator(p);
