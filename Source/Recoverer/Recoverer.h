@@ -40,6 +40,9 @@ class Recoverer
 {
 private:
 
+	/** Whether to balance the vertical center of contours. */
+	bool ifBalancing;
+
 	/**
 	 * Extracts support planes from shadow contours.
 	 *
@@ -70,6 +73,14 @@ private:
 	 * @param p	Initial polyhedron
 	 */
 	PolyhedronPtr buildDualPolyhedron(PolyhedronPtr p);
+
+	/**
+	 * Shifts all points to the given vector displacement.
+	 *
+	 * @param SCData	Shadow contour data
+	 * @param shift		Vector displacement
+	 */
+	void shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift);
 public:
 
 	/**
@@ -81,6 +92,11 @@ public:
 	 * Empty destructor.
 	 */
 	~Recoverer();
+
+	/**
+	 * Enables balancing in all functions.
+	 */
+	void enableBalancing(void);
 
 	/**
 	 * Builds naive polyhedron using naive approach that intersect half-spaces

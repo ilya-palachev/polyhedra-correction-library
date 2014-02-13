@@ -30,7 +30,8 @@
 #include <VertexInfo.h>
 #include <VertexInfo.h>
 
-Recoverer::Recoverer()
+Recoverer::Recoverer() :
+	ifBalancing(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -39,6 +40,13 @@ Recoverer::Recoverer()
 Recoverer::~Recoverer()
 {
 	DEBUG_START;
+	DEBUG_END;
+}
+
+void Recoverer::enableBalancing(void)
+{
+	DEBUG_START;
+	ifBalancing = true;
 	DEBUG_END;
 }
 
@@ -372,3 +380,29 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	return pDual;
 }
 
+void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
+{
+	DEBUG_START;
+	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
+	{
+		SContour* contourCurr = &SCData->contours[iContour];
+		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
+		{
+			SideOfContour* sideCurr = &contourCurr->sides[iSide];
+			sideCurr->A1 += shift;
+			sideCurr->A2 += shift;
+		}
+		/*
+		 * If we want new plane to include point (x + xt, y + yt, z + zt) for
+		 * each point (x, y, z) that is included in plane
+		 * a * x + b * y + c * z + d = 0
+		 * then its free coefficient must become equal to
+		 * d - a * xt - b * yt - c * zt
+		 *
+		 * TODO: For our case usually we shift points in vertical planes on a
+		 * vertical vector, thus, the plane will not actually move.
+		 */
+		contourCurr->plane.d -= contourCurr->plane.norm * shift;
+	}
+	DEBUG_END;
+}
