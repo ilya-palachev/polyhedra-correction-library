@@ -201,9 +201,9 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 
 			supportPlanes.push_back(supportPlane);
 			
-			double error1 = supportPlane.norm * sideCurr->A1 +
+			DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
 				supportPlane.dist;
-			double error2 = supportPlane.norm * sideCurr->A2 +
+			DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
 				supportPlane.dist;
 
 			DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
