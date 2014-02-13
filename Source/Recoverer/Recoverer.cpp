@@ -27,8 +27,8 @@
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
-#include <VertexInfo.h>
-#include <VertexInfo.h>
+#include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "Analyzers/SizeCalculator/SizeCalculator.h"
 
 Recoverer::Recoverer() :
 	ifBalancing(false)
@@ -75,7 +75,7 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
 
 	DEBUG_END;
-	return PolyhedronPtr;
+	return polyhedronDual;
 }
 
 PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
@@ -415,7 +415,7 @@ void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
 		 * TODO: For our case usually we shift points in vertical planes on a
 		 * vertical vector, thus, the plane will not actually move.
 		 */
-		contourCurr->plane.d -= contourCurr->plane.norm * shift;
+		contourCurr->plane.dist -= contourCurr->plane.norm * shift;
 	}
 	DEBUG_END;
 }
@@ -432,6 +432,6 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 
 	/* Shift all contours on z component of the vector of mass center. */
 	Vector3d ez(0., 0., 1.);
-	shiftAllContours(- (ez * center) * ez);
+	shiftAllContours(SCData, - (ez * center) * ez);
 	DEBUG_END;
 }
