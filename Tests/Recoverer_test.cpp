@@ -622,8 +622,8 @@ int main(int argc, char** argv)
 	else if (options->ifBuildContours &&
 			options->ifBuildDualNonConvexPolyhedron)
 	{
-		/* TODO: implement it. */
-		DEBUG_PRINT("Not implemented yet!");
+		/* Buid polyhedron consisting of dual shadow contours. */
+		recoverer->buildDualContours(SCData);
 	}
 	else
 	{

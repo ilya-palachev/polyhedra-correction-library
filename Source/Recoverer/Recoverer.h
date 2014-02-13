@@ -46,9 +46,16 @@ private:
 	/**
 	 * Extracts support planes from shadow contours.
 	 *
-	 * @param SCData	Shadow contours
+	 * @param SCData	Shadow contour data
 	 */
 	vector<Plane> extractSupportPlanes(ShadeContourDataPtr SCData);
+
+	/**
+	 * Extracts support planes from one shadow contour.
+	 *
+	 * @param contour	Shadow contour
+	 */
+	vector<Plane> extractSupportPlanes(SContour* contour);
 
 	/**
 	 * Performs the transformation of polar duality for the given set of planes,
@@ -88,6 +95,16 @@ private:
 	 * this position only on a vertical vector and report error otherwise.
 	 */
 	void balanceAllContours(ShadeContourDataPtr SCData);
+
+	/**
+	 * Builds polyhedron consisting of facets constructed from shadow contours,
+	 * or from their dual images.
+	 *
+	 * @param ifDual	Whether to build dual contours
+	 * @param SCData	Shadow contour data
+	 */
+	PolyhedronPtr buildMaybeDualContours(bool ifDual,
+			ShadeContourDataPtr SCData);
 public:
 
 	/**
@@ -130,6 +147,15 @@ public:
 	 * @param SCData	Shadow contour data
 	 */
 	PolyhedronPtr buildContours(ShadeContourDataPtr SCData);
+
+	/**
+	 * Build polyhedron consisting of facets constructed from dual images of
+	 * shadow contours (more precisely, from contours that are the images of
+	 * dual cylinders).
+	 *
+	 * @param SCData	Shadow contour data
+	 */
+	PolyhedronPtr buildDualContours(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;

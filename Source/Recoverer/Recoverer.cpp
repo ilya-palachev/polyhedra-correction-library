@@ -129,9 +129,16 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 	return polyhedronDual;
 }
 
-PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
+		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+
+	/* Balance contours if it is required. */
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+	}
 
 	/* New polyhedron will have 1 facet for each shadow contour. */
 	int numFacets = SCData->numContours;
@@ -152,12 +159,29 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 		Facet* facetNew = new Facet(iContour, contourCurr->ns,
 				contourCurr->plane, NULL);
 		p->facets[iContour] = *facetNew;
-		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
+
+		/* We hope that compiler will apply loop unswitching here. */
+		if (ifDual)
 		{
-			/* Nota Bene: here we read only 1st vertex of current side. */
-			p->vertices[iVertex] = contourCurr->sides[iSide].A1;
-			p->facets[iContour].indVertices[iSide] = iVertex;
-			++iVertex;
+			vector<Plane>  planes = extractSupportPlanes(contourCurr);
+			vector<Vector3d> points = mapPlanesToDualSpace(planes);
+			int iSide = 0;
+			for (auto &point : points)
+			{
+				p->vertices[iVertex] = point;
+				p->facets[iContour].indVertices[iSide++] = iVertex;
+				++iVertex;
+			}
+		}
+		else
+		{
+			for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
+			{
+				/* Nota Bene: here we read only 1st vertex of current side. */
+				p->vertices[iVertex] = contourCurr->sides[iSide].A1;
+				p->facets[iContour].indVertices[iSide] = iVertex;
+				++iVertex;
+			}
 		}
 
 		/* Cycling vertex. */
@@ -174,6 +198,60 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
+PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return buildMaybeDualContours(true, SCData);
+}
+
+PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return buildMaybeDualContours(false, SCData);
+}
+
+vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
+{
+	DEBUG_START;
+	vector<Plane> supportPlanes;
+	Vector3d normal = contour->plane.norm;
+
+	/* Iterate through the array of sides of current contour. */
+	for (int iSide = 0; iSide < contour->ns; ++iSide)
+	{
+		SideOfContour* sideCurr = &contour->sides[iSide];
+
+		/*
+		 * Here the plane that is incident to points A1 and A2 of the
+		 * current side and collinear to the vector of projection.
+		 *
+		 * TODO: Here should be the calculation of the best plane fitting
+		 * these conditions. Current implementation can produce big errors.
+		 */
+		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
+			normal;
+		Plane supportPlane(supportPlaneNormal,
+						   - supportPlaneNormal * sideCurr->A1);
+
+		supportPlanes.push_back(supportPlane);
+
+		DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
+			supportPlane.dist;
+		DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
+			supportPlane.dist;
+
+		DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
+
+		/* TODO: Here should be more strict conditions. */
+		ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
+		ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+	}
+	DEBUG_END;
+	return supportPlanes;
+}
+
 vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -184,38 +262,13 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 	{
 		DEBUG_PRINT("contour #%d", iContour);
 		SContour* contourCurr = &SCData->contours[iContour];
-		Vector3d normal = contourCurr->plane.norm;
 
-		/* Iterate through the array of sides of current contour. */
-		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
-		{
-			SideOfContour* sideCurr = &contourCurr->sides[iSide];
-
-			/*
-			 * Here the plane that is incident to points A1 and A2 of the
-			 * current side and collinear to the vector of projection.
-			 *
-			 * TODO: Here should be the calculation of the best plane fitting
-			 * these conditions. Current implementation can produce big errors.
-			 */
-			Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
-				normal;
-			Plane supportPlane(supportPlaneNormal,
-							   - supportPlaneNormal * sideCurr->A1);
-
-			supportPlanes.push_back(supportPlane);
-			
-			DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
-				supportPlane.dist;
-			DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
-				supportPlane.dist;
-
-			DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
-			
-			/* TODO: Here should be more strict conditions. */
-			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
-			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
-		}
+		/*
+		 * Extract support planes from one contour and insert it to common list.
+		 */
+		vector<Plane> supportPlanesPortion = extractSupportPlanes(contourCurr);
+		supportPlanes.insert(supportPlanes.begin(),
+				supportPlanesPortion.begin(), supportPlanes.end());
 	}
 
 	DEBUG_END;
