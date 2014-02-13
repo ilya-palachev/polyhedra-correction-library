@@ -107,7 +107,7 @@ double Facet::area(void)
 	return calculateAreaAndMaybeCenter(false, centerFake);
 }
 
-double Facet::calculateAreaAndCenter(Vector3d center)
+double Facet::calculateAreaAndCenter(Vector3d& center)
 {
 	DEBUG_START;
 	DEBUG_END;
