@@ -81,6 +81,13 @@ private:
 	 * @param shift		Vector displacement
 	 */
 	void shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift);
+
+	/**
+	 * Balances contours so that their common mass center lies right at the
+	 * center of coordinate system. We assume that contours are displaced from
+	 * this position only on a vertical vector and report error otherwise.
+	 */
+	void balanceAllContours(ShadeContourDataPtr SCData);
 public:
 
 	/**
@@ -104,7 +111,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	Polyhedron* buildNaivePolyhedron(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildNaivePolyhedron(ShadeContourDataPtr SCData);
 
 	/**
 	 * Builds non-convex polyhedron in dual space that contains all dual images
@@ -114,7 +121,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	Polyhedron* buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData);
 
 	/**
 	 * Builds polyhedron consisting of facets constructed from shadow contours
@@ -122,7 +129,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	Polyhedron* buildContours(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildContours(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;

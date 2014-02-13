@@ -50,41 +50,54 @@ void Recoverer::enableBalancing(void)
 	DEBUG_END;
 }
 
-Polyhedron* Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
-	/* 1. Extract support planes from shadow contour data. */
+	/* 1. Balance contours if it is required. */
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+	}
+
+	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
 	DEBUG_PRINT("Number of extracted support planes: %ld",
 		(long unsigned int) supportPlanes.size());
 
-	/* 2. Map planes to dual space to obtain the set of points in it. */
+	/* 3. Map planes to dual space to obtain the set of points in it. */
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
-	/* 3. Construct convex hull in the dual space. */
+	/* 4. Construct convex hull in the dual space. */
 	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
 
-	/* 4. Map dual polyhedron to the primal space. */
+	/* 5. Map dual polyhedron to the primal space. */
 	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
 
 	DEBUG_END;
-	return NULL;
+	return PolyhedronPtr;
 }
 
-Polyhedron* Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
+		SCData)
 {
 	DEBUG_START;
 
-	/* 1. Extract support planes from shadow contour data. */
+	/* 1. Balance contours if it is required. */
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+	}
+
+	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
 	DEBUG_PRINT("Number of extracted support planes: %ld",
 		(long unsigned int) supportPlanes.size());
 
-	/* 2. Map planes to dual space to obtain the set of points in it. */
+	/* 3. Map planes to dual space to obtain the set of points in it. */
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
-	/* 3. Normalize all points so that to put the to the sphere. */
+	/* 4. Normalize all points so that to put the to the sphere. */
 	vector<Vector3d> supportPointsNormalized;
 	supportPointsNormalized.insert(supportPointsNormalized.begin(),
 			supportPoints.begin(), supportPoints.end());
@@ -95,28 +108,28 @@ Polyhedron* Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData)
 		v.norm(1.);
 	}
 
-	/* 4. Construct convex hull in the dual space. */
+	/* 5. Construct convex hull in the dual space. */
 	PolyhedronPtr polyhedronDual = constructConvexHull(supportPointsNormalized);
 
 	ASSERT((unsigned long int) polyhedronDual->numVertices ==
 			supportPoints.size());
 
-	/* 5. Restore saved coordinates of vectors. */
+	/* 6. Restore saved coordinates of vectors. */
 	iVertex = 0;
 	for (auto &v : supportPoints)
 	{
 		polyhedronDual->vertices[iVertex++] = v;
 	}
 
-	/* 6. Print resulting polyhedron to the file. */
+	/* 7. Print resulting polyhedron to the file. */
 	polyhedronDual->fprint_ply_scale(1000000.,
 		"../poly-data-out/poly-dual-nonconvex-debug.ply", "dual-polyhedron");
 
 	DEBUG_END;
-	return NULL;
+	return polyhedronDual;
 }
 
-Polyhedron* Recoverer::buildContours(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -154,7 +167,7 @@ Polyhedron* Recoverer::buildContours(ShadeContourDataPtr SCData)
 		"contours");
 
 	DEBUG_END;
-	return NULL;
+	return p;
 }
 
 vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
@@ -404,5 +417,21 @@ void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
 		 */
 		contourCurr->plane.d -= contourCurr->plane.norm * shift;
 	}
+	DEBUG_END;
+}
+
+void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+	/* Construct polyhedron consisting of contours as facets. */
+	PolyhedronPtr p = buildContours(SCData);
+
+	/* Calculate the mass center of contours. */
+	SizeCalculator* sizeCalculator = new SizeCalculator(p);
+	Vector3d center = sizeCalculator->calculateSurfaceCenter();
+
+	/* Shift all contours on z component of the vector of mass center. */
+	Vector3d ez(0., 0., 1.);
+	shiftAllContours(- (ez * center) * ez);
 	DEBUG_END;
 }
