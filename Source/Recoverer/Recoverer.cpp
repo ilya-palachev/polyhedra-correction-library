@@ -159,6 +159,10 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 			p->facets[iContour].indVertices[iSide] = iVertex;
 			++iVertex;
 		}
+
+		/* Cycling vertex. */
+		p->facets[iContour].indVertices[p->facets[iContour].numVertices] =
+				p->facets[iContour].indVertices[0];
 	}
 	p->set_parent_polyhedron_in_facets();
 
