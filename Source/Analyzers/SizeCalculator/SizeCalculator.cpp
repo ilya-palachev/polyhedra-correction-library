@@ -23,7 +23,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "list_squares_method.h"
+#include "LeastSquaresMethod.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 #include "Polyhedron/Facet/Facet.h"

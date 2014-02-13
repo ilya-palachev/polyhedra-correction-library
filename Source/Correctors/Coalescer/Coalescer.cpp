@@ -22,7 +22,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "list_squares_method.h"
+#include "LeastSquaresMethod.h"
 #include "Correctors/Coalescer/Coalescer.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 

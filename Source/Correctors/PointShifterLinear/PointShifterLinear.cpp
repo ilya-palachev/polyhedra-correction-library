@@ -21,7 +21,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Gauss_string.h"
-#include "list_squares_method.h"
+#include "LeastSquaresMethod.h"
 #include "Correctors/PointShifterLinear/PointShifterLinear.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"

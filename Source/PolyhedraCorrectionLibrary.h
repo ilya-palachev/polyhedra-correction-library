@@ -44,7 +44,7 @@ using namespace libgexf;
 
 /* Includes from auxiliary external libraries (built-in): */
 #include "Vector3d.h"
-#include "list_squares_method.h"
+#include "LeastSquaresMethod.h"
 #include "Vector3d.h"
 #include "array_operations.h"
 #include "Gauss_string.h"
