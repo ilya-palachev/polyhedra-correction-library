@@ -419,6 +419,19 @@ public:
 	void fprint_ply_scale(double scale, const char *filename,
 			const char *comment);
 
+	/**
+	 * Writes the polyhedron to the file in Stanford PLY format.
+	 * Before writing the coordinates of vertices are scaled so that to provide
+	 * absolutely maximal coordinate to be equal to the given number.
+	 *
+	 * @param maxSize	Absolutely maximal coordinate (after scaling)
+	 * @param filename	The name of file
+	 * @param comment	The comment to be written to the file. It must contain
+	 * only one word.
+	 */
+	void fprint_ply_autoscale(double maxSize, const char *filename,
+			const char *comment);
+
 	/*
 	 * Preprocessing
 	 * ========================================================================

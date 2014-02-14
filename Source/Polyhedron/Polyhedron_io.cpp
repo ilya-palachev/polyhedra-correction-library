@@ -1058,3 +1058,31 @@ void Polyhedron::fprint_ply_scale(double scale, const char *filename,
 	DEBUG_END;
 }
 
+void Polyhedron::fprint_ply_autoscale(double maxSize, const char *filename,
+		const char *comment)
+{
+	DEBUG_START;
+	double xmin = 0.;
+	double xmax = 0.;
+	double ymin = 0.;
+	double ymax = 0.;
+	double zmin = 0.;
+	double zmax = 0.;
+
+	get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
+
+	/* Calculate absolutely maximal coordinate of the polyhedron. */
+	double absMax = 0.;
+	absMax = fabs(xmin) > absMax ? fabs(xmin) : absMax;
+	absMax = fabs(xmax) > absMax ? fabs(xmax) : absMax;
+	absMax = fabs(ymin) > absMax ? fabs(ymin) : absMax;
+	absMax = fabs(ymax) > absMax ? fabs(ymax) : absMax;
+	absMax = fabs(zmin) > absMax ? fabs(zmin) : absMax;
+	absMax = fabs(zmax) > absMax ? fabs(zmax) : absMax;
+
+	double scaleFactor = maxSize / absMax;
+
+	fprint_ply_scale(scaleFactor, filename, comment);
+
+	DEBUG_END;
+}
