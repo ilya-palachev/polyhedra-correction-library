@@ -30,6 +30,8 @@
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 
+#define DEFAULT_MAX_COORDINATE 1000000.
+
 Recoverer::Recoverer() :
 	ifBalancing(false)
 {
@@ -122,7 +124,7 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 	}
 
 	/* 7. Print resulting polyhedron to the file. */
-	polyhedronDual->fprint_ply_scale(1000000.,
+	polyhedronDual->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 		"../poly-data-out/poly-dual-nonconvex-debug.ply", "dual-polyhedron");
 
 	DEBUG_END;
@@ -201,8 +203,8 @@ PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
 	PolyhedronPtr p = buildMaybeDualContours(true, SCData);
 
 	/* Print resulting polyhedron to the file. */
-	p->fprint_ply_scale(1000000., "../poly-data-out/poly-dual-contours.ply",
-		"contours");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		"../poly-data-out/poly-dual-contours.ply", "contours");
 
 	DEBUG_END;
 	return p;
@@ -221,8 +223,8 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	PolyhedronPtr p = buildMaybeDualContours(false, SCData);
 
 	/* Print resulting polyhedron to the file. */
-	p->fprint_ply_scale(1000000., "../poly-data-out/poly-contours.ply",
-		"contours");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			"../poly-data-out/poly-contours.ply", "contours");
 
 	DEBUG_END;
 	return p;
@@ -401,7 +403,7 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	 * Default output directory should be determined by environmental variable
 	 * or by a config file.
 	 */
-	polyhedronDualPCL->fprint_ply_scale(1000000.,
+	polyhedronDualPCL->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
 	
 	DEBUG_END;
@@ -459,8 +461,8 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	pDual->set_parent_polyhedron_in_facets();
 	pDual->preprocessAdjacency();
 	pDual->my_fprint(stdout);
-	pDual->fprint_ply_scale(1000., "../poly-data-out/poly-primal-debug.ply", 
-		"primal-polyhedron");
+	pDual->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			"../poly-data-out/poly-primal-debug.ply", "primal-polyhedron");
 
 	DEBUG_END;
 	return pDual;
