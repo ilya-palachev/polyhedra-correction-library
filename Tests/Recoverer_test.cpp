@@ -76,13 +76,18 @@
  */
 #define OPTION_PRINT_PROBLEM 'p'
 
+/**
+ * Option "-r" runs recovering.
+ */
+#define OPTION_RECOVER 'r'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdp"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdpr"
 
 
 /** Error return value of getopt function. */
@@ -146,6 +151,9 @@ typedef struct
 
 	/** Whether the mode of problem printing is enabled. */
 	bool ifPrintProblem;
+
+	/** Whether the recovering mode is enabled. */
+	bool ifRecover;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -215,6 +223,7 @@ void printUsage(int argc, char** argv)
 			OPTION_BALANCE_DATA);
 	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
 			"to the file).", OPTION_PRINT_PROBLEM);
+	STDERR_PRINT("\t-%c\tRecover polyhedron.", OPTION_RECOVER);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -389,6 +398,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_PRINT_PROBLEM:
 			options->ifPrintProblem = true;
+			break;
+		case OPTION_RECOVER:
+			options->ifRecover = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -686,7 +698,12 @@ int main(int argc, char** argv)
 		recoverer->enableBalancing();
 	}
 
-	if (options->ifPrintProblem)
+	if (options->ifRecover)
+	{
+		/* Run the recoverer. */
+		recoverer->run(SCData);
+	}
+	else if (options->ifPrintProblem)
 	{
 		/* Just print naive matrix and vector of hvalues. */
 		buildNaiveMatrix(SCData, recoverer);
