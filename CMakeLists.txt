@@ -92,7 +92,7 @@ endif ()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
 	set(cat_config ${CMAKE_SOURCE_DIR}/Scripts/cat_config.sh)
 	set(debug_exceptions_config "${CMAKE_SOURCE_DIR}/config/debug_exceptions.conf")
 	set(debug_exceptions "")
