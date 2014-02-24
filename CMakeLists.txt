@@ -75,6 +75,7 @@ target_link_libraries(pcl
    xml2
    CGAL
    gmp
+   tsnnls
 )
 
 foreach(test_source_file ${SOURCE_tests})
