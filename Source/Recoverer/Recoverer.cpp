@@ -30,6 +30,17 @@
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 
+#ifndef isnan
+#define isnan
+#endif
+#ifndef finite
+#define finite
+#endif
+#ifndef isinf
+#define isinf
+#endif
+#include <libtsnnls/tsnnls.h>
+
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
@@ -679,4 +690,30 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 	buildMatrixByPolyhedron(polyhedron, numConditions, matrix);
 
 	DEBUG_END;
+}
+
+PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+	int numConditions = 0, numHvalues = 0;
+	double *matrix = NULL, *hvalues = NULL;
+
+	buildNaiveMatrix(SCData, numConditions, matrix, numHvalues, hvalues);
+
+	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
+			numHvalues, numConditions);
+
+	taucs_ccs_matrix* Qt = taucs_ccs_transpose(Q);
+
+	double conditionNumber = taucs_rcond(Qt);
+	double inRelErrTolerance = conditionNumber * conditionNumber *
+			EPS_MIN_DOUBLE;
+	double outResidualNorm;
+
+	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance, 0);
+
+	free(h);
+
+	DEBUG_END;
+	return NULL;
 }

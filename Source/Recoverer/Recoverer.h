@@ -165,6 +165,13 @@ public:
 	 */
 	void buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 			double*& matrix, int& numHvalues, double*& hvalues);
+
+	/**
+	 * Runs the recovering procedure.
+	 *
+	 * @param SCData	Shadow contour data
+	 */
+	PolyhedronPtr run(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;
