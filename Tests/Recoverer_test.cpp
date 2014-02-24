@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <cstring>
 
+#include "Constants.h"
 #include "PolyhedraCorrectionLibrary.h"
 
 /** The name of the test. */
@@ -605,19 +606,39 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 	FILE* fileHvalues = (FILE*) fopen("../poly-data-out/hvalues-naive.txt",
 			"w");
 
+	if (!fileMatrixNaive || !fileHvalues)
+	{
+		ERROR_PRINT("Failed to open file.");
+	}
+
 	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
 	{
+		fprintf (fileMatrixNaive, "%d ", iCondition);
 		for (int iCol = 0; iCol < numHvalues; ++iCol)
 		{
-			fprintf(fileMatrixNaive, "%lf ",
-					matrix[iCondition * numHvalues + iCol]);
+			double value = matrix[iCondition * numHvalues + iCol];
+			if (fabs(value) > EPS_MIN_DOUBLE)
+			{
+				fprintf(fileMatrixNaive, "%d %.16lf ", iCol, value);
+			}
 		}
 		fprintf(fileMatrixNaive, "\n");
 	}
 
 	for (int iCol = 0; iCol < numHvalues; ++iCol)
 	{
-		fprintf("%lf\n", hvalues[iCol]);
+		fprintf(fileHvalues, "%lf\n", hvalues[iCol]);
+	}
+
+	fclose(fileMatrixNaive);
+	fclose(fileHvalues);
+	if (matrix)
+	{
+		delete[] matrix;
+	}
+	if (hvalues)
+	{
+		delete[] hvalues;
 	}
 
 	DEBUG_END;
