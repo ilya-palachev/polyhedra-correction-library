@@ -510,3 +510,154 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	shiftAllContours(SCData, - (ez * center) * ez);
 	DEBUG_END;
 }
+
+static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
+		int& numConditions, double*& matrix)
+{
+	DEBUG_START;
+
+	/* Check that all facets of the polyhedron are triangles. */
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		if (polyhedron->facets[iFacet].numVertices != 3)
+		{
+			ERROR_PRINT("Facet #%d is not triangle. ", iFacet);
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	/* Count the number of edges to find the number of required conditions. */
+	int numEdges = 0;
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		numEdges += polyhedron->facets[iFacet].numVertices;
+	}
+	numConditions = numEdges / 2;
+
+	/* Preprocess the polyhedron. */
+	polyhedron->preprocessAdjacency();
+
+	int numHvalues = polyhedron->numVertices;
+
+	/* Allocate and prepare the matrix for the problem. */
+	matrix = new double[numConditions * numHvalues];
+	for (int i = 0; i < numConditions * numHvalues; ++i)
+	{
+		matrix[i] = 0.;
+	}
+
+	int iCondition = 0;
+	for (int iFacet = 0; iFacet < numConditions; ++iFacet)
+	{
+		Facet* facetCurr = &polyhedron->facets[iFacet];
+		for (int iPosition = 0; iPosition < facetCurr->numVertices; ++iPosition)
+		{
+			/* First 3 vertices of the quadruple. */
+			int iVertex1 = facetCurr->indVertices[iPosition];
+			int iVertex2 =facetCurr->indVertices[(iPosition + 1)
+			                               % facetCurr->numVertices];
+			int iVertex3 = facetCurr->indVertices[(iPosition + 2)
+			                               % facetCurr->numVertices];
+
+			/*
+			 * Get the 4th vertex of the quadruple using incidence
+			 * information.
+			 */
+			int iFacetNeighbor = facetCurr->indVertices[facetCurr->numVertices +
+			                                            iPosition + 1];
+			int iPositionNeighbor =
+					facetCurr->indVertices[2 *facetCurr->numVertices + iPosition
+					                       + 1];
+			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
+			int iPositionPrev = (facetNeighbor->numVertices + iPositionNeighbor
+					- 1) % facetNeighbor->numVertices;
+			int iVertex4 = facetNeighbor->indVertices[iPositionPrev];
+
+			/*
+			 * We add condition only in case when iVertex1 < iVertex2 only to
+			 * avoid twice addition of conditions.
+			 */
+			if (iVertex1 < iVertex2)
+			{
+				/*
+				 * Usual condition looks as follows:
+				 *
+				 * | h1   u1x   u1y   u1z | | 1   u1x   u1y   u1z |
+				 * | h2   u2x   u2y   u2z | | 1   u2x   u2y   u2z |
+				 * | h3   u3x   u3y   u3z | | 1   u3x   u3y   u3z |  >  0
+				 * | h4   u4x   u4y   u4z | | 1   u4x   u4y   u4z |
+				 *
+				 * where h1, h2, h3 and h4 are support values which have
+				 * numbers iVertex1, iVertex2, iVertex3 and iVertex4 here.
+				 */
+
+				Vector3d u1 = polyhedron->vertices[iVertex1];
+				Vector3d u2 = polyhedron->vertices[iVertex2];
+				Vector3d u3 = polyhedron->vertices[iVertex3];
+				Vector3d u4 = polyhedron->vertices[iVertex4];
+				double det1 = u2 % u3 * u4;
+				double det2 = - u1 % u3 * u4;
+				double det3 = u1 % u2 * u4;
+				double det4 = - u1 % u2 * u3;
+				double det = det1 + det2 + det3 + det4;
+				if (det < 0)
+				{
+					det1 = -det1;
+					det2 = -det2;
+					det3 = -det3;
+					det4 = -det4;
+				}
+
+				matrix[numHvalues * iCondition + iVertex1] = det1;
+				matrix[numHvalues * iCondition + iVertex2] = det2;
+				matrix[numHvalues * iCondition + iVertex3] = det3;
+				matrix[numHvalues * iCondition + iVertex4] = det4;
+			}
+		}
+	}
+	DEBUG_END;
+}
+
+void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
+		double*& matrix, int& numHvalues, double*& hvalues)
+{
+	DEBUG_START;
+
+	/* 1. Balance contours if it is required. */
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+	}
+
+	/* 2. Extract support planes from shadow contour data. */
+	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
+	DEBUG_PRINT("Number of extracted support planes: %ld",
+		(long unsigned int) supportPlanes.size());
+
+	/* 3. Get normal vectors of support planes and normalize them. */
+	vector<Vector3d> directions;
+	numHvalues = supportPlanes.size();
+	hvalues = new double[numHvalues];
+	int iValue = 0;
+	for (auto &plane : supportPlanes)
+	{
+		if (plane.dist < 0)
+		{
+			plane.dist = -plane.dist;
+			plane.norm = -plane.norm;
+		}
+		Vector3d normal = plane.norm;
+		normal.norm(1.);
+		directions.push_back(normal);
+		hvalues[iValue++] = plane.dist;
+	}
+
+	/* 4. Construct convex hull of the set of normal vectors. */
+	PolyhedronPtr polyhedron = constructConvexHull(directions);
+
+	/* 5. Build matrix by the polyhedron. */
+	buildMatrixByPolyhedron(polyhedron, numConditions, matrix);
+
+	DEBUG_END;
+}

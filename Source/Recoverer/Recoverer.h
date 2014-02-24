@@ -156,6 +156,15 @@ public:
 	 * @param SCData	Shadow contour data
 	 */
 	PolyhedronPtr buildDualContours(ShadeContourDataPtr SCData);
+
+	/**
+	 * Builds naive matrix for support function estimation problem.
+	 *
+	 * @param matrix	The matrix.
+	 * @param hvalues	The noisy-measured support vector.
+	 */
+	void buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
+			double*& matrix, int& numHvalues, double*& hvalues);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;
