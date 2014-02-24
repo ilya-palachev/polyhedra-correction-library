@@ -69,13 +69,19 @@
  */
 #define OPTION_BALANCE_DATA 'b'
 
+/**
+ * Option "-p" enable the mode of printing the problem, i.e. the support vector
+ * and the matrix of conditions.
+ */
+#define OPTION_PRINT_PROBLEM 'p'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcd"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdp"
 
 
 /** Error return value of getopt function. */
@@ -136,6 +142,9 @@ typedef struct
 
 	/** Whether to balance contour data before processing. */
 	bool ifBalancing;
+
+	/** Whether the mode of problem printing is enabled. */
+	bool ifPrintProblem;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -203,6 +212,8 @@ void printUsage(int argc, char** argv)
 		OPTION_CONTOURS);
 	STDERR_PRINT("\t-%c\tBalance contour data before processing.\n",
 			OPTION_BALANCE_DATA);
+	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
+			"to the file).", OPTION_PRINT_PROBLEM);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -374,6 +385,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_BALANCE_DATA:
 			options->ifBalancing = true;
+			break;
+		case OPTION_PRINT_PROBLEM:
+			options->ifPrintProblem = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -572,6 +586,44 @@ ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 }
 
 /**
+ * Prints the problems to files (for debugging purposes).
+ *
+ * @param SCData	Shadow contours data.
+ * @param recoverer	The recoverer to be used.
+ */
+static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
+{
+	DEBUG_START;
+	int numConditions = 0, numHvalues = 0;
+	double *matrix = NULL, *hvalues = NULL;
+
+	recoverer->buildNaiveMatrix(SCData, numConditions, matrix, numHvalues,
+			hvalues);
+
+	FILE* fileMatrixNaive = (FILE*) fopen("../poly-data-out/matrix-naive.txt",
+			"w");
+	FILE* fileHvalues = (FILE*) fopen("../poly-data-out/hvalues-naive.txt",
+			"w");
+
+	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
+	{
+		for (int iCol = 0; iCol < numHvalues; ++iCol)
+		{
+			fprintf(fileMatrixNaive, "%lf ",
+					matrix[iCondition * numHvalues + iCol]);
+		}
+		fprintf(fileMatrixNaive, "\n");
+	}
+
+	for (int iCol = 0; iCol < numHvalues; ++iCol)
+	{
+		fprintf("%lf\n", hvalues[iCol]);
+	}
+
+	DEBUG_END;
+}
+
+/**
  * The main function of the test.
  * 
  * @param argc	Standard Linux argc
@@ -607,7 +659,12 @@ int main(int argc, char** argv)
 		recoverer->enableBalancing();
 	}
 
-	if (options->ifBuildContours &&
+	if (options->ifPrintProblem)
+	{
+		/* Just print naive matrix and vector of hvalues. */
+		buildNaiveMatrix(SCData, recoverer);
+	}
+	else if (options->ifBuildContours &&
 			!options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Buid polyhedron consisting of shadow contours. */
