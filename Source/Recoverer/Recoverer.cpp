@@ -285,8 +285,10 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 		 * Extract support planes from one contour and insert it to common list.
 		 */
 		vector<Plane> supportPlanesPortion = extractSupportPlanes(contourCurr);
-		supportPlanes.insert(supportPlanes.begin(),
-				supportPlanesPortion.begin(), supportPlanes.end());
+		for (auto &plane : supportPlanesPortion)
+		{
+			supportPlanes.push_back(plane);
+		}
 	}
 
 	DEBUG_END;
@@ -548,14 +550,14 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	}
 
 	int iCondition = 0;
-	for (int iFacet = 0; iFacet < numConditions; ++iFacet)
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		Facet* facetCurr = &polyhedron->facets[iFacet];
 		for (int iPosition = 0; iPosition < facetCurr->numVertices; ++iPosition)
 		{
 			/* First 3 vertices of the quadruple. */
 			int iVertex1 = facetCurr->indVertices[iPosition];
-			int iVertex2 =facetCurr->indVertices[(iPosition + 1)
+			int iVertex2 = facetCurr->indVertices[(iPosition + 1)
 			                               % facetCurr->numVertices];
 			int iVertex3 = facetCurr->indVertices[(iPosition + 2)
 			                               % facetCurr->numVertices];
