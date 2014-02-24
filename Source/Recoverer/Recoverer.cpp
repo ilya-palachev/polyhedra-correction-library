@@ -513,6 +513,14 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
+/**
+ * Builds matrix of constraints from the polyhedron (which represents a convex
+ * hull of the set of directions for which the support values are given).
+ *
+ * @param polyhedron	Convex hull of the set of directions
+ * @param numConditions	The number of constraints (output)
+ * @param matrix		The matrix of constraints (output)
+ */
 static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		int& numConditions, double*& matrix)
 {
@@ -573,7 +581,7 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 					                       + 1];
 			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
 			int iPositionPrev = (facetNeighbor->numVertices + iPositionNeighbor
-					- 1) % facetNeighbor->numVertices;
+					+ 1) % facetNeighbor->numVertices;
 			int iVertex4 = facetNeighbor->indVertices[iPositionPrev];
 
 			/*
@@ -611,10 +619,19 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 					det4 = -det4;
 				}
 
+				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+						det1, iCondition, iVertex1);
 				matrix[numHvalues * iCondition + iVertex1] = det1;
+				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+						det2, iCondition, iVertex2);
 				matrix[numHvalues * iCondition + iVertex2] = det2;
+				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+						det3, iCondition, iVertex3);
 				matrix[numHvalues * iCondition + iVertex3] = det3;
+				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+						det4, iCondition, iVertex4);
 				matrix[numHvalues * iCondition + iVertex4] = det4;
+				++iCondition;
 			}
 		}
 	}
