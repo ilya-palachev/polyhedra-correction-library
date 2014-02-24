@@ -613,6 +613,8 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 
 	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
 	{
+		double constraint = 0.;
+		double constraint0 = 0.;
 		fprintf (fileMatrixNaive, "%d ", iCondition);
 		for (int iCol = 0; iCol < numHvalues; ++iCol)
 		{
@@ -620,9 +622,13 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 			if (fabs(value) > EPS_MIN_DOUBLE)
 			{
 				fprintf(fileMatrixNaive, "%d %.16lf ", iCol, value);
+				constraint += value * hvalues[iCol];
+				constraint0 += value;
 			}
 		}
 		fprintf(fileMatrixNaive, "\n");
+		DEBUG_PRINT("constraint[%d] = %.16lf, constraint0[%d] = %.16lf",
+				iCondition, constraint, iCondition, constraint0);
 	}
 
 	for (int iCol = 0; iCol < numHvalues; ++iCol)
