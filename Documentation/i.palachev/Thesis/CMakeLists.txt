@@ -1,1 +1,2 @@
 add_subdirectory(ReportAboutReconstruction)
+add_subdirectory(ReportAboutOptimization)
