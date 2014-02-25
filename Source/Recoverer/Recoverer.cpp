@@ -692,6 +692,26 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 	DEBUG_END;
 }
 
+static void analyzeTaucsMatrix(taucs_ccs_matrix* Q)
+{
+	DEBUG_START;
+	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
+		{
+			DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
+			if (iCol < Q->n)
+			{
+				for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
+				{
+					DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
+							Q->values.d[iRow]);
+				}
+			}
+		}
+		DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
+				Q->colptr[Q->n] - Q->colptr[0]);
+	DEBUG_END;
+}
+
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -699,18 +719,29 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	double *matrix = NULL, *hvalues = NULL;
 
 	buildNaiveMatrix(SCData, numConditions, matrix, numHvalues, hvalues);
+	DEBUG_PRINT("Matrix has been built.");
 
 	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
 			numHvalues, numConditions);
+	DEBUG_PRINT("TAUCS matrix has been constructed.");
+	analyzeTaucsMatrix(Q);
 
 	taucs_ccs_matrix* Qt = taucs_ccs_transpose(Q);
+	DEBUG_PRINT("Matrix has been transposed.");
 
 	double conditionNumber = taucs_rcond(Qt);
+	DEBUG_PRINT("Condition number has been calculated, it is %.16lf",
+			conditionNumber);
+
 	double inRelErrTolerance = conditionNumber * conditionNumber *
 			EPS_MIN_DOUBLE;
+	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
+
 	double outResidualNorm;
 
 	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance, 0);
+	DEBUG_PRINT("Function t_snnls has returned.");
+	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
 
 	free(h);
 
