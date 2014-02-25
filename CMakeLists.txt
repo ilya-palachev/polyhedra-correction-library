@@ -88,12 +88,6 @@ endforeach()
 if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
 	set(CMAKE_BUILD_TYPE "Release")
 	set(COMMON_FLAGS "${COMMON_FLAGS} -g")
-endif ()
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
-
-if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
 	set(cat_config ${CMAKE_SOURCE_DIR}/Scripts/cat_config.sh)
 	set(debug_exceptions_config "${CMAKE_SOURCE_DIR}/config/debug_exceptions.conf")
 	set(debug_exceptions "")
@@ -106,6 +100,9 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
 		set_source_files_properties(${souce_file} PROPERTIES COMPILE_FLAGS -UNDEBUG)
 	endforeach()
 endif ()
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
 
 add_subdirectory(Documentation)
 
