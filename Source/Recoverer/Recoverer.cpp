@@ -735,6 +735,43 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 	DEBUG_END;
 }
 
+static double l1_distance(int n, double* x, double* y)
+{
+	DEBUG_START;
+	double result = 0.;
+	for (int i = 0; i < n; ++i)
+	{
+		result += fabs(x[i] - y[i]);
+	}
+	DEBUG_END;
+	return result;
+}
+
+static double l2_distance(int n, double* x, double* y)
+{
+	DEBUG_START;
+	double result = 0.;
+	for (int i = 0; i < n; ++i)
+	{
+		result += (x[i] - y[i]) * (x[i] - y[i]);
+	}
+	DEBUG_END;
+	return result;
+}
+
+static double linf_distance(int n, double* x, double* y)
+{
+	DEBUG_START;
+	double result = 0.;
+	for (int i = 0; i < n; ++i)
+	{
+		result = fabs(x[i] - y[i]) > result ? fabs(x[i] - y[i]) : result;
+	}
+	DEBUG_END;
+	return result;
+}
+
+
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
