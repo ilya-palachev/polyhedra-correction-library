@@ -692,23 +692,44 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 	DEBUG_END;
 }
 
+#define NUM_NONZERO_EXPECTED 4
+
 static void analyzeTaucsMatrix(taucs_ccs_matrix* Q)
 {
 	DEBUG_START;
+
+	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
+
 	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
+	{
+		DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
+		if (iCol < Q->n)
 		{
-			DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
-			if (iCol < Q->n)
+			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
 			{
-				for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
-				{
-					DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
-							Q->values.d[iRow]);
-				}
+				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
+						Q->values.d[iRow]);
+				numElemRow[Q->rowind[iRow]]++;
 			}
 		}
-		DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
-				Q->colptr[Q->n] - Q->colptr[0]);
+	}
+	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
+			Q->colptr[Q->n] - Q->colptr[0]);
+
+	int numUnexcpectedNonzeros = 0;
+	for (int iRow = 0; iRow < Q->m; ++iRow)
+	{
+		DEBUG_PRINT("%d-th row of Q has %d elements.", iRow, numElemRow[iRow]);
+		if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
+		{
+			DEBUG_PRINT("Warning: unexpected number of nonzero elements in row");
+			++numUnexcpectedNonzeros;
+		}
+	}
+	DEBUG_PRINT("Number of rows with unexpected number of nonzero elements is "
+			"%d", numUnexcpectedNonzeros);
+
+	free(numElemRow);
 	DEBUG_END;
 }
 
