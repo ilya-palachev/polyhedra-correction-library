@@ -771,7 +771,6 @@ static double linf_distance(int n, double* x, double* y)
 	return result;
 }
 
-
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -780,6 +779,10 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 
 	buildNaiveMatrix(SCData, numConditions, matrix, numHvalues, hvalues);
 	DEBUG_PRINT("Matrix has been built.");
+
+	tsnnls_verbosity(10);
+	char* strStderr = strdup("stderr");
+	taucs_logfile(strStderr);
 
 	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
 			numHvalues, numConditions);
@@ -802,9 +805,22 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 
 	double outResidualNorm;
 
-	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance, 0);
-	DEBUG_PRINT("Function t_snnls has returned.");
+	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100.,
+			1);
+	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void*) h);
+
+	char* errorTsnnls;
+	tsnnls_error(&errorTsnnls);
+	ALWAYS_PRINT(stdout, "Error from tsnnls: %s", errorTsnnls);
+
 	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
+
+	ALWAYS_PRINT(stdout, "||h - h0||_{1} = %.16lf",
+			l1_distance(numHvalues, hvalues, h));
+	ALWAYS_PRINT(stdout, "||h - h0||_{2} = %.16lf",
+			l2_distance(numHvalues, hvalues, h));
+	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf",
+			linf_distance(numHvalues, hvalues, h));
 
 	free(h);
 	taucs_ccs_free(Q);
