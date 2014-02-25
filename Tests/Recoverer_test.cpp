@@ -27,6 +27,7 @@
 #include <errno.h>
 #include <cstring>
 
+#include "Constants.h"
 #include "PolyhedraCorrectionLibrary.h"
 
 /** The name of the test. */
@@ -69,13 +70,24 @@
  */
 #define OPTION_BALANCE_DATA 'b'
 
+/**
+ * Option "-p" enable the mode of printing the problem, i.e. the support vector
+ * and the matrix of conditions.
+ */
+#define OPTION_PRINT_PROBLEM 'p'
+
+/**
+ * Option "-r" runs recovering.
+ */
+#define OPTION_RECOVER 'r'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcd"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdpr"
 
 
 /** Error return value of getopt function. */
@@ -136,6 +148,12 @@ typedef struct
 
 	/** Whether to balance contour data before processing. */
 	bool ifBalancing;
+
+	/** Whether the mode of problem printing is enabled. */
+	bool ifPrintProblem;
+
+	/** Whether the recovering mode is enabled. */
+	bool ifRecover;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -203,6 +221,9 @@ void printUsage(int argc, char** argv)
 		OPTION_CONTOURS);
 	STDERR_PRINT("\t-%c\tBalance contour data before processing.\n",
 			OPTION_BALANCE_DATA);
+	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
+			"to the file).", OPTION_PRINT_PROBLEM);
+	STDERR_PRINT("\t-%c\tRecover polyhedron.", OPTION_RECOVER);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -374,6 +395,12 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_BALANCE_DATA:
 			options->ifBalancing = true;
+			break;
+		case OPTION_PRINT_PROBLEM:
+			options->ifPrintProblem = true;
+			break;
+		case OPTION_RECOVER:
+			options->ifRecover = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -572,6 +599,70 @@ ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 }
 
 /**
+ * Prints the problems to files (for debugging purposes).
+ *
+ * @param SCData	Shadow contours data.
+ * @param recoverer	The recoverer to be used.
+ */
+static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
+{
+	DEBUG_START;
+	int numConditions = 0, numHvalues = 0;
+	double *matrix = NULL, *hvalues = NULL;
+
+	recoverer->buildNaiveMatrix(SCData, numConditions, matrix, numHvalues,
+			hvalues);
+
+	FILE* fileMatrixNaive = (FILE*) fopen("../poly-data-out/matrix-naive.txt",
+			"w");
+	FILE* fileHvalues = (FILE*) fopen("../poly-data-out/hvalues-naive.txt",
+			"w");
+
+	if (!fileMatrixNaive || !fileHvalues)
+	{
+		ERROR_PRINT("Failed to open file.");
+	}
+
+	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
+	{
+		double constraint = 0.;
+		double constraint0 = 0.;
+		fprintf (fileMatrixNaive, "%d ", iCondition);
+		for (int iCol = 0; iCol < numHvalues; ++iCol)
+		{
+			double value = matrix[iCondition * numHvalues + iCol];
+			if (fabs(value) > EPS_MIN_DOUBLE)
+			{
+				fprintf(fileMatrixNaive, "%d %.16lf ", iCol, value);
+				constraint += value * hvalues[iCol];
+				constraint0 += value;
+			}
+		}
+		fprintf(fileMatrixNaive, "\n");
+		DEBUG_PRINT("constraint[%d] = %.16lf, constraint0[%d] = %.16lf",
+				iCondition, constraint, iCondition, constraint0);
+	}
+
+	for (int iCol = 0; iCol < numHvalues; ++iCol)
+	{
+		fprintf(fileHvalues, "%lf\n", hvalues[iCol]);
+	}
+
+	fclose(fileMatrixNaive);
+	fclose(fileHvalues);
+	if (matrix)
+	{
+		delete[] matrix;
+	}
+	if (hvalues)
+	{
+		delete[] hvalues;
+	}
+
+	DEBUG_END;
+}
+
+/**
  * The main function of the test.
  * 
  * @param argc	Standard Linux argc
@@ -607,7 +698,17 @@ int main(int argc, char** argv)
 		recoverer->enableBalancing();
 	}
 
-	if (options->ifBuildContours &&
+	if (options->ifRecover)
+	{
+		/* Run the recoverer. */
+		recoverer->run(SCData);
+	}
+	else if (options->ifPrintProblem)
+	{
+		/* Just print naive matrix and vector of hvalues. */
+		buildNaiveMatrix(SCData, recoverer);
+	}
+	else if (options->ifBuildContours &&
 			!options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Buid polyhedron consisting of shadow contours. */
