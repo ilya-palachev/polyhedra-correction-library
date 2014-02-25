@@ -44,7 +44,7 @@
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
-	ifBalancing(false)
+	ifBalancing(false), ifScaleMatrix(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -60,6 +60,13 @@ void Recoverer::enableBalancing(void)
 {
 	DEBUG_START;
 	ifBalancing = true;
+	DEBUG_END;
+}
+
+void Recoverer::enableMatrixScaling(void)
+{
+	DEBUG_START;
+	ifScaleMatrix = true;
 	DEBUG_END;
 }
 
@@ -533,7 +540,7 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
  * @param matrix		The matrix of constraints (output)
  */
 static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
-		int& numConditions, double*& matrix)
+		int& numConditions, double*& matrix, bool ifScaleMatrix)
 {
 	DEBUG_START;
 
@@ -630,6 +637,17 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 					det4 = -det4;
 				}
 
+				if (ifScaleMatrix)
+				{
+					double normRow = sqrt(det1 * det1 + det2 * det2 +
+							det3 * det3 + det4 * det4);
+					double coeff = 1. / normRow;
+					det1 *= coeff;
+					det2 *= coeff;
+					det3 *= coeff;
+					det4 *= coeff;
+				}
+
 				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
 						det1, iCondition, iVertex1);
 				matrix[numHvalues * iCondition + iVertex1] = det1;
@@ -687,7 +705,7 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 	PolyhedronPtr polyhedron = constructConvexHull(directions);
 
 	/* 5. Build matrix by the polyhedron. */
-	buildMatrixByPolyhedron(polyhedron, numConditions, matrix);
+	buildMatrixByPolyhedron(polyhedron, numConditions, matrix, ifScaleMatrix);
 
 	DEBUG_END;
 }

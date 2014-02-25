@@ -81,13 +81,18 @@
  */
 #define OPTION_RECOVER 'r'
 
+/**
+ * Option "-s" enables matrix scaling.
+ */
+#define OPTION_SCALE_MATRIX 's'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdpr"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdprs"
 
 
 /** Error return value of getopt function. */
@@ -154,6 +159,9 @@ typedef struct
 
 	/** Whether the recovering mode is enabled. */
 	bool ifRecover;
+
+	/** Whether to scale the matrix of problem. */
+	bool ifScaleMatrix;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -224,6 +232,7 @@ void printUsage(int argc, char** argv)
 	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
 			"to the file).", OPTION_PRINT_PROBLEM);
 	STDERR_PRINT("\t-%c\tRecover polyhedron.", OPTION_RECOVER);
+	STDERR_PRINT("\t-%c\tEnable matrix scaling.", OPTION_SCALE_MATRIX);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -262,6 +271,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifBuildDualNonConvexPolyhedron = false;
 	options->ifBuildContours = false;
 	options->ifBalancing = false;
+	options->ifPrintProblem = false;
+	options->ifRecover = false;
+	options->ifScaleMatrix = false;
 	while ((charCurr = getopt(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION))
 		!= GETOPT_FAILURE)
 	{
@@ -401,6 +413,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_RECOVER:
 			options->ifRecover = true;
+			break;
+		case OPTION_SCALE_MATRIX:
+			options->ifScaleMatrix = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -696,6 +711,12 @@ int main(int argc, char** argv)
 	if (options->ifBalancing)
 	{
 		recoverer->enableBalancing();
+	}
+
+	/* Enable matrix scaling if required. */
+	if (options->ifScaleMatrix)
+	{
+		recoverer->enableMatrixScaling();
 	}
 
 	if (options->ifRecover)
