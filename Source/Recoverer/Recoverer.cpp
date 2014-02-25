@@ -694,7 +694,7 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 
 #define NUM_NONZERO_EXPECTED 4
 
-static void analyzeTaucsMatrix(taucs_ccs_matrix* Q)
+static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 {
 	DEBUG_START;
 
@@ -716,19 +716,21 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q)
 	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
 			Q->colptr[Q->n] - Q->colptr[0]);
 
-	int numUnexcpectedNonzeros = 0;
-	for (int iRow = 0; iRow < Q->m; ++iRow)
+	if (ifAnalyzeExpect)
 	{
-		DEBUG_PRINT("%d-th row of Q has %d elements.", iRow, numElemRow[iRow]);
-		if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
+		int numUnexcpectedNonzeros = 0;
+		for (int iRow = 0; iRow < Q->m; ++iRow)
 		{
-			DEBUG_PRINT("Warning: unexpected number of nonzero elements in row");
-			++numUnexcpectedNonzeros;
+			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow, numElemRow[iRow]);
+			if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
+			{
+				DEBUG_PRINT("Warning: unexpected number of nonzero elements in row");
+				++numUnexcpectedNonzeros;
+			}
 		}
+		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements is "
+				"%d", numUnexcpectedNonzeros);
 	}
-	DEBUG_PRINT("Number of rows with unexpected number of nonzero elements is "
-			"%d", numUnexcpectedNonzeros);
-
 	free(numElemRow);
 	DEBUG_END;
 }
@@ -745,16 +747,19 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
 			numHvalues, numConditions);
 	DEBUG_PRINT("TAUCS matrix has been constructed.");
-	analyzeTaucsMatrix(Q);
+	analyzeTaucsMatrix(Q, true);
 
 	taucs_ccs_matrix* Qt = taucs_ccs_transpose(Q);
 	DEBUG_PRINT("Matrix has been transposed.");
+	analyzeTaucsMatrix(Qt, false);
+	DEBUG_PRINT("Q  has %d rows and %d columns", Q->m, Q->n);
+	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
 
-	double conditionNumber = taucs_rcond(Qt);
-	DEBUG_PRINT("Condition number has been calculated, it is %.16lf",
-			conditionNumber);
+	double conditionNumberQ = taucs_rcond(Q);
+	DEBUG_PRINT("Condition number of Q has been calculated, it is %.16lf",
+			conditionNumberQ);
 
-	double inRelErrTolerance = conditionNumber * conditionNumber *
+	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
 			EPS_MIN_DOUBLE;
 	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
 
@@ -765,6 +770,8 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
 
 	free(h);
+	taucs_ccs_free(Q);
+	taucs_ccs_free(Qt);
 
 	DEBUG_END;
 	return NULL;
