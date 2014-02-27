@@ -609,35 +609,39 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		for (int iPosition = 0; iPosition < vinfoCurr->numFacets; ++iPosition)
 		{
 			int iFacetNeighbor =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
 					                     iPosition];
 			int iPositionNeighbor =
-					vinfoCurr->indFacets[3 * vinfoCurr->numFacets + 1 +
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
 					                     iPosition];
 			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
+			ASSERT(iPositionNeighbor < facetNeighbor->numVertices);
 			int iVertexNeighbor =
 					facetNeighbor->indVertices[iPositionNeighbor + 1];
-			
-			int iPositionPrev = iPosition + 1;
+
+			int iPositionPrev = (vinfoCurr->numFacets + iPosition - 1) %
+					vinfoCurr->numFacets;
 			int iFacetNeighborPrev =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
 					                     iPositionPrev];
 			int iPositionNeighborPrev =
-					vinfoCurr->indFacets[3 * vinfoCurr->numFacets + 1 +
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
 					                     iPositionPrev];
 			Facet* facetNeighborPrev = &polyhedron->facets[iFacetNeighborPrev];
+			ASSERT(iPositionNeighborPrev < facetNeighborPrev->numVertices);
 			int iVertexNeighborPrev =
 					facetNeighborPrev->indVertices[iPositionNeighborPrev + 1];
 					
-			int iPositionNext = (vinfoCurr->numFacets + iPosition - 1) %
+			int iPositionNext = (vinfoCurr->numFacets + iPosition + 1) %
 					vinfoCurr->numFacets;
 			int iFacetNeighborNext =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
 					                     iPositionNext];
 			int iPositionNeighborNext =
-					vinfoCurr->indFacets[3 * vinfoCurr->numFacets + 1 +
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
 					                     iPositionNext];
 			Facet* facetNeighborNext = &polyhedron->facets[iFacetNeighborNext];
+			ASSERT(iPositionNeighborNext < facetNeighborNext->numVertices);
 			int iVertexNeighborNext =
 					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
 			
