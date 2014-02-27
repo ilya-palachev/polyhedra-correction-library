@@ -650,6 +650,14 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 			edgesCurrent.insert(edgeCurrent);
 		}
 
+		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident edges "
+				"are:", iVertex, vinfoCurr->numFacets);
+		for (auto &edge : edgeCurrnet)
+		{
+			DEBUG_PRINT("   edge [%d, %d, <%d>, <%d>]", edge.u0, edge.u1,
+					edge.u2, edge.u3);
+		}
+
 		if (vinfoCurr->numFacets == 3)
 		{
 			bool ifProved = false;
@@ -657,16 +665,23 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 			{
 				if (edgesProved.find(edgeCurrent) != edgesProved.end())
 				{
+					DEBUG_PRINT("Convexity of edge [%d, %d, <%d>, <%d>] already"
+							" proved, so all convexity of all edges is proved.",
+							edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
+							edgeCurrent.u3);
 					ifProved = true;
 					break;
 				}
 			}
-			
+
 			if (!ifProved)
 			{
+				DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
+							edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
+							edgeCurrent.u3);
 				edgesReported.insert(*(edgesCurrent.begin()));
 			}
-			
+
 			edgesProved.insert(edgesCurrent.begin(),
 					edgesCurrent.end());
 		}
@@ -676,6 +691,9 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 			{
 				if (edgesProved.find(edgeCurrent) != edgesProved.end())
 				{
+					DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
+								edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
+								edgeCurrent.u3);
 					edgesProved.insert(edgeCurrent);
 					edgesReported.insert(edgeCurrent);
 				}
@@ -840,15 +858,17 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 		int numUnexcpectedNonzeros = 0;
 		for (int iRow = 0; iRow < Q->m; ++iRow)
 		{
-			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow, numElemRow[iRow]);
+			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
+					numElemRow[iRow]);
 			if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
 			{
-				DEBUG_PRINT("Warning: unexpected number of nonzero elements in row");
+				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
+						"row");
 				++numUnexcpectedNonzeros;
 			}
 		}
-		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements is "
-				"%d", numUnexcpectedNonzeros);
+		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements "
+				"is %d", numUnexcpectedNonzeros);
 	}
 	free(numElemRow);
 	DEBUG_END;
