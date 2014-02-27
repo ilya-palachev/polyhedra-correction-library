@@ -652,7 +652,7 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident edges "
 				"are:", iVertex, vinfoCurr->numFacets);
-		for (auto &edge : edgeCurrnet)
+		for (auto &edge : edgesCurrent)
 		{
 			DEBUG_PRINT("   edge [%d, %d, <%d>, <%d>]", edge.u0, edge.u1,
 					edge.u2, edge.u3);
@@ -676,10 +676,11 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 			if (!ifProved)
 			{
+				auto edgeCurrent = edgesCurrent.begin();
 				DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
-							edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
-							edgeCurrent.u3);
-				edgesReported.insert(*(edgesCurrent.begin()));
+							edgeCurrent->u0, edgeCurrent->u1, edgeCurrent->u2,
+							edgeCurrent->u3);
+				edgesReported.insert(*edgeCurrent);
 			}
 
 			edgesProved.insert(edgesCurrent.begin(),
@@ -689,7 +690,7 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		{
 			for (auto &edgeCurrent : edgesCurrent)
 			{
-				if (edgesProved.find(edgeCurrent) != edgesProved.end())
+				if (edgesProved.find(edgeCurrent) == edgesProved.end())
 				{
 					DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
 								edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
