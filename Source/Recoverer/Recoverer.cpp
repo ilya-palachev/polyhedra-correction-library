@@ -19,6 +19,7 @@
  */
 
 #include <cmath>
+#include <set>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -40,6 +41,8 @@
 #define isinf
 #endif
 #include <libtsnnls/tsnnls.h>
+
+using namespace std;
 
 #define DEFAULT_MAX_COORDINATE 1000000.
 
@@ -531,6 +534,14 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
+typedef struct
+{
+	int u0;
+	int u1;
+	int u2;
+	int u3;
+} Quadruple;
+
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
@@ -555,18 +566,120 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		}
 	}
 
-	/* Count the number of edges to find the number of required conditions. */
-	int numEdges = 0;
-	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
-	{
-		numEdges += polyhedron->facets[iFacet].numVertices;
-	}
-	numConditions = numEdges / 2;
-
 	/* Preprocess the polyhedron. */
 	polyhedron->preprocessAdjacency();
 
 	int numHvalues = polyhedron->numVertices;
+
+	auto comparer = [](Quadruple e0, Quadruple e1)
+	{
+		int e0min, e0max, e1min, e1max;
+		if (e0.u0 < e0.u1)
+		{
+			e0min = e0.u0;
+			e0max = e0.u1;
+		}
+		else
+		{
+			e0min = e0.u1;
+			e0max = e0.u0;
+		}
+		
+		if (e1.u0 < e1.u1)
+		{
+			e1min = e1.u0;
+			e1max = e1.u1;
+		}
+		else
+		{
+			e1min = e1.u1;
+			e1max = e1.u0;
+		}
+		
+		return (e0min < e1min) || (e0min == e1min && e0max < e1max);
+	};
+	set<Quadruple, decltype(comparer)> edgesReported(comparer),
+			edgesProved(comparer), edgesCurrent(comparer);
+
+	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
+	{
+		VertexInfo* vinfoCurr = &polyhedron->vertexInfos[iVertex];
+		edgesCurrent.clear();
+
+		for (int iPosition = 0; iPosition < vinfoCurr->numFacets; ++iPosition)
+		{
+			int iFacetNeighbor =
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+					                     iPosition];
+			int iPositionNeighbor =
+					vinfoCurr->indFacets[3 * vinfoCurr->numFacets + 1 +
+					                     iPosition];
+			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
+			int iVertexNeighbor =
+					facetNeighbor->indVertices[iPositionNeighbor + 1];
+			
+			int iPositionPrev = iPosition + 1;
+			int iFacetNeighborPrev =
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+					                     iPositionPrev];
+			int iPositionNeighborPrev =
+					vinfoCurr->indFacets[3 * vinfoCurr->numFacets + 1 +
+					                     iPositionPrev];
+			Facet* facetNeighborPrev = &polyhedron->facets[iFacetNeighborPrev];
+			int iVertexNeighborPrev =
+					facetNeighborPrev->indVertices[iPositionNeighborPrev + 1];
+					
+			int iPositionNext = (vinfoCurr->numFacets + iPosition - 1) %
+					vinfoCurr->numFacets;
+			int iFacetNeighborNext =
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+					                     iPositionNext];
+			int iPositionNeighborNext =
+					vinfoCurr->indFacets[3 * vinfoCurr->numFacets + 1 +
+					                     iPositionNext];
+			Facet* facetNeighborNext = &polyhedron->facets[iFacetNeighborNext];
+			int iVertexNeighborNext =
+					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
+			
+			Quadruple edgeCurrent = {iVertex, iVertexNeighbor,
+					iVertexNeighborPrev, iVertexNeighborNext};
+			edgesCurrent.insert(edgeCurrent);
+		}
+
+		if (vinfoCurr->numFacets == 3)
+		{
+			bool ifProved = false;
+			for (auto &edgeCurrent : edgesCurrent)
+			{
+				if (edgesProved.find(edgeCurrent) != edgesProved.end())
+				{
+					ifProved = true;
+					break;
+				}
+			}
+			
+			if (!ifProved)
+			{
+				edgesReported.insert(*(edgesCurrent.begin()));
+			}
+			
+			edgesProved.insert(edgesCurrent.begin(),
+					edgesCurrent.end());
+		}
+		else
+		{
+			for (auto &edgeCurrent : edgesCurrent)
+			{
+				if (edgesProved.find(edgeCurrent) != edgesProved.end())
+				{
+					edgesProved.insert(edgeCurrent);
+					edgesReported.insert(edgeCurrent);
+				}
+			}
+		}
+	}
+
+	numConditions = edgesReported.size();
 
 	/* Allocate and prepare the matrix for the problem. */
 	matrix = new double[numConditions * numHvalues];
@@ -576,94 +689,68 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	}
 
 	int iCondition = 0;
-	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	for (auto &edge : edgesReported)
 	{
-		Facet* facetCurr = &polyhedron->facets[iFacet];
-		for (int iPosition = 0; iPosition < facetCurr->numVertices; ++iPosition)
+		int iVertex1 = edge.u0;
+		int iVertex2 = edge.u1;
+		int iVertex3 = edge.u2;
+		int iVertex4 = edge.u3;
+
+		/*
+		 * Usual condition looks as follows:
+		 *
+		 * | h1   u1x   u1y   u1z | | 1   u1x   u1y   u1z |
+		 * | h2   u2x   u2y   u2z | | 1   u2x   u2y   u2z |
+		 * | h3   u3x   u3y   u3z | | 1   u3x   u3y   u3z |  >  0
+		 * | h4   u4x   u4y   u4z | | 1   u4x   u4y   u4z |
+		 *
+		 * where h1, h2, h3 and h4 are support values which have
+		 * numbers iVertex1, iVertex2, iVertex3 and iVertex4 here.
+		 */
+
+		Vector3d u1 = polyhedron->vertices[iVertex1];
+		Vector3d u2 = polyhedron->vertices[iVertex2];
+		Vector3d u3 = polyhedron->vertices[iVertex3];
+		Vector3d u4 = polyhedron->vertices[iVertex4];
+		double det1 = u2 % u3 * u4;
+		double det2 = - u1 % u3 * u4;
+		double det3 = u1 % u2 * u4;
+		double det4 = - u1 % u2 * u3;
+		double det = det1 + det2 + det3 + det4;
+		if (det < 0)
 		{
-			/* First 3 vertices of the quadruple. */
-			int iVertex1 = facetCurr->indVertices[iPosition];
-			int iVertex2 = facetCurr->indVertices[(iPosition + 1)
-			                               % facetCurr->numVertices];
-			int iVertex3 = facetCurr->indVertices[(iPosition + 2)
-			                               % facetCurr->numVertices];
-
-			/*
-			 * Get the 4th vertex of the quadruple using incidence
-			 * information.
-			 */
-			int iFacetNeighbor = facetCurr->indVertices[facetCurr->numVertices +
-			                                            iPosition + 1];
-			int iPositionNeighbor =
-					facetCurr->indVertices[2 *facetCurr->numVertices + iPosition
-					                       + 1];
-			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
-			int iPositionPrev = (facetNeighbor->numVertices + iPositionNeighbor
-					+ 1) % facetNeighbor->numVertices;
-			int iVertex4 = facetNeighbor->indVertices[iPositionPrev];
-
-			/*
-			 * We add condition only in case when iVertex1 < iVertex2 only to
-			 * avoid twice addition of conditions.
-			 */
-			if (iVertex1 < iVertex2)
-			{
-				/*
-				 * Usual condition looks as follows:
-				 *
-				 * | h1   u1x   u1y   u1z | | 1   u1x   u1y   u1z |
-				 * | h2   u2x   u2y   u2z | | 1   u2x   u2y   u2z |
-				 * | h3   u3x   u3y   u3z | | 1   u3x   u3y   u3z |  >  0
-				 * | h4   u4x   u4y   u4z | | 1   u4x   u4y   u4z |
-				 *
-				 * where h1, h2, h3 and h4 are support values which have
-				 * numbers iVertex1, iVertex2, iVertex3 and iVertex4 here.
-				 */
-
-				Vector3d u1 = polyhedron->vertices[iVertex1];
-				Vector3d u2 = polyhedron->vertices[iVertex2];
-				Vector3d u3 = polyhedron->vertices[iVertex3];
-				Vector3d u4 = polyhedron->vertices[iVertex4];
-				double det1 = u2 % u3 * u4;
-				double det2 = - u1 % u3 * u4;
-				double det3 = u1 % u2 * u4;
-				double det4 = - u1 % u2 * u3;
-				double det = det1 + det2 + det3 + det4;
-				if (det < 0)
-				{
-					det1 = -det1;
-					det2 = -det2;
-					det3 = -det3;
-					det4 = -det4;
-				}
-
-				if (ifScaleMatrix)
-				{
-					double normRow = sqrt(det1 * det1 + det2 * det2 +
-							det3 * det3 + det4 * det4);
-					double coeff = 1. / normRow;
-					det1 *= coeff;
-					det2 *= coeff;
-					det3 *= coeff;
-					det4 *= coeff;
-				}
-
-				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-						det1, iCondition, iVertex1);
-				matrix[numHvalues * iCondition + iVertex1] = det1;
-				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-						det2, iCondition, iVertex2);
-				matrix[numHvalues * iCondition + iVertex2] = det2;
-				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-						det3, iCondition, iVertex3);
-				matrix[numHvalues * iCondition + iVertex3] = det3;
-				DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-						det4, iCondition, iVertex4);
-				matrix[numHvalues * iCondition + iVertex4] = det4;
-				++iCondition;
-			}
+			det1 = -det1;
+			det2 = -det2;
+			det3 = -det3;
+			det4 = -det4;
 		}
+
+		if (ifScaleMatrix)
+		{
+			double normRow = sqrt(det1 * det1 + det2 * det2 +
+					det3 * det3 + det4 * det4);
+			double coeff = 1. / normRow;
+			det1 *= coeff;
+			det2 *= coeff;
+			det3 *= coeff;
+			det4 *= coeff;
+		}
+
+		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+				det1, iCondition, iVertex1);
+		matrix[numHvalues * iCondition + iVertex1] = det1;
+		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+				det2, iCondition, iVertex2);
+		matrix[numHvalues * iCondition + iVertex2] = det2;
+		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+				det3, iCondition, iVertex3);
+		matrix[numHvalues * iCondition + iVertex3] = det3;
+		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+				det4, iCondition, iVertex4);
+		matrix[numHvalues * iCondition + iVertex4] = det4;
+		++iCondition;
 	}
+
 	DEBUG_END;
 }
 
@@ -703,6 +790,16 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 
 	/* 4. Construct convex hull of the set of normal vectors. */
 	PolyhedronPtr polyhedron = constructConvexHull(directions);
+	polyhedron->preprocessAdjacency();
+	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
+	{
+		int degree = polyhedron->vertexInfos[iVertex].numFacets;
+		DEBUG_PRINT("Vertex %d has degree %d", iVertex, degree);
+		if (degree > 3)
+		{
+			DEBUG_PRINT("--- more than 3");
+		}
+	}
 
 	/* 5. Build matrix by the polyhedron. */
 	buildMatrixByPolyhedron(polyhedron, numConditions, matrix, ifScaleMatrix);
