@@ -87,42 +87,90 @@
 образом.
 
 \begin{equation}
+\label{eq:gen-lp}
  J(u) = c_{1} u^{1} + \ldots + c_{n} u^{n} \to min
 \end{equation}
 
 при условиях
 
 \begin{equation}
+\label{eq:gen-lp-cond1}
  u^{k} \geq 0, \;\;\;\;\; k \in I
 \end{equation}
 
 \begin{equation}
+\label{eq:gen-lp-cond2}
  \left\{
   \begin{aligned}
    a_{11} u^{1} + \ldots + a_{1n} u^{n} \leq 0 \\
    \ldots \\
-   a_{n1} u^{1} + \ldots + a_{nn} u^{n} \leq 0 \\
+   a_{m1} u^{1} + \ldots + a_{mn} u^{n} \leq 0 \\
   \end{aligned}
  \right.
 \end{equation}
 
 \begin{equation}
+\label{eq:gen-lp-cond3}
  \left\{
   \begin{aligned}
-   a_{m1} u^{1} + \ldots + a_{mn} u^{n} = 0 \\
+   a_{m + 1, 1} u^{1} + \ldots + a_{m + 1, n} u^{n} = 0 \\
    \ldots \\
    a_{s1} u^{1} + \ldots + a_{sn} u^{n} = 0 \\
   \end{aligned}
  \right.
 \end{equation}
 
+где $I \subset \{1, 2, \ldots, n\}$ - множество индексов переменных, которые
+требуется поддерживать положительными.
+
+В векторном виде задачу (\ref{eq:gen-lp}), (\ref{eq:gen-lp-cond1}),
+(\ref{eq:gen-lp-cond2}), (\ref{eq:gen-lp-cond3}) можно записать следующим
+образом:
+
+\begin{equation}
+ \begin{aligned}
+  J(u) = \langle c, u \rangle \to min \\
+  u \in U = \{u \in \mathbb{R}^{n} \;\; | \;\; u^{k} \geq 0, k \in I,
+  A u \leq 0, \overline{A} u \overline{b}\}
+ \end{aligned}
+\end{equation}
+
+В качестве особого подкласса общей задачи линейного программирования
+выделяют так называемую \textit{каноническую задачу}:
+
+\begin{equation}
+ \begin{aligned}
+  J(u) = \langle c, u \rangle \to min \\
+  u \in U = \{u \in \mathbb{R}^{n} \;\; | \;\; u \geq 0,
+  \overline{A} u = \overline{b}\}
+ \end{aligned}
+\end{equation}
+
+а также \textit{основную задачу} линейного программирования:
+
+\begin{equation}
+ \begin{aligned}
+  J(u) = \langle c, u \rangle \to min \\
+  u \in U = \{u \in \mathbb{R}^{n} \;\; | \;\; u \geq 0,
+  \overline{A} u \leq \overline{b}\}
+ \end{aligned}
+\end{equation}
+
+Можно показать, что каждую из трех задач можно свести к любой другой с помощью
+введения дополнительных переменных. На практике как правило к этому стараются
+не прибегать, поскольку рост числа переменных обходится дорого с вычислительной 
+точки зрения.
+
+
+
+
 
 \section{Рассматриваемые задачи}
 \label{sec:problem}
 
-В предыдущем отчете было указано, что задача восстановления многогранника по 
-набору его теневых контуров сводится в том или ином виде к задаче квадратичной 
-минимизации. В рассматриваемом случае функционал представлял из собой сумму 
+В предыдущем отчете было указано, что задача восстановления многогранника по
+набору его теневых контуров сводится в том или ином виде к задаче квадратичной
+минимизации. В рассматриваемом случае функционал представлял из собой сумму
 квадратов разностей опорных чисел и их экспериментальных измерений:
 
 \begin{equation}
@@ -165,8 +213,8 @@ n$-матрицу, причем в каждой ее строке содержи
 и число $m$ ее строк не превышает $12 n$ (в соответствии с теоремой Эйлера о
 числе вершин, ребер и граней графа на сфере).
 
-Задачу минимизации (\ref{eq:problem1}) - (\ref{eq:problem1-cond}) можно 
-сформулировать несколько более удобным образом, как это описано, например, в 
+Задачу минимизации (\ref{eq:problem1}) - (\ref{eq:problem1-cond}) можно
+сформулировать несколько более удобным образом, как это описано, например, в
 книге \cite{BertsekasTsitsiklis1989}: оптимальное решение задачи
 (\ref{eq:problem1}) можно найти как
 
