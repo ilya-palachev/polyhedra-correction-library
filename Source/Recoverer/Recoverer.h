@@ -43,6 +43,9 @@ private:
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
 
+	/** Whether to scale the matrix of problem. */
+	bool ifScaleMatrix;
+
 	/**
 	 * Extracts support planes from shadow contours.
 	 *
@@ -121,6 +124,11 @@ public:
 	 * Enables balancing in all functions.
 	 */
 	void enableBalancing(void);
+
+	/**
+	 * Enables the scaling of the matrix of the problem.
+	 */
+	void enableMatrixScaling(void);
 
 	/**
 	 * Builds naive polyhedron using naive approach that intersect half-spaces
