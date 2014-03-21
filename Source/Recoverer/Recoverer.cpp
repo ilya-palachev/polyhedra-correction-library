@@ -652,7 +652,7 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident edges "
 				"are:", iVertex, vinfoCurr->numFacets);
-		for (auto &edge : edgesCurrent)
+		for (auto &edge DEBUG_VARIABLE: edgesCurrent)
 		{
 			DEBUG_PRINT("   edge [%d, %d, <%d>, <%d>]", edge.u0, edge.u1,
 					edge.u2, edge.u3);
@@ -704,7 +704,11 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 	numConditions = edgesReported.size();
 
-	/* Allocate and prepare the matrix for the problem. */
+	/*
+	 * Allocate and prepare the matrix for the problem.
+	 * TODO: We need to have only sparse matrix here. Current implementation
+	 * uses too much memory.
+	 */
 	matrix = new double[numConditions * numHvalues];
 	for (int i = 0; i < numConditions * numHvalues; ++i)
 	{
@@ -917,26 +921,31 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	int numConditions = 0, numHvalues = 0;
 	double *matrix = NULL, *hvalues = NULL;
 
+	/* 1. Build the support matrix. */
 	buildNaiveMatrix(SCData, numConditions, matrix, numHvalues, hvalues);
 	DEBUG_PRINT("Matrix has been built.");
 
+	/* Enable highest level of verbosity in TSNNLS package. */
 	tsnnls_verbosity(10);
 	char* strStderr = strdup("stderr");
 	taucs_logfile(strStderr);
 
+	/* 2. Create CAUCS matrix from naive matrix. */
 	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
 			numHvalues, numConditions);
 	DEBUG_PRINT("TAUCS matrix has been constructed.");
 	analyzeTaucsMatrix(Q, true);
 
+	/* 3. Transpose the matrix. */
 	taucs_ccs_matrix* Qt = taucs_ccs_transpose(Q);
 	DEBUG_PRINT("Matrix has been transposed.");
 	analyzeTaucsMatrix(Qt, false);
 	DEBUG_PRINT("Q  has %d rows and %d columns", Q->m, Q->n);
 	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
 
+	/* 4. Calculate the reciprocal of the condition number. */
 	double conditionNumberQ = taucs_rcond(Q);
-	DEBUG_PRINT("Condition number of Q has been calculated, it is %.16lf",
+	DEBUG_PRINT("rcond(Q) = %.16lf",
 			conditionNumberQ);
 
 	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
@@ -945,6 +954,7 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 
 	double outResidualNorm;
 
+	/* 5. Run the main TSNNLS algorithm of minimization. */
 	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100.,
 			1);
 	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void*) h);
