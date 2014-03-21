@@ -32,6 +32,17 @@
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 
+#ifndef isnan
+#define isnan
+#endif
+#ifndef finite
+#define finite
+#endif
+#ifndef isinf
+#define isinf
+#endif
+#include <libtsnnls/tsnnls.h>
+
 /**
  * Main recovering engine, based on support function estimation tuned for our
  * specific needs.
@@ -171,8 +182,8 @@ public:
 	 * @param matrix	The matrix.
 	 * @param hvalues	The noisy-measured support vector.
 	 */
-	void buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
-			double*& matrix, int& numHvalues, double*& hvalues);
+	taucs_ccs_matrix* buildSupportMatrix(ShadeContourDataPtr SCData,
+		int& numConditions, int& numHvalues, double*& hvalues);
 
 	/**
 	 * Runs the recovering procedure.

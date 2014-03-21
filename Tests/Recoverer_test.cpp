@@ -230,9 +230,9 @@ void printUsage(int argc, char** argv)
 	STDERR_PRINT("\t-%c\tBalance contour data before processing.\n",
 			OPTION_BALANCE_DATA);
 	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
-			"to the file).", OPTION_PRINT_PROBLEM);
-	STDERR_PRINT("\t-%c\tRecover polyhedron.", OPTION_RECOVER);
-	STDERR_PRINT("\t-%c\tEnable matrix scaling.", OPTION_SCALE_MATRIX);
+			"to the file).\n", OPTION_PRINT_PROBLEM);
+	STDERR_PRINT("\t-%c\tRecover polyhedron.\n", OPTION_RECOVER);
+	STDERR_PRINT("\t-%c\tEnable matrix scaling.\n", OPTION_SCALE_MATRIX);
 	STDERR_PRINT("Possible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -625,8 +625,9 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 	int numConditions = 0, numHvalues = 0;
 	double *matrix = NULL, *hvalues = NULL;
 
-	recoverer->buildNaiveMatrix(SCData, numConditions, matrix, numHvalues,
-			hvalues);
+	taucs_ccs_matrix* taucsMatrix = recoverer->buildSupportMatrix(SCData,
+		numConditions, numHvalues, hvalues);
+	matrix = taucs_convert_ccs_to_doubles(taucsMatrix);
 
 	FILE* fileMatrixNaive = (FILE*) fopen("../poly-data-out/matrix-naive.txt",
 			"w");
@@ -667,12 +668,13 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 	fclose(fileHvalues);
 	if (matrix)
 	{
-		delete[] matrix;
+		free(matrix);
 	}
 	if (hvalues)
 	{
 		delete[] hvalues;
 	}
+	taucs_ccs_free(taucsMatrix);
 
 	DEBUG_END;
 }

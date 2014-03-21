@@ -20,27 +20,17 @@
 
 #include <cmath>
 #include <set>
+#include <boost/concept_check.hpp>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "Recoverer/Recoverer.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
-
-#ifndef isnan
-#define isnan
-#endif
-#ifndef finite
-#define finite
-#endif
-#ifndef isinf
-#define isinf
-#endif
-#include <libtsnnls/tsnnls.h>
+#include "Recoverer/Recoverer.h"
 
 using namespace std;
 
@@ -550,8 +540,8 @@ typedef struct
  * @param numConditions	The number of constraints (output)
  * @param matrix		The matrix of constraints (output)
  */
-static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
-		int& numConditions, double*& matrix, bool ifScaleMatrix)
+static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
+		int& numConditions, bool ifScaleMatrix)
 {
 	DEBUG_START;
 
@@ -705,19 +695,24 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	numConditions = edgesReported.size();
 
 	/*
-	 * Allocate and prepare the matrix for the problem.
-	 * TODO: We need to have only sparse matrix here. Current implementation
-	 * uses too much memory.
+	 * Create TAUCS sparse matrix with
+	 * N = numHvalues rows
+	 * M = numConditions columns
+	 * NNZ = 4 * numConditions non-zero values (4 non-zero values in each 
+	 * column)
+	 * 
+	 * The created matrix is the transposed support matrix, because it's simpler
+	 * to create it in this form (due to specific of TAUCS interface).
 	 */
-	matrix = new double[numConditions * numHvalues];
-	for (int i = 0; i < numConditions * numHvalues; ++i)
-	{
-		matrix[i] = 0.;
-	}
+	taucs_ccs_matrix* matrix = taucs_ccs_new(numConditions, numHvalues,
+		4 * numConditions);
 
 	int iCondition = 0;
+	int nColumnOffset = 0;
 	for (auto &edge : edgesReported)
 	{
+		matrix->colptr[iCondition] = nColumnOffset;
+		
 		int iVertex1 = edge.u0;
 		int iVertex2 = edge.u1;
 		int iVertex3 = edge.u2;
@@ -765,24 +760,115 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
 				det1, iCondition, iVertex1);
-		matrix[numHvalues * iCondition + iVertex1] = det1;
+		matrix->rowind[nColumnOffset] = iVertex1;
+		matrix->values.d[nColumnOffset++] = det1;
+
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
 				det2, iCondition, iVertex2);
-		matrix[numHvalues * iCondition + iVertex2] = det2;
+		matrix->rowind[nColumnOffset] = iVertex2;
+		matrix->values.d[nColumnOffset++] = det2;
+
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
 				det3, iCondition, iVertex3);
-		matrix[numHvalues * iCondition + iVertex3] = det3;
+		matrix->rowind[nColumnOffset] = iVertex3;
+		matrix->values.d[nColumnOffset++] = det3;
+
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
 				det4, iCondition, iVertex4);
-		matrix[numHvalues * iCondition + iVertex4] = det4;
+		matrix->rowind[nColumnOffset] = iVertex4;
+		matrix->values.d[nColumnOffset++] = det4;
+		
 		++iCondition;
 	}
+	
+	matrix->colptr[iCondition] = nColumnOffset;
 
 	DEBUG_END;
+	return matrix;
 }
 
-void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
-		double*& matrix, int& numHvalues, double*& hvalues)
+static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
+	PolyhedronPtr polyhedron)
+{
+	DEBUG_START;
+
+	/*
+	 * Find IDs of vertices that have maximal coordinates of polyhedron's 
+	 * vertices.
+	 * 
+	 * Columns of transposed support matrix which have these IDs will be then
+	 * eliminated.
+	 */
+	Vector3d vMax = polyhedron->vertices[0];
+	int iXmax = 0, iYmax = 0, iZmax = 0;
+	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
+	{
+		if (polyhedron->vertices[iVertex].x > vMax.x)
+		{
+			vMax.x = polyhedron->vertices[iVertex].x;
+			iXmax = iVertex;
+		}
+
+		if (polyhedron->vertices[iVertex].y > vMax.y)
+		{
+			vMax.y = polyhedron->vertices[iVertex].y;
+			iYmax = iVertex;
+		}
+		
+		if (polyhedron->vertices[iVertex].z > vMax.z)
+		{
+			vMax.z = polyhedron->vertices[iVertex].z;
+			iZmax = iVertex;
+		}
+	}
+	/* TODO: Handle case when some of iXmax, iYmax, iZmax are equal. */
+	DEBUG_PRINT("%d-th vertex has maximal X coordinate = %lf", iXmax, vMax.x);
+	DEBUG_PRINT("%d-th vertex has maximal Y coordinate = %lf", iYmax, vMax.y);
+	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, vMax.z);
+	
+	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
+	
+	/* Allocate memory for regularized matrix. */
+	taucs_ccs_matrix* matrixRegularized = taucs_ccs_new(matrix->m - 3, 
+		matrix->n, 4 * (matrix->m - 3));
+	
+	int iConditionReg = 0;
+	int nOffsetReg = 0;
+	for (int iCondition = 0; iCondition < matrix->n; ++iCondition)
+	{
+		if ((iCondition == iXmax) ||
+			(iCondition == iYmax) ||
+			(iCondition == iZmax))
+			continue;
+
+		matrixRegularized->colptr[iConditionReg] = nOffsetReg;
+
+		for (int nOffset = matrix->colptr[iCondition];
+			 nOffset < matrix->colptr[iCondition + 1]; ++nOffset)
+		{
+			matrixRegularized->rowind[nOffsetReg] = matrix->rowind[nOffset];
+
+			int index = matrix->n * matrix->rowind[nOffset] + iCondition;
+			Vector3d vertex = polyhedron->vertices[index];
+			
+			matrixRegularized->values.d[nOffsetReg] =
+				matrix->values.d[nOffset] * (1. -
+				vertex.x / vMax.x -
+				vertex.y / vMax.y -
+				vertex.z / vMax.z);
+
+			++nOffsetReg;
+		}
+		
+		++iConditionReg;
+	}
+	
+	DEBUG_END;
+	return matrixRegularized;
+}
+
+taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
+	int& numConditions, int& numHvalues, double*& hvalues)
 {
 	DEBUG_START;
 
@@ -829,9 +915,21 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 	}
 
 	/* 5. Build matrix by the polyhedron. */
-	buildMatrixByPolyhedron(polyhedron, numConditions, matrix, ifScaleMatrix);
+	taucs_ccs_matrix* matrix = buildMatrixByPolyhedron(polyhedron, 
+		numConditions, ifScaleMatrix);
+
+	/*
+	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
+	 * v1 = (u1x, ..., uMx)
+	 * v2 = (u1y, ..., uMy)
+	 * v3 = (u1z, ..., uMz)
+	 */
+	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(matrix,
+		polyhedron);
+	taucs_ccs_free(matrix);
 
 	DEBUG_END;
+	return matrixRegularized;
 }
 
 #define NUM_NONZERO_EXPECTED 4
@@ -919,42 +1017,32 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 	int numConditions = 0, numHvalues = 0;
-	double *matrix = NULL, *hvalues = NULL;
+	double *hvalues = NULL;
 
 	/* 1. Build the support matrix. */
-	buildNaiveMatrix(SCData, numConditions, matrix, numHvalues, hvalues);
+	taucs_ccs_matrix* Qt = buildSupportMatrix(SCData, numConditions, numHvalues,
+		hvalues);	
+	analyzeTaucsMatrix(Qt, false);
 	DEBUG_PRINT("Matrix has been built.");
+	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
 
 	/* Enable highest level of verbosity in TSNNLS package. */
 	tsnnls_verbosity(10);
 	char* strStderr = strdup("stderr");
 	taucs_logfile(strStderr);
 
-	/* 2. Create CAUCS matrix from naive matrix. */
-	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
-			numHvalues, numConditions);
-	DEBUG_PRINT("TAUCS matrix has been constructed.");
-	analyzeTaucsMatrix(Q, true);
-
-	/* 3. Transpose the matrix. */
-	taucs_ccs_matrix* Qt = taucs_ccs_transpose(Q);
-	DEBUG_PRINT("Matrix has been transposed.");
-	analyzeTaucsMatrix(Qt, false);
-	DEBUG_PRINT("Q  has %d rows and %d columns", Q->m, Q->n);
-	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
-
-	/* 4. Calculate the reciprocal of the condition number. */
-	double conditionNumberQ = taucs_rcond(Q);
+	/* 2. Calculate the reciprocal of the condition number. */
+	double conditionNumberQt = taucs_rcond(Qt);
 	DEBUG_PRINT("rcond(Q) = %.16lf",
-			conditionNumberQ);
+			conditionNumberQt);
 
-	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
+	double inRelErrTolerance = conditionNumberQt * conditionNumberQt *
 			EPS_MIN_DOUBLE;
 	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
 
 	double outResidualNorm;
 
-	/* 5. Run the main TSNNLS algorithm of minimization. */
+	/* 3. Run the main TSNNLS algorithm of minimization. */
 	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100.,
 			1);
 	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void*) h);
@@ -973,7 +1061,6 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 			linf_distance(numHvalues, hvalues, h));
 
 	free(h);
-	taucs_ccs_free(Q);
 	taucs_ccs_free(Qt);
 
 	DEBUG_END;
