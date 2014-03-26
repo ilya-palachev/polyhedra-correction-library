@@ -356,7 +356,7 @@ struct Plane_from_facet
 	}
 };
 
-PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
+Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 {
 	DEBUG_START;
 	Polyhedron_3 poly;
@@ -405,6 +405,15 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
 
+	DEBUG_END;
+	return poly;
+}
+
+PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
+{
+	DEBUG_START;
+	Polyhedron_3 poly = constructConvexHullCGAL(points);
+
 	/* Convert CGAL polyhedron to PCL polyhedron: */
 	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
 
@@ -418,7 +427,6 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	 */
 	polyhedronDualPCL->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
-	
 	DEBUG_END;
 	return polyhedronDualPCL;
 }
@@ -665,9 +673,26 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 			int iVertexNeighborNext =
 					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
 			
-			TetrahedronVertexIDs tetrahedronCurrent = {iVertex, iVertexNeighbor,
-					iVertexNeighborPrev, iVertexNeighborNext};
-			tetrasCurrent.insert(tetrahedronCurrent);
+			/*
+			 * In order to sort found vertex IDs we create the set to sort
+			 * them.
+			 */
+			set<int> vertexSet;
+			vertexSet.insert(iVertex);
+			vertexSet.insert(iVertexNeighbor);
+			vertexSet.insert(iVertexNeighborPrev);
+			vertexSet.insert(iVertexNeighborNext);
+
+			if (vertexSet.size() == 4)
+			{
+				TetrahedronVertexIDs tetrahedronCurrent;
+				auto itVertexSet = vertexSet.begin();
+				tetrahedronCurrent.u0 = *(itVertexSet++);
+				tetrahedronCurrent.u1 = *(itVertexSet++);
+				tetrahedronCurrent.u2 = *(itVertexSet++);
+				tetrahedronCurrent.u3 = *(itVertexSet++);
+				tetrasCurrent.insert(tetrahedronCurrent);
+			}
 		}
 
 		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident "
@@ -699,8 +724,8 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 			{
 				auto tetrahedronCurrent = tetrasCurrent.begin();
 				DEBUG_PRINT("Reporting tetrahedron [%d, %d, <%d>, <%d>]",
-							tetrahedronCurrent->u0, tetrahedronCurrent->u1, tetrahedronCurrent->u2,
-							tetrahedronCurrent->u3);
+							tetrahedronCurrent->u0, tetrahedronCurrent->u1,
+							tetrahedronCurrent->u2, tetrahedronCurrent->u3);
 				tetrasReported.insert(*tetrahedronCurrent);
 			}
 
@@ -714,8 +739,8 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 				if (tetrasProved.find(tetrahedronCurrent) == tetrasProved.end())
 				{
 					DEBUG_PRINT("Reporting tetrahedron [%d, %d, <%d>, <%d>]",
-								tetrahedronCurrent.u0, tetrahedronCurrent.u1, tetrahedronCurrent.u2,
-								tetrahedronCurrent.u3);
+								tetrahedronCurrent.u0, tetrahedronCurrent.u1,
+								tetrahedronCurrent.u2, tetrahedronCurrent.u3);
 					tetrasProved.insert(tetrahedronCurrent);
 					tetrasReported.insert(tetrahedronCurrent);
 				}
@@ -778,6 +803,7 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	auto listTetrahedrons = findCoveringTetrahedrons(polyhedron);
 
 	numConditions = listTetrahedrons.size();
+	DEBUG_PRINT("Found %d covering tetrahedrons", numConditions);
 
 	/*
 	 * Create TAUCS sparse matrix with

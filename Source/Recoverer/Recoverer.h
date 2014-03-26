@@ -86,6 +86,13 @@ private:
 	 *
 	 * @param points	Vector of points
 	 */
+	Polyhedron_3 constructConvexHullCGAL(vector<Vector3d>);
+
+	/**
+	 * Constructs convex hull of the point set using CGAL API.
+	 *
+	 * @param points	Vector of points
+	 */
 	PolyhedronPtr constructConvexHull(vector<Vector3d>);
 
 	/**
