@@ -831,6 +831,24 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		iavQuadruple.insert(iav3);
 		iavQuadruple.insert(iav4);
 		
+		if (iavQuadruple.size() != 4)
+		{
+			ERROR_PRINT("Wrong number of coefficients in condition #%d, "
+					"size = %ld", iCondition, (long int) iavQuadruple.size());
+			DEBUG_PRINT("iVertex1 = %d, det1 = %.16lf", iVertex1, det1);
+			DEBUG_PRINT("iVertex2 = %d, det2 = %.16lf", iVertex2, det2);
+			DEBUG_PRINT("iVertex3 = %d, det3 = %.16lf", iVertex3, det3);
+			DEBUG_PRINT("iVertex4 = %d, det4 = %.16lf", iVertex4, det4);
+
+			int i = 0;
+			for (auto &iav : iavQuadruple)
+			{
+				DEBUG_PRINT("iavQuadruple[%d] = {.iVertex = %d, .det = %.16lf",
+						i, iav.iVertex, iav.det);
+				++i;
+			}
+		}
+
 		for (auto &iav : iavQuadruple)
 		{
 			DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
