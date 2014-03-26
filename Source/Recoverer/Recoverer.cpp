@@ -595,165 +595,96 @@ typedef struct
  * @param polyhedron	Convex hull of the set of directions
  */
 static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
-		PolyhedronPtr polyhedron)
+		Polyhedron_3& polyhedron)
 {
 	DEBUG_START;
 
-	auto comparer = [](TetrahedronVertexIDs e0, TetrahedronVertexIDs e1)
+	/* Check that all facets of the polyhedron are triangles. */
+	for (auto halfedge = polyhedron.halfedges_begin();
+			halfedge != polyhedron.halfedges_end(); ++halfedge)
 	{
-		int e0min, e0max, e1min, e1max;
-		if (e0.u0 < e0.u1)
+		if (!halfedge->is_triangle())
 		{
-			e0min = e0.u0;
-			e0max = e0.u1;
-		}
-		else
-		{
-			e0min = e0.u1;
-			e0max = e0.u0;
-		}
-		
-		if (e1.u0 < e1.u1)
-		{
-			e1min = e1.u0;
-			e1max = e1.u1;
-		}
-		else
-		{
-			e1min = e1.u1;
-			e1max = e1.u0;
-		}
-		
-		return (e0min < e1min) || (e0min == e1min && e0max < e1max);
-	};
-	set<TetrahedronVertexIDs, decltype(comparer)> tetrasReported(comparer),
-			tetrasProved(comparer), tetrasCurrent(comparer);
-
-	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
-	{
-		VertexInfo* vinfoCurr = &polyhedron->vertexInfos[iVertex];
-		tetrasCurrent.clear();
-
-		for (int iPosition = 0; iPosition < vinfoCurr->numFacets; ++iPosition)
-		{
-			int iFacetNeighbor =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-										 iPosition];
-			int iPositionNeighbor =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-										 iPosition];
-			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
-			ASSERT(iPositionNeighbor < facetNeighbor->numVertices);
-			int iVertexNeighbor =
-					facetNeighbor->indVertices[iPositionNeighbor + 1];
-
-			int iPositionPrev = (vinfoCurr->numFacets + iPosition - 1) %
-					vinfoCurr->numFacets;
-			int iFacetNeighborPrev =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-										 iPositionPrev];
-			int iPositionNeighborPrev =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-										 iPositionPrev];
-			Facet* facetNeighborPrev = &polyhedron->facets[iFacetNeighborPrev];
-			ASSERT(iPositionNeighborPrev < facetNeighborPrev->numVertices);
-			int iVertexNeighborPrev =
-					facetNeighborPrev->indVertices[iPositionNeighborPrev + 1];
-					
-			int iPositionNext = (vinfoCurr->numFacets + iPosition + 1) %
-					vinfoCurr->numFacets;
-			int iFacetNeighborNext =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-										 iPositionNext];
-			int iPositionNeighborNext =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-										 iPositionNext];
-			Facet* facetNeighborNext = &polyhedron->facets[iFacetNeighborNext];
-			ASSERT(iPositionNeighborNext < facetNeighborNext->numVertices);
-			int iVertexNeighborNext =
-					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
-			
-			/*
-			 * In order to sort found vertex IDs we create the set to sort
-			 * them.
-			 */
-			set<int> vertexSet;
-			vertexSet.insert(iVertex);
-			vertexSet.insert(iVertexNeighbor);
-			vertexSet.insert(iVertexNeighborPrev);
-			vertexSet.insert(iVertexNeighborNext);
-
-			if (vertexSet.size() == 4)
-			{
-				TetrahedronVertexIDs tetrahedronCurrent;
-				auto itVertexSet = vertexSet.begin();
-				tetrahedronCurrent.u0 = *(itVertexSet++);
-				tetrahedronCurrent.u1 = *(itVertexSet++);
-				tetrahedronCurrent.u2 = *(itVertexSet++);
-				tetrahedronCurrent.u3 = *(itVertexSet++);
-				tetrasCurrent.insert(tetrahedronCurrent);
-			}
-		}
-
-		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident "
-				"tetrahedrons are:", iVertex, vinfoCurr->numFacets);
-		for (auto &tetrahedron DEBUG_VARIABLE: tetrasCurrent)
-		{
-			DEBUG_PRINT("   tetrahedron [%d, %d, <%d>, <%d>]", tetrahedron.u0,
-					tetrahedron.u1, tetrahedron.u2, tetrahedron.u3);
-		}
-
-		if (vinfoCurr->numFacets == 3)
-		{
-			bool ifProved = false;
-			for (auto &tetrahedronCurrent : tetrasCurrent)
-			{
-				if (tetrasProved.find(tetrahedronCurrent) != tetrasProved.end())
-				{
-					DEBUG_PRINT("Convexity of tetrahedron [%d, %d, <%d>, <%d>] "
-							"already proved, so all convexity of all "
-							"tetrahedrons is proved.",
-							tetrahedronCurrent.u0, tetrahedronCurrent.u1,
-							tetrahedronCurrent.u2, tetrahedronCurrent.u3);
-					ifProved = true;
-					break;
-				}
-			}
-
-			if (!ifProved)
-			{
-				auto tetrahedronCurrent = tetrasCurrent.begin();
-				DEBUG_PRINT("Reporting tetrahedron [%d, %d, <%d>, <%d>]",
-							tetrahedronCurrent->u0, tetrahedronCurrent->u1,
-							tetrahedronCurrent->u2, tetrahedronCurrent->u3);
-				tetrasReported.insert(*tetrahedronCurrent);
-			}
-
-			tetrasProved.insert(tetrasCurrent.begin(),
-					tetrasCurrent.end());
-		}
-		else
-		{
-			for (auto &tetrahedronCurrent : tetrasCurrent)
-			{
-				if (tetrasProved.find(tetrahedronCurrent) == tetrasProved.end())
-				{
-					DEBUG_PRINT("Reporting tetrahedron [%d, %d, <%d>, <%d>]",
-								tetrahedronCurrent.u0, tetrahedronCurrent.u1,
-								tetrahedronCurrent.u2, tetrahedronCurrent.u3);
-					tetrasProved.insert(tetrahedronCurrent);
-					tetrasReported.insert(tetrahedronCurrent);
-				}
-			}
+			ERROR_PRINT("Facet #%d is not triangle, it has %d edges.",
+					halfedge->facet() - polyhedron.halfedges_begin(),
+					halfedge->facet_degree());
+			DEBUG_END;
+			exit(EXIT_FAILURE);
 		}
 	}
+
+	auto comparer = [](TetrahedronVertexIDs a, TetrahedronVertexIDs b)
+	{
+		if (a.u0 < b.u0)
+		{
+			return true;
+		}
+		else if (a.u0 == b.u0)
+		{
+			if (a.u1 < b.u1)
+			{
+				return true;
+			}
+			else if (a.u1 == b.u1)
+			{
+				if (a.u2 < b.u2)
+				{
+					return true;
+				}
+				else if (a.u2 == b.u2)
+				{
+					if (a.u3 < b.u3)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	};
+
+	set<TetrahedronVertexIDs, decltype(comparer)> tetrahedrons(comparer);
+
+	for (auto halfedge = polyhedron.halfedges_begin();
+			halfedge != polyhedron.halfedges_end(); ++halfedge)
+	{
+		set<int> vertexSet;
+
+		int iVertex0 = halfedge->vertex() -
+				polyhedron.vertices_begin();
+		int iVertex1 = halfedge->prev()->vertex() -
+				polyhedron.vertices_begin();
+		int iVertex2 = halfedge->next()->vertex() -
+				polyhedron.vertices_begin();
+		int iVertex3 = halfedge->opposite()->next()->vertex() -
+				polyhedron.vertices_begin();
+		DEBUG_PRINT("Adding tetrahedron [%d, %d, %d, %d]",
+				iVertex0, iVertex1, iVertex2, iVertex3);
+
+		vertexSet.insert(iVertex0);
+		vertexSet.insert(iVertex1);
+		vertexSet.insert(iVertex2);
+		vertexSet.insert(iVertex3);
+
+		ASSERT(vertexSet.size() == 4);
+
+		TetrahedronVertexIDs tetrahedron;
+		auto itVertex = vertexSet.begin();
+		tetrahedron.u0 = *(itVertex++);
+		tetrahedron.u1 = *(itVertex++);
+		tetrahedron.u2 = *(itVertex++);
+		tetrahedron.u3 = *(itVertex++);
+
+		tetrahedrons.insert(tetrahedron);
+	}
+
 
 	/*
 	 * Construct the list from sorted set and return it.
 	 */
 	list<TetrahedronVertexIDs> listTetrahedrons;
-	for (auto itTetrahedron = tetrasReported.begin();
-			itTetrahedron != tetrasReported.end(); ++itTetrahedron)
+	for (auto itTetrahedron = tetrahedrons.begin();
+			itTetrahedron != tetrahedrons.end(); ++itTetrahedron)
 	{
 		listTetrahedrons.push_back(*itTetrahedron);
 	}
@@ -779,26 +710,12 @@ typedef struct
  * @param numConditions	The number of constraints (output)
  * @param matrix		The matrix of constraints (output)
  */
-static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
+static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		int& numConditions, bool ifScaleMatrix)
 {
 	DEBUG_START;
 
-	/* Check that all facets of the polyhedron are triangles. */
-	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
-	{
-		if (polyhedron->facets[iFacet].numVertices != 3)
-		{
-			ERROR_PRINT("Facet #%d is not triangle. ", iFacet);
-			DEBUG_END;
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	/* Preprocess the polyhedron. */
-	polyhedron->preprocessAdjacency();
-
-	int numHvalues = polyhedron->numVertices;
+	int numHvalues = polyhedron->size_of_vertices();
 
 	auto listTetrahedrons = findCoveringTetrahedrons(polyhedron);
 
@@ -937,7 +854,7 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 }
 
 static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
-	PolyhedronPtr polyhedron)
+	Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 
@@ -1074,20 +991,10 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
-	PolyhedronPtr polyhedron = constructConvexHull(directions);
-	polyhedron->preprocessAdjacency();
-	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
-	{
-		int degree = polyhedron->vertexInfos[iVertex].numFacets;
-		DEBUG_PRINT("Vertex %d has degree %d", iVertex, degree);
-		if (degree > 3)
-		{
-			DEBUG_PRINT("--- more than 3");
-		}
-	}
+	Polyhedron_3 polyhedron = constructConvexHullCGAL(directions);
 
 	/* 5. Build matrix by the polyhedron. */
-	taucs_ccs_matrix* matrix = buildMatrixByPolyhedron(polyhedron, 
+	taucs_ccs_matrix* matrix = buildMatrixByPolyhedron(polyhedron,
 		numConditions, ifScaleMatrix);
 
 	/*
