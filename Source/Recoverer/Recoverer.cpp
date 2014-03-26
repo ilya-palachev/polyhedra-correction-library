@@ -749,7 +749,7 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	 * The created matrix is the transposed support matrix, because it's simpler
 	 * to create it in this form (due to specific of TAUCS interface).
 	 */
-	taucs_ccs_matrix* matrix = taucs_ccs_new(numConditions, numHvalues,
+	taucs_ccs_matrix* matrix = taucs_ccs_new(numHvalues, numConditions,
 		4 * numConditions);
 
 	int iCondition = 0;
@@ -757,7 +757,7 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	for (auto &edge : edgesReported)
 	{
 		matrix->colptr[iCondition] = nColumnOffset;
-		DEBUG_PRINT("Setting Q->colptr[%d] = %d", iCondition, nColumnOffset);
+//		DEBUG_PRINT("Setting Q->colptr[%d] = %d", iCondition, nColumnOffset);
 		
 		int iVertex1 = edge.u0;
 		int iVertex2 = edge.u1;
@@ -806,36 +806,36 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		
 		/* TODO: Sort iVertexj here to be able to add them in sorted order. */
 
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det1, iVertex1, iCondition);
+//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+//				det1, iVertex1, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex1;
-		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex1);
+//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex1);
 		matrix->values.d[nColumnOffset] = det1;
-		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det1);
+//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det1);
 		++nColumnOffset;
 
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det2, iVertex2, iCondition);
+//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+//				det2, iVertex2, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex2;
-		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex2);
+//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex2);
 		matrix->values.d[nColumnOffset] = det2;
-		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det2);
+//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det2);
 		++nColumnOffset;
 
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det3, iVertex3, iCondition);
+//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+//				det3, iVertex3, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex3;
-		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex3);
+//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex3);
 		matrix->values.d[nColumnOffset] = det3;
-		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det3);
+//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det3);
 		++nColumnOffset;
 
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det4, iVertex4, iCondition);
+//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+//				det4, iVertex4, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex4;
-		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex4);
+//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex4);
 		matrix->values.d[nColumnOffset] = det4;
-		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det4);
+//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det4);
 		++nColumnOffset;
 		
 		++iCondition;
@@ -846,13 +846,10 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 #ifndef NDEBUG
 	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
 	{
-		DEBUG_PRINT("Column pointer %d is equal to %d", iCondition,
-			matrix->colptr[iCondition]);
+		ASSERT(matrix->colptr[iCondition] == 4 * iCondition);
 	}
 	
-	analyzeTaucsMatrix(matrix, true);
-		
-	taucs_print_ccs_matrix(matrix);
+	analyzeTaucsMatrix(matrix, false);
 #endif
 	
 	DEBUG_END;
