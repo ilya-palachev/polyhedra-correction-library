@@ -569,14 +569,177 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 	DEBUG_END;
 }
 
+/**
+ * Stores the IDs of vertexes that form a tetrahedron.
+ */
 typedef struct
 {
 	int u0;
 	int u1;
 	int u2;
 	int u3;
-} Quadruple;
+} TetrahedronVertexIDs;
 
+
+/**
+ * Finds covering tetrahedrons for a given polyhedron.
+ *
+ * @param polyhedron	Convex hull of the set of directions
+ */
+static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
+		PolyhedronPtr polyhedron)
+{
+	DEBUG_START;
+
+	auto comparer = [](TetrahedronVertexIDs e0, TetrahedronVertexIDs e1)
+	{
+		int e0min, e0max, e1min, e1max;
+		if (e0.u0 < e0.u1)
+		{
+			e0min = e0.u0;
+			e0max = e0.u1;
+		}
+		else
+		{
+			e0min = e0.u1;
+			e0max = e0.u0;
+		}
+		
+		if (e1.u0 < e1.u1)
+		{
+			e1min = e1.u0;
+			e1max = e1.u1;
+		}
+		else
+		{
+			e1min = e1.u1;
+			e1max = e1.u0;
+		}
+		
+		return (e0min < e1min) || (e0min == e1min && e0max < e1max);
+	};
+	set<TetrahedronVertexIDs, decltype(comparer)> tetrasReported(comparer),
+			tetrasProved(comparer), tetrasCurrent(comparer);
+
+	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
+	{
+		VertexInfo* vinfoCurr = &polyhedron->vertexInfos[iVertex];
+		tetrasCurrent.clear();
+
+		for (int iPosition = 0; iPosition < vinfoCurr->numFacets; ++iPosition)
+		{
+			int iFacetNeighbor =
+					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
+										 iPosition];
+			int iPositionNeighbor =
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+										 iPosition];
+			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
+			ASSERT(iPositionNeighbor < facetNeighbor->numVertices);
+			int iVertexNeighbor =
+					facetNeighbor->indVertices[iPositionNeighbor + 1];
+
+			int iPositionPrev = (vinfoCurr->numFacets + iPosition - 1) %
+					vinfoCurr->numFacets;
+			int iFacetNeighborPrev =
+					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
+										 iPositionPrev];
+			int iPositionNeighborPrev =
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+										 iPositionPrev];
+			Facet* facetNeighborPrev = &polyhedron->facets[iFacetNeighborPrev];
+			ASSERT(iPositionNeighborPrev < facetNeighborPrev->numVertices);
+			int iVertexNeighborPrev =
+					facetNeighborPrev->indVertices[iPositionNeighborPrev + 1];
+					
+			int iPositionNext = (vinfoCurr->numFacets + iPosition + 1) %
+					vinfoCurr->numFacets;
+			int iFacetNeighborNext =
+					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
+										 iPositionNext];
+			int iPositionNeighborNext =
+					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
+										 iPositionNext];
+			Facet* facetNeighborNext = &polyhedron->facets[iFacetNeighborNext];
+			ASSERT(iPositionNeighborNext < facetNeighborNext->numVertices);
+			int iVertexNeighborNext =
+					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
+			
+			TetrahedronVertexIDs tetrahedronCurrent = {iVertex, iVertexNeighbor,
+					iVertexNeighborPrev, iVertexNeighborNext};
+			tetrasCurrent.insert(tetrahedronCurrent);
+		}
+
+		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident "
+				"tetrahedrons are:", iVertex, vinfoCurr->numFacets);
+		for (auto &tetrahedron DEBUG_VARIABLE: tetrasCurrent)
+		{
+			DEBUG_PRINT("   tetrahedron [%d, %d, <%d>, <%d>]", tetrahedron.u0,
+					tetrahedron.u1, tetrahedron.u2, tetrahedron.u3);
+		}
+
+		if (vinfoCurr->numFacets == 3)
+		{
+			bool ifProved = false;
+			for (auto &tetrahedronCurrent : tetrasCurrent)
+			{
+				if (tetrasProved.find(tetrahedronCurrent) != tetrasProved.end())
+				{
+					DEBUG_PRINT("Convexity of tetrahedron [%d, %d, <%d>, <%d>] "
+							"already proved, so all convexity of all "
+							"tetrahedrons is proved.",
+							tetrahedronCurrent.u0, tetrahedronCurrent.u1,
+							tetrahedronCurrent.u2, tetrahedronCurrent.u3);
+					ifProved = true;
+					break;
+				}
+			}
+
+			if (!ifProved)
+			{
+				auto tetrahedronCurrent = tetrasCurrent.begin();
+				DEBUG_PRINT("Reporting tetrahedron [%d, %d, <%d>, <%d>]",
+							tetrahedronCurrent->u0, tetrahedronCurrent->u1, tetrahedronCurrent->u2,
+							tetrahedronCurrent->u3);
+				tetrasReported.insert(*tetrahedronCurrent);
+			}
+
+			tetrasProved.insert(tetrasCurrent.begin(),
+					tetrasCurrent.end());
+		}
+		else
+		{
+			for (auto &tetrahedronCurrent : tetrasCurrent)
+			{
+				if (tetrasProved.find(tetrahedronCurrent) == tetrasProved.end())
+				{
+					DEBUG_PRINT("Reporting tetrahedron [%d, %d, <%d>, <%d>]",
+								tetrahedronCurrent.u0, tetrahedronCurrent.u1, tetrahedronCurrent.u2,
+								tetrahedronCurrent.u3);
+					tetrasProved.insert(tetrahedronCurrent);
+					tetrasReported.insert(tetrahedronCurrent);
+				}
+			}
+		}
+	}
+
+	/*
+	 * Construct the list from sorted set and return it.
+	 */
+	list<TetrahedronVertexIDs> listTetrahedrons;
+	for (auto itTetrahedron = tetrasReported.begin();
+			itTetrahedron != tetrasReported.end(); ++itTetrahedron)
+	{
+		listTetrahedrons.push_back(*itTetrahedron);
+	}
+
+	DEBUG_END;
+	return listTetrahedrons;
+}
+
+/**
+ * Pair of two values: vertex's ID and corresponding determinant.
+ */
 typedef struct
 {
 	int iVertex;
@@ -612,138 +775,9 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 	int numHvalues = polyhedron->numVertices;
 
-	auto comparer = [](Quadruple e0, Quadruple e1)
-	{
-		int e0min, e0max, e1min, e1max;
-		if (e0.u0 < e0.u1)
-		{
-			e0min = e0.u0;
-			e0max = e0.u1;
-		}
-		else
-		{
-			e0min = e0.u1;
-			e0max = e0.u0;
-		}
-		
-		if (e1.u0 < e1.u1)
-		{
-			e1min = e1.u0;
-			e1max = e1.u1;
-		}
-		else
-		{
-			e1min = e1.u1;
-			e1max = e1.u0;
-		}
-		
-		return (e0min < e1min) || (e0min == e1min && e0max < e1max);
-	};
-	set<Quadruple, decltype(comparer)> edgesReported(comparer),
-			edgesProved(comparer), edgesCurrent(comparer);
+	auto listTetrahedrons = findCoveringTetrahedrons(polyhedron);
 
-	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
-	{
-		VertexInfo* vinfoCurr = &polyhedron->vertexInfos[iVertex];
-		edgesCurrent.clear();
-
-		for (int iPosition = 0; iPosition < vinfoCurr->numFacets; ++iPosition)
-		{
-			int iFacetNeighbor =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-					                     iPosition];
-			int iPositionNeighbor =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-					                     iPosition];
-			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
-			ASSERT(iPositionNeighbor < facetNeighbor->numVertices);
-			int iVertexNeighbor =
-					facetNeighbor->indVertices[iPositionNeighbor + 1];
-
-			int iPositionPrev = (vinfoCurr->numFacets + iPosition - 1) %
-					vinfoCurr->numFacets;
-			int iFacetNeighborPrev =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-					                     iPositionPrev];
-			int iPositionNeighborPrev =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-					                     iPositionPrev];
-			Facet* facetNeighborPrev = &polyhedron->facets[iFacetNeighborPrev];
-			ASSERT(iPositionNeighborPrev < facetNeighborPrev->numVertices);
-			int iVertexNeighborPrev =
-					facetNeighborPrev->indVertices[iPositionNeighborPrev + 1];
-					
-			int iPositionNext = (vinfoCurr->numFacets + iPosition + 1) %
-					vinfoCurr->numFacets;
-			int iFacetNeighborNext =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-					                     iPositionNext];
-			int iPositionNeighborNext =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-					                     iPositionNext];
-			Facet* facetNeighborNext = &polyhedron->facets[iFacetNeighborNext];
-			ASSERT(iPositionNeighborNext < facetNeighborNext->numVertices);
-			int iVertexNeighborNext =
-					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
-			
-			Quadruple edgeCurrent = {iVertex, iVertexNeighbor,
-					iVertexNeighborPrev, iVertexNeighborNext};
-			edgesCurrent.insert(edgeCurrent);
-		}
-
-		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident edges "
-				"are:", iVertex, vinfoCurr->numFacets);
-		for (auto &edge DEBUG_VARIABLE: edgesCurrent)
-		{
-			DEBUG_PRINT("   edge [%d, %d, <%d>, <%d>]", edge.u0, edge.u1,
-					edge.u2, edge.u3);
-		}
-
-		if (vinfoCurr->numFacets == 3)
-		{
-			bool ifProved = false;
-			for (auto &edgeCurrent : edgesCurrent)
-			{
-				if (edgesProved.find(edgeCurrent) != edgesProved.end())
-				{
-					DEBUG_PRINT("Convexity of edge [%d, %d, <%d>, <%d>] already"
-							" proved, so all convexity of all edges is proved.",
-							edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
-							edgeCurrent.u3);
-					ifProved = true;
-					break;
-				}
-			}
-
-			if (!ifProved)
-			{
-				auto edgeCurrent = edgesCurrent.begin();
-				DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
-							edgeCurrent->u0, edgeCurrent->u1, edgeCurrent->u2,
-							edgeCurrent->u3);
-				edgesReported.insert(*edgeCurrent);
-			}
-
-			edgesProved.insert(edgesCurrent.begin(),
-					edgesCurrent.end());
-		}
-		else
-		{
-			for (auto &edgeCurrent : edgesCurrent)
-			{
-				if (edgesProved.find(edgeCurrent) == edgesProved.end())
-				{
-					DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
-								edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
-								edgeCurrent.u3);
-					edgesProved.insert(edgeCurrent);
-					edgesReported.insert(edgeCurrent);
-				}
-			}
-		}
-	}
-
-	numConditions = edgesReported.size();
+	numConditions = listTetrahedrons.size();
 
 	/*
 	 * Create TAUCS sparse matrix with
@@ -760,15 +794,15 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 
 	int iCondition = 0;
 	int nColumnOffset = 0;
-	for (auto &edge : edgesReported)
+	for (auto &tetrahedron : listTetrahedrons)
 	{
 		matrix->colptr[iCondition] = nColumnOffset;
 //		DEBUG_PRINT("Setting Q->colptr[%d] = %d", iCondition, nColumnOffset);
 		
-		int iVertex1 = edge.u0;
-		int iVertex2 = edge.u1;
-		int iVertex3 = edge.u2;
-		int iVertex4 = edge.u3;
+		int iVertex1 = tetrahedron.u0;
+		int iVertex2 = tetrahedron.u1;
+		int iVertex3 = tetrahedron.u2;
+		int iVertex4 = tetrahedron.u3;
 
 		/*
 		 * Usual condition looks as follows:
