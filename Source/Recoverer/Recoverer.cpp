@@ -524,6 +524,51 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
+#define NUM_NONZERO_EXPECTED 4
+
+static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
+{
+	DEBUG_START;
+
+	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
+
+	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
+	{
+		DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
+		if (iCol < Q->n)
+		{
+			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
+			{
+				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
+						Q->values.d[iRow]);
+				numElemRow[Q->rowind[iRow]]++;
+			}
+		}
+	}
+	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
+			Q->colptr[Q->n] - Q->colptr[0]);
+
+	if (ifAnalyzeExpect)
+	{
+		int numUnexcpectedNonzeros = 0;
+		for (int iRow = 0; iRow < Q->m; ++iRow)
+		{
+			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
+					numElemRow[iRow]);
+			if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
+			{
+				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
+						"row");
+				++numUnexcpectedNonzeros;
+			}
+		}
+		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements "
+				"is %d", numUnexcpectedNonzeros);
+	}
+	free(numElemRow);
+	DEBUG_END;
+}
+
 typedef struct
 {
 	int u0;
@@ -712,6 +757,7 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 	for (auto &edge : edgesReported)
 	{
 		matrix->colptr[iCondition] = nColumnOffset;
+		DEBUG_PRINT("Setting Q->colptr[%d] = %d", iCondition, nColumnOffset);
 		
 		int iVertex1 = edge.u0;
 		int iVertex2 = edge.u1;
@@ -757,32 +803,58 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 			det3 *= coeff;
 			det4 *= coeff;
 		}
+		
+		/* TODO: Sort iVertexj here to be able to add them in sorted order. */
 
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det1, iCondition, iVertex1);
+				det1, iVertex1, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex1;
-		matrix->values.d[nColumnOffset++] = det1;
+		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex1);
+		matrix->values.d[nColumnOffset] = det1;
+		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det1);
+		++nColumnOffset;
 
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det2, iCondition, iVertex2);
+				det2, iVertex2, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex2;
-		matrix->values.d[nColumnOffset++] = det2;
+		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex2);
+		matrix->values.d[nColumnOffset] = det2;
+		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det2);
+		++nColumnOffset;
 
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det3, iCondition, iVertex3);
+				det3, iVertex3, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex3;
-		matrix->values.d[nColumnOffset++] = det3;
+		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex3);
+		matrix->values.d[nColumnOffset] = det3;
+		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det3);
+		++nColumnOffset;
 
 		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det4, iCondition, iVertex4);
+				det4, iVertex4, iCondition);
 		matrix->rowind[nColumnOffset] = iVertex4;
-		matrix->values.d[nColumnOffset++] = det4;
+		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex4);
+		matrix->values.d[nColumnOffset] = det4;
+		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det4);
+		++nColumnOffset;
 		
 		++iCondition;
 	}
 	
 	matrix->colptr[iCondition] = nColumnOffset;
 
+#ifndef NDEBUG
+	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
+	{
+		DEBUG_PRINT("Column pointer %d is equal to %d", iCondition,
+			matrix->colptr[iCondition]);
+	}
+	
+	analyzeTaucsMatrix(matrix, true);
+		
+	taucs_print_ccs_matrix(matrix);
+#endif
+	
 	DEBUG_END;
 	return matrix;
 }
@@ -826,36 +898,59 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 	DEBUG_PRINT("%d-th vertex has maximal Y coordinate = %lf", iYmax, vMax.y);
 	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, vMax.z);
 	
+	/*
+	 * Since we are going to divide onto components of vMax, we will calculate
+	 * its reciprocal beforehand.
+	 */
+	vMax.x = 1. / vMax.x;
+	vMax.y = 1. / vMax.y;
+	vMax.z = 1. / vMax.z;
+	
 	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	
 	/* Allocate memory for regularized matrix. */
 	taucs_ccs_matrix* matrixRegularized = taucs_ccs_new(matrix->m - 3, 
 		matrix->n, 4 * (matrix->m - 3));
+	DEBUG_PRINT("Memory for regularized matrix has been allocated.");
 	
 	int iConditionReg = 0;
 	int nOffsetReg = 0;
 	for (int iCondition = 0; iCondition < matrix->n; ++iCondition)
 	{
+		DEBUG_PRINT("Regularization of %d-th column of matrix.", iCondition);
 		if ((iCondition == iXmax) ||
 			(iCondition == iYmax) ||
 			(iCondition == iZmax))
+		{
+			DEBUG_PRINT("Skipping the column that is going to be eliminated.");
 			continue;
+		}
 
 		matrixRegularized->colptr[iConditionReg] = nOffsetReg;
+		DEBUG_PRINT("Column pointer #%d has been set to %d", iConditionReg,
+			nOffsetReg);
 
 		for (int nOffset = matrix->colptr[iCondition];
 			 nOffset < matrix->colptr[iCondition + 1]; ++nOffset)
 		{
+			DEBUG_PRINT("Reading matrix from offset %d", nOffset);
+			
 			matrixRegularized->rowind[nOffsetReg] = matrix->rowind[nOffset];
+			DEBUG_PRINT("Row index at offset %d has been set to %d",
+				nOffsetReg, matrix->rowind[nOffset]);
 
 			int index = matrix->n * matrix->rowind[nOffset] + iCondition;
+			DEBUG_PRINT("Actually it is [%d][%d], or %d-th element of the "
+				"matrix", matrix->rowind[nOffset], iCondition, index);
+			
 			Vector3d vertex = polyhedron->vertices[index];
+			DEBUG_PRINT("Corresponding vertex is (%lf, %lf, %lf)",
+				vertex.x, vertex.x, vertex.z);
 			
 			matrixRegularized->values.d[nOffsetReg] =
-				matrix->values.d[nOffset] * (1. -
-				vertex.x / vMax.x -
-				vertex.y / vMax.y -
-				vertex.z / vMax.z);
+				matrix->values.d[nOffset] * (1. - vertex * vMax);
+			DEBUG_PRINT("Value at offset %d has been set to %lf", nOffsetReg,
+				matrixRegularized->values.d[nOffsetReg]);
 
 			++nOffsetReg;
 		}
@@ -867,7 +962,7 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 	return matrixRegularized;
 }
 
-taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
+taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,	
 	int& numConditions, int& numHvalues, double*& hvalues)
 {
 	DEBUG_START;
@@ -930,51 +1025,6 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 
 	DEBUG_END;
 	return matrixRegularized;
-}
-
-#define NUM_NONZERO_EXPECTED 4
-
-static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
-{
-	DEBUG_START;
-
-	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
-
-	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
-	{
-		DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
-		if (iCol < Q->n)
-		{
-			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
-			{
-				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
-						Q->values.d[iRow]);
-				numElemRow[Q->rowind[iRow]]++;
-			}
-		}
-	}
-	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
-			Q->colptr[Q->n] - Q->colptr[0]);
-
-	if (ifAnalyzeExpect)
-	{
-		int numUnexcpectedNonzeros = 0;
-		for (int iRow = 0; iRow < Q->m; ++iRow)
-		{
-			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
-					numElemRow[iRow]);
-			if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
-			{
-				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
-						"row");
-				++numUnexcpectedNonzeros;
-			}
-		}
-		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements "
-				"is %d", numUnexcpectedNonzeros);
-	}
-	free(numElemRow);
-	DEBUG_END;
 }
 
 static double l1_distance(int n, double* x, double* y)
