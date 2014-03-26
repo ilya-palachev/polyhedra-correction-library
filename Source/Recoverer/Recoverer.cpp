@@ -577,6 +577,12 @@ typedef struct
 	int u3;
 } Quadruple;
 
+typedef struct
+{
+	int iVertex;
+	double det;
+} IrowAndValue;
+
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
@@ -804,40 +810,36 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 			det4 *= coeff;
 		}
 		
-		/* TODO: Sort iVertexj here to be able to add them in sorted order. */
+		/*
+		 * Now sort pairs of vertex's IDs and corresponding determinant values
+		 * in order to store them to the matrix in the accending order.
+		 */
 
-//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-//				det1, iVertex1, iCondition);
-		matrix->rowind[nColumnOffset] = iVertex1;
-//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex1);
-		matrix->values.d[nColumnOffset] = det1;
-//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det1);
-		++nColumnOffset;
+		IrowAndValue iav1 = {iVertex1, det1};
+		IrowAndValue iav2 = {iVertex2, det2};
+		IrowAndValue iav3 = {iVertex3, det3};
+		IrowAndValue iav4 = {iVertex4, det4};
 
-//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-//				det2, iVertex2, iCondition);
-		matrix->rowind[nColumnOffset] = iVertex2;
-//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex2);
-		matrix->values.d[nColumnOffset] = det2;
-//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det2);
-		++nColumnOffset;
+		auto comparer = [](IrowAndValue a, IrowAndValue b)
+		{
+			return a.iVertex < b.iVertex;
+		};
 
-//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-//				det3, iVertex3, iCondition);
-		matrix->rowind[nColumnOffset] = iVertex3;
-//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex3);
-		matrix->values.d[nColumnOffset] = det3;
-//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det3);
-		++nColumnOffset;
-
-//		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-//				det4, iVertex4, iCondition);
-		matrix->rowind[nColumnOffset] = iVertex4;
-//		DEBUG_PRINT("Setting Q->rowind[%d] = %d", nColumnOffset, iVertex4);
-		matrix->values.d[nColumnOffset] = det4;
-//		DEBUG_PRINT("Setting Q->values.d[%d] = %lf)", nColumnOffset, det4);
-		++nColumnOffset;
+		set<IrowAndValue, decltype(comparer)> iavQuadruple(comparer);
+		iavQuadruple.insert(iav1);
+		iavQuadruple.insert(iav2);
+		iavQuadruple.insert(iav3);
+		iavQuadruple.insert(iav4);
 		
+		for (auto &iav : iavQuadruple)
+		{
+			DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
+					iav.det, iav.iVertex, iCondition);
+			matrix->rowind[nColumnOffset] = iav.iVertex;
+			matrix->values.d[nColumnOffset] = iav.det;
+			++nColumnOffset;
+		}
+
 		++iCondition;
 	}
 	
