@@ -1003,8 +1003,8 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	
 	/* Allocate memory for regularized matrix. */
-	taucs_ccs_matrix* matrixRegularized = taucs_ccs_new(matrix->m - 3, 
-		matrix->n, 4 * (matrix->m - 3));
+	taucs_ccs_matrix* matrixRegularized = taucs_ccs_new(matrix->m,
+		matrix->n - 3, 4 * (matrix->n - 3));
 	DEBUG_PRINT("Memory for regularized matrix has been allocated.");
 	
 	int iConditionReg = 0;
@@ -1033,12 +1033,13 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 			DEBUG_PRINT("Row index at offset %d has been set to %d",
 				nOffsetReg, matrix->rowind[nOffset]);
 
-			int index = matrix->n * matrix->rowind[nOffset] + iCondition;
-			DEBUG_PRINT("Actually it is [%d][%d], or %d-th element of the "
-				"matrix", matrix->rowind[nOffset], iCondition, index);
+			int index DEBUG_VARIABLE = matrix->n * matrix->rowind[nOffset] +
+					iCondition;
+			DEBUG_PRINT("Actually it is [%d][%d], or element at offset %d in "
+				"the matrix", matrix->rowind[nOffset], iCondition, index);
 			
 			auto vertex = polyhedron.vertices_begin();
-			vertex += index;
+			vertex += matrix->rowind[nOffset];
 
 			Point_3 zero(0., 0., 0.);
 			Point_3 point = vertex->point();
