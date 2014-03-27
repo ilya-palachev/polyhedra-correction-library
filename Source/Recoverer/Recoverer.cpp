@@ -602,6 +602,49 @@ typedef struct
 	Polyhedron_3::Vertex_handle v0, v1, v2, v3;
 } TetrahedronVertex;
 
+/**
+ * Counts the number of covering tetrahedrons for a given polyhedrons.
+ *
+ * @param polyhedron	Convex hull of the set of directions
+ */
+static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
+{
+	DEBUG_START;
+
+	/*
+	 * Test: Check whether the proper number of tetrahedrons has been found.
+	 *
+	 * First, calcualate the sum of vertex degrees
+	 */
+	unsigned long int degreeSum = 0;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		degreeSum += vertex->vertex_degree();
+	}
+
+	/* Second, the number of edges is a half of degrees sum. */
+	unsigned long int numTetrahedrons = degreeSum / 2;
+
+	/*
+	 * Third, each of 3 edges incident to any vertex of degree 3, share the same
+	 * tetrahedron, so we need to decrease the number of tetrahedrons by 2.
+	 */
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		unsigned long int degree = vertex->vertex_degree();
+		if (degree == 3)
+		{
+			numTetrahedrons -= 2;
+		}
+	}
+
+	DEBUG_PRINT("Counted number of tetrahedrons must be %ld", numTetrahedrons);
+
+	DEBUG_END;
+	return numTetrahedrons;
+}
 
 /**
  * Finds covering tetrahedrons for a given polyhedron.
@@ -699,7 +742,6 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 		tetrahedrons.insert(tetrahedron);
 	}
 
-
 	/*
 	 * Construct the list from sorted set and return it.
 	 */
@@ -739,6 +781,11 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 	int numHvalues = polyhedron.size_of_vertices();
 
 	auto listTetrahedrons = findCoveringTetrahedrons(polyhedron);
+
+#ifndef NDEBUG
+	/* Check whether the proper number of tetrahedrons has been found. */
+	ASSERT(listTetrahedrons.size() == countCoveringTetrahedrons(polyhedron));
+#endif
 
 	numConditions = listTetrahedrons.size();
 	DEBUG_PRINT("Found %d covering tetrahedrons", numConditions);
