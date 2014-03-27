@@ -926,20 +926,30 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 	return matrix;
 }
 
-static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
-	Polyhedron_3 polyhedron)
+/**
+ * Finds IDs of vertices that have maximal coordinates of polyhedron's
+ * vertices.
+ *
+ * Columns of transposed support matrix which have these IDs will be then
+ * eliminated.
+ *
+ * @param polyhedron	The polyhedron
+ * @param iXmax			Reference to returned ID of vertex with maximal X
+ * 						coordinate
+ * @param iYmax			Reference to returned ID of vertex with maximal Y
+ * 						coordinate
+ * @param iZmax			Reference to returned ID of vertex with maximal Z
+ * 						coordinate
+ *
+ * @return Vector with coordinates equal to reciprocals of maximal
+ * coordinates
+ */
+static Vector_3 findMaxCoordinates(Polyhedron_3 polyhedron, int& iXmax,
+		int& iYmax, int& iZmax)
 {
 	DEBUG_START;
-
-	/*
-	 * Find IDs of vertices that have maximal coordinates of polyhedron's 
-	 * vertices.
-	 * 
-	 * Columns of transposed support matrix which have these IDs will be then
-	 * eliminated.
-	 */
 	int iVertex = polyhedron.vertices_begin()->id;
-	int iXmax = iVertex, iYmax = iVertex, iZmax = iVertex;
+	iXmax = iYmax = iZmax = iVertex;
 
 	Point_3 pointFirst = polyhedron.vertices_begin()->point();
 	double xmax = pointFirst.x(), ymax = pointFirst.y(), zmax = pointFirst.z();
@@ -978,6 +988,17 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 	 * its reciprocal beforehand.
 	 */
 	Vector_3 vMax(1. / xmax, 1. / ymax, 1. / zmax);
+	DEBUG_END;
+	return vMax;
+}
+
+static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
+	Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+
+	int iXmax = 0, iYmax = 0, iZmax = 0;
+	Vector_3 vMax = findMaxCoordinates(polyhedron, iXmax, iYmax, iZmax);
 	
 	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	
