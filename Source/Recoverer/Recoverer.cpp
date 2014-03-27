@@ -405,6 +405,21 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
 
+	/* Assign vertex IDs that will be used later. */
+	long int i = 0;
+	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
+		 ++vertex)
+	{
+		vertex->id = i++;
+	}
+
+	/* Assign facet IDs that will be used later. */
+	i = 0;
+	for (auto facet = poly.facets_begin(); facet != poly.facets_end(); ++facet)
+	{
+		facet->id = i++;
+	}
+
 	DEBUG_END;
 	return poly;
 }
@@ -582,10 +597,10 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
  */
 typedef struct
 {
-	int u0;
-	int u1;
-	int u2;
-	int u3;
+	long int u0;
+	long int u1;
+	long int u2;
+	long int u3;
 } TetrahedronVertexIDs;
 
 
@@ -606,7 +621,7 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 		if (!halfedge->is_triangle())
 		{
 			ERROR_PRINT("Facet #%d is not triangle, it has %d edges.",
-					halfedge->facet() - polyhedron.halfedges_begin(),
+					halfedge->facet()->id,
 					halfedge->facet_degree());
 			DEBUG_END;
 			exit(EXIT_FAILURE);
@@ -648,17 +663,13 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 	for (auto halfedge = polyhedron.halfedges_begin();
 			halfedge != polyhedron.halfedges_end(); ++halfedge)
 	{
-		set<int> vertexSet;
+		set<long int> vertexSet;
 
-		int iVertex0 = halfedge->vertex() -
-				polyhedron.vertices_begin();
-		int iVertex1 = halfedge->prev()->vertex() -
-				polyhedron.vertices_begin();
-		int iVertex2 = halfedge->next()->vertex() -
-				polyhedron.vertices_begin();
-		int iVertex3 = halfedge->opposite()->next()->vertex() -
-				polyhedron.vertices_begin();
-		DEBUG_PRINT("Adding tetrahedron [%d, %d, %d, %d]",
+		long int iVertex0 = halfedge->vertex()->id;
+		long int iVertex1 = halfedge->prev()->vertex()->id;
+		long int iVertex2 = halfedge->next()->vertex()->id;
+		long int iVertex3 = halfedge->opposite()->next()->vertex()->id;
+		DEBUG_PRINT("Adding tetrahedron [%ld, %ld, %ld, %ld]",
 				iVertex0, iVertex1, iVertex2, iVertex3);
 
 		vertexSet.insert(iVertex0);
