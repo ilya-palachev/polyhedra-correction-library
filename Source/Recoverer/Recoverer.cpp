@@ -351,8 +351,10 @@ struct Plane_from_facet
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
-		return Polyhedron_3::Plane_3(h->vertex()->point(),
-				h->next()->vertex()->point(), h->opposite()->vertex()->point());
+		Point_3 point0 = h->vertex()->point();
+		Point_3 point1 = h->next()->vertex()->point();
+		Point_3 point2 = h->opposite()->vertex()->point();
+		return Polyhedron_3::Plane_3(point0, point1, point2);
 	}
 };
 
@@ -593,15 +595,12 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 }
 
 /**
- * Stores the IDs of vertexes that form a tetrahedron.
+ * Stores the handles of vertexes that form a tetrahedron.
  */
 typedef struct
 {
-	long int u0;
-	long int u1;
-	long int u2;
-	long int u3;
-} TetrahedronVertexIDs;
+	Polyhedron_3::Vertex_handle v0, v1, v2, v3;
+} TetrahedronVertex;
 
 
 /**
@@ -609,7 +608,7 @@ typedef struct
  *
  * @param polyhedron	Convex hull of the set of directions
  */
-static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
+static list<TetrahedronVertex> findCoveringTetrahedrons(
 		Polyhedron_3& polyhedron)
 {
 	DEBUG_START;
@@ -620,35 +619,38 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 	{
 		if (!halfedge->is_triangle())
 		{
-			ERROR_PRINT("Facet #%d is not triangle, it has %d edges.",
-					halfedge->facet()->id,
-					halfedge->facet_degree());
+			ERROR_PRINT("Facet #%ld is not triangle, it has %ld edges.",
+					(long int) halfedge->facet()->id,
+					(long int) halfedge->facet_degree());
 			DEBUG_END;
 			exit(EXIT_FAILURE);
 		}
 	}
 
-	auto comparer = [](TetrahedronVertexIDs a, TetrahedronVertexIDs b)
+	auto comparer = [](TetrahedronVertex a, TetrahedronVertex b)
 	{
-		if (a.u0 < b.u0)
+		long int a0 = a.v0->id, a1 = a.v1->id, a2 = a.v2->id, a3 = a.v3->id;
+		long int b0 = b.v0->id, b1 = b.v1->id, b2 = b.v2->id, b3 = b.v3->id;
+
+		if (a0 < b0)
 		{
 			return true;
 		}
-		else if (a.u0 == b.u0)
+		else if (a0 == b0)
 		{
-			if (a.u1 < b.u1)
+			if (a1 < b1)
 			{
 				return true;
 			}
-			else if (a.u1 == b.u1)
+			else if (a1 == b1)
 			{
-				if (a.u2 < b.u2)
+				if (a2 < b2)
 				{
 					return true;
 				}
-				else if (a.u2 == b.u2)
+				else if (a2 == b2)
 				{
-					if (a.u3 < b.u3)
+					if (a3 < b3)
 					{
 						return true;
 					}
@@ -658,33 +660,41 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 		return false;
 	};
 
-	set<TetrahedronVertexIDs, decltype(comparer)> tetrahedrons(comparer);
+
+	set<TetrahedronVertex, decltype(comparer)> tetrahedrons(comparer);
+
+	auto vertexComparer = [](Polyhedron_3::Vertex_handle a,
+			Polyhedron_3::Vertex_handle b)
+	{
+		return a->id < b->id;
+	};
+
+	set<Polyhedron_3::Vertex_handle, decltype(vertexComparer)>
+				vertexSet(vertexComparer);
 
 	for (auto halfedge = polyhedron.halfedges_begin();
 			halfedge != polyhedron.halfedges_end(); ++halfedge)
 	{
-		set<long int> vertexSet;
 
-		long int iVertex0 = halfedge->vertex()->id;
-		long int iVertex1 = halfedge->prev()->vertex()->id;
-		long int iVertex2 = halfedge->next()->vertex()->id;
-		long int iVertex3 = halfedge->opposite()->next()->vertex()->id;
-		DEBUG_PRINT("Adding tetrahedron [%ld, %ld, %ld, %ld]",
-				iVertex0, iVertex1, iVertex2, iVertex3);
+		vertexSet.clear();
 
-		vertexSet.insert(iVertex0);
-		vertexSet.insert(iVertex1);
-		vertexSet.insert(iVertex2);
-		vertexSet.insert(iVertex3);
+		vertexSet.insert(halfedge->vertex());
+		vertexSet.insert(halfedge->prev()->vertex());
+		vertexSet.insert(halfedge->next()->vertex());
+		vertexSet.insert(halfedge->opposite()->next()->vertex());
 
 		ASSERT(vertexSet.size() == 4);
 
-		TetrahedronVertexIDs tetrahedron;
+		TetrahedronVertex tetrahedron;
 		auto itVertex = vertexSet.begin();
-		tetrahedron.u0 = *(itVertex++);
-		tetrahedron.u1 = *(itVertex++);
-		tetrahedron.u2 = *(itVertex++);
-		tetrahedron.u3 = *(itVertex++);
+		tetrahedron.v0 = *(itVertex++);
+		tetrahedron.v1 = *(itVertex++);
+		tetrahedron.v2 = *(itVertex++);
+		tetrahedron.v3 = *(itVertex++);
+
+		DEBUG_PRINT("Adding tetrahedron [%ld, %ld, %ld, %ld]",
+				tetrahedron.v0->id, tetrahedron.v1->id, tetrahedron.v2->id,
+				tetrahedron.v3->id);
 
 		tetrahedrons.insert(tetrahedron);
 	}
@@ -693,7 +703,7 @@ static list<TetrahedronVertexIDs> findCoveringTetrahedrons(
 	/*
 	 * Construct the list from sorted set and return it.
 	 */
-	list<TetrahedronVertexIDs> listTetrahedrons;
+	list<TetrahedronVertex> listTetrahedrons;
 	for (auto itTetrahedron = tetrahedrons.begin();
 			itTetrahedron != tetrahedrons.end(); ++itTetrahedron)
 	{
@@ -726,7 +736,7 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 {
 	DEBUG_START;
 
-	int numHvalues = polyhedron->size_of_vertices();
+	int numHvalues = polyhedron.size_of_vertices();
 
 	auto listTetrahedrons = findCoveringTetrahedrons(polyhedron);
 
@@ -753,10 +763,16 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		matrix->colptr[iCondition] = nColumnOffset;
 //		DEBUG_PRINT("Setting Q->colptr[%d] = %d", iCondition, nColumnOffset);
 		
-		int iVertex1 = tetrahedron.u0;
-		int iVertex2 = tetrahedron.u1;
-		int iVertex3 = tetrahedron.u2;
-		int iVertex4 = tetrahedron.u3;
+		Point_3 zero(0., 0., 0.);
+		Vector_3 u1(zero, tetrahedron.v0->point());
+		Vector_3 u2(zero, tetrahedron.v1->point());
+		Vector_3 u3(zero, tetrahedron.v2->point());
+		Vector_3 u4(zero, tetrahedron.v3->point());
+
+		int iVertex1 = tetrahedron.v0->id;
+		int iVertex2 = tetrahedron.v1->id;
+		int iVertex3 = tetrahedron.v2->id;
+		int iVertex4 = tetrahedron.v3->id;
 
 		/*
 		 * Usual condition looks as follows:
@@ -770,14 +786,10 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		 * numbers iVertex1, iVertex2, iVertex3 and iVertex4 here.
 		 */
 
-		Vector3d u1 = polyhedron->vertices[iVertex1];
-		Vector3d u2 = polyhedron->vertices[iVertex2];
-		Vector3d u3 = polyhedron->vertices[iVertex3];
-		Vector3d u4 = polyhedron->vertices[iVertex4];
-		double det1 = u2 % u3 * u4;
-		double det2 = - u1 % u3 * u4;
-		double det3 = u1 % u2 * u4;
-		double det4 = - u1 % u2 * u3;
+		double det1 = + CGAL::determinant(u2, u3, u4);
+		double det2 = - CGAL::determinant(u1, u3, u4);
+		double det3 = + CGAL::determinant(u1, u2, u4);
+		double det4 = - CGAL::determinant(u1, u2, u3);
 		double det = det1 + det2 + det3 + det4;
 		if (det < 0)
 		{
@@ -801,6 +813,9 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		/*
 		 * Now sort pairs of vertex's IDs and corresponding determinant values
 		 * in order to store them to the matrix in the accending order.
+		 *
+		 * TODO: now when tetrahedron provides 4 verteices sorted by their IDs,
+		 * we can avoid this.
 		 */
 
 		IrowAndValue iav1 = {iVertex1, det1};
@@ -876,40 +891,46 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 	 * Columns of transposed support matrix which have these IDs will be then
 	 * eliminated.
 	 */
-	Vector3d vMax = polyhedron->vertices[0];
-	int iXmax = 0, iYmax = 0, iZmax = 0;
-	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
+	int iVertex = polyhedron.vertices_begin()->id;
+	int iXmax = iVertex, iYmax = iVertex, iZmax = iVertex;
+
+	Point_3 pointFirst = polyhedron.vertices_begin()->point();
+	double xmax = pointFirst.x(), ymax = pointFirst.y(), zmax = pointFirst.z();
+
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
 	{
-		if (polyhedron->vertices[iVertex].x > vMax.x)
+		iVertex = vertex->id;
+		Point_3 point = vertex->point();
+
+		if (point.x() > xmax)
 		{
-			vMax.x = polyhedron->vertices[iVertex].x;
+			xmax = point.x();
 			iXmax = iVertex;
 		}
 
-		if (polyhedron->vertices[iVertex].y > vMax.y)
+		if (point.y() > ymax)
 		{
-			vMax.y = polyhedron->vertices[iVertex].y;
+			ymax = point.y();
 			iYmax = iVertex;
 		}
 		
-		if (polyhedron->vertices[iVertex].z > vMax.z)
+		if (point.z() > zmax)
 		{
-			vMax.z = polyhedron->vertices[iVertex].z;
+			zmax = point.z();
 			iZmax = iVertex;
 		}
 	}
 	/* TODO: Handle case when some of iXmax, iYmax, iZmax are equal. */
-	DEBUG_PRINT("%d-th vertex has maximal X coordinate = %lf", iXmax, vMax.x);
-	DEBUG_PRINT("%d-th vertex has maximal Y coordinate = %lf", iYmax, vMax.y);
-	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, vMax.z);
+	DEBUG_PRINT("%d-th vertex has maximal X coordinate = %lf", iXmax, xmax);
+	DEBUG_PRINT("%d-th vertex has maximal Y coordinate = %lf", iYmax, ymax);
+	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, zmax);
 	
 	/*
 	 * Since we are going to divide onto components of vMax, we will calculate
 	 * its reciprocal beforehand.
 	 */
-	vMax.x = 1. / vMax.x;
-	vMax.y = 1. / vMax.y;
-	vMax.z = 1. / vMax.z;
+	Vector_3 vMax(1. / xmax, 1. / ymax, 1. / zmax);
 	
 	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	
@@ -948,12 +969,18 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 			DEBUG_PRINT("Actually it is [%d][%d], or %d-th element of the "
 				"matrix", matrix->rowind[nOffset], iCondition, index);
 			
-			Vector3d vertex = polyhedron->vertices[index];
+			auto vertex = polyhedron.vertices_begin();
+			vertex += index;
+
+			Point_3 zero(0., 0., 0.);
+			Point_3 point = vertex->point();
+			Vector_3 vector(zero, point);
+
 			DEBUG_PRINT("Corresponding vertex is (%lf, %lf, %lf)",
-				vertex.x, vertex.x, vertex.z);
+					vector.x(), vector.y(), vector.z());
 			
 			matrixRegularized->values.d[nOffsetReg] =
-				matrix->values.d[nOffset] * (1. - vertex * vMax);
+				matrix->values.d[nOffset] * (1. - vector * vMax);
 			DEBUG_PRINT("Value at offset %d has been set to %lf", nOffsetReg,
 				matrixRegularized->values.d[nOffsetReg]);
 

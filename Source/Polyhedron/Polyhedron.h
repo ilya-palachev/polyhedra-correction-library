@@ -29,52 +29,7 @@
 #include <memory>
 #include <list>
 
-/*
- * Inclusions from CGAL library.
- * TODO: They can dramatically increase build time. How to move them out from
- * here? Forward declarations are needed.
- */
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/HalfedgeDS_vector.h>
-#include <CGAL/point_generators_3.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/convex_hull_3.h>
-
-/** A face type with an ID member variable. */
-template <class Refs>
-struct My_face : public CGAL::HalfedgeDS_face_base<Refs> {
-	long int id;
-};
-
-/** A vertex type with an ID member variable. */
-template <class Refs>
-struct My_vertex : public CGAL::HalfedgeDS_vertex_base<Refs> {
-	long int id;
-};
-
-/** An items type using My_face and My_vertex. */
-struct My_items : public CGAL::Polyhedron_items_3 {
-
-	template <class Refs, class Traits>
-	struct Face_wrapper {
-		typedef My_face<Refs> Face;
-	};
-	
-	template <class Refs, class Traits>
-	struct Vertex_wrapper {
-		typedef My_vertex<Refs> Vertex;
-	};
-};
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-typedef CGAL::Polyhedron_3<Kernel, My_items, CGAL::HalfedgeDS_vector>
-	Polyhedron_3;
-typedef Kernel::Segment_3 Segment_3;
-
-/** Define point creator */
-typedef Kernel::Point_3 Point_3;
-typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
+#include "PolyhedronCGAL.h"
 
 /*
  * Forward declarations
