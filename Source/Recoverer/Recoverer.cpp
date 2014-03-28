@@ -999,49 +999,53 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 {
 	DEBUG_START;
 
+	taucs_ccs_matrix* Q = taucs_ccs_transpose(matrix);
+
 	int iXmax = 0, iYmax = 0, iZmax = 0;
 	Vector_3 vMax = findMaxCoordinates(polyhedron, iXmax, iYmax, iZmax);
 	
 	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	
 	/* Allocate memory for regularized matrix. */
-	taucs_ccs_matrix* matrixRegularized = taucs_ccs_new(matrix->m,
-		matrix->n - 3, 4 * (matrix->n - 3));
+	taucs_ccs_matrix* Qregularized = taucs_ccs_new(Q->m, Q->n - 3,
+			4 * (matrix->n - 3));
 	DEBUG_PRINT("Memory for regularized matrix has been allocated.");
 	
-	int iConditionReg = 0;
+	int iColumnReg = 0;
 	int nOffsetReg = 0;
-	for (int iCondition = 0; iCondition < matrix->n; ++iCondition)
+	for (int iColumn = 0; iColumn < matrix->n; ++iColumn)
 	{
-		DEBUG_PRINT("Regularization of %d-th column of matrix.", iCondition);
-		if ((iCondition == iXmax) ||
-			(iCondition == iYmax) ||
-			(iCondition == iZmax))
+		DEBUG_PRINT("Regularization of %d-th column of matrix.", iColumn);
+		if ((iColumn == iXmax) ||
+			(iColumn == iYmax) ||
+			(iColumn == iZmax))
 		{
 			DEBUG_PRINT("Skipping the column that is going to be eliminated.");
 			continue;
 		}
 
-		matrixRegularized->colptr[iConditionReg] = nOffsetReg;
-		DEBUG_PRINT("Column pointer #%d has been set to %d", iConditionReg,
+		auto vertex = polyhedron.vertices_begin();
+		vertex += Q->rowind[nOffset];
+
+		Qregularized->colptr[iColumnReg] = nOffsetReg;
+		DEBUG_PRINT("Column pointer #%d has been set to %d", iColumnReg,
 			nOffsetReg);
 
-		for (int nOffset = matrix->colptr[iCondition];
-			 nOffset < matrix->colptr[iCondition + 1]; ++nOffset)
+		for (int nOffset = Q->colptr[iColumn];
+			 nOffset < Q->colptr[iColumn + 1]; ++nOffset)
 		{
 			DEBUG_PRINT("Reading matrix from offset %d", nOffset);
 			
-			matrixRegularized->rowind[nOffsetReg] = matrix->rowind[nOffset];
+			Qregularized->rowind[nOffsetReg] = matrix->rowind[nOffset];
 			DEBUG_PRINT("Row index at offset %d has been set to %d",
-				nOffsetReg, matrix->rowind[nOffset]);
+				nOffsetReg, Q->rowind[nOffset]);
 
-			int index DEBUG_VARIABLE = matrix->n * matrix->rowind[nOffset] +
-					iCondition;
+			int index DEBUG_VARIABLE = Q->n * Q->rowind[nOffset] +
+					iColumn;
 			DEBUG_PRINT("Actually it is [%d][%d], or element at offset %d in "
-				"the matrix", matrix->rowind[nOffset], iCondition, index);
+				"the matrix", Q->rowind[nOffset], iColumn, index);
 			
-			auto vertex = polyhedron.vertices_begin();
-			vertex += matrix->rowind[nOffset];
+
 
 			Point_3 zero(0., 0., 0.);
 			Point_3 point = vertex->point();
@@ -1050,17 +1054,21 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 			DEBUG_PRINT("Corresponding vertex is (%lf, %lf, %lf)",
 					vector.x(), vector.y(), vector.z());
 			
-			matrixRegularized->values.d[nOffsetReg] =
-				matrix->values.d[nOffset] * (1. - vector * vMax);
+			Qregularized->values.d[nOffsetReg] =
+				Q->values.d[nOffset] * (1. - vector * vMax);
 			DEBUG_PRINT("Value at offset %d has been set to %lf", nOffsetReg,
-				matrixRegularized->values.d[nOffsetReg]);
+				Qregularized->values.d[nOffsetReg]);
 
 			++nOffsetReg;
 		}
 		
-		++iConditionReg;
+		++iColumnReg;
 	}
 	
+	taucs_ccs_matrix* matrixRegularized = taucs_ccs_transpose(Qregularized);
+	taucs_ccs_free(Q);
+	taucs_ccs_free(Qregularized);
+
 	DEBUG_END;
 	return matrixRegularized;
 }
@@ -1103,7 +1111,7 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	Polyhedron_3 polyhedron = constructConvexHullCGAL(directions);
 
 	/* 5. Build matrix by the polyhedron. */
-	taucs_ccs_matrix* matrix = buildMatrixByPolyhedron(polyhedron,
+	taucs_ccs_matrix* Qt = buildMatrixByPolyhedron(polyhedron,
 		numConditions, ifScaleMatrix);
 
 	/*
@@ -1112,9 +1120,9 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	 * v2 = (u1y, ..., uMy)
 	 * v3 = (u1z, ..., uMz)
 	 */
-	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(matrix,
+	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(Qt,
 		polyhedron);
-	taucs_ccs_free(matrix);
+	taucs_ccs_free(Qt);
 
 	DEBUG_END;
 	return matrixRegularized;
