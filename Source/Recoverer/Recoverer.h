@@ -57,6 +57,21 @@ private:
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
 
+	/** ID of vertex with maximal X coordinate. */
+	int iXmax;
+
+	/** ID of vertex with maximal Y coordinate. */
+	int iYmax;
+
+	/** ID of vertex with maximal Z coordinate. */
+	int iZmax;
+
+	/** Regularizing vector. */
+	Vector_3 vectorRegularizing;
+
+	/** Vector with saved 3 h-values that correspond to iXmax, iYmax, iZmax */
+	Vector_3 vectorMaxHValues;
+
 	/**
 	 * Extracts support planes from shadow contours.
 	 *
@@ -126,6 +141,31 @@ private:
 	 */
 	PolyhedronPtr buildMaybeDualContours(bool ifDual,
 			ShadeContourDataPtr SCData);
+
+	/**
+	 * Finds IDs of vertices that have maximal coordinates of polyhedron's
+	 * vertices.
+	 *
+	 * Columns of transposed support matrix which have these IDs will be then
+	 * eliminated.
+	 *
+	 * @param polyhedron	The polyhedron
+	 */
+	Vector_3 findMaxVertices(Polyhedron_3 polyhedron,
+		int& imax0, int& imax1, int& imax2);
+	
+	/**
+	 * Regularizes support matrix by eliminating columns that have IDs equal to
+	 * iXmax, iYmax, iZmax and regularizes also the h-values vector.
+	 * 
+	 * @param matrix		The transpose of support matrix
+	 * @param hvalues		The h-values vector
+	 * @param polyhedron	The polyhedron (convex hull of supporting
+	 * directions)
+	 */
+	taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
+		double* hvalues, Polyhedron_3 polyhedron);
+
 public:
 
 	/**

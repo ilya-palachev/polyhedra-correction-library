@@ -37,7 +37,8 @@ using namespace std;
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
-	ifBalancing(false), ifScaleMatrix(false)
+	ifBalancing(false), ifScaleMatrix(false), iXmax(0), iYmax(0), iZmax(0),
+	vectorRegularizing(0., 0., 0.)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -605,7 +606,7 @@ typedef struct
 } TetrahedronVertex;
 
 /**
- * Counts the number of covering tetrahedrons for a given polyhedrons.
+ * Counts the number of covering tetrahedrons for a given polyhedron.
  *
  * @param polyhedron	Convex hull of the set of directions
  */
@@ -736,10 +737,6 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 		tetrahedron.v1 = *(itVertex++);
 		tetrahedron.v2 = *(itVertex++);
 		tetrahedron.v3 = *(itVertex++);
-
-		DEBUG_PRINT("Adding tetrahedron [%ld, %ld, %ld, %ld]",
-				tetrahedron.v0->id, tetrahedron.v1->id, tetrahedron.v2->id,
-				tetrahedron.v3->id);
 
 		tetrahedrons.insert(tetrahedron);
 	}
@@ -903,8 +900,6 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 
 		for (auto &iav : iavQuadruple)
 		{
-			DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-					iav.det, iav.iVertex, iCondition);
 			matrix->rowind[nColumnOffset] = iav.iVertex;
 			matrix->values.d[nColumnOffset] = iav.det;
 			++nColumnOffset;
@@ -928,30 +923,21 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 	return matrix;
 }
 
-/**
- * Finds IDs of vertices that have maximal coordinates of polyhedron's
- * vertices.
- *
- * Columns of transposed support matrix which have these IDs will be then
- * eliminated.
- *
- * @param polyhedron	The polyhedron
- * @param iXmax			Reference to returned ID of vertex with maximal X
- * 						coordinate
- * @param iYmax			Reference to returned ID of vertex with maximal Y
- * 						coordinate
- * @param iZmax			Reference to returned ID of vertex with maximal Z
- * 						coordinate
- *
- * @return Vector with coordinates equal to reciprocals of maximal
- * coordinates
- */
-static Vector_3 findMaxCoordinates(Polyhedron_3 polyhedron, int& iXmax,
-		int& iYmax, int& iZmax)
+
+Vector_3 Recoverer::findMaxVertices(Polyhedron_3 polyhedron,
+	int& imax0, int& imax1, int& imax2)
 {
 	DEBUG_START;
 	int iVertex = polyhedron.vertices_begin()->id;
 	iXmax = iYmax = iZmax = iVertex;
+	
+	/*
+	 * These 3 variables are added to hadle the case when some of iXmax, iYmax
+	 * or iZmax are equal.
+	 */
+	int iXmaxKeeper = iXmax;
+	int iYmaxKeeper = iYmax;
+	int iZmaxKeeper = iZmax;
 
 	Point_3 pointFirst = polyhedron.vertices_begin()->point();
 	double xmax = pointFirst.x(), ymax = pointFirst.y(), zmax = pointFirst.z();
@@ -965,67 +951,120 @@ static Vector_3 findMaxCoordinates(Polyhedron_3 polyhedron, int& iXmax,
 		if (point.x() > xmax)
 		{
 			xmax = point.x();
+			iXmaxKeeper = iXmax;
 			iXmax = iVertex;
 		}
 
 		if (point.y() > ymax)
 		{
 			ymax = point.y();
+			iYmaxKeeper = iYmax;
 			iYmax = iVertex;
 		}
 		
 		if (point.z() > zmax)
 		{
 			zmax = point.z();
+			iZmaxKeeper = iZmax;
 			iZmax = iVertex;
 		}
 	}
-	/* TODO: Handle case when some of iXmax, iYmax, iZmax are equal. */
+
 	DEBUG_PRINT("%d-th vertex has maximal X coordinate = %lf", iXmax, xmax);
 	DEBUG_PRINT("%d-th vertex has maximal Y coordinate = %lf", iYmax, ymax);
 	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, zmax);
+
+	/* Sort indices of vertices with maximal coordinates. */
+	set<int> iMaxes;
+	iMaxes.insert(iXmax);
+	iMaxes.insert(iYmax);
+	iMaxes.insert(iZmax);
 	
 	/*
-	 * Since we are going to divide onto components of vMax, we will calculate
-	 * its reciprocal beforehand.
+	 * TODO: Handle case when iXmax = iYmax = iZmax and
+	 * iMaxKeeper = iYmaxKeeper = iZmaxKeeper
 	 */
-	Vector_3 vMax(1. / xmax, 1. / ymax, 1. / zmax);
+	if (iMaxes.size() < 3)
+	{
+		if (iXmax == iYmax)
+		{
+			iYmax = iYmaxKeeper;
+			iMaxes.insert(iYmax);
+		}
+		if (iYmax == iZmax)
+		{
+			iZmax = iZmaxKeeper;
+			iMaxes.insert(iZmax);
+		}
+		if (iXmax == iZmax)
+		{
+			iXmax = iXmaxKeeper;
+			iMaxes.insert(iXmax);
+		}
+	}
+	ASSERT(iMaxes.size() == 3);
+
+	auto itIMaxes = iMaxes.begin();
+	imax0 = *(itIMaxes++);
+	imax1 = *(itIMaxes++);
+	imax2 = *(itIMaxes++);
+	DEBUG_PRINT("And here are they sorted: %d, %d, %d", imax0, imax1, imax2);
+
 	DEBUG_END;
-	return vMax;
+	return Vector_3(1. / xmax, 1. / ymax, 1. / zmax);
 }
 
-static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
-	Polyhedron_3 polyhedron)
+taucs_ccs_matrix* Recoverer::regularizeSupportMatrix(taucs_ccs_matrix* matrix,
+	double* hvalues, Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 
 	taucs_ccs_matrix* Q = taucs_ccs_transpose(matrix);
 
-	int iXmax = 0, iYmax = 0, iZmax = 0;
-	Vector_3 vMax = findMaxCoordinates(polyhedron, iXmax, iYmax, iZmax);
+	int imax0 = 0, imax1 = 0, imax2 = 0;
+	Vector_3 vMax = findMaxVertices(polyhedron, imax0, imax1, imax2);
+	vectorMaxHValues = Vector_3(hvalues[iXmax], hvalues[iYmax], hvalues[iZmax]);
+	vectorRegularizing = Vector_3(
+		hvalues[iXmax] * vMax.x(),
+		hvalues[iYmax] * vMax.y(),
+		hvalues[iZmax] * vMax.z());
+
+	/* Regularize h-values vector. */
+	Point_3 zero(0., 0., 0.);
+	for (int iValue = 0; iValue < Q->n - 3; ++iValue)
+	{
+		/* Get vertex corresponding to the column of the matrix. */
+		auto vertex = polyhedron.vertices_begin() + iValue;
+		Point_3 point = vertex->point();
+		Vector_3 vector(zero, point);
+		double shift = -vector * vectorRegularizing;
+		if (iValue < imax0)
+			hvalues[iValue] += shift;
+		else if (iValue < imax1 - 1)
+			hvalues[iValue] = hvalues[iValue + 1] + shift;
+		else if (iValue < imax2 - 2)
+			hvalues[iValue] = hvalues[iValue + 2] + shift;
+		else
+			hvalues[iValue] = hvalues[iValue + 3] + shift;
+	}
+	DEBUG_PRINT("h-values have been successfully regularized.");
 	
-	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	
 	/* Allocate memory for regularized matrix. */
-	taucs_ccs_matrix* Qregularized = taucs_ccs_new(Q->m, Q->n - 3,
-			4 * (matrix->n - 3));
+	taucs_ccs_matrix* Qregularized = taucs_ccs_new(Q->m, Q->n - 3, 4 * Q->m);
 	DEBUG_PRINT("Memory for regularized matrix has been allocated.");
 	
 	int iColumnReg = 0;
 	int nOffsetReg = 0;
-	for (int iColumn = 0; iColumn < matrix->n; ++iColumn)
+	for (int iColumn = 0; iColumn < Q->n; ++iColumn)
 	{
 		DEBUG_PRINT("Regularization of %d-th column of matrix.", iColumn);
-		if ((iColumn == iXmax) ||
-			(iColumn == iYmax) ||
-			(iColumn == iZmax))
+		if ((iColumn == imax0) || (iColumn == imax1) || (iColumn == imax2))
 		{
+			DEBUG_PRINT("==================================================");
 			DEBUG_PRINT("Skipping the column that is going to be eliminated.");
 			continue;
 		}
-
-		auto vertex = polyhedron.vertices_begin();
-		vertex += Q->rowind[nOffset];
 
 		Qregularized->colptr[iColumnReg] = nOffsetReg;
 		DEBUG_PRINT("Column pointer #%d has been set to %d", iColumnReg,
@@ -1034,36 +1073,14 @@ static taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 		for (int nOffset = Q->colptr[iColumn];
 			 nOffset < Q->colptr[iColumn + 1]; ++nOffset)
 		{
-			DEBUG_PRINT("Reading matrix from offset %d", nOffset);
-			
-			Qregularized->rowind[nOffsetReg] = matrix->rowind[nOffset];
-			DEBUG_PRINT("Row index at offset %d has been set to %d",
-				nOffsetReg, Q->rowind[nOffset]);
-
-			int index DEBUG_VARIABLE = Q->n * Q->rowind[nOffset] +
-					iColumn;
-			DEBUG_PRINT("Actually it is [%d][%d], or element at offset %d in "
-				"the matrix", Q->rowind[nOffset], iColumn, index);
-			
-
-
-			Point_3 zero(0., 0., 0.);
-			Point_3 point = vertex->point();
-			Vector_3 vector(zero, point);
-
-			DEBUG_PRINT("Corresponding vertex is (%lf, %lf, %lf)",
-					vector.x(), vector.y(), vector.z());
-			
-			Qregularized->values.d[nOffsetReg] =
-				Q->values.d[nOffset] * (1. - vector * vMax);
-			DEBUG_PRINT("Value at offset %d has been set to %lf", nOffsetReg,
-				Qregularized->values.d[nOffsetReg]);
-
+			Qregularized->rowind[nOffsetReg] = Q->rowind[nOffset];
+			Qregularized->values.d[nOffsetReg] = Q->values.d[nOffset];
 			++nOffsetReg;
 		}
-		
+
 		++iColumnReg;
 	}
+	Qregularized->colptr[iColumnReg] = nOffsetReg;
 	
 	taucs_ccs_matrix* matrixRegularized = taucs_ccs_transpose(Qregularized);
 	taucs_ccs_free(Q);
@@ -1114,13 +1131,15 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	taucs_ccs_matrix* Qt = buildMatrixByPolyhedron(polyhedron,
 		numConditions, ifScaleMatrix);
 
+	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
+
 	/*
 	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
 	 * v1 = (u1x, ..., uMx)
 	 * v2 = (u1y, ..., uMy)
 	 * v3 = (u1z, ..., uMz)
 	 */
-	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(Qt,
+	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(Qt, hvalues,
 		polyhedron);
 	taucs_ccs_free(Qt);
 
