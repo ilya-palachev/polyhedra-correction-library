@@ -554,6 +554,7 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 {
 	DEBUG_START;
+#ifndef NDEBUG
 
 	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
 
@@ -591,6 +592,7 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 				"is %d", numUnexcpectedNonzeros);
 	}
 	free(numElemRow);
+#endif
 	DEBUG_END;
 }
 
@@ -1160,7 +1162,7 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	int numConditions = 0, numHvalues = 0;
 	double *hvalues = NULL;
 
-	/* 1. Build the support matrix. */
+	/* 1. Build the transpose of support matrix. */
 	taucs_ccs_matrix* Qt = buildSupportMatrix(SCData, numConditions, numHvalues,
 		hvalues);	
 	analyzeTaucsMatrix(Qt, false);
@@ -1172,12 +1174,34 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	char* strStderr = strdup("stderr");
 	taucs_logfile(strStderr);
 
-	/* 2. Calculate the reciprocal of the condition number. */
-	double conditionNumberQt = taucs_rcond(Qt);
+	/*
+	 * 2.Calculate the reciprocal of the condition number.
+	 *
+	 * In order to be able to do this, we need first to transpose Qt to obtain
+	 * the support matrix Q, since LAPACK's routine DGECON usually fails for
+	 * matrices where the number of rows is less than the number of columns.
+	 *
+	 * You can see this at this page:
+	 * http://www.netlib.org/lapack/explore-html/db/de4/dgecon_8f_source.html
+	 *
+	 * Here is the error:
+	 *  ** On entry to DGECON parameter number  4 had an illegal value
+	 *
+	 * Here is the source code that generates the error:
+	 *
+	 * ELSE IF( lda.LT.max( 1, n ) ) THEN
+	 * 		info = -4
+	 * ...
+	 * IF( info.NE.0 ) THEN
+	 * 		CALL xerbla( 'DGECON', -info )
+	 * 		RETURN
+	 */
+	taucs_ccs_matrix* Q = taucs_ccs_transpose(Qt);
+	double conditionNumberQ = taucs_rcond(Q);
 	DEBUG_PRINT("rcond(Q) = %.16lf",
-			conditionNumberQt);
+			conditionNumberQ);
 
-	double inRelErrTolerance = conditionNumberQt * conditionNumberQt *
+	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
 			EPS_MIN_DOUBLE;
 	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
 
@@ -1202,6 +1226,7 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 			linf_distance(numHvalues, hvalues, h));
 
 	free(h);
+	taucs_ccs_free(Q);
 	taucs_ccs_free(Qt);
 
 	DEBUG_END;
