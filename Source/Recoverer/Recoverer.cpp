@@ -1196,6 +1196,14 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	 * 		CALL xerbla( 'DGECON', -info )
 	 * 		RETURN
 	 */
+
+	double* Qtvals = taucs_convert_ccs_to_doubles(Qt);
+	taucs_ccs_matrix* fixed = taucs_construct_sorted_ccs_matrix(Qtvals, Qt->n,
+			Qt->m);
+	free(Qtvals);
+	taucs_ccs_free(Qt);
+	Qt = fixed;
+
 	taucs_ccs_matrix* Q = taucs_ccs_transpose(Qt);
 	double conditionNumberQ = taucs_rcond(Q);
 	DEBUG_PRINT("rcond(Q) = %.16lf",
