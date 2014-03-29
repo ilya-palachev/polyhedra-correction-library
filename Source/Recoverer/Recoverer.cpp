@@ -34,6 +34,13 @@
 
 using namespace std;
 
+static double l1_distance(int n, double* x, double* y);
+static double l1_norm(int n, double* x);
+static double l2_distance(int n, double* x, double* y);
+static double l2_norm(int n, double* x);
+static double linf_distance(int n, double* x, double* y);
+static double linf_norm(int n, double* x);
+
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
@@ -480,7 +487,7 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 		pDual->vertices[iVertex++] = vertex;
 	}
 
-	/*
+	/*m
 	 * Create dual facets using the information computed during
 	 * pre-processing.
 	 */
@@ -1090,6 +1097,72 @@ taucs_ccs_matrix* Recoverer::regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 	return matrixRegularized;
 }
 
+#define MAX_ACCEPTABLE_LINF_ERROR 1e-6
+
+/**
+ * Checks whether vectors vx, vy, vz are really the eigenvectors of the matrix Q
+ * corresponding to the eigenvalue 0 (i. e. basis kernel vectors)
+ *
+ * @param polyhedron	The polyhedron (convex hull of support directions)
+ * @param Qt			The transpose of the support matrix
+ */
+static bool checkSupportMatrix(Polyhedron_3 polyhedron, taucs_ccs_matrix* Qt)
+{
+	DEBUG_START;
+	/* Set eigenvectors vx, vy, vz. */
+	int numVertices = polyhedron.size_of_vertices();
+	double* vx = new double[numVertices];
+	double* vy = new double[numVertices];
+	double* vz = new double[numVertices];
+	double* vxQt = new double[numVertices];
+	double* vyQt = new double[numVertices];
+	double* vzQt = new double[numVertices];
+	
+	auto itVertex = polyhedron.vertices_begin();
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+	{
+		DEBUG_PRINT("vertex[%d].id = %ld", iVertex, itVertex->id);
+		ASSERT(itVertex->id == iVertex);
+		Point_3 point = itVertex->point();
+		vx[iVertex] = point.x();
+		vy[iVertex] = point.y();
+		vz[iVertex] = point.z();
+	}
+	
+	/* Check that vx, vy, vz really lie in the kernel of Q. */
+	taucs_transpose_vec_times_matrix_nosub(vx, Qt, vxQt);
+	double errorXinf = linf_norm(Qt->m, vxQt);
+	DEBUG_PRINT("||vx^{T} Q^{T}||_inf = %.16lf", errorXinf);
+	double errorX1 = l1_norm(Qt->m, vxQt);
+	DEBUG_PRINT("||vx^{T} Q^{T}||_1 = %.16lf", errorX1);
+	double errorX2 = l2_norm(Qt->m, vxQt);
+	DEBUG_PRINT("||vx^{T} Q^{T}||_2 = %.16lf", errorX2);
+	
+	taucs_transpose_vec_times_matrix_nosub(vy, Qt, vyQt);
+	double errorYinf = linf_norm(Qt->m, vyQt);
+	DEBUG_PRINT("||vy^{T} Q^{T}||_inf = %.16lf", errorYinf);
+	double errorY1 = l1_norm(Qt->m, vyQt);
+	DEBUG_PRINT("||vy^{T} Q^{T}||_1 = %.16lf", errorY1);
+	double errorY2 = l2_norm(Qt->m, vyQt);
+	DEBUG_PRINT("||vy^{T} Q^{T}||_2 = %.16lf", errorY2);
+
+	taucs_transpose_vec_times_matrix_nosub(vz, Qt, vzQt);
+	double errorZinf = linf_norm(Qt->m, vzQt);
+	DEBUG_PRINT("||vz^{T} Q^{T}||_inf = %.16lf", errorZinf);
+	double errorZ1 = l1_norm(Qt->m, vzQt);
+	DEBUG_PRINT("||vz^{T} Q^{T}||_1 = %.16lf", errorZ1);
+	double errorZ2 = l2_norm(Qt->m, vzQt);
+	DEBUG_PRINT("||vz^{T} Q^{T}||_2 = %.16lf", errorZ2);
+
+	delete[] vx;
+	delete[] vy;
+	delete[] vz;
+	DEBUG_END;
+	return (errorXinf < MAX_ACCEPTABLE_LINF_ERROR) &&
+		(errorYinf < MAX_ACCEPTABLE_LINF_ERROR) &&
+		(errorZinf < MAX_ACCEPTABLE_LINF_ERROR);
+}
+
 taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,	
 	int& numConditions, int& numHvalues, double*& hvalues)
 {
@@ -1131,7 +1204,8 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	taucs_ccs_matrix* Qt = buildMatrixByPolyhedron(polyhedron,
 		numConditions, ifScaleMatrix);
 
-	/* TODO: Check that vx, vy, and vz are really eigenvectors of our matrix. */
+	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
+	ASSERT(checkSupportMatrix(polyhedron, Qt));
 
 	/*
 	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
@@ -1159,6 +1233,18 @@ static double l1_distance(int n, double* x, double* y)
 	return result;
 }
 
+static double l1_norm(int n, double* x)
+{
+	DEBUG_START;
+	double result = 0.;
+	for (int i = 0; i < n; ++i)
+	{
+		result += fabs(x[i]);
+	}
+	DEBUG_END;
+	return result;
+}
+
 static double l2_distance(int n, double* x, double* y)
 {
 	DEBUG_START;
@@ -1171,6 +1257,18 @@ static double l2_distance(int n, double* x, double* y)
 	return result;
 }
 
+static double l2_norm(int n, double* x)
+{
+	DEBUG_START;
+	double result = 0.;
+	for (int i = 0; i < n; ++i)
+	{
+		result += (x[i]) * (x[i]);
+	}
+	DEBUG_END;
+	return result;
+}
+
 static double linf_distance(int n, double* x, double* y)
 {
 	DEBUG_START;
@@ -1178,6 +1276,18 @@ static double linf_distance(int n, double* x, double* y)
 	for (int i = 0; i < n; ++i)
 	{
 		result = fabs(x[i] - y[i]) > result ? fabs(x[i] - y[i]) : result;
+	}
+	DEBUG_END;
+	return result;
+}
+
+static double linf_norm(int n, double* x)
+{
+	DEBUG_START;
+	double result = 0.;
+	for (int i = 0; i < n; ++i)
+	{
+		result = fabs(x[i]) > result ? fabs(x[i]) : result;
 	}
 	DEBUG_END;
 	return result;
