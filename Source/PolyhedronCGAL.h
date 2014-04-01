@@ -88,6 +88,7 @@ public:
 template <class Refs>
 class HalfedgeIndexed : public CGAL::HalfedgeDS_halfedge_base<Refs>
 {
+public:
 	long int id;
 };
 
