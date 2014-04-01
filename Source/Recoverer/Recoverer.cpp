@@ -41,6 +41,34 @@ static double l2_norm(int n, double* x);
 static double linf_distance(int n, double* x, double* y);
 static double linf_norm(int n, double* x);
 
+static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
+{
+#ifndef NDEBUG
+	DEBUG_START;
+	long int iVertex = 0;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		ASSERT(iVertex++ == vertex->id);
+	}
+
+	long int iFacet = 0;
+	for (auto facet = polyhedron.facets_begin();
+		facet != polyhedron.facets_end(); ++facet)
+	{
+		ASSERT(iFacet++ == facet->id);
+	}
+
+	long int iHalfedge = 0;
+	for (auto halfedge = polyhedron.halfedges_begin();
+		halfedge != polyhedron.halfedges_end(); ++halfedge)
+	{
+		ASSERT(iHalfedge++ == halfedge->id);
+	}
+	DEBUG_END;
+#endif
+}
+
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
@@ -429,7 +457,14 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 	{
 		facet->id = i++;
 	}
-
+	
+	/* Assert halfedge IDs that will be checked later. */
+	i = 0;
+	for (auto halfedge = poly.halfedges_begin();
+		 halfedge != poly.halfedges_end(); ++halfedge)
+	{
+		halfedge->id = i++;
+	}
 	DEBUG_END;
 	return poly;
 }
@@ -627,9 +662,11 @@ static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
 	 * First, calcualate the sum of vertex degrees
 	 */
 	unsigned long int degreeSum = 0;
+	long int iVertex = 0;
 	for (auto vertex = polyhedron.vertices_begin();
 			vertex != polyhedron.vertices_end(); ++vertex)
 	{
+		ASSERT(iVertex++ == vertex->id);
 		degreeSum += vertex->vertex_degree();
 	}
 
@@ -1127,6 +1164,7 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, taucs_ccs_matrix* Qt)
 		vx[iVertex] = point.x();
 		vy[iVertex] = point.y();
 		vz[iVertex] = point.z();
+		++itVertex;
 	}
 	
 	/* Check that vx, vy, vz really lie in the kernel of Q. */
@@ -1199,10 +1237,12 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 
 	/* 4. Construct convex hull of the set of normal vectors. */
 	Polyhedron_3 polyhedron = constructConvexHullCGAL(directions);
+	checkPolyhedronIDs(polyhedron);
 
 	/* 5. Build matrix by the polyhedron. */
 	taucs_ccs_matrix* Qt = buildMatrixByPolyhedron(polyhedron,
 		numConditions, ifScaleMatrix);
+	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	ASSERT(checkSupportMatrix(polyhedron, Qt));
@@ -1215,6 +1255,7 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	 */
 	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(Qt, hvalues,
 		polyhedron);
+	checkPolyhedronIDs(polyhedron);
 	taucs_ccs_free(Qt);
 
 	DEBUG_END;
