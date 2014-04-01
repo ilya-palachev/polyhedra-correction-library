@@ -76,6 +76,7 @@ target_link_libraries(pcl
    CGAL
    gmp
    tsnnls
+   ipopt
 )
 
 foreach(test_source_file ${SOURCE_tests})

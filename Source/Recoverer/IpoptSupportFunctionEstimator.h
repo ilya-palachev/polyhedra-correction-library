@@ -26,6 +26,8 @@
 
 #include <coin/IpTNLP.hpp>
 
+using namespace Ipopt;
+
 #ifndef IPOPTSUPPORTFUNCTIONESTIMATOR_H_
 #define IPOPTSUPPORTFUNCTIONESTIMATOR_H_
 
