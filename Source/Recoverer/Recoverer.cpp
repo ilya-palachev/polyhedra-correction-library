@@ -800,15 +800,6 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 }
 
 /**
- * Pair of two values: vertex's ID and corresponding determinant.
- */
-typedef struct
-{
-	int iVertex;
-	double det;
-} IrowAndValue;
-
-/**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
  *
@@ -900,54 +891,18 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 			det4 *= coeff;
 		}
 		
-		/*
-		 * Now sort pairs of vertex's IDs and corresponding determinant values
-		 * in order to store them to the matrix in the accending order.
-		 *
-		 * TODO: now when tetrahedron provides 4 verteices sorted by their IDs,
-		 * we can avoid this.
-		 */
-
-		IrowAndValue iav1 = {iVertex1, det1};
-		IrowAndValue iav2 = {iVertex2, det2};
-		IrowAndValue iav3 = {iVertex3, det3};
-		IrowAndValue iav4 = {iVertex4, det4};
-
-		auto comparer = [](IrowAndValue a, IrowAndValue b)
-		{
-			return a.iVertex < b.iVertex;
-		};
-
-		set<IrowAndValue, decltype(comparer)> iavQuadruple(comparer);
-		iavQuadruple.insert(iav1);
-		iavQuadruple.insert(iav2);
-		iavQuadruple.insert(iav3);
-		iavQuadruple.insert(iav4);
-		
-		if (iavQuadruple.size() != 4)
-		{
-			ERROR_PRINT("Wrong number of coefficients in condition #%d, "
-					"size = %ld", iCondition, (long int) iavQuadruple.size());
-			DEBUG_PRINT("iVertex1 = %d, det1 = %.16lf", iVertex1, det1);
-			DEBUG_PRINT("iVertex2 = %d, det2 = %.16lf", iVertex2, det2);
-			DEBUG_PRINT("iVertex3 = %d, det3 = %.16lf", iVertex3, det3);
-			DEBUG_PRINT("iVertex4 = %d, det4 = %.16lf", iVertex4, det4);
-
-			int i = 0;
-			for (auto &iav : iavQuadruple)
-			{
-				DEBUG_PRINT("iavQuadruple[%d] = {.iVertex = %d, .det = %.16lf",
-						i, iav.iVertex, iav.det);
-				++i;
-			}
-		}
-
-		for (auto &iav : iavQuadruple)
-		{
-			matrix->rowind[nColumnOffset] = iav.iVertex;
-			matrix->values.d[nColumnOffset] = iav.det;
-			++nColumnOffset;
-		}
+		matrix->rowind[nColumnOffset] = iVertex1;
+		matrix->values.d[nColumnOffset] = det1;
+		++nColumnOffset;
+		matrix->rowind[nColumnOffset] = iVertex2;
+		matrix->values.d[nColumnOffset] = det2;
+		++nColumnOffset;
+		matrix->rowind[nColumnOffset] = iVertex3;
+		matrix->values.d[nColumnOffset] = det3;
+		++nColumnOffset;
+		matrix->rowind[nColumnOffset] = iVertex4;
+		matrix->values.d[nColumnOffset] = det4;
+		++nColumnOffset;
 
 		++iCondition;
 	}
