@@ -178,7 +178,7 @@ public:
 	 * 						the constraints.
 	 */
 	virtual bool eval_jac_g(Index n, const Number* x, bool new_x, Index m,
-			Index nele_jac, Index* iRow, Index *jCol, Number* values);
+			Index n_ele_jac, Index* iRow, Index *jCol, Number* values);
 
 	/**
 	 * Returns either the sparsity structure of the Hessian of the Lagrangian,
@@ -208,7 +208,7 @@ public:
 	 *
 	 */
 	virtual bool eval_h(Index n, const Number* x, bool new_x, Number obj_factor,
-			Index m, const Number* lambda, bool new_lambda, Index nele_hess,
+			Index m, const Number* lambda, bool new_lambda, Index n_ele_hess,
 			Index* iRow, Index* jCol, Number* values);
 
 	/**
