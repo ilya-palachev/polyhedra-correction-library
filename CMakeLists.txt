@@ -40,6 +40,7 @@ list(REMOVE_DUPLICATES INCLUDE_DIRS_all)
 
 list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LibGEXF")
 list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
+list (APPEND INCLUDE_DIRS_all "/usr/include/eigen3")
 include_directories(${INCLUDE_DIRS_all})
 
 # Common compiler flags used for build:
