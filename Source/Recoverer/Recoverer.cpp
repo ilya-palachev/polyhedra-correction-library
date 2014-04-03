@@ -1103,53 +1103,57 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, taucs_ccs_matrix* Qt)
 	DEBUG_START;
 	/* Set eigenvectors vx, vy, vz. */
 	int numVertices = polyhedron.size_of_vertices();
-	double* vx = new double[numVertices];
-	double* vy = new double[numVertices];
-	double* vz = new double[numVertices];
-	double* vxQt = new double[numVertices];
-	double* vyQt = new double[numVertices];
-	double* vzQt = new double[numVertices];
-	
+	DEBUG_PRINT("Allocating 6 arrays of of size %d of type double",
+			numVertices);
+	double* eigenVectorX = new double[numVertices];
+	double* eigenVectorY = new double[numVertices];
+	double* eigenVectorZ = new double[numVertices];
+	double* productX = new double[Qt->n];
+	double* productY = new double[Qt->n];
+	double* productZ = new double[Qt->n];
+
 	auto itVertex = polyhedron.vertices_begin();
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
-		DEBUG_PRINT("vertex[%d].id = %ld", iVertex, itVertex->id);
 		ASSERT(itVertex->id == iVertex);
 		Point_3 point = itVertex->point();
-		vx[iVertex] = point.x();
-		vy[iVertex] = point.y();
-		vz[iVertex] = point.z();
+		eigenVectorX[iVertex] = point.x();
+		eigenVectorY[iVertex] = point.y();
+		eigenVectorZ[iVertex] = point.z();
 		++itVertex;
 	}
-	
-	/* Check that vx, vy, vz really lie in the kernel of Q. */
-	taucs_transpose_vec_times_matrix_nosub(vx, Qt, vxQt);
-	double errorXinf = linf_norm(Qt->m, vxQt);
-	DEBUG_PRINT("||vx^{T} Q^{T}||_inf = %.16lf", errorXinf);
-	double errorX1 = l1_norm(Qt->m, vxQt);
-	DEBUG_PRINT("||vx^{T} Q^{T}||_1 = %.16lf", errorX1);
-	double errorX2 = l2_norm(Qt->m, vxQt);
-	DEBUG_PRINT("||vx^{T} Q^{T}||_2 = %.16lf", errorX2);
-	
-	taucs_transpose_vec_times_matrix_nosub(vy, Qt, vyQt);
-	double errorYinf = linf_norm(Qt->m, vyQt);
-	DEBUG_PRINT("||vy^{T} Q^{T}||_inf = %.16lf", errorYinf);
-	double errorY1 = l1_norm(Qt->m, vyQt);
-	DEBUG_PRINT("||vy^{T} Q^{T}||_1 = %.16lf", errorY1);
-	double errorY2 = l2_norm(Qt->m, vyQt);
-	DEBUG_PRINT("||vy^{T} Q^{T}||_2 = %.16lf", errorY2);
 
-	taucs_transpose_vec_times_matrix_nosub(vz, Qt, vzQt);
-	double errorZinf = linf_norm(Qt->m, vzQt);
-	DEBUG_PRINT("||vz^{T} Q^{T}||_inf = %.16lf", errorZinf);
-	double errorZ1 = l1_norm(Qt->m, vzQt);
-	DEBUG_PRINT("||vz^{T} Q^{T}||_1 = %.16lf", errorZ1);
-	double errorZ2 = l2_norm(Qt->m, vzQt);
-	DEBUG_PRINT("||vz^{T} Q^{T}||_2 = %.16lf", errorZ2);
+	/* Check that eigenVectorX, eigenVectorY, vz really lie in the kernel of Q. */
+	taucs_transpose_vec_times_matrix_nosub(eigenVectorX, Qt, productX);
+	double errorXinf = linf_norm(numVertices, productX);
+	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_inf = %.16lf", errorXinf);
+	double errorX1 = l1_norm(numVertices, productX);
+	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_1 = %.16lf", errorX1);
+	double errorX2 = l2_norm(numVertices, productX);
+	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_2 = %.16lf", errorX2);
 
-	delete[] vx;
-	delete[] vy;
-	delete[] vz;
+	taucs_transpose_vec_times_matrix_nosub(eigenVectorY, Qt, productY);
+	double errorYinf = linf_norm(numVertices, productY);
+	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_inf = %.16lf", errorYinf);
+	double errorY1 = l1_norm(numVertices, productY);
+	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_1 = %.16lf", errorY1);
+	double errorY2 = l2_norm(numVertices, productY);
+	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_2 = %.16lf", errorY2);
+
+	taucs_transpose_vec_times_matrix_nosub(eigenVectorZ, Qt, productZ);
+	double errorZinf = linf_norm(numVertices, productZ);
+	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_inf = %.16lf", errorZinf);
+	double errorZ1 = l1_norm(numVertices, productZ);
+	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_1 = %.16lf", errorZ1);
+	double errorZ2 = l2_norm(numVertices, productZ);
+	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_2 = %.16lf", errorZ2);
+
+	delete[] eigenVectorX;
+	delete[] eigenVectorY;
+	delete[] eigenVectorZ;
+	delete[] productX;
+	delete[] productY;
+	delete[] productZ;
 	DEBUG_END;
 	return (errorXinf < MAX_ACCEPTABLE_LINF_ERROR) &&
 		(errorYinf < MAX_ACCEPTABLE_LINF_ERROR) &&
@@ -1200,7 +1204,8 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
-	ASSERT(checkSupportMatrix(polyhedron, Qt));
+	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, Qt);
+	ASSERT_PRINT(ifCheckSuccessful, "Bad matrix.");
 
 	/*
 	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
