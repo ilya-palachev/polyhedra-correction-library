@@ -18,22 +18,29 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * @file SparseMatrixEigen.h
- * @brief Inclusions from Eigen library.
- */
+#include "Recoverer/SupportFunctionEstimationData.h"
 
-#ifndef SPARSEMATRIXEIGEN_H_
-#define SPARSEMATRIXEIGEN_H_
-
-#include <Eigen/Sparse>
-
-typedef Eigen::SparseMatrix<double> SparseMatrix;
-
-typedef Eigen::Triplet<double> Triplet;
-
-typedef Eigen::VectorXd VectorXd;
-
-typedef Eigen::VectorXi VectorXi;
-
+#ifndef isnan
+#define isnan
 #endif
+#ifndef finite
+#define finite
+#endif
+#ifndef isinf
+#define isinf
+#endif
+#include <libtsnnls/tsnnls.h>
+
+#ifndef TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
+#define TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
+
+class TsnnlsSupportFunctionEstimator : public SupportFunctionEstimationData
+{
+public:
+	TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData& data);
+	~TsnnlsSupportFunctionEstimator();
+
+	void run();
+};
+
+#endif /* TSNNLSSUPPORTFUNCTIONESTIMATOR_H_ */

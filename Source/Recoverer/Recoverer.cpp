@@ -34,12 +34,8 @@
 
 using namespace std;
 
-static double l1_distance(int n, double* x, double* y);
-static double l1_norm(int n, double* x);
-static double l2_distance(int n, double* x, double* y);
-static double l2_norm(int n, double* x);
-static double linf_distance(int n, double* x, double* y);
-static double linf_norm(int n, double* x);
+/** Each condition has exactly not more than  4 non-zero coefficients. */
+#define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
 
 static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 {
@@ -592,53 +588,6 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
-#define NUM_NONZERO_EXPECTED 4
-
-static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
-{
-	DEBUG_START;
-#ifndef NDEBUG
-
-	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
-
-	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
-	{
-		DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
-		if (iCol < Q->n)
-		{
-			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
-			{
-				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
-						Q->values.d[iRow]);
-				numElemRow[Q->rowind[iRow]]++;
-			}
-		}
-	}
-	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
-			Q->colptr[Q->n] - Q->colptr[0]);
-
-	if (ifAnalyzeExpect)
-	{
-		int numUnexcpectedNonzeros = 0;
-		for (int iRow = 0; iRow < Q->m; ++iRow)
-		{
-			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
-					numElemRow[iRow]);
-			if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
-			{
-				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
-						"row");
-				++numUnexcpectedNonzeros;
-			}
-		}
-		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements "
-				"is %d", numUnexcpectedNonzeros);
-	}
-	free(numElemRow);
-#endif
-	DEBUG_END;
-}
-
 /**
  * Stores the handles of vertexes that form a tetrahedron.
  */
@@ -807,8 +756,8 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
  * @param numConditions	The number of constraints (output)
  * @param matrix		The matrix of constraints (output)
  */
-static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
-		int& numConditions, bool ifScaleMatrix)
+static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
+		bool ifScaleMatrix)
 {
 	DEBUG_START;
 
@@ -821,29 +770,21 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 	ASSERT(listTetrahedrons.size() == countCoveringTetrahedrons(polyhedron));
 #endif
 
-	numConditions = listTetrahedrons.size();
+	int numConditions = listTetrahedrons.size();
 	DEBUG_PRINT("Found %d covering tetrahedrons", numConditions);
 
 	/*
-	 * Create TAUCS sparse matrix with
+	 * Create Eigen sparse matrix with
 	 * N = numHvalues rows
 	 * M = numConditions columns
-	 * NNZ = 4 * numConditions non-zero values (4 non-zero values in each 
-	 * column)
-	 * 
-	 * The created matrix is the transposed support matrix, because it's simpler
-	 * to create it in this form (due to specific of TAUCS interface).
 	 */
-	taucs_ccs_matrix* matrix = taucs_ccs_new(numHvalues, numConditions,
-		4 * numConditions);
+	SparseMatrix matrix(numHvalues, numConditions);
+	matrix.reserve(VectorXi::Constant(matrix.cols(),
+			NUM_NONZERO_COEFFICIENTS_IN_CONDITION));
 
 	int iCondition = 0;
-	int nColumnOffset = 0;
 	for (auto &tetrahedron : listTetrahedrons)
 	{
-		matrix->colptr[iCondition] = nColumnOffset;
-//		DEBUG_PRINT("Setting Q->colptr[%d] = %d", iCondition, nColumnOffset);
-		
 		Point_3 zero(0., 0., 0.);
 		Vector_3 u1(zero, tetrahedron.v0->point());
 		Vector_3 u2(zero, tetrahedron.v1->point());
@@ -891,33 +832,14 @@ static taucs_ccs_matrix* buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 			det4 *= coeff;
 		}
 		
-		matrix->rowind[nColumnOffset] = iVertex1;
-		matrix->values.d[nColumnOffset] = det1;
-		++nColumnOffset;
-		matrix->rowind[nColumnOffset] = iVertex2;
-		matrix->values.d[nColumnOffset] = det2;
-		++nColumnOffset;
-		matrix->rowind[nColumnOffset] = iVertex3;
-		matrix->values.d[nColumnOffset] = det3;
-		++nColumnOffset;
-		matrix->rowind[nColumnOffset] = iVertex4;
-		matrix->values.d[nColumnOffset] = det4;
-		++nColumnOffset;
+		matrix.insert(iVertex1, iCondition) = det1;
+		matrix.insert(iVertex2, iCondition) = det2;
+		matrix.insert(iVertex3, iCondition) = det3;
+		matrix.insert(iVertex4, iCondition) = det4;
 
 		++iCondition;
 	}
-	
-	matrix->colptr[iCondition] = nColumnOffset;
 
-#ifndef NDEBUG
-	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
-	{
-		ASSERT(matrix->colptr[iCondition] == 4 * iCondition);
-	}
-	
-	analyzeTaucsMatrix(matrix, false);
-#endif
-	
 	DEBUG_END;
 	return matrix;
 }
@@ -1013,24 +935,25 @@ Vector_3 Recoverer::findMaxVertices(Polyhedron_3 polyhedron,
 	return Vector_3(1. / xmax, 1. / ymax, 1. / zmax);
 }
 
-taucs_ccs_matrix* Recoverer::regularizeSupportMatrix(taucs_ccs_matrix* matrix,
-	double* hvalues, Polyhedron_3 polyhedron)
+void Recoverer::regularizeSupportMatrix(
+		SupportFunctionEstimationData* data, Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 
-	taucs_ccs_matrix* Q = taucs_ccs_transpose(matrix);
+	SparseMatrix Q = data->supportMatrix().transpose();
+	VectorXd hvalues = data->supportVector();
 
 	int imax0 = 0, imax1 = 0, imax2 = 0;
 	Vector_3 vMax = findMaxVertices(polyhedron, imax0, imax1, imax2);
-	vectorMaxHValues = Vector_3(hvalues[iXmax], hvalues[iYmax], hvalues[iZmax]);
+	vectorMaxHValues = Vector_3(hvalues(iXmax), hvalues(iYmax), hvalues(iZmax));
 	vectorRegularizing = Vector_3(
-		hvalues[iXmax] * vMax.x(),
-		hvalues[iYmax] * vMax.y(),
-		hvalues[iZmax] * vMax.z());
+		hvalues(iXmax) * vMax.x(),
+		hvalues(iYmax) * vMax.y(),
+		hvalues(iZmax) * vMax.z());
 
 	/* Regularize h-values vector. */
 	Point_3 zero(0., 0., 0.);
-	for (int iValue = 0; iValue < Q->n - 3; ++iValue)
+	for (int iValue = 0; iValue < Q.cols() - 3; ++iValue)
 	{
 		/* Get vertex corresponding to the column of the matrix. */
 		auto vertex = polyhedron.vertices_begin() + iValue;
@@ -1038,55 +961,24 @@ taucs_ccs_matrix* Recoverer::regularizeSupportMatrix(taucs_ccs_matrix* matrix,
 		Vector_3 vector(zero, point);
 		double shift = -vector * vectorRegularizing;
 		if (iValue < imax0)
-			hvalues[iValue] += shift;
+			hvalues(iValue) += shift;
 		else if (iValue < imax1 - 1)
-			hvalues[iValue] = hvalues[iValue + 1] + shift;
+			hvalues(iValue) = hvalues(iValue + 1) + shift;
 		else if (iValue < imax2 - 2)
-			hvalues[iValue] = hvalues[iValue + 2] + shift;
+			hvalues(iValue) = hvalues(iValue + 2) + shift;
 		else
-			hvalues[iValue] = hvalues[iValue + 3] + shift;
+			hvalues(iValue) = hvalues(iValue + 3) + shift;
 	}
 	DEBUG_PRINT("h-values have been successfully regularized.");
 	
-	
-	/* Allocate memory for regularized matrix. */
-	taucs_ccs_matrix* Qregularized = taucs_ccs_new(Q->m, Q->n - 3, 4 * Q->m);
-	DEBUG_PRINT("Memory for regularized matrix has been allocated.");
-	
-	int iColumnReg = 0;
-	int nOffsetReg = 0;
-	for (int iColumn = 0; iColumn < Q->n; ++iColumn)
-	{
-		DEBUG_PRINT("Regularization of %d-th column of matrix.", iColumn);
-		if ((iColumn == imax0) || (iColumn == imax1) || (iColumn == imax2))
-		{
-			DEBUG_PRINT("==================================================");
-			DEBUG_PRINT("Skipping the column that is going to be eliminated.");
-			continue;
-		}
+	/*
+	 * TODO: Implement cutting of 3 columns from matrix Q here
+	 */
 
-		Qregularized->colptr[iColumnReg] = nOffsetReg;
-		DEBUG_PRINT("Column pointer #%d has been set to %d", iColumnReg,
-			nOffsetReg);
-
-		for (int nOffset = Q->colptr[iColumn];
-			 nOffset < Q->colptr[iColumn + 1]; ++nOffset)
-		{
-			Qregularized->rowind[nOffsetReg] = Q->rowind[nOffset];
-			Qregularized->values.d[nOffsetReg] = Q->values.d[nOffset];
-			++nOffsetReg;
-		}
-
-		++iColumnReg;
-	}
-	Qregularized->colptr[iColumnReg] = nOffsetReg;
-	
-	taucs_ccs_matrix* matrixRegularized = taucs_ccs_transpose(Qregularized);
-	taucs_ccs_free(Q);
-	taucs_ccs_free(Qregularized);
+	Q.transpose();
 
 	DEBUG_END;
-	return matrixRegularized;
+	return;
 }
 
 #define MAX_ACCEPTABLE_LINF_ERROR 1e-6
@@ -1098,70 +990,50 @@ taucs_ccs_matrix* Recoverer::regularizeSupportMatrix(taucs_ccs_matrix* matrix,
  * @param polyhedron	The polyhedron (convex hull of support directions)
  * @param Qt			The transpose of the support matrix
  */
-static bool checkSupportMatrix(Polyhedron_3 polyhedron, taucs_ccs_matrix* Qt)
+static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
 {
 	DEBUG_START;
 	/* Set eigenvectors vx, vy, vz. */
 	int numVertices = polyhedron.size_of_vertices();
 	DEBUG_PRINT("Allocating 6 arrays of of size %d of type double",
 			numVertices);
-	double* eigenVectorX = new double[numVertices];
-	double* eigenVectorY = new double[numVertices];
-	double* eigenVectorZ = new double[numVertices];
-	double* productX = new double[Qt->n];
-	double* productY = new double[Qt->n];
-	double* productZ = new double[Qt->n];
+	VectorXd eigenVectorX, eigenVectorY, eigenVectorZ;
 
 	auto itVertex = polyhedron.vertices_begin();
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
 		ASSERT(itVertex->id == iVertex);
 		Point_3 point = itVertex->point();
-		eigenVectorX[iVertex] = point.x();
-		eigenVectorY[iVertex] = point.y();
-		eigenVectorZ[iVertex] = point.z();
+		eigenVectorX(iVertex) = point.x();
+		eigenVectorY(iVertex) = point.y();
+		eigenVectorZ(iVertex) = point.z();
 		++itVertex;
 	}
 
-	/* Check that eigenVectorX, eigenVectorY, vz really lie in the kernel of Q. */
-	taucs_transpose_vec_times_matrix_nosub(eigenVectorX, Qt, productX);
-	double errorXinf = linf_norm(numVertices, productX);
-	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_inf = %.16lf", errorXinf);
-	double errorX1 = l1_norm(numVertices, productX);
-	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_1 = %.16lf", errorX1);
-	double errorX2 = l2_norm(numVertices, productX);
+	/*
+	 * Check that eigenVectorX, eigenVectorY, eigenVectorZ really lie in the
+	 * kernel of Q.
+	 */
+	VectorXd productX = eigenVectorX * Qt;
+	double errorX2 = productX.norm();
 	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_2 = %.16lf", errorX2);
 
-	taucs_transpose_vec_times_matrix_nosub(eigenVectorY, Qt, productY);
-	double errorYinf = linf_norm(numVertices, productY);
-	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_inf = %.16lf", errorYinf);
-	double errorY1 = l1_norm(numVertices, productY);
-	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_1 = %.16lf", errorY1);
-	double errorY2 = l2_norm(numVertices, productY);
+	VectorXd productY = eigenVectorY * Qt;
+	double errorY2 = productY.norm();
 	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_2 = %.16lf", errorY2);
 
-	taucs_transpose_vec_times_matrix_nosub(eigenVectorZ, Qt, productZ);
-	double errorZinf = linf_norm(numVertices, productZ);
-	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_inf = %.16lf", errorZinf);
-	double errorZ1 = l1_norm(numVertices, productZ);
-	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_1 = %.16lf", errorZ1);
-	double errorZ2 = l2_norm(numVertices, productZ);
+	VectorXd productZ = eigenVectorX * Qt;
+	double errorZ2 = productZ.norm();
 	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_2 = %.16lf", errorZ2);
 
-	delete[] eigenVectorX;
-	delete[] eigenVectorY;
-	delete[] eigenVectorZ;
-	delete[] productX;
-	delete[] productY;
-	delete[] productZ;
 	DEBUG_END;
-	return (errorXinf < MAX_ACCEPTABLE_LINF_ERROR) &&
-		(errorYinf < MAX_ACCEPTABLE_LINF_ERROR) &&
-		(errorZinf < MAX_ACCEPTABLE_LINF_ERROR);
+	return (errorX2 < MAX_ACCEPTABLE_LINF_ERROR) &&
+		(errorY2 < MAX_ACCEPTABLE_LINF_ERROR) &&
+		(errorZ2 < MAX_ACCEPTABLE_LINF_ERROR);
 }
 
-taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,	
-	int& numConditions, int& numHvalues, double*& hvalues)
+SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
+		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -1178,8 +1050,8 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 
 	/* 3. Get normal vectors of support planes and normalize them. */
 	vector<Vector3d> directions;
-	numHvalues = supportPlanes.size();
-	hvalues = new double[numHvalues];
+	int numHvalues = supportPlanes.size();
+	VectorXd hvalues(numHvalues);
 	int iValue = 0;
 	for (auto &plane : supportPlanes)
 	{
@@ -1191,7 +1063,7 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 		Vector3d normal = plane.norm;
 		normal.norm(1.);
 		directions.push_back(normal);
-		hvalues[iValue++] = plane.dist;
+		hvalues(iValue++) = plane.dist;
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
@@ -1199,8 +1071,9 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5. Build matrix by the polyhedron. */
-	taucs_ccs_matrix* Qt = buildMatrixByPolyhedron(polyhedron,
-		numConditions, ifScaleMatrix);
+	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
+	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
+			numHvalues, Qt.cols(), Qt, hvalues);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
@@ -1213,167 +1086,20 @@ taucs_ccs_matrix* Recoverer::buildSupportMatrix(ShadeContourDataPtr SCData,
 	 * v2 = (u1y, ..., uMy)
 	 * v3 = (u1z, ..., uMz)
 	 */
-	taucs_ccs_matrix* matrixRegularized = regularizeSupportMatrix(Qt, hvalues,
-		polyhedron);
-	checkPolyhedronIDs(polyhedron);
-	taucs_ccs_free(Qt);
-
-	DEBUG_END;
-	return matrixRegularized;
-}
-
-static double l1_distance(int n, double* x, double* y)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
+	if (ifRegularize)
 	{
-		result += fabs(x[i] - y[i]);
+		regularizeSupportMatrix(data, polyhedron);
+		checkPolyhedronIDs(polyhedron);
 	}
-	DEBUG_END;
-	return result;
-}
 
-static double l1_norm(int n, double* x)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result += fabs(x[i]);
-	}
 	DEBUG_END;
-	return result;
-}
-
-static double l2_distance(int n, double* x, double* y)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result += (x[i] - y[i]) * (x[i] - y[i]);
-	}
-	DEBUG_END;
-	return result;
-}
-
-static double l2_norm(int n, double* x)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result += (x[i]) * (x[i]);
-	}
-	DEBUG_END;
-	return result;
-}
-
-static double linf_distance(int n, double* x, double* y)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result = fabs(x[i] - y[i]) > result ? fabs(x[i] - y[i]) : result;
-	}
-	DEBUG_END;
-	return result;
-}
-
-static double linf_norm(int n, double* x)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result = fabs(x[i]) > result ? fabs(x[i]) : result;
-	}
-	DEBUG_END;
-	return result;
+	return data;
 }
 
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
-	int numConditions = 0, numHvalues = 0;
-	double *hvalues = NULL;
 
-	/* 1. Build the transpose of support matrix. */
-	taucs_ccs_matrix* Qt = buildSupportMatrix(SCData, numConditions, numHvalues,
-		hvalues);	
-	analyzeTaucsMatrix(Qt, false);
-	DEBUG_PRINT("Matrix has been built.");
-	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
-
-	/* Enable highest level of verbosity in TSNNLS package. */
-	tsnnls_verbosity(10);
-	char* strStderr = strdup("stderr");
-	taucs_logfile(strStderr);
-
-	/*
-	 * 2.Calculate the reciprocal of the condition number.
-	 *
-	 * In order to be able to do this, we need first to transpose Qt to obtain
-	 * the support matrix Q, since LAPACK's routine DGECON usually fails for
-	 * matrices where the number of rows is less than the number of columns.
-	 *
-	 * You can see this at this page:
-	 * http://www.netlib.org/lapack/explore-html/db/de4/dgecon_8f_source.html
-	 *
-	 * Here is the error:
-	 *  ** On entry to DGECON parameter number  4 had an illegal value
-	 *
-	 * Here is the source code that generates the error:
-	 *
-	 * ELSE IF( lda.LT.max( 1, n ) ) THEN
-	 * 		info = -4
-	 * ...
-	 * IF( info.NE.0 ) THEN
-	 * 		CALL xerbla( 'DGECON', -info )
-	 * 		RETURN
-	 */
-
-	double* Qtvals = taucs_convert_ccs_to_doubles(Qt);
-	taucs_ccs_matrix* fixed = taucs_construct_sorted_ccs_matrix(Qtvals, Qt->n,
-			Qt->m);
-	free(Qtvals);
-	taucs_ccs_free(Qt);
-	Qt = fixed;
-
-	taucs_ccs_matrix* Q = taucs_ccs_transpose(Qt);
-	double conditionNumberQ = taucs_rcond(Q);
-	DEBUG_PRINT("rcond(Q) = %.16lf",
-			conditionNumberQ);
-
-	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
-			EPS_MIN_DOUBLE;
-	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
-
-	double outResidualNorm;
-
-	/* 3. Run the main TSNNLS algorithm of minimization. */
-	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100.,
-			1);
-	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void*) h);
-
-	char* errorTsnnls;
-	tsnnls_error(&errorTsnnls);
-	ALWAYS_PRINT(stdout, "Error from tsnnls: %s", errorTsnnls);
-
-	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
-
-	ALWAYS_PRINT(stdout, "||h - h0||_{1} = %.16lf",
-			l1_distance(numHvalues, hvalues, h));
-	ALWAYS_PRINT(stdout, "||h - h0||_{2} = %.16lf",
-			l2_distance(numHvalues, hvalues, h));
-	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf",
-			linf_distance(numHvalues, hvalues, h));
-
-	free(h);
-	taucs_ccs_free(Q);
-	taucs_ccs_free(Qt);
 
 	DEBUG_END;
 	return NULL;

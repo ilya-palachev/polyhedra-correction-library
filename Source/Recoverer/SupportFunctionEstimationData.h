@@ -54,7 +54,7 @@ private:
 	 *
 	 * TODO: Do we need to use some useful Eigen class here?
 	 */
-	double *m_supportVector;
+	VectorXd m_supportVector;
 
 public:
 	/** Default empty constructor. */
@@ -70,8 +70,9 @@ public:
 	 * @param supportVector	The support vector, i. e. the vector of support
 	 * 						function measurements.
 	 */
-	SupportFunctionEstimationData(int numValues, int numConditions,
-			SparseMatrix supportMatrix, double *supportVector);
+	SupportFunctionEstimationData(int numValues,
+			int numConditions, SparseMatrix supportMatrix,
+			VectorXd supportVector);
 
 	/** Default destructor. */
 	~SupportFunctionEstimationData();
@@ -86,7 +87,7 @@ public:
 	SparseMatrix supportMatrix(void);
 
 	/** Getter for member m_supportVector */
-	double *supportVector(void);
+	VectorXd supportVector(void);
 
 	/* FIXME: Do we need to have setters here? */
 };

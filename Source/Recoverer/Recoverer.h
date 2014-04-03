@@ -31,17 +31,19 @@
 
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "Recoverer/SupportFunctionEstimationData.h"
 
-#ifndef isnan
-#define isnan
-#endif
-#ifndef finite
-#define finite
-#endif
-#ifndef isinf
-#define isinf
-#endif
-#include <libtsnnls/tsnnls.h>
+/**
+ * Sets the estimator to be used for support function estimation.
+ */
+enum RecovererEstimator
+{
+	/** TSNNLS estimator (not working). */
+	TSNNLS_ESTIMATOR,
+
+	/* Ipopt estimator. */
+	IPOPT_ESTIMATOR
+};
 
 /**
  * Main recovering engine, based on support function estimation tuned for our
@@ -50,6 +52,12 @@
 class Recoverer
 {
 private:
+
+	/** Estimator to be used. */
+	RecovererEstimator estimator;
+
+	/** Whether to regularize the support matrix. */
+	bool ifRegularize;
 
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
@@ -159,12 +167,11 @@ private:
 	 * iXmax, iYmax, iZmax and regularizes also the h-values vector.
 	 * 
 	 * @param matrix		The transpose of support matrix
-	 * @param hvalues		The h-values vector
 	 * @param polyhedron	The polyhedron (convex hull of supporting
 	 * directions)
 	 */
-	taucs_ccs_matrix* regularizeSupportMatrix(taucs_ccs_matrix* matrix,
-		double* hvalues, Polyhedron_3 polyhedron);
+	void regularizeSupportMatrix(SupportFunctionEstimationData* data,
+			Polyhedron_3 polyhedron);
 
 public:
 
@@ -226,11 +233,10 @@ public:
 	/**
 	 * Builds naive matrix for support function estimation problem.
 	 *
-	 * @param matrix	The matrix.
-	 * @param hvalues	The noisy-measured support vector.
+	 * @param SCData	Shadow contour data
 	 */
-	taucs_ccs_matrix* buildSupportMatrix(ShadeContourDataPtr SCData,
-		int& numConditions, int& numHvalues, double*& hvalues);
+	SupportFunctionEstimationData* buildSupportMatrix(
+			ShadeContourDataPtr SCData);
 
 	/**
 	 * Runs the recovering procedure.

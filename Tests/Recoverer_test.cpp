@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <cstring>
+#include <fstream>
 
 #include "Constants.h"
 #include "PolyhedraCorrectionLibrary.h"
@@ -622,59 +623,19 @@ ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 {
 	DEBUG_START;
-	int numConditions = 0, numHvalues = 0;
-	double *matrix = NULL, *hvalues = NULL;
 
-	taucs_ccs_matrix* taucsMatrix = recoverer->buildSupportMatrix(SCData,
-		numConditions, numHvalues, hvalues);
-	matrix = taucs_convert_ccs_to_doubles(taucsMatrix);
+	SupportFunctionEstimationData* data =
+			recoverer->buildSupportMatrix(SCData);
 
-	FILE* fileMatrixNaive = (FILE*) fopen("../poly-data-out/matrix-naive.txt",
-			"w");
-	FILE* fileHvalues = (FILE*) fopen("../poly-data-out/hvalues-naive.txt",
-			"w");
+	ofstream fileMatrix;
+	fileMatrix.open("../poly-data-out/support-matrix.dat");
+	fileMatrix << data->supportMatrix();
+	fileMatrix.close();
 
-	if (!fileMatrixNaive || !fileHvalues)
-	{
-		ERROR_PRINT("Failed to open file.");
-	}
-
-	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
-	{
-		double constraint = 0.;
-		double constraint0 = 0.;
-		fprintf (fileMatrixNaive, "%d ", iCondition);
-		for (int iCol = 0; iCol < numHvalues; ++iCol)
-		{
-			double value = matrix[iCondition * numHvalues + iCol];
-			if (fabs(value) > EPS_MIN_DOUBLE)
-			{
-				fprintf(fileMatrixNaive, "%d %.16lf ", iCol, value);
-				constraint += value * hvalues[iCol];
-				constraint0 += value;
-			}
-		}
-		fprintf(fileMatrixNaive, "\n");
-		DEBUG_PRINT("constraint[%d] = %.16lf, constraint0[%d] = %.16lf",
-				iCondition, constraint, iCondition, constraint0);
-	}
-
-	for (int iCol = 0; iCol < numHvalues; ++iCol)
-	{
-		fprintf(fileHvalues, "%lf\n", hvalues[iCol]);
-	}
-
-	fclose(fileMatrixNaive);
-	fclose(fileHvalues);
-	if (matrix)
-	{
-		free(matrix);
-	}
-	if (hvalues)
-	{
-		delete[] hvalues;
-	}
-	taucs_ccs_free(taucsMatrix);
+	ofstream fileVector;
+	fileVector.open("../poly-data-out/support-vector.dat");
+	fileVector << data->supportVector();
+	fileVector.close();
 
 	DEBUG_END;
 }

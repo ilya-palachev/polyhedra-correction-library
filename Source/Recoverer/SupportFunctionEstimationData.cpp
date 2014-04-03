@@ -45,7 +45,7 @@ SupportFunctionEstimationData::~SupportFunctionEstimationData()
 }
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(int numValues,
-		int numConditions, SparseMatrix supportMatrix, double *supportVector) :
+		int numConditions, SparseMatrix supportMatrix, VectorXd supportVector) :
 		m_numValues(numValues),
 		m_numConditions(numConditions),
 		m_supportMatrix(supportMatrix),
@@ -85,7 +85,7 @@ SparseMatrix SupportFunctionEstimationData::supportMatrix(void)
 	return m_supportMatrix;
 }
 
-double *SupportFunctionEstimationData::supportVector(void)
+VectorXd SupportFunctionEstimationData::supportVector(void)
 {
 	DEBUG_START;
 	DEBUG_END;
