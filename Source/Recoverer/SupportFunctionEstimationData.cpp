@@ -38,7 +38,12 @@ SupportFunctionEstimationData::SupportFunctionEstimationData()
 	DEBUG_END;
 }
 
-SupportFunctionEstimationData::~SupportFunctionEstimationData()
+SupportFunctionEstimationData::SupportFunctionEstimationData(
+		SupportFunctionEstimationData *data) :
+	m_numValues(data->numValues()),
+	m_numConditions(data->numConditions()),
+	m_supportMatrix(data->supportMatrix()),
+	m_supportVector(data->supportVector())
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -61,6 +66,12 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(int numValues,
 	 *
 	 * TODO: Check that supportVector has dimension equal to m_numConditions.
 	 */
+	DEBUG_END;
+}
+
+SupportFunctionEstimationData::~SupportFunctionEstimationData()
+{
+	DEBUG_START;
 	DEBUG_END;
 }
 

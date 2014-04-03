@@ -25,6 +25,7 @@
  */
 
 #include <coin/IpTNLP.hpp>
+#include "Recoverer/SupportFunctionEstimationData.h"
 
 using namespace Ipopt;
 
@@ -35,7 +36,7 @@ using namespace Ipopt;
  * Iptopt-based non-linear optimizer in case of support
  * function estimation.
  */
-class IpoptSupportFunctionEstimator: public TNLP
+class IpoptSupportFunctionEstimator: public TNLP, SupportFunctionEstimationData
 {
 private:
 	/** The type of problem. */
@@ -48,7 +49,14 @@ private:
 		PROBLEM_DUAL
 	} problemType;
 public:
-	IpoptSupportFunctionEstimator();
+	/**
+	 * Default constructor
+	 *
+	 * @param data	Support function estimation data (input)
+	 */
+	IpoptSupportFunctionEstimator(SupportFunctionEstimationData *data);
+
+	/** Default destructor. */
 	~IpoptSupportFunctionEstimator();
 
 	/**

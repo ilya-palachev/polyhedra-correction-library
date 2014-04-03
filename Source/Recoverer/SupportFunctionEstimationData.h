@@ -60,6 +60,9 @@ public:
 	/** Default empty constructor. */
 	SupportFunctionEstimationData();
 
+	/** Copy-from-pointer constructor */
+	SupportFunctionEstimationData(SupportFunctionEstimationData *data);
+
 	/**
 	 * Default constructor.
 	 *

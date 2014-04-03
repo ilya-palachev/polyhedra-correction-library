@@ -27,7 +27,13 @@
 #include "DebugPrint.h"
 #include "Recoverer/IpoptSupportFunctionEstimator.h"
 
-IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator() :
+/*
+ * TODO: Implement dual problem here!
+ */
+
+IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
+		SupportFunctionEstimationData *data) :
+	SupportFunctionEstimationData(*data),
 	problemType(PROBLEM_PRIMAL)
 {
 	DEBUG_START;
