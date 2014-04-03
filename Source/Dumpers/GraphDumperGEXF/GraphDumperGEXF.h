@@ -37,6 +37,8 @@
  * In future we will need to have an alternative dumper.
  * */
 
+#if 0
+
 class GraphDumperGEXF
 {
 private:
@@ -67,4 +69,7 @@ public:
 	void dump(const char* fileName);
 };
 
+#endif
+
 #endif /* GRAPHDUMPERGEXF_H_ */
+
