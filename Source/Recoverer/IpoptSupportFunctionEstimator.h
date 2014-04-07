@@ -24,6 +24,8 @@
  * function estimation.
  */
 
+#ifdef USE_IPOPT
+
 #include <coin/IpTNLP.hpp>
 #include "Recoverer/SupportFunctionEstimationData.h"
 
@@ -256,3 +258,5 @@ public:
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */
+#endif /* USE_IPOPT*/
+

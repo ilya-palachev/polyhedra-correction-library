@@ -24,6 +24,8 @@
  * function estimation.
  */
 
+#ifdef USE_IPOPT
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include <coin/IpIpoptApplication.hpp>
@@ -286,3 +288,6 @@ void IpoptSupportFunctionEstimator::run(void)
 
 	DEBUG_END;
 }
+
+
+#endif /* USE_IPOPT*/

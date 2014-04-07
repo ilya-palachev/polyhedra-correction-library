@@ -61,6 +61,8 @@ add_library(lsm SHARED ${SOURCE_lsm})
 add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
 
+option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
+
 target_link_libraries(pcl 
    arrayOperations 
    gaussString 
@@ -71,8 +73,12 @@ target_link_libraries(pcl
    CGAL
    gmp
    tsnnls
-   ipopt
 )
+
+if (ENABLE_IPOPT)
+	target_link_libraries(pcl ipopt)
+	add_definitions(-DENABLE_IPOPT)
+endif()
 
 foreach(test_source_file ${SOURCE_tests})
 	get_filename_component(executable_name ${test_source_file} NAME_WE)
