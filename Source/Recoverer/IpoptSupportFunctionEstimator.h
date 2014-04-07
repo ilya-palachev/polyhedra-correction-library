@@ -238,7 +238,7 @@ public:
 	 * 							values, g(x∗ ).
 	 * @param lambda			(in), the final values of the constraint
 	 * 							multipliers, λ∗ .
-	 * @param obj value			(in), the final value of the objective, f (x∗ ).
+	 * @param obj_value			(in), the final value of the objective, f (x∗ ).
 	 * @param ip_data and ip_cq	are provided for expert users.
 	 *
 	 */
@@ -246,6 +246,13 @@ public:
 			const Number* x, const Number* z_L, const Number* z_U, Index m,
 			const Number* g, const Number* lambda, Number obj_value,
 			const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq);
+
+	/**
+	 * Runs the Ipopt algorithm.
+	 *
+	 *
+	 */
+	void run();
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */

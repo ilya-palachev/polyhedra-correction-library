@@ -34,6 +34,8 @@ typedef Eigen::Triplet<double> Triplet;
 
 typedef Eigen::VectorXd VectorXd;
 
+typedef Eigen::RowVectorXd RowVectorXd;
+
 typedef Eigen::VectorXi VectorXi;
 
 #endif
