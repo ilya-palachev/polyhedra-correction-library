@@ -19,22 +19,24 @@
  */
 
 /**
- * @file CGALSupportFunctionEstimator.h
- * @brief CGAL-based support function estimation (declaration).
+ * @file SupportFunctionEstimator.h
+ * @brief Generic support function estimator (definition).
  */
 
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "DebugPrint.h"
+#include "Recoverer/SupportFunctionEstimator.h"
 
-#ifndef CGALSUPPORTFUNCTIONESTIMATOR_H_
-#define CGALSUPPORTFUNCTIONESTIMATOR_H_
-
-class CGALSupportFunctionEstimator : public SupportFunctionEstimator
+SupportFunctionEstimator::SupportFunctionEstimator(
+		SupportFunctionEstimationData *data) :
+		SupportFunctionEstimationData(data)
 {
-public:
-	CGALSupportFunctionEstimator(SupportFunctionEstimationData *data);
-	~CGALSupportFunctionEstimator();
+	DEBUG_START;
+	DEBUG_END;
+}
 
-	virtual void run(void);
-};
+SupportFunctionEstimator::~SupportFunctionEstimator()
+{
+	DEBUG_START;
+	DEBUG_END;
+}
 
-#endif /* CGALSUPPORTFUNCTIONESTIMATOR_H_ */

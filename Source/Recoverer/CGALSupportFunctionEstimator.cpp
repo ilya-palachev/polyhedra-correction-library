@@ -46,7 +46,7 @@ typedef CGAL::Quadratic_program_solution<ET> Solution;
 
 CGALSupportFunctionEstimator::CGALSupportFunctionEstimator(
 		SupportFunctionEstimationData *data) :
-		SupportFunctionEstimationData(data)
+		SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;

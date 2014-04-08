@@ -27,7 +27,7 @@
 #ifdef USE_IPOPT
 
 #include <coin/IpTNLP.hpp>
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "Recoverer/SupportFunctionEstimator.h"
 
 using namespace Ipopt;
 
@@ -38,7 +38,7 @@ using namespace Ipopt;
  * Iptopt-based non-linear optimizer in case of support
  * function estimation.
  */
-class IpoptSupportFunctionEstimator: public TNLP, SupportFunctionEstimationData
+class IpoptSupportFunctionEstimator: public TNLP, SupportFunctionEstimator
 {
 private:
 	/** The type of problem. */
@@ -254,7 +254,7 @@ public:
 	 *
 	 *
 	 */
-	void run();
+	virtual void run(void);
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */

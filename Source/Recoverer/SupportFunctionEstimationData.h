@@ -78,7 +78,7 @@ public:
 			VectorXd supportVector);
 
 	/** Default destructor. */
-	~SupportFunctionEstimationData();
+	virtual ~SupportFunctionEstimationData();
 
 	/** Getter for member m_numValues. */
 	int numValues(void);

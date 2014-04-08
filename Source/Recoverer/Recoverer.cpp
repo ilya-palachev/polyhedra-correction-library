@@ -31,6 +31,9 @@
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Recoverer/Recoverer.h"
+#include "Recoverer/CGALSupportFunctionEstimator.h"
+#include "Recoverer/IpoptSupportFunctionEstimator.h"
+#include "Recoverer/TsnnlsSupportFunctionEstimator.h"
 
 using namespace std;
 
@@ -68,7 +71,12 @@ static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
-	ifBalancing(false), ifScaleMatrix(false), iXmax(0), iYmax(0), iZmax(0),
+	estimator(CGAL_ESTIMATOR),
+	ifBalancing(false),
+	ifScaleMatrix(false),
+	iXmax(0),
+	iYmax(0),
+	iZmax(0),
 	vectorRegularizing(0., 0., 0.)
 {
 	DEBUG_START;
@@ -1096,10 +1104,42 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	return data;
 }
 
+void Recoverer::setEstimator(RecovererEstimator e)
+{
+	DEBUG_START;
+	estimator = e;
+	DEBUG_END;
+}
+
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+	SupportFunctionEstimator *sfe;
 
+	/* Build problem data. */
+	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
+
+	switch (estimator)
+	{
+	case TSNNLS_ESTIMATOR:
+		sfe = static_cast<SupportFunctionEstimator*>(new
+				TsnnlsSupportFunctionEstimator(data));
+		break;
+	case IPOPT_ESTIMATOR:
+#if 0
+		/* TODO: complete this after enabling. */
+		sfe = static_cast<SupportFunctionEstimator*>(new
+				IpoptSupportFunctionEstimator(data));
+#endif
+		break;
+	case CGAL_ESTIMATOR:
+		sfe = static_cast<SupportFunctionEstimator*>(new
+				CGALSupportFunctionEstimator(data));
+		break;
+	}
+
+	/* Run support function estimation. */
+	sfe->run();
 
 	DEBUG_END;
 	return NULL;

@@ -24,7 +24,8 @@
 #include "TsnnlsSupportFunctionEstimator.h"
 
 TsnnlsSupportFunctionEstimator::TsnnlsSupportFunctionEstimator(
-		SupportFunctionEstimationData& data)
+		SupportFunctionEstimationData *data) :
+		SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;

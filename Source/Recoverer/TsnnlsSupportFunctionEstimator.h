@@ -18,7 +18,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "Recoverer/SupportFunctionEstimator.h"
 
 #ifndef isnan
 #define isnan
@@ -34,13 +34,13 @@
 #ifndef TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
 #define TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
 
-class TsnnlsSupportFunctionEstimator : public SupportFunctionEstimationData
+class TsnnlsSupportFunctionEstimator : public SupportFunctionEstimator
 {
 public:
-	TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData& data);
+	TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData *data);
 	~TsnnlsSupportFunctionEstimator();
 
-	void run();
+	virtual void run(void);
 };
 
 #endif /* TSNNLSSUPPORTFUNCTIONESTIMATOR_H_ */

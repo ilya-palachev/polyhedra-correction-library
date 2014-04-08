@@ -37,7 +37,7 @@
 
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 		SupportFunctionEstimationData *data) :
-	SupportFunctionEstimationData(*data),
+		SupportFunctionEstimator(data),
 	problemType(PROBLEM_PRIMAL)
 {
 	DEBUG_START;

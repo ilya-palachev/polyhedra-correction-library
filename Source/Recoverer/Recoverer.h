@@ -36,14 +36,17 @@
 /**
  * Sets the estimator to be used for support function estimation.
  */
-enum RecovererEstimator
+typedef enum
 {
 	/** TSNNLS estimator (not working). */
 	TSNNLS_ESTIMATOR,
 
-	/* Ipopt estimator. */
-	IPOPT_ESTIMATOR
-};
+	/** Ipopt estimator. */
+	IPOPT_ESTIMATOR,
+
+	/** CGAL estimator.  */
+	CGAL_ESTIMATOR
+} RecovererEstimator;
 
 /**
  * Main recovering engine, based on support function estimation tuned for our
@@ -237,6 +240,13 @@ public:
 	 */
 	SupportFunctionEstimationData* buildSupportMatrix(
 			ShadeContourDataPtr SCData);
+
+	/**
+	 * Sets the estimator that will be used for support function estimation.
+	 *
+	 * @param estimator	The type of estimator
+	 */
+	void setEstimator(RecovererEstimator e);
 
 	/**
 	 * Runs the recovering procedure.
