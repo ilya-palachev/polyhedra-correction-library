@@ -93,7 +93,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdprs"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdpr:s"
 
 
 /** Error return value of getopt function. */
@@ -160,6 +160,9 @@ typedef struct
 
 	/** Whether the recovering mode is enabled. */
 	bool ifRecover;
+	
+	/** The type of estimator that will be used for recovering. */
+	RecovererEstimator estimator;
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
@@ -200,6 +203,36 @@ RecovererTestModel recovererTestModels[] =
 	}
 };
 
+/** The number of possible estimators. */
+#define RECOVERER_ESTIMATORS_NUMBER 3
+
+/** Structure describing given estimator. */
+typedef struct
+{
+	RecovererEstimator id;		/**< The ID of estimator */
+	const char *name;			/**< Name */
+	const char *description;	/**< Description */
+} RecovererEstimatorDescription;
+
+RecovererEstimatorDescription estimatorDescriptions[] =
+{
+	{
+		TSNNLS_ESTIMATOR,
+		"tsnnls",
+		"TSNNLS nonnegative least squares solver (not working)"
+	},
+	{
+		IPOPT_ESTIMATOR,
+		"ipopt",
+		"Ipopt interior-point method for non-linear programming (not working)"
+	},
+	{
+		CGAL_ESTIMATOR,
+		"cgal",
+		"CGAL solver of quadratic programming problems"
+	}
+};
+
 /**
  * Prints the usage of the program.
  *
@@ -232,14 +265,24 @@ void printUsage(int argc, char** argv)
 			OPTION_BALANCE_DATA);
 	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
 			"to the file).\n", OPTION_PRINT_PROBLEM);
-	STDERR_PRINT("\t-%c\tRecover polyhedron.\n", OPTION_RECOVER);
+	STDERR_PRINT("\t-%c\tRecover polyhedron using some estimator.\n",
+			OPTION_RECOVER);
 	STDERR_PRINT("\t-%c\tEnable matrix scaling.\n", OPTION_SCALE_MATRIX);
-	STDERR_PRINT("Possible synthetic models are:\n");
+	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
 		RecovererTestModel *model = &recovererTestModels[iModel];
 		STDERR_PRINT("\t%d.  \"%s\"\t- %s\n", model->id, model->name,
 			model->description);
+	}
+	STDERR_PRINT("\nPossible estimators are:\n");
+	for (int iEstimator = 0; iEstimator < RECOVERER_ESTIMATORS_NUMBER;
+		++iEstimator)
+	{
+		RecovererEstimatorDescription *desc =
+			&estimatorDescriptions[iEstimator];
+		STDERR_PRINT("\t%d. \"%s\"\t - %s\n", desc->id, desc->name,
+			desc->description);
 	}
 	DEBUG_END;
 }
@@ -261,6 +304,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionModelName = false;
 	bool ifOptionNumContours = false;
 	bool ifOptionFirstAngle = false;
+	bool ifOptionRecover = false;
 	long int charCurr;
 	opterr = 0;
 
@@ -413,7 +457,33 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			options->ifPrintProblem = true;
 			break;
 		case OPTION_RECOVER:
+			if (ifOptionRecover)
+			{
+				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
+					" time.\n", OPTION_RECOVER);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+
 			options->ifRecover = true;
+			for (int iEstimator = 0; iEstimator < RECOVERER_ESTIMATORS_NUMBER;
+				++iEstimator)
+			{
+				if (strcmp(optarg, estimatorDescriptions[iEstimator].name) == 0)
+				{
+					options->estimator = (RecovererEstimator) iEstimator;
+					ifOptionRecover = true;
+					break;
+				}
+			}
+			if (!ifOptionRecover)
+			{
+				STDERR_PRINT("Invalid name of estimator - %s\n", optarg);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
 			break;
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
@@ -685,6 +755,7 @@ int main(int argc, char** argv)
 	if (options->ifRecover)
 	{
 		/* Run the recoverer. */
+		recoverer->setEstimator(options->estimator);
 		recoverer->run(SCData);
 	}
 	else if (options->ifPrintProblem)
