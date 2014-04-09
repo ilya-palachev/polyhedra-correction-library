@@ -1016,19 +1016,21 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
 		++itVertex;
 	}
 
+	SparseMatrix Q = SparseMatrix(Qt.transpose());
+
 	/*
 	 * Check that eigenVectorX, eigenVectorY, eigenVectorZ really lie in the
 	 * kernel of Q.
 	 */
-	VectorXd productX = eigenVectorX * Qt;
+	VectorXd productX = Q * eigenVectorX;
 	double errorX2 = productX.norm();
 	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_2 = %.16lf", errorX2);
 
-	VectorXd productY = eigenVectorY * Qt;
+	VectorXd productY = Q * eigenVectorY;
 	double errorY2 = productY.norm();
 	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_2 = %.16lf", errorY2);
 
-	VectorXd productZ = eigenVectorX * Qt;
+	VectorXd productZ = Q * eigenVectorZ;
 	double errorZ2 = productZ.norm();
 	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_2 = %.16lf", errorZ2);
 
