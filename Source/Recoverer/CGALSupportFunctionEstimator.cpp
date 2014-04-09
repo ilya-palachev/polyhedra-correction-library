@@ -37,7 +37,7 @@ typedef CGAL::Gmpz ET;
 typedef CGAL::MP_Float ET;
 #endif
 /* program and solution types */
-typedef CGAL::Quadratic_program<int> Program;
+typedef CGAL::Quadratic_program<double> Program;
 typedef CGAL::Quadratic_program_solution<ET> Solution;
 
 #include "DebugPrint.h"
@@ -58,7 +58,12 @@ CGALSupportFunctionEstimator::~CGALSupportFunctionEstimator()
 	DEBUG_END;
 }
 
-void CGALSupportFunctionEstimator::run(void)
+void CGALSupportFunctionEstimator::runLP(void)
+{
+
+}
+
+void CGALSupportFunctionEstimator::runQP(void)
 {
 	DEBUG_START;
 	/* by default, we have a nonnegative QP with Ax <= b */
@@ -96,6 +101,31 @@ void CGALSupportFunctionEstimator::run(void)
 
 	/* output solution */
 	std::cout << s;
+	DEBUG_END;
+}
 
+void CGALSupportFunctionEstimator::run(void)
+{
+	DEBUG_START;
+	switch(mode)
+	{
+	case CGAL_ESTIMATION_LINEAR:
+		runLP();
+		break;
+	case CGAL_ESTIMATION_QUADRATIC:
+		runQP();
+		break;
+	default:
+		__builtin_unreachable();
+		break;
+	}
+
+	DEBUG_END;
+}
+
+void CGALSupportFunctionEstimator::setMode(CGALEstimationMode m)
+{
+	DEBUG_START;
+	mode = m;
 	DEBUG_END;
 }

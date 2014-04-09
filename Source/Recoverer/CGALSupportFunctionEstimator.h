@@ -28,13 +28,47 @@
 #ifndef CGALSUPPORTFUNCTIONESTIMATOR_H_
 #define CGALSUPPORTFUNCTIONESTIMATOR_H_
 
+/** Mode of estimation. */
+typedef enum
+{
+	CGAL_ESTIMATION_LINEAR,		/**< LP problem eps -> min, Qh>=0 |h-h0|<eps */
+	CGAL_ESTIMATION_QUADRATIC	/**< QP problem ||h-h0||^2 -> min, Qh>=0 */
+} CGALEstimationMode;
+
+/**
+ * Estimation engine based on Linear and Quadratic Programming Solver from CGAL.
+ */
 class CGALSupportFunctionEstimator : public SupportFunctionEstimator
 {
+	/** Current mode of estimation. */
+	CGALEstimationMode mode;
+
+	/** Runs LP problem solver. */
+	void runLP(void);
+
+	/** Runs QP problem solver. */
+	void runQP(void);
+
 public:
+	/**
+	 * Default constructor
+	 *
+	 * @param data	SFE data
+	 */
 	CGALSupportFunctionEstimator(SupportFunctionEstimationData *data);
+
+	/** Default destructor. */
 	~CGALSupportFunctionEstimator();
 
+	/** Runs the estiamtion process. */
 	virtual void run(void);
+
+	/**
+	 * Sets current mode of estimation.
+	 *
+	 * @param m	Mode to be set.
+	 */
+	void setMode(CGALEstimationMode m);
 };
 
 #endif /* CGALSUPPORTFUNCTIONESTIMATOR_H_ */
