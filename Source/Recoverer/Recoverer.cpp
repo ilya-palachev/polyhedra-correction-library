@@ -37,9 +37,6 @@
 
 using namespace std;
 
-/** Each condition has exactly not more than  4 non-zero coefficients. */
-#define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
-
 static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 {
 #ifndef NDEBUG

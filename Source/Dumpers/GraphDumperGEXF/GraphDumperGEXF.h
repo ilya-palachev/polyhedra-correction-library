@@ -21,6 +21,8 @@
 #ifndef GRAPHDUMPERGEXF_H_
 #define GRAPHDUMPERGEXF_H_
 
+#ifdef USE_GRAPH_DUMPER
+
 #include <libgexf.h>
 
 #include "DataContainers/EdgeData/EdgeData.h"
@@ -37,7 +39,7 @@
  * In future we will need to have an alternative dumper.
  * */
 
-#if 0
+
 
 class GraphDumperGEXF
 {
@@ -69,7 +71,7 @@ public:
 	void dump(const char* fileName);
 };
 
-#endif
+#endif /* USE_GRAPH_DUMPER */
 
 #endif /* GRAPHDUMPERGEXF_H_ */
 

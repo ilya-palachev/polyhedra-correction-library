@@ -33,7 +33,7 @@ class SupportFunctionEstimator : public SupportFunctionEstimationData
 public:
 	SupportFunctionEstimator(SupportFunctionEstimationData *data);
 	virtual ~SupportFunctionEstimator();
-	virtual void run(void);
+	virtual void run(void) = 0;
 };
 
 #endif /* SUPPORTFUNCTIONESTIMATOR_H_ */

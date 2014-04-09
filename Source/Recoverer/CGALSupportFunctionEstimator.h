@@ -23,7 +23,7 @@
  * @brief CGAL-based support function estimation (declaration).
  */
 
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "Recoverer/SupportFunctionEstimator.h"
 
 #ifndef CGALSUPPORTFUNCTIONESTIMATOR_H_
 #define CGALSUPPORTFUNCTIONESTIMATOR_H_

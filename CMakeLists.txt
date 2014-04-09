@@ -34,10 +34,7 @@ list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/ArrayOperations")
 list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/GaussString")
 list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LSM")
 list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/Vector3d")
-list (APPEND INCLUDE_DIRS_all "/usr/include/libgexf")
-list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
 list (APPEND INCLUDE_DIRS_all "/usr/include/eigen3")
-include_directories(${INCLUDE_DIRS_all})
 
 # Common compiler flags used for build:
 set(COMMON_FLAGS "")
@@ -62,14 +59,13 @@ add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
 
 option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
+option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 
 target_link_libraries(pcl 
    arrayOperations 
    gaussString 
    lsm 
    vector3d
-   gexf
-   xml2
    CGAL
    gmp
    tsnnls
@@ -79,6 +75,15 @@ if (ENABLE_IPOPT)
 	target_link_libraries(pcl ipopt)
 	add_definitions(-DENABLE_IPOPT)
 endif()
+
+if (ENABLE_GRAPH_DUMPER)
+	target_link_libraries(pcl gexf xml2)
+	add_definitions(-DUSE_GRAPH_DUMPER)
+	list (APPEND INCLUDE_DIRS_all "/usr/include/libgexf")
+	list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
+endif()
+
+include_directories(${INCLUDE_DIRS_all})
 
 foreach(test_source_file ${SOURCE_tests})
 	get_filename_component(executable_name ${test_source_file} NAME_WE)

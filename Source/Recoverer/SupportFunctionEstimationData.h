@@ -29,6 +29,9 @@
 
 #include "SparseMatrixEigen.h"
 
+/** Each condition has exactly not more than  4 non-zero coefficients. */
+#define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
+
 /**
  * Structure that represents the input data for support function estimation
  * engines.

@@ -39,13 +39,13 @@
 typedef enum
 {
 	/** TSNNLS estimator (not working). */
-	TSNNLS_ESTIMATOR,
+	TSNNLS_ESTIMATOR = 0,
 
 	/** Ipopt estimator. */
-	IPOPT_ESTIMATOR,
+	IPOPT_ESTIMATOR = 1,
 
 	/** CGAL estimator.  */
-	CGAL_ESTIMATOR
+	CGAL_ESTIMATOR = 2
 } RecovererEstimator;
 
 /**
