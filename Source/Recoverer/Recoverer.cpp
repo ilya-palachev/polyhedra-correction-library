@@ -1002,7 +1002,8 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
 	int numVertices = polyhedron.size_of_vertices();
 	DEBUG_PRINT("Allocating 6 arrays of of size %d of type double",
 			numVertices);
-	VectorXd eigenVectorX, eigenVectorY, eigenVectorZ;
+	VectorXd eigenVectorX(numVertices), eigenVectorY(numVertices),
+		eigenVectorZ(numVertices);
 
 	auto itVertex = polyhedron.vertices_begin();
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
@@ -1111,7 +1112,7 @@ void Recoverer::setEstimator(RecovererEstimator e)
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
-	SupportFunctionEstimator *sfe;
+	SupportFunctionEstimator *sfe = NULL;
 
 	/* Build problem data. */
 	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
@@ -1133,10 +1134,15 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 		sfe = static_cast<SupportFunctionEstimator*>(new
 				CGALSupportFunctionEstimator(data));
 		break;
+	default:
+		__builtin_unreachable();
+		break;
 	}
 
 	/* Run support function estimation. */
-	sfe->run();
+	if (sfe)
+		sfe->run();
+	delete sfe;
 
 	DEBUG_END;
 	return NULL;
