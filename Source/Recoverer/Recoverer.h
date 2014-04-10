@@ -44,8 +44,11 @@ typedef enum
 	/** Ipopt estimator. */
 	IPOPT_ESTIMATOR = 1,
 
-	/** CGAL estimator.  */
-	CGAL_ESTIMATOR = 2
+	/** Quadratic primal CGAL estimator.  */
+	CGAL_ESTIMATOR = 2,
+
+	/** Linear CGAL estimator. */
+	CGAL_ESTIMATOR_LINEAR = 3
 } RecovererEstimator;
 
 /**
