@@ -38,7 +38,9 @@ using namespace Ipopt;
  * Iptopt-based non-linear optimizer in case of support
  * function estimation.
  */
-class IpoptSupportFunctionEstimator: public TNLP, SupportFunctionEstimator
+class IpoptSupportFunctionEstimator:
+	public TNLP,
+	public SupportFunctionEstimator
 {
 private:
 	/** The type of problem. */

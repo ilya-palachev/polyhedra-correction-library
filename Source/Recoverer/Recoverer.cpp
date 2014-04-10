@@ -1127,7 +1127,7 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 				TsnnlsSupportFunctionEstimator(data));
 		break;
 	case IPOPT_ESTIMATOR:
-#if 0
+#ifdef USE_IPOPT
 		/* TODO: complete this after enabling. */
 		sfe = static_cast<SupportFunctionEstimator*>(new
 				IpoptSupportFunctionEstimator(data));
