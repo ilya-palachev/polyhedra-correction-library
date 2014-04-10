@@ -72,8 +72,9 @@ target_link_libraries(pcl
 )
 
 if (ENABLE_IPOPT)
-	target_link_libraries(pcl ipopt)
-	add_definitions(-DENABLE_IPOPT)
+	target_link_libraries(pcl ipopt coinmumps coinhsl)
+	add_definitions(-DUSE_IPOPT)
+	message("!!! Ipopt solver is enabled !!!")
 endif()
 
 if (ENABLE_GRAPH_DUMPER)
