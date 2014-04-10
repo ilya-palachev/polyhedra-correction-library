@@ -54,9 +54,17 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 		Index& nnz_jac_g, Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	DEBUG_START;
+
 	n = numValues();
+	DEBUG_PRINT("Number of variables is set to n = %d", n);
+
 	m = numConditions();
+	DEBUG_PRINT("Number of constraints is set to m = %d", m);
+
 	nnz_jac_g = supportMatrix().nonZeros();
+	DEBUG_PRINT("Number of non-zero elements in the Jacobian of g is set to "
+			"nnz_jac_g = %d", nnz_jac_g);
+
 	nnz_h_lag = 0;
 	index_style = TNLP::C_STYLE;
 	DEBUG_END;
@@ -69,6 +77,12 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 		Number* x_u, Index m, Number* g_l, Number* g_u)
 {
 	DEBUG_START;
+
+	ASSERT(x_l);
+	ASSERT(x_u);
+	ASSERT(g_l);
+	ASSERT(g_u);
+
 	for (int i = 0; i < n; ++i)
 	{
 		x_l[i] = -TNLP_INFINITY;
@@ -77,7 +91,7 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 	for (int i = 0; i < m; ++i)
 	{
 		g_l[i] = 0.;
-		g_l[i] = +TNLP_INFINITY;
+		g_u[i] = +TNLP_INFINITY;
 	}
 	DEBUG_END;
 	return true;
@@ -88,6 +102,9 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 		bool init_lambda, Number* lambda)
 {
 	DEBUG_START;
+
+	ASSERT(x);
+
 	if (init_x)
 	{
 		for (int i = 0; i < n; ++i)
@@ -107,6 +124,9 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 		Number& obj_value)
 {
 	DEBUG_START;
+
+	ASSERT(x);
+
 	obj_value = 0.;
 	VectorXd x0 = supportVector();
 	for (int i = 0; i < n; ++i)
@@ -121,6 +141,10 @@ bool IpoptSupportFunctionEstimator::eval_grad_f(Index n, const Number* x,
 		bool new_x, Number* grad_f)
 {
 	DEBUG_START;
+
+	ASSERT(x);
+	ASSERT(grad_f);
+
 	VectorXd x0 = supportVector();
 	for (int i = 0; i < n; ++i)
 	{
@@ -134,6 +158,10 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 		Index m, Number* g)
 {
 	DEBUG_START;
+
+	ASSERT(x);
+	ASSERT(g);
+
 	VectorXd h(n);
 	for (int i = 0; i < n; ++i)
 	{
@@ -157,6 +185,22 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 		Number* values)
 {
 	DEBUG_START;
+
+	DEBUG_PRINT("Input parameters:");
+	DEBUG_PRINT("   n = %d", n);
+	DEBUG_PRINT("   x = %p", (void*) x);
+	DEBUG_PRINT("   new_x = %d", new_x);
+	DEBUG_PRINT("   m = %d", m);
+	DEBUG_PRINT("   n_ele_jac = %d", n_ele_jac);
+	DEBUG_PRINT("   iRow = %p", (void*) iRow);
+	DEBUG_PRINT("   jCol = %p", (void*) jCol);
+	DEBUG_PRINT("   values = %p", (void*) values);\
+
+	ASSERT(iRow);
+	ASSERT(jCol);
+	if (new_x)
+		ASSERT(values);
+
 	SparseMatrix Q = supportMatrix();
 	n_ele_jac = Q.nonZeros();
 
@@ -164,9 +208,12 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
+			DEBUG_PRINT("Setting jac_g[%d][%d] = %lf", it.row(), it.col(),
+					it.value());
 			iRow[i] = it.row();
 			jCol[i] = it.col();
-			values[i] = it.value();
+			if (new_x)
+				values[i] = it.value();
 			++i;
 		}
 	DEBUG_END;
@@ -178,6 +225,28 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 		Index n_ele_hess, Index* iRow, Index* jCol, Number* values)
 {
 	DEBUG_START;
+
+	DEBUG_PRINT("Input parameters:");
+	DEBUG_PRINT("   n = %d", n);
+	DEBUG_PRINT("   x = %p", (void*) x);
+	DEBUG_PRINT("   new_x = %d", new_x);
+	DEBUG_PRINT("   obj_factor = %lf", obj_factor);
+	DEBUG_PRINT("   m = %d", m);
+	DEBUG_PRINT("   lambda = %p", (void*) lambda);
+	DEBUG_PRINT("   new_lambda = %d", new_lambda);
+	DEBUG_PRINT("   n_ele_hess = %d", n_ele_hess);
+	DEBUG_PRINT("   iRow = %p", (void*) iRow);
+	DEBUG_PRINT("   jCol = %p", (void*) jCol);
+	DEBUG_PRINT("   values = %p", (void*) values);\
+
+	ASSERT(iRow);
+	ASSERT(jCol);
+	if (new_x)
+		ASSERT(values);
+
+	if (n_ele_hess == 0)
+		return true;
+
 	SparseMatrix Q = supportMatrix();
 	Q *= 2. * obj_factor;
 	n_ele_hess = Q.nonZeros();
@@ -186,9 +255,12 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
+			DEBUG_PRINT("Setting h[%d][%d] = %lf", it.row(), it.col(),
+					it.value());
 			iRow[i] = it.row();
 			jCol[i] = it.col();
-			values[i] = it.value();
+			if (new_x)
+				values[i] = it.value();
 			++i;
 		}
 	DEBUG_END;
