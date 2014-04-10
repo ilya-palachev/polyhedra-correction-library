@@ -1115,6 +1115,7 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 	SupportFunctionEstimator *sfe = NULL;
+	CGALSupportFunctionEstimator *sfeCGAL = NULL;
 
 	/* Build problem data. */
 	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
@@ -1133,14 +1134,12 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 #endif
 		break;
 	case CGAL_ESTIMATOR:
-		CGALSupportFunctionEstimator *sfeCGAL =
-				new	CGALSupportFunctionEstimator(data);
+		sfeCGAL = new CGALSupportFunctionEstimator(data);
 		sfeCGAL->setMode(CGAL_ESTIMATION_QUADRATIC);
 		sfe = static_cast<SupportFunctionEstimator*>(sfeCGAL);
 		break;
 	case CGAL_ESTIMATOR_LINEAR:
-		CGALSupportFunctionEstimator *sfeCGAL =
-				new	CGALSupportFunctionEstimator(data);
+		sfeCGAL = new CGALSupportFunctionEstimator(data);
 		sfeCGAL->setMode(CGAL_ESTIMATION_LINEAR);
 		sfe = static_cast<SupportFunctionEstimator*>(sfeCGAL);
 		break;

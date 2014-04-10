@@ -60,25 +60,84 @@ CGALSupportFunctionEstimator::~CGALSupportFunctionEstimator()
 
 void CGALSupportFunctionEstimator::runLP(void)
 {
+	DEBUG_START;
+	/*
+	 * Create LP problem with constraints Ax >= b and no variables lower/upper
+	 * bounds.
+	 */
+	Program lp (CGAL::LARGER, false, 0., false, 0.);
 
+	int iEpsilon = numValues();
+	int numVariables = numValues();
+	int numConstraints = numConditions();
+
+	lp.set_c(iEpsilon, 1.); /* Functional = \epsilon */
+
+	/* Add standard SFE constraints. */
+	SparseMatrix Q = supportMatrix();
+	for (int k = 0; k < Q.outerSize(); ++k)
+		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
+		{
+			lp.set_a(it.row(), it.col(), it.value());
+		}
+
+	/*
+	 * Add additional constraints of that provide ||h - h^{0}|| <= \epsilon
+	 *
+	 * System
+	 *
+	 *  h_{i} - h_{i}^{0} >= -\epslion
+	 *  h_{i} - h_{i}^{0} <=  \epslion
+	 *
+	 * is equal to the system
+	 *
+	 *  h_{i} + \epsilon >= h_{i}^{0}
+	 * -h_{i} + \epsilon >= -h_{i}^{0}
+	 */
+	VectorXd h0 = supportVector();
+	for (int i = 0; i < numVariables; ++i)
+	{
+		/*  h_{i} + \epsilon >= h_{i}^{0} */
+		lp.set_a(2 * i + numConstraints, i, 1.);
+		lp.set_a(2 * i + numConstraints, iEpsilon, 1.);
+		lp.set_b(2 * i + numConstraints, h0(i));
+
+		/* -h_{i} + \epsilon >= -h_{i}^{0} */
+		lp.set_a(2 * i + 1 + numConstraints, i, -1.);
+		lp.set_a(2 * i + 1 + numConstraints, iEpsilon, 1.);
+		lp.set_b(2 * i + 1 + numConstraints, -h0(i));
+	}
+
+	/* solve the program, using ET as the exact type */
+	Solution s = CGAL::solve_linear_program(lp, ET());
+	assert (s.solves_linear_program(lp));
+
+	/* output solution */
+	std::cout << s;
+
+	DEBUG_END;
 }
 
 void CGALSupportFunctionEstimator::runQP(void)
 {
 	DEBUG_START;
-	/* by default, we have a nonnegative QP with Ax <= b */
-	Program qp (CGAL::SMALLER, true, 0, false, 0);
+	/*
+	 * Create QP problem with constraints Ax >= b and no variables lower/upper
+	 * bounds.
+	 */
+	Program qp (CGAL::LARGER, false, 0., false, 0.);
+	int numVariables = numValues();
 
 	/* Set matrix D to identity matrix. */
-	for (int i = 0; i < numValues(); ++i)
+	for (int i = 0; i < numVariables; ++i)
 	{
-		qp.set_d(i, i, 1.);
+		qp.set_d(i, i, 2.); /* NOTE: We set matrix 2 * D here! */
 	}
 
 	/* Set vector c to -2 * h_0. */
 	double h0norm = 0.;
 	VectorXd h0 = supportVector();
-	for (int i = 0; i < numValues(); ++i)
+	for (int i = 0; i < numVariables; ++i)
 	{
 		qp.set_c(i, -2. * h0(i));
 		h0norm += h0(i) * h0(i);
@@ -87,12 +146,12 @@ void CGALSupportFunctionEstimator::runQP(void)
 	/* Set scalar c0 to <h_0, h_0>. */
 	qp.set_c0(h0norm);
 
-	/* Set A matrix to -Q. */
+	/* Set A matrix to Q. */
 	SparseMatrix Q = supportMatrix();
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
-			qp.set_a(it.row(), it.col(), -it.value());
+			qp.set_a(it.row(), it.col(), it.value());
 		}
 
 	/* solve the program, using ET as the exact type */

@@ -204,7 +204,7 @@ RecovererTestModel recovererTestModels[] =
 };
 
 /** The number of possible estimators. */
-#define RECOVERER_ESTIMATORS_NUMBER 3
+#define RECOVERER_ESTIMATORS_NUMBER 4
 
 /** Structure describing given estimator. */
 typedef struct
@@ -230,6 +230,11 @@ RecovererEstimatorDescription estimatorDescriptions[] =
 		CGAL_ESTIMATOR,
 		"cgal",
 		"CGAL solver of quadratic programming problems"
+	},
+	{
+		CGAL_ESTIMATOR_LINEAR,
+		"cgal-lp",
+		"CGAL solver of linear programming problems"
 	}
 };
 
