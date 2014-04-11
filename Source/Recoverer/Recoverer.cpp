@@ -20,34 +20,61 @@
 
 #include <cmath>
 #include <set>
+#include <boost/concept_check.hpp>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "Recoverer/Recoverer.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "DataContainers/ShadeContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
-
-#ifndef isnan
-#define isnan
-#endif
-#ifndef finite
-#define finite
-#endif
-#ifndef isinf
-#define isinf
-#endif
-#include <libtsnnls/tsnnls.h>
+#include "Recoverer/Recoverer.h"
+#include "Recoverer/CGALSupportFunctionEstimator.h"
+#include "Recoverer/IpoptSupportFunctionEstimator.h"
+#include "Recoverer/TsnnlsSupportFunctionEstimator.h"
 
 using namespace std;
+
+static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
+{
+#ifndef NDEBUG
+	DEBUG_START;
+	long int iVertex = 0;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		ASSERT(iVertex++ == vertex->id);
+	}
+
+	long int iFacet = 0;
+	for (auto facet = polyhedron.facets_begin();
+		facet != polyhedron.facets_end(); ++facet)
+	{
+		ASSERT(iFacet++ == facet->id);
+	}
+
+	long int iHalfedge = 0;
+	for (auto halfedge = polyhedron.halfedges_begin();
+		halfedge != polyhedron.halfedges_end(); ++halfedge)
+	{
+		ASSERT(iHalfedge++ == halfedge->id);
+	}
+	DEBUG_END;
+#endif
+}
 
 #define DEFAULT_MAX_COORDINATE 1000000.
 
 Recoverer::Recoverer() :
-	ifBalancing(false), ifScaleMatrix(false)
+	estimator(CGAL_ESTIMATOR),
+	ifBalancing(false),
+	ifScaleMatrix(false),
+	iXmax(0),
+	iYmax(0),
+	iZmax(0),
+	vectorRegularizing(0., 0., 0.)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -361,12 +388,14 @@ struct Plane_from_facet
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
-		return Polyhedron_3::Plane_3(h->vertex()->point(),
-				h->next()->vertex()->point(), h->opposite()->vertex()->point());
+		Point_3 point0 = h->vertex()->point();
+		Point_3 point1 = h->next()->vertex()->point();
+		Point_3 point2 = h->opposite()->vertex()->point();
+		return Polyhedron_3::Plane_3(point0, point1, point2);
 	}
 };
 
-PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
+Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 {
 	DEBUG_START;
 	Polyhedron_3 poly;
@@ -415,6 +444,37 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
 
+	/* Assign vertex IDs that will be used later. */
+	long int i = 0;
+	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
+		 ++vertex)
+	{
+		vertex->id = i++;
+	}
+
+	/* Assign facet IDs that will be used later. */
+	i = 0;
+	for (auto facet = poly.facets_begin(); facet != poly.facets_end(); ++facet)
+	{
+		facet->id = i++;
+	}
+	
+	/* Assert halfedge IDs that will be checked later. */
+	i = 0;
+	for (auto halfedge = poly.halfedges_begin();
+		 halfedge != poly.halfedges_end(); ++halfedge)
+	{
+		halfedge->id = i++;
+	}
+	DEBUG_END;
+	return poly;
+}
+
+PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
+{
+	DEBUG_START;
+	Polyhedron_3 poly = constructConvexHullCGAL(points);
+
 	/* Convert CGAL polyhedron to PCL polyhedron: */
 	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
 
@@ -428,7 +488,6 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	 */
 	polyhedronDualPCL->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
-	
 	DEBUG_END;
 	return polyhedronDualPCL;
 }
@@ -464,7 +523,7 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 		pDual->vertices[iVertex++] = vertex;
 	}
 
-	/*
+	/*m
 	 * Create dual facets using the information computed during
 	 * pre-processing.
 	 */
@@ -534,13 +593,165 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
+/**
+ * Stores the handles of vertexes that form a tetrahedron.
+ */
 typedef struct
 {
-	int u0;
-	int u1;
-	int u2;
-	int u3;
-} Quadruple;
+	Polyhedron_3::Vertex_handle v0, v1, v2, v3;
+} TetrahedronVertex;
+
+/**
+ * Counts the number of covering tetrahedrons for a given polyhedron.
+ *
+ * @param polyhedron	Convex hull of the set of directions
+ */
+static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
+{
+	DEBUG_START;
+
+	/*
+	 * Test: Check whether the proper number of tetrahedrons has been found.
+	 *
+	 * First, calcualate the sum of vertex degrees
+	 */
+	unsigned long int degreeSum = 0;
+	long int iVertex = 0;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		ASSERT(iVertex++ == vertex->id);
+		degreeSum += vertex->vertex_degree();
+	}
+
+	/* Second, the number of edges is a half of degrees sum. */
+	unsigned long int numTetrahedrons = degreeSum / 2;
+
+	/*
+	 * Third, each of 3 edges incident to any vertex of degree 3, share the same
+	 * tetrahedron, so we need to decrease the number of tetrahedrons by 2.
+	 */
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		unsigned long int degree = vertex->vertex_degree();
+		if (degree == 3)
+		{
+			numTetrahedrons -= 2;
+		}
+	}
+
+	DEBUG_PRINT("Counted number of tetrahedrons must be %ld", numTetrahedrons);
+
+	DEBUG_END;
+	return numTetrahedrons;
+}
+
+/**
+ * Finds covering tetrahedrons for a given polyhedron.
+ *
+ * @param polyhedron	Convex hull of the set of directions
+ */
+static list<TetrahedronVertex> findCoveringTetrahedrons(
+		Polyhedron_3& polyhedron)
+{
+	DEBUG_START;
+
+	/* Check that all facets of the polyhedron are triangles. */
+	for (auto halfedge = polyhedron.halfedges_begin();
+			halfedge != polyhedron.halfedges_end(); ++halfedge)
+	{
+		if (!halfedge->is_triangle())
+		{
+			ERROR_PRINT("Facet #%ld is not triangle, it has %ld edges.",
+					(long int) halfedge->facet()->id,
+					(long int) halfedge->facet_degree());
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	auto comparer = [](TetrahedronVertex a, TetrahedronVertex b)
+	{
+		long int a0 = a.v0->id, a1 = a.v1->id, a2 = a.v2->id, a3 = a.v3->id;
+		long int b0 = b.v0->id, b1 = b.v1->id, b2 = b.v2->id, b3 = b.v3->id;
+
+		if (a0 < b0)
+		{
+			return true;
+		}
+		else if (a0 == b0)
+		{
+			if (a1 < b1)
+			{
+				return true;
+			}
+			else if (a1 == b1)
+			{
+				if (a2 < b2)
+				{
+					return true;
+				}
+				else if (a2 == b2)
+				{
+					if (a3 < b3)
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	};
+
+
+	set<TetrahedronVertex, decltype(comparer)> tetrahedrons(comparer);
+
+	auto vertexComparer = [](Polyhedron_3::Vertex_handle a,
+			Polyhedron_3::Vertex_handle b)
+	{
+		return a->id < b->id;
+	};
+
+	set<Polyhedron_3::Vertex_handle, decltype(vertexComparer)>
+				vertexSet(vertexComparer);
+
+	for (auto halfedge = polyhedron.halfedges_begin();
+			halfedge != polyhedron.halfedges_end(); ++halfedge)
+	{
+
+		vertexSet.clear();
+
+		vertexSet.insert(halfedge->vertex());
+		vertexSet.insert(halfedge->prev()->vertex());
+		vertexSet.insert(halfedge->next()->vertex());
+		vertexSet.insert(halfedge->opposite()->next()->vertex());
+
+		ASSERT(vertexSet.size() == 4);
+
+		TetrahedronVertex tetrahedron;
+		auto itVertex = vertexSet.begin();
+		tetrahedron.v0 = *(itVertex++);
+		tetrahedron.v1 = *(itVertex++);
+		tetrahedron.v2 = *(itVertex++);
+		tetrahedron.v3 = *(itVertex++);
+
+		tetrahedrons.insert(tetrahedron);
+	}
+
+	/*
+	 * Construct the list from sorted set and return it.
+	 */
+	list<TetrahedronVertex> listTetrahedrons;
+	for (auto itTetrahedron = tetrahedrons.begin();
+			itTetrahedron != tetrahedrons.end(); ++itTetrahedron)
+	{
+		listTetrahedrons.push_back(*itTetrahedron);
+	}
+
+	DEBUG_END;
+	return listTetrahedrons;
+}
 
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
@@ -550,174 +761,45 @@ typedef struct
  * @param numConditions	The number of constraints (output)
  * @param matrix		The matrix of constraints (output)
  */
-static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
-		int& numConditions, double*& matrix, bool ifScaleMatrix)
+static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
+		bool ifScaleMatrix)
 {
 	DEBUG_START;
 
-	/* Check that all facets of the polyhedron are triangles. */
-	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
-	{
-		if (polyhedron->facets[iFacet].numVertices != 3)
-		{
-			ERROR_PRINT("Facet #%d is not triangle. ", iFacet);
-			DEBUG_END;
-			exit(EXIT_FAILURE);
-		}
-	}
+	int numHvalues = polyhedron.size_of_vertices();
 
-	/* Preprocess the polyhedron. */
-	polyhedron->preprocessAdjacency();
+	auto listTetrahedrons = findCoveringTetrahedrons(polyhedron);
 
-	int numHvalues = polyhedron->numVertices;
+#ifndef NDEBUG
+	/* Check whether the proper number of tetrahedrons has been found. */
+	ASSERT(listTetrahedrons.size() == countCoveringTetrahedrons(polyhedron));
+#endif
 
-	auto comparer = [](Quadruple e0, Quadruple e1)
-	{
-		int e0min, e0max, e1min, e1max;
-		if (e0.u0 < e0.u1)
-		{
-			e0min = e0.u0;
-			e0max = e0.u1;
-		}
-		else
-		{
-			e0min = e0.u1;
-			e0max = e0.u0;
-		}
-		
-		if (e1.u0 < e1.u1)
-		{
-			e1min = e1.u0;
-			e1max = e1.u1;
-		}
-		else
-		{
-			e1min = e1.u1;
-			e1max = e1.u0;
-		}
-		
-		return (e0min < e1min) || (e0min == e1min && e0max < e1max);
-	};
-	set<Quadruple, decltype(comparer)> edgesReported(comparer),
-			edgesProved(comparer), edgesCurrent(comparer);
+	int numConditions = listTetrahedrons.size();
+	DEBUG_PRINT("Found %d covering tetrahedrons", numConditions);
 
-	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
-	{
-		VertexInfo* vinfoCurr = &polyhedron->vertexInfos[iVertex];
-		edgesCurrent.clear();
-
-		for (int iPosition = 0; iPosition < vinfoCurr->numFacets; ++iPosition)
-		{
-			int iFacetNeighbor =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-					                     iPosition];
-			int iPositionNeighbor =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-					                     iPosition];
-			Facet* facetNeighbor = &polyhedron->facets[iFacetNeighbor];
-			ASSERT(iPositionNeighbor < facetNeighbor->numVertices);
-			int iVertexNeighbor =
-					facetNeighbor->indVertices[iPositionNeighbor + 1];
-
-			int iPositionPrev = (vinfoCurr->numFacets + iPosition - 1) %
-					vinfoCurr->numFacets;
-			int iFacetNeighborPrev =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-					                     iPositionPrev];
-			int iPositionNeighborPrev =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-					                     iPositionPrev];
-			Facet* facetNeighborPrev = &polyhedron->facets[iFacetNeighborPrev];
-			ASSERT(iPositionNeighborPrev < facetNeighborPrev->numVertices);
-			int iVertexNeighborPrev =
-					facetNeighborPrev->indVertices[iPositionNeighborPrev + 1];
-					
-			int iPositionNext = (vinfoCurr->numFacets + iPosition + 1) %
-					vinfoCurr->numFacets;
-			int iFacetNeighborNext =
-					vinfoCurr->indFacets[vinfoCurr->numFacets + 1 +
-					                     iPositionNext];
-			int iPositionNeighborNext =
-					vinfoCurr->indFacets[2 * vinfoCurr->numFacets + 1 +
-					                     iPositionNext];
-			Facet* facetNeighborNext = &polyhedron->facets[iFacetNeighborNext];
-			ASSERT(iPositionNeighborNext < facetNeighborNext->numVertices);
-			int iVertexNeighborNext =
-					facetNeighborNext->indVertices[iPositionNeighborNext + 1];
-			
-			Quadruple edgeCurrent = {iVertex, iVertexNeighbor,
-					iVertexNeighborPrev, iVertexNeighborNext};
-			edgesCurrent.insert(edgeCurrent);
-		}
-
-		DEBUG_PRINT("Processing vertex #%d, it's degree = %d. Incident edges "
-				"are:", iVertex, vinfoCurr->numFacets);
-		for (auto &edge : edgesCurrent)
-		{
-			DEBUG_PRINT("   edge [%d, %d, <%d>, <%d>]", edge.u0, edge.u1,
-					edge.u2, edge.u3);
-		}
-
-		if (vinfoCurr->numFacets == 3)
-		{
-			bool ifProved = false;
-			for (auto &edgeCurrent : edgesCurrent)
-			{
-				if (edgesProved.find(edgeCurrent) != edgesProved.end())
-				{
-					DEBUG_PRINT("Convexity of edge [%d, %d, <%d>, <%d>] already"
-							" proved, so all convexity of all edges is proved.",
-							edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
-							edgeCurrent.u3);
-					ifProved = true;
-					break;
-				}
-			}
-
-			if (!ifProved)
-			{
-				auto edgeCurrent = edgesCurrent.begin();
-				DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
-							edgeCurrent->u0, edgeCurrent->u1, edgeCurrent->u2,
-							edgeCurrent->u3);
-				edgesReported.insert(*edgeCurrent);
-			}
-
-			edgesProved.insert(edgesCurrent.begin(),
-					edgesCurrent.end());
-		}
-		else
-		{
-			for (auto &edgeCurrent : edgesCurrent)
-			{
-				if (edgesProved.find(edgeCurrent) == edgesProved.end())
-				{
-					DEBUG_PRINT("Reporting edge [%d, %d, <%d>, <%d>]",
-								edgeCurrent.u0, edgeCurrent.u1, edgeCurrent.u2,
-								edgeCurrent.u3);
-					edgesProved.insert(edgeCurrent);
-					edgesReported.insert(edgeCurrent);
-				}
-			}
-		}
-	}
-
-	numConditions = edgesReported.size();
-
-	/* Allocate and prepare the matrix for the problem. */
-	matrix = new double[numConditions * numHvalues];
-	for (int i = 0; i < numConditions * numHvalues; ++i)
-	{
-		matrix[i] = 0.;
-	}
+	/*
+	 * Create Eigen sparse matrix with
+	 * N = numHvalues rows
+	 * M = numConditions columns
+	 */
+	SparseMatrix matrix(numHvalues, numConditions);
+	matrix.reserve(VectorXi::Constant(matrix.cols(),
+			NUM_NONZERO_COEFFICIENTS_IN_CONDITION));
 
 	int iCondition = 0;
-	for (auto &edge : edgesReported)
+	for (auto &tetrahedron : listTetrahedrons)
 	{
-		int iVertex1 = edge.u0;
-		int iVertex2 = edge.u1;
-		int iVertex3 = edge.u2;
-		int iVertex4 = edge.u3;
+		Point_3 zero(0., 0., 0.);
+		Vector_3 u1(zero, tetrahedron.v0->point());
+		Vector_3 u2(zero, tetrahedron.v1->point());
+		Vector_3 u3(zero, tetrahedron.v2->point());
+		Vector_3 u4(zero, tetrahedron.v3->point());
+
+		int iVertex1 = tetrahedron.v0->id;
+		int iVertex2 = tetrahedron.v1->id;
+		int iVertex3 = tetrahedron.v2->id;
+		int iVertex4 = tetrahedron.v3->id;
 
 		/*
 		 * Usual condition looks as follows:
@@ -731,14 +813,10 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 		 * numbers iVertex1, iVertex2, iVertex3 and iVertex4 here.
 		 */
 
-		Vector3d u1 = polyhedron->vertices[iVertex1];
-		Vector3d u2 = polyhedron->vertices[iVertex2];
-		Vector3d u3 = polyhedron->vertices[iVertex3];
-		Vector3d u4 = polyhedron->vertices[iVertex4];
-		double det1 = u2 % u3 * u4;
-		double det2 = - u1 % u3 * u4;
-		double det3 = u1 % u2 * u4;
-		double det4 = - u1 % u2 * u3;
+		double det1 = + CGAL::determinant(u2, u3, u4);
+		double det2 = - CGAL::determinant(u1, u3, u4);
+		double det3 = + CGAL::determinant(u1, u2, u4);
+		double det4 = - CGAL::determinant(u1, u2, u3);
 		double det = det1 + det2 + det3 + det4;
 		if (det < 0)
 		{
@@ -758,27 +836,212 @@ static void buildMatrixByPolyhedron(PolyhedronPtr polyhedron,
 			det3 *= coeff;
 			det4 *= coeff;
 		}
+		
+		matrix.insert(iVertex1, iCondition) = det1;
+		matrix.insert(iVertex2, iCondition) = det2;
+		matrix.insert(iVertex3, iCondition) = det3;
+		matrix.insert(iVertex4, iCondition) = det4;
 
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det1, iCondition, iVertex1);
-		matrix[numHvalues * iCondition + iVertex1] = det1;
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det2, iCondition, iVertex2);
-		matrix[numHvalues * iCondition + iVertex2] = det2;
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det3, iCondition, iVertex3);
-		matrix[numHvalues * iCondition + iVertex3] = det3;
-		DEBUG_PRINT("Printing value %.16lf to position (%d, %d)",
-				det4, iCondition, iVertex4);
-		matrix[numHvalues * iCondition + iVertex4] = det4;
 		++iCondition;
 	}
 
 	DEBUG_END;
+	return matrix;
 }
 
-void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
-		double*& matrix, int& numHvalues, double*& hvalues)
+
+Vector_3 Recoverer::findMaxVertices(Polyhedron_3 polyhedron,
+	int& imax0, int& imax1, int& imax2)
+{
+	DEBUG_START;
+	int iVertex = polyhedron.vertices_begin()->id;
+	iXmax = iYmax = iZmax = iVertex;
+	
+	/*
+	 * These 3 variables are added to hadle the case when some of iXmax, iYmax
+	 * or iZmax are equal.
+	 */
+	int iXmaxKeeper = iXmax;
+	int iYmaxKeeper = iYmax;
+	int iZmaxKeeper = iZmax;
+
+	Point_3 pointFirst = polyhedron.vertices_begin()->point();
+	double xmax = pointFirst.x(), ymax = pointFirst.y(), zmax = pointFirst.z();
+
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		iVertex = vertex->id;
+		Point_3 point = vertex->point();
+
+		if (point.x() > xmax)
+		{
+			xmax = point.x();
+			iXmaxKeeper = iXmax;
+			iXmax = iVertex;
+		}
+
+		if (point.y() > ymax)
+		{
+			ymax = point.y();
+			iYmaxKeeper = iYmax;
+			iYmax = iVertex;
+		}
+		
+		if (point.z() > zmax)
+		{
+			zmax = point.z();
+			iZmaxKeeper = iZmax;
+			iZmax = iVertex;
+		}
+	}
+
+	DEBUG_PRINT("%d-th vertex has maximal X coordinate = %lf", iXmax, xmax);
+	DEBUG_PRINT("%d-th vertex has maximal Y coordinate = %lf", iYmax, ymax);
+	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, zmax);
+
+	/* Sort indices of vertices with maximal coordinates. */
+	set<int> iMaxes;
+	iMaxes.insert(iXmax);
+	iMaxes.insert(iYmax);
+	iMaxes.insert(iZmax);
+	
+	/*
+	 * TODO: Handle case when iXmax = iYmax = iZmax and
+	 * iMaxKeeper = iYmaxKeeper = iZmaxKeeper
+	 */
+	if (iMaxes.size() < 3)
+	{
+		if (iXmax == iYmax)
+		{
+			iYmax = iYmaxKeeper;
+			iMaxes.insert(iYmax);
+		}
+		if (iYmax == iZmax)
+		{
+			iZmax = iZmaxKeeper;
+			iMaxes.insert(iZmax);
+		}
+		if (iXmax == iZmax)
+		{
+			iXmax = iXmaxKeeper;
+			iMaxes.insert(iXmax);
+		}
+	}
+	ASSERT(iMaxes.size() == 3);
+
+	auto itIMaxes = iMaxes.begin();
+	imax0 = *(itIMaxes++);
+	imax1 = *(itIMaxes++);
+	imax2 = *(itIMaxes++);
+	DEBUG_PRINT("And here are they sorted: %d, %d, %d", imax0, imax1, imax2);
+
+	DEBUG_END;
+	return Vector_3(1. / xmax, 1. / ymax, 1. / zmax);
+}
+
+void Recoverer::regularizeSupportMatrix(
+		SupportFunctionEstimationData* data, Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+
+	SparseMatrix Q = data->supportMatrix().transpose();
+	VectorXd hvalues = data->supportVector();
+
+	int imax0 = 0, imax1 = 0, imax2 = 0;
+	Vector_3 vMax = findMaxVertices(polyhedron, imax0, imax1, imax2);
+	vectorMaxHValues = Vector_3(hvalues(iXmax), hvalues(iYmax), hvalues(iZmax));
+	vectorRegularizing = Vector_3(
+		hvalues(iXmax) * vMax.x(),
+		hvalues(iYmax) * vMax.y(),
+		hvalues(iZmax) * vMax.z());
+
+	/* Regularize h-values vector. */
+	Point_3 zero(0., 0., 0.);
+	for (int iValue = 0; iValue < Q.cols() - 3; ++iValue)
+	{
+		/* Get vertex corresponding to the column of the matrix. */
+		auto vertex = polyhedron.vertices_begin() + iValue;
+		Point_3 point = vertex->point();
+		Vector_3 vector(zero, point);
+		double shift = -vector * vectorRegularizing;
+		if (iValue < imax0)
+			hvalues(iValue) += shift;
+		else if (iValue < imax1 - 1)
+			hvalues(iValue) = hvalues(iValue + 1) + shift;
+		else if (iValue < imax2 - 2)
+			hvalues(iValue) = hvalues(iValue + 2) + shift;
+		else
+			hvalues(iValue) = hvalues(iValue + 3) + shift;
+	}
+	DEBUG_PRINT("h-values have been successfully regularized.");
+	
+	/*
+	 * TODO: Implement cutting of 3 columns from matrix Q here
+	 */
+
+	Q.transpose();
+
+	DEBUG_END;
+	return;
+}
+
+#define MAX_ACCEPTABLE_LINF_ERROR 1e-6
+
+/**
+ * Checks whether vectors vx, vy, vz are really the eigenvectors of the matrix Q
+ * corresponding to the eigenvalue 0 (i. e. basis kernel vectors)
+ *
+ * @param polyhedron	The polyhedron (convex hull of support directions)
+ * @param Qt			The transpose of the support matrix
+ */
+static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
+{
+	DEBUG_START;
+	/* Set eigenvectors vx, vy, vz. */
+	int numVertices = polyhedron.size_of_vertices();
+	DEBUG_PRINT("Allocating 6 arrays of of size %d of type double",
+			numVertices);
+	VectorXd eigenVectorX(numVertices), eigenVectorY(numVertices),
+		eigenVectorZ(numVertices);
+
+	auto itVertex = polyhedron.vertices_begin();
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+	{
+		ASSERT(itVertex->id == iVertex);
+		Point_3 point = itVertex->point();
+		eigenVectorX(iVertex) = point.x();
+		eigenVectorY(iVertex) = point.y();
+		eigenVectorZ(iVertex) = point.z();
+		++itVertex;
+	}
+
+	SparseMatrix Q = SparseMatrix(Qt.transpose());
+
+	/*
+	 * Check that eigenVectorX, eigenVectorY, eigenVectorZ really lie in the
+	 * kernel of Q.
+	 */
+	VectorXd productX = Q * eigenVectorX;
+	double errorX2 = productX.norm();
+	DEBUG_PRINT("||eigenVectorX^{T} Q^{T}||_2 = %.16lf", errorX2);
+
+	VectorXd productY = Q * eigenVectorY;
+	double errorY2 = productY.norm();
+	DEBUG_PRINT("||eigenVectorY^{T} Q^{T}||_2 = %.16lf", errorY2);
+
+	VectorXd productZ = Q * eigenVectorZ;
+	double errorZ2 = productZ.norm();
+	DEBUG_PRINT("||eigenVectorZ^{T} Q^{T}||_2 = %.16lf", errorZ2);
+
+	DEBUG_END;
+	return (errorX2 < MAX_ACCEPTABLE_LINF_ERROR) &&
+		(errorY2 < MAX_ACCEPTABLE_LINF_ERROR) &&
+		(errorZ2 < MAX_ACCEPTABLE_LINF_ERROR);
+}
+
+SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
+		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -795,8 +1058,8 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 
 	/* 3. Get normal vectors of support planes and normalize them. */
 	vector<Vector3d> directions;
-	numHvalues = supportPlanes.size();
-	hvalues = new double[numHvalues];
+	int numHvalues = supportPlanes.size();
+	VectorXd hvalues(numHvalues);
 	int iValue = 0;
 	for (auto &plane : supportPlanes)
 	{
@@ -808,163 +1071,91 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
 		Vector3d normal = plane.norm;
 		normal.norm(1.);
 		directions.push_back(normal);
-		hvalues[iValue++] = plane.dist;
+		hvalues(iValue++) = plane.dist;
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
-	PolyhedronPtr polyhedron = constructConvexHull(directions);
-	polyhedron->preprocessAdjacency();
-	for (int iVertex = 0; iVertex < polyhedron->numVertices; ++iVertex)
-	{
-		int degree = polyhedron->vertexInfos[iVertex].numFacets;
-		DEBUG_PRINT("Vertex %d has degree %d", iVertex, degree);
-		if (degree > 3)
-		{
-			DEBUG_PRINT("--- more than 3");
-		}
-	}
+	Polyhedron_3 polyhedron = constructConvexHullCGAL(directions);
+	checkPolyhedronIDs(polyhedron);
 
 	/* 5. Build matrix by the polyhedron. */
-	buildMatrixByPolyhedron(polyhedron, numConditions, matrix, ifScaleMatrix);
+	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
+	SparseMatrix Q = Qt.transpose();
+	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
+			numHvalues, Q.rows(), Q, hvalues);
+	checkPolyhedronIDs(polyhedron);
+
+	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
+	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, Qt);
+	ASSERT_PRINT(ifCheckSuccessful, "Bad matrix.");
+
+	/*
+	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
+	 * v1 = (u1x, ..., uMx)
+	 * v2 = (u1y, ..., uMy)
+	 * v3 = (u1z, ..., uMz)
+	 *
+	 * TODO: Regularization is not supported in Ipopt solver for now. We need
+	 * to fix it.
+	 */
+	if (ifRegularize)
+	{
+		regularizeSupportMatrix(data, polyhedron);
+		checkPolyhedronIDs(polyhedron);
+	}
 
 	DEBUG_END;
+	return data;
 }
 
-#define NUM_NONZERO_EXPECTED 4
-
-static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
+void Recoverer::setEstimator(RecovererEstimator e)
 {
 	DEBUG_START;
-
-	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
-
-	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
-	{
-		DEBUG_PRINT("Q->colptr[%d] = %d", iCol, Q->colptr[iCol]);
-		if (iCol < Q->n)
-		{
-			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
-			{
-				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
-						Q->values.d[iRow]);
-				numElemRow[Q->rowind[iRow]]++;
-			}
-		}
-	}
-	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
-			Q->colptr[Q->n] - Q->colptr[0]);
-
-	if (ifAnalyzeExpect)
-	{
-		int numUnexcpectedNonzeros = 0;
-		for (int iRow = 0; iRow < Q->m; ++iRow)
-		{
-			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
-					numElemRow[iRow]);
-			if (numElemRow[iRow] != NUM_NONZERO_EXPECTED)
-			{
-				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
-						"row");
-				++numUnexcpectedNonzeros;
-			}
-		}
-		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements "
-				"is %d", numUnexcpectedNonzeros);
-	}
-	free(numElemRow);
+	estimator = e;
 	DEBUG_END;
-}
-
-static double l1_distance(int n, double* x, double* y)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result += fabs(x[i] - y[i]);
-	}
-	DEBUG_END;
-	return result;
-}
-
-static double l2_distance(int n, double* x, double* y)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result += (x[i] - y[i]) * (x[i] - y[i]);
-	}
-	DEBUG_END;
-	return result;
-}
-
-static double linf_distance(int n, double* x, double* y)
-{
-	DEBUG_START;
-	double result = 0.;
-	for (int i = 0; i < n; ++i)
-	{
-		result = fabs(x[i] - y[i]) > result ? fabs(x[i] - y[i]) : result;
-	}
-	DEBUG_END;
-	return result;
 }
 
 PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
-	int numConditions = 0, numHvalues = 0;
-	double *matrix = NULL, *hvalues = NULL;
+	SupportFunctionEstimator *sfe = NULL;
+	CGALSupportFunctionEstimator *sfeCGAL = NULL;
 
-	buildNaiveMatrix(SCData, numConditions, matrix, numHvalues, hvalues);
-	DEBUG_PRINT("Matrix has been built.");
+	/* Build problem data. */
+	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
 
-	tsnnls_verbosity(10);
-	char* strStderr = strdup("stderr");
-	taucs_logfile(strStderr);
+	switch (estimator)
+	{
+	case TSNNLS_ESTIMATOR:
+		sfe = static_cast<SupportFunctionEstimator*>(new
+				TsnnlsSupportFunctionEstimator(data));
+		break;
+	case IPOPT_ESTIMATOR:
+#ifdef USE_IPOPT
+		/* TODO: complete this after enabling. */
+		sfe = static_cast<SupportFunctionEstimator*>(new
+				IpoptSupportFunctionEstimator(data));
+#endif
+		break;
+	case CGAL_ESTIMATOR:
+		sfeCGAL = new CGALSupportFunctionEstimator(data);
+		sfeCGAL->setMode(CGAL_ESTIMATION_QUADRATIC);
+		sfe = static_cast<SupportFunctionEstimator*>(sfeCGAL);
+		break;
+	case CGAL_ESTIMATOR_LINEAR:
+		sfeCGAL = new CGALSupportFunctionEstimator(data);
+		sfeCGAL->setMode(CGAL_ESTIMATION_LINEAR);
+		sfe = static_cast<SupportFunctionEstimator*>(sfeCGAL);
+		break;
+	default:
+		__builtin_unreachable();
+		break;
+	}
 
-	taucs_ccs_matrix* Q = taucs_construct_sorted_ccs_matrix(matrix,
-			numHvalues, numConditions);
-	DEBUG_PRINT("TAUCS matrix has been constructed.");
-	analyzeTaucsMatrix(Q, true);
-
-	taucs_ccs_matrix* Qt = taucs_ccs_transpose(Q);
-	DEBUG_PRINT("Matrix has been transposed.");
-	analyzeTaucsMatrix(Qt, false);
-	DEBUG_PRINT("Q  has %d rows and %d columns", Q->m, Q->n);
-	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
-
-	double conditionNumberQ = taucs_rcond(Q);
-	DEBUG_PRINT("Condition number of Q has been calculated, it is %.16lf",
-			conditionNumberQ);
-
-	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
-			EPS_MIN_DOUBLE;
-	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
-
-	double outResidualNorm;
-
-	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100.,
-			1);
-	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void*) h);
-
-	char* errorTsnnls;
-	tsnnls_error(&errorTsnnls);
-	ALWAYS_PRINT(stdout, "Error from tsnnls: %s", errorTsnnls);
-
-	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
-
-	ALWAYS_PRINT(stdout, "||h - h0||_{1} = %.16lf",
-			l1_distance(numHvalues, hvalues, h));
-	ALWAYS_PRINT(stdout, "||h - h0||_{2} = %.16lf",
-			l2_distance(numHvalues, hvalues, h));
-	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf",
-			linf_distance(numHvalues, hvalues, h));
-
-	free(h);
-	taucs_ccs_free(Q);
-	taucs_ccs_free(Qt);
+	/* Run support function estimation. */
+	if (sfe)
+		sfe->run();
+	delete sfe;
 
 	DEBUG_END;
 	return NULL;

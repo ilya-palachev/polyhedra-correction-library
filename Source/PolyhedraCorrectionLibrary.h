@@ -37,11 +37,6 @@
 #include <memory>
 using namespace std;
 
-/* Includes from external libraries: */
-#include <libgexf.h>
-using namespace libgexf;
-
-
 /* Includes from auxiliary external libraries (built-in): */
 #include "Vector3d.h"
 #include "LeastSquaresMethod.h"

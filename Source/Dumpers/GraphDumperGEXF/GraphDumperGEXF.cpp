@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef USE_GRAPH_DUMPER
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
@@ -128,3 +130,5 @@ void GraphDumperGEXF::dump(const char* fileName)
 
     DEBUG_END;
 }
+
+#endif /* USE_GRAPH_DUMPER */

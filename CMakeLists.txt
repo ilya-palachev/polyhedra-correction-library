@@ -12,16 +12,8 @@ file(GLOB_RECURSE SOURCE_gaussString          "./External/GaussString/*.cpp")
 file(GLOB_RECURSE SOURCE_lsm                  "./External/LSM/*.cpp")
 file(GLOB_RECURSE SOURCE_vector3d             "./External/Vector3d/*.cpp")
 file(GLOB_RECURSE SOURCE_pcl                  "./Source/*.cpp")
-file(GLOB_RECURSE SOURCE_gexf                 "./External/LibGEXF/*.cpp")
 
 file(GLOB_RECURSE SOURCE_tests                "./Tests/*.cpp")
-
-file(GLOB_RECURSE HEADERS_arrayOperations     "./External/ArrayOperations/*.h")
-file(GLOB_RECURSE HEADERS_gaussString         "./External/GaussString/*.h")
-file(GLOB_RECURSE HEADERS_lsm                 "./External/LSM/*.h")
-file(GLOB_RECURSE HEADERS_Vector3d            "./External/Vector3d/*.h")
-file(GLOB_RECURSE HEADERS_pcl                 "./Source/*.h")
-file(GLOB_RECURSE HEADERS_gexf                "./External/LibGEXF/*.h")
 
 set (HEADERS_all "")
 list (APPEND HEADERS_all ${HEADERS_arrayOperations})
@@ -29,7 +21,6 @@ list (APPEND HEADERS_all ${HEADERS_gaussString})
 list (APPEND HEADERS_all ${HEADERS_lsm})
 list (APPEND HEADERS_all ${HEADERS_Vector3d})
 list (APPEND HEADERS_all ${HEADERS_pcl})
-list (APPEND HEADERS_all ${HEADERS_gexf})
 
 set (INCLUDE_DIRS_all "")
 foreach (_headerFile ${HEADERS_all})
@@ -38,9 +29,12 @@ foreach (_headerFile ${HEADERS_all})
 endforeach()
 list(REMOVE_DUPLICATES INCLUDE_DIRS_all)
 
-list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LibGEXF")
-list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
-include_directories(${INCLUDE_DIRS_all})
+list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/Source")
+list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/ArrayOperations")
+list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/GaussString")
+list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/LSM")
+list (APPEND INCLUDE_DIRS_all "${CMAKE_SOURCE_DIR}/External/Vector3d")
+list (APPEND INCLUDE_DIRS_all "/usr/include/eigen3")
 
 # Common compiler flags used for build:
 set(COMMON_FLAGS "")
@@ -64,19 +58,33 @@ add_library(lsm SHARED ${SOURCE_lsm})
 add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
 
-add_subdirectory("./External/LibGEXF")
+option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
+option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 
 target_link_libraries(pcl 
    arrayOperations 
    gaussString 
    lsm 
    vector3d
-   gexf
-   xml2
    CGAL
    gmp
    tsnnls
 )
+
+if (ENABLE_IPOPT)
+	target_link_libraries(pcl ipopt coinmumps coinhsl)
+	add_definitions(-DUSE_IPOPT)
+	message("!!! Ipopt solver is enabled !!!")
+endif()
+
+if (ENABLE_GRAPH_DUMPER)
+	target_link_libraries(pcl gexf xml2)
+	add_definitions(-DUSE_GRAPH_DUMPER)
+	list (APPEND INCLUDE_DIRS_all "/usr/include/libgexf")
+	list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
+endif()
+
+include_directories(${INCLUDE_DIRS_all})
 
 foreach(test_source_file ${SOURCE_tests})
 	get_filename_component(executable_name ${test_source_file} NAME_WE)

@@ -21,6 +21,8 @@
 #ifndef GRAPHDUMPERGEXF_H_
 #define GRAPHDUMPERGEXF_H_
 
+#ifdef USE_GRAPH_DUMPER
+
 #include <libgexf.h>
 
 #include "DataContainers/EdgeData/EdgeData.h"
@@ -36,6 +38,8 @@
  * This format has been chosen because it's used by Gephi visualizer.
  * In future we will need to have an alternative dumper.
  * */
+
+
 
 class GraphDumperGEXF
 {
@@ -67,4 +71,7 @@ public:
 	void dump(const char* fileName);
 };
 
+#endif /* USE_GRAPH_DUMPER */
+
 #endif /* GRAPHDUMPERGEXF_H_ */
+

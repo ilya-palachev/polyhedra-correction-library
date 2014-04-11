@@ -29,24 +29,7 @@
 #include <memory>
 #include <list>
 
-/*
- * Inclusions from CGAL library.
- * TODO: They can dramatically increase build time. How to move them out from
- * here? Forward declarations are needed.
- */
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/point_generators_3.h>
-#include <CGAL/algorithm.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/convex_hull_3.h>
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Polyhedron_3<K> Polyhedron_3;
-typedef K::Segment_3 Segment_3;
-
-/** Define point creator */
-typedef K::Point_3 Point_3;
-typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
+#include "PolyhedronCGAL.h"
 
 /*
  * Forward declarations

@@ -31,6 +31,25 @@
 
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "Recoverer/SupportFunctionEstimationData.h"
+
+/**
+ * Sets the estimator to be used for support function estimation.
+ */
+typedef enum
+{
+	/** TSNNLS estimator (not working). */
+	TSNNLS_ESTIMATOR = 0,
+
+	/** Ipopt estimator. */
+	IPOPT_ESTIMATOR = 1,
+
+	/** Quadratic primal CGAL estimator.  */
+	CGAL_ESTIMATOR = 2,
+
+	/** Linear CGAL estimator. */
+	CGAL_ESTIMATOR_LINEAR = 3
+} RecovererEstimator;
 
 /**
  * Main recovering engine, based on support function estimation tuned for our
@@ -40,11 +59,32 @@ class Recoverer
 {
 private:
 
+	/** Estimator to be used. */
+	RecovererEstimator estimator;
+
+	/** Whether to regularize the support matrix. */
+	bool ifRegularize;
+
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
+
+	/** ID of vertex with maximal X coordinate. */
+	int iXmax;
+
+	/** ID of vertex with maximal Y coordinate. */
+	int iYmax;
+
+	/** ID of vertex with maximal Z coordinate. */
+	int iZmax;
+
+	/** Regularizing vector. */
+	Vector_3 vectorRegularizing;
+
+	/** Vector with saved 3 h-values that correspond to iXmax, iYmax, iZmax */
+	Vector_3 vectorMaxHValues;
 
 	/**
 	 * Extracts support planes from shadow contours.
@@ -69,6 +109,13 @@ private:
 	 * @param planes	The vector of planes
 	 */
 	vector<Vector3d> mapPlanesToDualSpace(vector<Plane> planes);
+
+	/**
+	 * Constructs convex hull of the point set using CGAL API.
+	 *
+	 * @param points	Vector of points
+	 */
+	Polyhedron_3 constructConvexHullCGAL(vector<Vector3d>);
 
 	/**
 	 * Constructs convex hull of the point set using CGAL API.
@@ -108,6 +155,30 @@ private:
 	 */
 	PolyhedronPtr buildMaybeDualContours(bool ifDual,
 			ShadeContourDataPtr SCData);
+
+	/**
+	 * Finds IDs of vertices that have maximal coordinates of polyhedron's
+	 * vertices.
+	 *
+	 * Columns of transposed support matrix which have these IDs will be then
+	 * eliminated.
+	 *
+	 * @param polyhedron	The polyhedron
+	 */
+	Vector_3 findMaxVertices(Polyhedron_3 polyhedron,
+		int& imax0, int& imax1, int& imax2);
+	
+	/**
+	 * Regularizes support matrix by eliminating columns that have IDs equal to
+	 * iXmax, iYmax, iZmax and regularizes also the h-values vector.
+	 * 
+	 * @param matrix		The transpose of support matrix
+	 * @param polyhedron	The polyhedron (convex hull of supporting
+	 * directions)
+	 */
+	void regularizeSupportMatrix(SupportFunctionEstimationData* data,
+			Polyhedron_3 polyhedron);
+
 public:
 
 	/**
@@ -168,11 +239,17 @@ public:
 	/**
 	 * Builds naive matrix for support function estimation problem.
 	 *
-	 * @param matrix	The matrix.
-	 * @param hvalues	The noisy-measured support vector.
+	 * @param SCData	Shadow contour data
 	 */
-	void buildNaiveMatrix(ShadeContourDataPtr SCData, int& numConditions,
-			double*& matrix, int& numHvalues, double*& hvalues);
+	SupportFunctionEstimationData* buildSupportMatrix(
+			ShadeContourDataPtr SCData);
+
+	/**
+	 * Sets the estimator that will be used for support function estimation.
+	 *
+	 * @param estimator	The type of estimator
+	 */
+	void setEstimator(RecovererEstimator e);
 
 	/**
 	 * Runs the recovering procedure.

@@ -482,7 +482,9 @@ bool EdgeReducer::rePreprocessFacets()
 	DEBUG_PRINT("-------------- After stage 1 we have the following");
 	DEBUG_PRINT("               configuration of facets:");
 
+#ifdef USE_GRAPH_DUMPER
 	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
+#endif /* USE_GRAPH_DUMPER */
 
 	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
@@ -494,9 +496,13 @@ bool EdgeReducer::rePreprocessFacets()
 		/* Verify the information about incidence structure after removals. */
 		ASSERT(facetCurr->verifyIncidenceStructure());
 
+#ifdef USE_GRAPH_DUMPER
 		graphDumper->collect(facetCurr);
+#endif /* USE_GRAPH_DUMPER */
 	}
+#ifdef USE_GRAPH_DUMPER
 	graphDumper->dump("poly-data-out/facets_dump.gexf");
+#endif /* USE_GRAPH_DUMPER */
 
 	DEBUG_PRINT("-------------- end of dumping facets");
 #endif /* NDEBUG */
