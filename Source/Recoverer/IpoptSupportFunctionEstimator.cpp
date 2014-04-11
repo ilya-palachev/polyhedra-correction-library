@@ -65,7 +65,10 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 	DEBUG_PRINT("Number of non-zero elements in the Jacobian of g is set to "
 			"nnz_jac_g = %d", nnz_jac_g);
 
-	nnz_h_lag = 0;
+	nnz_h_lag = nnz_jac_g;
+	DEBUG_PRINT("Number of non-zero elements in the Hessian is set to "
+			"nnz_h_lag = %d", nnz_h_lag);
+
 	index_style = TNLP::C_STYLE;
 	DEBUG_END;
 	return true;
@@ -196,24 +199,37 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	DEBUG_PRINT("   jCol = %p", (void*) jCol);
 	DEBUG_PRINT("   values = %p", (void*) values);\
 
-	ASSERT(iRow);
-	ASSERT(jCol);
+	if (!values)
+	{
+		ASSERT(iRow);
+		ASSERT(jCol);
+	}
 	if (new_x)
 		ASSERT(values);
 
 	SparseMatrix Q = supportMatrix();
-	n_ele_jac = Q.nonZeros();
+	ASSERT(n_ele_jac == Q.nonZeros());
 
 	int i = 0;
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
-			DEBUG_PRINT("Setting jac_g[%d][%d] = %lf", it.row(), it.col(),
-					it.value());
-			iRow[i] = it.row();
-			jCol[i] = it.col();
-			if (new_x)
+			if (values)
+			{
+				/* Inform about the values of Lagrangian of g */
+				DEBUG_PRINT("Setting jac_g[%d][%d] = %lf", it.row(), it.col(),
+						it.value());
 				values[i] = it.value();
+
+			}
+			else
+			{
+				/* Inform about the sparsity structure of the Lagrangian of g */
+				DEBUG_PRINT("Setting as nonzero jac_g[%d][%d]", it.row(),
+						it.col());
+				iRow[i] = it.row();
+				jCol[i] = it.col();
+			}
 			++i;
 		}
 	DEBUG_END;
@@ -239,28 +255,36 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	DEBUG_PRINT("   jCol = %p", (void*) jCol);
 	DEBUG_PRINT("   values = %p", (void*) values);\
 
-	ASSERT(iRow);
-	ASSERT(jCol);
+	if (!values)
+	{
+		ASSERT(iRow);
+		ASSERT(jCol);
+	}
 	if (new_x)
 		ASSERT(values);
 
-	if (n_ele_hess == 0)
-		return true;
-
 	SparseMatrix Q = supportMatrix();
 	Q *= 2. * obj_factor;
-	n_ele_hess = Q.nonZeros();
+	ASSERT(n_ele_hess == Q.nonZeros());
 
 	int i = 0;
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
-			DEBUG_PRINT("Setting h[%d][%d] = %lf", it.row(), it.col(),
-					it.value());
-			iRow[i] = it.row();
-			jCol[i] = it.col();
-			if (new_x)
+			if (values)
+			{
+				/* Inform about the values of Hessian */
+				DEBUG_PRINT("Setting h[%d][%d] = %lf", it.row(), it.col(),
+						it.value());
 				values[i] = it.value();
+			}
+			else
+			{
+				/* Inform about the sparsity structure of Hessian */
+				DEBUG_PRINT("Setting as nonzero h[%d][%d]", it.row(), it.col());
+				iRow[i] = it.row();
+				jCol[i] = it.col();
+			}
 			++i;
 		}
 	DEBUG_END;
