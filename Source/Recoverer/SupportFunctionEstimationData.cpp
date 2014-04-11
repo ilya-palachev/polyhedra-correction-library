@@ -46,6 +46,9 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	m_supportVector(data->supportVector())
 {
 	DEBUG_START;
+	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
+	ASSERT(m_supportMatrix.rows() == m_numConditions);
+	ASSERT(m_supportMatrix.cols() == m_numValues);
 	DEBUG_END;
 }
 
@@ -58,8 +61,8 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(int numValues,
 {
 	DEBUG_START;
 	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
-	ASSERT(m_supportMatrix.rows() == m_numValues);
-	ASSERT(m_supportMatrix.cols() == m_numConditions);
+	ASSERT(m_supportMatrix.rows() == m_numConditions);
+	ASSERT(m_supportMatrix.cols() == m_numValues);
 	/*
 	 * TODO: Check also that number of conditions (i. e. number of edges in the
 	 * sphere triangulation) satisfies bounds arrising from Euler's theorem.

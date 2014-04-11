@@ -1080,8 +1080,9 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
+	SparseMatrix Q = Qt.transpose();
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			numHvalues, Qt.cols(), Qt, hvalues);
+			numHvalues, Q.rows(), Q, hvalues);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
@@ -1093,6 +1094,9 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	 * v1 = (u1x, ..., uMx)
 	 * v2 = (u1y, ..., uMy)
 	 * v3 = (u1z, ..., uMz)
+	 *
+	 * TODO: Regularization is not supported in Ipopt solver for now. We need
+	 * to fix it.
 	 */
 	if (ifRegularize)
 	{

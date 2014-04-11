@@ -217,16 +217,12 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			if (values)
 			{
 				/* Inform about the values of Lagrangian of g */
-				DEBUG_PRINT("Setting jac_g[%d][%d] = %lf", it.row(), it.col(),
-						it.value());
 				values[i] = it.value();
 
 			}
 			else
 			{
 				/* Inform about the sparsity structure of the Lagrangian of g */
-				DEBUG_PRINT("Setting as nonzero jac_g[%d][%d]", it.row(),
-						it.col());
 				iRow[i] = it.row();
 				jCol[i] = it.col();
 			}
@@ -264,8 +260,9 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 		ASSERT(values);
 
 	SparseMatrix Q = supportMatrix();
-	Q *= 2. * obj_factor;
 	ASSERT(n_ele_hess == Q.nonZeros());
+	Q *= 2. * obj_factor;
+
 
 	int i = 0;
 	for (int k = 0; k < Q.outerSize(); ++k)
@@ -274,14 +271,11 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 			if (values)
 			{
 				/* Inform about the values of Hessian */
-				DEBUG_PRINT("Setting h[%d][%d] = %lf", it.row(), it.col(),
-						it.value());
 				values[i] = it.value();
 			}
 			else
 			{
 				/* Inform about the sparsity structure of Hessian */
-				DEBUG_PRINT("Setting as nonzero h[%d][%d]", it.row(), it.col());
 				iRow[i] = it.row();
 				jCol[i] = it.col();
 			}
