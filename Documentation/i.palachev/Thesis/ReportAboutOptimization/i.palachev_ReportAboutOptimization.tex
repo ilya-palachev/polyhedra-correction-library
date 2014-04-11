@@ -1,0 +1,1644 @@
+
+% Copyright (c) 2009-20134 Ilya Palachev <iliyapalachev@gmail.com>
+% This document contains the report about reconstruction of convex sets.
+
+% Declare the class of document: size of paper, size of font, and etc.
+% Type of the document is "article".
+\documentclass[a4paper, 12pt, titlepage]{article} 
+
+% Package that enables setting the size of free spaces at the border of the 
+% page with the command  \geometry :
+\usepackage{geometry}
+\geometry {
+   left=3cm,
+   right=1.5cm,
+   top=2cm,
+   bottom=2cm
+}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage[english,russian]{babel}
+
+\usepackage{amsmath}
+
+%\usepackage{cmap}
+
+\usepackage{indentfirst}
+
+\usepackage{a4wide,amssymb}
+
+%\usepackage[pdftex]{graphicx}
+
+%\usepackage{wrapfig}
+
+%\linespread{1.3}               % полтора интервала. Если 1.6, то два интервала
+\pagestyle{plain}               % номерует страницы
+
+\usepackage{graphicx}
+\renewcommand{\topfraction}{1}
+\renewcommand{\textfraction}{0}
+
+% Package that enables usage of theorems and definition designed in a 
+% standard way.
+% http://en.wikibooks.org/wiki/LaTeX/Theorems
+\usepackage{amsthm}
+
+% Create environment for smart definitions
+\theoremstyle{definition}
+\newtheorem{SmartDefinition}{Определение}
+
+% Create environment for smart theorems
+\theoremstyle{plain}
+\newtheorem{SmartTheorem}{Теорема}
+
+% Create environment for smart lemmas
+\theoremstyle{plain}
+\newtheorem{SmartLemma}{Лемма}
+
+% The following code enables back references:
+\usepackage{color} 
+\definecolor{darkgreen}{rgb}{0,.5,0} 
+\usepackage[unicode,colorlinks,filecolor=blue,citecolor=darkgreen,pagebackref]
+{hyperref}
+
+% The package that provides symbols like \Square:
+\usepackage{wasysym}
+
+%opening
+\title{Отчет по методам оптимизации}
+\author{Палачев Илья}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\newpage
+\section{Линейное программирование}
+Одним из самых распространенных классов задач оптимизации являются задачи
+\textbf{линейного программирования}. Методы решения этих задач имеют широкое
+приложение в разнообразных прикладных областях науки. Самым распространенным
+методом решения задач линейного программирования является так называемый
+\textbf{симплекс-метод}, который будет далее описан в этом разделе.
+
+\textit{Общая задача линейного программирования} формулируется следующим
+образом.
+
+\begin{equation}
+\label{eq:gen-lp}
+ J(u) = c_{1} u^{1} + \ldots + c_{n} u^{n} \to min
+\end{equation}
+
+при условиях
+
+\begin{equation}
+\label{eq:gen-lp-cond1}
+ u^{k} \geq 0, \;\;\;\;\; k \in I
+\end{equation}
+
+\begin{equation}
+\label{eq:gen-lp-cond2}
+ \left\{
+  \begin{aligned}
+   a_{11} u^{1} + \ldots + a_{1n} u^{n} \leq 0 \\
+   \ldots \\
+   a_{m1} u^{1} + \ldots + a_{mn} u^{n} \leq 0 \\
+  \end{aligned}
+ \right.
+\end{equation}
+
+\begin{equation}
+\label{eq:gen-lp-cond3}
+ \left\{
+  \begin{aligned}
+   a_{m + 1, 1} u^{1} + \ldots + a_{m + 1, n} u^{n} = 0 \\
+   \ldots \\
+   a_{s1} u^{1} + \ldots + a_{sn} u^{n} = 0 \\
+  \end{aligned}
+ \right.
+\end{equation}
+
+где $I \subset \{1, 2, \ldots, n\}$ - множество индексов переменных, которые
+требуется поддерживать положительными.
+
+В векторном виде задачу (\ref{eq:gen-lp}), (\ref{eq:gen-lp-cond1}),
+(\ref{eq:gen-lp-cond2}), (\ref{eq:gen-lp-cond3}) можно записать следующим
+образом:
+
+\begin{equation}
+ \begin{aligned}
+  J(u) = \langle c, u \rangle \to min \\
+  u \in U = \{u \in \mathbb{R}^{n} \;\; | \;\; u^{k} \geq 0, k \in I,
+  A u \leq 0, \overline{A} u \overline{b}\}
+ \end{aligned}
+\end{equation}
+
+В качестве особого подкласса общей задачи линейного программирования
+выделяют так называемую \textit{каноническую задачу}:
+
+\begin{equation}
+ \begin{aligned}
+  J(u) = \langle c, u \rangle \to min \\
+  u \in U = \{u \in \mathbb{R}^{n} \;\; | \;\; u \geq 0,
+  \overline{A} u = \overline{b}\}
+ \end{aligned}
+\end{equation}
+
+а также \textit{основную задачу} линейного программирования:
+
+\begin{equation}
+ \begin{aligned}
+  J(u) = \langle c, u \rangle \to min \\
+  u \in U = \{u \in \mathbb{R}^{n} \;\; | \;\; u \geq 0,
+  \overline{A} u \leq \overline{b}\}
+ \end{aligned}
+\end{equation}
+
+Можно показать, что каждую из трех задач можно свести к любой другой с помощью
+введения дополнительных переменных. На практике как правило к этому стараются
+не прибегать, поскольку рост числа переменных обходится дорого с вычислительной 
+точки зрения. Далее мы будем рассматривать методы решения канонической задачи.
+
+Из геометрических соображений видно, что множество ограничений $U$ является
+многогранным, причем либо ограниченным, либо неограниченным. Если рассмотреть
+поверхности уровня минимизируемого функционала, которые являются аффинными
+подпространствами в $\mathbb{R}^{n}$, то пересекая их с множеством $U$, мы
+сможем выявить поверхность самого низкого уровня. На ней и будет достигаться
+минимум функционала. Это поверхность будет являться опорной к множеству
+ограничений, поэтому в ее пересечении с $U$ будет содержаться хотя бы одна 
+вершина $U$. В теории линейного программирования такие вершины принято
+называть \textit{угловыми}.
+
+\begin{SmartDefinition}
+ Пусть $U$ -- выпуклое множество в $\mathbb{R}^{n}$. Тогда $v \in U$ называется
+ \textbf{угловой точкой} множества $U$, если представление
+ $v = \alpha v_{1} + (1 - \alpha) v_{2}$ при $v_{1}, v_{2} \in U$ и
+ $0 < \alpha < 1$ возможно лишь при $v_{1} = v_{2}$. Иначе говоря $v$ -- угловая
+ точка множества $U$, если она не является внутренней точкой никакого отрезка,
+ принадлежащего множеству $U$.
+\end{SmartDefinition}
+
+В случае канонической задачи множество $U$ представляет из себя следующее:
+
+\begin{equation}
+\label{eq:canon-cond}
+ U = \{u \in \mathbb{R}^{n} \;\; | \;\; u \geq 0, A u = b\}
+\end{equation}
+
+Критерий того, что точка является угловой точкой множества определяет следующая
+теорема.
+
+\begin{SmartTheorem}
+ Пусть множество определяется условиями (\ref{eq:canon-cond}), $A \neq 0$,
+ $r = rang A$ -- ранг матрицы $A$. Для того, чтобы точка
+ $v = (v_{1}, v_{2}, \ldots, v_{n})$ была угловой точкой множества $U$,
+ необходимо и достаточно, чтобы существовали набор из $r$ номеров
+ $j_{1}, \ldots, j_{r}$ ($1 \leq j_{l} \leq n, l = 1, \ldots, r$) таких, что
+ \begin{equation}
+ \label{eq:vertex-def}
+  A_{j_{1}} v^{j_{1}} + \ldots + A_{j_{r}} v^{j_{r}} = b;
+  \;\; v^{j} = 0, j \neq j_{l}, l = 1, \ldots, r
+ \end{equation}
+\end{SmartTheorem}
+
+В последнем определении существенно, что в (\ref{eq:vertex-def}) берутся ровно
+$r$ векторов $A_{j_{1}}, \ldots, A_{j_{r}}$ -- ровно такое число векторов,
+каков ранг матрицы $A$.
+
+\begin{SmartDefinition}
+ Систему векторов $A_{j_{1}}, \ldots, A_{j_{r}}$, входящих в первое из равенств
+ (\ref{eq:vertex-def}), называют \textit{базисом угловой точки} $v$, а
+ соответствующие им величины $v^{j_{1}}, \ldots, v^{j_{r}}$ --
+ \textit{базисными координатами} угловой точки $v$. Если все базисные 
+ координаты угловой точки положительны, то такую угловую точку называют
+ \textit{невырожденной}. В противном случае -- \textit{вырожденной}. При
+ фиксированном базисе $A_{j_{1}}, \ldots, A_{j_{r}}$ переменные
+ $u^{j_{1}}, \ldots, u^{j_{r}}$ называются \textit{базисными переменными}
+ угловой точки, а остальные $u^{j}$ -- \textit{небазисными (свободными)
+ переменными}.
+\end{SmartDefinition}
+
+Для того чтобы избежать трудоемкого полного перебора всех угловых точек
+множества ограничений $U$, выбирают одну, от нее переходят к другой, у которой
+значение функционала меньше и т. д. В этом и состоит симплекс-метод.
+
+Далее будем считать, что $m = n$ и все уравнения ограничений, линейно зависимые
+от других, выброшены.
+
+Пусть нам известна угловая точка $v$. Пусть $\overline{u} = (u_{1},
+u_{r})$ -- вектор, составленный из базисных переменных угловой точки
+$v$. Перепишем систему ограничений в следующем виде:
+
+\begin{equation}
+ B \overline{u} + A_{r + 1} u^{r + 1} + \ldots + A_{n} u^{n} = b
+\end{equation}
+
+Домножим эту систему слева на $B^{-1}$, базисные переменные через
+небазисные и получим следующее:
+
+\begin{equation}
+\label{eq:nonfree-via-free}
+ \begin{aligned}
+  u^{1} = v^{1} - \gamma_{1, r + 1} u^{r + 1} - \ldots - \gamma_{1 k} u^{k} -
+  \ldots - \gamma_{1 n} u^{n} \\
+  \ldots \\
+  u^{i} = v^{i} - \gamma_{i, r + 1} u^{r + 1} - \ldots - \gamma_{i k} u^{k} -
+  \ldots - \gamma_{i n} u^{n} \\
+  \ldots \\
+  u^{r} = v^{r} - \gamma_{r, r + 1} u^{r + 1} - \ldots - \gamma_{r k} u^{k} -
+  \ldots - \gamma_{r n} u^{n} \\
+ \end{aligned}
+\end{equation}
+
+Подставив эти выражения в формулу функционала, получим:
+
+\begin{equation}
+ J(u) = J(v) - \sum \limits_{i = r + 1}^{n} \Delta_{i} u^{i}
+\end{equation}
+
+где
+
+\begin{equation}
+ \Delta_{i} = \langle \overline{c}, B^{-1} A_{i} \rangle =
+ \sum \limits_{s = 1}^{r} c_{s} \gamma_{s i} - c_{i}
+\end{equation}
+
+Запишем величины $\gamma_{s k}, v^{i}, \Delta_{i}$ в так называемую
+симплекс-таблицу:
+
+\begin{table}[hh]
+\caption{Симплекс-таблица}
+\label{simplex-table}
+\begin{center}
+\begin{tabular}{|p{2cm}|c|c|c|c|c|c|c|c|c|c|c|c|c|c|p{2cm}|}
+\hline
+Базисные \par переменные & $u^{1}$ & $\ldots$ & $u^{i}$ & $\ldots$ &
+$u^{s}$ & $\ldots$ & $u^{r}$ & $u^{r + 1}$ & $\ldots$ & $u^{k}$ & $\ldots$ &
+$u^{j}$ & $\ldots$ & $u^{n}$ & Свободные \par члены \\
+\hline
+$u^{1}$ & 1 & $\ldots$ & 0 & $\ldots$ & 0 & $\ldots$ & 0 & $\gamma_{1, r + 1}$ &
+$\ldots$ & $\gamma_{1k}$ & $\ldots$ & $\gamma_{1j}$ & $\ldots$ & $\gamma_{1n}$
+& $v^{1}$ \\
+$\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ &
+$\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ &
+$\ldots$ & $\ldots$ \\
+$u^{i}$ & 0 & $\ldots$ & 1 & $\ldots$ & 0 & $\ldots$ & 0 & $\gamma_{i, r + 1}$ &
+$\ldots$ & $\gamma_{i k}$ & $\ldots$ & $\gamma_{i j}$ & $\ldots$ &
+$\gamma_{i n}$ & $v^{i}$ \\
+$\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ &
+$\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ &
+$\ldots$ & $\ldots$ \\
+$u^{s}$ & 0 & $\ldots$ & 0 & $\ldots$ & 1 & $\ldots$ & 0 & $\gamma_{s, r + 1}$ &
+$\ldots$ & $\gamma_{s k}$ & $\ldots$ & $\gamma_{s j}$ & $\ldots$ &
+$\gamma_{s n}$ & $v^{s}$ \\
+$\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ &
+$\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ & $\ldots$ &
+$\ldots$ & $\ldots$ \\
+$u^{r}$ & 0 & $\ldots$ & 0 & $\ldots$ & 0 & $\ldots$ & 1 & $\gamma_{r, r + 1}$ &
+$\ldots$ & $\gamma_{r k}$ & $\ldots$ & $\gamma_{r j}$ & $\ldots$ &
+$\gamma_{r n}$ & $v^{r}$ \\
+\hline
+Функция & 0 & $\ldots$ & 0 & $\ldots$ & 0 & $\ldots$ & 0 & $\Delta_{r + 1}$ &
+$\ldots$ & $\Delta_{k}$ & $\ldots$ & $\Delta_{j}$ & $\ldots$ & $\Delta_{n}$ &
+$J(v)$ \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Опишем коротко алгоритм линейного программирования. Допустим, что множество $U$
+непусто и нам уже известна некоторая угловая точка $v$.
+
+Будем менять по очереди небазисные переменные, тогда функционал будет меняться
+по формуле
+
+\begin{equation}
+ J(u) = J(v) - \Delta_{k} u^{k}
+\end{equation}
+
+Будем искать такой номер $k$ ($r + 1 \leq k \leq n$) и такую величину $u^{k}$,
+чтобы точка $w$, полученная по формулам (\ref{eq:nonfree-via-free}) для набора
+свободных переменных $0, \ldots, 0, u_{k}, 0, \ldots, 0$, удовлетворяла
+условиям связи $A w = b$. В зависимости от знаков величин $\gamma_{s k},
+\Delta_{i}$ выделяют три возможных случая:
+
+\textbf{Случай 1.} $\Delta_{i} \leq 0$ для всех $i = r + 1, \ldots, n$. Тогда 
+можно показать, что $v$ -- точка минимума функционала.
+
+\textbf{Случай 2.} Существует такой номер $k$ ($r + 1 \leq k \leq n$), что 
+$\Delta_{k} > 0$, но все $\gamma_{i k} \leq 0$ для всех $i = 1, \ldots, r$.
+Тогда можно показать, что функционал не является ограниченным снизу на $U$.
+
+\textbf{Случай 3.} Существуют номера $k$ ($r + 1 \leq k \leq n$),
+$i$ ($1 \leq i \leq r$) такие что $\Delta_{k} > 0$ и $\gamma_{i k} > 0$.
+Для того чтобы обеспечить выполнение условий связи полагают
+$u^{k} = v_{s} / \gamma_{s k}$, где индекс $s$ выбран следующим образом:
+
+\begin{equation}
+ \operatornamewithlimits{min}_{i \in I_{k}} v^{i} / \gamma_{i k} =
+ v_{s} / \gamma_{s k}
+\end{equation}
+
+Соответствующую величину $\gamma_{s k}$ называют \textit{разрешающим элементом}
+симплекс-таблицы.
+
+Можно показать что полученная таким образом точка $w$ является угловой, 
+реализует меньшее значение функционала, чем точка $v$, и что вектора
+$A_{1}, \ldots, A_{s - 1}, A_{s + 1}, \ldots, A_{r}, A_{k}$ образуют ее базис.
+После этого пересчитывают величины симплекс-таблицы по тем же принципам,
+которые описаны выше, и вновь ищут следующую угловую точку.
+
+Описанная выше процедура работает для случая, когда точка $v$ является
+невырожденной. Если же она вырождена, то во время работы алгоритма может
+произойти \textit{зацикливание}. Для того, чтобы его избежать, применяют
+специальный метод, называемый \textbf{антициклином}. Он состоит в том, что
+симплекс-таблица расширяется дополнительными столбцами единичной матрицы
+порядка $r \times r$. На каждом шаге эти столбцы преобразуются по тем же
+правилам, что и обычные. В случае вырожденной угловой точки эти столбцы
+позволяют выбрать такой особый базис угловой точки $v$ (которых, вообще говоря,
+должно быть несколько), что зацикливания можно избежать.
+
+Указанные выше построения основывались на том, что некоторая угловая точка
+множества $U$ уже известна. Для того, чтобы найти первую угловую точку также
+применяют особый метод.
+
+А именно, множество переменных $u = (u^{1}, \ldots, u^{n})$ расширяется
+дополнительными переменными $w = (u^{n + 1}, \ldots, u^{n + m})$ и в
+пространстве $\mathbb{R}^{n + m}$ относительно переменных
+$z = (u, w)^{T}$ рассматривают следующую каноническую задачу линейного
+программирования:
+
+\begin{equation}
+\begin{aligned}
+ J_{1}(z) = u^{n + 1} + \ldots + u^{n + m} \to min \\
+ z \in Z = \{ z \in \mathbb{R}^{n + m} | z \geq 0,
+ C z \equiv A u + w = b \} \\
+\end{aligned}
+\end{equation}
+
+Оказывается, что для нее точка $z_{0} = (0, b) \geq 0$ является угловой точкой
+множества $Z$. Очевидно, что $J_{1}(z) \geq 0$ при всех $z \in Z$. Поэтому
+алгоритм симлекс-метода обязательно сходится. Пусть он сойдется к некоторой
+точке $z_{*}$. Тогда можно показать, что если $J_{1}(z_{*}) > 0$, то
+$U = \varnothing$, а если $J_{1}(z_{*}) = v^{n + 1} + \ldots + v^{n + m} = 0$, 
+так что $z = (v, 0)$, где $v$ -- угловая точка множества $U$.
+
+
+
+\section{Градиентный метод}
+
+\subsection{Общее определение градиентного метода}
+
+Будем рассматривать задачу
+
+\begin{equation}
+ J(u) \to inf ; \;\;\; u \in U \equiv \mathbb{R}^{n},
+\end{equation}
+
+предполагая, что функция $J(u)$ непрерывно дифференцируема на $\mathbb{R}^{n}$,
+т. е. $J(u) \in C^{1}(\mathbb{R}^{n})$. Исходя из равенства
+
+\begin{equation}
+ J(u + h) - J(u) = \langle J'(u), h \rangle + o(h; u)
+\end{equation}
+
+и оценки
+
+\begin{equation}
+ -|J'(u)| \cdot |h| \leq \langle J'(u), h \rangle \leq |J'(u)| \cdot |h|
+\end{equation}
+
+нетрудно заметить, что при $J'(u) \neq 0$ направление наибыстрейшего возрастания
+функции $J(u)$ в точке $u$ совпадает с направлением градиента $J'(u)$, а
+направление наибыстрейшего убывания -- с направлением антиградиента $-J'(u)$.
+Это свойство лежит в основе целого ряда численных методов минимизации --
+градиентных методов.
+
+Все градиентные методы представляют собой итерационные процессы вида
+
+\begin{equation}
+ u{k + 1} = u_{k} - \alpha_{k} J'(u_{k}), \;\;\; \alpha_{k} > 0, \;\;
+ k = 0, 1, \ldots
+\end{equation}
+
+где $\alpha_{k}$ называется длиной шага или просто шагом градиентного метода.
+Если $J'(u_{k}) \neq 0$, то $\alpha_{k} > 0$ можно выбрать так, чтобы
+$J(u_{k + 1}) < J(u_{k})$. В зависимости от стратегии выбора шага выделяют
+различные разновидности градиентного метода.
+
+\subsection{Метод скорейшего спуска}
+
+Так, в \textbf{методе скорейшего спуска} шаг выбирается так, чтобы на каждой
+итерации алгоритма было получено максимально возможное уменьшение величины
+функционала. А именно, на каждой итерации решается задача одномерной минимизации
+
+\begin{equation}
+ J(u_{k} - \alpha J'(u_{k})) \to min
+\end{equation}
+
+и в качестве величины шага берется полученное оптимальное значение $\alpha > 0$.
+
+\subsection{Метод автоматического выбора шага}
+
+Для упрощения алгоритмов часто используют некоторое фиксированное значение
+величины шага $\alpha$ и на каждом шаге итерации проверяют условие убывания
+функционала. В случае, если оно нарушается, шаг дробят
+($\alpha := \frac{1}{2}$). Для ускорения сходимости шаг также пытаются увеличить
+на некоторых итерациях.
+
+\subsection{Случай липшицевости градиента}
+
+В случае если функция $J(u) \in C^{1, 1}(\mathbb{R}^{n})$, т. е.
+$J(u) \in C^{1}(\mathbb{R}^{n})$ и градиент удовлетворяет условию Липшица
+
+\begin{equation}
+ |J'(u) - J'(v)| \leq L |u - v|, \;\;\; u, v \in \mathbb{R}^{n}
+\end{equation}
+
+причем константа $L$ известна, в качестве $\alpha_{k}$ может быть взято любое
+число, удовлетворяющее условиям:
+
+\begin{equation}
+ 0 < \varepsilon_{0} \leq \alpha_{k} \leq 2 / (L + 2 \varepsilon)
+\end{equation}
+
+\subsection{Ослабленный метод скорейшего спуска}
+
+Данный метод отличается от метода скорейшего спуска тем, что на каждой итерации
+длина шага выбирается по несколько более ослабленному критерию:
+
+\begin{equation}
+ J(u_{k}) - J(u_{k} - \alpha_{k} J'(u_{k})) \geq
+ \varepsilon \alpha_{k} |J'(u_{u_{k}})|^{2}, \;\;\; \varepsilon > 0
+\end{equation}
+
+
+\subsection{Случай известной точной нижней грани функционала}
+
+В случае, когда точная нижняя грань функционала
+$J_{*} = \operatornamewithlimits{inf}_{\mathbb{R}^{n}} J(u > -\infty)$ известна,
+можно принять
+
+\begin{equation}
+ \alpha_{k} = (J(u_{k}) - J_{*}) |J'(u_{k})|^{-2}
+\end{equation}
+
+--это абсцисса точки пересечения прямой $J = J_{*}$ с касательной к кривой
+$J = f_{k}(\alpha) = J(u_{k} - \alpha J'(u_{k}))$ в точке $(0, f_{k}(0))$.
+
+\subsection{Критерии окончания счета}
+
+На практике используются следующие критерии остановки:
+
+\begin{equation}
+ |u_{k} - u_{k + 1}| \leq \varepsilon
+\end{equation}
+
+\begin{equation}
+ |J(u_{k}) - J(u_{k + 1})| \leq \delta
+\end{equation}
+
+\begin{equation}
+ |J'(u_{k})| \leq \gamma
+\end{equation}
+
+где $\varepsilon, \delta, \gamma$ -- заданные числа. Разумеется, к этим 
+критериям окончания счета надо относиться критически, поскольку они могут
+выполниться и вдали от искомой точки минимума. К сожалению, надежных критериев
+окончания счета, которые гарантировали бы получение решения исходной задачи с
+требуемой точностью, пока нет.
+
+
+
+\section{Метод проекции градиента}
+
+Будем рассматривать задачу
+
+\begin{equation}
+ f(x) \to inf; \;\;\; x \in X \subset \mathbb{R}^{n}
+\end{equation}
+
+где множество $X$ есть, вообще говоря, несобственное подмножество в
+$\mathbb{R}^{n}$, а $f(x) \in C^{1}(X)$. Непосредственное применение
+описанного выше градиентного метода может привести к тому что очередная точка
+$x_{k + 1} \notin X$. Однако эту трудность можно преодолеть, если полученную
+точку $x_{k + 1} = x_{k} - \alpha_{k} f'(x_{k})$ при каждом $k$ проектировать
+на множество $X$. Таким образом, \textbf{метод проекции градиента}
+представляет из себя следующий итерационный процесс:
+
+\begin{equation}
+ x_{k + 1} = \mathcal{P}_{X}(x_{k} - \alpha_{k} f'(x_{k})), \;\;\;
+ k = 0, 1, \ldots
+\end{equation}
+
+где $\alpha_{k}$ -- положительная величина. В зависимости от выбора
+$\alpha_{k}$ можно получить различные варианты метода проекции градиента.
+В целом они идейно повторяют соответствующие варианты метода градиента.
+
+\section{Метод условного градиента}
+
+Этот метод приспособлен для решения задачи
+
+\begin{equation}
+ f(x) \to inf; \;\;\; x \in X
+\end{equation}
+
+где $X$ -- выпуклое замкнутое ограниченное множество из $\mathbb{R}^{n}$,
+функция $f(x) \in C^{1}(X)$. Пусть $x_{0} \in X$ -- некоторое начальное
+приближение. Если известно $k$-е приближение $x_{k} \in X, k \geq 0$, то
+приращение функции $f(x)$ в точке $x_{k}$ можем представить в виде
+
+\begin{equation}
+ f(x) - f(x_{k}) = \langle f'(x_{k}, x - x_{k}) + o(|x - x_{k}|) \rangle
+\end{equation}
+
+Возьмем главную линейную часть этого приращения
+
+\begin{equation}
+ f_{k}(x) = \langle f'(x_{k}, x - x_{k}) \rangle,
+\end{equation}
+
+и определим вспомогательное приближение $\overline{x}_{k}$ из условий
+
+\begin{equation}
+ \label{eq:constrained-gradient-method}
+ \overline{x}_{k} \in X, \;\;\;
+ \operatornamewithlimits{inf}_{X} f_{k}(x) = f_{k}(\overline{x}_{k}) =
+ \langle f'(x_{k}), \overline{x}_{k} - x_{k} \rangle
+\end{equation}
+
+Так как множество $X$ замкнуто и ограничено, а линейная функция $f_{k}(x)$
+непрерывна, то точка $\overline{x}_{k}$ всегда существует. Заметим, что если
+
+\begin{equation}
+ X = \{x \in \mathbb{R}^{n}: \; x \geq 0, \;
+ \langle a_{i}, x \rangle \leq b^{i}, \; i = 1, \ldots, m; \;
+ \langle a_{i}, x \rangle = b^{i}, i = m + 1, \ldots, s \},
+\end{equation}
+
+то задача (\ref{eq:constrained-gradient-method}) превратится в задачу линейного
+программирования.
+
+На практике частно довольствуются не точным решением задачи
+(\ref{eq:constrained-gradient-method}, а приближенным:
+
+\begin{equation}
+ \label{eq:constrained-gradient-method-approx}
+ \overline{x}_{k} \in X, \;
+ f_{k}(\overline{x}_{k}) \leq \operatornamewithlimits{min}_{X} f_{k}(x) +
+ \varepsilon_{k}, \;\;\; \varepsilon_{k} \geq 0, \;\;\;
+ \operatornamewithlimits{lim}_{k \to \infty} \varepsilon_{k} = 0.
+\end{equation}
+
+Допустим, что точка $\overline{x}_{k}$, удовлетворяющая условиям
+(\ref{eq:constrained-gradient-method-approx}) или
+(\ref{eq:constrained-gradient-method}) уже найдена. Тогда следующее
+$(k + 1)$-е приближение будем искать в виде
+
+\begin{equation}
+ x_{k + 1} = x_{k} + \alpha_{k} (\overline{x}_{k} - x_{k}), \;\;\;
+ 0 \leq \alpha_{k} \leq 1.
+\end{equation}
+
+\section{Метод возможных направлений}
+
+\begin{SmartDefinition}
+ Направление $e \neq 0$ называется \textbf{возможным} в точке $x \in X$,
+ если $x + t e \in X$ при всех $t, 0 \leq t \leq t_{0}$, где $t_{0}$ --
+ положительное число, зависящее от точки $x$, направления $e$ и от
+ структуры множества $X$.
+\end{SmartDefinition}
+
+\begin{SmartDefinition}
+ Направление $e \neq 0$ называется \textbf{возможным направлением убывания}
+ функции $f(x)$ в точке $x$ на множестве $X$, если $e$ -- возможное
+ направление в точке $x$ и $f(x + \alpha e) < f(x)$ при всех
+ $\alpha, 0 < \alpha < \beta$, где $0 < \beta \leq t_{0}$.
+\end{SmartDefinition}
+
+Метод возможных направлений состоит в том, что на каждом шаге определяется
+возможное направление убывания и производится шаг вдоль этого направления.
+Ключевым вопросом при применении метода возможных направлений является
+наличие простых и достаточно удобных для реализации на ЭВМ способов выбора
+возможных направлений убывания. Приведем некоторые примеры. Рассмотрим
+задачу:
+
+\begin{equation}
+ f(x) \to inf; \;\;\; x \in X \{x \in \mathbb{R}^{n}: \; g_{i}(x) \leq 0,
+ \; i = 1, \ldots, m\},
+\end{equation}
+
+где функции $f(x), g_{i}(x), i = 1, \ldots, m,$ определены на всем пространстве
+$\mathbb{R}^{n}$ и $f(x), g_{i}(x) \in C^{1}(X)$. Пусть известно $k$-е
+приближение $x_{k} \in X, k \geq 0$. Введем множество номеров
+
+\begin{equation}
+ I_{k} = \{i: \; 1 \leq i \leq m, g_{i}(x_{k}) = 0\}.
+\end{equation}
+
+Возможно, что $I_{k} = \varnothing$, -- это будет означать, что
+$g_{i}(x_{k}) < 0$ при всех $i = 1, \ldots, m$, т. е. $x_{k} \in int \; X$ --
+такая возможность ниже не исключается. В пространстве переменных
+
+\begin{equation}
+ z = (e, \sigma) = (e^{1}, \ldots, e^{n}, \sigma) \in \mathbb{R}^{n}
+\end{equation}
+
+рассмотрим вспомогательную задачу
+
+\begin{equation}
+\label{eq:possible-directions-simple}
+\sigma \to inf, \;\;\; z = (e, \sigma) \in W_{k} =
+\{(e, \sigma): \;\;\; \langle f'(x_{k}), e \rangle \leq \sigma,
+\langle g_{i}'(x_{k}), e \rangle \leq \sigma, i \in I_{k}; \;\;\;
+|e^{j}| \leq 1, j = 1, \ldots, n \} 
+\end{equation}
+
+Заметим, что задача (\ref{eq:possible-directions-simple}) является задачей
+линейного программирования, причем минимизируемая функция явно не зависит от 
+переменных $e = (e^{1}, \ldots, e^{n})$. Далее, ясно, что $(0, 0) \in W_{k}$,
+так что $W_{k} \neq \varnothing$ и
+$\operatornamewithlimits{inf}_{W_{k}} \sigma = \sigma_{k} \leq 0$ при всех
+$k = 0, 1, \ldots$. Очевидно, множество $W_{k}$ замкнуто. Наконец, условия
+$|e^{j}| \leq 1, j = 1, \ldots, n$, называемые условиями нормировки,
+гарантируют ограниченность множества $W_{k}$. Следовательно, задача
+(\ref{eq:possible-directions-simple}) имеет хотя бы одно решение.
+
+Предположим, что задача (\ref{eq:possible-directions-simple}) решена и найдены
+$(e_{k}, \sigma_{k}) \in W_{k}$ такие, что
+$\sigma_{k} = \operatornamewithlimits{inf}_{W_{k}} \sigma$. Выше было замечено,
+что $\sigma_{k} \leq 0$.
+
+Сначала рассмотрим случай $\sigma_{k} < 0$. Оказывается, в этом случае
+направление $e_{k}$, полученное из задачи (\ref{eq:possible-directions-simple}),
+является возможным направлением убывания.
+
+Используя найденное таким образом направление $e_{k}$, следующее $(k + 1)$-е
+приближение определим так:
+
+\begin{equation}
+ \label{eq:possible-directions-iter}
+ x_{k + 1} = x_{k} + \alpha_{k} e_{k}, \;\;\; 0 < \alpha_{k} \leq \beta_{k},
+\end{equation}
+
+\begin{equation}
+ \beta_{k} = sup \{\alpha: \; x_{k} + t e _{k} \in X, 0 \leq t \leq \alpha\} > 0
+\end{equation}
+
+Выбирая $\alpha_{k}$ различными способами в (\ref{eq:possible-directions-iter}),
+будем получать различные варианты метода возможных направлений.
+
+\section{Проксимальный метод}
+
+Этот метод используется для решения выпуклых задач минимизации
+
+\begin{equation}
+ f(x) \to inf, \;\;\; x \in X,
+\end{equation}
+
+когда $X$ -- выпуклое замкнутое множество из $\mathbb{R}^{n}$, функция $f(x)$
+выпукла на $X$. В его основе лежит понятие \textbf{проксимального оператора},
+который определяется следующим образом. Фиксируются точка $x \in \mathbb{R}^{n}$
+и число $\alpha > 0$, определяется функция
+
+\begin{equation}
+ \phi(z, x, \alpha) = \frac{1}{2} |z - x|^{2} + \alpha f(z)
+\end{equation}
+
+переменной $z \in X$, и рассматривается задача минимизации
+
+\begin{equation}
+ \label{eq:proximal-problem}
+ \phi(z, x, \alpha) \to inf, \;\;\; z \in X.
+\end{equation}
+
+Можно показать, что таким образом данное определение обеспечивает тот факт,
+что задача (\ref{eq:proximal-problem}) имеет, притом единственное решение
+$z_{*} = z_{*}(x, \alpha)$. Тем самым определен оператор, который каждой точке
+$x \in \mathbb{R}^{n}$ и числу $\alpha > 0$ ставит в соответствие решение
+$z_{*}$ задачи (\ref{eq:proximal-problem}). Этот оператор называется
+\textbf{проксимальным}, его обозначают символом $pr$. Можно показать следующую
+связь между проксимальным оператором и оператором проектирования:
+
+\begin{equation}
+ pr(x, \alpha) = \mathcal{P}_{X}(x - \alpha f'(pr(x, \alpha))) \;\;\;
+ \forall x \in \mathbb{R}^{n}, \;\;\; \alpha > 0.
+\end{equation}
+
+Проксимальный метод заключается в построении последовательности $\{x_{k}\}$ по
+следующему правилу:
+
+\begin{equation}
+ \label{eq:proximal-method}
+ x_{k + 1} = pr(x_{k}, \alpha_{k}), \;\;\; k = 1, 2, \ldots,
+\end{equation}
+
+где начальная точка $x_{0}$ и последовательность $\{\alpha_{k}\}$
+предполагаются заданными. Итерационный процесс (\ref{eq:proximal-method})
+основан на известном из анализа методе поиска неподвижных точек сжимающих
+операторов и идейно близок к рассмотренному выше методу проекции градиента.
+
+\section{Метод линеаризации}
+
+Этот метод на каждой итерации использует линейные аппроксимации минимизируемой
+функции и функций, задающих ограничения. Опишем его для задачи
+
+\begin{equation}
+ f(x) \to inf, \;\;\;
+ x \in X  = \{x \in X_{0}: g_{1} \leq 0, \ldots, g_{m}(x) \leq 0\},
+\end{equation}
+
+предполагая, что $X_{0}$ -- выпуклое замкнутое множество из $\mathbb{R}^{n}$
+и функции $f(x), g_{i}(x) \in C^{1}(X_{0})$. Пусть $x_{0}$ -- начальное
+приближение, $x_{0} \in X_{0}$. Предположим, что $k$-е приближение
+$x_{k} \in X_{0}$ при некотором $k \geq 0$ уже известно. Введем функцию
+
+\begin{equation}
+ \Phi_{x} = \frac{1}{2} |x - x_{k}|^{2} +
+ \alpha_{k} \langle f'(x_{k}), x - x_{k} \rangle, \;\;\; \alpha_{k} > 0, 
+\end{equation}
+
+и множество
+
+\begin{equation}
+ W_{k} = \{x \in X_{0}: \;\;\;
+ g_{i}(x_{k}) + \langle g_{i}'(x_{k}), x - x_{k} \rangle \leq 0,
+ i = 1, \ldots, m \}.
+\end{equation}
+
+Пусть $W_{k} \neq \varnothing$. В качестве $(k + 1)$-го приближения $x_{k + 1}$
+возьмем решение следующей задачи минимизации:
+
+\begin{equation}
+ \label{eq:linearization-problem}
+ \Phi_{k}(x) \to inf, \;\;\; x \in W_{k},
+\end{equation}
+
+Если $X_{0}$ многогранное множество, то задача (\ref{eq:linearization-problem})
+представляет собой задачу квадратичного программирования и может быть решена
+конечношаговым методом (см. следующий раздел). Если $W_{k}$ -- ограниченное
+множество, то для решения задачи (\ref{eq:linearization-problem}) может быть
+использован, например, метод условного градиента.
+
+\section{Квадратичное программирование}
+
+\begin{SmartDefinition}
+ \textbf{Задачей квадратичного программирования} называется следующая задача
+ оптимизации:
+ \begin{equation}
+  \begin{aligned}
+  \label{eq:qp}
+  J(u) = \frac{1}{2} \langle C u, u \rangle + \langle c, u \rangle \to min \\
+  u \in U = \{u -in \mathbb{R}^{n} | \;\; \langle a_{i}, u \rangle \leq b^{i},
+  i = 1, \ldots, m; \langle a_{i}, u \rangle = b^{i}, i = m + 1, \ldots, s\} \\
+  \end{aligned}
+ \end{equation}
+ где $C$ -- симметричная неотрицательно определенная матрица размера
+ $n \times n$, т. е.
+ $C \geq 0$; $c, a_{i} \in \mathbb{R}^{n}, b^{i} \in \mathbb{R}^{n} (i = 1, 
+ \ldots, s)$. При этом возможно что возможны такие частные случаи, когда могут
+ быть только условия типа равенств ($m = 0$) или только условия типа неравенств
+ ($s = m$) или никаких условий ($s = m = 0$).
+\end{SmartDefinition}
+
+Оказывается, для задачи (\ref{eq:qp}), как и для задачи линейного
+программирования, существуют конечные (конечношаговые) методы их решения.
+
+Рассмотрим функцию Лагранжа задачи (\ref{eq:qp}):
+
+\begin{equation}
+ \begin{aligned}
+ L(u, \lambda) = \frac{1}{2} \langle C u, u \rangle + \langle c, u \rangle +
+ \langle \lambda A u - b \rangle = \\
+ \frac{1}{2} \langle C u, u \rangle +
+ \langle c + A^{T} \lambda, u \rangle - \langle \lambda, b \rangle \\
+ u \in U_{0} = \mathbb{R}^{n} \\
+ \lambda \in \Lambda_{0} = \{\lambda = (\lambda_{1}, \ldots, \lambda_{s})
+ \in \mathbb{R}^{s} | \;\; \lambda_{1} \geq 0, \ldots, \lambda_{m} \geq 0 \}
+ \end{aligned}
+\end{equation}
+
+\begin{SmartDefinition}
+ Следующая задача оптимизации называется \textbf{задачей, двойственной к задаче}
+ (\ref{eq:qp}):
+ \begin{equation}
+  \begin{aligned}
+   \psi(\lambda) = \operatornamewithlimits{inf}_{u \in \mathbb{R}^{n}}
+   L(u, \lambda) \to sup, \;\;\; \lambda \in \Lambda_{0}
+  \end{aligned}
+ \end{equation}
+\end{SmartDefinition}
+
+Относительно двойственных задач в методах оптимизации существует довольно
+формализованная теория. Так, следующая теорема (см. теорему 4.9.4 
+из \cite{Vasilev1980}) устанавливает связь между точками экстремумов
+первичной и двойственной задач.
+
+\begin{SmartTheorem}
+ Рассмотрим следующую задачу минимизации:
+ \begin{equation}
+  \begin{aligned}
+  J(u) \to min \\
+  u \in U = \{u \in U_{0} | \;\;
+  g_{i}(u) = \langle a_{i}, u \rangle  - b^{i} \leq 0, i = 1, \ldots, m; \\
+  g_{i}(u) = \langle a_{i}, u \rangle  - b^{i} = 0, i = m + 1, \ldots, s \}
+  \end{aligned}
+ \end{equation}
+ где $U_{0}$ представляет из себя следующее многогранное множество:
+ \begin{equation}
+  \begin{aligned}
+   U_{0} = \{u \in \mathbb{R}^{n} | \;\;
+   \langle d_{i}, u \rangle \leq f^{i}, i = 1, \ldots, p; \\
+   \langle d_{i}, u \rangle = f^{i}, i = p + 1, \ldots, q \}
+  \end{aligned}
+ \end{equation}
+ $a_{i}, d_{i} \in \mathbb{R}^{n}$ -- заданные векторы, $b^{i}, f^{i}$ --
+ заданные числа.
+ Пусть функция $J(u)$ выпукла на $U_{0}$, $J(u) \in C^{1}(U_{0})$.
+ Пусть множество $U_{*}$ есть множество решений задачи оптимизации:
+ \begin{equation}
+  U^{*} = \{u \in U | \;\; J(u) = \operatornamewithlimits{inf}_{v \in U} J(v)
+  = J_{*} > - \infty\}
+ \end{equation}
+ Пусть $U_{*} \neq \varnothing$.
+ 
+ Тогда для каждой точки $u_{*} \in U_{*}$ необходимо существуют множители
+ Лагранжа
+ $\lambda^{*} = (\lambda_{1}^{*}, \ldots, \lambda_{s}^{*}) \in \Lambda_{0}$
+ где
+ \begin{equation}
+  \Lambda_{0} = \{\lambda = (\lambda_{1}, \ldots, \lambda_{s})
+  \in \mathbb{R}^{s} | \;\; \lambda_{1} \geq 0, \ldots, \lambda_{m} \geq 0 \}
+ \end{equation}
+ такие, что пара $(u_{*}, \lambda^{*})$ образует седловую точку функции Лагранжа
+ на множестве $U_{0} \times \Lambda_{0}$.
+\end{SmartTheorem}
+
+В соответствии с этой теоремой двойственная задача также имеет решение, причем
+
+\begin{equation}
+ \psi(\lambda^{*} = J(u_{*}))
+\end{equation}
+
+В случае если $C > 0$ функция $\psi(\lambda)$ может быть выписана явно. При
+фиксированном $\lambda$ минимум функции Лагранжа по $u$ однозначно определяется
+из системы $C u + c + A^{T} \lambda = 0$, так что
+$u(\lambda) = - C^{-1} (c + A^{T} \lambda)$. Поэтому
+
+\begin{equation}
+ \begin{aligned}
+  \psi(\lambda) = L(u(\lambda, \lambda)) =
+  - \frac{1}{2} \langle c + A^{T} \lambda, C^{-1} (c + A^{T} \lambda) \rangle -
+  \langle \lambda, b \rangle = \\
+  = - \frac{1}{2} \langle (A C^{-1} A^{T}) \lambda, \lambda) \rangle
+  - \frac{1}{2} \langle C^{-1} c, c \rangle, \;\; \lambda \in \Lambda_{0}
+ \end{aligned}
+\end{equation}
+
+Решения первичной и двойственной задач связываются следующим соотношением:
+
+\begin{equation}
+ u_{*} = - C^{-1} (c + A^{T} \lambda^{*})
+\end{equation}
+
+
+В случае, когда ограничения типа неравенств отсутствуют, т. е. когда множество
+ограничений представляет из себя следующее
+
+\begin{equation}
+ U = \{u \in \mathbb{R}^{n} | \;\; \langle a_{i}, b \rangle = b^{i},
+ i = 1, \ldots, s\}
+\end{equation}
+
+то в двойственной задаче множество ограничений становится равным $\Lambda_{0} = 
+\mathbb{R}^{s}$, то есть двойственная задача становится задачей безусловной 
+минимизации
+
+\begin{equation}
+ - \psi (\lambda) \to inf, \;\; \lambda \in \mathbb{R}^{s}
+\end{equation}
+
+Для того, чтобы решить эту задачу, воспользуемся следующей теоремой (см. 
+теорему 4.2.3 из (\cite{Vasilev1980})):
+
+\begin{SmartTheorem}
+ Пусть $U$ -- выпуклое множество, $J(u) \in C^{1}(U)$ и пусть $U_{*}$ --
+ множество точек минимума $J(u)$ на $U$. Тогда в любой точке $u_{*} \in U_{*}$
+ необходимо выполняется неравенство
+ \begin{equation}
+ \label{eq:optimality-condition}
+  \langle J'(u_{*}), u - u_{*} \rangle \geq 0 \;\;\; \forall u \in U
+ \end{equation}
+ а в случае $u_{*} \in int U$ неравенство (\ref{eq:optimality-condition})
+ превращается в равенство
+ \begin{equation}
+  J'(u_{*}) = 0
+ \end{equation}
+ Если, кроме того, $J(u)$ выпукла на $U$, то условие
+ (\ref{eq:optimality-condition}) является достаточным для того, чтобы
+ $u_{*} \in U_{*}$
+\end{SmartTheorem}
+
+Следовательно, всякое решение двойственной задачи квадратичного программирования
+может быть найдено как решение следующей системы линейных уравнений:
+
+\begin{equation}
+ - \psi'(\lambda^{*}) = A C^{-1} A^{T} \lambda^{*} + A C^{-1} c + b = 0
+\end{equation}
+
+Покажем теперь, как решать задачу квадратичного программирования, когда есть
+ограничения типа неравенств. Далее будем предполагать, что $C > 0$. Далее будет
+показано, что задача с ограничениями типа неравенств может быть сведена к 
+решению конечного числа задач с ограничениями типа равенств.
+
+\begin{SmartDefinition}
+ Точка $v$ называется \textbf{особой точкой задачи квадратичного 
+ программирования} (\ref{eq:qp}), если $v \in U$ и $v$ является решением задачи
+ \begin{equation}
+ \label{eq:spec-point}
+  \begin{aligned}
+    J(u) \to inf \\
+    u \in V = \{u \in \mathbb{R}^{n} | \;\; \langle a_{i}, u \rangle = b^{i},
+    i \in I \cup \{m + 1, \ldots, s\}\}
+  \end{aligned}
+ \end{equation}
+ где $I$ -- какое-либо подмножество индексов $\{1, \ldots, m\}$ (возможность
+ $I = \varnothing$ не исключается).
+\end{SmartDefinition}
+
+С помощью несложных рассуждений можно доказать следующую лемму:
+
+\begin{SmartLemma}
+ Пусть в задаче (\ref{eq:qp}) $C \geq 0$, $J_{*} > - \infty$,
+ $U_{*} \neq \varnothing$. Тогда каждое решение $u_{*}$ задачи квадратичного 
+ программирования является особой  точкой этой задачи.
+\end{SmartLemma}
+
+Перебирая все возможные задачи с ограничениями типа равенств, соответствующие
+исходной задаче, можно таким образом найти решение исходной задачи, то есть
+справедлива следующая теорема:
+
+\begin{SmartTheorem}
+ Пусть $C > 0$ и множество $U$ в задаче квадратичного программирования непусто.
+ Тогда существует конечный метод решения задачи (\ref{eq:qp}).
+\end{SmartTheorem}
+
+С точки зрения практики, однако, данная теорема не предоставляет никакой пользы,
+поскольку перебор всех возможных особых точек слишком трудоемок для реальных
+приложений. Поэтому используется специальная методика для нахождения решения
+задачи квадратичного программирования. Она состоит из трех этапов.
+
+\textbf{Этап 1.} Определяется, будет ли множество ограничений $U$ непустым, и 
+если $U \neq \varnothing$, то находится какая-либо $v \in U$. Здесь может быть
+использован, например, симплекс-метод, описанный в предыдущем разделе.
+
+\textbf{Этап 2.} По известной неособой точке $v \in U$ строится особая точка
+$w \in U$ со значением $J(w) \leq J(v)$. Для этого используется следующий
+итерационный процесс:
+
+\textbf{1.} $u_{0} = v$
+
+\textbf{2.} Пусть известно $u_{k}$. Построим $\overline{u}_{k}$ как решение
+задачи (\ref{eq:spec-point}) при
+
+\begin{equation}
+ I = I(u_{k}) = \{i: \;\;
+ 1 \leq i \leq m, \langle a_{i}, u_{k} \rangle = b^{i}\}
+\end{equation}
+
+\textbf{3.} Если $\overline{u}_{k} \in U$, то процесс останавливается и полагают
+$w = \overline{u}_{k}$.
+
+\textbf{4.} Если $\overline{u}_{k} \notin U$, то полагают
+
+\begin{equation}
+ I_{1} = \{j: \;\; \langle a_{j}, \overline{u}_{k} \rangle > b^{i},
+ j \notin I(u_{k}), 1 \leq j \leq m\} \neq \varnothing
+\end{equation}
+
+\begin{equation}
+ \begin{aligned}
+  u_{k + 1} = u_{k} + \alpha_{k} (\overline{u}_{k} - u_{k}), \\
+  \alpha_{k} = \operatornamewithlimits{min}_{j \in I_{1}}
+  (\frac{b^{j} - \langle a_{j}, u_{k} \rangle}
+  {\langle a_{j}, \overline{u}_{k} - u_{k \rangle}})
+ \end{aligned}
+\end{equation}
+
+При этом можно показать что $u_{k + 1} \in U$. После этого мы возвращаемся к
+пункту 2.
+
+\textbf{Этап 3.} 
+
+\textbf{1.} Выясняется, будет ли особая точка $w$, построенная на 2-м
+этапе, решением задачи (\ref{eq:qp}).
+
+\textbf{2.} Если это не так, то производится переход
+к следующей точке $z \in U$, для которой $J(z) < J(w)$. Для этих целей 
+достаточно совершить один шаг модифицированного метода условного градиента,
+приняв в качестве начальной точку $w$, полученную на 2-м этапе. А именно,
+сначала можно решить следующую задачу линейного программирования:
+
+\begin{equation}
+ \begin{aligned}
+ \langle J'(w), e \rangle = \langle C w + c, e \rangle \to inf \\
+ e \in \mathfrak{E} = \{e = (e^{1}, \ldots, e^{n}) \in \mathbb{R}^{n} | \;\;
+ \langle a_{i}, e \rangle \leq 0, i \in I(w) = \{i: 1 \leq i \leq m,
+ \langle a_{i}, w \rangle = b^{i}\} \\
+ \langle a_{i}, e \rangle = 0, i = m + 1, \ldots, s, -1 \leq e^{j} \leq 1,
+ j = 1, \ldots, n\}
+ \end{aligned}
+\end{equation}
+
+\textbf{3.} Положим $\beta = \langle J'(w), e_{*} \rangle$. Очевидно, что
+$\beta \leq 0$, поскольку нулевой вектор $0$ содержится в множестве
+ограничений $\mathfrak{E}$ линейной задачи.
+
+\textbf{4.} Если $\beta = 0$, то можно показать, что $w$ -- решение задачи
+(\ref{eq:qp}).
+
+\textbf{5.} Если же $\beta < 0$, то можно показать, что $e_{*}$ -- возможное
+направление убывания функции $J(u)$ в точке $w$. Тогда полагают
+$z = w + \alpha_{0} e_{*}$, где $\alpha_{0}$ -- достаточно малое число. И
+производится возвращение к этапу 2.
+
+Такое поочередное следование по этапам 2 и 3 алгоритма позволит 
+построить последовательность особых точек исходной задачи, на которой 
+функционал убывает и, следовательно, таким образом можно найти искомое решение
+задачи.
+
+\section{Метод сопряженных направлений}
+
+В методе сопряженных направлений строится последовательность направлений поиска
+$p_{k}$, являющихся линейными комбинациями градиента и предыдущих
+направлений.
+
+Алгоритм метода выражается следующими расчетными формулами:
+
+\begin{equation}
+ \label{eq:conjugate-method}
+ x_{k + 1} = x_{k} - \lambda_{k} p_{k}, \;\;\; k = 0, 1, \ldots
+\end{equation}
+
+\begin{equation}
+ p_{0} = \nabla f(x_{0}), \;\; p_{k} = \nabla f(x_{k}) + \beta_{k} p_{k - 1},
+ \;\; k = 1, 2, \ldots
+\end{equation}
+
+где $\beta_{k}$ -- весовые коэффициенты, одним из способов определения которых
+служит следующая формула:
+
+\begin{equation}
+ \beta_{k} = 
+ \frac{\sum \limits_{i = 1}^{n}(\frac{\partial f}{\partial x_{i})}^{2}_{x_{k}}}
+ {\sum \limits_{i = 1}^{n}(\frac{\partial f}{\partial x_{i})}^{2}_{x_{k - 1}}}
+\end{equation}
+
+Ниже приводятся этапы этого алгоритма.
+
+\textbf{1}. В исходной точке $x_{0}$ вычисляют градиент как начальное 
+направление поиска, т. е.
+
+\begin{equation}
+ p_{0} = \nabla f(x_{0})
+\end{equation}
+
+\textbf{2}. По формуле (\ref{eq:conjugate-method}) находят точку $x_{k + 1}$,
+минимизируя функцию $f$ по $\lambda$ с помощью методов одномерного поиска.
+
+\textbf{3}. Вычисляют в точке $x_{k + 1}$ значение функции $f(x_{k + 1})$ и
+значение градиента $\nabla f(x_{k + 1})$.
+
+\textbf{4}. Определяют новое направление поиска из соотношения
+
+\begin{equation}
+ p_{i}^{k + 1} = (\frac{\partial f}{\partial x_{i}})_{x_{k + 1}} + p_{i}^{k}
+ \frac
+ {\sum \limits_{i = 1}^{n}(\frac{\partial f}{\partial x_{i})}^{2}_{x_{k + 1}}}
+ {\sum \limits_{i = 1}^{n}(\frac{\partial f}{\partial x_{i})}^{2}_{x_{k}}}
+\end{equation}
+
+и так далее
+
+\textbf{5}. Поиск заканчивают при выполнении условия:
+
+\begin{equation}
+ \sqrt{\sum \limits_{i = 1}^{n} (p_{i}^{k})^{2}} \leq \varepsilon
+\end{equation}
+
+Алгоритм метода может предусматривать обновление через каждые $m$ итераций, 
+тогда точка $A_{m + 1}$ становится исходной, и поиск вновь начинается с 
+направления антиградиента функции.
+
+
+
+\section{Рассматриваемые задачи}
+\label{sec:problem}
+
+В предыдущем отчете было указано, что задача восстановления многогранника по
+набору его теневых контуров сводится в том или ином виде к задаче квадратичной
+минимизации. В рассматриваемом случае функционал представлял из себя сумму
+квадратов разностей опорных чисел и их экспериментальных измерений:
+
+\begin{equation}
+\label{eq:problem1}
+ I(h) = I(h_{1}, h_{2}, \ldots, h_{n}) = ||h - h^{0}||_{2}^{2} =
+ \sum \limits_{i = 1}^{n} (h_{i} - h_{i}^{0})^{2} \to min
+\end{equation}
+
+где числа $h_{i}^{0}$ есть экспериментальные измерения величин $h_{i}$.
+
+При этом требовалось, чтобы вектор опорных чисел удовлетворял условию
+
+\begin{equation}
+\label{eq:problem1-cond}
+ Q h \geq 0
+\end{equation}
+
+где матрица $Q$ представляла собой матрицу коэффициентов линейных неравенств
+следующего типа:
+
+\begin{equation}
+\left|\begin{array}{cc}
+  h_{1} & u_{1}^{T} \\
+  h_{2} & u_{2}^{T} \\
+  h_{3} & u_{3}^{T} \\
+  h_{4} & u_{4}^{T} \\
+\end{array}\right|
+  \left|\begin{array}{cc}
+  1 & u_{1}^{T} \\
+  1 & u_{2}^{T} \\
+  1 & u_{3}^{T} \\
+  1 & u_{4}^{T} \\
+\end{array}\right|
+\geq 0
+\end{equation}
+
+где $u_{i}^{T}$ -- известные опорные направления, а $h_{i}$ -- неизвестные
+опорные числа. Таким образом, матрица $Q$ представляет собой $m \times
+n$-матрицу, причем в каждой ее строке содержится не более 4 ненулевых элементов,
+и число $m$ ее строк не превышает $12 n$ (в соответствии с теоремой Эйлера о
+числе вершин, ребер и граней графа на сфере).
+
+Задачу минимизации (\ref{eq:problem1}) - (\ref{eq:problem1-cond}) можно
+сформулировать несколько более удобным образом, как это описано, например, в
+книге \cite{BertsekasTsitsiklis1989}: оптимальное решение задачи
+(\ref{eq:problem1}) можно найти как
+
+\begin{equation}
+\label{eq:problem2}
+ h^{*} = h^{0} - Q^{T} u^{*}
+\end{equation}
+
+где $u^{*}$ есть решение задачи минимизации функционала
+
+\begin{equation}
+\label{eq:problem2-cond}
+ I(u_{1}, u_{2}, \ldots, u_{m}) = ||Q^{T} u - h^{0}||_{2}^{2} \to min
+\end{equation}
+
+при условиях неотрицательности переменных:
+
+\begin{equation}
+ u \geq 0
+\end{equation}
+
+Данный отчет посвящен поиску методов, которые позволили бы решить задачи
+(\ref{eq:problem1}) - (\ref{eq:problem1-cond}) или (\ref{eq:problem2}) -
+(\ref{eq:problem2-cond}) наиболее эффективно. В предшествующих работах был
+использован алгоритм из статьи \cite{BierlaireTointTuyttens1991}, основанный
+на методике, использующей известный алгоритм LSQR (который был опубликован в 
+статье \cite{PaigeSaunders1982}). Для более подробного изучения метода
+следует ознакомиться с процессом Ланцоша (см. \cite{Lanczos1950}) и
+бидиагонализационной процедурой Голубя - Кагана (см. \cite{Golub1965}).
+
+В данной работе мы попытались найти альтернативные подходы к решению данной 
+проблемы.
+
+\section{Метод нормальных уравнений}
+
+Если говорить о задачах наименьших квадратов вообще, то их можно выделить в
+особый тип задач минимизации. Предположим, что матрица $A \in \mathbb{R}^{m
+\times n}$ и $m > n$. В общем случае невозможно точно решить уравнение
+$A x = b$, поскольку число условий больше числа неизвестных, лучшее что можно
+сделать -- это минимизировать невязку $r = b - A x$. Задачи наименьших
+квадратов формулируются как задачи минимизации евклидовой нормы невязки:
+
+$$
+||r||^{2}_{2} = \langle r, r \rangle \to min
+$$
+
+Один из способов решить задачу наименьших квадратов -- применить к ней прямой
+и стандартный подход. Поскольку известно что $||r||^{2} = ||A x - b||^{2}$, то
+производная по направлению $\partial x$ равна
+
+$$
+\nabla_{x} ||r||^{2} \cdot \partial x = 2 \langle A \partial x, b - A x\rangle =
+2 \partial x^{T} (A^{T} b - A^{T} A x)
+$$
+
+Минимум достигается тогда, когда производные по всем возможным направлениям 
+равны нулю, откуда получаем так называемые \textbf{нормальные уравнения}:
+
+\begin{equation}
+ A^{T} A x = A^{T} b
+\end{equation}
+
+Решение можно получить как
+
+\begin{equation}
+ x = (A^{T} A)^{-1} A^{T} b = A^{\dag} b
+\end{equation}
+
+где $A^{\dag} = (A^{T} A)^{-1} A^{T}$ -- псевдообратная матрица Мура - Пенроуза
+(которую часто называют просто псевдообратной матрицей).
+
+Если столбцы матрицы $A$ не слишком близки к линейно зависимым, т. е. если 
+задача не является плохо обусловленной, часто просто образуют нормальные 
+уравнения и решают их с помощью метода факторизации Холецкого:
+
+\begin{equation}
+ A^{T} A = R^{T} R
+\end{equation}
+
+где $R$ -- верхняя треугольная матрица.
+
+На основе метода нормальных уравнений написана библиотека TSNNLS для решения
+задач наименьших квадратов с ограничениями типа условий неотрицательности.
+Подробно данная библиотека описана в статье \cite{CantarellaPiatek2004}, а в
+статье \cite{Portugal1994} дано теоретическое обоснование алгоритма.
+
+\section{QR факторизация}
+
+Другой подход состоит в том, что записывают QR-факторизацию:
+
+\begin{equation}
+ A = Q R = [Q_{1} Q_{2}]\left[\begin{array}{c}
+                               R_{1} \\
+                               0 \\
+                              \end{array}
+\right] = Q_{1} R_{1}
+\end{equation}
+
+где $Q \in \mathbb{R}^{m \times m}$ ортогональная ($Q^{T} Q = I$) и $R$ --
+верхняя треугольная. Столбцы матрицы $Q_{1} \in \mathbb{R}^{m \times n}$
+образуют ортонормированный базис в образе оператора $A$, а столбцы матрицы 
+$Q_{2}$ -- базис в ортогональном дополнении. Факторизацию
+$A = Q_{1} R_{1}$ иногда называют "экономичной" QR-факторизацией.
+
+Поскольку умножение на ортогональную матрицу не изменяет длины, можно записать,
+что
+
+\begin{equation}
+ ||r||^{2} = ||Q^{T} r||^{2} =
+ ||R_{1} x - Q_{1}^{T} b||^{2} + ||Q_{2}^{T} b||^{2}
+\end{equation}
+
+Вторая часть выражения ($||Q_{2}^{T} b||^{2}$) есть ошибка, уменьшить которую
+мы не можем, но зато можно добиться зануления $R_{1} x - Q_{1}^{T} b$.
+Следовательно, решение задачи наименьших квадратов получается как решение
+следующего уравнения:
+
+\begin{equation}
+ x = R_{1}^{-1} Q_{1}^{T} b
+\end{equation}
+
+
+
+
+
+\section{PDCO -- первично-двойственный метод выпуклой оптимизации}
+
+В данном разделе разобран алгоритм PDCO, представленный в работе
+\cite{Saunders2013} (см. также страницу проекта \cite{PDCO}, а также статью 
+\cite{ChenDonohoSaunders2001}). Здесь мы приводим
+выдержки из упомянутой статьи и приводим обоснования некоторых используемых 
+методов.
+
+PDCO (первично-двойственный метод выпуклой оптимизации) -- это библиотека на 
+Matlab  для решения задач следующего вида:
+
+\begin{equation}
+ \begin{aligned}
+ \phi(x) \to min \\
+ Ax = b, \;\;\; l \leq x \leq u \\
+ \end{aligned}
+\end{equation}
+
+Где $\phi(x)$ есть выпуклая функция с известным градиентом $g(x)$ и гессианом
+$H(x)$, а $A \in \mathbb{R}^{m \times n}$. К такому формату условий могут быть 
+приведены любые линейные условия. Например, двусторонние условия
+$\alpha \leq a^{T} \overline{x} \leq \beta$ следует переформулировать как
+$a^{T} \overline{x} - \xi = 0, \; \alpha \leq \xi \leq \beta$, где 
+$\overline{x}$ и $\xi$ суть две разные части вектора $x$.
+
+Для того чтобы допускалось решение задач наименьших квадратов, и для того чтобы
+обеспечить единственность первичного и двойственного решения (и для повышения
+стабильности), в реальности PDCO производит решение регуляризованной задачи:
+
+\begin{equation}
+ \begin{aligned}
+  \phi(x) + \frac{1}{2}||D_{1} x||^{2} + \frac{1}{2}||r||^{2} \to \min \\
+  A x + D_{2} r = b, \;\;\; l \leq x \leq u
+ \end{aligned}
+\end{equation}
+
+где $D_{1}, D_{2}$ суть фиксированные положительно определенные диагональные
+матрицы. Диагональные элементы $D_{1}$ обычно полагают малыми ($10^{-3}$ или
+$10^{-4}$). Аналогично поступают и с матрицей $D_{2}$, если условия связи
+должны быть выполнены с относительно большой точностью. Для решения задач
+наименьших квадратов некоторые диагональные элементы матрицы $D_{2}$ полагаются
+равными 1. Заметим, что некоторые элементы векторов $l$ и $u$ могут быть 
+равными $-\infty$ и $+\infty$ соответственно, но предполагается, что в матрицах
+$A, b, D_{1}, D_{2}$ нет больших чисел. Если $||D_{2}||$ есть малое число,
+ожидается, что матрица $A$ является недо-определенной ($m < n$). Если
+$D_{2} = I$, матрица $A$ может иметь любую форму.
+
+\subsection{Барьерный подход}
+Во-первых, вводятся фиктивные переменные $x_{1}$ и $x_{2}$ для того, чтобы
+преобразовать задачу к задаче с условиями неотрицательности:
+
+\begin{equation}
+ \label{eq:co}
+ \begin{aligned}
+  \phi(x) + \frac{1}{2}||D_{1} x||^{2} + \frac{1}{2}||r||^{2} \to \min \\
+  A x + D_{2} r = b \\
+  x - x_{1} = l \\
+  x + x_{2} = u \\
+  x_{1}, x_{2} \geq 0 \\
+ \end{aligned}
+\end{equation}
+
+Во-вторых, условия неотрицательности заменяются логарифмической барьерной
+функцией, в результате чего получается последовательность выпуклых подзадач с
+уменьшающимися величинами $\mu$ ($\mu > 0$)
+
+\begin{equation}
+ \label{eq:co-mu}
+ \begin{aligned}
+  \phi(x) + \frac{1}{2}||D_{1} x||^{2} + \frac{1}{2}||r||^{2} -
+  \mu \sum \limits_{j = 1}^{n} ln([x_{1}]_{j} [x_{2}]_{j}) \to min \\
+  A x + D_{2} r = b \;\;\;\;\;\;\; : y\\
+  x - x_{1} = l \;\;\;\;\;\;\; : z_{1}\\
+  -x - x_{2} = -u \;\;\;\;\;\;\; : z_{2}\\
+ \end{aligned}
+\end{equation}
+
+где $y, z_{1}, z_{2}$ обозначают двойственные переменные для соответствующих
+условий. При $\mu > 0$ большая часть переменных являются строго положительными:
+$x_{1}, x_{2}, z_{1}, z_{2} > 0$ (исключения возникают, когда $l_{j} = -\infty$
+или $u_{j} = \infty$ -- тогда соответствующее уравнение отбрасывается и
+$j$-я компонента векторов $x_{1}$ и $x_{2}$ не существуют).
+
+Если говорить более общно, то (следуя \cite{Vasilev1980}) метод барьерных
+функций состоит в следующем. По аналогии с методом штрафных функций, он
+позволяет получить такую последовательность $u_{k} \in U$, которая будет
+сходиться к оптимальному решению. Чтобы этого добиться, выделяют некоторое
+"запрещенное" множество $\gamma \subset U$ (например, это может быть граница
+множества $U$) и дополняют функционал функцией, которая стремится к
+бесконечности по мере приближения к $\gamma$.
+
+\begin{SmartDefinition}
+ Пусть $\gamma$ -- некоторое подмножество множества $U$ допустимых значений
+ переменной. Функцию $B(u)$ назовем \textbf{барьером} или \textbf{барьерной
+ функцией} подмножества $\gamma$, если $B(u)$ определена, конечна и 
+ неотрицательна во всех точках $u \in U \setminus \gamma$, причем
+ $\operatornamewithlimits{lim}_{r \to \infty} B(v_{r}) = \infty$ для всех
+ последовательностей $\{u_{r}\} \in U \setminus \gamma$, которые сходятся к
+ какой-либо точке $v \in \gamma$.
+\end{SmartDefinition}
+
+Далее, рассматривается последовательность задач
+
+\begin{equation}
+ F_{k}(u) \equiv J(u) + a_{k} B(u) \to min, \;\;\; u \in U \setminus \gamma, 
+\;\;\;
+ k = 1, 2, \ldots
+\end{equation}
+
+где $\{a_{k}\}$ -- положительная последовательность, сходящаяся к нулю (эти 
+величины называются барьерными коэффициентами).
+
+Для каждой задачи находится ее приближенное решение $u_{k}$:
+
+\begin{equation}
+ u_{k} \in U \setminus \gamma, \;\; F_{k}(u_{k}) \leq F_{k*} + \varepsilon_{k},
+ \;\; k = 1, 2, \ldots
+\end{equation}
+
+где $F_{k*}$ -- оптимальное значение функционала из $k$-й задачи,
+$\varepsilon_{k} \geq 0, \operatornamewithlimits{lim}_{k \to \infty} = 0$.
+
+Сходимость этого метода обеспечивается следующей теоремой:
+
+\begin{SmartTheorem}
+ Пусть $\gamma$ -- некоторое подмножество из $U$,
+ $U \setminus \gamma \neq \varnothing$, и $J_{*} = J_{**}$, где
+ $J_{*} = \operatornamewithlimits{inf}_{U} J(u)$,
+ $J_{**} = \operatornamewithlimits{inf}_{U \setminus \gamma} J(u) > -\infty$.
+ 
+ Пусть $B(u)$ -- какая-либо барьерная функция подмножества $\gamma$, а
+ последовательность $\{u_{k}\}$ определена описанным выше способом. Тогда
+ \begin{equation}
+  \operatornamewithlimits{lim}_{k \to \infty} F_{k*} =
+  \operatornamewithlimits{lim}_{k \to \infty} F_{k}(u_{k}) =
+  \operatornamewithlimits{lim}_{k \to \infty} J(u_{k}) = J_{*}, \;\;\;
+  \operatornamewithlimits{lim}_{k \to \infty} a_{k} B_{u_{k}} = 0
+ \end{equation}
+ Кроме того, если множество $U$ ограничено и замкнуто, а $J(u)$
+ полунепрерывна снизу на $U$, то $\{u_{k}\}$ сходится к $U_{*}$.
+\end{SmartTheorem}
+
+В данном случае в текущей работе Saunders использовал логарифмическую функцию в
+качестве барьерной.
+
+Условия Каруша-Куна-Таккера для барьерных подзадач включают в себя три 
+\textit{первичных} уравнения из (\ref{eq:co-mu}), а также четыре 
+\textit{двойственных} уравнения, которые состоят в том, что функционал
+подзадачи является линейной комбинацией градиента и первичных условий:
+
+\begin{equation}
+ \begin{aligned}
+  A x + D_{2} r = b \\
+  x - x_{1} = l \\
+  -x - x_{2} = -u \\
+  A^{T} y + z_{1} - z_{2} = g(x) + D_{1}^{2} x \;\;\;\;\;\; :x \\
+  D_{2} y = r \;\;\;\;\;\; :r \\
+  X_{1} z_{1} = \mu e \;\;\;\;\;\; :x_{1} \\
+  X_{2} z_{2} = \mu e \;\;\;\;\;\; :x_{2} \\
+ \end{aligned}
+\end{equation}
+
+где $X_{1} = diag(x_{1}), X_{2} = diag(x_{2})$ (аналогичные обозначения приняты
+и для $Z_{1}, Z_{2}$ далее). Последние два уравнения часто называют
+возмущенными условиями сопряженности. Изначально они получаются в несколько
+ином виде. Двойственное уравнение для $x_{1}$ в действительности представляет
+из себя
+
+\begin{equation}
+ -z_{1} = \nabla(-\mu ln(x_{1})) = -\mu X_{1}^{-1} e
+\end{equation}
+
+где $e$ -- вектор, составленный из единиц. Следовательно, из $x_{1} > 0$
+следует что $z_{1} > 0$, и умножение на матрицу $-X_{1}$ дает эквивалентное
+уравнение, приведенное выше: $X_{1} z_{1} = \mu e$.
+
+\subsection{Метод Ньютона}
+
+Далее переменные $r = D_{2} y$ исключаются и применяется метод Ньютона:
+
+\begin{equation}
+ \begin{aligned}
+  A(x + \Delta x) + D_{2}^{2} (y + \Delta y) = b \\
+  (x + \Delta x) - (x_{1} + \Delta x_{1}) = l \\
+  -(x + \Delta x) - (x_{2} + \Delta x_{2}) = -u \\
+  A^{T} (y + \Delta y) + (z_{1} + \Delta z_{1}) - (z_{2} + \Delta z_{2}) =
+  g + H \Delta x + D_{1}^{2} (x + \Delta x) \\
+  X_{1} z_{1} + X_{1} \Delta z_{1} + Z_{1} \Delta x_{1} = \mu e \\
+  X_{2} z_{2} + X_{2} \Delta z_{2} + Z_{2} \Delta x_{2} = \mu e \\
+ \end{aligned}
+\end{equation}
+
+где $g$ и $H$ -- вычисленные в текущей точке значения градиента и гессиана
+минимизируемого функционала. Для того, чтобы решить эту систему, производится 
+работа со следующими тремя парами векторов невязок:
+
+\begin{equation}
+ \label{eq:newton1}
+ \left(
+  \begin{array}{c}
+   \Delta x - \Delta x_{1} \\
+   - \Delta x - \Delta x_{2} \\
+   \end{array}
+ \right) =
+ \left(
+  \begin{array}{c}
+   r_{l} \\
+   r_{u} \\
+   \end{array}
+ \right) \equiv
+ \left(
+  \begin{array}{c}
+   l - x + x_{1} \\
+   -u + x + x_{2} \\
+   \end{array}
+ \right),
+\end{equation}
+
+\begin{equation}
+\label{eq:newton2}
+ \left(
+  \begin{array}{c}
+   X_{1} \Delta z_{1} + Z_{1} \Delta x_{1} \\
+   X_{2} \Delta z_{2} + Z_{2} \Delta x_{2} \\
+   \end{array}
+ \right) =
+ \left(
+  \begin{array}{c}
+   c_{l} \\
+   c_{u} \\
+   \end{array}
+ \right) \equiv
+ \left(
+  \begin{array}{c}
+   \mu e - X_{1} z_{1} \\
+   \mu e - X_{2} z_{2} \\
+   \end{array}
+ \right),
+\end{equation}
+
+\begin{equation}
+\label{eq:newton3}
+ \left(
+  \begin{array}{c}
+   A \Delta x + D_{2}^{2} \Delta y \\
+   -H_{1} \Delta x + A^{T} \Delta y\ + \Delta z_{1} - \Delta z_{2} \\
+   \end{array}
+ \right) =
+ \left(
+  \begin{array}{c}
+   r_{1} \\
+   r_{2} \\
+   \end{array}
+ \right) \equiv
+ \left(
+  \begin{array}{c}
+   b - A x - D_{2}^{2} y \\
+   g + D_{1}^{2} - A^{T} y - z_{1} + z_{2} \\
+   \end{array}
+ \right),
+\end{equation}
+
+где $H_{1} = H + D_{1}^{2}$. Выразим
+$\Delta x_{1}, \Delta x_{2}, \Delta z_{1}, \Delta z_{2}$ из уравнений
+(\ref{eq:newton1}) и (\ref{eq:newton2}), чтобы подставить в (\ref{eq:newton3}).
+Получим:
+
+\begin{equation}
+ \left(
+  \begin{array}{c}
+   \Delta x_{1} \\
+   \Delta x_{2} \\
+   \end{array}
+ \right) =
+ \left(
+  \begin{array}{c}
+   -r_{l} + \Delta x \\
+   -r_{u} - \Delta x \\
+   \end{array}
+ \right), \;\;\;
+ \left(
+  \begin{array}{c}
+   \Delta z_{1} \\
+   \Delta z_{2} \\
+   \end{array}
+ \right) =
+ \left(
+  \begin{array}{c}
+   X_{1}^{-1} (c_{l} - Z_{1} \Delta x_{1}) \\
+   X_{2}^{-1} (c_{u} - Z_{2} \Delta x_{2}) \\
+   \end{array}
+ \right),
+\end{equation}
+
+Обозначим
+\begin{equation}
+ \begin{aligned}
+  H_{2} \equiv H + D_{1}^{2} + X_{1}^{-1} Z_{1} + X_{2}^{-1} Z_{2} \\
+  w \equiv r_{2} - X_{1}^{-1} (c_{l} + Z_{1} r_{l})
+  + X_{2}^{-1} (c_{u} + Z_{2} r_{u}) \\
+ \end{aligned}
+\end{equation}
+
+Итак, получим что:
+\begin{equation}
+ \left(
+  \begin{array}{cc}
+   -H_{2} & A^{T} \\
+   A & D_{2}^{2} \\
+   \end{array}
+ \right)
+ \left(
+  \begin{array}{c}
+   \Delta x \\
+   \Delta y \\
+   \end{array}
+ \right) =
+ \left(
+  \begin{array}{c}
+   w \\
+   r_{1} \\
+   \end{array}
+ \right)
+\end{equation}
+
+
+
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
