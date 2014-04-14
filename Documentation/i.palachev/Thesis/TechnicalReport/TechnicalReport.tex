@@ -1,0 +1,180 @@
+
+% Copyright (c) 2009-20134 Ilya Palachev <iliyapalachev@gmail.com>
+
+% Declare the class of document: size of paper, size of font, and etc.
+% Type of the document is "article".
+\documentclass[a4paper, 12pt, titlepage]{article} 
+
+% Package that enables setting the size of free spaces at the border of the 
+% page with the command  \geometry :
+\usepackage{geometry}
+\geometry {
+   left=3cm,
+   right=1.5cm,
+   top=2cm,
+   bottom=2cm
+}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage[english,russian]{babel}
+
+\usepackage{amsmath}
+
+%\usepackage{cmap}
+
+\usepackage{indentfirst}
+
+\usepackage{a4wide,amssymb}
+
+%\usepackage[pdftex]{graphicx}
+
+%\usepackage{wrapfig}
+
+%\linespread{1.3}               % полтора интервала. Если 1.6, то два интервала
+\pagestyle{plain}               % номерует страницы
+
+\usepackage{graphicx}
+\renewcommand{\topfraction}{1}
+\renewcommand{\textfraction}{0}
+
+% Package that enables usage of theorems and definition designed in a 
+% standard way.
+% http://en.wikibooks.org/wiki/LaTeX/Theorems
+\usepackage{amsthm}
+
+% Create environment for smart definitions
+\theoremstyle{definition}
+\newtheorem{SmartDefinition}{Определение}
+
+% Create environment for smart theorems
+\theoremstyle{plain}
+\newtheorem{SmartTheorem}{Теорема}
+
+% Create environment for smart lemmas
+\theoremstyle{plain}
+\newtheorem{SmartLemma}{Лемма}
+
+% The following code enables back references:
+\usepackage{color} 
+\definecolor{darkgreen}{rgb}{0,.5,0} 
+\usepackage[unicode,colorlinks,filecolor=blue,citecolor=darkgreen,pagebackref]
+{hyperref}
+
+% The package that provides symbols like \Square:
+\usepackage{wasysym}
+
+%opening
+\title{Опорные методы восстановления выпуклых тел и их обобщения для задачи
+восстановления многогранников по теневым и бликовым контурам \\ Технический
+отчет}
+\author{Палачев Илья}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Введение}
+
+\subsection{Исходная практическая проблема восстановления моделей алмазов по
+теневым и бликовым контурам}
+
+\subsection{Описание технологии построения моделей алмазов}
+
+\subsection{Погрешности в теневых контурах и их последствия}
+
+\subsection{Можно ли корректировать теневые контуры?}
+
+\subsection{Смежные проблемы в компьютерной томографии, магнитно-резонансной
+визуализации и обработке данных лазерного радара}
+
+\subsection{Обзор работы}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Преобразование двойственности и опорное представление
+выпуклого тела (исторический обзор)}
+
+\subsection{Понятие полярного преобразования двойственности}
+
+\subsection{Пересечение многогранников и выпуклая оболочка многогранников --
+двойственные задачи}
+
+\subsection{Пересечение полупространств и выпуклая оболочка вершин -- 
+двойственные задачи}
+
+\subsection{Опорное и точечное зондирование -- двойственные задачи}
+
+\subsection{Понятие опорной функции выпуклого тела}
+
+\subsection{Свойства опорного представления}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Первичная и двойственная формулировка исходной проблемы}
+
+\subsection{Первичная формулировка проблемы}
+
+\subsection{Двойственная формулировка проблемы}
+
+\subsection{Критерий согласованности теневых контуров}
+
+\subsection{Обобщение для случая бликовых контуров}
+
+\subsection{Образы одной вершины на разных контурах}
+
+\subsection{Разрешение нарушений плоскостности при подвижке вершины}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Опорные методы и опорные задачи восстановления выпуклых
+тел (исторический обзор)}
+
+\subsection{Понятие опорной функции выпуклого тела}
+
+\subsection{Опорные задачи}
+
+\subsection{Двухмерные опорные методы}
+
+\subsection{Трехмерный метод восстановления базового тела}
+
+\subsection{Трехмерный метод вершинного восстановления тела}
+
+\subsection{Двухмерный метод обнаружения краев}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Эффективный критерий согласованности опорных данных}
+
+\subsection{Критерий выпуклости многогранника}
+
+\subsection{Связь между локальной согласованностью опорных данных и выпуклостью
+многогранника в ребре}
+
+\subsection{Критерий согласованности опорных данных}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Различные способы сведения исходной проблемы к опорным задачам}
+
+\subsection{Наивная интерпретация сторон контуров как опорных плоскостей}
+
+\subsection{Кластеризация вершин теневых контуров}
+
+\subsection{Предварительная кластеризация и сведение к опорной задаче
+вершинного восстановления}
+
+\subsection{Учет невыпуклости в теневых контурах}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
