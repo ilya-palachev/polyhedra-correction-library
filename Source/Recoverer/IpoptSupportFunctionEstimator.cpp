@@ -382,6 +382,9 @@ void IpoptSupportFunctionEstimator::run(void)
 		return;
 	}
 
+	app->Options()->SetNumericValue("tol", 1e-16);
+	app->Options()->SetNumericValue("acceptable_tol", 1e-16);
+
 	/* Ask Ipopt to solve the problem */
 	status = app->OptimizeTNLP(this);
 	if (status == Solve_Succeeded)
