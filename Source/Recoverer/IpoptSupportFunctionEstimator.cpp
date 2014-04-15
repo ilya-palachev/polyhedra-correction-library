@@ -110,9 +110,10 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 
 	if (init_x)
 	{
+		VectorXd x0 = supportVector();
 		for (int i = 0; i < n; ++i)
 		{
-			x[i] = 1.;
+			x[i] = x0(i);
 		}
 	}
 	if (init_z || init_lambda)
