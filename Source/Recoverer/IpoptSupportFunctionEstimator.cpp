@@ -210,6 +210,15 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	SparseMatrix Q = supportMatrix();
 	ASSERT(n_ele_jac == Q.nonZeros());
 
+	/* Assign all values of sparsity structure to -1 */
+	if (!values)
+	{
+		for (int i = 0; i < n_ele_jac; ++i)
+		{
+			iRow[i] = jCol[i] = -1;
+		}
+	}
+
 	int i = 0;
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
@@ -218,7 +227,6 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			{
 				/* Inform about the values of Lagrangian of g */
 				values[i] = it.value();
-
 			}
 			else
 			{
@@ -228,6 +236,20 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			}
 			++i;
 		}
+
+	/* Check that all values of sparsity structure have been correctly set. */
+	if (!values)
+	{
+		for (int i = 0; i < n_ele_jac; ++i)
+		{
+			ASSERT(iRow[i] != -1);
+			ASSERT(iRow[i] >= 0);
+			ASSERT(iRow[i] < Q.rows());
+			ASSERT(jCol[i] != -1);
+			ASSERT(jCol[i] >= 0);
+			ASSERT(jCol[i] < Q.cols());
+		}
+	}
 	DEBUG_END;
 	return true;
 }
@@ -263,6 +285,14 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	ASSERT(n_ele_hess == Q.nonZeros());
 	Q *= 2. * obj_factor;
 
+	/* Assign all values of sparsity structure to -1 */
+	if (!values)
+	{
+		for (int i = 0; i < n_ele_hess; ++i)
+		{
+			iRow[i] = jCol[i] = -1;
+		}
+	}
 
 	int i = 0;
 	for (int k = 0; k < Q.outerSize(); ++k)
@@ -281,6 +311,20 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 			}
 			++i;
 		}
+
+	/* Check that all values of sparsity structure have been correctly set. */
+	if (!values)
+	{
+		for (int i = 0; i < n_ele_hess; ++i)
+		{
+			ASSERT(iRow[i] != -1);
+			ASSERT(iRow[i] >= 0);
+			ASSERT(iRow[i] < Q.rows());
+			ASSERT(jCol[i] != -1);
+			ASSERT(jCol[i] >= 0);
+			ASSERT(jCol[i] < Q.cols());
+		}
+	}
 	DEBUG_END;
 	return true;
 }
