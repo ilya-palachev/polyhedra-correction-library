@@ -1155,7 +1155,6 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	/* Run support function estimation. */
 	if (sfe)
 		sfe->run();
-	delete sfe;
 
 	DEBUG_END;
 	return NULL;
