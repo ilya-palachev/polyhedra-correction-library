@@ -65,7 +65,7 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 	DEBUG_PRINT("Number of non-zero elements in the Jacobian of g is set to "
 			"nnz_jac_g = %d", nnz_jac_g);
 
-	nnz_h_lag = nnz_jac_g;
+	nnz_h_lag = numValues();
 	DEBUG_PRINT("Number of non-zero elements in the Hessian is set to "
 			"nnz_h_lag = %d", nnz_h_lag);
 
@@ -271,60 +271,32 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	DEBUG_PRINT("   n_ele_hess = %d", n_ele_hess);
 	DEBUG_PRINT("   iRow = %p", (void*) iRow);
 	DEBUG_PRINT("   jCol = %p", (void*) jCol);
-	DEBUG_PRINT("   values = %p", (void*) values);\
+	DEBUG_PRINT("   values = %p", (void*) values);
 
-	if (!values)
-	{
-		ASSERT(iRow);
-		ASSERT(jCol);
-	}
+	ASSERT(n_ele_hess == numValues());
+
 	if (new_x)
 		ASSERT(values);
 
-	SparseMatrix Q = supportMatrix();
-	ASSERT(n_ele_hess == Q.nonZeros());
-	Q *= 2. * obj_factor;
-
-	/* Assign all values of sparsity structure to -1 */
 	if (!values)
 	{
+		/* Set sparsity structure of the Hessian. */
+		ASSERT(iRow);
+		ASSERT(jCol);
 		for (int i = 0; i < n_ele_hess; ++i)
 		{
-			iRow[i] = jCol[i] = -1;
+			iRow[i] = jCol[i] = i;
+		}
+	}
+	else
+	{
+		/* Set values of the Hessian. */
+		for (int i = 0; i < n_ele_hess; ++i)
+		{
+			values[i] = 2. * obj_factor;
 		}
 	}
 
-	int i = 0;
-	for (int k = 0; k < Q.outerSize(); ++k)
-		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
-		{
-			if (values)
-			{
-				/* Inform about the values of Hessian */
-				values[i] = it.value();
-			}
-			else
-			{
-				/* Inform about the sparsity structure of Hessian */
-				iRow[i] = it.row();
-				jCol[i] = it.col();
-			}
-			++i;
-		}
-
-	/* Check that all values of sparsity structure have been correctly set. */
-	if (!values)
-	{
-		for (int i = 0; i < n_ele_hess; ++i)
-		{
-			ASSERT(iRow[i] != -1);
-			ASSERT(iRow[i] >= 0);
-			ASSERT(iRow[i] < Q.rows());
-			ASSERT(jCol[i] != -1);
-			ASSERT(jCol[i] >= 0);
-			ASSERT(jCol[i] < Q.cols());
-		}
-	}
 	DEBUG_END;
 	return true;
 }
