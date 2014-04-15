@@ -71,6 +71,9 @@ private:
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
 
+	/** Whether to convexify shadow contours. */
+	bool ifConvexifyContours;
+
 	/** ID of vertex with maximal X coordinate. */
 	int iXmax;
 

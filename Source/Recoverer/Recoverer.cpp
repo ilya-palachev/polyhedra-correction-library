@@ -71,6 +71,7 @@ Recoverer::Recoverer() :
 	estimator(CGAL_ESTIMATOR),
 	ifBalancing(false),
 	ifScaleMatrix(false),
+	ifConvexifyContours(true),
 	iXmax(0),
 	iYmax(0),
 	iZmax(0),
@@ -283,36 +284,95 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	DEBUG_START;
 	vector<Plane> supportPlanes;
 	Vector3d normal = contour->plane.norm;
+	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
 
-	/* Iterate through the array of sides of current contour. */
-	for (int iSide = 0; iSide < contour->ns; ++iSide)
+	if (ifConvexifyContours)
 	{
-		SideOfContour* sideCurr = &contour->sides[iSide];
+		/*
+		 * TODO: This is a temporal workaround. In future we need to perform
+		 * convexification so that to remember what points are vertices of
+		 * convex hull.
+		 */
+
+		Polyhedron_3 poly;
+		std::vector<Vector3d> points;
+
+		/* Iterate through the array of sides of current contour. */
+		for (int iSide = 0; iSide < contour->ns; ++iSide)
+		{
+			SideOfContour* sideCurr = &contour->sides[iSide];
+
+			/*
+			 * Check that second vertex of previous side lies closely to first
+			 * vertex of the current side.
+			 */
+			SideOfContour* sidePrev DEBUG_VARIABLE =
+					&contour->sides[(contour->ns + iSide - 1) % contour->ns];
+			ASSERT(qmod(sidePrev->A2 - sideCurr->A1) < 3. * EPS_MIN_DOUBLE);
+
+			/* Project current vertex to the plane of contour. */
+			Vector3d vCurr = contour->plane.project(sideCurr->A1);
+			ASSERT(qmod(sideCurr->A1 - vCurr) < EPS_MIN_DOUBLE);
+
+			/* Assertion: vCurr lies in the plane of contour. */
+			ASSERT(fabs(normal.x * vCurr.x + normal.y * vCurr.y) <
+					EPS_MIN_DOUBLE);
+
+			/* Rotate vCurr to Oxz, then to Oxy to obtain 2D point. */
+			Vector3d point(normal.y * vCurr.x - normal.x * vCurr.y,
+					vCurr.z, 0.);
+
+			points.push_back(point);
+		}
+
+		poly = constructConvexHullCGAL(points);
+		ASSERT(poly->size_of_facets() == 1);
+
+		auto facet = poly.facets_begin();
+		auto halfedge = facet->halfedge();
+		vector<Point_2> extremePoints;
+		for (int i = 0; i < facet->facet_degree(); ++i)
+		{
+			Point_2 point = halfedge->vertex()->point();
+			extremePoints.push_back(point);
+			halfedge = halfedge->next();
+		}
 
 		/*
-		 * Here the plane that is incident to points A1 and A2 of the
-		 * current side and collinear to the vector of projection.
-		 *
-		 * TODO: Here should be the calculation of the best plane fitting
-		 * these conditions. Current implementation can produce big errors.
+		 * TODO: Complete this implementation.
 		 */
-		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
-			normal;
-		Plane supportPlane(supportPlaneNormal,
-						   - supportPlaneNormal * sideCurr->A1);
+	}
+	else
+	{
+		/* Iterate through the array of sides of current contour. */
+		for (int iSide = 0; iSide < contour->ns; ++iSide)
+		{
+			SideOfContour* sideCurr = &contour->sides[iSide];
+			/*
+			 * Here the plane that is incident to points A1 and A2 of the
+			 * current side and collinear to the vector of projection.
+			 *
+			 * TODO: Here should be the calculation of the best plane fitting
+			 * these conditions. Current implementation can produce big errors.
+			 */
+			Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
+				normal;
+			Plane supportPlane(supportPlaneNormal,
+							   - supportPlaneNormal * sideCurr->A1);
 
-		supportPlanes.push_back(supportPlane);
+			supportPlanes.push_back(supportPlane);
 
-		DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
-			supportPlane.dist;
-		DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
-			supportPlane.dist;
+			DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
+				supportPlane.dist;
+			DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
+				supportPlane.dist;
 
-		DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
+			DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
 
-		/* TODO: Here should be more strict conditions. */
-		ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
-		ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+			/* TODO: Here should be more strict conditions. */
+			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
+			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+		}
 	}
 	DEBUG_END;
 	return supportPlanes;
