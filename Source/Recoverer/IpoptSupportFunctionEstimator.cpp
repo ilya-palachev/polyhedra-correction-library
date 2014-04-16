@@ -110,10 +110,11 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 
 	if (init_x)
 	{
-		VectorXd x0 = supportVector();
+//		VectorXd x0 = supportVector();
 		for (int i = 0; i < n; ++i)
 		{
-			x[i] = x0(i);
+//			x[i] = x0(i);
+			x[i] = 1.;
 		}
 	}
 	if (init_z || init_lambda)
@@ -382,8 +383,8 @@ void IpoptSupportFunctionEstimator::run(void)
 		return;
 	}
 
-	app->Options()->SetNumericValue("tol", 1e-16);
-	app->Options()->SetNumericValue("acceptable_tol", 1e-16);
+	app->Options()->SetNumericValue("tol", 1e-10);
+	app->Options()->SetNumericValue("acceptable_tol", 1e-10);
 
 	/* Ask Ipopt to solve the problem */
 	status = app->OptimizeTNLP(this);

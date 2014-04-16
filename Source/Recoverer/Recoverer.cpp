@@ -308,34 +308,68 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 			 */
 			SideOfContour* sidePrev DEBUG_VARIABLE =
 					&contour->sides[(contour->ns + iSide - 1) % contour->ns];
-			ASSERT(qmod(sidePrev->A2 - sideCurr->A1) < 3. * EPS_MIN_DOUBLE);
+			DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
+					(contour->ns + iSide - 1) % contour->ns,
+					sidePrev->A2.x, sidePrev->A2.y, sidePrev->A2.z);
+			DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
+					iSide, sideCurr->A1.x, sideCurr->A1.y, sideCurr->A1.z);
+			Vector3d diff = sidePrev->A2 - sideCurr->A1;
+			DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
+					diff.x, diff.y, diff.z);
+			ASSERT(qmod(diff) < 100. * EPS_MIN_DOUBLE || iSide == 0);
 
 			/* Project current vertex to the plane of contour. */
 			Vector3d vCurr = contour->plane.project(sideCurr->A1);
-			ASSERT(qmod(sideCurr->A1 - vCurr) < EPS_MIN_DOUBLE);
+			ASSERT(qmod(sideCurr->A1 - vCurr) < 1000. * EPS_MIN_DOUBLE);
 
-			/* Assertion: vCurr lies in the plane of contour. */
-			ASSERT(fabs(normal.x * vCurr.x + normal.y * vCurr.y) <
-					EPS_MIN_DOUBLE);
-
-			/* Rotate vCurr to Oxz, then to Oxy to obtain 2D point. */
-			Vector3d point(normal.y * vCurr.x - normal.x * vCurr.y,
-					vCurr.z, 0.);
-
-			points.push_back(point);
+			points.push_back(vCurr);
 		}
 
 		poly = constructConvexHullCGAL(points);
-		ASSERT(poly->size_of_facets() == 1);
+		DEBUG_PRINT("poly.size_of_facets() = %d", (int) poly.size_of_facets());
+		ASSERT(poly.size_of_facets() == 1);
+		if ((int) poly.size_of_vertices() != (int) contour->ns)
+		{
+			MAIN_PRINT(COLOUR_RED
+					"Warning: contour #%d is non-convex, its hull "
+					"contains %d of %d of its points"
+					COLOUR_NORM,
+					contour->id, (int) poly.size_of_vertices(), contour->ns);
+		}
 
 		auto facet = poly.facets_begin();
 		auto halfedge = facet->halfedge();
-		vector<Point_2> extremePoints;
-		for (int i = 0; i < facet->facet_degree(); ++i)
+		vector<Point_3> extremePoints;
+		for (int i = 0; i < (int) facet->facet_degree(); ++i)
 		{
-			Point_2 point = halfedge->vertex()->point();
+			Point_3 point = halfedge->vertex()->point();
 			extremePoints.push_back(point);
 			halfedge = halfedge->next();
+		}
+
+		for (int i = 0; i < (int) extremePoints.size(); ++i)
+		{
+			Point_3 P1 = extremePoints[i];
+			Point_3 P2 = extremePoints[(i + 1 + extremePoints.size())
+			                           % extremePoints.size()];
+			Vector3d A1(P1.x(), P1.y(), P1.z());
+			Vector3d A2(P2.x(), P2.y(), P2.z());
+
+			Vector3d supportPlaneNormal = (A1 - A2) % normal;
+			Plane supportPlane(supportPlaneNormal, - supportPlaneNormal * A1);
+
+			supportPlanes.push_back(supportPlane);
+
+			DEBUG_VARIABLE double error1 = supportPlane.norm * A1 +
+				supportPlane.dist;
+			DEBUG_VARIABLE double error2 = supportPlane.norm * A2 +
+				supportPlane.dist;
+
+			DEBUG_PRINT("   extreme point #%d\t%le\t%le", i, error1, error2);
+
+			/* TODO: Here should be more strict conditions. */
+			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
+			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
 		}
 
 		/*
@@ -676,7 +710,7 @@ static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
 	 * First, calcualate the sum of vertex degrees
 	 */
 	unsigned long int degreeSum = 0;
-	long int iVertex = 0;
+	long int iVertex DEBUG_VARIABLE = 0;
 	for (auto vertex = polyhedron.vertices_begin();
 			vertex != polyhedron.vertices_end(); ++vertex)
 	{
