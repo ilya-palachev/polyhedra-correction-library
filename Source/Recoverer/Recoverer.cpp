@@ -313,7 +313,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 					sidePrev->A2.x, sidePrev->A2.y, sidePrev->A2.z);
 			DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
 					iSide, sideCurr->A1.x, sideCurr->A1.y, sideCurr->A1.z);
-			Vector3d diff = sidePrev->A2 - sideCurr->A1;
+			Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
 			DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
 					diff.x, diff.y, diff.z);
 			ASSERT(qmod(diff) < 100. * EPS_MIN_DOUBLE || iSide == 0);
@@ -695,6 +695,7 @@ typedef struct
 	Polyhedron_3::Vertex_handle v0, v1, v2, v3;
 } TetrahedronVertex;
 
+#ifndef NDEBUG
 /**
  * Counts the number of covering tetrahedrons for a given polyhedron.
  *
@@ -740,6 +741,7 @@ static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
 	DEBUG_END;
 	return numTetrahedrons;
 }
+#endif
 
 /**
  * Finds covering tetrahedrons for a given polyhedron.
