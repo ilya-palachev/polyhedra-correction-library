@@ -41,6 +41,7 @@ poly-data-out
 *.tex~
 *.toc
 *.dvi
+*.out
 
 # BibTEX automatically generated files:
 *.bbl
