@@ -11,13 +11,15 @@
 *.kate-swp
 # * Aspell backup files:
 *.bak
+# * Vim backup files:
+*.swp
 
 # Building directories and files:
 *.o
 *.so
 *.a
 Build*
-build
+build*
 
 # Directory with output from polyhedral algorithms:
 poly-data-out
