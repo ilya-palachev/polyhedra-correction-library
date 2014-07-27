@@ -13,6 +13,8 @@
 *.bak
 # * Vim backup files:
 *.swp
+# * LibreOffice Draw backup files:
+*.odg#
 
 # Building directories and files:
 *.o
