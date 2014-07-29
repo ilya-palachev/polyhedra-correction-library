@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef USE_TSNNLS
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -255,3 +257,4 @@ void TsnnlsSupportFunctionEstimator::run()
 	taucs_ccs_free(Qt);
 }
 
+#endif /* USE_TSNNLS */

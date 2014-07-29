@@ -1223,8 +1223,10 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 	switch (estimator)
 	{
 	case TSNNLS_ESTIMATOR:
+#ifdef USE_TSNNLS
 		sfe = static_cast<SupportFunctionEstimator*>(new
 				TsnnlsSupportFunctionEstimator(data));
+#endif
 		break;
 	case IPOPT_ESTIMATOR:
 #ifdef USE_IPOPT
