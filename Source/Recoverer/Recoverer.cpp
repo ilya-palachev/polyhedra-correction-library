@@ -279,6 +279,46 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
+static vector<Vector3d> connectContour(SContour* contour)
+{
+	DEBUG_START;
+	vector<Vector3d> points;
+
+	/*
+	 * TODO: add support of option "--check-connectivity" here.
+	 */
+	 
+	/* Iterate through the array of sides of current contour. */
+	for (int iSide = 0; iSide < contour->ns; ++iSide)
+	{
+		SideOfContour* sideCurr = &contour->sides[iSide];
+
+		/*
+		 * Check that second vertex of previous side lies closely to first
+		 * vertex of the current side.
+		 */
+		SideOfContour* sidePrev DEBUG_VARIABLE =
+				&contour->sides[(contour->ns + iSide - 1) % contour->ns];
+		DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
+				(contour->ns + iSide - 1) % contour->ns,
+				sidePrev->A2.x, sidePrev->A2.y, sidePrev->A2.z);
+		DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
+				iSide, sideCurr->A1.x, sideCurr->A1.y, sideCurr->A1.z);
+		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
+		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
+				diff.x, diff.y, diff.z);
+		ASSERT(qmod(diff) < 100. * EPS_MIN_DOUBLE || iSide == 0);
+
+		/* Project current vertex to the plane of contour. */
+		Vector3d vCurr = contour->plane.project(sideCurr->A1);
+		ASSERT(qmod(sideCurr->A1 - vCurr) < 1000. * EPS_MIN_DOUBLE);
+
+		points.push_back(vCurr);
+	}
+	DEBUG_END;
+	return points;
+}
+
 vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 {
 	DEBUG_START;
@@ -295,35 +335,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		 */
 
 		Polyhedron_3 poly;
-		std::vector<Vector3d> points;
-
-		/* Iterate through the array of sides of current contour. */
-		for (int iSide = 0; iSide < contour->ns; ++iSide)
-		{
-			SideOfContour* sideCurr = &contour->sides[iSide];
-
-			/*
-			 * Check that second vertex of previous side lies closely to first
-			 * vertex of the current side.
-			 */
-			SideOfContour* sidePrev DEBUG_VARIABLE =
-					&contour->sides[(contour->ns + iSide - 1) % contour->ns];
-			DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
-					(contour->ns + iSide - 1) % contour->ns,
-					sidePrev->A2.x, sidePrev->A2.y, sidePrev->A2.z);
-			DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
-					iSide, sideCurr->A1.x, sideCurr->A1.y, sideCurr->A1.z);
-			Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
-			DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
-					diff.x, diff.y, diff.z);
-			ASSERT(qmod(diff) < 100. * EPS_MIN_DOUBLE || iSide == 0);
-
-			/* Project current vertex to the plane of contour. */
-			Vector3d vCurr = contour->plane.project(sideCurr->A1);
-			ASSERT(qmod(sideCurr->A1 - vCurr) < 1000. * EPS_MIN_DOUBLE);
-
-			points.push_back(vCurr);
-		}
+		auto points = connectContour(contour);
 
 		poly = constructConvexHullCGAL(points);
 		DEBUG_PRINT("poly.size_of_facets() = %d", (int) poly.size_of_facets());
