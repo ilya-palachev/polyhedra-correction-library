@@ -22,6 +22,8 @@
 #include <set>
 #include <boost/concept_check.hpp>
 
+#include <CGAL/convex_hull_2.h>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -338,11 +340,28 @@ static vector<Point_2> mapPointsToOXYplane(vector<Vector3d> points, Vector3d nu)
 	return pointsMapped;
 }
 
+static vector<Point_3> mapPointsFromOXYplane(vector<Point_2> points, Vector_3 nu)
+{
+	DEBUG_START;
+	Vector_3 ez(0., 0, 1.);
+	nu = nu * 1. / sqrt(nu.squared_length()); /* Normalize vector \nu. */
+	Vector_3 tau = cross_product(nu, ez);
+
+	vector<Point_3> pointsMapped;
+	CGAL::Origin o;
+	for (auto &point : points)
+	{
+		pointsMapped.push_back(o + tau * point.x() + ez * point.y());
+	}
+	DEBUG_END;
+	return pointsMapped;
+}
+
 vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 {
 	DEBUG_START;
 	vector<Plane> supportPlanes;
-	Vector3d normal = contour->plane.norm;
+	auto normal = contour->plane.norm;
 	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
 
 	if (ifConvexifyContours)
@@ -353,30 +372,25 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		 * convex hull.
 		 */
 
-		Polyhedron_3 poly;
 		auto points = connectContour(contour);
 
-		poly = constructConvexHullCGAL(points);
-		DEBUG_PRINT("poly.size_of_facets() = %d", (int) poly.size_of_facets());
-		ASSERT(poly.size_of_facets() == 1);
-		if ((int) poly.size_of_vertices() != (int) contour->ns)
+		auto pointsMapped = mapPointsToOXYplane(points, normal);
+		vector<Point_2> hull;
+		convex_hull_2(pointsMapped.begin(), pointsMapped.end(),
+			std::back_inserter(hull));
+		
+		if ((int) hull.size() != (int) contour->ns)
 		{
 			MAIN_PRINT(COLOUR_RED
 					"Warning: contour #%d is non-convex, its hull "
 					"contains %d of %d of its points"
 					COLOUR_NORM,
-					contour->id, (int) poly.size_of_vertices(), contour->ns);
+					contour->id, (int) hull.size(), contour->ns);
 		}
 
-		auto facet = poly.facets_begin();
-		auto halfedge = facet->halfedge();
-		vector<Point_3> extremePoints;
-		for (int i = 0; i < (int) facet->facet_degree(); ++i)
-		{
-			Point_3 point = halfedge->vertex()->point();
-			extremePoints.push_back(point);
-			halfedge = halfedge->next();
-		}
+		/* TODO: Add automatic conversion from Vector3d to Vector_3 !!! */
+		auto extremePoints = mapPointsFromOXYplane(hull,
+					Vector_3(normal.x, normal.y, normal.z));
 
 		for (int i = 0; i < (int) extremePoints.size(); ++i)
 		{
@@ -402,10 +416,6 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
 			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
 		}
-
-		/*
-		 * TODO: Complete this implementation.
-		 */
 	}
 	else
 	{
