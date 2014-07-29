@@ -319,6 +319,25 @@ static vector<Vector3d> connectContour(SContour* contour)
 	return points;
 }
 
+static vector<Point_2> mapPointsToOXYplane(vector<Vector3d> points, Vector3d nu)
+{
+	DEBUG_START;
+	Vector3d ez(0., 0., 1.);
+	nu.norm(1.);
+	Vector3d tau = nu % ez;
+
+	double xCurr = 0., yCurr = 0.;
+	vector<Point_2> pointsMapped;
+	for(auto &point : points)
+	{
+		xCurr = point * tau;
+		yCurr = point * nu;
+		pointsMapped.push_back(Point_2(xCurr, yCurr));
+	}
+	DEBUG_END;
+	return pointsMapped;
+}
+
 vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 {
 	DEBUG_START;
