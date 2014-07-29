@@ -78,7 +78,7 @@ if (ENABLE_TSNNLS)
 endif()
 
 if (ENABLE_IPOPT)
-	target_link_libraries(pcl ipopt coinmumps coinhsl)
+	target_link_libraries(pcl ipopt coinmumps coinhsl blas lapack)
 	add_definitions(-DUSE_IPOPT)
 	message("!!! Ipopt solver is enabled !!!")
 endif()
