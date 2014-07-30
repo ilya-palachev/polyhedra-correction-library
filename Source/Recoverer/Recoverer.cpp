@@ -360,7 +360,7 @@ static vector<Point_2> mapPointsToOXYplane(vector<Vector3d> points, Vector3d nu)
 	for(auto &point : points)
 	{
 		xCurr = point * tau;
-		yCurr = point * nu;
+		yCurr = point * ez;
 		pointsMapped.push_back(Point_2(xCurr, yCurr));
 	}
 	DEBUG_END;
