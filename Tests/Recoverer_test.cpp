@@ -23,8 +23,7 @@
  * @brief Unit tests for Recoverer of the polyhedron.
  */
 
-#include <unistd.h>
-#include <errno.h>
+#include <getopt.h>
 #include <cstring>
 #include <fstream>
 
@@ -94,6 +93,74 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdpr:s"
+
+/**
+ * The definition of corresponding long options list.
+ */
+static struct option optionsLong[] =
+{
+	{
+		"file-name",
+		required_argument,
+		0,
+		OPTION_FILE_NAME
+	},
+	{
+		"model-name",
+		required_argument,
+		0,
+		OPTION_MODEL_NAME
+	},
+	{
+		"contours-number",
+		required_argument,
+		0,
+		OPTION_CONTOURS_NUMBER
+	},
+	{
+		"first-angle",
+		required_argument,
+		0,
+		OPTION_FIRST_ANGLE
+	},
+	{
+		"dual-nonconvex-polyhedron",
+		no_argument,
+		0,
+		OPTION_DUAL_NONCONVEX_POLYHEDRON
+	},
+	{
+		"contours",
+		no_argument,
+		0,
+		OPTION_CONTOURS
+	},
+	{
+		"balance-data",
+		no_argument,
+		0,
+		OPTION_BALANCE_DATA
+	},
+	{
+		"print-problem",
+		no_argument,
+		0,
+		OPTION_PRINT_PROBLEM
+	},
+	{
+		"recover",
+		required_argument,
+		0,
+		OPTION_RECOVER
+	},
+	{
+		"scale-matrix",
+		no_argument,
+		0,
+		OPTION_SCALE_MATRIX
+	},
+	{0, 0, 0, 0}
+};
 
 
 /** Error return value of getopt function. */
@@ -254,25 +321,26 @@ void printUsage(int argc, char** argv)
 		"contours>]\n", TEST_NAME, OPTION_FILE_NAME, OPTION_MODEL_NAME,
 		OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("Options:\n");
-	STDERR_PRINT("\t-%c\tThe name of file with shadow contours to be "
-		"processed\n", OPTION_FILE_NAME);
-	STDERR_PRINT("\t-%c\tThe name of synthetic model to be tested on.\n",
-		OPTION_MODEL_NAME);
-	STDERR_PRINT("\t-%c\tThe number of contours to be generated from the "
-		"synthetic model\n", OPTION_CONTOURS_NUMBER);
-	STDERR_PRINT("\t-%c\tThe fist angle from which the first shadow contour is "
-		"obtained\n", OPTION_FIRST_ANGLE);
-	STDERR_PRINT("\t-%c\tBuild only dual non-convex polyhedron.\n",
-		OPTION_DUAL_NONCONVEX_POLYHEDRON);
-	STDERR_PRINT("\t-%c\tBuild polyhedron consisting of shadow contours.\n",
-		OPTION_CONTOURS);
-	STDERR_PRINT("\t-%c\tBalance contour data before processing.\n",
-			OPTION_BALANCE_DATA);
-	STDERR_PRINT("\t-%c\tPrint problem mode (print matrix and hvalues vector "
-			"to the file).\n", OPTION_PRINT_PROBLEM);
-	STDERR_PRINT("\t-%c\tRecover polyhedron using some estimator.\n",
-			OPTION_RECOVER);
-	STDERR_PRINT("\t-%c\tEnable matrix scaling.\n", OPTION_SCALE_MATRIX);
+	STDERR_PRINT("\t-%c --%s\tThe name of file with shadow contours to be "
+		"processed\n", OPTION_FILE_NAME, optionsLong[0].name);
+	STDERR_PRINT("\t-%c --%s\tThe name of synthetic model to be tested on.\n",
+		OPTION_MODEL_NAME, optionsLong[1].name);
+	STDERR_PRINT("\t-%c --%s\tThe number of contours to be generated from the "
+		"synthetic model\n", OPTION_CONTOURS_NUMBER, optionsLong[2].name);
+	STDERR_PRINT("\t-%c --%s\tThe fist angle from which the first shadow contour is "
+		"obtained\n", OPTION_FIRST_ANGLE, optionsLong[3].name);
+	STDERR_PRINT("\t-%c --%s\tBuild only dual non-convex polyhedron.\n",
+		OPTION_DUAL_NONCONVEX_POLYHEDRON, optionsLong[4].name);
+	STDERR_PRINT("\t-%c --%s\tBuild polyhedron consisting of shadow contours.\n",
+		OPTION_CONTOURS, optionsLong[5].name);
+	STDERR_PRINT("\t-%c --%s\tBalance contour data before processing.\n",
+		OPTION_BALANCE_DATA, optionsLong[6].name);
+	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues vector "
+		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[7].name);
+	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
+		OPTION_RECOVER, optionsLong[8].name);
+	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
+		OPTION_SCALE_MATRIX, optionsLong[9].name);
 	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -324,13 +392,21 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifPrintProblem = false;
 	options->ifRecover = false;
 	options->ifScaleMatrix = false;
-	while ((charCurr = getopt(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION))
-		!= GETOPT_FAILURE)
+	int optionIndex = 0;
+	while ((charCurr = getopt_long(argc, argv,
+		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
+		&optionIndex)) != GETOPT_FAILURE)
 	{
 		char *charMistaken = NULL;
 
 		switch (charCurr)
 		{
+		case 0:
+			STDERR_PRINT("Impossible happened!");
+			printUsage(argc, argv);
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+			break;
 		case OPTION_FILE_NAME:
 			if (ifOptionFileName)
 			{
