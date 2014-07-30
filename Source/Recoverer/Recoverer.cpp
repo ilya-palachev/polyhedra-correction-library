@@ -281,17 +281,15 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
-static vector<Vector3d> connectContour(SContour* contour)
+static bool checkContourConnectivity(SContour* contour)
 {
 	DEBUG_START;
-	vector<Vector3d> points;
-
+	bool ifConnected = true;
 	/*
-	 * TODO: add support of option "--check-connectivity" here.
-	 */
-	 
-	/* Iterate through the array of sides of current contour. */
-	for (int iSide = 0; iSide < contour->ns; ++iSide)
+         * FIXME: Is it true that contours are ususally not connected between first
+         * and last sides?
+         */
+	for (int iSide = 0; iSide < contour->ns; ++iSide) 
 	{
 		SideOfContour* sideCurr = &contour->sides[iSide];
 
@@ -309,11 +307,40 @@ static vector<Vector3d> connectContour(SContour* contour)
 		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
 		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
 				diff.x, diff.y, diff.z);
-		ASSERT(qmod(diff) < 100. * EPS_MIN_DOUBLE || iSide == 0);
+		ifConnected &= qmod(diff) < EPS_MIN_DOUBLE || iSide == 0;
+		ASSERT(ifConnected);
+	}
+	DEBUG_END;
+	return ifConnected;
+}
+
+static vector<Vector3d> connectContour(SContour* contour)
+{
+	DEBUG_START;
+	vector<Vector3d> points;
+
+	/*
+	 * TODO: add support of option "--check-connectivity" here.
+	 */
+	if (!checkContourConnectivity(contour))
+	{
+		MAIN_PRINT(COLOUR_RED "Warning: contour %d is not connected!" COLOUR_NORM,
+			contour->id);
+		return points;
+	}
+	 
+	/* Iterate through the array of sides of current contour. */
+	/*
+	 * FIXME: Is it true that contours are ususally not connected between first
+	 * and last sides?
+	 */
+	for (int iSide = 0; iSide < contour->ns; ++iSide) 
+	{
+		SideOfContour* sideCurr = &contour->sides[iSide];
 
 		/* Project current vertex to the plane of contour. */
 		Vector3d vCurr = contour->plane.project(sideCurr->A1);
-		ASSERT(qmod(sideCurr->A1 - vCurr) < 1000. * EPS_MIN_DOUBLE);
+		ASSERT(qmod(sideCurr->A1 - vCurr) < 100000. * EPS_MIN_DOUBLE);
 
 		points.push_back(vCurr);
 	}
