@@ -602,6 +602,13 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 				DEBUG_END;
 				exit(EXIT_FAILURE);
 				break;
+			case OPTION_RECOVER:
+				STDERR_PRINT("Option \"-%c\" requires an argument -- the name of"
+					" recoverer engine.\n", OPTION_RECOVER);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+				break;
 			default:
 				STDERR_PRINT("Unknown option \"-%c\"\n", optopt);
 				printUsage(argc, argv);
