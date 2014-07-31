@@ -26,6 +26,7 @@
 #include <getopt.h>
 #include <cstring>
 #include <fstream>
+#include <sys/time.h>
 
 #include "Constants.h"
 #include "PolyhedraCorrectionLibrary.h"
@@ -71,6 +72,12 @@
 #define OPTION_BALANCE_DATA 'b'
 
 /**
+ * Options "-l" controls the absolute limit of random shift of modeled contour
+ * points.
+ */
+#define OPTION_LIMIT_RANDOM 'l'
+
+/**
  * Option "-p" enable the mode of printing the problem, i.e. the support vector
  * and the matrix of conditions.
  */
@@ -92,7 +99,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdpr:s"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:pr:s"
 
 /**
  * The definition of corresponding long options list.
@@ -140,6 +147,12 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_BALANCE_DATA
+	},
+	{
+		"limit-random",
+		required_argument,
+		0,
+		OPTION_LIMIT_RANDOM
 	},
 	{
 		"print-problem",
@@ -210,6 +223,7 @@ typedef struct
 			RecovererTestModelID id;	/**< The ID of model */
 			int numContours;			/**< The number of generated contours */
 			double shiftAngleFirst;		/**< The value of first angle */
+			double limitRandom;		/**< The limit of random shift */
 		} model;
 	} input;
 
@@ -335,12 +349,14 @@ void printUsage(int argc, char** argv)
 		OPTION_CONTOURS, optionsLong[5].name);
 	STDERR_PRINT("\t-%c --%s\tBalance contour data before processing.\n",
 		OPTION_BALANCE_DATA, optionsLong[6].name);
+	STDERR_PRINT("\t-%c --%s\tThe absolute limit of random shift of modeled "
+		"contour.", OPTION_LIMIT_RANDOM, optionsLong[7].name);
 	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues vector "
-		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[7].name);
+		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[8].name);
 	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
-		OPTION_RECOVER, optionsLong[8].name);
+		OPTION_RECOVER, optionsLong[9].name);
 	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
-		OPTION_SCALE_MATRIX, optionsLong[9].name);
+		OPTION_SCALE_MATRIX, optionsLong[10].name);
 	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -360,6 +376,29 @@ void printUsage(int argc, char** argv)
 	DEBUG_END;
 }
 
+static void errorOptionTwice(int argc, char** argv, char option)
+{
+	STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
+		" time.\n", option);
+	printUsage(argc, argv);
+	exit(EXIT_FAILURE);
+}
+
+static void errorCannotParseNumber(int argc, char** argv, char* strBuggy)
+{
+	STDERR_PRINT("Cannot parse number. Invalid character %s\n",
+		strBuggy);
+	printUsage(argc, argv);
+	exit(EXIT_FAILURE);
+}
+
+static void errorOutOfRange(int argc, char** argv)
+{
+	STDERR_PRINT("Given number is out of range\n");
+		printUsage(argc, argv);
+	exit(EXIT_FAILURE);
+}
+
 /**
  * Parses command line string to obtain options from it.
  * 
@@ -377,6 +416,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionModelName = false;
 	bool ifOptionNumContours = false;
 	bool ifOptionFirstAngle = false;
+	bool ifOptionLimitRandom = false;
 	bool ifOptionRecover = false;
 	long int charCurr;
 	opterr = 0;
@@ -410,11 +450,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_FILE_NAME:
 			if (ifOptionFileName)
 			{
-				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
-					" time.\n", OPTION_FILE_NAME);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOptionTwice(argc, argv, OPTION_FILE_NAME);
 			}
 
 			options->mode = RECOVERER_REAL_TESTING;
@@ -424,11 +460,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_MODEL_NAME:
 			if (ifOptionModelName)
 			{
-				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
-					" time.\n", OPTION_MODEL_NAME);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOptionTwice(argc, argv, OPTION_MODEL_NAME);
 			}
 
 			options->mode = RECOVERER_SYNTHETIC_TESTING;
@@ -453,11 +485,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_CONTOURS_NUMBER:
 			if (ifOptionNumContours)
 			{
-				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
-					" time.\n", OPTION_CONTOURS_NUMBER);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOptionTwice(argc, argv, OPTION_CONTOURS_NUMBER);
 			}
 
 			/* Parse digital number from input argument. */
@@ -473,20 +501,13 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			 */
 			if (charMistaken && *charMistaken)
 			{
-				STDERR_PRINT("Cannot parse number. Invalid character %s\n",
-					charMistaken);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorCannotParseNumber(argc, argv, charMistaken);
 			}
 
 			/* In case of underflow or overflow errno is set to ERANGE. */
 			if (errno == ERANGE)
 			{
-				STDERR_PRINT("Given number of contours is out of range\n");
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOutOfRange(argc, argv);
 			}
 
 			ifOptionNumContours = true;
@@ -494,11 +515,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_FIRST_ANGLE:
 			if (ifOptionFirstAngle)
 			{
-				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
-					"time.\n", OPTION_FIRST_ANGLE);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOptionTwice(argc, argv, OPTION_FIRST_ANGLE);
 			}
 			/* Parse floating-point number from input argument. */
 			options->input.model.shiftAngleFirst =
@@ -507,20 +524,13 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			/* If user gives invalid character, the charMistaken is set to it */
 			if (charMistaken && *charMistaken)
 			{
-				STDERR_PRINT("Cannot parse number. Invalid character %s\n",
-					charMistaken);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorCannotParseNumber(argc, argv, charMistaken);
 			}
-
+			
 			/* In case of underflow or overflow errno is set to ERANGE. */
 			if (errno == ERANGE)
 			{
-				STDERR_PRINT("Given value of angle is out of range\n");
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOutOfRange(argc, argv);
 			}
 
 			ifOptionFirstAngle = true;
@@ -534,17 +544,35 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_BALANCE_DATA:
 			options->ifBalancing = true;
 			break;
+		case OPTION_LIMIT_RANDOM:
+			if (ifOptionLimitRandom)
+			{
+				errorOptionTwice(argc, argv, OPTION_LIMIT_RANDOM);
+			}
+			/* Parse floating-point number from input argument. */
+			options->input.model.limitRandom =
+					strtod(optarg, &charMistaken);
+
+			/* If user gives invalid character, the charMistaken is set to it */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv, charMistaken);
+			}
+
+			/* In case of underflow or overflow errno is set to ERANGE. */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv) ;
+			}
+
+			ifOptionLimitRandom = true;
 		case OPTION_PRINT_PROBLEM:
 			options->ifPrintProblem = true;
 			break;
 		case OPTION_RECOVER:
 			if (ifOptionRecover)
 			{
-				STDERR_PRINT("Option \"-%c\" cannot be specified more than one"
-					" time.\n", OPTION_RECOVER);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
+				errorOptionTwice(argc, argv, OPTION_RECOVER);
 			}
 
 			options->ifRecover = true;
@@ -636,13 +664,20 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
-	/* Check that option "-n" is provided for option "-m". */
-	if ((ifOptionModelName && (!ifOptionNumContours || !ifOptionFirstAngle))
-		|| (!ifOptionModelName && ifOptionNumContours))
+	/* 
+	 * Check that all 4 options "-m", "-n", "-a" and "-l" are given
+	 * simultaneously.
+	 */
+	if (!(ifOptionModelName && ifOptionNumContours &&
+		ifOptionFirstAngle && ifOptionLimitRandom) &&
+		(ifOptionModelName || ifOptionNumContours ||
+		ifOptionFirstAngle || ifOptionLimitRandom))
 	{
-		STDERR_PRINT("Option \"-%c\" requires options \"-%c\" and \"-%c\" to be"
-			" specified.\n", OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER,
-			OPTION_FIRST_ANGLE);
+		STDERR_PRINT("Option \"-%c\" requires options \"-%c\","
+			"\"-%c\" and \"-%c\" to be specified, "
+			"and vice versa.\n",
+			OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER,
+			OPTION_FIRST_ANGLE, OPTION_LIMIT_RANDOM);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -740,6 +775,63 @@ ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
 }
 
 /**
+ * Generates random number d such that |d| <= maxDelta
+ * 
+ * @param maxDelta	maximum absolute limit of generated number
+ */
+static double genRandomDouble(double maxDelta)
+{
+	DEBUG_START;
+	//srand((unsigned) time(0));
+	struct timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
+	
+	int randomInteger = rand();
+	double randomDouble = randomInteger;
+	const double halfRandMax = RAND_MAX * 0.5;
+	randomDouble -= halfRandMax;
+	randomDouble /= halfRandMax;
+
+	randomDouble *= maxDelta;
+
+	DEBUG_END;
+	return randomDouble;
+}
+
+/**
+ * Shifts all points of contours on random double vectors
+ *
+ * @param maxDelta	maximum delta in shift vectors' coordinates
+ */
+void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
+{
+	DEBUG_START;
+	for (int iContour = 0; iContour < data->numContours; ++iContour)
+	{
+		SContour* contour = &data->contours[iContour];
+		for (int iSide = 0; iSide < contour->ns; ++iSide)
+		{
+			SideOfContour* side = &contour->sides[iSide];
+			Vector3d A1_backup DEBUG_VARIABLE = side->A1;
+			side->A1 += Vector3d(genRandomDouble(maxDelta),
+				genRandomDouble(maxDelta),
+				genRandomDouble(maxDelta));
+			DEBUG_PRINT("shift: (%lf, %lf, %lf) -> "
+				"(%lf, %lf, %lf)",
+				A1_backup.x, A1_backup.y, A1_backup.z,
+				side->A1.x, side->A1.y, side->A2.z);
+		}
+		for (int iSide = 0; iSide < contour->ns - 1; ++iSide)
+		{
+			contour->sides[iSide].A2 = contour->sides[iSide + 1].A1;
+		}
+		contour->sides[contour->ns - 1].A2 = contour->sides[0].A1;
+	}
+	DEBUG_END;
+}
+
+/**
  * Generates synthetic shadow contour data.
  *
  * @param options	The result of command-line parsing.
@@ -767,6 +859,9 @@ ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	/* Generate shadow contours data for given model. */
 	constructor->run(options->input.model.numContours,
 			options->input.model.shiftAngleFirst);
+
+	/* Shift points contours on random vectors. */
+	shiftContoursRandom(SCData, options->input.model.limitRandom);
 
 	DEBUG_END;
 	return SCData;
