@@ -71,6 +71,7 @@ static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 
 Recoverer::Recoverer() :
 	estimator(CGAL_ESTIMATOR),
+	ifRegularize(false),
 	ifBalancing(false),
 	ifScaleMatrix(false),
 	ifConvexifyContours(true),
