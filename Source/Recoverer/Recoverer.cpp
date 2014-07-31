@@ -341,7 +341,6 @@ static vector<Vector3d> connectContour(SContour* contour)
 
 		/* Project current vertex to the plane of contour. */
 		Vector3d vCurr = contour->plane.project(sideCurr->A1);
-		ASSERT(qmod(sideCurr->A1 - vCurr) < 100000. * EPS_MIN_DOUBLE);
 
 		points.push_back(vCurr);
 	}
@@ -606,6 +605,8 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		(long unsigned int) poly.size_of_vertices(),
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
+	ASSERT(points.size() == poly.size_of_vertices()
+		&& "Not all dimenstion points are extreme.");
 
 	/* Assign vertex IDs that will be used later. */
 	long int i = 0;
@@ -1246,6 +1247,9 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
 	SparseMatrix Q = Qt.transpose();
+	DEBUG_PRINT("Q is %d x %d matrix, numHvalues = %d", Q.rows(), Q.cols(),
+		numHvalues);
+	ASSERT(numHvalues == Q.cols());
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			numHvalues, Q.rows(), Q, hvalues);
 	checkPolyhedronIDs(polyhedron);
