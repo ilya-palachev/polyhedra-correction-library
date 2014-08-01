@@ -252,6 +252,11 @@ void TsnnlsSupportFunctionEstimator::run()
 	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf",
 			linf_distance(numHvalues, hvalues, h));
 
+	VectorXd estimation(numHvalues);
+	for (int i = 0; i < numHvalues; ++i)
+	{
+		estimation(i) = h[i];
+	}
 	free(h);
 	taucs_ccs_free(Q);
 	taucs_ccs_free(Qt);

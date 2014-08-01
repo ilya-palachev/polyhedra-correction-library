@@ -42,7 +42,7 @@ public:
 	TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData *data);
 	~TsnnlsSupportFunctionEstimator();
 
-	virtual void run(void);
+	virtual VectorXd run(void);
 };
 
 #endif /* TSNNLSSUPPORTFUNCTIONESTIMATOR_H_ */

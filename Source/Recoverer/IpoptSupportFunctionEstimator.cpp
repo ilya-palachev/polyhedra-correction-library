@@ -38,7 +38,8 @@
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 		SupportFunctionEstimationData *data) :
 		SupportFunctionEstimator(data),
-	problemType(PROBLEM_PRIMAL)
+	problemType(PROBLEM_PRIMAL),
+	solution(numValues())
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -314,6 +315,10 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 	{
 	case SUCCESS:
 		MAIN_PRINT("SUCCESS");
+		for (int i = 0; i < numValues(); ++i)
+		{
+			solution(i) = x[i];
+		}
 		break;
 	case MAXITER_EXCEEDED:
 		MAIN_PRINT("MAXITER_EXCEEDED");
@@ -369,7 +374,7 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 	return;
 }
 
-void IpoptSupportFunctionEstimator::run(void)
+VectorXd IpoptSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
@@ -380,7 +385,7 @@ void IpoptSupportFunctionEstimator::run(void)
 	if (status != Solve_Succeeded)
 	{
 		MAIN_PRINT("*** Error during initialization!");
-		return;
+		return solution;
 	}
 
 	app->Options()->SetNumericValue("tol", 1e-10);
@@ -398,6 +403,7 @@ void IpoptSupportFunctionEstimator::run(void)
 	}
 
 	DEBUG_END;
+	return solution;
 }
 
 

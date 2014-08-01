@@ -1284,7 +1284,7 @@ void Recoverer::setEstimator(RecovererEstimator e)
 	DEBUG_END;
 }
 
-PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
+ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 	SupportFunctionEstimator *sfe = NULL;
@@ -1319,13 +1319,15 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 		sfe = static_cast<SupportFunctionEstimator*>(sfeCGAL);
 		break;
 	default:
-		__builtin_unreachable();
+		ERROR_PRINT("Error: type of estimator is not set.");
+		DEBUG_END;
+		return NULL;
 		break;
 	}
+	ASSERT(sfe);
 
 	/* Run support function estimation. */
-	if (sfe)
-		sfe->run();
+	VectorXd estimate = sfe->run();
 
 	DEBUG_END;
 	return NULL;

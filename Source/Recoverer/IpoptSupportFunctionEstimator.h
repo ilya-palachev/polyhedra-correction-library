@@ -52,6 +52,9 @@ private:
 		/** Dual problem: minimize ||Q^T u - h0|| subject to u >= 0 */
 		PROBLEM_DUAL
 	} problemType;
+
+	/** The solutions returned by Ipopt. */
+	VectorXd solution;
 public:
 	/**
 	 * Default constructor
@@ -256,7 +259,7 @@ public:
 	 *
 	 *
 	 */
-	virtual void run(void);
+	virtual VectorXd run(void);
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */

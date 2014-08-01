@@ -259,7 +259,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr run(ShadeContourDataPtr SCData);
+	ShadeContourDataPtr run(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;

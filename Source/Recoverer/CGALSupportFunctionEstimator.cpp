@@ -58,7 +58,7 @@ CGALSupportFunctionEstimator::~CGALSupportFunctionEstimator()
 	DEBUG_END;
 }
 
-void CGALSupportFunctionEstimator::runLP(void)
+VectorXd CGALSupportFunctionEstimator::runLP(void)
 {
 	DEBUG_START;
 	/*
@@ -114,11 +114,17 @@ void CGALSupportFunctionEstimator::runLP(void)
 
 	/* output solution */
 	std::cout << s;
+	VectorXd estimation(numValues()); int i = 0;
+	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
+	{
+		estimation(i++) = d->to_double();
+	}
 
 	DEBUG_END;
+	return estimation;
 }
 
-void CGALSupportFunctionEstimator::runQP(void)
+VectorXd CGALSupportFunctionEstimator::runQP(void)
 {
 	DEBUG_START;
 	/*
@@ -160,26 +166,35 @@ void CGALSupportFunctionEstimator::runQP(void)
 
 	/* output solution */
 	std::cout << s;
+	VectorXd estimation(numValues()); int i = 0;
+	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
+	{
+		estimation(i++) = d->to_double();
+	}
+
 	DEBUG_END;
+	return estimation;
 }
 
-void CGALSupportFunctionEstimator::run(void)
+VectorXd CGALSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	switch(mode)
 	{
 	case CGAL_ESTIMATION_LINEAR:
-		runLP();
+		return runLP();
 		break;
 	case CGAL_ESTIMATION_QUADRATIC:
-		runQP();
+		return runQP();
 		break;
 	default:
 		__builtin_unreachable();
 		break;
 	}
 
+	__builtin_unreachable();
 	DEBUG_END;
+	return VectorXd(1);
 }
 
 void CGALSupportFunctionEstimator::setMode(CGALEstimationMode m)
