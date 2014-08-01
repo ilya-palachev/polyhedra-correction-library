@@ -350,7 +350,7 @@ void printUsage(int argc, char** argv)
 	STDERR_PRINT("\t-%c --%s\tBalance contour data before processing.\n",
 		OPTION_BALANCE_DATA, optionsLong[6].name);
 	STDERR_PRINT("\t-%c --%s\tThe absolute limit of random shift of modeled "
-		"contour.", OPTION_LIMIT_RANDOM, optionsLong[7].name);
+		"contour.\n", OPTION_LIMIT_RANDOM, optionsLong[7].name);
 	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues vector "
 		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[8].name);
 	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
@@ -802,6 +802,7 @@ static double genRandomDouble(double maxDelta)
 /**
  * Shifts all points of contours on random double vectors
  *
+ * @param data		Shadow contours data
  * @param maxDelta	maximum delta in shift vectors' coordinates
  */
 void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
@@ -893,22 +894,18 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
 	DEBUG_END;
 }
 
+
 /**
- * The main function of the test.
- * 
- * @param argc	Standard Linux argc
- * @param argv	Standard Linux argv
+ * Makes shadow contour data requested by user: synthetic or real, and dumps it
+ * if it has been requested
+ *
+ * @param options	Parsed command-line options
+ * @param recoverer	The used recoverer
  */
-int main(int argc, char** argv)
+static ShadeContourDataPtr makeRequestedData(CommandLineOptions* options,
+	RecovererPtr recoverer)
 {
 	DEBUG_START;
-
-	/*
-	 * Parse command line arguments. This function exits the program in case of
-	 * failure during the parsing.
-	 */
-	CommandLineOptions *options = parseCommandLine(argc, argv);
-
 	ShadeContourDataPtr SCData;
 
 	if (options->mode == RECOVERER_REAL_TESTING)
@@ -919,8 +916,24 @@ int main(int argc, char** argv)
 	{
 		SCData = generateSyntheticSCData(options);
 	}
+	
+	if (options->ifPrintProblem)
+	{
+		/* Just print naive matrix and vector of hvalues. */
+		buildNaiveMatrix(SCData, recoverer);
+	}
+	DEBUG_END;
+	return SCData;
+}
 
-	/* Create the recoverer.*/
+/**
+ * Makes recoverer with requested properties.
+ *
+ * @param options	Parsed command-line options
+ */
+static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
+{
+	DEBUG_START;
 	RecovererPtr recoverer(new Recoverer());
 
 	/* Enable balancing if required. */
@@ -934,41 +947,95 @@ int main(int argc, char** argv)
 	{
 		recoverer->enableMatrixScaling();
 	}
+	DEBUG_END;
+	return recoverer;
+}
 
-	if (options->ifRecover)
-	{
-		/* Run the recoverer. */
-		recoverer->setEstimator(options->estimator);
-		recoverer->run(SCData);
-	}
-	else if (options->ifPrintProblem)
-	{
-		/* Just print naive matrix and vector of hvalues. */
-		buildNaiveMatrix(SCData, recoverer);
-	}
-	else if (options->ifBuildContours &&
+/**
+ * Dumps given shadow contour data, if it has been requested.
+ *
+ * @param options	Parsed command-line options
+ * @param recoverer	The recoverer to be used
+ * @param data		Shadow contours data
+ */
+static void makeRequestedOutput(CommandLineOptions* options,
+	RecovererPtr recoverer, ShadeContourDataPtr data)
+{
+	DEBUG_START;
+
+	if (options->ifBuildContours &&
 			!options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Buid polyhedron consisting of shadow contours. */
-		recoverer->buildContours(SCData);
+		recoverer->buildContours(data);
 	}
 	else if (!options->ifBuildContours &&
 			options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Just build dual non-convex polyhedron. */
-		recoverer->buildDualNonConvexPolyhedron(SCData);
+		recoverer->buildDualNonConvexPolyhedron(data);
 	}
 	else if (options->ifBuildContours &&
 			options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Buid polyhedron consisting of dual shadow contours. */
-		recoverer->buildDualContours(SCData);
+		recoverer->buildDualContours(data);
+	}
+	DEBUG_END;
+}
+
+/**
+ * Runs the recovering with requested mode.
+ *
+ * @param options	Parsed command-line options
+ * @param recoverer	The recoverer to be used
+ * @param data		Shadow contours data
+ */
+void runRequestedRecovery(CommandLineOptions* options,
+	RecovererPtr recoverer, ShadeContourDataPtr data)
+{
+	DEBUG_START;
+
+	/* Dump some output before processing, if it's requested. */
+	makeRequestedOutput(options, recoverer, data);
+
+	if (options->ifRecover)
+	{
+		/* Run the recoverer. */
+		recoverer->setEstimator(options->estimator);
+		recoverer->run(data);
+		/* TODO: call makeRequestedOutput here, for processed data. */
 	}
 	else
 	{
 		/* Run naive recovering. */
-		recoverer->buildNaivePolyhedron(SCData);
+		recoverer->buildNaivePolyhedron(data);
 	}
+
+	DEBUG_END;
+}
+
+/**
+ * The main function of the test.
+ * 
+ * @param argc	Standard Linux argc
+ * @param argv	Standard Linux argv
+ */
+int main(int argc, char** argv)
+{
+	DEBUG_START;
+
+	/* Parse command line arguments. */
+	CommandLineOptions *options = parseCommandLine(argc, argv);
+
+	/* Create the recoverer with requested properties. */
+	RecovererPtr recoverer = makeRequestedRecoverer(options);
+
+	/* Read or generate data depending on requested option. */
+	ShadeContourDataPtr data = makeRequestedData(options, recoverer);
+
+	/* Run the recovery. */
+	runRequestedRecovery(options, recoverer, data);
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
