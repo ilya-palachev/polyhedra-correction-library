@@ -93,13 +93,23 @@
  */
 #define OPTION_SCALE_MATRIX 's'
 
+/**
+ * Option "-x" enables the convexification of shadow contous.
+ */
+#define OPTION_CONVEXIFY_CONTOURS 'x'
+
+/**
+ * Option "-z"enables the regualrization of support matrix.
+ */
+#define OPTION_REGULARIZE_MATRIX 'z'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:pr:s"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:pr:sxz"
 
 /**
  * The definition of corresponding long options list.
@@ -171,6 +181,18 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_SCALE_MATRIX
+	},
+	{
+		"convexify-contours",
+		no_argument,
+		0,
+		OPTION_CONVEXIFY_CONTOURS
+	},
+	{
+		"regularize-matrix",
+		no_argument,
+		0,
+		OPTION_REGULARIZE_MATRIX
 	},
 	{0, 0, 0, 0}
 };
@@ -247,6 +269,12 @@ typedef struct
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
+
+	/** Whether to convexify contours. */
+	bool ifConvexifyContours;
+
+	/** Whether to regaularize support matrix. */
+	bool ifRegularize;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -357,6 +385,10 @@ void printUsage(int argc, char** argv)
 		OPTION_RECOVER, optionsLong[9].name);
 	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
 		OPTION_SCALE_MATRIX, optionsLong[10].name);
+	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
+		OPTION_CONVEXIFY_CONTOURS, optionsLong[11].name);
+	STDERR_PRINT("\t-%c --%s\tEnable support matrix regularization.\n",
+		OPTION_REGULARIZE_MATRIX, optionsLong[12].name);
 	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -596,6 +628,12 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
+			break;
+		case OPTION_CONVEXIFY_CONTOURS:
+			options->ifConvexifyContours = true;
+			break;
+		case OPTION_REGULARIZE_MATRIX:
+			options->ifRegularize = true;
 			break;
 		case GETOPT_QUESTION:
 			switch (optopt)
@@ -947,6 +985,19 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 	{
 		recoverer->enableMatrixScaling();
 	}
+
+	/* Enable contours convexification if required. */
+	if (options->ifConvexifyContours)
+	{
+		recoverer->enableContoursConvexification();
+	}
+
+	/* Enable support matrix regularization if required. */
+	if (options->ifRegularize)
+	{
+		recoverer->enableRegularization();
+	}
+
 	DEBUG_END;
 	return recoverer;
 }

@@ -71,10 +71,10 @@ static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 
 Recoverer::Recoverer() :
 	estimator(CGAL_ESTIMATOR),
-	ifRegularize(false),
 	ifBalancing(false),
-	ifScaleMatrix(false),
 	ifConvexifyContours(true),
+	ifRegularize(false),
+	ifScaleMatrix(false),
 	iXmax(0),
 	iYmax(0),
 	iZmax(0),
@@ -94,6 +94,20 @@ void Recoverer::enableBalancing(void)
 {
 	DEBUG_START;
 	ifBalancing = true;
+	DEBUG_END;
+}
+
+void Recoverer::enableContoursConvexification(void)
+{
+	DEBUG_START;
+	ifConvexifyContours = true;
+	DEBUG_END;
+}
+
+void Recoverer::enableRegularization(void)
+{
+	DEBUG_START;
+	ifRegularize = true;
 	DEBUG_END;
 }
 
@@ -1269,6 +1283,13 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	 */
 	if (ifRegularize)
 	{
+		if (estimator == IPOPT_ESTIMATOR)
+		{
+			ERROR_PRINT("Regularization of support matrix for "
+				"Ipopt estimator is not implemented yet.");
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+		}
 		regularizeSupportMatrix(data, polyhedron);
 		checkPolyhedronIDs(polyhedron);
 	}

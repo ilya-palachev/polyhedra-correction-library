@@ -62,17 +62,17 @@ private:
 	/** Estimator to be used. */
 	RecovererEstimator estimator;
 
-	/** Whether to regularize the support matrix. */
-	bool ifRegularize;
-
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
 
-	/** Whether to scale the matrix of problem. */
-	bool ifScaleMatrix;
-
 	/** Whether to convexify shadow contours. */
 	bool ifConvexifyContours;
+
+	/** Whether to regularize the support matrix. */
+	bool ifRegularize;
+
+	/** Whether to scale the matrix of problem. */
+	bool ifScaleMatrix;
 
 	/** ID of vertex with maximal X coordinate. */
 	int iXmax;
@@ -198,6 +198,17 @@ public:
 	 * Enables balancing in all functions.
 	 */
 	void enableBalancing(void);
+
+	/**
+	 * Enables the convexification of shadow contours.
+	 */
+	void enableContoursConvexification(void);
+
+	/**
+	 * Enables the regularization of support matrix based on knowledge about
+	 * eigenvectors eigenvalues of support matrix Q
+	 */
+	void enableRegularization(void);
 
 	/**
 	 * Enables the scaling of the matrix of the problem.
