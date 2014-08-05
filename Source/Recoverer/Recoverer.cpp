@@ -1305,6 +1305,37 @@ void Recoverer::setEstimator(RecovererEstimator e)
 	DEBUG_END;
 }
 
+static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
+{
+	DEBUG_START;
+	DEBUG_PRINT("Estimation report:");
+	double DEBUG_VARIABLE L1 = 0.;
+	double DEBUG_VARIABLE L2 = 0.;
+	double DEBUG_VARIABLE Linf = 0.;
+	ASSERT(h0.size() == h.size());
+	for (int i = 0; i < h.size(); ++i)
+	{
+		double DEBUG_VARIABLE delta = h0(i) - h(i);
+		DEBUG_PRINT("h[%d] :  %lf - %lf = %lf", i, h0(i), h(i), delta);
+		L1 += fabs(delta);
+		L2 += delta * delta;
+		Linf = delta > Linf ? delta : Linf;
+	}
+	DEBUG_PRINT("L1 = %lf", L1);
+	DEBUG_PRINT("L2 = %lf", L2);
+	DEBUG_PRINT("Linf = %lf", Linf);
+
+	DEBUG_PRINT("-------------------------------");
+	VectorXd Qh0 = Q * h0;
+	VectorXd Qh  = Q * h;
+	ASSERT(Qh0.size() == Qh.size());
+	for (int i = 0; i < Qh.size(); ++i)
+	{
+		DEBUG_PRINT("Q * h[%d] : %lf -> %lf", i, Qh0(i), Qh(i));
+	}
+	DEBUG_END;
+}
+
 ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -1349,6 +1380,9 @@ ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 
 	/* Run support function estimation. */
 	VectorXd estimate = sfe->run();
+
+	printEstimationReport(data->supportMatrix(), data->supportVector(),
+		estimate);
 
 	DEBUG_END;
 	return NULL;
