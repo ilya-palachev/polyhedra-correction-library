@@ -213,7 +213,18 @@ void ShadeContourData::fprint(FILE* file)
 void ShadeContourData::fprintDefault(FILE* file)
 {
 	DEBUG_START;
+	ALWAYS_PRINT(file, "# num_shadow_contours\n");
+	ALWAYS_PRINT(file, "%d\n", numContours);
+	ALWAYS_PRINT(file, "# contour:  num_sides   normal_to_plane\n");
+	ALWAYS_PRINT(file, "#           confidence   type\n");
+	ALWAYS_PRINT(file, "#           x y z coordinates of point 1 in plane of projection\n");
+	ALWAYS_PRINT(file, "#           x y z coordinates of point 2 in plane of projection\n");
 
+	for (int i = 0; i < numContours; ++i)
+	{
+		ALWAYS_PRINT(file, "\n");
+		contours[i].fprintDefault(file);
+	}
 	DEBUG_END;
 }
 

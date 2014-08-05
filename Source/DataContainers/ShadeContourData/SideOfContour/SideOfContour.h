@@ -58,6 +58,7 @@ public:
 	// SideOfContour_io.cpp :
 	void my_fprint(FILE* file);
 	void my_fprint_short(FILE* file);
+	void fprintDefault(FILE* file);
 
 };
 

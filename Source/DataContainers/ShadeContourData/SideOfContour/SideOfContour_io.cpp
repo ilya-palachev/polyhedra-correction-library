@@ -51,3 +51,12 @@ void SideOfContour::my_fprint_short(FILE* file)
 			A1.x, A1.y, A1.z, A2.x, A2.y, A2.z);
 	DEBUG_END;
 }
+
+void SideOfContour::fprintDefault(FILE* file)
+{
+	DEBUG_START;
+	ALWAYS_PRINT(file, "      %lf    %d\n", confidence, type);
+	ALWAYS_PRINT(file, "      %lf      %lf     %lf\n", A1.x, A1.y, A1.z);
+	ALWAYS_PRINT(file, "      %lf      %lf     %lf\n", A2.x, A2.y, A2.z);
+	DEBUG_END;
+}
