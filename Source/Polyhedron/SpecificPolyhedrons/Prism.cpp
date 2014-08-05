@@ -54,6 +54,8 @@ Prism::~Prism()
 	DEBUG_END;
 }
 
+#define NUM_VERTICES_IN_PRISM_ELEMENT 4
+
 void Prism::init()
 {
 	DEBUG_START;
@@ -70,7 +72,7 @@ void Prism::init()
 	facets = new Facet[numVerticesBase + 2];
 
 	int *index;
-	index = new int[4];
+	index = new int[3 * NUM_VERTICES_IN_PRISM_ELEMENT + 1];
 
 	Plane plane;
 
@@ -82,24 +84,25 @@ void Prism::init()
 		index[3] = index[0] + numVerticesBase;
 		plane = Plane(vertices[index[0]], vertices[index[1]],
 				vertices[index[2]]);
-		facets[i] = Facet(i, 4, plane, index, get_ptr(), false);
+		facets[i] = Facet(i, NUM_VERTICES_IN_PRISM_ELEMENT, plane,
+			index, NULL, false);
 	}
 
-	index = new int[numVerticesBase];
+	index = new int[3 * numVerticesBase + 1];
 
 	for (int i = 0; i < numVerticesBase; ++i)
 		index[i] = numVerticesBase - 1 - i;
 
 	plane = Plane(Vector3d(0., 0., -1.), 0.);
 	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
-			index, get_ptr(), false);
+			index, NULL, false);
 
 	for (int i = 0; i < numVerticesBase; ++i)
 		index[i] = i + numVerticesBase;
 
 	plane = Plane(Vector3d(0., 0., 1.), -height);
 	facets[numVerticesBase + 1] = Facet(numVerticesBase + 1, numVerticesBase,
-			plane, index, get_ptr(), false);
+			plane, index, NULL, false);
 
 	numVertices = 2 * numVerticesBase;
 	numFacets = numVerticesBase + 2;

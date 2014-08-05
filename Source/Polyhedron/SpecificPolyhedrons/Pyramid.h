@@ -35,7 +35,7 @@ private:
 public:
 	Pyramid();
 	Pyramid(int nv, double h, double r);
-	~Pyramid();
+	virtual ~Pyramid();
 };
 
 #endif /* PYRAMID_H_ */

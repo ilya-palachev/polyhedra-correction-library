@@ -54,6 +54,8 @@ Pyramid::~Pyramid()
 	DEBUG_END;
 }
 
+#define NUM_VERTICES_IN_PYRAMID_ELEMENT 3
+
 void Pyramid::init()
 {
 	DEBUG_START;
@@ -69,7 +71,7 @@ void Pyramid::init()
 	facets = new Facet[numVerticesBase + 1];
 
 	int *index;
-	index = new int[3];
+	index = new int[3 * NUM_VERTICES_IN_PYRAMID_ELEMENT + 1];
 
 	for (int i = 0; i < numVerticesBase; ++i)
 	{
@@ -78,17 +80,18 @@ void Pyramid::init()
 		index[2] = (i + 1) % numVerticesBase;
 		Plane plane = Plane(vertices[index[0]], vertices[index[1]],
 				vertices[index[2]]);
-		facets[i] = Facet(i, 3, plane, index, get_ptr(), false);
+		facets[i] = Facet(i, NUM_VERTICES_IN_PYRAMID_ELEMENT, plane,
+			index, NULL, false);
 	}
 
-	index = new int[numVerticesBase];
+	index = new int[3 * numVerticesBase + 1];
 
 	for (int i = 0; i < numVerticesBase; ++i)
 		index[i] = numVerticesBase - 1 - i;
 
 	Plane plane = Plane(Vector3d(0., 0., -1.), 0.);
 	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
-			index, get_ptr(), false);
+			index, NULL, false);
 
 	if (index)
 		delete[] index;
