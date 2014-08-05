@@ -46,7 +46,6 @@ typedef Kernel::Point_3 Point_3;
 typedef Kernel::Vector_3 Vector_3;
 typedef Kernel::Segment_3 Segment_3;
 typedef Kernel::Plane_3 Plane_3;
-typedef Kernel::Point_2 Point_2;
 
 /** Define point creator */
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;

@@ -29,9 +29,20 @@
 
 #include <vector>
 
+#include <CGAL/basic.h>
+#include <CGAL/Filtered_kernel.h>
+
+#include "PCLKernel/PCLKernel.h"
+#include "PCLKernel/PCLPoint_2_iostream.h"
+
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "Recoverer/SupportFunctionEstimationData.h"
+
+typedef PCLKernel<double> PCL_K;
+typedef CGAL::Filtered_kernel_adaptor<PCL_K> K;
+
+typedef K::Point_2 Point_2;
 
 /**
  * Sets the estimator to be used for support function estimation.
