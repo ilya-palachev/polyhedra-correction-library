@@ -1243,14 +1243,26 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	int iValue = 0;
 	for (auto &plane : supportPlanes)
 	{
+		DEBUG_PRINT("Processing support plane "
+			"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
+			plane.norm.x, plane.norm.y, plane.norm.z,
+			plane.dist);
 		if (plane.dist < 0)
 		{
 			plane.dist = -plane.dist;
 			plane.norm = -plane.norm;
+			DEBUG_PRINT("The plane was reverted: "
+				"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
+				plane.norm.x, plane.norm.y, plane.norm.z,
+				plane.dist);
 		}
 		Vector3d normal = plane.norm;
 		normal.norm(1.);
+		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
+			iValue, normal.x, normal.y, normal.z);
 		directions.push_back(normal);
+		DEBUG_PRINT("Adding %d-th support value %lf",
+			iValue, plane.dist);
 		hvalues(iValue++) = plane.dist;
 	}
 
@@ -1305,6 +1317,8 @@ void Recoverer::setEstimator(RecovererEstimator e)
 	DEBUG_END;
 }
 
+#define ACCEPTED_TOL 1e-6
+
 static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 {
 	DEBUG_START;
@@ -1331,7 +1345,8 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 	ASSERT(Qh0.size() == Qh.size());
 	for (int i = 0; i < Qh.size(); ++i)
 	{
-		DEBUG_PRINT("Q * h[%d] : %lf -> %lf", i, Qh0(i), Qh(i));
+		DEBUG_PRINT("Q * h[%d] : %le -> %le", i, Qh0(i), Qh(i));
+		ASSERT(Qh(i) >= -ACCEPTED_TOL);
 	}
 	DEBUG_END;
 }
