@@ -624,11 +624,25 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 
 	/* Assign vertex IDs that will be used later. */
 	long int i = 0;
+	pointCGAL = pointsCGAL.begin();
+	long int numViolations = 0;
 	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
 		 ++vertex)
 	{
+		Point_3 DEBUG_VARIABLE pointOld = vertex->point();
+		Point_3 DEBUG_VARIABLE pointNew = *pointCGAL;
+		double DEBUG_VARIABLE dist =
+			(pointOld - pointNew).squared_length();
+		DEBUG_PRINT("v_{%ld} = (%lf, %lf, %lf), "
+			"P->v_{%ld} = (%lf, %lf, %lf), dist = %lf",
+			i, pointOld.x(), pointOld.y(), pointOld.z(),
+			i, pointNew.x(), pointNew.y(), pointNew.z(), dist);
+		numViolations += dist > EPS_MIN_DOUBLE;
 		vertex->id = i++;
+		++pointCGAL;
 	}
+	DEBUG_PRINT("Number of violation: %ld", numViolations);
+	ASSERT(numViolations == 0);
 
 	/* Assign facet IDs that will be used later. */
 	i = 0;
