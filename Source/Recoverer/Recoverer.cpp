@@ -1257,6 +1257,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 				plane.dist);
 		}
 		Vector3d normal = plane.norm;
+		plane.dist /= sqrt(qmod(normal));
 		normal.norm(1.);
 		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
 			iValue, normal.x, normal.y, normal.z);
