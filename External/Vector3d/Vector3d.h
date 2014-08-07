@@ -45,6 +45,49 @@ public:
 		return *this;
 	}
 
+	/**
+	 * Compares 2 vectors in lexicographical order.
+	 *
+	 * @param v	Reference to 2nd vector
+	 */
+	bool operator <(const Vector3d& v) const
+	{
+		if (x < v.x)
+			return true;
+		else if (x <= v.x)
+		{
+			if (y < v.y)
+				return true;
+			else if ((y <= v.y) && z < v.z)
+				return true;
+		}
+		return false;
+	}
+
+	bool operator >(const Vector3d& v) const
+	{
+		if (x > v.x)
+			return true;
+		else if (x >= v.x)
+		{
+			if (y > v.y)
+				return true;
+			else if ((y >= v.y) && z > v.z)
+				return true;
+		}
+		return false;
+	}
+
+	bool operator >=(const Vector3d& v) const
+	{
+		return !(this->operator<(v));
+	}
+
+	bool operator <=(const Vector3d& v) const
+	{
+		return !(this->operator>(v));
+	}
+
 	Vector3d operator -() const
 	{
 		return Vector3d(-x, -y, -z);
