@@ -100,6 +100,15 @@ private:
 	/** Vector with saved 3 h-values that correspond to iXmax, iYmax, iZmax */
 	Vector_3 vectorMaxHValues;
 
+	/** Map from initial support directions's ID's and points on hull. */
+	long int *mapID;
+
+	/** Support values in initial (before hull construction) order. */
+	double *hvaluesInit;
+
+	/** Inverse map of the previous map (not a function). */
+	std::list<long int> *mapIDinverse;
+
 	/**
 	 * Extracts support planes from shadow contours.
 	 *

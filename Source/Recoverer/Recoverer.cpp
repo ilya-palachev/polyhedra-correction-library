@@ -78,7 +78,10 @@ Recoverer::Recoverer() :
 	iXmax(0),
 	iYmax(0),
 	iZmax(0),
-	vectorRegularizing(0., 0., 0.)
+	vectorRegularizing(0., 0., 0.),
+	mapID(NULL),
+	hvaluesInit(NULL),
+	mapIDinverse(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -87,6 +90,12 @@ Recoverer::Recoverer() :
 Recoverer::~Recoverer()
 {
 	DEBUG_START;
+	if (mapID != NULL)
+		delete[] mapID;
+	if (hvaluesInit != NULL)
+		delete[] hvaluesInit;
+	if (mapIDinverse != NULL)
+		delete[] mapIDinverse;
 	DEBUG_END;
 }
 
@@ -571,17 +580,37 @@ struct Plane_from_facet
 	}
 };
 
-Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
+struct PCL_Point_3 : public Point_3
+{
+	long int id;
+	
+	PCL_Point_3(double x, double y, double z, long int i)
+		: Point_3(x, y, z), id(i)
+	{};
+};
+
+Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
 	Polyhedron_3 poly;
 
+
+        auto comparer = [](PCL_Point_3 a, PCL_Point_3 b)
+        {
+		DEBUG_PRINT("Comparing %ld and %ld points", a.id, b.id);
+                return a < b || (a <= b && a.id < b.id);
+        };
+
 	/* Convert Vector3d objects to Point_3 objects. */
-	std::vector<Point_3> pointsCGAL;
-	for (auto &point : points)
+	std::set<PCL_Point_3, decltype(comparer)> pointsCGAL(comparer);
+
+	long int i = 0;
+	for (auto &point : pointsPCL)
 	{
-		Point_3 pointCGAL(point.x, point.y, point.z);
-		pointsCGAL.push_back(pointCGAL);
+		PCL_Point_3 pointCGAL(point.x, point.y, point.z, i++);
+		DEBUG_VARIABLE long int sizePrev = pointsCGAL.size();
+		pointsCGAL.insert(pointCGAL);
+		ASSERT((long int) pointsCGAL.size() == sizePrev + 1);
 
 		DEBUG_PRINT("Convert Vector3d(%lf, %lf, %lf) to Point_3(%lf, %lf, %lf)",
 					point.x, point.y, point.z,
@@ -592,26 +621,32 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		ASSERT(fabs(point.z - pointCGAL.z()) < EPS_MIN_DOUBLE);
 	}
 	DEBUG_PRINT("There are %ld PCL points and %ld CGAL points",
-		(long unsigned int) points.size(),
+		(long unsigned int) pointsPCL.size(),
 		(long unsigned int) pointsCGAL.size());
-	auto point = points.begin();
-	auto pointCGAL = pointsCGAL.begin();
+	auto itPointCGAL = pointsCGAL.begin();
 	do
 	{
-		ASSERT(fabs(point->x - pointCGAL->x()) < EPS_MIN_DOUBLE);
-		ASSERT(fabs(point->y - pointCGAL->y()) < EPS_MIN_DOUBLE);
-		ASSERT(fabs(point->z - pointCGAL->z()) < EPS_MIN_DOUBLE);
-	} while(++point != points.end() && ++pointCGAL != pointsCGAL.end());
+		auto DEBUG_VARIABLE pointCGAL = *itPointCGAL;
+		++itPointCGAL;
+		DEBUG_PRINT("current point's id = %ld", pointCGAL.id);
+		if (itPointCGAL != pointsCGAL.end())
+		{
+			auto DEBUG_VARIABLE pointCGALNext = *itPointCGAL;
+			ASSERT(pointCGAL <= pointCGALNext);
+		}
+		else break;
+	} while(1);
+	ASSERT(pointsCGAL.size() == pointsPCL.size());
 
 	/* Use the algorithm of standard STATIC convex hull. */
 	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), poly);
 
-	/* Calculate equations of planes for each facet. */
+	/* Calculte equations of planes for each facet. */
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
 
 	DEBUG_PRINT("Convex hull of %ld points contains %ld extreme points.",
-		(long unsigned int) points.size(),
+		(long unsigned int) pointsCGAL.size(),
 		(long unsigned int) poly.size_of_vertices());
 	
 	DEBUG_PRINT("Output polyhedron contains %ld vertices, %ld halfedges and "
@@ -619,30 +654,24 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		(long unsigned int) poly.size_of_vertices(),
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
-	ASSERT(points.size() == poly.size_of_vertices()
-		&& "Not all dimenstion points are extreme.");
+
+	std::set<PCL_Point_3> pointsHull;
 
 	/* Assign vertex IDs that will be used later. */
-	long int i = 0;
-	pointCGAL = pointsCGAL.begin();
-	long int numViolations = 0;
+	i = 0;
 	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
 		 ++vertex)
 	{
-		Point_3 DEBUG_VARIABLE pointOld = vertex->point();
-		Point_3 DEBUG_VARIABLE pointNew = *pointCGAL;
-		double DEBUG_VARIABLE dist =
-			(pointOld - pointNew).squared_length();
-		DEBUG_PRINT("v_{%ld} = (%lf, %lf, %lf), "
-			"P->v_{%ld} = (%lf, %lf, %lf), dist = %lf",
-			i, pointOld.x(), pointOld.y(), pointOld.z(),
-			i, pointNew.x(), pointNew.y(), pointNew.z(), dist);
-		numViolations += dist > EPS_MIN_DOUBLE;
-		vertex->id = i++;
-		++pointCGAL;
+		vertex->id = i;
+
+		/*
+		 * Also construct lexicographically ordered set of hull's
+		 * extreme points.
+		 */
+		auto point = vertex->point();
+		pointsHull.insert(PCL_Point_3(point.x(), point.y(), point.z(),
+			i++));
 	}
-	DEBUG_PRINT("Number of violation: %ld", numViolations);
-	ASSERT(numViolations == 0);
 
 	/* Assign facet IDs that will be used later. */
 	i = 0;
@@ -659,6 +688,55 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		halfedge->id = i++;
 	}
 	DEBUG_END;
+
+	/*
+	 * Now construct 2 maps: direct and inverse, between initial points and
+	 * extreme points of their recently obtained convex hull.
+	 */
+	mapID = new long int[pointsCGAL.size()];
+	for (long int i = 0; i < (long int) pointsCGAL.size(); ++i)
+	{
+		mapID[i] = INT_NOT_INITIALIZED;
+	}
+	mapIDinverse = new std::list<long int>[pointsHull.size()];
+	auto pointHull = pointsHull.begin();
+	auto point = pointsCGAL.begin();
+	i = 0;
+	while (point != pointsCGAL.end())
+	{
+		double dist = (*point - *pointHull).squared_length();
+		DEBUG_PRINT("Squared dist from point #%ld (initial ID is #%ld) "
+			"to hull's point #%ld is %lf",
+			i++, point->id, pointHull->id, dist);
+		if (dist < EPS_MIN_DOUBLE)
+		{
+			DEBUG_PRINT("----- Map case found!");
+			mapID[point->id] = pointHull->id;
+			mapIDinverse[pointHull->id].push_back(point->id);
+			++point;
+		}
+		else
+		{
+			++pointHull;
+		}
+
+	}
+
+	for (long int i = 0; i < (long int) pointsPCL.size(); ++i)
+	{
+		ASSERT(mapID[i] != INT_NOT_INITIALIZED);
+	}
+
+	for (long int i = 0; i < (long int) pointsHull.size(); ++i)
+	{
+		ASSERT(!mapIDinverse[i].empty());
+		if (mapIDinverse[i].size() > 1)
+		{
+			DEBUG_PRINT("Hull's point #%ld has %ld corresponding "
+				"initial points.",
+				i, mapIDinverse[i].size());
+		}
+	}
 	return poly;
 }
 
@@ -1252,9 +1330,9 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 
 	/* 3. Get normal vectors of support planes and normalize them. */
 	vector<Vector3d> directions;
-	int numHvalues = supportPlanes.size();
-	VectorXd hvalues(numHvalues);
 	int iValue = 0;
+	long int numHvaluesInit = supportPlanes.size();
+	hvaluesInit = new double[numHvaluesInit];
 	for (auto &plane : supportPlanes)
 	{
 		DEBUG_PRINT("Processing support plane "
@@ -1278,7 +1356,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		directions.push_back(normal);
 		DEBUG_PRINT("Adding %d-th support value %lf",
 			iValue, plane.dist);
-		hvalues(iValue++) = plane.dist;
+		hvaluesInit[iValue++] = plane.dist;
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
@@ -1288,9 +1366,27 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
 	SparseMatrix Q = Qt.transpose();
-	DEBUG_PRINT("Q is %d x %d matrix, numHvalues = %d", Q.rows(), Q.cols(),
-		numHvalues);
-	ASSERT(numHvalues == Q.cols());
+	
+	long int numHvalues = Q.cols();
+	VectorXd hvalues(numHvalues);
+	for (long int i = 0; i < numHvalues; ++i)
+	{
+		double hvalue = 0.;
+		auto it = mapIDinverse[i].begin();
+		while (it != mapIDinverse[i].end())
+		{
+			ASSERT(*it >= 0);
+			ASSERT(*it < numHvaluesInit);
+			hvalue += hvaluesInit[*it];
+			++it;
+		}
+		hvalue /= mapIDinverse[i].size();
+		hvalues(i) = hvalue;
+	}
+	
+	DEBUG_PRINT("Q is %d x %d matrix, numHvaluesInit = %ld", Q.rows(), Q.cols(),
+		numHvaluesInit);
+	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			numHvalues, Q.rows(), Q, hvalues);
 	checkPolyhedronIDs(polyhedron);
