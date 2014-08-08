@@ -1433,7 +1433,7 @@ void Recoverer::setEstimator(RecovererEstimator e)
 static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 {
 	DEBUG_START;
-	DEBUG_PRINT("Estimation report:");
+	MAIN_PRINT("Estimation report:");
 	double DEBUG_VARIABLE L1 = 0.;
 	double DEBUG_VARIABLE L2 = 0.;
 	double DEBUG_VARIABLE Linf = 0.;
@@ -1446,9 +1446,9 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 		L2 += delta * delta;
 		Linf = delta > Linf ? delta : Linf;
 	}
-	DEBUG_PRINT("L1 = %lf", L1);
-	DEBUG_PRINT("L2 = %lf", L2);
-	DEBUG_PRINT("Linf = %lf", Linf);
+	MAIN_PRINT("L1 = %lf", L1);
+	MAIN_PRINT("L2 = %lf", L2);
+	MAIN_PRINT("Linf = %lf", Linf);
 
 	DEBUG_PRINT("-------------------------------");
 	VectorXd Qh0 = Q * h0;
