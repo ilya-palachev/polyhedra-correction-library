@@ -597,7 +597,6 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 
         auto comparer = [](PCL_Point_3 a, PCL_Point_3 b)
         {
-		DEBUG_PRINT("Comparing %ld and %ld points", a.id, b.id);
                 return a < b || (a <= b && a.id < b.id);
         };
 
@@ -612,10 +611,6 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 		pointsCGAL.insert(pointCGAL);
 		ASSERT((long int) pointsCGAL.size() == sizePrev + 1);
 
-		DEBUG_PRINT("Convert Vector3d(%lf, %lf, %lf) to Point_3(%lf, %lf, %lf)",
-					point.x, point.y, point.z,
-					pointCGAL.x(), pointCGAL.y(), pointCGAL.z());
-
 		ASSERT(fabs(point.x - pointCGAL.x()) < EPS_MIN_DOUBLE);
 		ASSERT(fabs(point.y - pointCGAL.y()) < EPS_MIN_DOUBLE);
 		ASSERT(fabs(point.z - pointCGAL.z()) < EPS_MIN_DOUBLE);
@@ -628,7 +623,6 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 	{
 		auto DEBUG_VARIABLE pointCGAL = *itPointCGAL;
 		++itPointCGAL;
-		DEBUG_PRINT("current point's id = %ld", pointCGAL.id);
 		if (itPointCGAL != pointsCGAL.end())
 		{
 			auto DEBUG_VARIABLE pointCGALNext = *itPointCGAL;
@@ -1016,14 +1010,26 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 		tetrahedrons.insert(tetrahedron);
 	}
 
+	for (auto vertex = polyhedron.vertices_begin();
+		vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		DEBUG_PRINT("hull_v[%ld] = (%lf, %lf, %lf)", vertex->id,
+			vertex->point().x(), vertex->point().y(),
+			vertex->point().z());
+	}
+
 	/*
 	 * Construct the list from sorted set and return it.
 	 */
 	list<TetrahedronVertex> listTetrahedrons;
+	long int DEBUG_VARIABLE i = 0;
 	for (auto itTetrahedron = tetrahedrons.begin();
 			itTetrahedron != tetrahedrons.end(); ++itTetrahedron)
 	{
 		listTetrahedrons.push_back(*itTetrahedron);
+		DEBUG_PRINT("Tetrahedron #%ld: [%ld %ld %ld %ld]", i++,
+			itTetrahedron->v0->id, itTetrahedron->v1->id,
+			itTetrahedron->v2->id, itTetrahedron->v3->id);
 	}
 
 	DEBUG_END;
@@ -1461,7 +1467,11 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 	ASSERT(Qh0.size() == Qh.size());
 	for (int i = 0; i < Qh.size(); ++i)
 	{
-		DEBUG_PRINT("Q * h[%d] : %le -> %le", i, Qh0(i), Qh(i));
+		if (fabs (Qh0(i)) > ACCEPTED_TOL
+			|| fabs (Qh(i)) > ACCEPTED_TOL)
+		{
+			DEBUG_PRINT("Q * h[%d] : %le -> %le", i, Qh0(i), Qh(i));
+		}
 		ASSERT(Qh(i) >= -ACCEPTED_TOL);
 	}
 	DEBUG_END;
