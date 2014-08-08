@@ -23,6 +23,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "Constants.h"
 #include "LeastSquaresMethod.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
@@ -528,11 +529,17 @@ Vector3d SizeCalculator::calculateSurfaceCenter(void)
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
 		areaFacet =
-				polyhedron->facets[iFacet].calculateAreaAndCenter(centerFacet);
+			polyhedron->facets[iFacet].calculateAreaAndCenter(centerFacet);
+		areaFacet = fabs(areaFacet);
 		centerSurface += areaFacet * centerFacet;
 		areaSurface += areaFacet;
 	}
+	ASSERT(isfinite(areaSurface));
+	ASSERT(fabs(areaSurface) > EPS_MIN_DOUBLE);
 	centerSurface /= areaSurface;
+	ASSERT(isfinite(centerSurface.x));
+	ASSERT(isfinite(centerSurface.y));
+	ASSERT(isfinite(centerSurface.z));
 
 	DEBUG_END;
 	return centerSurface;

@@ -823,6 +823,9 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
 {
 	DEBUG_START;
+	ASSERT(isfinite(shift.x));
+	ASSERT(isfinite(shift.y));
+	ASSERT(isfinite(shift.z));
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
 		SContour* contourCurr = &SCData->contours[iContour];
@@ -856,6 +859,8 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	/* Calculate the mass center of contours. */
 	SizeCalculator* sizeCalculator = new SizeCalculator(p);
 	Vector3d center = sizeCalculator->calculateSurfaceCenter();
+	DEBUG_PRINT("Center of contours = (%lf, %lf, %lf)",
+		center.x, center.y, center.z);
 
 	/* Shift all contours on z component of the vector of mass center. */
 	Vector3d ez(0., 0., 1.);
