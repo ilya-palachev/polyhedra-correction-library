@@ -696,22 +696,54 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 	auto pointHull = pointsHull.begin();
 	auto point = pointsCGAL.begin();
 	i = 0;
+	double minDist = std::numeric_limits<double>::max();
+	double numConsidered = 0;
+	auto pointHullMin = pointsHull.end();
 	while (point != pointsCGAL.end())
 	{
 		double dist = (*point - *pointHull).squared_length();
-		DEBUG_PRINT("Squared dist from point #%ld (initial ID is #%ld) "
-			"to hull's point #%ld is %lf",
-			i++, point->id, pointHull->id, dist);
+		DEBUG_PRINT("Squared dist from point #%ld = (%lf, %lf, %lf) "
+			"initial ID is #%ld) "
+			"to hull's point #%ld = (%lf, %lf, %lf) is %lf",
+			i, point->x(), point->y(), point->z(), point->id,
+			pointHull->id,
+			pointHull->x(), pointHull->y(), pointHull->z(), dist);
 		if (dist < EPS_MIN_DOUBLE)
 		{
 			DEBUG_PRINT("----- Map case found!");
 			mapID[point->id] = pointHull->id;
 			mapIDinverse[pointHull->id].push_back(point->id);
 			++point;
+			++i;
+			numConsidered = 0;
+			minDist = std::numeric_limits<double>::max();
 		}
 		else
 		{
 			++pointHull;
+			if (pointHull == pointsHull.end())
+				pointHull = pointsHull.begin();
+			++numConsidered;
+			if (numConsidered >= pointsHull.size())
+			{
+				ASSERT(pointHullMin != pointsHull.end());
+				DEBUG_PRINT("----- Forcing map to nearest "
+					"hull point #%ld = (%lf, %lf, %lf), "
+					"minDist is %lf", pointHullMin->id,
+					pointHullMin->x(), pointHullMin->y(),
+					pointHullMin->z(), minDist);
+				mapID[point->id] = pointHullMin->id;
+				mapIDinverse[pointHullMin->id].push_back(point->id);
+				++point;
+				++i;
+				numConsidered = 0;
+				minDist = std::numeric_limits<double>::max();
+			}
+			else if (dist < minDist)
+			{
+				minDist = dist;
+				pointHullMin = pointHull;
+			}
 		}
 
 	}
