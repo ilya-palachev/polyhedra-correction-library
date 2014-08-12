@@ -598,6 +598,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			ifOptionLimitRandom = true;
+			break;
 		case OPTION_PRINT_PROBLEM:
 			options->ifPrintProblem = true;
 			break;
