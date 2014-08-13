@@ -38,6 +38,7 @@
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 		SupportFunctionEstimationData *data) :
 		SupportFunctionEstimator(data),
+	mode(IPOPT_ESTIMATION_QUADRATIC),
 	problemType(PROBLEM_PRIMAL),
 	solution(numValues())
 {
@@ -56,17 +57,26 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 {
 	DEBUG_START;
 
-	n = numValues();
+	switch (mode)
+	{
+	case IPOPT_ESTIMATION_QUADRATIC:
+		n = numValues();
+		m = numConditions();
+		nnz_jac_g = supportMatrix().nonZeros();
+		nnz_h_lag = numValues();
+		break;
+	case IPOPT_ESTIMATION_LINEAR:
+		n = numValues() + 1;
+		m = numConditions() + numValues() * 2;
+		nnz_jac_g = supportMatrix().nonZeros() + numValues() * 4;
+		nnz_h_lag = 0;
+		break;
+	}
+
 	DEBUG_PRINT("Number of variables is set to n = %d", n);
-
-	m = numConditions();
 	DEBUG_PRINT("Number of constraints is set to m = %d", m);
-
-	nnz_jac_g = supportMatrix().nonZeros();
 	DEBUG_PRINT("Number of non-zero elements in the Jacobian of g is set to "
 			"nnz_jac_g = %d", nnz_jac_g);
-
-	nnz_h_lag = numValues();
 	DEBUG_PRINT("Number of non-zero elements in the Hessian is set to "
 			"nnz_h_lag = %d", nnz_h_lag);
 
@@ -86,6 +96,14 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 	ASSERT(x_u);
 	ASSERT(g_l);
 	ASSERT(g_u);
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
 
 	for (int i = 0; i < n; ++i)
 	{
@@ -108,15 +126,29 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 	DEBUG_START;
 
 	ASSERT(x);
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
+	
 
 	if (init_x)
 	{
-//		VectorXd x0 = supportVector();
-		for (int i = 0; i < n; ++i)
+		VectorXd x0 = supportVector();
+		int num = numValues();
+		for (int i = 0; i < num; ++i)
 		{
-//			x[i] = x0(i);
-			x[i] = 1.;
+			x[i] = x0(i);
 		}
+		if (mode == IPOPT_ESTIMATION_LINEAR)
+		{
+			x[num] = 1.; /* epsilon_0 */
+		}
+		
 	}
 	if (init_z || init_lambda)
 	{
@@ -132,12 +164,28 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 	DEBUG_START;
 
 	ASSERT(x);
-
-	obj_value = 0.;
 	VectorXd x0 = supportVector();
-	for (int i = 0; i < n; ++i)
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		obj_value += (x[i] - x0(i)) * (x[i] - x0(i));
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
+
+	switch (mode)
+	{
+	case IPOPT_ESTIMATION_QUADRATIC:
+		obj_value = 0.;
+		for (int i = 0; i < n; ++i)
+		{
+			obj_value += (x[i] - x0(i)) * (x[i] - x0(i));
+		}
+		break;
+	case IPOPT_ESTIMATION_LINEAR:
+		obj_value = x[numValues()]; /* epsilon */
+		break;
 	}
 	DEBUG_END;
 	return true;
@@ -150,12 +198,34 @@ bool IpoptSupportFunctionEstimator::eval_grad_f(Index n, const Number* x,
 
 	ASSERT(x);
 	ASSERT(grad_f);
-
-	VectorXd x0 = supportVector();
-	for (int i = 0; i < n; ++i)
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		grad_f[i] = 2. * (x[i] - x0(i));
+		ASSERT(n == numValues());
 	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
+	VectorXd x0 = supportVector();
+	int num = numValues();
+
+	switch (mode)
+	{
+	case IPOPT_ESTIMATION_QUADRATIC:
+		for (int i = 0; i < num; ++i)
+		{
+			grad_f[i] = 2. * (x[i] - x0(i));
+		}
+		break;
+	case IPOPT_ESTIMATION_LINEAR:
+		for (int i = 0; i < num; ++i)
+		{
+			grad_f[i] = 0.;
+		}
+		grad_f[num] = 1.;
+		break;
+	}
+
 	DEBUG_END;
 	return true;
 }
@@ -167,19 +237,38 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 
 	ASSERT(x);
 	ASSERT(g);
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
+	int num = numValues();
 
-	VectorXd h(n);
-	for (int i = 0; i < n; ++i)
+	VectorXd h(num);
+	for (int i = 0; i < num; ++i)
 	{
 		h(i) = x[i];
 	}
 
 	VectorXd Qh(m);
 	Qh = supportMatrix() * h;
+	VectorXd h0 = supportVector();
 
-	for (int i = 0; i < m; ++i)
+	int numConds = numConditions();
+	for (int i = 0; i < numConds; ++i)
 	{
 		g[i] = Qh[i];
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		for (int i = 0 ; i < num; ++i)
+		{
+			g[numConds + 2 * i] = h(i) + x[num] - h0(i);
+			g[numConds + 2 * i + 1] = -h(i) + x[num] + h0(i);
+		}
 	}
 
 	DEBUG_END;
@@ -201,6 +290,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	DEBUG_PRINT("   iRow = %p", (void*) iRow);
 	DEBUG_PRINT("   jCol = %p", (void*) jCol);
 	DEBUG_PRINT("   values = %p", (void*) values);\
+	int num = numValues();
 
 	if (!values)
 	{
@@ -208,10 +298,29 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 		ASSERT(jCol);
 	}
 	if (new_x)
+	{
 		ASSERT(values);
+	}
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
 
 	SparseMatrix Q = supportMatrix();
-	ASSERT(n_ele_jac == Q.nonZeros());
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n_ele_jac == Q.nonZeros());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n_ele_jac == Q.nonZeros() + num * 4);
+	}
+	int nonZeros = Q.nonZeros();
+	int numConds = numConditions();
 
 	/* Assign all values of sparsity structure to -1 */
 	if (!values)
@@ -240,17 +349,53 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			++i;
 		}
 
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		for (i = 0; i < num; ++i)
+		{
+			if (values)
+			{
+				values[nonZeros + 4 * i] = 1.;	
+				values[nonZeros + 4 * i + 1] = 1.;	
+				values[nonZeros + 4 * i + 2] = -1.;	
+				values[nonZeros + 4 * i + 3] = 1.;	
+			}
+			else
+			{
+				iRow[nonZeros + 4 * i] = numConds + 2 * i;
+				jCol[nonZeros + 4 * i] = i;
+				iRow[nonZeros + 4 * i + 1] = numConds + 2 * i;
+				jCol[nonZeros + 4 * i + 1] = num;
+				iRow[nonZeros + 4 * i + 2] = numConds + 2 * i
+					+ 1;
+				jCol[nonZeros + 4 * i + 2] = i;
+				iRow[nonZeros + 4 * i + 3] = numConds + 2 * i
+					+ 1;
+				jCol[nonZeros + 4 * i + 3] = num;
+			}
+		}
+	}
+
 	/* Check that all values of sparsity structure have been correctly set. */
 	if (!values)
 	{
 		for (int i = 0; i < n_ele_jac; ++i)
 		{
+			DEBUG_PRINT("Checking element #%d", i);
 			ASSERT(iRow[i] != -1);
 			ASSERT(iRow[i] >= 0);
-			ASSERT(iRow[i] < Q.rows());
 			ASSERT(jCol[i] != -1);
 			ASSERT(jCol[i] >= 0);
-			ASSERT(jCol[i] < Q.cols());
+			if (mode == IPOPT_ESTIMATION_QUADRATIC)
+			{
+				ASSERT(iRow[i] < Q.rows());
+				ASSERT(jCol[i] < Q.cols());
+			}
+			if (mode == IPOPT_ESTIMATION_LINEAR)
+			{
+				ASSERT(iRow[i] < Q.rows() + 4 * num);
+				ASSERT(jCol[i] < Q.cols() + 1);
+			}
 		}
 	}
 	DEBUG_END;
@@ -276,6 +421,19 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	DEBUG_PRINT("   jCol = %p", (void*) jCol);
 	DEBUG_PRINT("   values = %p", (void*) values);
 
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		DEBUG_END;
+		return true;
+	}
 	ASSERT(n_ele_hess == numValues());
 
 	if (new_x)
@@ -310,6 +468,14 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 		const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq)
 {
 	DEBUG_START;
+	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	{
+		ASSERT(n == numValues());
+	}
+	if (mode == IPOPT_ESTIMATION_LINEAR)
+	{
+		ASSERT(n == numValues() + 1);
+	}
 
 	switch (status)
 	{
@@ -404,6 +570,13 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 
 	DEBUG_END;
 	return solution;
+}
+
+void IpoptSupportFunctionEstimator::setMode(IpoptEstimationMode m)
+{
+	DEBUG_START;
+	mode = m;
+	DEBUG_END;
 }
 
 

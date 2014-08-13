@@ -49,17 +49,24 @@ typedef K::Point_2 Point_2;
  */
 typedef enum
 {
+#ifdef USE_TSNNLS
 	/** TSNNLS estimator (not working). */
-	TSNNLS_ESTIMATOR = 0,
+	TSNNLS_ESTIMATOR,
+#endif /* USE_TSNNLS */
 
+#ifdef USE_IPOPT
 	/** Ipopt estimator. */
-	IPOPT_ESTIMATOR = 1,
+	IPOPT_ESTIMATOR,
+
+	/** Linear Ipopt estimator. */
+	IPOPT_ESTIMATOR_LINEAR,
+#endif /* USE_IPOPT */
 
 	/** Quadratic primal CGAL estimator.  */
-	CGAL_ESTIMATOR = 2,
+	CGAL_ESTIMATOR,
 
 	/** Linear CGAL estimator. */
-	CGAL_ESTIMATOR_LINEAR = 3
+	CGAL_ESTIMATOR_LINEAR
 } RecovererEstimator;
 
 /**

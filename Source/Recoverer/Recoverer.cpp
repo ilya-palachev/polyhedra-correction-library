@@ -1514,25 +1514,33 @@ ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 	DEBUG_START;
 	SupportFunctionEstimator *sfe = NULL;
 	CGALSupportFunctionEstimator *sfeCGAL = NULL;
+#ifdef USE_IPOPT
+	IpoptSupportFunctionEstimator *sfeIpopt = NULL;
+#endif /* USE_IPOPT */
 
 	/* Build problem data. */
 	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
 
 	switch (estimator)
 	{
-	case TSNNLS_ESTIMATOR:
 #ifdef USE_TSNNLS
+	case TSNNLS_ESTIMATOR:
 		sfe = static_cast<SupportFunctionEstimator*>(new
 				TsnnlsSupportFunctionEstimator(data));
-#endif
 		break;
-	case IPOPT_ESTIMATOR:
+#endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
-		/* TODO: complete this after enabling. */
-		sfe = static_cast<SupportFunctionEstimator*>(new
-				IpoptSupportFunctionEstimator(data));
-#endif
+	case IPOPT_ESTIMATOR:
+		sfeIpopt = new IpoptSupportFunctionEstimator(data);
+		sfeIpopt->setMode(IPOPT_ESTIMATION_QUADRATIC);
+		sfe = static_cast<SupportFunctionEstimator*>(sfeIpopt);
 		break;
+	case IPOPT_ESTIMATOR_LINEAR:
+		sfeIpopt = new IpoptSupportFunctionEstimator(data);
+		sfeIpopt->setMode(IPOPT_ESTIMATION_LINEAR);
+		sfe = static_cast<SupportFunctionEstimator*>(sfeIpopt);
+		break;
+#endif /* USE_IPOPT */
 	case CGAL_ESTIMATOR:
 		sfeCGAL = new CGALSupportFunctionEstimator(data);
 		sfeCGAL->setMode(CGAL_ESTIMATION_QUADRATIC);

@@ -325,16 +325,25 @@ typedef struct
 
 RecovererEstimatorDescription estimatorDescriptions[] =
 {
+#ifdef USE_TSNNLS
 	{
 		TSNNLS_ESTIMATOR,
 		"tsnnls",
 		"TSNNLS nonnegative least squares solver (not working)"
 	},
+#endif /* USE_TSNNLS */
+#ifdef USE_IPOPT
 	{
 		IPOPT_ESTIMATOR,
 		"ipopt",
-		"Ipopt interior-point method for non-linear programming (not working)"
+		"Ipopt interior-point method for quadratic programming"
 	},
+	{
+		IPOPT_ESTIMATOR_LINEAR,
+		"ipopt-lp",
+		"Ipopt interior-point method for linear programming"
+	},
+#endif /* USE_IPOPT */
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
