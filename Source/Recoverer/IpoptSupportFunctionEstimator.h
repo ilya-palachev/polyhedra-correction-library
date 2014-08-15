@@ -34,6 +34,13 @@ using namespace Ipopt;
 #ifndef IPOPTSUPPORTFUNCTIONESTIMATOR_H_
 #define IPOPTSUPPORTFUNCTIONESTIMATOR_H_
 
+/** Mode of estimation. */
+typedef enum
+{
+	IPOPT_ESTIMATION_LINEAR,		/**< LP problem eps -> min, Qh>=0 |h-h0|<eps */
+	IPOPT_ESTIMATION_QUADRATIC	/**< QP problem ||h-h0||^2 -> min, Qh>=0 */
+} IpoptEstimationMode;
+
 /**
  * Iptopt-based non-linear optimizer in case of support
  * function estimation.
@@ -43,6 +50,10 @@ class IpoptSupportFunctionEstimator:
 	public SupportFunctionEstimator
 {
 private:
+
+	/* Current mode of estimation. */
+	IpoptEstimationMode mode;
+
 	/** The type of problem. */
 	enum
 	{
@@ -52,6 +63,9 @@ private:
 		/** Dual problem: minimize ||Q^T u - h0|| subject to u >= 0 */
 		PROBLEM_DUAL
 	} problemType;
+
+	/** The solutions returned by Ipopt. */
+	VectorXd solution;
 public:
 	/**
 	 * Default constructor
@@ -256,7 +270,14 @@ public:
 	 *
 	 *
 	 */
-	virtual void run(void);
+	virtual VectorXd run(void);
+
+	/**
+	 * Sets current mode of estimation.
+	 *
+	 * @param m	Mode to be set.
+	 */
+	void setMode(IpoptEstimationMode m);
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */

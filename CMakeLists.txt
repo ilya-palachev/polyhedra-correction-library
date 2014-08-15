@@ -58,6 +58,7 @@ add_library(lsm SHARED ${SOURCE_lsm})
 add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
 
+option(ENABLE_TSNNLS "Enable tsnnls solver (does not work)" OFF)
 option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
 option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 
@@ -68,11 +69,16 @@ target_link_libraries(pcl
    vector3d
    CGAL
    gmp
-   tsnnls
 )
 
+if (ENABLE_TSNNLS)
+	target_link_libraries(pcl tsnnls)
+	add_definitions(-DUSE_TSNNLS)
+	message("!!! TSNNLS solver is enabled !!!")
+endif()
+
 if (ENABLE_IPOPT)
-	target_link_libraries(pcl ipopt coinmumps coinhsl)
+	target_link_libraries(pcl ipopt coinmumps coinhsl blas lapack)
 	add_definitions(-DUSE_IPOPT)
 	message("!!! Ipopt solver is enabled !!!")
 endif()

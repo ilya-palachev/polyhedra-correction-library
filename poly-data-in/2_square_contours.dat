@@ -1,0 +1,35 @@
+# num_shadow_contours
+  2
+# contour:  num_sides   normal_to_plane
+#           confidence   type
+#           x y z coordinates of point 1 in plane of projection
+#           x y z coordinates of point 2 in plane of projection
+
+   4        1.0000000      0.0000000      0.0000000
+      1 0
+      0 1 1
+      0 1 -1
+      1 0
+      0 1 -1
+      0 -1 -1
+      1 0
+      0 -1 -1
+      0 -1 1
+      1 0
+      0 -1 1
+      0 1 1
+
+   4       0.0000000       1.0000000      0.0000000
+      1 0
+      1 0 1
+      1 0 -1
+      1 0
+      1 0 -1
+      -1 0 -1
+      1 0
+      -1 0 -1
+      -1 0 1
+      1 0
+      -1 0 1
+      1 0 1
+

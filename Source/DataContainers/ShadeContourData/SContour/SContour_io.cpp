@@ -41,3 +41,15 @@ void SContour::my_fprint(FILE* file)
 	}
 	DEBUG_END;
 }
+
+void SContour::fprintDefault(FILE* file)
+{
+	DEBUG_START;
+	ALWAYS_PRINT(file, "   %d        %lf      %lf      %lf\n", ns,
+		plane.norm.x, plane.norm.y, plane.norm.z);
+	for (int i = 0; i < ns; ++i)
+	{
+		sides[i].fprintDefault(file);
+	}
+	DEBUG_END;
+}

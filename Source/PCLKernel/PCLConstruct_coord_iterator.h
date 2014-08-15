@@ -18,32 +18,28 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef USE_TSNNLS 
+/**
+ * @file PCLConstruct_coord_iterator.h
+ * @brief Implementation of iterator needed for Point_2 extension.
+ */
 
-#include "Recoverer/SupportFunctionEstimator.h"
+#ifndef PCLCONSTRUCT_COORD_ITERATOR_H
+#define PCLCONSTRUCT_COORD_ITERATOR_H
 
-#ifndef isnan
-#define isnan
-#endif
-#ifndef finite
-#define finite
-#endif
-#ifndef isinf
-#define isinf
-#endif
-#include <libtsnnls/tsnnls.h>
-
-#ifndef TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
-#define TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
-
-class TsnnlsSupportFunctionEstimator : public SupportFunctionEstimator
+class PCLConstruct_coord_iterator
 {
 public:
-	TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData *data);
-	~TsnnlsSupportFunctionEstimator();
+	const double* operator()(const PCLPoint_2 &p)
+	{
+		return &p.x();
+	}
 
-	virtual VectorXd run(void);
+	const double * operator()(const PCLPoint_2 &p, int)
+	{
+		const double* pyptr = &p.y();
+		pyptr++;
+		return pyptr;
+	}
 };
 
-#endif /* TSNNLSSUPPORTFUNCTIONESTIMATOR_H_ */
-#endif /* USE_TSNNLS */
+#endif /* PCLCONSTRUCT_COORD_ITERATOR_H */

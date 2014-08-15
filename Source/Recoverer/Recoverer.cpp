@@ -22,6 +22,8 @@
 #include <set>
 #include <boost/concept_check.hpp>
 
+#include <CGAL/convex_hull_2.h>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -70,11 +72,16 @@ static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 Recoverer::Recoverer() :
 	estimator(CGAL_ESTIMATOR),
 	ifBalancing(false),
+	ifConvexifyContours(true),
+	ifRegularize(false),
 	ifScaleMatrix(false),
 	iXmax(0),
 	iYmax(0),
 	iZmax(0),
-	vectorRegularizing(0., 0., 0.)
+	vectorRegularizing(0., 0., 0.),
+	mapID(NULL),
+	hvaluesInit(NULL),
+	mapIDinverse(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -83,6 +90,12 @@ Recoverer::Recoverer() :
 Recoverer::~Recoverer()
 {
 	DEBUG_START;
+	if (mapID != NULL)
+		delete[] mapID;
+	if (hvaluesInit != NULL)
+		delete[] hvaluesInit;
+	if (mapIDinverse != NULL)
+		delete[] mapIDinverse;
 	DEBUG_END;
 }
 
@@ -90,6 +103,20 @@ void Recoverer::enableBalancing(void)
 {
 	DEBUG_START;
 	ifBalancing = true;
+	DEBUG_END;
+}
+
+void Recoverer::enableContoursConvexification(void)
+{
+	DEBUG_START;
+	ifConvexifyContours = true;
+	DEBUG_END;
+}
+
+void Recoverer::enableRegularization(void)
+{
+	DEBUG_START;
+	ifRegularize = true;
 	DEBUG_END;
 }
 
@@ -278,41 +305,199 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
-vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
+static bool checkContourConnectivity(SContour* contour)
 {
 	DEBUG_START;
-	vector<Plane> supportPlanes;
-	Vector3d normal = contour->plane.norm;
-
-	/* Iterate through the array of sides of current contour. */
-	for (int iSide = 0; iSide < contour->ns; ++iSide)
+	bool ifConnected = true;
+	/*
+         * FIXME: Is it true that contours are ususally not connected between first
+         * and last sides?
+         */
+	for (int iSide = 0; iSide < contour->ns; ++iSide) 
 	{
 		SideOfContour* sideCurr = &contour->sides[iSide];
 
 		/*
-		 * Here the plane that is incident to points A1 and A2 of the
-		 * current side and collinear to the vector of projection.
-		 *
-		 * TODO: Here should be the calculation of the best plane fitting
-		 * these conditions. Current implementation can produce big errors.
+		 * Check that second vertex of previous side lies closely to first
+		 * vertex of the current side.
 		 */
-		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
-			normal;
-		Plane supportPlane(supportPlaneNormal,
-						   - supportPlaneNormal * sideCurr->A1);
+		SideOfContour* sidePrev DEBUG_VARIABLE =
+				&contour->sides[(contour->ns + iSide - 1) % contour->ns];
+		DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
+				(contour->ns + iSide - 1) % contour->ns,
+				sidePrev->A2.x, sidePrev->A2.y, sidePrev->A2.z);
+		DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
+				iSide, sideCurr->A1.x, sideCurr->A1.y, sideCurr->A1.z);
+		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
+		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
+				diff.x, diff.y, diff.z);
+		ifConnected &= qmod(diff) < EPS_MIN_DOUBLE || iSide == 0;
+		ASSERT(ifConnected);
+	}
+	DEBUG_END;
+	return ifConnected;
+}
 
-		supportPlanes.push_back(supportPlane);
+static vector<Vector3d> connectContour(SContour* contour)
+{
+	DEBUG_START;
+	vector<Vector3d> points;
 
-		DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
-			supportPlane.dist;
-		DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
-			supportPlane.dist;
+	/*
+	 * TODO: add support of option "--check-connectivity" here.
+	 */
+	if (!checkContourConnectivity(contour))
+	{
+		MAIN_PRINT(COLOUR_RED "Warning: contour %d is not connected!" COLOUR_NORM,
+			contour->id);
+		return points;
+	}
+	 
+	/* Iterate through the array of sides of current contour. */
+	/*
+	 * FIXME: Is it true that contours are ususally not connected between first
+	 * and last sides?
+	 */
+	for (int iSide = 0; iSide < contour->ns; ++iSide) 
+	{
+		SideOfContour* sideCurr = &contour->sides[iSide];
 
-		DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
+		/* Project current vertex to the plane of contour. */
+		Vector3d vCurr = contour->plane.project(sideCurr->A1);
 
-		/* TODO: Here should be more strict conditions. */
-		ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
-		ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+		points.push_back(vCurr);
+	}
+	DEBUG_END;
+	return points;
+}
+
+static vector<Point_2> mapPointsToOXYplane(vector<Vector3d> points, Vector3d nu)
+{
+	DEBUG_START;
+	Vector3d ez(0., 0., 1.);
+	nu.norm(1.);
+	Vector3d tau = nu % ez;
+
+	double xCurr = 0., yCurr = 0.;
+	vector<Point_2> pointsMapped;
+	for(auto &point : points)
+	{
+		xCurr = point * tau;
+		yCurr = point * ez;
+		pointsMapped.push_back(Point_2(xCurr, yCurr));
+	}
+	DEBUG_END;
+	return pointsMapped;
+}
+
+static vector<Point_3> mapPointsFromOXYplane(vector<Point_2> points, Vector_3 nu)
+{
+	DEBUG_START;
+	Vector_3 ez(0., 0, 1.);
+	nu = nu * 1. / sqrt(nu.squared_length()); /* Normalize vector \nu. */
+	Vector_3 tau = cross_product(nu, ez);
+
+	vector<Point_3> pointsMapped;
+	CGAL::Origin o;
+	for (auto &point : points)
+	{
+		pointsMapped.push_back(o + tau * point.x() + ez * point.y());
+	}
+	DEBUG_END;
+	return pointsMapped;
+}
+
+vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
+{
+	DEBUG_START;
+	vector<Plane> supportPlanes;
+	auto normal = contour->plane.norm;
+	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
+
+	if (ifConvexifyContours)
+	{
+		/*
+		 * TODO: This is a temporal workaround. In future we need to perform
+		 * convexification so that to remember what points are vertices of
+		 * convex hull.
+		 */
+
+		auto points = connectContour(contour);
+
+		auto pointsMapped = mapPointsToOXYplane(points, normal);
+		vector<Point_2> hull;
+		convex_hull_2(pointsMapped.begin(), pointsMapped.end(),
+			std::back_inserter(hull));
+		
+		if ((int) hull.size() != (int) contour->ns)
+		{
+			MAIN_PRINT(COLOUR_RED
+					"Warning: contour #%d is non-convex, its hull "
+					"contains %d of %d of its points"
+					COLOUR_NORM,
+					contour->id, (int) hull.size(), contour->ns);
+		}
+
+		/* TODO: Add automatic conversion from Vector3d to Vector_3 !!! */
+		auto extremePoints = mapPointsFromOXYplane(hull,
+					Vector_3(normal.x, normal.y, normal.z));
+
+		for (int i = 0; i < (int) extremePoints.size(); ++i)
+		{
+			Point_3 P1 = extremePoints[i];
+			Point_3 P2 = extremePoints[(i + 1 + extremePoints.size())
+			                           % extremePoints.size()];
+			Vector3d A1(P1.x(), P1.y(), P1.z());
+			Vector3d A2(P2.x(), P2.y(), P2.z());
+
+			Vector3d supportPlaneNormal = (A1 - A2) % normal;
+			Plane supportPlane(supportPlaneNormal, - supportPlaneNormal * A1);
+
+			supportPlanes.push_back(supportPlane);
+
+			DEBUG_VARIABLE double error1 = supportPlane.norm * A1 +
+				supportPlane.dist;
+			DEBUG_VARIABLE double error2 = supportPlane.norm * A2 +
+				supportPlane.dist;
+
+			DEBUG_PRINT("   extreme point #%d\t%le\t%le", i, error1, error2);
+
+			/* TODO: Here should be more strict conditions. */
+			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
+			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+		}
+	}
+	else
+	{
+		/* Iterate through the array of sides of current contour. */
+		for (int iSide = 0; iSide < contour->ns; ++iSide)
+		{
+			SideOfContour* sideCurr = &contour->sides[iSide];
+			/*
+			 * Here the plane that is incident to points A1 and A2 of the
+			 * current side and collinear to the vector of projection.
+			 *
+			 * TODO: Here should be the calculation of the best plane fitting
+			 * these conditions. Current implementation can produce big errors.
+			 */
+			Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
+				normal;
+			Plane supportPlane(supportPlaneNormal,
+							   - supportPlaneNormal * sideCurr->A1);
+
+			supportPlanes.push_back(supportPlane);
+
+			DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
+				supportPlane.dist;
+			DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
+				supportPlane.dist;
+
+			DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
+
+			/* TODO: Here should be more strict conditions. */
+			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
+			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+		}
 	}
 	DEBUG_END;
 	return supportPlanes;
@@ -395,47 +580,67 @@ struct Plane_from_facet
 	}
 };
 
-Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
+struct PCL_Point_3 : public Point_3
+{
+	long int id;
+	
+	PCL_Point_3(double x, double y, double z, long int i)
+		: Point_3(x, y, z), id(i)
+	{};
+};
+
+Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
 	Polyhedron_3 poly;
 
-	/* Convert Vector3d objects to Point_3 objects. */
-	std::vector<Point_3> pointsCGAL;
-	for (auto &point : points)
-	{
-		Point_3 pointCGAL(point.x, point.y, point.z);
-		pointsCGAL.push_back(pointCGAL);
 
-		DEBUG_PRINT("Convert Vector3d(%lf, %lf, %lf) to Point_3(%lf, %lf, %lf)",
-					point.x, point.y, point.z,
-					pointCGAL.x(), pointCGAL.y(), pointCGAL.z());
+        auto comparer = [](PCL_Point_3 a, PCL_Point_3 b)
+        {
+                return a < b || (a <= b && a.id < b.id);
+        };
+
+	/* Convert Vector3d objects to Point_3 objects. */
+	std::set<PCL_Point_3, decltype(comparer)> pointsCGAL(comparer);
+
+	long int i = 0;
+	for (auto &point : pointsPCL)
+	{
+		PCL_Point_3 pointCGAL(point.x, point.y, point.z, i++);
+		DEBUG_VARIABLE long int sizePrev = pointsCGAL.size();
+		pointsCGAL.insert(pointCGAL);
+		ASSERT((long int) pointsCGAL.size() == sizePrev + 1);
 
 		ASSERT(fabs(point.x - pointCGAL.x()) < EPS_MIN_DOUBLE);
 		ASSERT(fabs(point.y - pointCGAL.y()) < EPS_MIN_DOUBLE);
 		ASSERT(fabs(point.z - pointCGAL.z()) < EPS_MIN_DOUBLE);
 	}
 	DEBUG_PRINT("There are %ld PCL points and %ld CGAL points",
-		(long unsigned int) points.size(),
+		(long unsigned int) pointsPCL.size(),
 		(long unsigned int) pointsCGAL.size());
-	auto point = points.begin();
-	auto pointCGAL = pointsCGAL.begin();
+	auto itPointCGAL = pointsCGAL.begin();
 	do
 	{
-		ASSERT(fabs(point->x - pointCGAL->x()) < EPS_MIN_DOUBLE);
-		ASSERT(fabs(point->y - pointCGAL->y()) < EPS_MIN_DOUBLE);
-		ASSERT(fabs(point->z - pointCGAL->z()) < EPS_MIN_DOUBLE);
-	} while(++point != points.end() && ++pointCGAL != pointsCGAL.end());
+		auto DEBUG_VARIABLE pointCGAL = *itPointCGAL;
+		++itPointCGAL;
+		if (itPointCGAL != pointsCGAL.end())
+		{
+			auto DEBUG_VARIABLE pointCGALNext = *itPointCGAL;
+			ASSERT(pointCGAL <= pointCGALNext);
+		}
+		else break;
+	} while(1);
+	ASSERT(pointsCGAL.size() == pointsPCL.size());
 
 	/* Use the algorithm of standard STATIC convex hull. */
 	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), poly);
 
-	/* Calculate equations of planes for each facet. */
+	/* Calculte equations of planes for each facet. */
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
 
 	DEBUG_PRINT("Convex hull of %ld points contains %ld extreme points.",
-		(long unsigned int) points.size(),
+		(long unsigned int) pointsCGAL.size(),
 		(long unsigned int) poly.size_of_vertices());
 	
 	DEBUG_PRINT("Output polyhedron contains %ld vertices, %ld halfedges and "
@@ -444,12 +649,22 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
 
+	std::set<PCL_Point_3> pointsHull;
+
 	/* Assign vertex IDs that will be used later. */
-	long int i = 0;
+	i = 0;
 	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
 		 ++vertex)
 	{
-		vertex->id = i++;
+		vertex->id = i;
+
+		/*
+		 * Also construct lexicographically ordered set of hull's
+		 * extreme points.
+		 */
+		auto point = vertex->point();
+		pointsHull.insert(PCL_Point_3(point.x(), point.y(), point.z(),
+			i++));
 	}
 
 	/* Assign facet IDs that will be used later. */
@@ -467,6 +682,87 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> points)
 		halfedge->id = i++;
 	}
 	DEBUG_END;
+
+	/*
+	 * Now construct 2 maps: direct and inverse, between initial points and
+	 * extreme points of their recently obtained convex hull.
+	 */
+	mapID = new long int[pointsCGAL.size()];
+	for (long int i = 0; i < (long int) pointsCGAL.size(); ++i)
+	{
+		mapID[i] = INT_NOT_INITIALIZED;
+	}
+	mapIDinverse = new std::list<long int>[pointsHull.size()];
+	auto pointHull = pointsHull.begin();
+	auto point = pointsCGAL.begin();
+	i = 0;
+	double minDist = std::numeric_limits<double>::max();
+	double numConsidered = 0;
+	auto pointHullMin = pointsHull.end();
+	while (point != pointsCGAL.end())
+	{
+		double dist = (*point - *pointHull).squared_length();
+		DEBUG_PRINT("Squared dist from point #%ld = (%lf, %lf, %lf) "
+			"initial ID is #%ld) "
+			"to hull's point #%ld = (%lf, %lf, %lf) is %lf",
+			i, point->x(), point->y(), point->z(), point->id,
+			pointHull->id,
+			pointHull->x(), pointHull->y(), pointHull->z(), dist);
+		if (dist < EPS_MIN_DOUBLE)
+		{
+			DEBUG_PRINT("----- Map case found!");
+			mapID[point->id] = pointHull->id;
+			mapIDinverse[pointHull->id].push_back(point->id);
+			++point;
+			++i;
+			numConsidered = 0;
+			minDist = std::numeric_limits<double>::max();
+		}
+		else
+		{
+			++pointHull;
+			if (pointHull == pointsHull.end())
+				pointHull = pointsHull.begin();
+			++numConsidered;
+			if (numConsidered >= pointsHull.size())
+			{
+				ASSERT(pointHullMin != pointsHull.end());
+				DEBUG_PRINT("----- Forcing map to nearest "
+					"hull point #%ld = (%lf, %lf, %lf), "
+					"minDist is %lf", pointHullMin->id,
+					pointHullMin->x(), pointHullMin->y(),
+					pointHullMin->z(), minDist);
+				mapID[point->id] = pointHullMin->id;
+				mapIDinverse[pointHullMin->id].push_back(point->id);
+				++point;
+				++i;
+				numConsidered = 0;
+				minDist = std::numeric_limits<double>::max();
+			}
+			else if (dist < minDist)
+			{
+				minDist = dist;
+				pointHullMin = pointHull;
+			}
+		}
+
+	}
+
+	for (long int i = 0; i < (long int) pointsPCL.size(); ++i)
+	{
+		ASSERT(mapID[i] != INT_NOT_INITIALIZED);
+	}
+
+	for (long int i = 0; i < (long int) pointsHull.size(); ++i)
+	{
+		ASSERT(!mapIDinverse[i].empty());
+		if (mapIDinverse[i].size() > 1)
+		{
+			DEBUG_PRINT("Hull's point #%ld has %ld corresponding "
+				"initial points.",
+				i, mapIDinverse[i].size());
+		}
+	}
 	return poly;
 }
 
@@ -553,6 +849,9 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
 {
 	DEBUG_START;
+	ASSERT(isfinite(shift.x));
+	ASSERT(isfinite(shift.y));
+	ASSERT(isfinite(shift.z));
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
 		SContour* contourCurr = &SCData->contours[iContour];
@@ -586,6 +885,8 @@ void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
 	/* Calculate the mass center of contours. */
 	SizeCalculator* sizeCalculator = new SizeCalculator(p);
 	Vector3d center = sizeCalculator->calculateSurfaceCenter();
+	DEBUG_PRINT("Center of contours = (%lf, %lf, %lf)",
+		center.x, center.y, center.z);
 
 	/* Shift all contours on z component of the vector of mass center. */
 	Vector3d ez(0., 0., 1.);
@@ -601,6 +902,7 @@ typedef struct
 	Polyhedron_3::Vertex_handle v0, v1, v2, v3;
 } TetrahedronVertex;
 
+#ifndef NDEBUG
 /**
  * Counts the number of covering tetrahedrons for a given polyhedron.
  *
@@ -616,7 +918,7 @@ static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
 	 * First, calcualate the sum of vertex degrees
 	 */
 	unsigned long int degreeSum = 0;
-	long int iVertex = 0;
+	long int iVertex DEBUG_VARIABLE = 0;
 	for (auto vertex = polyhedron.vertices_begin();
 			vertex != polyhedron.vertices_end(); ++vertex)
 	{
@@ -646,6 +948,7 @@ static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
 	DEBUG_END;
 	return numTetrahedrons;
 }
+#endif
 
 /**
  * Finds covering tetrahedrons for a given polyhedron.
@@ -739,14 +1042,26 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 		tetrahedrons.insert(tetrahedron);
 	}
 
+	for (auto vertex = polyhedron.vertices_begin();
+		vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		DEBUG_PRINT("hull_v[%ld] = (%lf, %lf, %lf)", vertex->id,
+			vertex->point().x(), vertex->point().y(),
+			vertex->point().z());
+	}
+
 	/*
 	 * Construct the list from sorted set and return it.
 	 */
 	list<TetrahedronVertex> listTetrahedrons;
+	long int DEBUG_VARIABLE i = 0;
 	for (auto itTetrahedron = tetrahedrons.begin();
 			itTetrahedron != tetrahedrons.end(); ++itTetrahedron)
 	{
 		listTetrahedrons.push_back(*itTetrahedron);
+		DEBUG_PRINT("Tetrahedron #%ld: [%ld %ld %ld %ld]", i++,
+			itTetrahedron->v0->id, itTetrahedron->v1->id,
+			itTetrahedron->v2->id, itTetrahedron->v3->id);
 	}
 
 	DEBUG_END;
@@ -1058,20 +1373,33 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 
 	/* 3. Get normal vectors of support planes and normalize them. */
 	vector<Vector3d> directions;
-	int numHvalues = supportPlanes.size();
-	VectorXd hvalues(numHvalues);
 	int iValue = 0;
+	long int numHvaluesInit = supportPlanes.size();
+	hvaluesInit = new double[numHvaluesInit];
 	for (auto &plane : supportPlanes)
 	{
+		DEBUG_PRINT("Processing support plane "
+			"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
+			plane.norm.x, plane.norm.y, plane.norm.z,
+			plane.dist);
 		if (plane.dist < 0)
 		{
 			plane.dist = -plane.dist;
 			plane.norm = -plane.norm;
+			DEBUG_PRINT("The plane was reverted: "
+				"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
+				plane.norm.x, plane.norm.y, plane.norm.z,
+				plane.dist);
 		}
 		Vector3d normal = plane.norm;
+		plane.dist /= sqrt(qmod(normal));
 		normal.norm(1.);
+		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
+			iValue, normal.x, normal.y, normal.z);
 		directions.push_back(normal);
-		hvalues(iValue++) = plane.dist;
+		DEBUG_PRINT("Adding %d-th support value %lf",
+			iValue, plane.dist);
+		hvaluesInit[iValue++] = plane.dist;
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
@@ -1081,6 +1409,27 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
 	SparseMatrix Q = Qt.transpose();
+	
+	long int numHvalues = Q.cols();
+	VectorXd hvalues(numHvalues);
+	for (long int i = 0; i < numHvalues; ++i)
+	{
+		double hvalue = 0.;
+		auto it = mapIDinverse[i].begin();
+		while (it != mapIDinverse[i].end())
+		{
+			ASSERT(*it >= 0);
+			ASSERT(*it < numHvaluesInit);
+			hvalue += hvaluesInit[*it];
+			++it;
+		}
+		hvalue /= mapIDinverse[i].size();
+		hvalues(i) = hvalue;
+	}
+	
+	DEBUG_PRINT("Q is %d x %d matrix, numHvaluesInit = %ld", Q.rows(), Q.cols(),
+		numHvaluesInit);
+	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			numHvalues, Q.rows(), Q, hvalues);
 	checkPolyhedronIDs(polyhedron);
@@ -1100,6 +1449,13 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	 */
 	if (ifRegularize)
 	{
+		if (estimator == IPOPT_ESTIMATOR)
+		{
+			ERROR_PRINT("Regularization of support matrix for "
+				"Ipopt estimator is not implemented yet.");
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+		}
 		regularizeSupportMatrix(data, polyhedron);
 		checkPolyhedronIDs(polyhedron);
 	}
@@ -1115,28 +1471,76 @@ void Recoverer::setEstimator(RecovererEstimator e)
 	DEBUG_END;
 }
 
-PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
+#define ACCEPTED_TOL 1e-6
+
+static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
+{
+	DEBUG_START;
+	MAIN_PRINT("Estimation report:");
+	double DEBUG_VARIABLE L1 = 0.;
+	double DEBUG_VARIABLE L2 = 0.;
+	double DEBUG_VARIABLE Linf = 0.;
+	ASSERT(h0.size() == h.size());
+	for (int i = 0; i < h.size(); ++i)
+	{
+		double DEBUG_VARIABLE delta = h0(i) - h(i);
+		DEBUG_PRINT("h[%d] :  %lf - %lf = %lf", i, h0(i), h(i), delta);
+		L1 += fabs(delta);
+		L2 += delta * delta;
+		Linf = delta > Linf ? delta : Linf;
+	}
+	MAIN_PRINT("L1 = %lf", L1);
+	MAIN_PRINT("L2 = %lf", L2);
+	MAIN_PRINT("Linf = %lf", Linf);
+
+	DEBUG_PRINT("-------------------------------");
+	VectorXd Qh0 = Q * h0;
+	VectorXd Qh  = Q * h;
+	ASSERT(Qh0.size() == Qh.size());
+	for (int i = 0; i < Qh.size(); ++i)
+	{
+		if (fabs (Qh0(i)) > ACCEPTED_TOL
+			|| fabs (Qh(i)) > ACCEPTED_TOL)
+		{
+			DEBUG_PRINT("Q * h[%d] : %le -> %le", i, Qh0(i), Qh(i));
+		}
+		ASSERT(Qh(i) >= -ACCEPTED_TOL);
+	}
+	DEBUG_END;
+}
+
+ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 	SupportFunctionEstimator *sfe = NULL;
 	CGALSupportFunctionEstimator *sfeCGAL = NULL;
+#ifdef USE_IPOPT
+	IpoptSupportFunctionEstimator *sfeIpopt = NULL;
+#endif /* USE_IPOPT */
 
 	/* Build problem data. */
 	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
 
 	switch (estimator)
 	{
+#ifdef USE_TSNNLS
 	case TSNNLS_ESTIMATOR:
 		sfe = static_cast<SupportFunctionEstimator*>(new
 				TsnnlsSupportFunctionEstimator(data));
 		break;
-	case IPOPT_ESTIMATOR:
+#endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
-		/* TODO: complete this after enabling. */
-		sfe = static_cast<SupportFunctionEstimator*>(new
-				IpoptSupportFunctionEstimator(data));
-#endif
+	case IPOPT_ESTIMATOR:
+		sfeIpopt = new IpoptSupportFunctionEstimator(data);
+		sfeIpopt->setMode(IPOPT_ESTIMATION_QUADRATIC);
+		sfe = static_cast<SupportFunctionEstimator*>(sfeIpopt);
 		break;
+	case IPOPT_ESTIMATOR_LINEAR:
+		sfeIpopt = new IpoptSupportFunctionEstimator(data);
+		sfeIpopt->setMode(IPOPT_ESTIMATION_LINEAR);
+		sfe = static_cast<SupportFunctionEstimator*>(sfeIpopt);
+		break;
+#endif /* USE_IPOPT */
 	case CGAL_ESTIMATOR:
 		sfeCGAL = new CGALSupportFunctionEstimator(data);
 		sfeCGAL->setMode(CGAL_ESTIMATION_QUADRATIC);
@@ -1148,14 +1552,18 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 		sfe = static_cast<SupportFunctionEstimator*>(sfeCGAL);
 		break;
 	default:
-		__builtin_unreachable();
+		ERROR_PRINT("Error: type of estimator is not set.");
+		DEBUG_END;
+		return NULL;
 		break;
 	}
+	ASSERT(sfe);
 
 	/* Run support function estimation. */
-	if (sfe)
-		sfe->run();
-	delete sfe;
+	VectorXd estimate = sfe->run();
+
+	printEstimationReport(data->supportMatrix(), data->supportVector(),
+		estimate);
 
 	DEBUG_END;
 	return NULL;

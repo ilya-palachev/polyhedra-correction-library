@@ -35,7 +35,7 @@ private:
 public:
 	Prism();
 	Prism(int nv, double h, double r);
-	~Prism();
+	virtual ~Prism();
 };
 
 #endif /* PRISM_H_ */

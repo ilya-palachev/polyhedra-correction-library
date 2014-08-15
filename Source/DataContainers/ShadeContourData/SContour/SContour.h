@@ -59,6 +59,8 @@ public:
 	// SContour_io.cpp :
 
 	void my_fprint(FILE* file);
+	
+	void fprintDefault(FILE* file);
 };
 
 #endif	/* SCONTOUR_H */

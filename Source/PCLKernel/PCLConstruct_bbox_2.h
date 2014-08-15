@@ -18,32 +18,25 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef USE_TSNNLS 
+/**
+ * @file PCLConstruct_bbox_2.h
+ * @brief Implementation of functionr for bounding box computation -
+ * to make basic algorithms work with PCLPoint_2
+ */
 
-#include "Recoverer/SupportFunctionEstimator.h"
+#ifndef PCLCONSTRUCT_BBOX_2
+#define PCLCONSTRUCT_BBOX_2
 
-#ifndef isnan
-#define isnan
-#endif
-#ifndef finite
-#define finite
-#endif
-#ifndef isinf
-#define isinf
-#endif
-#include <libtsnnls/tsnnls.h>
-
-#ifndef TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
-#define TSNNLSSUPPORTFUNCTIONESTIMATOR_H_
-
-class TsnnlsSupportFunctionEstimator : public SupportFunctionEstimator
+template <class ConstructBbox_2>
+class PCLConstruct_bbox_2 : public ConstructBbox_2
 {
 public:
-	TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData *data);
-	~TsnnlsSupportFunctionEstimator();
+	using ConstructBbox_2::operator();
 
-	virtual VectorXd run(void);
+	CGAL::Bbox_2 operator()(const PCLPoint_2 &p) const
+	{
+		return CGAL::Bbox_2(p.x(), p.y(), p.x(), p.y());
+	}
 };
 
-#endif /* TSNNLSSUPPORTFUNCTIONESTIMATOR_H_ */
-#endif /* USE_TSNNLS */
+#endif /* PCLCONSTRUCT_BBOX_2 */

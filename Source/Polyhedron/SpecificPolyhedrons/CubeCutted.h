@@ -30,7 +30,7 @@ private:
 	void init();
 public:
 	CubeCutted();
-	~CubeCutted();
+	virtual ~CubeCutted();
 };
 
 #endif /* CUBECUTTED_H_ */

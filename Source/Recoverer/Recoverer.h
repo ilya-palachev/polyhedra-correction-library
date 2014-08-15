@@ -29,26 +29,44 @@
 
 #include <vector>
 
+#include <CGAL/basic.h>
+#include <CGAL/Filtered_kernel.h>
+
+#include "PCLKernel/PCLKernel.h"
+#include "PCLKernel/PCLPoint_2_iostream.h"
+
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "Recoverer/SupportFunctionEstimationData.h"
+
+typedef PCLKernel<double> PCL_K;
+typedef CGAL::Filtered_kernel_adaptor<PCL_K> K;
+
+typedef K::Point_2 Point_2;
 
 /**
  * Sets the estimator to be used for support function estimation.
  */
 typedef enum
 {
+#ifdef USE_TSNNLS
 	/** TSNNLS estimator (not working). */
-	TSNNLS_ESTIMATOR = 0,
+	TSNNLS_ESTIMATOR,
+#endif /* USE_TSNNLS */
 
+#ifdef USE_IPOPT
 	/** Ipopt estimator. */
-	IPOPT_ESTIMATOR = 1,
+	IPOPT_ESTIMATOR,
+
+	/** Linear Ipopt estimator. */
+	IPOPT_ESTIMATOR_LINEAR,
+#endif /* USE_IPOPT */
 
 	/** Quadratic primal CGAL estimator.  */
-	CGAL_ESTIMATOR = 2,
+	CGAL_ESTIMATOR,
 
 	/** Linear CGAL estimator. */
-	CGAL_ESTIMATOR_LINEAR = 3
+	CGAL_ESTIMATOR_LINEAR
 } RecovererEstimator;
 
 /**
@@ -62,11 +80,14 @@ private:
 	/** Estimator to be used. */
 	RecovererEstimator estimator;
 
-	/** Whether to regularize the support matrix. */
-	bool ifRegularize;
-
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
+
+	/** Whether to convexify shadow contours. */
+	bool ifConvexifyContours;
+
+	/** Whether to regularize the support matrix. */
+	bool ifRegularize;
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
@@ -85,6 +106,15 @@ private:
 
 	/** Vector with saved 3 h-values that correspond to iXmax, iYmax, iZmax */
 	Vector_3 vectorMaxHValues;
+
+	/** Map from initial support directions's ID's and points on hull. */
+	long int *mapID;
+
+	/** Support values in initial (before hull construction) order. */
+	double *hvaluesInit;
+
+	/** Inverse map of the previous map (not a function). */
+	std::list<long int> *mapIDinverse;
 
 	/**
 	 * Extracts support planes from shadow contours.
@@ -197,6 +227,17 @@ public:
 	void enableBalancing(void);
 
 	/**
+	 * Enables the convexification of shadow contours.
+	 */
+	void enableContoursConvexification(void);
+
+	/**
+	 * Enables the regularization of support matrix based on knowledge about
+	 * eigenvectors eigenvalues of support matrix Q
+	 */
+	void enableRegularization(void);
+
+	/**
 	 * Enables the scaling of the matrix of the problem.
 	 */
 	void enableMatrixScaling(void);
@@ -256,7 +297,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr run(ShadeContourDataPtr SCData);
+	ShadeContourDataPtr run(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;

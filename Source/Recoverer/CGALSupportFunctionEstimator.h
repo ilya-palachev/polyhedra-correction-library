@@ -44,10 +44,10 @@ class CGALSupportFunctionEstimator : public SupportFunctionEstimator
 	CGALEstimationMode mode;
 
 	/** Runs LP problem solver. */
-	void runLP(void);
+	VectorXd runLP(void);
 
 	/** Runs QP problem solver. */
-	void runQP(void);
+	VectorXd runQP(void);
 
 public:
 	/**
@@ -61,7 +61,7 @@ public:
 	~CGALSupportFunctionEstimator();
 
 	/** Runs the estiamtion process. */
-	virtual void run(void);
+	virtual VectorXd run(void);
 
 	/**
 	 * Sets current mode of estimation.

@@ -61,7 +61,7 @@ void CubeCutted::init()
 
 	facets = new Facet[10];
 
-	int index[8];
+	int index[3 * 8 + 1];
 	Plane plane;
 
 	index[0] = 0;
@@ -69,28 +69,28 @@ void CubeCutted::init()
 	index[2] = 2;
 	index[3] = 1;
 	plane = Plane(Vector3d(0., 0., -1.), 0);
-	facets[0] = Facet(0, 4, plane, index, get_ptr(), false);
+	facets[0] = Facet(0, 4, plane, index, NULL, false);
 
 	index[0] = 4;
 	index[1] = 5;
 	index[2] = 6;
 	index[3] = 7;
 	plane = Plane(Vector3d(0., 0., 1.), -1.);
-	facets[1] = Facet(1, 4, plane, index, get_ptr(), false);
+	facets[1] = Facet(1, 4, plane, index, NULL, false);
 
 	index[0] = 8;
 	index[1] = 9;
 	index[2] = 10;
 	index[3] = 11;
 	plane = Plane(Vector3d(0., 0., 1.), -3.);
-	facets[2] = Facet(2, 4, plane, index, get_ptr(), false);
+	facets[2] = Facet(2, 4, plane, index, NULL, false);
 
 	index[0] = 12;
 	index[1] = 13;
 	index[2] = 14;
 	index[3] = 15;
 	plane = Plane(Vector3d(0., 0., 1.), -3.);
-	facets[3] = Facet(3, 4, plane, index, get_ptr(), false);
+	facets[3] = Facet(3, 4, plane, index, NULL, false);
 
 	index[0] = 0;
 	index[1] = 1;
@@ -101,7 +101,7 @@ void CubeCutted::init()
 	index[6] = 9;
 	index[7] = 8;
 	plane = Plane(Vector3d(1., 0., 0.), -3.);
-	facets[4] = Facet(4, 8, plane, index, get_ptr(), false);
+	facets[4] = Facet(4, 8, plane, index, NULL, false);
 
 	index[0] = 3;
 	index[1] = 11;
@@ -112,35 +112,35 @@ void CubeCutted::init()
 	index[6] = 14;
 	index[7] = 2;
 	plane = Plane(Vector3d(-1., 0., 0.), 0.);
-	facets[5] = Facet(5, 8, plane, index, get_ptr(), false);
+	facets[5] = Facet(5, 8, plane, index, NULL, false);
 
 	index[0] = 1;
 	index[1] = 2;
 	index[2] = 14;
 	index[3] = 13;
 	plane = Plane(Vector3d(0., 1., 0.), -3.);
-	facets[6] = Facet(6, 4, plane, index, get_ptr(), false);
+	facets[6] = Facet(6, 4, plane, index, NULL, false);
 
 	index[0] = 0;
 	index[1] = 8;
 	index[2] = 11;
 	index[3] = 3;
 	plane = Plane(Vector3d(0., -1., 0.), 0.);
-	facets[7] = Facet(7, 4, plane, index, get_ptr(), false);
+	facets[7] = Facet(7, 4, plane, index, NULL, false);
 
 	index[0] = 4;
 	index[1] = 7;
 	index[2] = 10;
 	index[3] = 9;
 	plane = Plane(Vector3d(0., 1., 0.), -1.);
-	facets[8] = Facet(8, 4, plane, index, get_ptr(), false);
+	facets[8] = Facet(8, 4, plane, index, NULL, false);
 
 	index[0] = 5;
 	index[1] = 12;
 	index[2] = 15;
 	index[3] = 6;
 	plane = Plane(Vector3d(0., -1., 0.), 2.);
-	facets[9] = Facet(9, 4, plane, index, get_ptr(), false);
+	facets[9] = Facet(9, 4, plane, index, NULL, false);
 
 	numVertices = 16;
 	numFacets = 10;
