@@ -99,7 +99,7 @@ foreach(test_source_file ${SOURCE_tests})
 	target_link_libraries(${executable_name} pcl gaussString)
 endforeach()
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Valgrind")
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Valgrind")
 	set(CMAKE_BUILD_TYPE "Release")
 	set(COMMON_FLAGS "${COMMON_FLAGS} -g")
 	set(cat_config ${CMAKE_SOURCE_DIR}/Scripts/cat_config.sh)
