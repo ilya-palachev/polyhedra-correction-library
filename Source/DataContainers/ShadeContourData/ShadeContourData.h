@@ -32,6 +32,11 @@
 class SContour;
 
 /**
+ * Shared pointer to the shadow contour data.
+ */
+typedef std::shared_ptr<ShadeContourData> ShadeContourDataPtr;
+
+/**
  * Container of shadow contour data used for polyhedral reconstruction.
  * Usually this data is obtained from experimental measurements or from
  * synthetic generation from simple models.
@@ -58,6 +63,20 @@ public:
 	 * TODO: shade contour data can be not associated with any polyhedron!
 	 */
 	ShadeContourData(shared_ptr<Polyhedron> p);
+
+	/**
+	 * Copy constructor from shared pointer
+	 *
+	 * @param data	The data to be copied
+	 */
+	ShadeContourData(const ShadeContourDataPtr data);
+
+	/**
+	 * Copy constructor from reference
+	 *
+	 * @param data	The data to be copied
+	 */
+	ShadeContourData(const ShadeContourData& data);
 
 	/**
 	 * Destructor for the freeing of data.
@@ -112,10 +131,5 @@ public:
 	bool operator !=(const ShadeContourData& contourData) const;
 
 };
-
-/**
- * Shared pointer to the shadow contour data.
- */
-typedef std::shared_ptr<ShadeContourData> ShadeContourDataPtr;
 
 #endif /* SHADECONTOURDATA_H_ */

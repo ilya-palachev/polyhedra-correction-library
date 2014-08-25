@@ -293,6 +293,18 @@ public:
 	void setEstimator(RecovererEstimator e);
 
 	/**
+	 * Produces corrected shadow contour data from initial data and vector
+	 * of estimated support values
+	 *
+	 * @param SCData	Shadow contour data
+	 * @param estData	Support function estimation data used by
+	 * 			estimator
+	 * @param estimate	The result of SFE's work
+	 */
+	ShadeContourDataPtr produceCorrectedData(ShadeContourDataPtr SCData,
+		SupportFunctionEstimationData *estData, VectorXd estimate);
+
+	/**
 	 * Runs the recovering procedure.
 	 *
 	 * @param SCData	Shadow contour data

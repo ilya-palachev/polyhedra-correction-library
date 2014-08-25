@@ -1509,6 +1509,55 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 	DEBUG_END;
 }
 
+
+ShadeContourDataPtr Recoverer::produceCorrectedData(
+	ShadeContourDataPtr SCData,
+	SupportFunctionEstimationData *estData,
+	VectorXd estimate)
+{
+	DEBUG_START;
+	ShadeContourDataPtr data(SCData);
+
+	int iAux = 0;
+	for (int iContour = 0; iContour < data->numContours; ++iContour)
+	{
+		SContour *contour = &data->contours[iContour];
+		for (int iSide = 0; iSide < contour->ns; ++iSide)
+		{
+			SideOfContour *side = &contour->sides[iSide];
+			int iSideNext = (iSide + contour->ns + 1) 
+				% contour->ns;
+			SideOfContour *sideNext = &contour->sides[iSideNext];
+			int iValue = mapID[iAux + iSide];
+			int iValueNext = mapID[iAux + iSideNext];
+
+			Vector3d vec = side->A2;
+			double hValueOld = estData->supportVector()(iValue);
+			double hValueNew = estimate(iValue);
+			double factor = hValueNew / hValueOld;
+			Vector3d vecNew = vec * factor;
+
+			double hValueNextOld = estData->supportVector()(iValueNext);
+			double hValueNextNew = estimate(iValueNext);
+			double factorNext = hValueNextNew / hValueNextOld;
+			Vector3d vecNewNext = vec * factorNext;
+
+			Vector3d tangentNext = sideNext->A1 - sideNext->A2;
+			Vector3d vecNewPrj = vecNew * (vecNew * tangentNext);
+			Vector3d tangent = side->A2 - side->A1;
+			Vector3d vecNewNextPrj = vecNewNext * (vecNewNext
+				* tangent);
+			
+			Vector3d vecCorrected = vec + vecNewPrj + vecNewNextPrj;
+			side->A2 = vecCorrected;
+			sideNext->A1 = vecCorrected;
+		}
+		iAux += contour->ns;
+	}
+	DEBUG_END;
+	return data;
+}
+
 ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;

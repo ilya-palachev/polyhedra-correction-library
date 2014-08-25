@@ -22,6 +22,13 @@
 #include "DebugAssert.h"
 #include "DataContainers/PData/PData.h"
 
+PData::PData() :
+		polyhedron(NULL)
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
 PData::PData(shared_ptr<Polyhedron> p) :
 		polyhedron(p)
 {

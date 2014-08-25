@@ -33,6 +33,7 @@ public:
 	 * So we need not have a pointer to parent polyhedron here.
 	 */
 	shared_ptr<Polyhedron> polyhedron;
+	PData();
 	PData(shared_ptr<Polyhedron> p);
 	virtual ~PData();
 };

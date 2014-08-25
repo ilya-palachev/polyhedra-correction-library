@@ -32,6 +32,28 @@ ShadeContourData::ShadeContourData(shared_ptr<Polyhedron> p) :
 	DEBUG_END;
 }
 
+ShadeContourData::ShadeContourData(const ShadeContourData& data) :
+				PData(),
+				numContours(data.numContours),
+				contours(NULL)
+{
+	DEBUG_START;
+	contours = new SContour[numContours];
+	memcpy(contours, data.contours, numContours * sizeof(SContour));
+	DEBUG_END;
+}
+
+ShadeContourData::ShadeContourData(const ShadeContourDataPtr data) :
+				PData(),
+				numContours(data->numContours),
+				contours(NULL)
+{
+	DEBUG_START;
+	contours = new SContour[numContours];
+	memcpy(contours, data->contours, numContours * sizeof(SContour));
+	DEBUG_END;
+}
+
 ShadeContourData::~ShadeContourData()
 {
 	DEBUG_START;
