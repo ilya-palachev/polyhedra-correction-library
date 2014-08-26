@@ -312,9 +312,6 @@ RecovererTestModel recovererTestModels[] =
 	}
 };
 
-/** The number of possible estimators. */
-#define RECOVERER_ESTIMATORS_NUMBER 4
-
 /** Structure describing given estimator. */
 typedef struct
 {
@@ -406,7 +403,10 @@ void printUsage(int argc, char** argv)
 			model->description);
 	}
 	STDERR_PRINT("\nPossible estimators are:\n");
-	for (int iEstimator = 0; iEstimator < RECOVERER_ESTIMATORS_NUMBER;
+	int numEstimators = sizeof(estimatorDescriptions)
+		/ sizeof(RecovererEstimatorDescription);
+	DEBUG_PRINT("Number of estimators: %d", numEstimators);
+	for (int iEstimator = 0; iEstimator < numEstimators;
 		++iEstimator)
 	{
 		RecovererEstimatorDescription *desc =
@@ -461,6 +461,10 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionRecover = false;
 	long int charCurr;
 	opterr = 0;
+
+	int numEstimators = sizeof(estimatorDescriptions)
+		/ sizeof(RecovererEstimatorDescription);
+	DEBUG_PRINT("Number of estimators: %d", numEstimators);
 
 	/*
 	 * Iterate command line arguments using standard Libc function getopt.
@@ -618,7 +622,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			options->ifRecover = true;
-			for (int iEstimator = 0; iEstimator < RECOVERER_ESTIMATORS_NUMBER;
+			for (int iEstimator = 0; iEstimator < numEstimators;
 				++iEstimator)
 			{
 				if (strcmp(optarg, estimatorDescriptions[iEstimator].name) == 0)
