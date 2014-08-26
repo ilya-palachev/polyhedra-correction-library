@@ -69,6 +69,8 @@ typedef enum
 	CGAL_ESTIMATOR_LINEAR
 } RecovererEstimator;
 
+#define DEFAULT_MAX_COORDINATE 1000000.
+
 /**
  * Main recovering engine, based on support function estimation tuned for our
  * specific needs.
@@ -76,6 +78,9 @@ typedef enum
 class Recoverer
 {
 private:
+
+	/** Output file name. */
+	char *outputName;
 
 	/** Estimator to be used. */
 	RecovererEstimator estimator;
@@ -222,6 +227,13 @@ public:
 	~Recoverer();
 
 	/**
+	 * Sets output file name.
+	 *
+	 * @param name	The name of output file
+	 */
+	void setOutputName(char *name);
+
+	/**
 	 * Enables balancing in all functions.
 	 */
 	void enableBalancing(void);
@@ -241,6 +253,13 @@ public:
 	 * Enables the scaling of the matrix of the problem.
 	 */
 	void enableMatrixScaling(void);
+
+	/**
+	 * Prints the problems to files (for debugging purposes).
+	 *
+	 * @param SCData	Shadow contours data.
+	 */
+	void buildNaiveMatrix(ShadeContourDataPtr SCData);
 
 	/**
 	 * Builds naive polyhedron using naive approach that intersect half-spaces
@@ -313,5 +332,7 @@ public:
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;
+
+char *makeNameWithSuffix(char *outputName, const char *suffix);
 
 #endif /* RECOVERER_H */

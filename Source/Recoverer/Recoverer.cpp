@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <set>
+#include <fstream>
 #include <boost/concept_check.hpp>
 
 #include <CGAL/convex_hull_2.h>
@@ -38,6 +39,15 @@
 #include "Recoverer/TsnnlsSupportFunctionEstimator.h"
 
 using namespace std;
+
+char *makeNameWithSuffix(char *outputName, const char *suffix)
+{
+	char *name = (char*) malloc(strlen(outputName) + strlen(suffix) + 1);
+	name[0] = '\0';
+	strcat(name, outputName);
+	strcat(name, suffix);
+	return name;
+}
 
 static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 {
@@ -67,9 +77,8 @@ static void checkPolyhedronIDs(Polyhedron_3 polyhedron)
 #endif
 }
 
-#define DEFAULT_MAX_COORDINATE 1000000.
-
 Recoverer::Recoverer() :
+	outputName(NULL),
 	estimator(CGAL_ESTIMATOR),
 	ifBalancing(false),
 	ifConvexifyContours(true),
@@ -99,6 +108,16 @@ Recoverer::~Recoverer()
 	DEBUG_END;
 }
 
+void Recoverer::setOutputName(char *name)
+{
+	DEBUG_START;
+	ASSERT(name);
+	if (outputName)
+		free(outputName);
+	outputName = name;
+	DEBUG_END;
+}
+
 void Recoverer::enableBalancing(void)
 {
 	DEBUG_START;
@@ -124,6 +143,30 @@ void Recoverer::enableMatrixScaling(void)
 {
 	DEBUG_START;
 	ifScaleMatrix = true;
+	DEBUG_END;
+}
+
+void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+
+	SupportFunctionEstimationData* data =
+			buildSupportMatrix(SCData);
+
+	ofstream fileMatrix;
+	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
+	fileMatrix.open(name);
+	free(name);
+	fileMatrix << data->supportMatrix();
+	fileMatrix.close();
+
+	ofstream fileVector;
+	name = makeNameWithSuffix(outputName, ".support-vector.mat");
+	fileVector.open(name);
+	free(name);
+	fileVector << data->supportVector();
+	fileVector.close();
+
 	DEBUG_END;
 }
 
@@ -198,9 +241,12 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 		polyhedronDual->vertices[iVertex++] = v;
 	}
 
+
 	/* 7. Print resulting polyhedron to the file. */
+	char *name = makeNameWithSuffix(outputName, ".dual-polyhedron.ply");
 	polyhedronDual->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		"../poly-data-out/poly-dual-nonconvex-debug.ply", "dual-polyhedron");
+		name, "dual-polyhedron");
+	free(name);
 
 	DEBUG_END;
 	return polyhedronDual;
@@ -278,8 +324,10 @@ PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
 	PolyhedronPtr p = buildMaybeDualContours(true, SCData);
 
 	/* Print resulting polyhedron to the file. */
+	char *name = makeNameWithSuffix(outputName, ".dual-contours.ply");
 	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		"../poly-data-out/poly-dual-contours.ply", "contours");
+		name, "contours");
+	free(name);
 
 	DEBUG_END;
 	return p;
@@ -298,8 +346,10 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	PolyhedronPtr p = buildMaybeDualContours(false, SCData);
 
 	/* Print resulting polyhedron to the file. */
+	char *name = makeNameWithSuffix(outputName, ".contours.ply");
 	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			"../poly-data-out/poly-contours.ply", "contours");
+		name, "contours");
+	free(name);
 
 	DEBUG_END;
 	return p;
@@ -777,13 +827,10 @@ PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 	polyhedronDualPCL->set_parent_polyhedron_in_facets();
 	polyhedronDualPCL->my_fprint(stdout);
 	
-	/*
-	 * TODO: We should not use absolute paths or .. here !!!
-	 * Default output directory should be determined by environmental variable
-	 * or by a config file.
-	 */
+	char *name = makeNameWithSuffix(outputName, ".dual-polyhedron.ply");
 	polyhedronDualPCL->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		"../poly-data-out/poly-dual-debug.ply", "dual-polyhedron");
+		name, "dual-polyhedron");
+	free(name);
 	DEBUG_END;
 	return polyhedronDualPCL;
 }
@@ -819,7 +866,7 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 		pDual->vertices[iVertex++] = vertex;
 	}
 
-	/*m
+	/*
 	 * Create dual facets using the information computed during
 	 * pre-processing.
 	 */
@@ -839,9 +886,11 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	pDual->set_parent_polyhedron_in_facets();
 	pDual->preprocessAdjacency();
 	pDual->my_fprint(stdout);
-	pDual->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			"../poly-data-out/poly-primal-debug.ply", "primal-polyhedron");
 
+	char *name = makeNameWithSuffix(outputName, ".primal-debug.ply");
+	pDual->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "primal-polyhedron");
+	free(name);
 	DEBUG_END;
 	return pDual;
 }
@@ -1617,5 +1666,5 @@ ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 		estimate);
 
 	DEBUG_END;
-	return NULL;
+	return produceCorrectedData(SCData, data, estimate);
 }
