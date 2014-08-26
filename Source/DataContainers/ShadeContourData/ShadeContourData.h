@@ -96,8 +96,6 @@ public:
 	 *
 	 * @param file	File descriptor of file with shadow contour data to be read
 	 * in.
-	 *
-	 * TODO: Not implemented yet!
 	 */
 	bool fscanDefault(FILE* file);
 
@@ -115,6 +113,13 @@ public:
 	 * @param file	File descriptor to be written to.
 	 */
 	void fprintDefault(FILE* file);
+
+	/**
+	 * Writes shadow contour data to the file in standard format.
+	 *
+	 * @param file  File name to be written to.
+	 */
+	void fprintDefault(const char *fileName);
 
 	/**
 	 * Overloaded operator "==" for comparing of shadow contour data.

@@ -80,6 +80,7 @@ bool ShadeContourData::fscanDefault(const char* fileNameContours)
 	}
 
 	bool fscanReturnValue = fscanDefault(fd);
+	fclose(fd);
 	DEBUG_END;
 	return fscanReturnValue;
 }
@@ -247,6 +248,23 @@ void ShadeContourData::fprintDefault(FILE* file)
 		ALWAYS_PRINT(file, "\n");
 		contours[i].fprintDefault(file);
 	}
+	DEBUG_END;
+}
+
+void ShadeContourData::fprintDefault(const char* fileName)
+{
+	DEBUG_START;
+	FILE* fd = (FILE*) fopen(fileName, "w");
+
+	if (!fd)
+	{
+		ERROR_PRINT("Failed to open file %s", fileName);
+		DEBUG_END;
+		return;
+	}
+
+	fprintDefault(fd);
+	fclose(fd);
 	DEBUG_END;
 }
 
