@@ -1449,6 +1449,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	 */
 	if (ifRegularize)
 	{
+#ifdef USE_IPOPT
 		if (estimator == IPOPT_ESTIMATOR)
 		{
 			ERROR_PRINT("Regularization of support matrix for "
@@ -1456,6 +1457,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 			DEBUG_END;
 			exit(EXIT_FAILURE);
 		}
+#endif
 		regularizeSupportMatrix(data, polyhedron);
 		checkPolyhedronIDs(polyhedron);
 	}
