@@ -89,6 +89,7 @@ Recoverer::Recoverer() :
 	iZmax(0),
 	vectorRegularizing(0., 0., 0.),
 	mapID(NULL),
+	mapIDsize(0),
 	hvaluesInit(NULL),
 	mapIDinverse(NULL)
 {
@@ -355,54 +356,11 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
-static bool checkContourConnectivity(SContour* contour)
-{
-	DEBUG_START;
-	bool ifConnected = true;
-	/*
-         * FIXME: Is it true that contours are ususally not connected between first
-         * and last sides?
-         */
-	for (int iSide = 0; iSide < contour->ns; ++iSide) 
-	{
-		SideOfContour* sideCurr = &contour->sides[iSide];
-
-		/*
-		 * Check that second vertex of previous side lies closely to first
-		 * vertex of the current side.
-		 */
-		SideOfContour* sidePrev DEBUG_VARIABLE =
-				&contour->sides[(contour->ns + iSide - 1) % contour->ns];
-		DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
-				(contour->ns + iSide - 1) % contour->ns,
-				sidePrev->A2.x, sidePrev->A2.y, sidePrev->A2.z);
-		DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
-				iSide, sideCurr->A1.x, sideCurr->A1.y, sideCurr->A1.z);
-		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
-		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
-				diff.x, diff.y, diff.z);
-		ifConnected &= qmod(diff) < EPS_MIN_DOUBLE || iSide == 0;
-		ASSERT(ifConnected);
-	}
-	DEBUG_END;
-	return ifConnected;
-}
-
 static vector<Vector3d> connectContour(SContour* contour)
 {
 	DEBUG_START;
 	vector<Vector3d> points;
 
-	/*
-	 * TODO: add support of option "--check-connectivity" here.
-	 */
-	if (!checkContourConnectivity(contour))
-	{
-		MAIN_PRINT(COLOUR_RED "Warning: contour %d is not connected!" COLOUR_NORM,
-			contour->id);
-		return points;
-	}
-	 
 	/* Iterate through the array of sides of current contour. */
 	/*
 	 * FIXME: Is it true that contours are ususally not connected between first
@@ -414,8 +372,36 @@ static vector<Vector3d> connectContour(SContour* contour)
 
 		/* Project current vertex to the plane of contour. */
 		Vector3d vCurr = contour->plane.project(sideCurr->A1);
-
 		points.push_back(vCurr);
+		
+		/*
+		 * Check that second vertex of previous side lies closely to first
+		 * vertex of the current side.
+		 */
+		int iSidePrev = (contour->ns + iSide - 1) % contour->ns;
+		SideOfContour* sidePrev DEBUG_VARIABLE =
+				&contour->sides[iSidePrev];
+		DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
+				iSidePrev,
+				sidePrev->A2.x, sidePrev->A2.y,
+				sidePrev->A2.z);
+		DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
+				iSide, sideCurr->A1.x, sideCurr->A1.y,
+				sideCurr->A1.z);
+		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
+		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
+				diff.x, diff.y, diff.z);
+
+
+		if (qmod(diff) >= EPS_MIN_DOUBLE)
+		{
+			vCurr = contour->plane.project(sidePrev->A2);
+			points.push_back(vCurr);
+			MAIN_PRINT(COLOUR_RED
+				"Warning: contour %d is not connected! "
+				"A gap found between %d-th and %d-th sides."
+				COLOUR_NORM, contour->id, iSidePrev, iSide);
+		}
 	}
 	DEBUG_END;
 	return points;
@@ -479,13 +465,14 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		convex_hull_2(pointsMapped.begin(), pointsMapped.end(),
 			std::back_inserter(hull));
 		
-		if ((int) hull.size() != (int) contour->ns)
+		if ((int) hull.size() != (int) points.size())
 		{
+			ASSERT(hull.size() < points.size());
 			MAIN_PRINT(COLOUR_RED
-					"Warning: contour #%d is non-convex, its hull "
-					"contains %d of %d of its points"
-					COLOUR_NORM,
-					contour->id, (int) hull.size(), contour->ns);
+				"Warning: contour #%d is non-convex, its hull "
+				"contains %d of %d of its points"
+				COLOUR_NORM,
+				contour->id, (int) hull.size(), (int) points.size());
 		}
 
 		/* TODO: Add automatic conversion from Vector3d to Vector_3 !!! */
@@ -738,6 +725,7 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 	 * extreme points of their recently obtained convex hull.
 	 */
 	mapID = new long int[pointsCGAL.size()];
+	mapIDsize = pointsCGAL.size();
 	for (long int i = 0; i < (long int) pointsCGAL.size(); ++i)
 	{
 		mapID[i] = INT_NOT_INITIALIZED;
@@ -752,12 +740,13 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 	while (point != pointsCGAL.end())
 	{
 		double dist = (*point - *pointHull).squared_length();
-		DEBUG_PRINT("Squared dist from point #%ld = (%lf, %lf, %lf) "
+		/*DEBUG_PRINT("Squared dist from point #%ld = (%lf, %lf, %lf) "
 			"initial ID is #%ld) "
 			"to hull's point #%ld = (%lf, %lf, %lf) is %lf",
 			i, point->x(), point->y(), point->z(), point->id,
 			pointHull->id,
 			pointHull->x(), pointHull->y(), pointHull->z(), dist);
+		*/
 		if (dist < EPS_MIN_DOUBLE)
 		{
 			DEBUG_PRINT("----- Map case found!");
@@ -1569,6 +1558,15 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	DEBUG_START;
 	ShadeContourDataPtr data(SCData);
 
+	int numSidesTotal = 0;
+	for (int iContour = 0; iContour < data->numContours; ++iContour)
+        {
+		numSidesTotal += data->contours[iContour].ns;
+	}
+	DEBUG_PRINT("Total number of sides: %d", numSidesTotal);
+	DEBUG_PRINT("mapIDsize = %ld", mapIDsize);
+	ASSERT(numSidesTotal == mapIDsize);
+
 	int iAux = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
@@ -1580,6 +1578,11 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 				% contour->ns;
 			SideOfContour *sideNext = &contour->sides[iSideNext];
 			int iValue = mapID[iAux + iSide];
+			ASSERT(iAux + iSideNext >= 0);
+			ASSERT(iSideNext < contour->ns);
+			DEBUG_PRINT("iAux + iSideNext = %d, mapIDsize = %ld",
+				iAux + iSideNext, mapIDsize);
+			ASSERT(iAux + iSideNext < mapIDsize);
 			int iValueNext = mapID[iAux + iSideNext];
 
 			Vector3d vec = side->A2;

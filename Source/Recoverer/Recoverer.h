@@ -115,6 +115,9 @@ private:
 	/** Map from initial support directions's ID's and points on hull. */
 	long int *mapID;
 
+	/** The size of map. */
+	long int mapIDsize;
+
 	/** Support values in initial (before hull construction) order. */
 	double *hvaluesInit;
 
