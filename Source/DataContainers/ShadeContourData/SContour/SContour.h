@@ -27,12 +27,23 @@
 #define	SCONTOUR_H
 
 #include <cstdio>
-
 #include <memory>
+#include <vector>
 
+#include <CGAL/basic.h>
+#include <CGAL/Filtered_kernel.h>
+
+#include "PCLKernel/PCLKernel.h"
+
+#include "Constants.h"
 #include "Vector3d.h"
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+
+typedef PCLKernel<double> PCL_K;
+typedef CGAL::Filtered_kernel_adaptor<PCL_K> K;
+
+typedef K::Point_2 Point_2;
 
 /**
  * The shadow contour class.
@@ -78,6 +89,12 @@ public:
 	 */
 	SContour(const SContour& orig);
 
+	/**
+	 * Creates shadow contour from the vector of its points and from its
+	 * plane
+	 */
+	SContour(vector<Point_3> points, Plane plane);
+
 	/** The destructor. */
 	~SContour();
 
@@ -102,6 +119,11 @@ public:
 	 */
 	bool operator !=(const SContour& scontour) const;
 
+	/**
+	 * Convexifies the contour and returns the convexified version of it.
+	 */
+	SContour& convexify();
+
 	/* Implemented in file SContour_io.cpp : */
 
 	/**
@@ -117,6 +139,13 @@ public:
 	 * @param file	The file descriptor
 	 */
 	void fprintDefault(FILE* file);
+
+private:
+	/**
+	 * Gets the vector of all points of the contour (all non-equal
+	 * points).
+	 */
+	vector<Vector3d> getPoints();
 };
 
 #endif	/* SCONTOUR_H */
