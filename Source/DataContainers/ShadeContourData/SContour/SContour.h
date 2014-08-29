@@ -18,6 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file SideOfContour.h
+ * @brief The declaration of shadow contour class.
+ */
+
 #ifndef SCONTOUR_H
 #define	SCONTOUR_H
 
@@ -29,37 +34,88 @@
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
 
+/**
+ * The shadow contour class.
+ */
 class SContour
 {
 public:
-	int id; // Indetifier
+	/**
+	 * The ID of the contour in the array of contours (inside shadow
+	 * contour data)
+	 */
+	int id;
 
-	int ns; // Number of sides
+	/** The number of sides in contour */
+	int ns;
 
-	Plane plane; // Plane of contour. Usually it includes (0, 0, 0),
-				 // so in its equation a*x + b*y + c*z + d = 0
-				 // coefficient d = 0
+	/**
+	 * The plane of contour.
+	 * Usually it includes (0, 0, 0), so in its equation
+	 * a*x + b*y + c*z + d = 0
+	 * coefficient d = 0
+	 */
+	Plane plane;
 
-	shared_ptr<Polyhedron> poly; // Pointer to parent polyhedon which given contour
-					  // is the part of.
+	/**
+	 * Pointer to parent polyhedon which given contour from which the
+	 * contour was generated (for synthetically generated contours).
+	 */
+	shared_ptr<Polyhedron> poly;
 
-	SideOfContour* sides; // Array of contour sides
+	/** The array of contour sides. */
+	SideOfContour* sides;
 
-	// SContour.cpp :
+	/* Implemented in file SContour.cpp:*/
 
+	/** Empty contructor. */
 	SContour();
+
+	/**
+	 * Copy constructor. Creates contour as the copy of another one.
+	 *
+	 * @param orig	The original contour.
+	 */
 	SContour(const SContour& orig);
+
+	/** The destructor. */
 	~SContour();
 
+	/**
+	 * The "=" operator, used for copying of shadow contours.
+	 *
+	 * @param scontour  The original contour.
+	 */
 	SContour& operator =(const SContour& scontour);
 
+	/**
+	 * The equality operator.
+	 *
+	 * @param scontour  The second contour.
+	 */
 	bool operator ==(const SContour& scontour) const;
+
+	/**
+	 * The inequality operator.
+	 *
+	 * @param scontour  The second contour.
+	 */
 	bool operator !=(const SContour& scontour) const;
 
-	// SContour_io.cpp :
+	/* Implemented in file SContour_io.cpp : */
 
+	/**
+	 * Dumps internal representation of contour to the file descriptor.
+	 *
+	 * @param file	The file descriptor
+	 */
 	void my_fprint(FILE* file);
-	
+
+	/**
+	 * Dumps standard output form of contour to the file descriptor.
+	 *
+	 * @param file	The file descriptor
+	 */
 	void fprintDefault(FILE* file);
 };
 
