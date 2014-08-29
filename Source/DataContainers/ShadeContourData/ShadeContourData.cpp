@@ -98,7 +98,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong file format, in header #1");
-			fclose(fd);
 			DEBUG_END;
 			return false;
 		}
@@ -108,7 +107,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 	if (fscanf(fd, "%d", &numContours) != 1)
 	{
 		ERROR_PRINT("Wrong file format, in number of contours");
-		fclose(fd);
 		DEBUG_END;
 		return false;
 	}
@@ -118,7 +116,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 		if (fscanf(fd, "%s", scannedString) != 1)
 		{
 			ERROR_PRINT("Wrong file format, in header #2");
-			fclose(fd);
 			DEBUG_END;
 			return false;
 		}
@@ -135,7 +132,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 		{
 			ERROR_PRINT("Wrong file format, number of sides for contour #%d",
 					iContour);
-			fclose(fd);
 			DEBUG_END;
 			return false;
 		}
@@ -147,7 +143,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 			ERROR_PRINT("Wrong file format, "
 					"in normal to plane for contour #%d",
 					iContour);
-			fclose(fd);
 			DEBUG_END;
 			return false;
 		}
@@ -165,7 +160,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 				ERROR_PRINT("Wrong file format,"
 						"in confidence of side #%d of contour #%d",
 						iSide, iContour);
-				fclose(fd);
 				DEBUG_END;
 				return false;
 			}
@@ -175,7 +169,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 				ERROR_PRINT("Wrong file format,"
 						"in type of side #%d of contour #%d",
 						iSide, iContour);
-				fclose(fd);
 				DEBUG_END;
 				return false;
 			}
@@ -187,7 +180,6 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 				ERROR_PRINT("Wrong file format,"
 						"in A1 for side #%d of contour #%d",
 						iSide, iContour);
-				fclose(fd);
 				DEBUG_END;
 				return false;
 			}
@@ -199,14 +191,12 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 				ERROR_PRINT("Wrong file format,"
 						"in A1 for side #%d of contour #%d",
 						iSide, iContour);
-				fclose(fd);
 				DEBUG_END;
 				return false;
 			}
 		}
 	}
 
-	fclose(fd);
 	if (scannedString != NULL)
 	{
 		delete[] scannedString;
