@@ -122,7 +122,7 @@ public:
 	/**
 	 * Convexifies the contour and returns the convexified version of it.
 	 */
-	SContour& convexify();
+	SContour *convexify();
 
 	/* Implemented in file SContour_io.cpp : */
 

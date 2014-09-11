@@ -251,7 +251,7 @@ static vector<Point_3> mapPointsFromOXYplane(vector<Point_2> points, Vector_3 nu
 	return pointsMapped;
 }
 
-SContour& SContour::convexify()
+SContour *SContour::convexify()
 {
 	DEBUG_START;
 	/*
@@ -283,5 +283,5 @@ SContour& SContour::convexify()
 
 	SContour *contour = new SContour(extremePoints, plane);
 	DEBUG_END;
-	return *contour;
+	return contour;
 }

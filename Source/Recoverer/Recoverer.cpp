@@ -366,17 +366,20 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 
 	if (ifConvexifyContours)
 	{
-		SContour contourConv = contour->convexify();
+		SContour *contourConv = contour->convexify();
 		ASSERT(contour->id >= 0);
 		ASSERT(contour->id < shadowDataPrep->numContours);
-		shadowDataPrep->contours[contour->id] = contourConv;
-		contour = &contourConv;
+		shadowDataPrep->contours[contour->id] = *contourConv;
+		contour = contourConv;
 	}
+	ASSERT(contour);
+	ASSERT(contour->sides);
 
 	/* Iterate through the array of sides of current contour. */
 	for (int iSide = 0; iSide < contour->ns; ++iSide)
 	{
 		SideOfContour* sideCurr = &contour->sides[iSide];
+		ASSERT(sideCurr);
 		/*
 		 * Here the plane that is incident to points A1 and A2 of the
 		 * current side and collinear to the vector of projection.
