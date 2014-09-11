@@ -196,7 +196,7 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
 
 	DEBUG_END;
-	return polyhedronDual;
+	return polyhedron;
 }
 
 PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
@@ -363,12 +363,12 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	vector<Plane> supportPlanes;
 	auto normal = contour->plane.norm;
 	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
-	ASSERT(shadowDataPrep);
 
 	if (ifConvexifyContours)
 	{
 		SContour *contourConv = contour->convexify();
 		ASSERT(contour->id >= 0);
+		ASSERT(shadowDataPrep);
 		ASSERT(contour->id < shadowDataPrep->numContours);
 		shadowDataPrep->contours[contour->id] = *contourConv;
 		contour = contourConv;
