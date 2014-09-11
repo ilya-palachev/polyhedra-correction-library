@@ -1069,7 +1069,7 @@ void runRequestedRecovery(CommandLineOptions* options,
 		/* Run naive recovering. */
 		PolyhedronPtr p = recoverer->buildNaivePolyhedron(data);
 		name = makeNameWithSuffix(options->outputName,
-			".recovered.ply");
+			".naively-recovered.ply");
 		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 			name, "recovered-polyhedron");
 	}
