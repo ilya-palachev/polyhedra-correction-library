@@ -388,6 +388,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		 * fitting these conditions. Current implementation can
 		 * produce big errors.
 		 */
+		ASSERT(qmod(sideCurr->A1 - sideCurr->A2) > 0);
 		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
 			normal;
 		Plane supportPlane(supportPlaneNormal,

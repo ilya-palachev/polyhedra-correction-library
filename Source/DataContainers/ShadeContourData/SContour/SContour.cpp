@@ -66,11 +66,13 @@ SContour::SContour(vector<Point_3> points, Plane plane)
 	{
 		ASSERT(point != points.end());
 		sides[i].A1 = Vector3d(point->x(), point->y(), point->z());
+		++point;
 	}
 	for (int i = 0; i < ns; ++i)
 	{
 		int iNext = (ns + i + 1) % ns;
 		sides[i].A2 = sides[iNext].A1;
+		ASSERT(qmod(sides[i].A1 - sides[i].A2) > 0);
 	}
 	DEBUG_END;
 }
@@ -109,6 +111,8 @@ SContour& SContour::operator =(const SContour& scontour)
 	for (int iSide = 0; iSide < ns; ++iSide)
 	{
 		sides[iSide] = scontour.sides[iSide];
+		ASSERT(sides[iSide].A1 == scontour.sides[iSide].A1);
+		ASSERT(sides[iSide].A2 == scontour.sides[iSide].A2);
 	}
 
 	DEBUG_END;
@@ -282,6 +286,13 @@ SContour *SContour::convexify()
 					plane.norm.z));
 
 	SContour *contour = new SContour(extremePoints, plane);
+#ifndef NDEBUG
+	for (int iSide = 0; iSide < contour->ns; ++iSide)
+	{
+		SideOfContour *side = &contour->sides[iSide];
+		ASSERT(qmod(side->A1 - side->A2) > 0);
+	}
+#endif /* NDEBUG */
 	DEBUG_END;
 	return contour;
 }
