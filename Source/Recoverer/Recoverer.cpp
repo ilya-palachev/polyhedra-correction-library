@@ -1432,7 +1432,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	int numSidesTotal = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
         {
-		numSidesTotal += data->contours[iContour].ns;
+		numSidesTotal += shadowDataPrep->contours[iContour].ns;
 	}
 	DEBUG_PRINT("Total number of sides: %d", numSidesTotal);
 	DEBUG_PRINT("mapIDsize = %ld", mapIDsize);
@@ -1441,7 +1441,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	int iAux = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
-		SContour *contour = &data->contours[iContour];
+		SContour *contour = &shadowDataPrep->contours[iContour];
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{
 			SideOfContour *side = &contour->sides[iSide];
