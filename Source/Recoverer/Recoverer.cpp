@@ -79,7 +79,7 @@ Recoverer::Recoverer() :
 	outputName(NULL),
 	estimator(CGAL_ESTIMATOR),
 	ifBalancing(false),
-	ifConvexifyContours(true),
+	ifConvexifyContours(false),
 	ifRegularize(false),
 	ifScaleMatrix(false),
 	iXmax(0),
@@ -363,6 +363,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	vector<Plane> supportPlanes;
 	auto normal = contour->plane.norm;
 	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
+	ASSERT(shadowDataPrep);
 
 	if (ifConvexifyContours)
 	{
