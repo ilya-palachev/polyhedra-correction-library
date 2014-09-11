@@ -23,8 +23,6 @@
 #include <fstream>
 #include <boost/concept_check.hpp>
 
-#include <CGAL/convex_hull_2.h>
-
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -91,7 +89,9 @@ Recoverer::Recoverer() :
 	mapID(NULL),
 	mapIDsize(0),
 	hvaluesInit(NULL),
-	mapIDinverse(NULL)
+	mapIDinverse(NULL),
+	shadowDataInit(NULL),
+	shadowDataPrep(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -356,92 +356,6 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
-static vector<Vector3d> connectContour(SContour* contour)
-{
-	DEBUG_START;
-	vector<Vector3d> points;
-
-	/* Iterate through the array of sides of current contour. */
-	/*
-	 * FIXME: Is it true that contours are ususally not connected between first
-	 * and last sides?
-	 */
-	for (int iSide = 0; iSide < contour->ns; ++iSide) 
-	{
-		SideOfContour* sideCurr = &contour->sides[iSide];
-
-		/* Project current vertex to the plane of contour. */
-		Vector3d vCurr = contour->plane.project(sideCurr->A1);
-		points.push_back(vCurr);
-		
-		/*
-		 * Check that second vertex of previous side lies closely to first
-		 * vertex of the current side.
-		 */
-		int iSidePrev = (contour->ns + iSide - 1) % contour->ns;
-		SideOfContour* sidePrev DEBUG_VARIABLE =
-				&contour->sides[iSidePrev];
-		DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
-				iSidePrev,
-				sidePrev->A2.x, sidePrev->A2.y,
-				sidePrev->A2.z);
-		DEBUG_PRINT("sides[%d]->A1 = (%lf, %lf, %lf)",
-				iSide, sideCurr->A1.x, sideCurr->A1.y,
-				sideCurr->A1.z);
-		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
-		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
-				diff.x, diff.y, diff.z);
-
-
-		if (qmod(diff) >= EPS_MIN_DOUBLE)
-		{
-			vCurr = contour->plane.project(sidePrev->A2);
-			points.push_back(vCurr);
-			MAIN_PRINT(COLOUR_RED
-				"Warning: contour %d is not connected! "
-				"A gap found between %d-th and %d-th sides."
-				COLOUR_NORM, contour->id, iSidePrev, iSide);
-		}
-	}
-	DEBUG_END;
-	return points;
-}
-
-static vector<Point_2> mapPointsToOXYplane(vector<Vector3d> points, Vector3d nu)
-{
-	DEBUG_START;
-	Vector3d ez(0., 0., 1.);
-	nu.norm(1.);
-	Vector3d tau = nu % ez;
-
-	double xCurr = 0., yCurr = 0.;
-	vector<Point_2> pointsMapped;
-	for(auto &point : points)
-	{
-		xCurr = point * tau;
-		yCurr = point * ez;
-		pointsMapped.push_back(Point_2(xCurr, yCurr));
-	}
-	DEBUG_END;
-	return pointsMapped;
-}
-
-static vector<Point_3> mapPointsFromOXYplane(vector<Point_2> points, Vector_3 nu)
-{
-	DEBUG_START;
-	Vector_3 ez(0., 0, 1.);
-	nu = nu * 1. / sqrt(nu.squared_length()); /* Normalize vector \nu. */
-	Vector_3 tau = cross_product(nu, ez);
-
-	vector<Point_3> pointsMapped;
-	CGAL::Origin o;
-	for (auto &point : points)
-	{
-		pointsMapped.push_back(o + tau * point.x() + ez * point.y());
-	}
-	DEBUG_END;
-	return pointsMapped;
-}
 
 vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 {
@@ -452,89 +366,42 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 
 	if (ifConvexifyContours)
 	{
-		/*
-		 * TODO: This is a temporal workaround. In future we need to perform
-		 * convexification so that to remember what points are vertices of
-		 * convex hull.
-		 */
-
-		auto points = connectContour(contour);
-
-		auto pointsMapped = mapPointsToOXYplane(points, normal);
-		vector<Point_2> hull;
-		convex_hull_2(pointsMapped.begin(), pointsMapped.end(),
-			std::back_inserter(hull));
-		
-		if ((int) hull.size() != (int) points.size())
-		{
-			ASSERT(hull.size() < points.size());
-			MAIN_PRINT(COLOUR_RED
-				"Warning: contour #%d is non-convex, its hull "
-				"contains %d of %d of its points"
-				COLOUR_NORM,
-				contour->id, (int) hull.size(), (int) points.size());
-		}
-
-		/* TODO: Add automatic conversion from Vector3d to Vector_3 !!! */
-		auto extremePoints = mapPointsFromOXYplane(hull,
-					Vector_3(normal.x, normal.y, normal.z));
-
-		for (int i = 0; i < (int) extremePoints.size(); ++i)
-		{
-			Point_3 P1 = extremePoints[i];
-			Point_3 P2 = extremePoints[(i + 1 + extremePoints.size())
-			                           % extremePoints.size()];
-			Vector3d A1(P1.x(), P1.y(), P1.z());
-			Vector3d A2(P2.x(), P2.y(), P2.z());
-
-			Vector3d supportPlaneNormal = (A1 - A2) % normal;
-			Plane supportPlane(supportPlaneNormal, - supportPlaneNormal * A1);
-
-			supportPlanes.push_back(supportPlane);
-
-			DEBUG_VARIABLE double error1 = supportPlane.norm * A1 +
-				supportPlane.dist;
-			DEBUG_VARIABLE double error2 = supportPlane.norm * A2 +
-				supportPlane.dist;
-
-			DEBUG_PRINT("   extreme point #%d\t%le\t%le", i, error1, error2);
-
-			/* TODO: Here should be more strict conditions. */
-			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
-			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
-		}
+		SContour contourConv = contour->convexify();
+		ASSERT(contour->id >= 0);
+		ASSERT(contour->id < shadowDataPrep->numContours);
+		shadowDataPrep->contours[contour->id] = contourConv;
+		contour = &contourConv;
 	}
-	else
+
+	/* Iterate through the array of sides of current contour. */
+	for (int iSide = 0; iSide < contour->ns; ++iSide)
 	{
-		/* Iterate through the array of sides of current contour. */
-		for (int iSide = 0; iSide < contour->ns; ++iSide)
-		{
-			SideOfContour* sideCurr = &contour->sides[iSide];
-			/*
-			 * Here the plane that is incident to points A1 and A2 of the
-			 * current side and collinear to the vector of projection.
-			 *
-			 * TODO: Here should be the calculation of the best plane fitting
-			 * these conditions. Current implementation can produce big errors.
-			 */
-			Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
-				normal;
-			Plane supportPlane(supportPlaneNormal,
-							   - supportPlaneNormal * sideCurr->A1);
+		SideOfContour* sideCurr = &contour->sides[iSide];
+		/*
+		 * Here the plane that is incident to points A1 and A2 of the
+		 * current side and collinear to the vector of projection.
+		 *
+		 * TODO: Here should be the calculation of the best plane
+		 * fitting these conditions. Current implementation can
+		 * produce big errors.
+		 */
+		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
+			normal;
+		Plane supportPlane(supportPlaneNormal,
+			- supportPlaneNormal * sideCurr->A1);
 
-			supportPlanes.push_back(supportPlane);
+		supportPlanes.push_back(supportPlane);
 
-			DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1 +
-				supportPlane.dist;
-			DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2 +
-				supportPlane.dist;
+		DEBUG_VARIABLE double error1 = supportPlane.norm * sideCurr->A1
+			+ supportPlane.dist;
+		DEBUG_VARIABLE double error2 = supportPlane.norm * sideCurr->A2
+			+ supportPlane.dist;
 
-			DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
+		DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
 
-			/* TODO: Here should be more strict conditions. */
-			ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
-			ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
-		}
+		/* TODO: Here should be more strict conditions. */
+		ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
+		ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
 	}
 	DEBUG_END;
 	return supportPlanes;
@@ -1615,6 +1482,14 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+	shadowDataInit = SCData;
+	ShadeContourDataPtr SCDataPrep(new
+		ShadeContourData(SCData->polyhedron));
+	shadowDataPrep = SCDataPrep;
+	ASSERT(SCDataPrep->numContours == shadowDataPrep->numContours);
+	shadowDataPrep->numContours = SCData->numContours;
+	shadowDataPrep->contours = new SContour[SCData->numContours];
+
 	SupportFunctionEstimator *sfe = NULL;
 	CGALSupportFunctionEstimator *sfeCGAL = NULL;
 #ifdef USE_IPOPT

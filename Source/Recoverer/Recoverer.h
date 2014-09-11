@@ -39,10 +39,6 @@
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "Recoverer/SupportFunctionEstimationData.h"
 
-typedef PCLKernel<double> PCL_K;
-typedef CGAL::Filtered_kernel_adaptor<PCL_K> K;
-
-typedef K::Point_2 Point_2;
 
 /**
  * Sets the estimator to be used for support function estimation.
@@ -123,6 +119,12 @@ private:
 
 	/** Inverse map of the previous map (not a function). */
 	std::list<long int> *mapIDinverse;
+
+	/** Shadow contour data (initial data). */
+	ShadeContourDataPtr shadowDataInit;
+
+	/** Shadow contour data (preprocessed). */
+	ShadeContourDataPtr shadowDataPrep;
 
 	/**
 	 * Extracts support planes from shadow contours.
