@@ -1068,14 +1068,24 @@ void runRequestedRecovery(CommandLineOptions* options,
 {
 	DEBUG_START;
 	char *name = NULL;
-	double max = 0., maxRec = 0.;
+	double max = 0., maxConv = 0., maxRec = 0.;
 
 	/* Dump some output before processing, if it's requested. */
 	makeRequestedOutput(options, recoverer, data);
 
 	/* Run naive recovering. */
+	recoverer->disableContoursConvexification();
 	PolyhedronPtr pNaive = recoverer->buildNaivePolyhedron(data);
 	max = maxCoord(pNaive);
+
+	PolyhedronPtr pNaiveConv = NULL;
+	if (options->ifConvexifyContours)
+	{
+		recoverer->enableContoursConvexification();
+		pNaiveConv = recoverer->buildNaivePolyhedron(data);
+		maxConv = maxCoord(pNaiveConv);
+		max = maxConv > max ? maxConv : max;
+	}
 
 	if (options->ifRecover)
 	{
@@ -1104,6 +1114,15 @@ void runRequestedRecovery(CommandLineOptions* options,
 	pNaive->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
 		name, "naively-recovered-polyhedron");
 	free(name);
+
+	if (options->ifConvexifyContours)
+	{
+		name = makeNameWithSuffix(options->outputName,
+		".naively-recovered-from-conv-contours.ply");
+		pNaiveConv->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
+			name, "naively-recovered-from-conv-contours");
+		free(name);
+	}
 
 	DEBUG_END;
 }
