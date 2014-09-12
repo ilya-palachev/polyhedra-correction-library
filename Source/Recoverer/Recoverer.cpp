@@ -109,6 +109,19 @@ Recoverer::~Recoverer()
 	DEBUG_END;
 }
 
+void Recoverer::initData(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+	shadowDataInit = SCData;
+	ShadeContourDataPtr SCDataPrep(new
+		ShadeContourData(SCData->polyhedron));
+	shadowDataPrep = SCDataPrep;
+	ASSERT(SCDataPrep->numContours == shadowDataPrep->numContours);
+	shadowDataPrep->numContours = SCData->numContours;
+	shadowDataPrep->contours = new SContour[SCData->numContours];
+	DEBUG_END;
+}
+
 void Recoverer::setOutputName(char *name)
 {
 	DEBUG_START;
@@ -130,6 +143,13 @@ void Recoverer::enableContoursConvexification(void)
 {
 	DEBUG_START;
 	ifConvexifyContours = true;
+	DEBUG_END;
+}
+
+void Recoverer::disableContoursConvexification(void)
+{
+	DEBUG_START;
+	ifConvexifyContours = false;
 	DEBUG_END;
 }
 
@@ -180,6 +200,8 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	{
 		balanceAllContours(SCData);
 	}
+
+	initData(SCData);
 
 	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
@@ -1423,17 +1445,16 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 
 
 ShadeContourDataPtr Recoverer::produceCorrectedData(
-	ShadeContourDataPtr SCData,
 	SupportFunctionEstimationData *estData,
 	VectorXd estimate)
 {
 	DEBUG_START;
-	ShadeContourDataPtr data(SCData);
+	ShadeContourDataPtr data(shadowDataPrep);
 
 	int numSidesTotal = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
         {
-		numSidesTotal += shadowDataPrep->contours[iContour].ns;
+		numSidesTotal += data->contours[iContour].ns;
 	}
 	DEBUG_PRINT("Total number of sides: %d", numSidesTotal);
 	DEBUG_PRINT("mapIDsize = %ld", mapIDsize);
@@ -1442,7 +1463,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	int iAux = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
-		SContour *contour = &shadowDataPrep->contours[iContour];
+		SContour *contour = &data->contours[iContour];
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{
 			SideOfContour *side = &contour->sides[iSide];
@@ -1487,13 +1508,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
-	shadowDataInit = SCData;
-	ShadeContourDataPtr SCDataPrep(new
-		ShadeContourData(SCData->polyhedron));
-	shadowDataPrep = SCDataPrep;
-	ASSERT(SCDataPrep->numContours == shadowDataPrep->numContours);
-	shadowDataPrep->numContours = SCData->numContours;
-	shadowDataPrep->contours = new SContour[SCData->numContours];
+	initData(SCData);
 
 	SupportFunctionEstimator *sfe = NULL;
 	CGALSupportFunctionEstimator *sfeCGAL = NULL;
@@ -1549,5 +1564,5 @@ ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 		estimate);
 
 	DEBUG_END;
-	return produceCorrectedData(SCData, data, estimate);
+	return produceCorrectedData(data, estimate);
 }

@@ -127,6 +127,13 @@ private:
 	ShadeContourDataPtr shadowDataPrep;
 
 	/**
+	 * Initializes fields shadowDataInit and shadowDataPrep
+	 *
+	 * @param SCData	Shadow contour data
+	 */
+	void initData(ShadeContourDataPtr SCData);
+
+	/**
 	 * Extracts support planes from shadow contours.
 	 *
 	 * @param SCData	Shadow contour data
@@ -249,6 +256,11 @@ public:
 	void enableContoursConvexification(void);
 
 	/**
+	 * Disables the convexification of shadow contours.
+	 */
+	void disableContoursConvexification(void);
+
+	/**
 	 * Enables the regularization of support matrix based on knowledge about
 	 * eigenvectors eigenvalues of support matrix Q
 	 */
@@ -320,12 +332,11 @@ public:
 	 * Produces corrected shadow contour data from initial data and vector
 	 * of estimated support values
 	 *
-	 * @param SCData	Shadow contour data
 	 * @param estData	Support function estimation data used by
 	 * 			estimator
 	 * @param estimate	The result of SFE's work
 	 */
-	ShadeContourDataPtr produceCorrectedData(ShadeContourDataPtr SCData,
+	ShadeContourDataPtr produceCorrectedData(
 		SupportFunctionEstimationData *estData, VectorXd estimate);
 
 	/**
