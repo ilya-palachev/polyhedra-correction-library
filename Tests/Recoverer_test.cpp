@@ -1028,6 +1028,35 @@ static void makeRequestedOutput(CommandLineOptions* options,
 }
 
 /**
+ * Calculates the abolsolute maximum of polyhedron coordinates
+ *
+ * @param p	The polyhedron
+ */
+static double maxCoord(PolyhedronPtr p)
+{
+	DEBUG_START;
+	double max = 0.;
+	double xmax = 0., ymax = 0., zmax = 0.,
+		xmin = 0., ymin = 0., zmin = 0.;
+
+	p->get_boundary(xmin, ymin, zmin, xmax, ymax, zmax);
+	xmin = fabs(xmin);
+	ymin = fabs(ymin);
+	zmin = fabs(zmin);
+	xmax = fabs(xmax);
+	ymax = fabs(ymax);
+	zmax = fabs(zmax);
+	max = xmin > max ? xmin : max;
+	max = ymin > max ? ymin : max;
+	max = zmin > max ? zmin : max;
+	max = xmax > max ? xmax : max;
+	max = ymax > max ? ymax : max;
+	max = zmax > max ? zmax : max;
+	DEBUG_END;
+	return max;
+}
+
+/**
  * Runs the recovering with requested mode.
  *
  * @param options	Parsed command-line options
@@ -1039,9 +1068,14 @@ void runRequestedRecovery(CommandLineOptions* options,
 {
 	DEBUG_START;
 	char *name = NULL;
+	double max = 0., maxRec = 0.;
 
 	/* Dump some output before processing, if it's requested. */
 	makeRequestedOutput(options, recoverer, data);
+
+	/* Run naive recovering. */
+	PolyhedronPtr pNaive = recoverer->buildNaivePolyhedron(data);
+	max = maxCoord(pNaive);
 
 	if (options->ifRecover)
 	{
@@ -1053,29 +1087,24 @@ void runRequestedRecovery(CommandLineOptions* options,
                         ".corrected-contours.dat");
 		dataCorr->fprintDefault(name);
 		free(name);
-		
+
 		PolyhedronPtr p = recoverer->buildNaivePolyhedron(dataCorr);
+		maxRec = maxCoord(p);
+		max = maxRec > max ? maxRec : max;
+		
 		name = makeNameWithSuffix(options->outputName,
 			".recovered.ply");
-		/*
-		 * TODO: We should parse the suffix of name and call print
-		 * function depending on it.
-		 */
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		p->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
 			name, "recovered-polyhedron");
-	}
-	else
-	{
-		/* Run naive recovering. */
-		PolyhedronPtr p = recoverer->buildNaivePolyhedron(data);
-		name = makeNameWithSuffix(options->outputName,
-			".naively-recovered.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "recovered-polyhedron");
-	}
-
-	if (name)
 		free(name);
+	}
+	
+	name = makeNameWithSuffix(options->outputName,
+		".naively-recovered.ply");
+	pNaive->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
+		name, "naively-recovered-polyhedron");
+	free(name);
+
 	DEBUG_END;
 }
 
