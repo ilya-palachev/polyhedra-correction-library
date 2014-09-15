@@ -20,7 +20,7 @@ Build*
 build
 
 # Directory with output from polyhedral algorithms:
-poly-data-out
+poly-data-*
 
 # Eclipse setting files:
 *.cproject
@@ -41,6 +41,7 @@ poly-data-out
 *.tex~
 *.toc
 *.dvi
+*.out
 
 # BibTEX automatically generated files:
 *.bbl
