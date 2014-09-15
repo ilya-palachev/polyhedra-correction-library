@@ -50,3 +50,6 @@ poly-data-*
 
 # Config files:
 config/debug_exceptions.conf
+
+# VIM files:
+.*.swp
