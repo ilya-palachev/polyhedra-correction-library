@@ -99,6 +99,11 @@
 #define OPTION_SCALE_MATRIX 's'
 
 /**
+ * Option "-v" enables verbose mode.
+ */
+#define OPTION_VERBOSE 'v'
+
+/**
  * Option "-x" enables the convexification of shadow contous.
  */
 #define OPTION_CONVEXIFY_CONTOURS 'x'
@@ -114,7 +119,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:o:pr:sxz"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:o:pr:svxz"
 
 /**
  * The definition of corresponding long options list.
@@ -192,6 +197,12 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_SCALE_MATRIX
+	},
+	{
+		"verbose",
+		no_argument,
+		0,
+		OPTION_VERBOSE
 	},
 	{
 		"convexify-contours",
@@ -283,6 +294,9 @@ typedef struct
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
+
+	/** Whether to produce output data. */
+	bool ifVerbose;
 
 	/** Whether to convexify contours. */
 	bool ifConvexifyContours;
@@ -408,6 +422,8 @@ void printUsage(int argc, char** argv)
 		OPTION_RECOVER, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
 		OPTION_SCALE_MATRIX, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tEnable verbose mode.\n",
+		OPTION_VERBOSE, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
 		OPTION_CONVEXIFY_CONTOURS, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable support matrix regularization.\n",
@@ -494,6 +510,8 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifBalancing = false;
 	options->ifPrintProblem = false;
 	options->ifRecover = false;
+	options->ifVerbose = false;
+	options->ifConvexifyContours = false;
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
 	int optionIndex = 0;
@@ -669,6 +687,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
+			break;
+		case OPTION_VERBOSE:
+			options->ifVerbose = true;
 			break;
 		case OPTION_CONVEXIFY_CONTOURS:
 			options->ifConvexifyContours = true;
@@ -1006,23 +1027,46 @@ static void makeRequestedOutput(CommandLineOptions* options,
 		recoverer->buildNaiveMatrix(data);
 	}
 
+	PolyhedronPtr p = NULL;
+
 	if (options->ifBuildContours &&
 			!options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Buid polyhedron consisting of shadow contours. */
-		recoverer->buildContours(data);
+		p = recoverer->buildContours(data);
+
+		/* Print resulting polyhedron to the file. */
+		char *name = makeNameWithSuffix(options->outputName,
+			".contours.ply");
+		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			name, "contours");
+		free(name);
 	}
 	else if (!options->ifBuildContours &&
 			options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Just build dual non-convex polyhedron. */
-		recoverer->buildDualNonConvexPolyhedron(data);
+		p = recoverer->buildDualNonConvexPolyhedron(data);
+
+		/* Print resulting polyhedron to the file. */
+		char *name = makeNameWithSuffix(options->outputName,
+			".dual-polyhedron.ply");
+		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			name, "dual-polyhedron");
+		free(name);
 	}
 	else if (options->ifBuildContours &&
 			options->ifBuildDualNonConvexPolyhedron)
 	{
 		/* Buid polyhedron consisting of dual shadow contours. */
-		recoverer->buildDualContours(data);
+		p = recoverer->buildDualContours(data);
+
+		/* Print resulting polyhedron to the file. */
+		char *name = makeNameWithSuffix(options->outputName,
+			".dual-contours.ply");
+		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			name, "contours");
+		free(name);
 	}
 	DEBUG_END;
 }
@@ -1057,23 +1101,49 @@ static double maxCoord(PolyhedronPtr p)
 }
 
 /**
- * Runs the recovering with requested mode.
+ * Runs the recovering with verbose mode.
  *
  * @param options	Parsed command-line options
  * @param recoverer	The recoverer to be used
  * @param data		Shadow contours data
  */
-void runRequestedRecovery(CommandLineOptions* options,
+void runVerboseRecovery(CommandLineOptions* options,
 	RecovererPtr recoverer, ShadeContourDataPtr data)
 {
 	DEBUG_START;
-	char *name = NULL;
 	double max = 0., maxConv = 0., maxRec = 0.;
+	
+	/* Buid polyhedron consisting of shadow contours. */
+	PolyhedronPtr p = recoverer->buildContours(data);
 
-	/* Dump some output before processing, if it's requested. */
-	makeRequestedOutput(options, recoverer, data);
+	/* Print resulting polyhedron to the file. */
+	char *name = makeNameWithSuffix(options->outputName,
+		".contours.ply");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "contours");
+	free(name);
 
-	/* Run naive recovering. */
+
+	/* Just build dual non-convex polyhedron. */
+	p = recoverer->buildDualNonConvexPolyhedron(data);
+
+	/* Print resulting polyhedron to the file. */
+	name = makeNameWithSuffix(options->outputName,
+		".dual-polyhedron.ply");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "dual-polyhedron");
+	free(name);
+
+	/* Buid polyhedron consisting of dual shadow contours. */
+	p = recoverer->buildDualContours(data);
+
+	/* Print resulting polyhedron to the file. */
+	name = makeNameWithSuffix(options->outputName, ".dual-contours.ply");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "contours");
+	free(name);
+	
+	/* Run naive recovering without contours convexification. */
 	recoverer->disableContoursConvexification();
 	PolyhedronPtr pNaive = recoverer->buildNaivePolyhedron(data);
 	max = maxCoord(pNaive);
@@ -1123,7 +1193,63 @@ void runRequestedRecovery(CommandLineOptions* options,
 			name, "naively-recovered-from-conv-contours");
 		free(name);
 	}
+	DEBUG_END;
+}
 
+/**
+ * Runs the recovering with requested mode.
+ *
+ * @param options	Parsed command-line options
+ * @param recoverer	The recoverer to be used
+ * @param data		Shadow contours data
+ */
+void runRequestedRecovery(CommandLineOptions* options,
+	RecovererPtr recoverer, ShadeContourDataPtr data)
+{
+	DEBUG_START;
+	char *name = NULL;
+
+	/* In verbose mode we dump all output and it is sync-scaled... */
+	if (options->ifVerbose)
+	{
+		runVerboseRecovery(options, recoverer, data);
+		DEBUG_END;
+		/* ...that's why we don't call makeRequestedOutput. */
+		return;
+	}
+
+	/* Dump some output before processing, if it's requested. */
+	makeRequestedOutput(options, recoverer, data);
+
+	if (options->ifRecover)
+	{
+		/* Run the recoverer. */
+		recoverer->setEstimator(options->estimator);
+		
+		ShadeContourDataPtr dataCorr = recoverer->run(data);
+		name = makeNameWithSuffix(options->outputName,
+                        ".corrected-contours.dat");
+		dataCorr->fprintDefault(name);
+		free(name);
+		
+		PolyhedronPtr p = recoverer->buildNaivePolyhedron(dataCorr);
+		name = makeNameWithSuffix(options->outputName,
+			".recovered.ply");
+		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			name, "recovered-polyhedron");
+	}
+	else
+	{
+		/* Run naive recovering. */
+		PolyhedronPtr p = recoverer->buildNaivePolyhedron(data);
+		name = makeNameWithSuffix(options->outputName,
+			".naively-recovered.ply");
+		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			name, "recovered-polyhedron");
+	}
+
+	if (name)
+		free(name);
 	DEBUG_END;
 }
 

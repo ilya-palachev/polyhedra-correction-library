@@ -264,13 +264,6 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 		polyhedronDual->vertices[iVertex++] = v;
 	}
 
-
-	/* 7. Print resulting polyhedron to the file. */
-	char *name = makeNameWithSuffix(outputName, ".dual-polyhedron.ply");
-	polyhedronDual->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "dual-polyhedron");
-	free(name);
-
 	DEBUG_END;
 	return polyhedronDual;
 }
@@ -346,12 +339,6 @@ PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
 
 	PolyhedronPtr p = buildMaybeDualContours(true, SCData);
 
-	/* Print resulting polyhedron to the file. */
-	char *name = makeNameWithSuffix(outputName, ".dual-contours.ply");
-	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "contours");
-	free(name);
-
 	DEBUG_END;
 	return p;
 }
@@ -367,12 +354,6 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 	}
 
 	PolyhedronPtr p = buildMaybeDualContours(false, SCData);
-
-	/* Print resulting polyhedron to the file. */
-	char *name = makeNameWithSuffix(outputName, ".contours.ply");
-	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "contours");
-	free(name);
 
 	DEBUG_END;
 	return p;
