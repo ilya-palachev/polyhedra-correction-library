@@ -1433,6 +1433,15 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	ShadeContourDataPtr data(shadowDataPrep);
 
 	int numSidesTotal = 0;
+	ASSERT(data->numContours > 0);
+#ifndef NDEBUG
+	ASSERT(shadowDataPrep->contours[0].ns > 0);
+	for (int iContour = 0; iContour < shadowDataPrep->numContours; ++iContour)
+	{
+		ASSERT(shadowDataPrep->contours[iContour].ns > 0);
+	}
+#endif /* NDEBUG */
+
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
         {
 		numSidesTotal += data->contours[iContour].ns;
