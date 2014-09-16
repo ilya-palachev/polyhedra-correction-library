@@ -72,6 +72,7 @@ SContour::SContour(vector<Point_3> points, Plane plane)
 	{
 		int iNext = (ns + i + 1) % ns;
 		sides[i].A2 = sides[iNext].A1;
+		ASSERT(isfinite(qmod(sides[i].A1 - sides[i].A2)));
 		ASSERT(qmod(sides[i].A1 - sides[i].A2) > 0);
 	}
 	DEBUG_END;
@@ -181,6 +182,9 @@ vector<Vector3d> SContour::getPoints()
 	for (int iSide = 0; iSide < ns; ++iSide) 
 	{
 		SideOfContour* sideCurr = &sides[iSide];
+		ASSERT(isfinite(sideCurr->A1.x));
+		ASSERT(isfinite(sideCurr->A1.y));
+		ASSERT(isfinite(sideCurr->A1.z));
 
 		/* Project current vertex to the plane of contour. */
 		Vector3d vCurr = plane.project(sideCurr->A1);
@@ -193,6 +197,9 @@ vector<Vector3d> SContour::getPoints()
 		int iSidePrev = (ns + iSide - 1) % ns;
 		SideOfContour* sidePrev DEBUG_VARIABLE =
 				&sides[iSidePrev];
+		ASSERT(isfinite(sidePrev->A2.x));
+		ASSERT(isfinite(sidePrev->A2.y));
+		ASSERT(isfinite(sidePrev->A2.z));
 		DEBUG_PRINT("sides[%d]->A2 = (%lf, %lf, %lf)",
 				iSidePrev,
 				sidePrev->A2.x, sidePrev->A2.y,
@@ -201,6 +208,9 @@ vector<Vector3d> SContour::getPoints()
 				iSide, sideCurr->A1.x, sideCurr->A1.y,
 				sideCurr->A1.z);
 		Vector3d diff DEBUG_VARIABLE = sidePrev->A2 - sideCurr->A1;
+		ASSERT(isfinite(diff.x));
+		ASSERT(isfinite(diff.y));
+		ASSERT(isfinite(diff.z));
 		DEBUG_PRINT("   difference = (%lf, %lf, %lf)",
 				diff.x, diff.y, diff.z);
 
@@ -241,8 +251,19 @@ static vector<Point_2> mapPointsToOXYplane(vector<Vector3d> points, Vector3d nu)
 static vector<Point_3> mapPointsFromOXYplane(vector<Point_2> points, Vector_3 nu)
 {
 	DEBUG_START;
+
+	ASSERT((fpclassify(nu.x()) != FP_ZERO
+		|| fpclassify(nu.y()) != FP_ZERO
+		|| fpclassify(nu.z()) != FP_ZERO)
+		&& "nu is null vector");
+
 	Vector_3 ez(0., 0, 1.);
-	nu = nu * 1. / sqrt(nu.squared_length()); /* Normalize vector \nu. */
+	double length = sqrt(nu.squared_length());
+	ASSERT(fpclassify(length) != FP_ZERO);
+	nu = nu * 1. / length; /* Normalize vector \nu. */
+	ASSERT(isfinite(nu.x()));
+	ASSERT(isfinite(nu.y()));
+	ASSERT(isfinite(nu.z()));
 	Vector_3 tau = cross_product(nu, ez);
 
 	vector<Point_3> pointsMapped;
@@ -258,6 +279,12 @@ static vector<Point_3> mapPointsFromOXYplane(vector<Point_2> points, Vector_3 nu
 SContour *SContour::convexify()
 {
 	DEBUG_START;
+	
+	ASSERT((fpclassify(plane.norm.x) != FP_ZERO
+		|| fpclassify(plane.norm.y) != FP_ZERO
+		|| fpclassify(plane.norm.z) != FP_ZERO)
+		&& "nu is null vector");
+
 	/*
 	 * TODO: This is a temporal workaround. In future we need to perform
 	 * convexification so that to remember what points are vertices of
@@ -265,7 +292,19 @@ SContour *SContour::convexify()
 	 */
 	auto points = getPoints();
 
+	ASSERT((fpclassify(plane.norm.x) != FP_ZERO
+		|| fpclassify(plane.norm.y) != FP_ZERO
+		|| fpclassify(plane.norm.z) != FP_ZERO)
+		&& "nu is null vector");
+
+
 	auto pointsMapped = mapPointsToOXYplane(points, plane.norm);
+	
+	ASSERT((fpclassify(plane.norm.x) != FP_ZERO
+		|| fpclassify(plane.norm.y) != FP_ZERO
+		|| fpclassify(plane.norm.z) != FP_ZERO)
+		&& "nu is null vector");
+
 	vector<Point_2> hull;
 	convex_hull_2(pointsMapped.begin(), pointsMapped.end(),
 		std::back_inserter(hull));
@@ -279,6 +318,11 @@ SContour *SContour::convexify()
 			COLOUR_NORM, id, (int) hull.size(),
 			(int) points.size());
 	}
+
+	ASSERT((fpclassify(plane.norm.x) != FP_ZERO
+		|| fpclassify(plane.norm.y) != FP_ZERO
+		|| fpclassify(plane.norm.z) != FP_ZERO)
+		&& "nu is null vector");
 
 	/* TODO: Add automatic conversion from Vector3d to Vector_3 !!! */
 	auto extremePoints = mapPointsFromOXYplane(hull,
