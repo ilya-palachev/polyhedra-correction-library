@@ -1167,8 +1167,18 @@ void runVerboseRecovery(CommandLineOptions* options,
                         ".corrected-contours.dat");
 		dataCorr->fprintDefault(name);
 		free(name);
+		
+		/* Buid polyhedron consisting of corrected shadow contours. */
+		p = recoverer->buildContours(dataCorr);
 
-		PolyhedronPtr p = recoverer->buildNaivePolyhedron(dataCorr);
+		/* Print resulting polyhedron to the file. */
+		char *name = makeNameWithSuffix(options->outputName,
+			".corrected-contours.ply");
+		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+			name, "corrected-contours");
+		free(name);
+
+		p = recoverer->buildNaivePolyhedron(dataCorr);
 		maxRec = maxCoord(p);
 		max = maxRec > max ? maxRec : max;
 		
