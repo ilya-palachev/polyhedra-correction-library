@@ -283,6 +283,11 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
 		SContour* contour = &SCData->contours[iContour];
+		auto normal = contour->plane.norm;
+	        ASSERT((fpclassify(normal.x) != FP_ZERO
+	                || fpclassify(normal.y) != FP_ZERO
+	                || fpclassify(normal.z) != FP_ZERO)
+	                && "normal is null vector");
 
 		vector<Vector3d> vertices;
 		if (ifDual)
@@ -368,6 +373,10 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	DEBUG_START;
 	vector<Plane> supportPlanes;
 	auto normal = contour->plane.norm;
+        ASSERT((fpclassify(normal.x) != FP_ZERO
+                || fpclassify(normal.y) != FP_ZERO
+                || fpclassify(normal.z) != FP_ZERO)
+                && "normal is null vector");
 	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
 
 	if (ifConvexifyContours)
@@ -428,6 +437,11 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 	{
 		DEBUG_PRINT("contour #%d", iContour);
 		SContour* contourCurr = &SCData->contours[iContour];
+		auto normal = contourCurr->plane.norm;
+	        ASSERT((fpclassify(normal.x) != FP_ZERO
+	                || fpclassify(normal.y) != FP_ZERO
+	                || fpclassify(normal.z) != FP_ZERO)
+	                && "normal is null vector");
 
 		/*
 		 * Extract support planes from one contour and insert it to common list.
