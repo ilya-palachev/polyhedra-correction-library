@@ -232,6 +232,8 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 		balanceAllContours(SCData);
 	}
 
+	initData(SCData);
+
 	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
 	DEBUG_PRINT("Number of extracted support planes: %ld",
