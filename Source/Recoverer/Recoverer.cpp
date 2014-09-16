@@ -274,55 +274,56 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
-
 	/* New polyhedron will have 1 facet for each shadow contour. */
-	int numFacets = SCData->numContours;
+        int numFacets = SCData->numContours;
 
 	/* Count the total number of vertices required for polyhedron. */
 	int numVertices = 0;
+	list<vector<Vector3d>> verticesAll;
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
-		numVertices += SCData->contours[iContour].ns;
-	}
-	PolyhedronPtr p(new Polyhedron(numVertices, numFacets));
+		SContour* contour = &SCData->contours[iContour];
 
-	/* Add a facet for each shadow contour. */
-	int iVertex = 0;
-	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
-	{
-		SContour* contourCurr = &SCData->contours[iContour];
-		Facet* facetNew = new Facet(iContour, contourCurr->ns,
-				contourCurr->plane, NULL);
-		p->facets[iContour] = *facetNew;
-
-		/* We hope that compiler will apply loop unswitching here. */
+		vector<Vector3d> vertices;
 		if (ifDual)
 		{
-			vector<Plane>  planes = extractSupportPlanes(contourCurr);
-			vector<Vector3d> points = mapPlanesToDualSpace(planes);
-			int iSide = 0;
-			for (auto &point : points)
-			{
-				p->vertices[iVertex] = point;
-				p->facets[iContour].indVertices[iSide++] = iVertex;
-				++iVertex;
-			}
+			auto planes = extractSupportPlanes(contour);
+			vertices = mapPlanesToDualSpace(planes);
 		}
 		else
 		{
-			for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
-			{
-				/* Nota Bene: here we read only 1st vertex of current side. */
-				p->vertices[iVertex] = contourCurr->sides[iSide].A1;
-				p->facets[iContour].indVertices[iSide] = iVertex;
-				++iVertex;
-			}
+			vertices = contour->getPoints();
+		}
+		verticesAll.push_back(vertices);
+		numVertices += vertices.size();
+	}
+
+	PolyhedronPtr p(new Polyhedron(numVertices, numFacets));
+
+	auto vertices = verticesAll.begin();
+	int iVertex = 0;
+	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
+	{
+		ASSERT(vertices != verticesAll.end());
+		SContour* contour = &SCData->contours[iContour];
+		Facet *facet = new Facet(iContour, vertices->size(),
+			contour->plane, NULL);
+		p->facets[iContour] = *facet;
+
+		int iSide = 0;
+		for (auto vertex : *vertices)
+		{
+			p->vertices[iVertex] = vertex;
+			p->facets[iContour].indVertices[iSide++] = iVertex;
+			++iVertex;
 		}
 
 		/* Cycling vertex. */
 		p->facets[iContour].indVertices[p->facets[iContour].numVertices] =
 				p->facets[iContour].indVertices[0];
+		++vertices;
 	}
+
 	p->set_parent_polyhedron_in_facets();
 
 	DEBUG_END;
