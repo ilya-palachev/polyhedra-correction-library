@@ -39,7 +39,10 @@ ShadeContourData::ShadeContourData(const ShadeContourData& data) :
 {
 	DEBUG_START;
 	contours = new SContour[numContours];
-	memcpy(contours, data.contours, numContours * sizeof(SContour));
+	for (int i = 0; i < numContours; ++i)
+	{
+		contours[i] = data.contours[i];
+	}
 	DEBUG_END;
 }
 
@@ -50,7 +53,10 @@ ShadeContourData::ShadeContourData(const ShadeContourDataPtr data) :
 {
 	DEBUG_START;
 	contours = new SContour[numContours];
-	memcpy(contours, data->contours, numContours * sizeof(SContour));
+	for (int i = 0; i < numContours; ++i)
+	{
+		contours[i] = data->contours[i];
+	}
 	DEBUG_END;
 }
 
