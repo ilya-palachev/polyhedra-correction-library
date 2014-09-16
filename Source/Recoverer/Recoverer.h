@@ -142,6 +142,9 @@ private:
 	/** Shadow contour data (preprocessed). */
 	ShadeContourDataPtr shadowDataPrep;
 
+	/** Support directions. */
+	vector<Vector3d> supportDirections;
+
 	/**
 	 * Initializes fields shadowDataInit and shadowDataPrep
 	 *
@@ -362,8 +365,21 @@ public:
 	void setEstimator(RecovererEstimator e);
 
 	/**
+	 * Recovers final polyhedron from initial data and vector
+	 * of estimated support values
+	 *
+	 * @param estData       Support function estimation data used by
+	 *                      estimator
+	 * @param estimate      The result of SFE's work
+	 */
+	PolyhedronPtr produceFinalPolyhedron(
+		SupportFunctionEstimationData *estData, VectorXd estimate);
+
+	/**
 	 * Produces corrected shadow contour data from initial data and vector
 	 * of estimated support values
+	 *
+	 * FIXME: It does not work correctly for now!!!
 	 *
 	 * @param estData	Support function estimation data used by
 	 * 			estimator
@@ -377,7 +393,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	ShadeContourDataPtr run(ShadeContourDataPtr SCData);
+	PolyhedronPtr run(ShadeContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;

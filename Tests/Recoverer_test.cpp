@@ -1162,7 +1162,18 @@ void runVerboseRecovery(CommandLineOptions* options,
 		/* Run the recoverer. */
 		recoverer->setEstimator(options->estimator);
 		
-		ShadeContourDataPtr dataCorr = recoverer->run(data);
+		p = recoverer->run(data);
+		maxRec = maxCoord(p);
+		max = maxRec > max ? maxRec : max;
+		
+		name = makeNameWithSuffix(options->outputName,
+			".recovered.ply");
+		p->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
+			name, "recovered-polyhedron");
+		free(name);
+		
+		/* TODO: uncomment this after completing sc-generator. */
+#if 0
 		name = makeNameWithSuffix(options->outputName,
                         ".corrected-contours.dat");
 		dataCorr->fprintDefault(name);
@@ -1179,14 +1190,7 @@ void runVerboseRecovery(CommandLineOptions* options,
 		free(name);
 
 		p = recoverer->buildNaivePolyhedron(dataCorr);
-		maxRec = maxCoord(p);
-		max = maxRec > max ? maxRec : max;
-		
-		name = makeNameWithSuffix(options->outputName,
-			".recovered.ply");
-		p->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
-			name, "recovered-polyhedron");
-		free(name);
+#endif /* 0 */
 	}
 	
 	name = makeNameWithSuffix(options->outputName,
@@ -1236,13 +1240,7 @@ void runRequestedRecovery(CommandLineOptions* options,
 		/* Run the recoverer. */
 		recoverer->setEstimator(options->estimator);
 		
-		ShadeContourDataPtr dataCorr = recoverer->run(data);
-		name = makeNameWithSuffix(options->outputName,
-                        ".corrected-contours.dat");
-		dataCorr->fprintDefault(name);
-		free(name);
-		
-		PolyhedronPtr p = recoverer->buildNaivePolyhedron(dataCorr);
+		PolyhedronPtr p = recoverer->run(data);
 		name = makeNameWithSuffix(options->outputName,
 			".recovered.ply");
 		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,

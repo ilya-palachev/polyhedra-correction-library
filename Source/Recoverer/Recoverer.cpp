@@ -91,7 +91,8 @@ Recoverer::Recoverer() :
 	hvaluesInit(NULL),
 	mapIDinverse(NULL),
 	shadowDataInit(NULL),
-	shadowDataPrep(NULL)
+	shadowDataPrep(NULL),
+	supportDirections()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -405,8 +406,15 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		 * produce big errors.
 		 */
 		ASSERT(qmod(sideCurr->A1 - sideCurr->A2) > 0);
+		
 		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
 			normal;
+		/*
+		 * Save new support direction (will be used in
+		 * recoverCorrectedData function).
+		 */
+		supportDirections.push_back(supportPlaneNormal);
+
 		Plane supportPlane(supportPlaneNormal,
 			- supportPlaneNormal * sideCurr->A1);
 
@@ -1479,6 +1487,33 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 	DEBUG_END;
 }
 
+PolyhedronPtr Recoverer::produceFinalPolyhedron(
+	SupportFunctionEstimationData *estData,
+	VectorXd estimate)
+{
+	DEBUG_START;
+	vector<Vector3d> points;
+	int numValues = estData->numValues();
+	for (int i = 0; i < numValues; ++i)
+	{
+		points.push_back(supportDirections[i] / estimate(i));
+	}
+
+	/* Construct convex hull in the dual space. */
+	PolyhedronPtr polyhedronDual = constructConvexHull(points);
+
+	/* Map dual polyhedron to the primal space. */
+	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
+
+	DEBUG_END;
+	return polyhedron;
+}
+
+/*
+ * This function does not work correctly!
+ * TODO: Fix it and add possibility to choose between it and
+ * recoverCorrectedData to try different methods.
+ */
 ShadeContourDataPtr Recoverer::produceCorrectedData(
 	SupportFunctionEstimationData *estData,
 	VectorXd estimate)
@@ -1561,7 +1596,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	return data;
 }
 
-ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 	initData(SCData);
@@ -1620,5 +1655,5 @@ ShadeContourDataPtr Recoverer::run(ShadeContourDataPtr SCData)
 		estimate);
 
 	DEBUG_END;
-	return produceCorrectedData(data, estimate);
+	return produceFinalPolyhedron(data, estimate);
 }
