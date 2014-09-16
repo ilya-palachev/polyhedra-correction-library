@@ -509,28 +509,11 @@ struct Plane_from_facet
 	}
 };
 
-struct PCL_Point_3 : public Point_3
-{
-	long int id;
-	
-	PCL_Point_3(double x, double y, double z, long int i)
-		: Point_3(x, y, z), id(i)
-	{};
-};
-
-Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
+static CGALpointsSet convertPCLpointsToCGALpoints(vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
-	Polyhedron_3 poly;
-
-
-        auto comparer = [](PCL_Point_3 a, PCL_Point_3 b)
-        {
-                return a < b || (a <= b && a.id < b.id);
-        };
-
 	/* Convert Vector3d objects to Point_3 objects. */
-	std::set<PCL_Point_3, decltype(comparer)> pointsCGAL(comparer);
+	CGALpointsSet pointsCGAL(PCL_Point_3_comparer);
 
 	long int i = 0;
 	for (auto &point : pointsPCL)
@@ -560,6 +543,14 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 		else break;
 	} while(1);
 	ASSERT(pointsCGAL.size() == pointsPCL.size());
+	DEBUG_END;
+	return pointsCGAL;
+}
+
+static Polyhedron_3 convexHullCGAL(CGALpointsSet pointsCGAL)
+{
+	DEBUG_START;
+	Polyhedron_3 poly;
 
 	/* Use the algorithm of standard STATIC convex hull. */
 	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), poly);
@@ -577,23 +568,19 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 		(long unsigned int) poly.size_of_vertices(),
 		(long unsigned int) poly.size_of_halfedges(),
 		(long unsigned int) poly.size_of_facets());
+	DEBUG_END;
+	return poly;
+}
 
-	std::set<PCL_Point_3> pointsHull;
-
+static void assignPolyhedronIDs(Polyhedron_3 poly)
+{
+	DEBUG_START;
 	/* Assign vertex IDs that will be used later. */
-	i = 0;
+	int i = 0;
 	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
 		 ++vertex)
 	{
 		vertex->id = i;
-
-		/*
-		 * Also construct lexicographically ordered set of hull's
-		 * extreme points.
-		 */
-		auto point = vertex->point();
-		pointsHull.insert(PCL_Point_3(point.x(), point.y(), point.z(),
-			i++));
 	}
 
 	/* Assign facet IDs that will be used later. */
@@ -611,11 +598,28 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 		halfedge->id = i++;
 	}
 	DEBUG_END;
+}
 
-	/*
-	 * Now construct 2 maps: direct and inverse, between initial points and
-	 * extreme points of their recently obtained convex hull.
-	 */
+static std::set<PCL_Point_3> getPoints(Polyhedron_3 poly)
+{
+	DEBUG_START;
+	std::set<PCL_Point_3> pointsHull;
+	int i = 0;
+	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
+		 ++vertex)
+	{
+		auto point = vertex->point();
+		pointsHull.insert(PCL_Point_3(point.x(), point.y(), point.z(),
+			i++));
+	}
+	DEBUG_END;
+	return pointsHull;
+}
+
+void Recoverer::constructIDmaps(std::set<PCL_Point_3> pointsHull,
+	CGALpointsSet pointsCGAL)
+{
+	DEBUG_START;
 	mapID = new long int[pointsCGAL.size()];
 	mapIDsize = pointsCGAL.size();
 	for (long int i = 0; i < (long int) pointsCGAL.size(); ++i)
@@ -625,20 +629,13 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 	mapIDinverse = new std::list<long int>[pointsHull.size()];
 	auto pointHull = pointsHull.begin();
 	auto point = pointsCGAL.begin();
-	i = 0;
+	int i = 0;
 	double minDist = std::numeric_limits<double>::max();
 	double numConsidered = 0;
 	auto pointHullMin = pointsHull.end();
 	while (point != pointsCGAL.end())
 	{
 		double dist = (*point - *pointHull).squared_length();
-		/*DEBUG_PRINT("Squared dist from point #%ld = (%lf, %lf, %lf) "
-			"initial ID is #%ld) "
-			"to hull's point #%ld = (%lf, %lf, %lf) is %lf",
-			i, point->x(), point->y(), point->z(), point->id,
-			pointHull->id,
-			pointHull->x(), pointHull->y(), pointHull->z(), dist);
-		*/
 		if (dist < EPS_MIN_DOUBLE)
 		{
 			DEBUG_PRINT("----- Map case found!");
@@ -679,7 +676,7 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 
 	}
 
-	for (long int i = 0; i < (long int) pointsPCL.size(); ++i)
+	for (long int i = 0; i < (long int) pointsCGAL.size(); ++i)
 	{
 		ASSERT(mapID[i] != INT_NOT_INITIALIZED);
 	}
@@ -694,6 +691,31 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL (vector<Vector3d> pointsPCL)
 				i, mapIDinverse[i].size());
 		}
 	}
+	DEBUG_END;
+}
+
+Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
+{
+	DEBUG_START;
+
+	/* Construct the sorted set of CGAL points from PCL points. */
+	auto pointsCGAL = convertPCLpointsToCGALpoints(pointsPCL);
+
+	/* Construct convex hull using CGAL library. */
+	Polyhedron_3 poly = convexHullCGAL(pointsCGAL);
+
+	/* Assign IDs to the parts of obtained polyhedron. */
+	assignPolyhedronIDs(poly);
+
+	/* Get vertex points of the obtained polyhedron. */
+	auto pointsHull = getPoints(poly);
+
+	/*
+	 * Now construct 2 maps: direct and inverse, between initial points and
+	 * extreme points of their recently obtained convex hull.
+	 */
+	constructIDmaps(pointsHull, pointsCGAL);
+
 	return poly;
 }
 
@@ -1440,7 +1462,6 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 	}
 	DEBUG_END;
 }
-
 
 ShadeContourDataPtr Recoverer::produceCorrectedData(
 	SupportFunctionEstimationData *estData,

@@ -67,6 +67,22 @@ typedef enum
 
 #define DEFAULT_MAX_COORDINATE 1000000.
 
+struct PCL_Point_3 : public Point_3
+{
+	long int id;
+	
+	PCL_Point_3(double x, double y, double z, long int i)
+		: Point_3(x, y, z), id(i)
+	{};
+};
+
+auto PCL_Point_3_comparer = [](PCL_Point_3 a, PCL_Point_3 b)
+{
+	return a < b || (a <= b && a.id < b.id);
+};
+
+typedef std::set<PCL_Point_3, decltype(PCL_Point_3_comparer)> CGALpointsSet;
+
 /**
  * Main recovering engine, based on support function estimation tuned for our
  * specific needs.
@@ -156,6 +172,15 @@ private:
 	 * @param planes	The vector of planes
 	 */
 	vector<Vector3d> mapPlanesToDualSpace(vector<Plane> planes);
+
+	/**
+	 * Constructs ID maps (used in constructConvexHullCGAL)
+	 *
+	 * @param pointsHull	Obtained hull points
+	 * @param pointsCGAL	Initial CGAL points
+	 */
+	void constructIDmaps(std::set<PCL_Point_3> pointsHull,
+        	CGALpointsSet pointsCGAL);
 
 	/**
 	 * Constructs convex hull of the point set using CGAL API.
