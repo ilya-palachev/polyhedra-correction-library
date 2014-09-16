@@ -140,7 +140,6 @@ public:
 	 */
 	void fprintDefault(FILE* file);
 
-private:
 	/**
 	 * Gets the vector of all points of the contour (all non-equal
 	 * points).
