@@ -48,6 +48,11 @@ SContour::SContour(const SContour& orig) :
 	sides()
 {
 	DEBUG_START;
+	auto normal = orig.plane.norm;
+	ASSERT((fpclassify(normal.x) != FP_ZERO
+		|| fpclassify(normal.y) != FP_ZERO
+		|| fpclassify(normal.z) != FP_ZERO)
+		&& "orig.plane.norm is null vector");
 	sides = new SideOfContour[ns + 1];
 	for (int i = 0; i < ns; ++i)
 	{
