@@ -61,10 +61,14 @@ SContour::SContour(const SContour& orig) :
 	DEBUG_END;
 }
 
-SContour::SContour(vector<Point_3> points, Plane plane)
+SContour::SContour(vector<Point_3> points, Plane planeOrig) :
+	id(-1),
+	ns((int) points.size()),
+	plane(planeOrig),
+	poly(NULL),
+	sides()
 {
 	DEBUG_START;
-	ns = (int) points.size();
 	sides = new SideOfContour[ns];
 	auto point = points.begin();
 	for (int i = 0; i < ns; ++i)
@@ -335,6 +339,8 @@ SContour *SContour::convexify()
 					plane.norm.z));
 
 	SContour *contour = new SContour(extremePoints, plane);
+	contour->id = id;
+	contour->poly = poly;
 #ifndef NDEBUG
 	for (int iSide = 0; iSide < contour->ns; ++iSide)
 	{
