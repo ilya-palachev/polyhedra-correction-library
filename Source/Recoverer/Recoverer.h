@@ -174,7 +174,7 @@ private:
 	vector<Vector3d> mapPlanesToDualSpace(vector<Plane> planes);
 
 	/**
-	 * Constructs ID maps (used in constructConvexHullCGAL)
+	 * Constructs ID maps (used in constructHullAndIDmaps)
 	 *
 	 * @param pointsHull	Obtained hull points
 	 * @param pointsCGAL	Initial CGAL points
@@ -183,18 +183,26 @@ private:
         	CGALpointsSet pointsCGAL);
 
 	/**
-	 * Constructs convex hull of the point set using CGAL API.
+	 * Constructs convex hull of the point set using CGAL API and calls
+	 * constructIDmaps to construct ID maps.
 	 *
 	 * @param points	Vector of points
 	 */
-	Polyhedron_3 constructConvexHullCGAL(vector<Vector3d>);
+	Polyhedron_3 constructHullAndIDmaps(vector<Vector3d> pointsPCL);
+
+	/**
+	 * Constructs convex hull of the point set using CGAL API
+	 *
+	 * @param points	Vector of points
+	 */
+	Polyhedron_3 constructConvexHullCGAL(vector<Vector3d> pointsPCL);
 
 	/**
 	 * Constructs convex hull of the point set using CGAL API.
 	 *
 	 * @param points	Vector of points
 	 */
-	PolyhedronPtr constructConvexHull(vector<Vector3d>);
+	PolyhedronPtr constructConvexHull(vector<Vector3d> pointsPCL);
 
 	/**
 	 * Builds dual polyhedron to the given polyhedron.

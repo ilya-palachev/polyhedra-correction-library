@@ -694,7 +694,7 @@ void Recoverer::constructIDmaps(std::set<PCL_Point_3> pointsHull,
 	DEBUG_END;
 }
 
-Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
+Polyhedron_3 Recoverer::constructHullAndIDmaps(vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
 
@@ -719,10 +719,26 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
 	return poly;
 }
 
+Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
+{
+	DEBUG_START;
+
+	/* Construct the sorted set of CGAL points from PCL points. */
+	auto pointsCGAL = convertPCLpointsToCGALpoints(pointsPCL);
+
+	/* Construct convex hull using CGAL library. */
+	Polyhedron_3 poly = convexHullCGAL(pointsCGAL);
+
+	/* Assign IDs to the parts of obtained polyhedron. */
+	assignPolyhedronIDs(poly);
+
+	return poly;
+}
+
 PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 {
 	DEBUG_START;
-	Polyhedron_3 poly = constructConvexHullCGAL(points);
+	Polyhedron_3 poly = constructHullAndIDmaps(points);
 
 	/* Convert CGAL polyhedron to PCL polyhedron: */
 	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
@@ -1355,7 +1371,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
-	Polyhedron_3 polyhedron = constructConvexHullCGAL(directions);
+	Polyhedron_3 polyhedron = constructHullAndIDmaps(directions);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5. Build matrix by the polyhedron. */
