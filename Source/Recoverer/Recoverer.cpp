@@ -420,8 +420,8 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		DEBUG_PRINT("   side #%d\t%le\t%le", iSide, error1, error2);
 
 		/* TODO: Here should be more strict conditions. */
-		ASSERT(fabs(error1) < 100 * EPS_MIN_DOUBLE);
-		ASSERT(fabs(error2) < 100 * EPS_MIN_DOUBLE);
+		ASSERT(fabs(error1) < 1000 * EPS_MIN_DOUBLE);
+		ASSERT(fabs(error2) < 1000 * EPS_MIN_DOUBLE);
 	}
 	DEBUG_END;
 	return supportPlanes;
