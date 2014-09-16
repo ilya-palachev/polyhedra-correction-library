@@ -48,7 +48,7 @@ SContour::SContour(const SContour& orig) :
 	sides()
 {
 	DEBUG_START;
-	auto normal = orig.plane.norm;
+	auto DEBUG_VARIABLE normal = orig.plane.norm;
 	ASSERT((fpclassify(normal.x) != FP_ZERO
 		|| fpclassify(normal.y) != FP_ZERO
 		|| fpclassify(normal.z) != FP_ZERO)
