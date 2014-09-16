@@ -283,7 +283,7 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
 		SContour* contour = &SCData->contours[iContour];
-		auto normal = contour->plane.norm;
+		auto DEBUG_VARIABLE normal = contour->plane.norm;
 	        ASSERT((fpclassify(normal.x) != FP_ZERO
 	                || fpclassify(normal.y) != FP_ZERO
 	                || fpclassify(normal.z) != FP_ZERO)
@@ -372,7 +372,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 {
 	DEBUG_START;
 	vector<Plane> supportPlanes;
-	auto normal = contour->plane.norm;
+	auto DEBUG_VARIABLE normal = contour->plane.norm;
         ASSERT((fpclassify(normal.x) != FP_ZERO
                 || fpclassify(normal.y) != FP_ZERO
                 || fpclassify(normal.z) != FP_ZERO)
@@ -437,7 +437,7 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 	{
 		DEBUG_PRINT("contour #%d", iContour);
 		SContour* contourCurr = &SCData->contours[iContour];
-		auto normal = contourCurr->plane.norm;
+		auto DEBUG_VARIABLE normal = contourCurr->plane.norm;
 	        ASSERT((fpclassify(normal.x) != FP_ZERO
 	                || fpclassify(normal.y) != FP_ZERO
 	                || fpclassify(normal.z) != FP_ZERO)
@@ -1457,7 +1457,8 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	{
 		DEBUG_PRINT("Checking shadowDataPrep, contour #%d", iContour);
 		ASSERT(shadowDataPrep->contours[iContour].ns > 0);
-		auto normal = shadowDataPrep->contours[iContour].plane.norm;
+		auto DEBUG_VARIABLE normal =
+			shadowDataPrep->contours[iContour].plane.norm;
 		ASSERT((fpclassify(normal.x) != FP_ZERO
 			|| fpclassify(normal.y) != FP_ZERO
 			|| fpclassify(normal.z) != FP_ZERO)
@@ -1477,7 +1478,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
 		SContour *contour = &data->contours[iContour];
-		auto normal = contour->plane.norm;
+		auto DEBUG_VARIABLE normal = contour->plane.norm;
 		ASSERT((fpclassify(normal.x) != FP_ZERO
 			|| fpclassify(normal.y) != FP_ZERO
 			|| fpclassify(normal.z) != FP_ZERO)
