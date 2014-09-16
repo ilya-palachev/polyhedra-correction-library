@@ -1455,7 +1455,13 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	ASSERT(shadowDataPrep->contours[0].ns > 0);
 	for (int iContour = 0; iContour < shadowDataPrep->numContours; ++iContour)
 	{
+		DEBUG_PRINT("Checking shadowDataPrep, contour #%d", iContour);
 		ASSERT(shadowDataPrep->contours[iContour].ns > 0);
+		auto normal = shadowDataPrep->contours[iContour].plane.norm;
+		ASSERT((fpclassify(normal.x) != FP_ZERO
+			|| fpclassify(normal.y) != FP_ZERO
+			|| fpclassify(normal.z) != FP_ZERO)
+			&& "normal is null vector");
 	}
 #endif /* NDEBUG */
 
@@ -1471,6 +1477,11 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
 		SContour *contour = &data->contours[iContour];
+		auto normal = contour->plane.norm;
+		ASSERT((fpclassify(normal.x) != FP_ZERO
+			|| fpclassify(normal.y) != FP_ZERO
+			|| fpclassify(normal.z) != FP_ZERO)
+			&& "normal is null vector");
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{
 			SideOfContour *side = &contour->sides[iSide];
