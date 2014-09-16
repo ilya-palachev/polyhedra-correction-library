@@ -572,28 +572,28 @@ static Polyhedron_3 convexHullCGAL(CGALpointsSet pointsCGAL)
 	return poly;
 }
 
-static void assignPolyhedronIDs(Polyhedron_3 poly)
+static void assignPolyhedronIDs(Polyhedron_3 *poly)
 {
 	DEBUG_START;
 	/* Assign vertex IDs that will be used later. */
 	int i = 0;
-	for (auto vertex = poly.vertices_begin(); vertex != poly.vertices_end();
+	for (auto vertex = poly->vertices_begin(); vertex != poly->vertices_end();
 		 ++vertex)
 	{
-		vertex->id = i;
+		vertex->id = i++;
 	}
 
 	/* Assign facet IDs that will be used later. */
 	i = 0;
-	for (auto facet = poly.facets_begin(); facet != poly.facets_end(); ++facet)
+	for (auto facet = poly->facets_begin(); facet != poly->facets_end(); ++facet)
 	{
 		facet->id = i++;
 	}
 	
 	/* Assert halfedge IDs that will be checked later. */
 	i = 0;
-	for (auto halfedge = poly.halfedges_begin();
-		 halfedge != poly.halfedges_end(); ++halfedge)
+	for (auto halfedge = poly->halfedges_begin();
+		 halfedge != poly->halfedges_end(); ++halfedge)
 	{
 		halfedge->id = i++;
 	}
@@ -705,7 +705,7 @@ Polyhedron_3 Recoverer::constructHullAndIDmaps(vector<Vector3d> pointsPCL)
 	Polyhedron_3 poly = convexHullCGAL(pointsCGAL);
 
 	/* Assign IDs to the parts of obtained polyhedron. */
-	assignPolyhedronIDs(poly);
+	assignPolyhedronIDs(&poly);
 
 	/* Get vertex points of the obtained polyhedron. */
 	auto pointsHull = getPoints(poly);
@@ -730,7 +730,7 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
 	Polyhedron_3 poly = convexHullCGAL(pointsCGAL);
 
 	/* Assign IDs to the parts of obtained polyhedron. */
-	assignPolyhedronIDs(poly);
+	assignPolyhedronIDs(&poly);
 
 	return poly;
 }
