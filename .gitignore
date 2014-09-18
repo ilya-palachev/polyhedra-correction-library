@@ -17,7 +17,7 @@
 *.so
 *.a
 Build*
-build
+build*
 
 # Directory with output from polyhedral algorithms:
 poly-data-*
