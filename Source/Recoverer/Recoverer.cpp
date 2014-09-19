@@ -409,6 +409,20 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		
 		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
 			normal;
+		/* Normalization must be done here, not at higher level! */
+		supportPlaneNormal.norm(1.);
+
+		/*
+		 * The only way to find right orientation of normal is to check
+		 * that both points of the contour side lie at the positive
+		 * halfspace of the plane.
+		 */
+		if (supportPlaneNormal * sideCurr->A1 < 0)
+		{
+			supportPlaneNormal = -supportPlaneNormal;
+		}
+		ASSERT(supportPlaneNormal * sideCurr->A1 > 0);
+		ASSERT(supportPlaneNormal * sideCurr->A2 > 0);
 
 		Plane supportPlane(supportPlaneNormal,
 			- supportPlaneNormal * sideCurr->A1);
@@ -477,6 +491,7 @@ vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
 		Vector3d vector = plane.norm;
 
 		/* 3 multiplications is more efficient than 3 divisions: */
+		ASSERT(fpclassify(plane.dist) != FP_ZERO);
 		vector *= -1. / plane.dist;
 		vectors.push_back(vector);
 
@@ -1370,21 +1385,18 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 			"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
 			plane.norm.x, plane.norm.y, plane.norm.z,
 			plane.dist);
-		if (plane.dist < 0)
-		{
-			plane.dist = -plane.dist;
-			plane.norm = -plane.norm;
-			DEBUG_PRINT("The plane was reverted: "
-				"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
-				plane.norm.x, plane.norm.y, plane.norm.z,
-				plane.dist);
-		}
-		Vector3d normal = plane.norm;
-		plane.dist /= sqrt(qmod(normal));
-		normal.norm(1.);
+
+		/* Assert that d != 0*/
+		ASSERT(fpclassify(plane.dist) != FP_ZERO);
+
+		/* Assert that ||nu|| == 1 */
+		double DEBUG_VARIABLE norm = sqrt(qmod(plane.norm));
+		DEBUG_PRINT("norm = %lf, norm - 1. = %le", norm, norm - 1.);
+		ASSERT(fabs(norm - 1.) <= 10. * EPS_MIN_DOUBLE);
+
 		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
-			iValue, normal.x, normal.y, normal.z);
-		directions.push_back(normal);
+			iValue, plane.norm.x, plane.norm.y, plane.norm.z);
+		directions.push_back(plane.norm);
 		DEBUG_PRINT("Adding %d-th support value %lf",
 			iValue, plane.dist);
 		hvaluesInit[iValue++] = plane.dist;
@@ -1393,7 +1405,8 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		 * Save new support direction (will be used in
 		 * recoverCorrectedData function).
 		 */
-		SupportItem item = {normal, plane.dist};
+		ASSERT(plane.dist < 0.);
+		SupportItem item = {plane.norm, -plane.dist};
 		supportItems.insert(item);
 	}
 
@@ -1410,6 +1423,8 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	
 	auto points = getPoints(polyhedron);
 	int i = 0;
+	supportDirections.clear();
+	ASSERT(supportDirections.empty());
 	for (auto &point : points)
 	{
 		Vector3d v(point.x(), point.y(), point.z());
