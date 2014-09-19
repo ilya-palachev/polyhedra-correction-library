@@ -1147,6 +1147,7 @@ void runVerboseRecovery(CommandLineOptions* options,
 	recoverer->disableContoursConvexification();
 	PolyhedronPtr pNaive = recoverer->buildNaivePolyhedron(data);
 	max = maxCoord(pNaive);
+	DEBUG_PRINT("Size of naive polyhedron: %lf.", max);
 
 	PolyhedronPtr pNaiveConv = NULL;
 	if (options->ifConvexifyContours)
@@ -1154,6 +1155,7 @@ void runVerboseRecovery(CommandLineOptions* options,
 		recoverer->enableContoursConvexification();
 		pNaiveConv = recoverer->buildNaivePolyhedron(data);
 		maxConv = maxCoord(pNaiveConv);
+		DEBUG_PRINT("Size of conv-naive polyhedron: %lf.", maxConv);
 		max = maxConv > max ? maxConv : max;
 	}
 
@@ -1164,6 +1166,7 @@ void runVerboseRecovery(CommandLineOptions* options,
 		
 		p = recoverer->run(data);
 		maxRec = maxCoord(p);
+		DEBUG_PRINT("Size of recovered polyhedron: %lf.", maxRec);
 		max = maxRec > max ? maxRec : max;
 		
 		name = makeNameWithSuffix(options->outputName,
