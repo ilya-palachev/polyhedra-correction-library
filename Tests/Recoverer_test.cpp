@@ -350,6 +350,11 @@ typedef struct
 
 RecovererEstimatorDescription estimatorDescriptions[] =
 {
+	{
+		ZERO_ESTIMATOR,
+		"zero",
+		"Estimator that does nothing"
+	},
 #ifdef USE_TSNNLS
 	{
 		TSNNLS_ESTIMATOR,

@@ -694,6 +694,12 @@ void Recoverer::constructIDmaps(std::set<PCL_Point_3> pointsHull,
 
 	}
 
+	if (estimator == ZERO_ESTIMATOR)
+	{
+		DEBUG_END;
+		return;
+	}
+
 	for (long int i = 0; i < (long int) pointsCGAL.size(); ++i)
 	{
 		ASSERT(mapID[i] != INT_NOT_INITIALIZED);
@@ -1511,7 +1517,8 @@ void Recoverer::setEstimator(RecovererEstimator e)
 
 #define ACCEPTED_TOL 1e-6
 
-static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
+static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
+	RecovererEstimator estimator)
 {
 	DEBUG_START;
 	MAIN_PRINT("Estimation report:");
@@ -1542,7 +1549,10 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 		{
 			DEBUG_PRINT("Q * h[%d] : %le -> %le", i, Qh0(i), Qh(i));
 		}
-		ASSERT(Qh(i) >= -ACCEPTED_TOL);
+		if (estimator != ZERO_ESTIMATOR)
+		{
+			ASSERT(Qh(i) >= -ACCEPTED_TOL);
+		}
 	}
 	DEBUG_END;
 }
@@ -1672,6 +1682,9 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 
 	switch (estimator)
 	{
+	case ZERO_ESTIMATOR:
+		DEBUG_PRINT("Zero estimator is on!");
+		break;
 #ifdef USE_TSNNLS
 	case TSNNLS_ESTIMATOR:
 		sfe = static_cast<SupportFunctionEstimator*>(new
@@ -1706,13 +1719,17 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 		return NULL;
 		break;
 	}
-	ASSERT(sfe);
+	if (estimator != ZERO_ESTIMATOR)
+	{
+		ASSERT(sfe);
+	}
 
 	/* Run support function estimation. */
-	VectorXd estimate = sfe->run();
+	VectorXd estimate = estimator == ZERO_ESTIMATOR ? data->supportVector()
+		: sfe->run();
 
 	printEstimationReport(data->supportMatrix(), data->supportVector(),
-		estimate);
+		estimate, estimator);
 
 	DEBUG_END;
 	return produceFinalPolyhedron(data, estimate);
