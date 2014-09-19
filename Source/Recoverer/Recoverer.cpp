@@ -409,11 +409,6 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		
 		Vector3d supportPlaneNormal = (sideCurr->A1 - sideCurr->A2) %
 			normal;
-		/*
-		 * Save new support direction (will be used in
-		 * recoverCorrectedData function).
-		 */
-		supportDirections.push_back(supportPlaneNormal);
 
 		Plane supportPlane(supportPlaneNormal,
 			- supportPlaneNormal * sideCurr->A1);
@@ -746,7 +741,7 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
 PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
 {
 	DEBUG_START;
-	Polyhedron_3 poly = constructHullAndIDmaps(points);
+	Polyhedron_3 poly = constructConvexHullCGAL(points);
 
 	/* Convert CGAL polyhedron to PCL polyhedron: */
 	PolyhedronPtr polyhedronDualPCL(new Polyhedron(poly));
@@ -1331,6 +1326,22 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
 		(errorZ2 < MAX_ACCEPTABLE_LINF_ERROR);
 }
 
+/** Item of support function measurement. */
+struct SupportItem
+{
+	Vector3d u; /**< the direction. */
+	double h;   /**< the support value. */
+	SupportItem() : u(Vector3d(0., 0., 0.)), h(0) {}
+	SupportItem(Vector3d u_, double h_) : u(u_), h(h_) {}
+};
+
+auto supportItem_comparer = [](SupportItem a, SupportItem b)
+{
+	return a.u < b.u;
+};
+
+typedef std::set<SupportItem, decltype(supportItem_comparer)> SupportItemSet;
+
 SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		ShadeContourDataPtr SCData)
 {
@@ -1352,6 +1363,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	int iValue = 0;
 	long int numHvaluesInit = supportPlanes.size();
 	hvaluesInit = new double[numHvaluesInit];
+	SupportItemSet supportItems(supportItem_comparer);
 	for (auto &plane : supportPlanes)
 	{
 		DEBUG_PRINT("Processing support plane "
@@ -1376,6 +1388,13 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		DEBUG_PRINT("Adding %d-th support value %lf",
 			iValue, plane.dist);
 		hvaluesInit[iValue++] = plane.dist;
+
+		/*
+		 * Save new support direction (will be used in
+		 * recoverCorrectedData function).
+		 */
+		SupportItem item = {normal, plane.dist};
+		supportItems.insert(item);
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
@@ -1388,20 +1407,46 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	
 	long int numHvalues = Q.cols();
 	VectorXd hvalues(numHvalues);
+	
+	auto points = getPoints(polyhedron);
+	int i = 0;
+	for (auto &point : points)
+	{
+		Vector3d v(point.x(), point.y(), point.z());
+		SupportItem item = {v, 0};
+		auto result = supportItems.find(item);
+		ASSERT(result != supportItems.end() && "Cannot found an item");
+		hvalues(i) = result->h;
+		supportDirections.push_back(result->u);
+		DEBUG_PRINT("   constructed hvalue = %lf for direction "
+			"(%lf, %lf, %lf)", result->h, result->u.x,
+			result->u.y, result->u.z);
+		++i;
+	}
+
+/* TODO: Fix this method and use it. */
+#if 0
+
 	for (long int i = 0; i < numHvalues; ++i)
 	{
+		DEBUG_PRINT("Constructing hvalue #%ld.", i);
 		double hvalue = 0.;
 		auto it = mapIDinverse[i].begin();
 		while (it != mapIDinverse[i].end())
 		{
 			ASSERT(*it >= 0);
 			ASSERT(*it < numHvaluesInit);
+			DEBUG_PRINT("   id %ld, hvalue = %lf", *it, hvaluesInit[*it]);
 			hvalue += hvaluesInit[*it];
 			++it;
 		}
 		hvalue /= mapIDinverse[i].size();
+		Vector3d u = supportDirections[i];
+		DEBUG_PRINT("   constructed hvalue = %lf for direction "
+			"(%lf, %lf, %lf)", hvalue, u.x, u.y, u.z);
 		hvalues(i) = hvalue;
 	}
+#endif /* 0 */
 	
 	DEBUG_PRINT("Q is %d x %d matrix, numHvaluesInit = %ld", Q.rows(), Q.cols(),
 		numHvaluesInit);
