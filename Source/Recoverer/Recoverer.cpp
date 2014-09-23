@@ -686,7 +686,6 @@ void Recoverer::constructIDmaps(std::set<PCL_Point_3> pointsHull,
 
 	for (long int i = 0; i < (long int) pointsHull.size(); ++i)
 	{
-		ASSERT(!mapIDinverse[i].empty());
 		if (mapIDinverse[i].size() > 1)
 		{
 			DEBUG_PRINT("Hull's point #%ld has %ld corresponding "
