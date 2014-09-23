@@ -243,29 +243,8 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 	/* 3. Map planes to dual space to obtain the set of points in it. */
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
-	/* 4. Normalize all points so that to put the to the sphere. */
-	vector<Vector3d> supportPointsNormalized;
-	supportPointsNormalized.insert(supportPointsNormalized.begin(),
-			supportPoints.begin(), supportPoints.end());
-	int iVertex = 0;
-	for (auto &v : supportPointsNormalized)
-	{
-		ASSERT(v == supportPoints[iVertex++]);
-		v.norm(1.);
-	}
-
-	/* 5. Construct convex hull in the dual space. */
-	PolyhedronPtr polyhedronDual = constructConvexHull(supportPointsNormalized);
-
-	ASSERT((unsigned long int) polyhedronDual->numVertices ==
-			supportPoints.size());
-
-	/* 6. Restore saved coordinates of vectors. */
-	iVertex = 0;
-	for (auto &v : supportPoints)
-	{
-		polyhedronDual->vertices[iVertex++] = v;
-	}
+	/* 4. Construct convex hull in the dual space. */
+	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
 
 	DEBUG_END;
 	return polyhedronDual;
