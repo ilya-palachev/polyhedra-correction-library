@@ -1421,16 +1421,18 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
 			iValue, plane.norm.x, plane.norm.y, plane.norm.z);
 		directions.push_back(plane.norm);
+		double supportValue = -plane.dist;
+		ASSERT(supportValue > 0.);
 		DEBUG_PRINT("Adding %d-th support value %lf",
-			iValue, plane.dist);
-		hvaluesInit[iValue++] = plane.dist;
+			iValue, supportValue);
+		hvaluesInit[iValue++] = supportValue;
 
 		/*
 		 * Save new support direction (will be used in
 		 * recoverCorrectedData function).
 		 */
 		ASSERT(plane.dist < 0.);
-		SupportItem item = {plane.norm, -plane.dist};
+		SupportItem item = {plane.norm, supportValue};
 		supportItems.insert(item);
 	}
 
