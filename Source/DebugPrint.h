@@ -23,62 +23,103 @@
 
 #include <cstdio>
 
-//#define DEBUG
-//#define DEBUG1
 #define OUTPUT
-//#define TCPRINT //Печатать вывод из Polyhedron::test_consections()
 #define GLOBAL_CORRECTION_DERIVATIVE_TESTING
 
-#define COLOUR_NORM  		"\x1B[0m"
-#define COLOUR_RED  		"\x1B[31m"
-#define COLOUR_GREEN  	"\x1B[32m"
-#define COLOUR_YELLOW  	"\x1B[33m"
-#define COLOUR_BLUE 		"\x1B[34m"
-#define COLOUR_MAGENTA  "\x1B[35m"
-#define COLOUR_CYAN  		"\x1B[36m"
-#define COLOUR_WHITE  	"\x1B[37m"
+#define COLOUR_NORM "\x1B[0m"
+#define COLOUR_RED "\x1B[31m"
+#define COLOUR_GREEN "\x1B[32m"
+#define COLOUR_YELLOW "\x1B[33m"
+#define COLOUR_BLUE "\x1B[34m"
+#define COLOUR_MAGENTA "\x1B[35m"
+#define COLOUR_CYAN "\x1B[36m"
+#define COLOUR_WHITE "\x1B[37m"
 
 #define WHERESTR  "[%s: %d]: "
 #define WHEREARG  __PRETTY_FUNCTION__, __LINE__
-#define STDERR_PRINT(...)       fprintf(stderr, __VA_ARGS__)
-#define FILE_PRINT(_file, ...)       fprintf(_file, ##__VA_ARGS__)
+#define STDERR_PRINT(...) \
+	do \
+	{ \
+		fprintf(stderr, __VA_ARGS__); \
+	} \
+	while (0)
+#define FILE_PRINT(_file, ...) \
+	do \
+	{ \
+		fprintf(_file, ##__VA_ARGS__); \
+	} \
+	while (0)
 
 #ifndef NDEBUG
-#		define DEBUG_PRINT(...)  \
-	STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
-	STDERR_PRINT(__VA_ARGS__); \
-	STDERR_PRINT("\n");
-#		define REGULAR_PRINT(_file, ...)  \
-	FILE_PRINT(_file, COLOUR_NORM); \
-	FILE_PRINT(_file, ##__VA_ARGS__);
-#		define DEBUG_START DEBUG_PRINT("Start")
-#		define DEBUG_END DEBUG_PRINT("End")
+#define DEBUG_PRINT(...)  \
+	do \
+	{ \
+		STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
+		STDERR_PRINT(__VA_ARGS__); \
+		STDERR_PRINT("\n"); \
+	} \
+	while (0)
+#define REGULAR_PRINT(_file, ...)  \
+	do \
+	{ \
+		FILE_PRINT(_file, COLOUR_NORM); \
+		FILE_PRINT(_file, ##__VA_ARGS__); \
+	} \
+	while (0)
+#define DEBUG_START \
+	do \
+	{ \
+		DEBUG_PRINT("Start"); \
+	} \
+	while (0)
+#define DEBUG_END \
+	do \
+	{ \
+		DEBUG_PRINT("End"); \
+	} \
+	while (0)
 
 #else
-#		define DEBUG_PRINT(...)
-#		define REGULAR_PRINT(...)
-#		define DEBUG_START
-#		define DEBUG_END
+#define DEBUG_PRINT(...)
+#define REGULAR_PRINT(...)
+#define DEBUG_START
+#define DEBUG_END
 #endif
 
 #define MAIN_PRINT(...)  \
-	STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
-	STDERR_PRINT(__VA_ARGS__); \
-	STDERR_PRINT("\n" COLOUR_NORM);
+	do \
+	{ \
+		STDERR_PRINT(COLOUR_NORM WHERESTR, WHEREARG); \
+		STDERR_PRINT(__VA_ARGS__); \
+		STDERR_PRINT("\n" COLOUR_NORM); \
+	} \
+	while (0)
 
 #define ALWAYS_PRINT(_file, ...)  \
-	FILE_PRINT(_file, __VA_ARGS__)
+	do \
+	{ \
+		FILE_PRINT(_file, __VA_ARGS__); \
+	} \
+	while (0)
 
 #define ERROR_PRINT(...)  \
-	STDERR_PRINT(COLOUR_RED WHERESTR, WHEREARG); \
-	STDERR_PRINT(__VA_ARGS__); \
-	STDERR_PRINT("\n" COLOUR_NORM);
+	do \
+	{ \
+		STDERR_PRINT(COLOUR_RED WHERESTR, WHEREARG); \
+		STDERR_PRINT(__VA_ARGS__); \
+		STDERR_PRINT("\n" COLOUR_NORM); \
+	} \
+	while (0)
 
 #define PRINT(...)  \
-	STDERR_PRINT(COLOUR_NORM); \
-	STDERR_PRINT(__VA_ARGS__); \
-	STDERR_PRINT("\n" COLOUR_NORM);
+	do \
+	{ \
+		STDERR_PRINT(COLOUR_NORM); \
+		STDERR_PRINT(__VA_ARGS__); \
+		STDERR_PRINT("\n" COLOUR_NORM); \
+	} \
+	while (0)
 
-#		define DEBUG_VARIABLE __attribute__ ((unused))
+#define DEBUG_VARIABLE __attribute__ ((unused))
 
 #endif //DEBUGPRINT_H
