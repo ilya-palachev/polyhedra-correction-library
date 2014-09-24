@@ -392,6 +392,23 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 		supportPlaneNormal.norm(1.);
 
 		/*
+		 * We do this, because CGAL::convex_hull_3 is buggy for 1e-15
+		 * values.
+		 */
+		if (fabs(supportPlaneNormal.x) < 10. * EPS_MIN_DOUBLE)
+		{
+			supportPlaneNormal.x = 0.;
+		}
+		if (fabs(supportPlaneNormal.y) < 10. * EPS_MIN_DOUBLE)
+		{
+			supportPlaneNormal.y = 0.;
+		}
+		if (fabs(supportPlaneNormal.z) < 10. * EPS_MIN_DOUBLE)
+		{
+			supportPlaneNormal.z = 0.;
+		}
+
+		/*
 		 * The only way to find right orientation of normal is to check
 		 * that both points of the contour side lie at the positive
 		 * halfspace of the plane.
