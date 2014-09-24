@@ -901,7 +901,7 @@ void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
 			DEBUG_PRINT("shift: (%lf, %lf, %lf) -> "
 				"(%lf, %lf, %lf)",
 				A1_backup.x, A1_backup.y, A1_backup.z,
-				side->A1.x, side->A1.y, side->A2.z);
+				side->A1.x, side->A1.y, side->A1.z);
 		}
 		for (int iSide = 0; iSide < contour->ns - 1; ++iSide)
 		{
