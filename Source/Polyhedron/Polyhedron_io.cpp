@@ -49,10 +49,14 @@ void Polyhedron::my_fprint(FILE* file)
 	REGULAR_PRINT(file, "Polyhedron:\n");
 	REGULAR_PRINT(file, "numv = %d\nnumf = %d\n", numVertices, numFacets);
 	for (i = 0; i < numVertices; ++i)
+	{
 		REGULAR_PRINT(file, "   vertex[%d] = (%f, %f, %f)\n", i, vertices[i].x,
 				vertices[i].y, vertices[i].z);
+	}
 	for (i = 0; i < numFacets; ++i)
+	{
 		facets[i].my_fprint_all(file);
+	}
 	if (vertexInfos != NULL)
 	{
 		for (i = 0; i < numVertices; ++i)
