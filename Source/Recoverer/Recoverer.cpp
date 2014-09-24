@@ -1417,11 +1417,39 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		double DEBUG_VARIABLE norm = sqrt(qmod(plane.norm));
 		DEBUG_PRINT("norm = %lf, norm - 1. = %le", norm, norm - 1.);
 		ASSERT(fabs(norm - 1.) <= 10. * EPS_MIN_DOUBLE);
+		double supportValue = -plane.dist;
+
+		int iExisting = 0;
+		bool ifExist = false;
+		for (auto &direction : directions)
+		{
+			if ((fabs(direction.x - plane.norm.x)
+				< 10. * EPS_MIN_DOUBLE) &&
+				(fabs(direction.y - plane.norm.y)
+				< 10. * EPS_MIN_DOUBLE) &&
+				(fabs(direction.z - plane.norm.z)
+				< 10. * EPS_MIN_DOUBLE))
+			{
+				ifExist = true;
+				break;
+			}
+			++iExisting;
+		}
+		if (ifExist)
+		{
+			DEBUG_PRINT("! Aborting, since direction already "
+				"exists in the directions array, it's #%d",
+				iExisting);
+			DEBUG_PRINT("Old value = %lf, new value = %lf",
+				hvaluesInit[iExisting], supportValue);
+			ASSERT(fabs (hvaluesInit[iExisting] - supportValue)
+				< 10. * EPS_MIN_DOUBLE);
+			continue;
+		}
 
 		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
 			iValue, plane.norm.x, plane.norm.y, plane.norm.z);
 		directions.push_back(plane.norm);
-		double supportValue = -plane.dist;
 		ASSERT(supportValue > 0.);
 		DEBUG_PRINT("Adding %d-th support value %lf",
 			iValue, supportValue);
