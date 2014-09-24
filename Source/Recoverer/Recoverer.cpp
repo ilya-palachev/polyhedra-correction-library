@@ -549,12 +549,35 @@ static Polyhedron_3 convexHullCGAL(CGALpointsSet pointsCGAL)
 	DEBUG_START;
 	Polyhedron_3 poly;
 
+#ifndef NDEBUG
+	long i = 0;
+	for (auto point = pointsCGAL.begin(); point != pointsCGAL.end();
+		++point)
+	{
+		DEBUG_PRINT("processed point #%ld: (%le, %le, %le)", i,
+			point->x(), point->y(), point->z());
+		++i;
+	}
+#endif
+
 	/* Use the algorithm of standard STATIC convex hull. */
 	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), poly);
 
 	/* Calculte equations of planes for each facet. */
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
 			Plane_from_facet());
+
+#ifndef NDEBUG
+	i = 0;
+	for (auto vertex = poly.vertices_begin();
+		vertex != poly.vertices_end(); ++vertex)
+	{
+		auto point = vertex->point();
+		DEBUG_PRINT("convex hull's point #%ld: (%le, %le, %le)", i,
+			point.x(), point.y(), point.z());
+		++i;
+	}
+#endif
 
 	DEBUG_PRINT("Convex hull of %ld points contains %ld extreme points.",
 		(long unsigned int) pointsCGAL.size(),
