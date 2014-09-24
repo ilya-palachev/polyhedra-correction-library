@@ -554,8 +554,8 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 		return solution;
 	}
 
-	app->Options()->SetNumericValue("tol", 1e-6);
-	app->Options()->SetNumericValue("acceptable_tol", 1e-6);
+	app->Options()->SetNumericValue("tol", 1e-10);
+	app->Options()->SetNumericValue("acceptable_tol", 1e-10);
 
 	/* Ask Ipopt to solve the problem */
 	status = app->OptimizeTNLP(this);
