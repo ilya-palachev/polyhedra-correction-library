@@ -455,17 +455,44 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 	                || fpclassify(normal.y) != FP_ZERO
 	                || fpclassify(normal.z) != FP_ZERO)
 	                && "normal is null vector");
-
-		/*
-		 * Extract support planes from one contour and insert it to common list.
-		 */
-		vector<Plane> supportPlanesPortion = extractSupportPlanes(contourCurr);
+		/* Extract support planes from contour and try to push them */
+		vector<Plane> supportPlanesPortion =
+			extractSupportPlanes(contourCurr);
 		for (auto &plane : supportPlanesPortion)
 		{
+			/* Plane is skipped if it already exists in array. */
+			int iExisting = 0;
+			bool ifExist = false;
+			auto planePrev = supportPlanes.begin();
+			for (; planePrev != supportPlanes.end(); ++planePrev)
+			{
+				auto direction = planePrev->norm;
+				if ((fabs(direction.x - plane.norm.x)
+					< 10. * EPS_MIN_DOUBLE) &&
+					(fabs(direction.y - plane.norm.y)
+					< 10. * EPS_MIN_DOUBLE) &&
+					(fabs(direction.z - plane.norm.z)
+					< 10. * EPS_MIN_DOUBLE))
+				{
+					ifExist = true;
+					break;
+				}
+				++iExisting;
+			}
+			if (ifExist)
+			{
+				DEBUG_PRINT("! Aborting, since direction "
+					"already exists in the directions "
+					"array, it's #%d", iExisting);
+				DEBUG_PRINT("Old value = %lf, new value = %lf",
+					planePrev->dist, plane.dist);
+				ASSERT(fabs(planePrev->dist - plane.dist)
+					< 10. * EPS_MIN_DOUBLE);
+				continue;
+			}
 			supportPlanes.push_back(plane);
 		}
 	}
-
 	DEBUG_END;
 	return supportPlanes;
 }
@@ -1443,34 +1470,6 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		DEBUG_PRINT("norm = %lf, norm - 1. = %le", norm, norm - 1.);
 		ASSERT(fabs(norm - 1.) <= 10. * EPS_MIN_DOUBLE);
 		double supportValue = -plane.dist;
-
-		int iExisting = 0;
-		bool ifExist = false;
-		for (auto &direction : directions)
-		{
-			if ((fabs(direction.x - plane.norm.x)
-				< 10. * EPS_MIN_DOUBLE) &&
-				(fabs(direction.y - plane.norm.y)
-				< 10. * EPS_MIN_DOUBLE) &&
-				(fabs(direction.z - plane.norm.z)
-				< 10. * EPS_MIN_DOUBLE))
-			{
-				ifExist = true;
-				break;
-			}
-			++iExisting;
-		}
-		if (ifExist)
-		{
-			DEBUG_PRINT("! Aborting, since direction already "
-				"exists in the directions array, it's #%d",
-				iExisting);
-			DEBUG_PRINT("Old value = %lf, new value = %lf",
-				hvaluesInit[iExisting], supportValue);
-			ASSERT(fabs (hvaluesInit[iExisting] - supportValue)
-				< 10. * EPS_MIN_DOUBLE);
-			continue;
-		}
 
 		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
 			iValue, plane.norm.x, plane.norm.y, plane.norm.z);
