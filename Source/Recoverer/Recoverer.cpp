@@ -1499,12 +1499,13 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 	long int numHvalues = Q.cols();
 	VectorXd hvalues(numHvalues);
 	
-	auto points = getPoints(polyhedron);
 	int i = 0;
 	supportDirections.clear();
 	ASSERT(supportDirections.empty());
-	for (auto &point : points)
+	for (auto vertex = polyhedron.vertices_begin();
+		vertex != polyhedron.vertices_end(); ++vertex)
 	{
+		auto point = vertex->point();
 		Vector3d v(point.x(), point.y(), point.z());
 		SupportItem item = {v, 0};
 		auto result = supportItems.find(item);
