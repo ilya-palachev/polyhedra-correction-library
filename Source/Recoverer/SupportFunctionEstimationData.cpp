@@ -39,35 +39,40 @@ SupportFunctionEstimationData::SupportFunctionEstimationData()
 }
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(
-		SupportFunctionEstimationData *data) :
+	SupportFunctionEstimationData *data) :
 	m_numValues(data->numValues()),
 	m_numConditions(data->numConditions()),
 	m_supportMatrix(data->supportMatrix()),
-	m_supportVector(data->supportVector())
+	m_supportVector(data->supportVector()),
+	m_startingVector(data->startingVector())
 {
 	DEBUG_START;
 	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
 	ASSERT(m_supportMatrix.rows() == m_numConditions);
 	ASSERT(m_supportMatrix.cols() == m_numValues);
+	ASSERT(m_numValues == m_supportVector.rows());
+	ASSERT(m_numValues == m_startingVector.rows());
 	DEBUG_END;
 }
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(int numValues,
-		int numConditions, SparseMatrix supportMatrix, VectorXd supportVector) :
-		m_numValues(numValues),
-		m_numConditions(numConditions),
-		m_supportMatrix(supportMatrix),
-		m_supportVector(supportVector)
+	int numConditions, SparseMatrix supportMatrix,
+	VectorXd supportVector, VectorXd startingVector) :
+	m_numValues(numValues),
+	m_numConditions(numConditions),
+	m_supportMatrix(supportMatrix),
+	m_supportVector(supportVector),
+	m_startingVector(startingVector)
 {
 	DEBUG_START;
 	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
 	ASSERT(m_supportMatrix.rows() == m_numConditions);
 	ASSERT(m_supportMatrix.cols() == m_numValues);
+	ASSERT(m_numValues == m_supportVector.rows());
+	ASSERT(m_numValues == m_startingVector.rows());
 	/*
 	 * TODO: Check also that number of conditions (i. e. number of edges in the
 	 * sphere triangulation) satisfies bounds arrising from Euler's theorem.
-	 *
-	 * TODO: Check that supportVector has dimension equal to m_numConditions.
 	 */
 	DEBUG_END;
 }
@@ -104,4 +109,11 @@ VectorXd SupportFunctionEstimationData::supportVector(void)
 	DEBUG_START;
 	DEBUG_END;
 	return m_supportVector;
+}
+
+VectorXd SupportFunctionEstimationData::startingVector(void)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return m_startingVector;
 }

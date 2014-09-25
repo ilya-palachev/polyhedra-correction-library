@@ -43,8 +43,8 @@ private:
 	int m_numValues;
 
 	/**
-	 * The number of consistency conditions to be verified to provide consistent
-	 * estimation.
+	 * The number of consistency conditions to be verified to provide
+	 * consistent estimation.
 	 */
 	int m_numConditions;
 
@@ -59,6 +59,11 @@ private:
 	 */
 	VectorXd m_supportVector;
 
+	/**
+	 * Starting point of the algorith (rude estimate)
+	 */
+	VectorXd m_startingVector;
+
 public:
 	/** Default empty constructor. */
 	SupportFunctionEstimationData();
@@ -69,16 +74,17 @@ public:
 	/**
 	 * Default constructor.
 	 *
-	 * @param numValues		The number of support function measurements.
-	 * @param numConditions	The number of consistency conditions to be verified
-	 * 						to provide consistent estimation.
+	 * @param numValues		The number of support function
+	 * 	measurements.
+	 * @param numConditions	The number of consistency conditions to be
+	 * 	verified to provide consistent estimation.
 	 * @param supportMatrix	The support matrix of problem.
 	 * @param supportVector	The support vector, i. e. the vector of support
-	 * 						function measurements.
+	 * 	function measurements.
 	 */
 	SupportFunctionEstimationData(int numValues,
-			int numConditions, SparseMatrix supportMatrix,
-			VectorXd supportVector);
+		int numConditions, SparseMatrix supportMatrix,
+		VectorXd supportVector, VectorXs startingVector);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();
@@ -94,6 +100,9 @@ public:
 
 	/** Getter for member m_supportVector */
 	VectorXd supportVector(void);
+
+	/** Getter for member m_startingVector */
+	VectorXd startingVector(void);
 
 	/* FIXME: Do we need to have setters here? */
 };
