@@ -28,11 +28,21 @@
 
 #include "Recoverer/SupportFunctionEstimationData.h"
 
+/** The generic support function estimator. */
 class SupportFunctionEstimator : public SupportFunctionEstimationData
 {
 public:
+	/**
+	 * Constructs the estimator and sets its data.
+	 *
+	 * @param data	Support function estimation data
+	 */
 	SupportFunctionEstimator(SupportFunctionEstimationData *data);
+
+	/** Destructs the estimator. */
 	virtual ~SupportFunctionEstimator();
+
+	/** Runs the estimator (should be defined in child classes). */
 	virtual VectorXd run(void) = 0;
 };
 
