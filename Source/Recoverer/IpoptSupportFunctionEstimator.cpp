@@ -138,7 +138,7 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 
 	if (init_x)
 	{
-		VectorXd x0 = supportVector();
+		VectorXd x0 = startingVector();
 		int num = numValues();
 		for (int i = 0; i < num; ++i)
 		{
