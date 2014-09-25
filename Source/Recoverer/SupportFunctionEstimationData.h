@@ -84,7 +84,7 @@ public:
 	 */
 	SupportFunctionEstimationData(int numValues,
 		int numConditions, SparseMatrix supportMatrix,
-		VectorXd supportVector, VectorXs startingVector);
+		VectorXd supportVector, VectorXd startingVector);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();
