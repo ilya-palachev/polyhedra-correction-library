@@ -1619,7 +1619,21 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 		if (fabs (Qh0(i)) > ACCEPTED_TOL
 			|| fabs (Qh(i)) > ACCEPTED_TOL)
 		{
-			DEBUG_PRINT("Q * h[%d] : %le -> %le", i, Qh0(i), Qh(i));
+			if (Qh0(i) < 0. && Qh(i) >= 0)
+				DEBUG_PRINT("Q * h[%d] : " COLOUR_RED "%le"
+					COLOUR_NORM " -> %le", i,
+					Qh0(i), Qh(i));
+			else if (Qh0(i) >= 0. && Qh(i) < 0)
+				DEBUG_PRINT("Q * h[%d] : %le" COLOUR_RED
+					" -> %le" COLOUR_NORM, i,
+					Qh0(i), Qh(i));
+			else if (Qh0(i) < 0. && Qh(i) < 0)
+				DEBUG_PRINT("Q * h[%d] : " COLOUR_RED "%le"
+					" -> %le" COLOUR_NORM, i,
+					Qh0(i), Qh(i));
+			else
+				DEBUG_PRINT("Q * h[%d] : %le -> %le", i,
+					Qh0(i), Qh(i));
 		}
 		if (estimator != ZERO_ESTIMATOR)
 		{
