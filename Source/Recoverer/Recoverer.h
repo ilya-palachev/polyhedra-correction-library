@@ -352,11 +352,11 @@ public:
 	PolyhedronPtr buildDualContours(ShadeContourDataPtr SCData);
 
 	/**
-	 * Builds naive matrix for support function estimation problem.
+	 * Build data for support function estimation problem.
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	SupportFunctionEstimationData* buildSupportMatrix(
+	SupportFunctionEstimationData* buildSFEData(
 			ShadeContourDataPtr SCData);
 
 	/**

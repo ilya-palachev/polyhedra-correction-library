@@ -173,7 +173,7 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
 	DEBUG_START;
 
 	SupportFunctionEstimationData* data =
-			buildSupportMatrix(SCData);
+			buildSFEData(SCData);
 
 	ofstream fileMatrix;
 	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
@@ -1433,7 +1433,7 @@ auto supportItem_comparer = [](SupportItem a, SupportItem b)
 
 typedef std::set<SupportItem, decltype(supportItem_comparer)> SupportItemSet;
 
-SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
+SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -1546,7 +1546,7 @@ SupportFunctionEstimationData* Recoverer::buildSupportMatrix(
 		numHvaluesInit);
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			numHvalues, Q.rows(), Q, hvalues);
+			numHvalues, Q.rows(), Q, hvalues, hvalues);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
@@ -1765,7 +1765,7 @@ PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
 #endif /* USE_IPOPT */
 
 	/* Build problem data. */
-	SupportFunctionEstimationData *data = buildSupportMatrix(SCData);
+	SupportFunctionEstimationData *data = buildSFEData(SCData);
 
 	switch (estimator)
 	{
