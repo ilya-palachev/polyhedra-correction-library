@@ -317,6 +317,13 @@ public:
 	void buildNaiveMatrix(ShadeContourDataPtr SCData);
 
 	/**
+	 * Builds naive polyhedron from support planes
+	 *
+	 * @param supportPlanes	Vector of support planes
+	 */
+	PolyhedronPtr buildPolyhedronFromPlanes(vector<Plane> supportPlanes);
+
+	/**
 	 * Builds naive polyhedron using naive approach that intersect half-spaces
 	 * corresponding to support planes.
 	 *

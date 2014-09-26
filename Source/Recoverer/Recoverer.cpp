@@ -192,6 +192,21 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
+PolyhedronPtr Recoverer::buildPolyhedronFromPlanes(vector<Plane> supportPlanes)
+{
+	DEBUG_START;
+	/* 1. Map planes to dual space to obtain the set of points in it. */
+	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
+
+	/* 2. Construct convex hull in the dual space. */
+	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
+
+	/* 3. Map dual polyhedron to the primal space. */
+	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
+	DEBUG_END;
+	return polyhedron;
+}
+
 PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -209,14 +224,8 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	DEBUG_PRINT("Number of extracted support planes: %ld",
 		(long unsigned int) supportPlanes.size());
 
-	/* 3. Map planes to dual space to obtain the set of points in it. */
-	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
-
-	/* 4. Construct convex hull in the dual space. */
-	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
-
-	/* 5. Map dual polyhedron to the primal space. */
-	PolyhedronPtr polyhedron = buildDualPolyhedron(polyhedronDual);
+	/* 3. Build polyhedron from extracted support planes. */
+	PolyhedronPtr polyhedron = buildPolyhedronFromPlanes(supportPlanes);
 
 	DEBUG_END;
 	return polyhedron;
@@ -1495,7 +1504,11 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
 	SparseMatrix Q = Qt.transpose();
-	
+
+	/* 
+	 * 5.1. Build vector of support values associated with new order of
+	 * vertices.
+	 */
 	long int numHvalues = Q.cols();
 	VectorXd hvalues(numHvalues);
 	
@@ -1517,6 +1530,26 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 			result->u.y, result->u.z);
 		++i;
 	}
+
+	/*
+	 * 5.2. Build strting point for support function estimation.
+	 * To do this, we construct naive polyhedron and calculate its support
+	 * values
+	 */
+	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanes);
+	VectorXd startingVector(numHvalues);
+	iValue = 0;
+	for (auto &direction: supportDirections)
+	{
+		double max = 0.;
+		for (int iVertex = 0; iVertex < p->numVertices; ++iVertex)
+		{
+			double product = direction * p->vertices[iVertex];
+			max = product > max ? product : max;
+		}
+		startingVector(iValue) = max;
+	}
+	
 
 /* TODO: Fix this method and use it. */
 #if 0
@@ -1546,7 +1579,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		numHvaluesInit);
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			numHvalues, Q.rows(), Q, hvalues, hvalues);
+			numHvalues, Q.rows(), Q, hvalues, startingVector);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
