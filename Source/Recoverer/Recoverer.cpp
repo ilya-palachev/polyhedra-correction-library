@@ -38,6 +38,9 @@
 
 using namespace std;
 
+static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
+	RecovererEstimator estimator);
+
 char *makeNameWithSuffix(char *outputName, const char *suffix)
 {
 	char *name = (char*) malloc(strlen(outputName) + strlen(suffix) + 1);
@@ -1530,6 +1533,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 			result->u.y, result->u.z);
 		++i;
 	}
+	ASSERT(supportDirections.size() == polyhedron.size_of_vertices());
 
 	/*
 	 * 5.2. Build strting point for support function estimation.
@@ -1547,9 +1551,14 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 			double product = direction * p->vertices[iVertex];
 			max = product > max ? product : max;
 		}
+		DEBUG_PRINT("starting vector, value #%d = %le", iValue, max);
+		ASSERT(max >= 0.);
 		startingVector(iValue) = max;
+		++iValue;
 	}
-	
+	DEBUG_PRINT("============== Preliminary estimation =================");
+	printEstimationReport(Q, hvalues, startingVector, estimator);
+	DEBUG_PRINT("========== End of preliminary estimation ==============");
 
 /* TODO: Fix this method and use it. */
 #if 0
