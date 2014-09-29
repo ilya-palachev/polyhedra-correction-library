@@ -1219,6 +1219,7 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 			det2 = -det2;
 			det3 = -det3;
 			det4 = -det4;
+			det = -det;
 		}
 
 		if (ifScaleMatrix)
@@ -1231,6 +1232,10 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 			det3 *= coeff;
 			det4 *= coeff;
 		}
+		DEBUG_PRINT("%d: det1 = %le, det2 = %le, det3 = %le, "
+			"det4 = %le, det = %le", iCondition, det1, det2, det3,
+			det4, det);
+		ASSERT(det > 0);
 		
 		matrix.insert(iVertex1, iCondition) = det1;
 		matrix.insert(iVertex2, iCondition) = det2;
