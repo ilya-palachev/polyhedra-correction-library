@@ -23,6 +23,8 @@
 #include <fstream>
 #include <boost/concept_check.hpp>
 
+#include <Eigen/Dense>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
@@ -1148,6 +1150,16 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 	return listTetrahedrons;
 }
 
+static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
+{
+	Eigen::Matrix3d A;
+	A << v1.x(), v1.y(), v1.z(),
+		v2.x(), v2.y(), v2.z(),
+		v3.x(), v3.y(), v3.z();
+	cout << A;
+	return A.determinant();
+}
+
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
@@ -1208,10 +1220,32 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		 * numbers iVertex1, iVertex2, iVertex3 and iVertex4 here.
 		 */
 
-		double det1 = + CGAL::determinant(u2, u3, u4);
-		double det2 = - CGAL::determinant(u1, u3, u4);
-		double det3 = + CGAL::determinant(u1, u2, u4);
-		double det4 = - CGAL::determinant(u1, u2, u3);
+		double det1 = CGAL::determinant(u2, u3, u4);
+		double det2 = CGAL::determinant(u1, u3, u4);
+		double det3 = CGAL::determinant(u1, u2, u4);
+		double det4 = CGAL::determinant(u1, u2, u3);
+
+		double edet1 = determinantEigen(u2, u3, u4);
+		double edet2 = determinantEigen(u1, u3, u4);
+		double edet3 = determinantEigen(u1, u2, u4);
+		double edet4 = determinantEigen(u1, u2, u3);
+
+		DEBUG_PRINT("det1 = %le, edet1 = %le, diff = %le", det1, edet1,
+			det1 - edet1);
+		ASSERT(fabs(det1 - edet1) <= 10. * EPS_MIN_DOUBLE);
+		DEBUG_PRINT("det2 = %le, edet2 = %le, diff = %le", det2, edet2,
+			det2 - edet2);
+		ASSERT(fabs(det2 - edet2) <= 10. * EPS_MIN_DOUBLE);
+		DEBUG_PRINT("det3 = %le, edet3 = %le, diff = %le", det3, edet3,
+			det3 - edet3);
+		ASSERT(fabs(det3 - edet3) <= 10. * EPS_MIN_DOUBLE);
+		DEBUG_PRINT("det4 = %le, edet4 = %le, diff = %le", det4, edet4,
+			det4 - edet4);
+		ASSERT(fabs(det4 - edet4) <= 10. * EPS_MIN_DOUBLE);
+
+		det2 = -det2;
+		det4 = -det4;
+
 		double det = det1 + det2 + det3 + det4;
 		if (det < 0)
 		{
@@ -1561,6 +1595,9 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	 * values
 	 */
 	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanes);
+	DEBUG_PRINT("Constructed starting polyhedron with %d vertices and %d "
+		"facets from %ld planes", p->numVertices, p->numFacets,
+		supportPlanes.size());
 	VectorXd startingVector(numHvalues);
 	iValue = 0;
 	for (auto &direction: supportDirections)
