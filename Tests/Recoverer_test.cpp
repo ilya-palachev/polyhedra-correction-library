@@ -1117,6 +1117,8 @@ void runVerboseRecovery(CommandLineOptions* options,
 {
 	DEBUG_START;
 	double max = 0., maxConv = 0., maxRec = 0.;
+
+	recoverer->buildNaiveMatrix(data);
 	
 	/* Buid polyhedron consisting of shadow contours. */
 	PolyhedronPtr p = recoverer->buildContours(data);

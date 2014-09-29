@@ -175,12 +175,16 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
+	initData(SCData);
+
 	SupportFunctionEstimationData* data =
 			buildSFEData(SCData);
 
 	ofstream fileMatrix;
 	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
+	DEBUG_PRINT("Printing to %s", name);
 	fileMatrix.open(name);
+	ASSERT(fileMatrix);
 	free(name);
 	fileMatrix << data->supportMatrix();
 	fileMatrix.close();
@@ -188,6 +192,7 @@ void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
 	ofstream fileVector;
 	name = makeNameWithSuffix(outputName, ".support-vector.mat");
 	fileVector.open(name);
+	ASSERT(fileVector);
 	free(name);
 	fileVector << data->supportVector();
 	fileVector.close();
@@ -1477,6 +1482,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 
 		/* Assert that d != 0*/
 		ASSERT(fpclassify(plane.dist) != FP_ZERO);
+		ASSERT(fabs(plane.dist) > EPS_MIN_DOUBLE);
 
 		/* Assert that ||nu|| == 1 */
 		double DEBUG_VARIABLE norm = sqrt(qmod(plane.norm));
@@ -1509,6 +1515,14 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
 	SparseMatrix Q = Qt.transpose();
 
+	ofstream fileMatrix;
+	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
+	DEBUG_PRINT("Printing to %s", name);
+	fileMatrix.open(name);
+	ASSERT(fileMatrix);
+	free(name);
+	fileMatrix << Q;
+	fileMatrix.close();
 	/* 
 	 * 5.1. Build vector of support values associated with new order of
 	 * vertices.
