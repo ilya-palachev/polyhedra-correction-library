@@ -527,6 +527,7 @@ vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
 
 		/* 3 multiplications is more efficient than 3 divisions: */
 		ASSERT(fpclassify(plane.dist) != FP_ZERO);
+		ASSERT(fabs(plane.dist) > EPS_MIN_DOUBLE);
 		vector *= -1. / plane.dist;
 		vectors.push_back(vector);
 
