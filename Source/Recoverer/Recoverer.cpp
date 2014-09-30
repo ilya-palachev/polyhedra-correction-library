@@ -1225,10 +1225,10 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		double det3 = CGAL::determinant(u1, u2, u4);
 		double det4 = CGAL::determinant(u1, u2, u3);
 
-		double edet1 = determinantEigen(u2, u3, u4);
-		double edet2 = determinantEigen(u1, u3, u4);
-		double edet3 = determinantEigen(u1, u2, u4);
-		double edet4 = determinantEigen(u1, u2, u3);
+		double DEBUG_VARIABLE edet1 = determinantEigen(u2, u3, u4);
+		double DEBUG_VARIABLE edet2 = determinantEigen(u1, u3, u4);
+		double DEBUG_VARIABLE edet3 = determinantEigen(u1, u2, u4);
+		double DEBUG_VARIABLE edet4 = determinantEigen(u1, u2, u3);
 
 		DEBUG_PRINT("det1 = %le, edet1 = %le, diff = %le", det1, edet1,
 			det1 - edet1);
