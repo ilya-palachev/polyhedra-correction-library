@@ -1585,18 +1585,29 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	Polyhedron_3 polyhedron = constructHullAndIDmaps(directions);
 	checkPolyhedronIDs(polyhedron);
 
+#ifndef NDEBUG
+	PolyhedronPtr polyhedronTmp(new Polyhedron(polyhedron));
+	char *name = makeNameWithSuffix(outputName,
+		".polyhedron_of_directions.ply");
+	polyhedronTmp->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "polyhedron_of_directions");
+	free(name);
+#endif
+
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Q = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
 //	SparseMatrix Q = Qt.transpose();
 
+#ifndef NDEBUG
 	ofstream fileMatrix;
-	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
+	name = makeNameWithSuffix(outputName, ".support-matrix.mat");
 	DEBUG_PRINT("Printing to %s", name);
 	fileMatrix.open(name);
 	ASSERT(fileMatrix);
 	free(name);
 	fileMatrix << Q;
 	fileMatrix.close();
+#endif
 	/* 
 	 * 5.1. Build vector of support values associated with new order of
 	 * vertices.
@@ -1615,6 +1626,9 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		SupportItem item = {v, 0};
 		auto result = supportItems.find(item);
 		ASSERT(result != supportItems.end() && "Cannot found an item");
+		ASSERT(fpclassify(v.x - result->u.x) == FP_ZERO);
+		ASSERT(fpclassify(v.y - result->u.y) == FP_ZERO);
+		ASSERT(fpclassify(v.z - result->u.z) == FP_ZERO);
 		hvalues(i) = result->h;
 		supportDirections.push_back(result->u);
 		DEBUG_PRINT("   constructed hvalue = %lf for direction "
@@ -1629,7 +1643,16 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	 * To do this, we construct naive polyhedron and calculate its support
 	 * values
 	 */
+
+#ifndef NDEBUG
 	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanes);
+	name = makeNameWithSuffix(outputName,
+		".polyhedron_starting_point.ply");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "polyhedron_starting_point");
+	free(name);
+#endif
+	
 	DEBUG_PRINT("Constructed starting polyhedron with %d vertices and %d "
 		"facets from %ld planes", p->numVertices, p->numFacets,
 		supportPlanes.size());
@@ -1770,10 +1793,33 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 				DEBUG_PRINT("Q * h[%d] : %le -> %le", i,
 					Qh0(i), Qh(i));
 		}
-		if (estimator != ZERO_ESTIMATOR)
+		if (Qh(i) >= -ACCEPTED_TOL || estimator == ZERO_ESTIMATOR)
 		{
-			ASSERT(Qh(i) >= -ACCEPTED_TOL);
+			continue;
 		}
+		double sum = 0.;
+		for (int k = 0; k < Q.outerSize(); ++k)
+		{
+			for (Eigen::SparseMatrix<double>::InnerIterator
+				it(Q, k); it; ++it)
+			{
+				if (it.row() == i)
+				{
+					double local = it.value()
+						* h(it.col());
+					DEBUG_PRINT("Q[%d][%d] = %le",
+						it.row(), it.col(),
+						it.value());
+					DEBUG_PRINT(" *   h[%d] = %le",
+						it.col(), h(it.col()));
+					DEBUG_PRINT(" = %le", local);
+					DEBUG_PRINT("---------------");
+					sum += local;
+				}
+			}
+		}
+		ASSERT(fpclassify(Qh(i) - sum) == FP_ZERO);
+		ASSERT(Qh(i) >= -ACCEPTED_TOL);
 	}
 	DEBUG_END;
 }
