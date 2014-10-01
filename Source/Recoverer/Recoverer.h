@@ -407,6 +407,6 @@ public:
 
 typedef shared_ptr<Recoverer> RecovererPtr;
 
-char *makeNameWithSuffix(char *outputName, const char *suffix);
+char *makeNameWithSuffix(const char *outputName, const char *suffix);
 
 #endif /* RECOVERER_H */

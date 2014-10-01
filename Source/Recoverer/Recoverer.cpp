@@ -43,7 +43,7 @@ using namespace std;
 static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	RecovererEstimator estimator);
 
-char *makeNameWithSuffix(char *outputName, const char *suffix)
+char *makeNameWithSuffix(const char *outputName, const char *suffix)
 {
 	char *name = (char*) malloc(strlen(outputName) + strlen(suffix) + 1);
 	name[0] = '\0';
@@ -1152,12 +1152,16 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 
 static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
 {
+	DEBUG_START;
 	Eigen::Matrix3d A;
 	A << v1.x(), v1.y(), v1.z(),
 		v2.x(), v2.y(), v2.z(),
 		v3.x(), v3.y(), v3.z();
 	cout << A;
-	return A.determinant();
+	double det = A.determinant();
+	DEBUG_PRINT("det calculated by Eigen is: %le", det);
+	DEBUG_END;
+	return det;
 }
 
 /**
@@ -1187,12 +1191,13 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 
 	/*
 	 * Create Eigen sparse matrix with
-	 * N = numHvalues rows
-	 * M = numConditions columns
+	 * N = numHvalues columns
+	 * M = numConditions rows
 	 */
-	SparseMatrix matrix(numHvalues, numConditions);
-	matrix.reserve(VectorXi::Constant(matrix.cols(),
-			NUM_NONZERO_COEFFICIENTS_IN_CONDITION));
+	SparseMatrix matrix(numConditions, numHvalues);
+	typedef Eigen::Triplet<double> Triplet;
+	std::vector<Triplet> triple;
+	triple.reserve(4 * numConditions);
 
 	int iCondition = 0;
 	for (auto &tetrahedron : listTetrahedrons)
@@ -1204,9 +1209,13 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		Vector_3 u4(zero, tetrahedron.v3->point());
 
 		int iVertex1 = tetrahedron.v0->id;
+		DEBUG_PRINT("iVertex1 = %d", iVertex1);
 		int iVertex2 = tetrahedron.v1->id;
+		DEBUG_PRINT("iVertex2 = %d", iVertex2);
 		int iVertex3 = tetrahedron.v2->id;
+		DEBUG_PRINT("iVertex3 = %d", iVertex3);
 		int iVertex4 = tetrahedron.v3->id;
+		DEBUG_PRINT("iVertex4 = %d", iVertex4);
 
 		/*
 		 * Usual condition looks as follows:
@@ -1270,15 +1279,41 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 			"det4 = %le, det = %le", iCondition, det1, det2, det3,
 			det4, det);
 		ASSERT(det > 0);
-		
-		matrix.insert(iVertex1, iCondition) = det1;
-		matrix.insert(iVertex2, iCondition) = det2;
-		matrix.insert(iVertex3, iCondition) = det3;
-		matrix.insert(iVertex4, iCondition) = det4;
+
+		DEBUG_PRINT("Pushing [%d][%d]-th element = %le", iCondition, iVertex1, det1);
+		triple.push_back(Triplet(iCondition, iVertex1, det1));
+		DEBUG_PRINT("Pushing [%d][%d]-th element = %le", iCondition, iVertex2, det2);
+		triple.push_back(Triplet(iCondition, iVertex2, det2));
+		DEBUG_PRINT("Pushing [%d][%d]-th element = %le", iCondition, iVertex3, det3);
+		triple.push_back(Triplet(iCondition, iVertex3, det3));
+		DEBUG_PRINT("Pushing [%d][%d]-th element = %le", iCondition, iVertex4, det4);
+		triple.push_back(Triplet(iCondition, iVertex4, det4));
+#if 0
+		matrix.insert(iCondition, iVertex1) = det1;
+		matrix.insert(iCondition, iVertex2) = det2;
+		matrix.insert(iCondition, iVertex3) = det3;
+		matrix.insert(iCondition, iVertex4) = det4;
+#endif
 
 		++iCondition;
 	}
+	matrix.setFromTriplets(triple.begin(), triple.end());
 
+#if 0
+	char *s = (char*) malloc(sizeof(int) * sizeof(char) + 4);
+	for (int iCondition = 0; iCondition < numConditions; ++iCondition)
+	{
+		DEBUG_PRINT("Printing row #%d", iCondition);
+		ofstream fileRow;
+		sprintf(s, "%d.txt", iCondition);
+		char *name = makeNameWithSuffix("matrix-row-", s);
+		fileRow.open(name);
+		ASSERT(fileRow);
+		free(name);
+		SparseMatrix row = matrix.row(iCondition);
+		fileRow << row;
+	}
+#endif
 	DEBUG_END;
 	return matrix;
 }
@@ -1551,8 +1586,8 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5. Build matrix by the polyhedron. */
-	SparseMatrix Qt = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
-	SparseMatrix Q = Qt.transpose();
+	SparseMatrix Q = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
+//	SparseMatrix Q = Qt.transpose();
 
 	ofstream fileMatrix;
 	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
@@ -1649,7 +1684,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
-	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, Qt);
+	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, Q);
 	ASSERT_PRINT(ifCheckSuccessful, "Bad matrix.");
 
 	/*
