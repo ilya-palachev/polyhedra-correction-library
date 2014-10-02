@@ -117,9 +117,14 @@
 #define GETOPT_QUESTION '?'
 
 /**
+ * Option "-g" sets the minimal distance between support directions.
+ */
+#define OPTION_DIST_DIRECTION 'g'
+
+/**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:o:pr:svxz"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdg:l:o:pr:svxz"
 
 /**
  * The definition of corresponding long options list.
@@ -197,6 +202,12 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_SCALE_MATRIX
+	},
+	{
+		"dist-direction",
+		required_argument,
+		0,
+		OPTION_DIST_DIRECTION
 	},
 	{
 		"verbose",
@@ -303,6 +314,9 @@ typedef struct
 
 	/** Whether to regaularize support matrix. */
 	bool ifRegularize;
+
+	/** The minimal distance between support directions. */
+	double distDirectionMinimal;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -427,6 +441,8 @@ void printUsage(int argc, char** argv)
 		OPTION_RECOVER, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
 		OPTION_SCALE_MATRIX, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tMinimal distance between support "
+		"directions.\n", OPTION_DIST_DIRECTION, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable verbose mode.\n",
 		OPTION_VERBOSE, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
@@ -519,6 +535,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifConvexifyContours = false;
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
+	options->distDirectionMinimal = 0.;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -692,6 +709,21 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
+			break;
+		case OPTION_DIST_DIRECTION:
+			options->distDirectionMinimal = strtod(optarg, &charMistaken);
+			
+			/* If user gives invalid character, the charMistaken is set to it */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv, charMistaken);
+			}
+
+			/* In case of underflow or overflow errno is set to ERANGE. */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv) ;
+			}
 			break;
 		case OPTION_VERBOSE:
 			options->ifVerbose = true;
@@ -982,6 +1014,9 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 {
 	DEBUG_START;
 	RecovererPtr recoverer(new Recoverer());
+
+	/* Set the minimal distance between support directins. */
+	recoverer->setDistDirectionMinimal(options->distDirectionMinimal);
 
 	/* Set the name of output file. */
 	recoverer->setOutputName(options->outputName);

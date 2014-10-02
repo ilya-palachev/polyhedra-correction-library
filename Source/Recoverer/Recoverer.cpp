@@ -87,6 +87,7 @@ Recoverer::Recoverer() :
 	ifConvexifyContours(false),
 	ifRegularize(false),
 	ifScaleMatrix(false),
+	distDirectionMinimal(0.),
 	iXmax(0),
 	iYmax(0),
 	iZmax(0),
@@ -170,6 +171,13 @@ void Recoverer::enableMatrixScaling(void)
 {
 	DEBUG_START;
 	ifScaleMatrix = true;
+	DEBUG_END;
+}
+
+void Recoverer::setDistDirectionMinimal(double dist)
+{
+	DEBUG_START;
+	distDirectionMinimal = dist;
 	DEBUG_END;
 }
 
@@ -1168,7 +1176,6 @@ static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
 	return det;
 }
 
-#define DIST_DIRECTION_MINIMAL 3e-3
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
@@ -1178,7 +1185,7 @@ static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
  * @param matrix		The matrix of constraints (output)
  */
 static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
-		bool ifScaleMatrix)
+		bool ifScaleMatrix, double distDirectionMinimal)
 {
 	DEBUG_START;
 
@@ -1257,12 +1264,12 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		double d34 = (u3 - u4).squared_length();
 		DEBUG_PRINT("||u3 - u4|| = %le", d34);
 		
-		if (d12 < DIST_DIRECTION_MINIMAL
-			|| d13 < DIST_DIRECTION_MINIMAL
-			|| d14 < DIST_DIRECTION_MINIMAL
-			|| d23 < DIST_DIRECTION_MINIMAL
-			|| d24 < DIST_DIRECTION_MINIMAL
-			|| d34 < DIST_DIRECTION_MINIMAL)
+		if (d12 < distDirectionMinimal
+			|| d13 < distDirectionMinimal
+			|| d14 < distDirectionMinimal
+			|| d23 < distDirectionMinimal
+			|| d24 < distDirectionMinimal
+			|| d34 < distDirectionMinimal)
 		{
 			ERROR_PRINT("Too close directions detected!");
 			continue;
@@ -1650,7 +1657,8 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 #endif
 
 	/* 5. Build matrix by the polyhedron. */
-	SparseMatrix Q = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix);
+	SparseMatrix Q = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix,
+		distDirectionMinimal);
 //	SparseMatrix Q = Qt.transpose();
 
 #ifndef NDEBUG

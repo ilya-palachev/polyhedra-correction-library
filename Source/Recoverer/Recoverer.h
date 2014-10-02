@@ -111,6 +111,9 @@ private:
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
 
+	/** The distance below which we consider support directions equal. */
+	double distDirectionMinimal;
+
 	/** ID of vertex with maximal X coordinate. */
 	int iXmax;
 
@@ -308,6 +311,13 @@ public:
 	 * Enables the scaling of the matrix of the problem.
 	 */
 	void enableMatrixScaling(void);
+
+	/**
+	 * Sets the minimal direction distance.
+	 *
+	 * @param dist	The minimal distance.
+	 */
+	void setDistDirectionMinimal(double dist);
 
 	/**
 	 * Prints the problems to files (for debugging purposes).
