@@ -1699,8 +1699,8 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	 * values
 	 */
 
-#ifndef NDEBUG
 	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanesProcessed);
+#ifndef NDEBUG
 	name = makeNameWithSuffix(outputName,
 		".polyhedron_starting_point.ply");
 	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
