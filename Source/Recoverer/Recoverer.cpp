@@ -1159,14 +1159,16 @@ static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
 		v3.x(), v3.y(), v3.z(), 0., 0.,
 		0., 0., 0., 1., 0.,
 		0., 0., 0., 0., 1.;
+#ifndef NDEBUG
 	std::cerr << A << std::endl;
+#endif
 	double det = A.determinant();
 	DEBUG_PRINT("det calculated by Eigen is: %le", det);
 	DEBUG_END;
 	return det;
 }
 
-#define DIST_DIRECTION_MINIMAL 3e-6
+#define DIST_DIRECTION_MINIMAL 3e-3
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
