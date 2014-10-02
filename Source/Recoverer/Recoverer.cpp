@@ -1153,17 +1153,20 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
 {
 	DEBUG_START;
-	Eigen::Matrix3d A;
-	A << v1.x(), v1.y(), v1.z(),
-		v2.x(), v2.y(), v2.z(),
-		v3.x(), v3.y(), v3.z();
-	cout << A;
+	Eigen::MatrixXd A(5, 5);
+	A << v1.x(), v1.y(), v1.z(), 0., 0.,
+		v2.x(), v2.y(), v2.z(), 0., 0.,
+		v3.x(), v3.y(), v3.z(), 0., 0.,
+		0., 0., 0., 1., 0.,
+		0., 0., 0., 0., 1.;
+	std::cerr << A << std::endl;
 	double det = A.determinant();
 	DEBUG_PRINT("det calculated by Eigen is: %le", det);
 	DEBUG_END;
 	return det;
 }
 
+#define DIST_DIRECTION_MINIMAL 3e-6
 /**
  * Builds matrix of constraints from the polyhedron (which represents a convex
  * hull of the set of directions for which the support values are given).
@@ -1202,11 +1205,16 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 	int iCondition = 0;
 	for (auto &tetrahedron : listTetrahedrons)
 	{
+		DEBUG_PRINT("---- Preparing %d-th condition ----", iCondition);
 		Point_3 zero(0., 0., 0.);
 		Vector_3 u1(zero, tetrahedron.v0->point());
+		DEBUG_PRINT("u1 = (%le, %le, %le)", u1.x(), u1.y(), u1.z());
 		Vector_3 u2(zero, tetrahedron.v1->point());
+		DEBUG_PRINT("u2 = (%le, %le, %le)", u2.x(), u2.y(), u2.z());
 		Vector_3 u3(zero, tetrahedron.v2->point());
+		DEBUG_PRINT("u3 = (%le, %le, %le)", u3.x(), u3.y(), u3.z());
 		Vector_3 u4(zero, tetrahedron.v3->point());
+		DEBUG_PRINT("u4 = (%le, %le, %le)", u4.x(), u4.y(), u4.z());
 
 		int iVertex1 = tetrahedron.v0->id;
 		DEBUG_PRINT("iVertex1 = %d", iVertex1);
@@ -1216,6 +1224,47 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 		DEBUG_PRINT("iVertex3 = %d", iVertex3);
 		int iVertex4 = tetrahedron.v3->id;
 		DEBUG_PRINT("iVertex4 = %d", iVertex4);
+
+		DEBUG_PRINT("u1 - u2 = (%le, %le, %le)", u1.x() - u2.x(),
+			u1.y() - u2.y(), u1.z() - u2.z());
+		double d12 = (u1 - u2).squared_length();
+		DEBUG_PRINT("||u1 - u2|| = %le", d12);
+
+		DEBUG_PRINT("u1 - u3 = (%le, %le, %le)", u1.x() - u3.x(),
+			u1.y() - u3.y(), u1.z() - u3.z());
+		double d13 = (u1 - u3).squared_length();
+		DEBUG_PRINT("||u1 - u3|| = %le", d13);
+
+		DEBUG_PRINT("u1 - u4 = (%le, %le, %le)", u1.x() - u4.x(),
+			u1.y() - u4.y(), u1.z() - u4.z());
+		double d14 = (u1 - u4).squared_length();
+		DEBUG_PRINT("||u1 - u4|| = %le", d14);
+
+		DEBUG_PRINT("u2 - u3 = (%le, %le, %le)", u2.x() - u3.x(),
+			u2.y() - u3.y(), u2.z() - u3.z());
+		double d23 = (u2 - u3).squared_length();
+		DEBUG_PRINT("||u2 - u3|| = %le", d23);
+
+		DEBUG_PRINT("u2 - u4 = (%le, %le, %le)", u2.x() - u4.x(),
+			u2.y() - u4.y(), u2.z() - u4.z());
+		double d24 = (u2 - u4).squared_length();
+		DEBUG_PRINT("||u2 - u4|| = %le", d24);
+
+		DEBUG_PRINT("u3 - u4 = (%le, %le, %le)", u3.x() - u4.x(),
+			u3.y() - u4.y(), u3.z() - u4.z());
+		double d34 = (u3 - u4).squared_length();
+		DEBUG_PRINT("||u3 - u4|| = %le", d34);
+		
+		if (d12 < DIST_DIRECTION_MINIMAL
+			|| d13 < DIST_DIRECTION_MINIMAL
+			|| d14 < DIST_DIRECTION_MINIMAL
+			|| d23 < DIST_DIRECTION_MINIMAL
+			|| d24 < DIST_DIRECTION_MINIMAL
+			|| d34 < DIST_DIRECTION_MINIMAL)
+		{
+			ERROR_PRINT("Too close directions detected!");
+			continue;
+		}
 
 		/*
 		 * Usual condition looks as follows:
@@ -1624,6 +1673,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	int i = 0;
 	supportDirections.clear();
 	ASSERT(supportDirections.empty());
+	vector<Plane> supportPlanesProcessed;
 	for (auto vertex = polyhedron.vertices_begin();
 		vertex != polyhedron.vertices_end(); ++vertex)
 	{
@@ -1637,6 +1687,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ASSERT(fpclassify(v.z - result->u.z) == FP_ZERO);
 		hvalues(i) = result->h;
 		supportDirections.push_back(result->u);
+		supportPlanesProcessed.push_back(Plane(result->u, -result->h));
 		DEBUG_PRINT("   constructed hvalue = %lf for direction "
 			"(%lf, %lf, %lf)", result->h, result->u.x,
 			result->u.y, result->u.z);
@@ -1651,7 +1702,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	 */
 
 #ifndef NDEBUG
-	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanes);
+	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanesProcessed);
 	name = makeNameWithSuffix(outputName,
 		".polyhedron_starting_point.ply");
 	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
