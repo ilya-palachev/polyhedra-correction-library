@@ -1529,6 +1529,12 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
+#ifndef NDEBUG
+	char *name = makeNameWithSuffix(outputName,
+		".contours_initial.dat");
+	SCData->fprintDefault(name);
+	free(name);
+#endif
 
 	/* 1. Balance contours if it is required. */
 	if (ifBalancing)
@@ -1587,7 +1593,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 
 #ifndef NDEBUG
 	PolyhedronPtr polyhedronTmp(new Polyhedron(polyhedron));
-	char *name = makeNameWithSuffix(outputName,
+	name = makeNameWithSuffix(outputName,
 		".polyhedron_of_directions.ply");
 	polyhedronTmp->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 		name, "polyhedron_of_directions");
