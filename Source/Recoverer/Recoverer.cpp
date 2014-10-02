@@ -1511,9 +1511,9 @@ void Recoverer::regularizeSupportMatrix(
  * corresponding to the eigenvalue 0 (i. e. basis kernel vectors)
  *
  * @param polyhedron	The polyhedron (convex hull of support directions)
- * @param Qt			The transpose of the support matrix
+ * @param Q			The support matrix
  */
-static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
+static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Q)
 {
 	DEBUG_START;
 	/* Set eigenvectors vx, vy, vz. */
@@ -1533,8 +1533,6 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Qt)
 		eigenVectorZ(iVertex) = point.z();
 		++itVertex;
 	}
-
-	SparseMatrix Q = SparseMatrix(Qt.transpose());
 
 	/*
 	 * Check that eigenVectorX, eigenVectorY, eigenVectorZ really lie in the
