@@ -1185,16 +1185,7 @@ static double determinantEigen(Vector_3 v1, Vector_3 v2, Vector_3 v3)
 	return det;
 }
 
-/**
- * Builds matrix of constraints from the polyhedron (which represents a convex
- * hull of the set of directions for which the support values are given).
- *
- * @param polyhedron	Convex hull of the set of directions
- * @param numConditions	The number of constraints (output)
- * @param matrix		The matrix of constraints (output)
- */
-static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
-		bool ifScaleMatrix, double distDirectionMinimal)
+SparseMatrix Recoverer::buildMatrixByPolyhedron(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 
@@ -1382,6 +1373,17 @@ static SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron,
 	}
 #endif
 	DEBUG_END;
+
+#ifndef NDEBUG
+	ofstream fileMatrix;
+	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
+	DEBUG_PRINT("Printing to %s", name);
+	fileMatrix.open(name);
+	ASSERT(fileMatrix);
+	free(name);
+	fileMatrix << matrix;
+	fileMatrix.close();
+#endif
 	return matrix;
 }
 
@@ -1670,20 +1672,8 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	auto polyhedron = makePolyhedronOfDirections(supportItems);
 
 	/* 5. Build matrix by the polyhedron. */
-	SparseMatrix Q = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix,
-		distDirectionMinimal);
-//	SparseMatrix Q = Qt.transpose();
+	auto Q = buildMatrixByPolyhedron(polyhedron);
 
-#ifndef NDEBUG
-	ofstream fileMatrix;
-	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
-	DEBUG_PRINT("Printing to %s", name);
-	fileMatrix.open(name);
-	ASSERT(fileMatrix);
-	free(name);
-	fileMatrix << Q;
-	fileMatrix.close();
-#endif
 	/* 
 	 * 5.1. Build vector of support values associated with new order of
 	 * vertices.
@@ -1724,7 +1714,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 
 	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanesProcessed);
 #ifndef NDEBUG
-	name = makeNameWithSuffix(outputName,
+	char *name = makeNameWithSuffix(outputName,
 		".polyhedron_starting_point.ply");
 	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
 		name, "polyhedron_starting_point");

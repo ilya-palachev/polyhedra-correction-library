@@ -278,6 +278,15 @@ private:
 	 * @param supportItems	The set of support items.
 	 */
 	Polyhedron_3 makePolyhedronOfDirections(SupportItemSet supportItems);
+	
+	/**
+	 * Builds matrix of constraints from the polyhedron (which represents
+	 * a convex hull of the set of directions for which the support values
+	 * are given).
+	 *
+	 * @param polyhedron	Convex hull of the set of directions
+	 */
+	SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron);
 
 public:
 
