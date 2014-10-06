@@ -1578,6 +1578,53 @@ auto supportItem_comparer = [](SupportItem a, SupportItem b)
 
 typedef std::set<SupportItem, decltype(supportItem_comparer)> SupportItemSet;
 
+/**
+ * Creates the lexicographically sorted set of support items from the vector
+ * of support planes
+ *
+ * @param supportPlanes	The vector of support planes.
+ */
+static SupportItemSet makeSupportItemSet(vector<Plane> supportPlanes)
+{
+	DEBUG_START;
+	int iValue = 0;
+	SupportItemSet supportItems(supportItem_comparer);
+	for (auto &plane : supportPlanes)
+	{
+		DEBUG_PRINT("Processing support plane "
+			"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
+			plane.norm.x, plane.norm.y, plane.norm.z,
+			plane.dist);
+
+		/* Assert that d != 0*/
+		ASSERT(fpclassify(plane.dist) != FP_ZERO);
+		ASSERT(fabs(plane.dist) > EPS_MIN_DOUBLE);
+
+		/* Assert that ||nu|| == 1 */
+		double DEBUG_VARIABLE norm = sqrt(qmod(plane.norm));
+		DEBUG_PRINT("norm = %lf, norm - 1. = %le", norm, norm - 1.);
+		ASSERT(fabs(norm - 1.) <= 10. * EPS_MIN_DOUBLE);
+		double supportValue = -plane.dist;
+
+		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
+			iValue, plane.norm.x, plane.norm.y, plane.norm.z);
+		ASSERT(supportValue > 0.);
+		DEBUG_PRINT("Adding %d-th support value %lf",
+			iValue, supportValue);
+		++iValue;
+
+		/*
+		 * Save new support direction (will be used in
+		 * recoverCorrectedData function).
+		 */
+		ASSERT(plane.dist < 0.);
+		SupportItem item = {plane.norm, supportValue};
+		supportItems.insert(item);
+	}
+	DEBUG_END;
+	return supportItems;
+}
+
 SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
@@ -1601,41 +1648,12 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		(long unsigned int) supportPlanes.size());
 
 	/* 3. Get normal vectors of support planes and normalize them. */
+	auto supportItems = makeSupportItemSet(supportPlanes);
+
 	vector<Vector3d> directions;
-	int iValue = 0;
-	SupportItemSet supportItems(supportItem_comparer);
-	for (auto &plane : supportPlanes)
+	for (auto &supportItem: supportItems)
 	{
-		DEBUG_PRINT("Processing support plane "
-			"(%lf)x + (%lf)y + (%lf)z + (%lf) = 0",
-			plane.norm.x, plane.norm.y, plane.norm.z,
-			plane.dist);
-
-		/* Assert that d != 0*/
-		ASSERT(fpclassify(plane.dist) != FP_ZERO);
-		ASSERT(fabs(plane.dist) > EPS_MIN_DOUBLE);
-
-		/* Assert that ||nu|| == 1 */
-		double DEBUG_VARIABLE norm = sqrt(qmod(plane.norm));
-		DEBUG_PRINT("norm = %lf, norm - 1. = %le", norm, norm - 1.);
-		ASSERT(fabs(norm - 1.) <= 10. * EPS_MIN_DOUBLE);
-		double supportValue = -plane.dist;
-
-		DEBUG_PRINT("Adding %d-th direction vector (%lf, %lf, %lf)",
-			iValue, plane.norm.x, plane.norm.y, plane.norm.z);
-		directions.push_back(plane.norm);
-		ASSERT(supportValue > 0.);
-		DEBUG_PRINT("Adding %d-th support value %lf",
-			iValue, supportValue);
-		++iValue;
-
-		/*
-		 * Save new support direction (will be used in
-		 * recoverCorrectedData function).
-		 */
-		ASSERT(plane.dist < 0.);
-		SupportItem item = {plane.norm, supportValue};
-		supportItems.insert(item);
+		directions.push_back(supportItem.u);
 	}
 
 	/* 4. Construct convex hull of the set of normal vectors. */
@@ -1717,7 +1735,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		"facets from %ld planes", p->numVertices, p->numFacets,
 		supportPlanes.size());
 	VectorXd startingVector(numHvalues);
-	iValue = 0;
+	int iValue = 0;
 	for (auto &direction: supportDirections)
 	{
 		double max = 0.;
