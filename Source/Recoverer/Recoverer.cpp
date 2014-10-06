@@ -1661,7 +1661,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	/* 2. Extract support planes from shadow contour data. */
 	auto supportPlanes = extractSupportPlanes(SCData);
 
-	/* 3. Get normal vectors of support planes and normalize them. */
+	/* 3. Create set of support items from support planes. */
 	auto supportItems = makeSupportItemSet(supportPlanes);
 
 	/* 4. Construct convex hull of the set of normal vectors. */
@@ -1674,8 +1674,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	 * 5.1. Build vector of support values associated with new order of
 	 * vertices.
 	 */
-	long int numHvalues = Q.cols();
-	VectorXd hvalues(numHvalues);
+	VectorXd hvalues(Q.cols());
 	
 	int i = 0;
 	supportDirections.clear();
@@ -1720,7 +1719,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	DEBUG_PRINT("Constructed starting polyhedron with %d vertices and %d "
 		"facets from %ld planes", p->numVertices, p->numFacets,
 		supportPlanes.size());
-	VectorXd startingVector(numHvalues);
+	VectorXd startingVector(Q.cols());
 	int iValue = 0;
 	for (auto &direction: supportDirections)
 	{
@@ -1742,7 +1741,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	DEBUG_PRINT("Q is %d x %d matrix", Q.rows(), Q.cols());
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			numHvalues, Q.rows(), Q, hvalues, startingVector);
+			Q.cols(), Q.rows(), Q, hvalues, startingVector);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
