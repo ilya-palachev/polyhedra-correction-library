@@ -1562,22 +1562,6 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Q)
 		(errorZ2 < MAX_ACCEPTABLE_LINF_ERROR);
 }
 
-/** Item of support function measurement. */
-struct SupportItem
-{
-	Vector3d u; /**< the direction. */
-	double h;   /**< the support value. */
-	SupportItem() : u(Vector3d(0., 0., 0.)), h(0) {}
-	SupportItem(Vector3d u_, double h_) : u(u_), h(h_) {}
-};
-
-auto supportItem_comparer = [](SupportItem a, SupportItem b)
-{
-	return a.u < b.u;
-};
-
-typedef std::set<SupportItem, decltype(supportItem_comparer)> SupportItemSet;
-
 /**
  * Creates the lexicographically sorted set of support items from the vector
  * of support planes
@@ -1625,6 +1609,35 @@ static SupportItemSet makeSupportItemSet(vector<Plane> supportPlanes)
 	return supportItems;
 }
 
+/**
+ * Creates polyhedron of support directions from the set of support items
+ *
+ * @param supportItems	The set of support items.
+ */
+Polyhedron_3 Recoverer::makePolyhedronOfDirections(SupportItemSet supportItems)
+{
+	DEBUG_START;
+	vector<Vector3d> directions;
+	for (auto &supportItem: supportItems)
+	{
+		directions.push_back(supportItem.u);
+	}
+
+	Polyhedron_3 polyhedron = constructHullAndIDmaps(directions);
+	checkPolyhedronIDs(polyhedron);
+
+#ifndef NDEBUG
+	PolyhedronPtr polyhedronTmp(new Polyhedron(polyhedron));
+	char *name = makeNameWithSuffix(outputName,
+		".polyhedron_of_directions.ply");
+	polyhedronTmp->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "polyhedron_of_directions");
+	free(name);
+#endif
+	DEBUG_END;
+	return polyhedron;
+}
+
 SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
@@ -1650,24 +1663,8 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	/* 3. Get normal vectors of support planes and normalize them. */
 	auto supportItems = makeSupportItemSet(supportPlanes);
 
-	vector<Vector3d> directions;
-	for (auto &supportItem: supportItems)
-	{
-		directions.push_back(supportItem.u);
-	}
-
 	/* 4. Construct convex hull of the set of normal vectors. */
-	Polyhedron_3 polyhedron = constructHullAndIDmaps(directions);
-	checkPolyhedronIDs(polyhedron);
-
-#ifndef NDEBUG
-	PolyhedronPtr polyhedronTmp(new Polyhedron(polyhedron));
-	name = makeNameWithSuffix(outputName,
-		".polyhedron_of_directions.ply");
-	polyhedronTmp->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "polyhedron_of_directions");
-	free(name);
-#endif
+	auto polyhedron = makePolyhedronOfDirections(supportItems);
 
 	/* 5. Build matrix by the polyhedron. */
 	SparseMatrix Q = buildMatrixByPolyhedron(polyhedron, ifScaleMatrix,

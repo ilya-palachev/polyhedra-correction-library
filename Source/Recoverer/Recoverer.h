@@ -38,6 +38,7 @@
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadeContourData/ShadeContourData.h"
 #include "Recoverer/SupportFunctionEstimationData.h"
+#include "Recoverer/SupportItemSet.h"
 
 
 /**
@@ -263,6 +264,13 @@ private:
 	 */
 	void regularizeSupportMatrix(SupportFunctionEstimationData* data,
 			Polyhedron_3 polyhedron);
+
+	/**
+	 * Creates polyhedron of support directions from the set of support items
+	 *
+	 * @param supportItems	The set of support items.
+	 */
+	Polyhedron_3 makePolyhedronOfDirections(SupportItemSet supportItems);
 
 public:
 
