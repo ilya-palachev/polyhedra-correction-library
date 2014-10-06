@@ -257,8 +257,6 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 
 	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
-	DEBUG_PRINT("Number of extracted support planes: %ld",
-		(long unsigned int) supportPlanes.size());
 
 	/* 3. Build polyhedron from extracted support planes. */
 	PolyhedronPtr polyhedron = buildPolyhedronFromPlanes(supportPlanes);
@@ -279,8 +277,6 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 
 	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
-	DEBUG_PRINT("Number of extracted support planes: %ld",
-		(long unsigned int) supportPlanes.size());
 
 	/* 3. Map planes to dual space to obtain the set of points in it. */
 	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
@@ -529,6 +525,8 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
 			supportPlanes.push_back(plane);
 		}
 	}
+	DEBUG_PRINT("Number of extracted support planes: %ld",
+		(long unsigned int) supportPlanes.size());
 	DEBUG_END;
 	return supportPlanes;
 }
@@ -1661,9 +1659,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	preprocessSCData(SCData);
 
 	/* 2. Extract support planes from shadow contour data. */
-	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
-	DEBUG_PRINT("Number of extracted support planes: %ld",
-		(long unsigned int) supportPlanes.size());
+	auto supportPlanes = extractSupportPlanes(SCData);
 
 	/* 3. Get normal vectors of support planes and normalize them. */
 	auto supportItems = makeSupportItemSet(supportPlanes);
