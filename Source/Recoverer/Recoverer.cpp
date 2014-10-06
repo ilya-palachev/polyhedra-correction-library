@@ -1688,6 +1688,53 @@ static std::tuple<VectorXd, std::vector<Vector3d>> makeOrderedSupportData(
 	return std::make_tuple(supportVector, supportDirections);
 }
 
+VectorXd Recoverer::makeStartingVector(VectorXd supportVector,
+	std::vector<Vector3d> supportDirections, SparseMatrix supportMatrix)
+{
+	DEBUG_START;
+	std::vector<Plane> supportPlanesProcessed;
+	for (int i = 0; i < supportDirections.size(); ++i)
+	{
+		supportPlanesProcessed.push_back(Plane(supportDirections[i],
+			-supportVector(i)));
+	}
+
+	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanesProcessed);
+#ifndef NDEBUG
+	char *name = makeNameWithSuffix(outputName,
+		".polyhedron_starting_point.ply");
+	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
+		name, "polyhedron_starting_point");
+	free(name);
+#endif
+	
+	DEBUG_PRINT("Constructed starting polyhedron with %d vertices and %d "
+		"facets from %ld planes", p->numVertices, p->numFacets,
+		supportPlanesProcessed.size());
+	VectorXd startingVector(supportMatrix.cols());
+	int iValue = 0;
+	for (auto &direction: supportDirections)
+	{
+		double max = 0.;
+		for (int iVertex = 0; iVertex < p->numVertices; ++iVertex)
+		{
+			double product = direction * p->vertices[iVertex];
+			max = product > max ? product : max;
+		}
+		DEBUG_PRINT("starting vector, value #%d = %le", iValue, max);
+		ASSERT(max >= 0.);
+		startingVector(iValue) = max;
+		++iValue;
+	}
+	DEBUG_PRINT("============== Preliminary estimation =================");
+	printEstimationReport(supportMatrix, supportVector, startingVector,
+		estimator);
+	DEBUG_PRINT("========== End of preliminary estimation ==============");
+
+	DEBUG_END;
+	return startingVector;
+}
+
 SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
@@ -1714,55 +1761,12 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	auto supportVector = std::get<0>(orderedSupportData);
 	auto supportDirections = std::get<1>(orderedSupportData);
 
-	/*
-	 * 5.2. Build strting point for support function estimation.
-	 * To do this, we construct naive polyhedron and calculate its support
-	 * values
-	 */
+	/* 7. Create starting point for the estimation algorithm. */
+	auto startingVector = makeStartingVector(supportVector,
+		supportDirections, Q);
 
-	std::vector<Plane> supportPlanesProcessed;
-	for (int i = 0; i < supportDirections.size(); ++i)
-	{
-		supportPlanesProcessed.push_back(Plane(supportDirections[i],
-			-supportVector(i)));
-	}
-
-	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanesProcessed);
-#ifndef NDEBUG
-	char *name = makeNameWithSuffix(outputName,
-		".polyhedron_starting_point.ply");
-	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "polyhedron_starting_point");
-	free(name);
-#endif
-	
-	DEBUG_PRINT("Constructed starting polyhedron with %d vertices and %d "
-		"facets from %ld planes", p->numVertices, p->numFacets,
-		supportPlanes.size());
-	VectorXd startingVector(Q.cols());
-	int iValue = 0;
-	for (auto &direction: supportDirections)
-	{
-		double max = 0.;
-		for (int iVertex = 0; iVertex < p->numVertices; ++iVertex)
-		{
-			double product = direction * p->vertices[iVertex];
-			max = product > max ? product : max;
-		}
-		DEBUG_PRINT("starting vector, value #%d = %le", iValue, max);
-		ASSERT(max >= 0.);
-		startingVector(iValue) = max;
-		++iValue;
-	}
-	DEBUG_PRINT("============== Preliminary estimation =================");
-	printEstimationReport(Q, supportVector, startingVector, estimator);
-	DEBUG_PRINT("========== End of preliminary estimation ==============");
-
-	DEBUG_PRINT("Q is %d x %d matrix", Q.rows(), Q.cols());
-	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			Q, supportVector, startingVector, supportDirections);
-	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
 	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, Q);

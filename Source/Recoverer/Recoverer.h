@@ -285,6 +285,19 @@ private:
 	 */
 	SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron);
 
+	/**
+	 * Creates the starting point for the estimation algoeithm.
+	 *
+	 * @param supportVector		The support vector of the estimation
+	 * 				algorithm.
+	 * @param supportDirections	The vector of support directions.
+	 * @param supportMatrix		The support matrix.
+	 * @param estimator		The mode of estimation.
+	 */
+	VectorXd makeStartingVector(VectorXd supportVector,
+		std::vector<Vector3d> supportDirections,
+		SparseMatrix supportMatrix);
+
 public:
 
 	/**
