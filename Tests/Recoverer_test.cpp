@@ -869,7 +869,7 @@ PolyhedronPtr makePolyhedron(RecovererTestModelID id)
  *
  * @param options	The result of command-line parsing.
  */
-ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
+ShadowContourDataPtr getRealSCData(CommandLineOptions* options)
 {
 	DEBUG_START;
 
@@ -877,7 +877,7 @@ ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
 	PolyhedronPtr p(new Polyhedron());
 
 	/* Create shadow contour data and associate p with it. */
-	ShadeContourDataPtr SCData(new ShadeContourData(p));
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
 
 	/* Read shadow contours data from file. */
 	SCData->fscanDefault(options->input.fileName);
@@ -917,7 +917,7 @@ static double genRandomDouble(double maxDelta)
  * @param data		Shadow contours data
  * @param maxDelta	maximum delta in shift vectors' coordinates
  */
-void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
+void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 {
 	DEBUG_START;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
@@ -949,7 +949,7 @@ void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
  *
  * @param options	The result of command-line parsing.
  */
-ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
+ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 {
 	DEBUG_START;
 
@@ -960,13 +960,13 @@ ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	p->set_parent_polyhedron_in_facets();
 
 	/* Create shadow contour data and associate p with it. */
-	ShadeContourDataPtr SCData(new ShadeContourData(p));
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
 
 	/*
 	 * Create shadow contour constructor and associate p and SCData with
 	 * them.
 	 */
-	ShadeContourConstructorPtr constructor(new ShadeContourConstructor(p,
+	ShadowContourConstructorPtr constructor(new ShadowContourConstructor(p,
 			SCData));
 
 	/* Generate shadow contours data for given model. */
@@ -987,11 +987,11 @@ ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
  * @param options	Parsed command-line options
  * @param recoverer	The used recoverer
  */
-static ShadeContourDataPtr makeRequestedData(CommandLineOptions* options,
+static ShadowContourDataPtr makeRequestedData(CommandLineOptions* options,
 	RecovererPtr recoverer)
 {
 	DEBUG_START;
-	ShadeContourDataPtr SCData;
+	ShadowContourDataPtr SCData;
 
 	if (options->mode == RECOVERER_REAL_TESTING)
 	{
@@ -1057,7 +1057,7 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
  * @param data		Shadow contours data
  */
 static void makeRequestedOutput(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadeContourDataPtr data)
+	RecovererPtr recoverer, ShadowContourDataPtr data)
 {
 	DEBUG_START;
 
@@ -1148,7 +1148,7 @@ static double maxCoord(PolyhedronPtr p)
  * @param data		Shadow contours data
  */
 void runVerboseRecovery(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadeContourDataPtr data)
+	RecovererPtr recoverer, ShadowContourDataPtr data)
 {
 	DEBUG_START;
 	double max = 0., maxConv = 0., maxRec = 0.;
@@ -1263,7 +1263,7 @@ void runVerboseRecovery(CommandLineOptions* options,
  * @param data		Shadow contours data
  */
 void runRequestedRecovery(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadeContourDataPtr data)
+	RecovererPtr recoverer, ShadowContourDataPtr data)
 {
 	DEBUG_START;
 	char *name = NULL;
@@ -1323,7 +1323,7 @@ int main(int argc, char** argv)
 	RecovererPtr recoverer = makeRequestedRecoverer(options);
 
 	/* Read or generate data depending on requested option. */
-	ShadeContourDataPtr data = makeRequestedData(options, recoverer);
+	ShadowContourDataPtr data = makeRequestedData(options, recoverer);
 
 	/* Run the recovery. */
 	runRequestedRecovery(options, recoverer, data);

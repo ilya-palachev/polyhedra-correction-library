@@ -73,8 +73,8 @@ int main(int argc, char** argv)
 	
 	polyhedron->printSortedByAreaFacets();
 
-	shared_ptr<ShadeContourData> contourData(new ShadeContourData(polyhedron));
-	shared_ptr<ShadeContourConstructor> scConstructor(new ShadeContourConstructor(
+	shared_ptr<ShadowContourData> contourData(new ShadowContourData(polyhedron));
+	shared_ptr<ShadowContourConstructor> scConstructor(new ShadowContourConstructor(
 			polyhedron, contourData));
 	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);

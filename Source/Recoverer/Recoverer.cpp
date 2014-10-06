@@ -28,8 +28,8 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
@@ -114,12 +114,12 @@ Recoverer::~Recoverer()
 	DEBUG_END;
 }
 
-void Recoverer::initData(ShadeContourDataPtr SCData)
+void Recoverer::initData(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	shadowDataInit = SCData;
-	ShadeContourDataPtr SCDataPrep(new
-		ShadeContourData(SCData->polyhedron));
+	ShadowContourDataPtr SCDataPrep(new
+		ShadowContourData(SCData->polyhedron));
 	shadowDataPrep = SCDataPrep;
 	ASSERT(SCDataPrep->numContours == shadowDataPrep->numContours);
 	shadowDataPrep->numContours = SCData->numContours;
@@ -179,7 +179,7 @@ void Recoverer::setDistDirectionMinimal(double dist)
 	DEBUG_END;
 }
 
-void Recoverer::preprocessSCData(ShadeContourDataPtr SCData)
+void Recoverer::preprocessSCData(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	
@@ -203,7 +203,7 @@ void Recoverer::preprocessSCData(ShadeContourDataPtr SCData)
 	DEBUG_END;
 }
 
-void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
+void Recoverer::buildNaiveMatrix(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -247,7 +247,7 @@ PolyhedronPtr Recoverer::buildPolyhedronFromPlanes(vector<Plane> supportPlanes)
 	return polyhedron;
 }
 
-PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -266,7 +266,7 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 	return polyhedron;
 }
 
-PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
+PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadowContourDataPtr
 		SCData)
 {
 	DEBUG_START;
@@ -290,7 +290,7 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 }
 
 PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
-		ShadeContourDataPtr SCData)
+		ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	/* New polyhedron will have 1 facet for each shadow contour. */
@@ -354,7 +354,7 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 	return p;
 }
 
-PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildDualContours(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -367,7 +367,7 @@ PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
 	return p;
 }
 
-PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::buildContours(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -473,7 +473,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	return supportPlanes;
 }
 
-vector<Plane> Recoverer::extractSupportPlanes(ShadeContourDataPtr SCData)
+vector<Plane> Recoverer::extractSupportPlanes(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	vector<Plane> supportPlanes;
@@ -944,7 +944,7 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	return pDual;
 }
 
-void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
+void Recoverer::shiftAllContours(ShadowContourDataPtr SCData, Vector3d shift)
 {
 	DEBUG_START;
 	ASSERT(isfinite(shift.x));
@@ -974,7 +974,7 @@ void Recoverer::shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift)
 	DEBUG_END;
 }
 
-void Recoverer::balanceAllContours(ShadeContourDataPtr SCData)
+void Recoverer::balanceAllContours(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	/* Construct polyhedron consisting of contours as facets. */
@@ -1773,7 +1773,7 @@ void Recoverer::postprocessSFEData(SupportFunctionEstimationData *data,
 }
 
 SupportFunctionEstimationData* Recoverer::buildSFEData(
-		ShadeContourDataPtr SCData)
+		ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 
@@ -1928,12 +1928,12 @@ PolyhedronPtr Recoverer::produceFinalPolyhedron(
  * TODO: Fix it and add possibility to choose between it and
  * recoverCorrectedData to try different methods.
  */
-ShadeContourDataPtr Recoverer::produceCorrectedData(
+ShadowContourDataPtr Recoverer::produceCorrectedData(
 	SupportFunctionEstimationData *estData,
 	VectorXd estimate)
 {
 	DEBUG_START;
-	ShadeContourDataPtr data(shadowDataPrep);
+	ShadowContourDataPtr data(shadowDataPrep);
 
 	int numSidesTotal = 0;
 	ASSERT(data->numContours > 0);
@@ -2010,7 +2010,7 @@ ShadeContourDataPtr Recoverer::produceCorrectedData(
 	return data;
 }
 
-PolyhedronPtr Recoverer::run(ShadeContourDataPtr SCData)
+PolyhedronPtr Recoverer::run(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	initData(SCData);

@@ -24,13 +24,13 @@
 #include "DebugAssert.h"
 #include "Vector3d.h"
 #include "Constants.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
-#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GSAssociator/GSAssociator.h"
 #include "Polyhedron/Facet/Facet.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
-GlobalShadeCorrector::GlobalShadeCorrector() :
+GlobalShadowCorrector::GlobalShadowCorrector() :
 				PCorrector(),
 				edgeData(NULL),
 				contourData(NULL),
@@ -52,8 +52,8 @@ GlobalShadeCorrector::GlobalShadeCorrector() :
 	DEBUG_END;
 }
 
-GlobalShadeCorrector::GlobalShadeCorrector(shared_ptr<Polyhedron> p,
-		ShadeContourDataPtr scd, GSCorrectorParameters* _parameters) :
+GlobalShadowCorrector::GlobalShadowCorrector(shared_ptr<Polyhedron> p,
+		ShadowContourDataPtr scd, GSCorrectorParameters* _parameters) :
 				PCorrector(p),
 				edgeData(),
 				contourData(scd),
@@ -74,8 +74,8 @@ GlobalShadeCorrector::GlobalShadeCorrector(shared_ptr<Polyhedron> p,
 	DEBUG_END;
 }
 
-GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
-		ShadeContourDataPtr scd, GSCorrectorParameters* _parameters) :
+GlobalShadowCorrector::GlobalShadowCorrector(Polyhedron* p,
+		ShadowContourDataPtr scd, GSCorrectorParameters* _parameters) :
 				PCorrector(p),
 				edgeData(),
 				contourData(scd),
@@ -96,7 +96,7 @@ GlobalShadeCorrector::GlobalShadeCorrector(Polyhedron* p,
 	DEBUG_END;
 }
 
-void GlobalShadeCorrector::init()
+void GlobalShadowCorrector::init()
 {
 	DEBUG_START;
 
@@ -113,7 +113,7 @@ void GlobalShadeCorrector::init()
 	DEBUG_END;
 }
 
-GlobalShadeCorrector::~GlobalShadeCorrector()
+GlobalShadowCorrector::~GlobalShadowCorrector()
 {
 	DEBUG_START;
 
@@ -155,14 +155,14 @@ GlobalShadeCorrector::~GlobalShadeCorrector()
 	DEBUG_END;
 }
 
-void GlobalShadeCorrector::setFacetsCorrected(list<int> _facetsCorrected)
+void GlobalShadowCorrector::setFacetsCorrected(list<int> _facetsCorrected)
 {
 	DEBUG_START;
 	facetsCorrected = _facetsCorrected;
 	DEBUG_END;
 }
 
-void GlobalShadeCorrector::runCorrection()
+void GlobalShadowCorrector::runCorrection()
 {
 	DEBUG_START;
 	if (parameters.methodName != METHOD_ALL)
@@ -250,7 +250,7 @@ void GlobalShadeCorrector::runCorrection()
 	DEBUG_END;
 }
 
-GSCorrectorStatus GlobalShadeCorrector::repairAndRun(MethodCorrector method,
+GSCorrectorStatus GlobalShadowCorrector::repairAndRun(MethodCorrector method,
 		Plane* planesInitial)
 {
 	DEBUG_START;
@@ -263,7 +263,7 @@ GSCorrectorStatus GlobalShadeCorrector::repairAndRun(MethodCorrector method,
 	return runCorrectionDo();
 }
 
-GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
+GSCorrectorStatus GlobalShadowCorrector::runCorrectionDo()
 {
 	DEBUG_START;
 	
@@ -410,7 +410,7 @@ GSCorrectorStatus GlobalShadeCorrector::runCorrectionDo()
 	return status;
 }
 
-void GlobalShadeCorrector::findNotAssociatedFacets()
+void GlobalShadowCorrector::findNotAssociatedFacets()
 {
 	DEBUG_START;
 	for (list<int>::iterator itFacet = facetsCorrected.begin();
@@ -437,7 +437,7 @@ void GlobalShadeCorrector::findNotAssociatedFacets()
 	DEBUG_END;
 }
 
-double GlobalShadeCorrector::calculateFunctional()
+double GlobalShadowCorrector::calculateFunctional()
 {
 	DEBUG_START;
 	double sum = 0;
@@ -533,7 +533,7 @@ double GlobalShadeCorrector::calculateFunctional()
 
 }
 
-void GlobalShadeCorrector::shiftCoefficients(double delta)
+void GlobalShadowCorrector::shiftCoefficients(double delta)
 {
 	DEBUG_START;
 
@@ -598,7 +598,7 @@ void GlobalShadeCorrector::shiftCoefficients(double delta)
 	DEBUG_END;
 }
 
-double GlobalShadeCorrector::calculateFunctional(double delta)
+double GlobalShadowCorrector::calculateFunctional(double delta)
 {
 	DEBUG_START;
 
@@ -613,7 +613,7 @@ double GlobalShadeCorrector::calculateFunctional(double delta)
 const double GOLDEN_RATIO_RECIPROCAL = 0.5 * (sqrt(5) - 1);
 const double INTERVAL_PRECISION = 1e-10;
 
-double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
+double GlobalShadowCorrector::findOptimalDelta(double deltaMax)
 {
 	DEBUG_START;
 
@@ -653,7 +653,7 @@ double GlobalShadeCorrector::findOptimalDelta(double deltaMax)
 	return leftBound;
 }
 
-double GlobalShadeCorrector::calculateGradientNorm()
+double GlobalShadowCorrector::calculateGradientNorm()
 {
 	DEBUG_START;
 
@@ -667,7 +667,7 @@ double GlobalShadeCorrector::calculateGradientNorm()
 	return norm;
 }
 
-void GlobalShadeCorrector::runCorrectionIteration()
+void GlobalShadowCorrector::runCorrectionIteration()
 {
 	DEBUG_START;
 	calculateGradient();
@@ -726,7 +726,7 @@ void GlobalShadeCorrector::runCorrectionIteration()
 	DEBUG_END;
 }
 
-void GlobalShadeCorrector::calculateGradient()
+void GlobalShadowCorrector::calculateGradient()
 {
 	DEBUG_START;
 	for (int i = 0; i < dim; ++i)

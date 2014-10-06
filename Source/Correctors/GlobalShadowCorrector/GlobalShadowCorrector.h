@@ -24,7 +24,7 @@
 #include <list>
 
 #include "Correctors/PCorrector/PCorrector.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
 
 class Plane;
 class GSAssociator;
@@ -75,11 +75,11 @@ const double DEFAULT_MAX_DELTA = 1.;
 
 const double EPSILON_FOR_DIVISION = 1e-16;
 
-class GlobalShadeCorrector: public PCorrector
+class GlobalShadowCorrector: public PCorrector
 {
 protected:
 	EdgeDataPtr edgeData;
-	ShadeContourDataPtr contourData;
+	ShadowContourDataPtr contourData;
 
 private:
 
@@ -125,7 +125,7 @@ private:
 	int dim;
 
 	/* Object of type GSAssociator is needed here because it's deletion causes
-	 * the deletion of its parent object, i. e. GlobalShadeCorrector. This
+	 * the deletion of its parent object, i. e. GlobalShadowCorrector. This
 	 * deletes the list facetNotAssociated.
 	 *
 	 * This issue has been found by the use of Valgrind (Memcheck) tool. */
@@ -157,12 +157,12 @@ private:
 
 	void init();
 public:
-	GlobalShadeCorrector();
-	GlobalShadeCorrector(shared_ptr<Polyhedron> p, ShadeContourDataPtr scd,
+	GlobalShadowCorrector();
+	GlobalShadowCorrector(shared_ptr<Polyhedron> p, ShadowContourDataPtr scd,
 		GSCorrectorParameters* _parameters);
-	GlobalShadeCorrector(Polyhedron* p, ShadeContourDataPtr scd,
+	GlobalShadowCorrector(Polyhedron* p, ShadowContourDataPtr scd,
 				GSCorrectorParameters* _parameters);
-	virtual ~GlobalShadeCorrector();
+	virtual ~GlobalShadowCorrector();
 	void setFacetsCorrected(list<int> _facetsCorrected);
 
 	void runCorrection();

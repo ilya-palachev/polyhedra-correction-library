@@ -23,7 +23,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
 #include "Polyhedron/Facet/Facet.h"
 
 const double EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE = 0.5;
@@ -32,14 +32,14 @@ const double MINIMAL_TRUSTED_ERROR = 1e-6;
 const double DEFAULT_DERIVATIVE_STEP = 1e-8;
 const double DEFAULT_DERIVATIVE_STEP_RECIPROCAL = 1e+8;
 
-void GlobalShadeCorrector::derivativeTest_all()
+void GlobalShadowCorrector::derivativeTest_all()
 {
 	DEBUG_START;
 	derivativeTest_1();
 	DEBUG_END;
 }
 
-void GlobalShadeCorrector::derivativeTest_1()
+void GlobalShadowCorrector::derivativeTest_1()
 {
 	DEBUG_START;
 	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated.begin();
@@ -103,7 +103,7 @@ void GlobalShadeCorrector::derivativeTest_1()
 	DEBUG_END;
 }
 
-double GlobalShadeCorrector::calculateFunctionalDerivative_1(int iFacet,
+double GlobalShadowCorrector::calculateFunctionalDerivative_1(int iFacet,
 		int iCoefficient)
 {
 	DEBUG_START;

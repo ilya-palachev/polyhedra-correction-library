@@ -20,10 +20,10 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
-ShadeContourData::ShadeContourData(shared_ptr<Polyhedron> p) :
+ShadowContourData::ShadowContourData(shared_ptr<Polyhedron> p) :
 				PData(p),
 				numContours(0),
 				contours(NULL)
@@ -32,7 +32,7 @@ ShadeContourData::ShadeContourData(shared_ptr<Polyhedron> p) :
 	DEBUG_END;
 }
 
-ShadeContourData::ShadeContourData(const ShadeContourData& data) :
+ShadowContourData::ShadowContourData(const ShadowContourData& data) :
 				PData(),
 				numContours(data.numContours),
 				contours(NULL)
@@ -46,7 +46,7 @@ ShadeContourData::ShadeContourData(const ShadeContourData& data) :
 	DEBUG_END;
 }
 
-ShadeContourData::ShadeContourData(const ShadeContourDataPtr data) :
+ShadowContourData::ShadowContourData(const ShadowContourDataPtr data) :
 				PData(),
 				numContours(data->numContours),
 				contours(NULL)
@@ -60,10 +60,10 @@ ShadeContourData::ShadeContourData(const ShadeContourDataPtr data) :
 	DEBUG_END;
 }
 
-ShadeContourData::~ShadeContourData()
+ShadowContourData::~ShadowContourData()
 {
 	DEBUG_START;
-	DEBUG_PRINT("Shade contour data is being deleted now!");
+	DEBUG_PRINT("Shadow contour data is being deleted now!");
 	if (contours != NULL)
 	{
 		delete[] contours;
@@ -73,7 +73,7 @@ ShadeContourData::~ShadeContourData()
 	DEBUG_END;
 }
 
-bool ShadeContourData::fscanDefault(const char* fileNameContours)
+bool ShadowContourData::fscanDefault(const char* fileNameContours)
 {
 	DEBUG_START;
 	FILE* fd = (FILE*) fopen(fileNameContours, "r");
@@ -94,7 +94,7 @@ bool ShadeContourData::fscanDefault(const char* fileNameContours)
 #define STD_SC_FORMAT_HEADER_SIZE_1 2
 #define STD_SC_FORMAT_HEADER_SIZE_2 31
 
-bool ShadeContourData::fscanDefault(FILE* fd)
+bool ShadowContourData::fscanDefault(FILE* fd)
 {
 	DEBUG_START;
 
@@ -217,10 +217,10 @@ bool ShadeContourData::fscanDefault(FILE* fd)
 #undef STD_SC_FORMAT_HEADER_SIZE_1
 #undef STD_SC_FORMAT_HEADER_SIZE_2
 
-void ShadeContourData::fprint(FILE* file)
+void ShadowContourData::fprint(FILE* file)
 {
 	DEBUG_START;
-	REGULAR_PRINT(file, "Dumping shade contour data. Number of contours: %d\n",
+	REGULAR_PRINT(file, "Dumping shadow contour data. Number of contours: %d\n",
 			numContours);
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
@@ -229,7 +229,7 @@ void ShadeContourData::fprint(FILE* file)
 	DEBUG_END;
 }
 
-void ShadeContourData::fprintDefault(FILE* file)
+void ShadowContourData::fprintDefault(FILE* file)
 {
 	DEBUG_START;
 	ALWAYS_PRINT(file, "# num_shadow_contours\n");
@@ -247,7 +247,7 @@ void ShadeContourData::fprintDefault(FILE* file)
 	DEBUG_END;
 }
 
-void ShadeContourData::fprintDefault(const char* fileName)
+void ShadowContourData::fprintDefault(const char* fileName)
 {
 	DEBUG_START;
 	FILE* fd = (FILE*) fopen(fileName, "w");
@@ -264,7 +264,7 @@ void ShadeContourData::fprintDefault(const char* fileName)
 	DEBUG_END;
 }
 
-bool ShadeContourData::operator ==(const ShadeContourData& contourData) const
+bool ShadowContourData::operator ==(const ShadowContourData& contourData) const
 {
 	DEBUG_START;
 	if (numContours != contourData.numContours)
@@ -285,7 +285,7 @@ bool ShadeContourData::operator ==(const ShadeContourData& contourData) const
 	return true;
 }
 
-bool ShadeContourData::operator !=(const ShadeContourData& contourData) const
+bool ShadowContourData::operator !=(const ShadowContourData& contourData) const
 {
 	DEBUG_START;
 	bool returnValue = !(*this == contourData);

@@ -25,7 +25,7 @@
 struct _TestParameters
 {
 	char* fileNamePolyhedron;
-	char* fileNameShadeContours;
+	char* fileNameShadowContours;
 	MethodCorrector method;
 	double epsLoopStop;
 	double deltaGardientStep;
@@ -56,8 +56,8 @@ int main(int argc, char** argv)
 	}
 	polyhedron->my_fprint(stderr);
 
-	shared_ptr<ShadeContourData> contourData(new ShadeContourData(polyhedron));
-	if (!contourData->fscanDefault(parameters.fileNameShadeContours))
+	shared_ptr<ShadowContourData> contourData(new ShadowContourData(polyhedron));
+	if (!contourData->fscanDefault(parameters.fileNameShadowContours))
 	{
 		DEBUG_END;
 		return EXIT_FAILURE;
@@ -93,10 +93,10 @@ int main(int argc, char** argv)
 		parameters.fileNamePolyhedron = NULL;
 	}
 
-	if (parameters.fileNameShadeContours != NULL)
+	if (parameters.fileNameShadowContours != NULL)
 	{
-		delete[] parameters.fileNameShadeContours;
-		parameters.fileNameShadeContours = NULL;
+		delete[] parameters.fileNameShadowContours;
+		parameters.fileNameShadowContours = NULL;
 	}
 
 	DEBUG_END;
@@ -109,7 +109,7 @@ void printUsage()
 	printf(
 			"Usage: \n"
 					"./globalCorrectionReal <file with polyhedron> "
-					"<file with shade contours> <method name>"
+					"<file with shadow contours> <method name>"
 					"<eps max loop> <delta gradient descend> <number of "
 					"corrected facets>\n");
 	printf("\nPossible methods: gd (gradient descent), "
@@ -129,11 +129,11 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 		return EXIT_FAILURE;
 	}
 	parameters.fileNamePolyhedron = new char[255];
-	parameters.fileNameShadeContours = new char[255];
+	parameters.fileNameShadowContours = new char[255];
 	char* method = new char[255];
 
 	bool ifCorrectInput = sscanf(argv[1], "%s", parameters.fileNamePolyhedron)
-			&& sscanf(argv[2], "%s", parameters.fileNameShadeContours)
+			&& sscanf(argv[2], "%s", parameters.fileNameShadowContours)
 			&& sscanf(argv[3], "%s", method)
 			&& sscanf(argv[4], "%lf", &parameters.epsLoopStop)
 			&& sscanf(argv[5], "%lf", &parameters.deltaGardientStep)

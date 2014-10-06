@@ -29,7 +29,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "ShadowContourClusterizer.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
 ShadowContourClusterizer::ShadowContourClusterizer() :
 		PAnalyzer()
@@ -66,7 +66,7 @@ static double angleModulo2PI(double angle)
 	return angle;
 }
 
-void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
+void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
 										 const char* fileNamePlot)
 {
 	DEBUG_START;

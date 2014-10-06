@@ -23,7 +23,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+#include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 
 SideOfContour::SideOfContour() :
 				confidence(0),

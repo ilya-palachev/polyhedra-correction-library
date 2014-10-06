@@ -22,13 +22,13 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
-#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GSAssociator/GSAssociator.h"
 #include "DataContainers/EdgeData/EdgeData.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
 #include "Polyhedron/Facet/Facet.h"
 
-void GlobalShadeCorrector::preprocess()
+void GlobalShadowCorrector::preprocess()
 {
 	DEBUG_START;
 	edgeData.reset(new EdgeData());
@@ -39,7 +39,7 @@ void GlobalShadeCorrector::preprocess()
 	DEBUG_END;
 }
 
-void GlobalShadeCorrector::preprocessAssociations()
+void GlobalShadowCorrector::preprocessAssociations()
 {
 	DEBUG_START;
 	associator = new GSAssociator(this);

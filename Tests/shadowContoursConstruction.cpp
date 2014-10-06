@@ -35,10 +35,10 @@ int main(int argc, char** argv)
 	/* Create a cube with side 1 and with center in the O = (0, 0, 0). */
 	shared_ptr<Polyhedron> cube(new Cube(1., 0., 0., 0.));
 
-	shared_ptr<ShadeContourData> contourData(new
-			ShadeContourData(cube));
-	shared_ptr<ShadeContourConstructor> scConstructor(new
-			ShadeContourConstructor(cube, contourData));
+	shared_ptr<ShadowContourData> contourData(new
+			ShadowContourData(cube));
+	shared_ptr<ShadowContourConstructor> scConstructor(new
+			ShadowContourConstructor(cube, contourData));
 	scConstructor->run(NUM_CONTOURS, SHIFT_ANGLE_FIRST);
 
 	/* In case when environmental variable
@@ -55,8 +55,8 @@ int main(int argc, char** argv)
 	{
 		DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 
-		shared_ptr<ShadeContourData> contourDataOriginal(new
-				ShadeContourData(cube));
+		shared_ptr<ShadowContourData> contourDataOriginal(new
+				ShadowContourData(cube));
 		bool ifScanSucceeded =
 				contourDataOriginal->fscanDefault(nameFileOriginal);
 		if (!ifScanSucceeded)

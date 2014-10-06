@@ -70,18 +70,18 @@ class TreeClusterNorm;
 
 class PData;
 class EdgeData;
-class ShadeContourData;
+class ShadowContourData;
 
 class PDataConstructor;
 class EdgeConstructor;
-class ShadeContourConstructor;
+class ShadowContourConstructor;
 
 class PCorrector;
 
 class Intersector;
 class FacetIntersector;
 
-class GlobalShadeCorrector;
+class GlobalShadowCorrector;
 class GSAssociator;
 
 class Coalescer;
@@ -116,13 +116,13 @@ class GraphDumperGEXF;
 #include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
 #include "DataContainers/EdgeData/Edge/Edge.h"
 #include "DataContainers/EdgeData/EdgeData.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
-#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
-#include "DataConstructors/ShadeContourConstructor/ShadeContourConstructor.h"
+#include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
 
 
 #include "Correctors/PCorrector/PCorrector.h"
@@ -131,8 +131,8 @@ class GraphDumperGEXF;
 #include "Correctors/Intersector/EdgeList/EdgeList.h"
 #include "Correctors/Intersector/FutureFacet/FutureFacet.h"
 #include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
-#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GSAssociator/GSAssociator.h"
 #include "Correctors/Coalescer/Coalescer.h"
 #include "Correctors/VertexGrouper/VertexGrouper.h"
 #include "Correctors/PointShifter/PointShifter.h"

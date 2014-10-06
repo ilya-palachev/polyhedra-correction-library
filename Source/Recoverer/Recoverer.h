@@ -36,7 +36,7 @@
 #include "PCLKernel/PCLPoint_2_iostream.h"
 
 #include "Polyhedron/Polyhedron.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "Recoverer/SupportFunctionEstimationData.h"
 #include "Recoverer/SupportItemSet.h"
 
@@ -140,31 +140,31 @@ private:
 	std::list<long int> *mapIDinverse;
 
 	/** Shadow contour data (initial data). */
-	ShadeContourDataPtr shadowDataInit;
+	ShadowContourDataPtr shadowDataInit;
 
 	/** Shadow contour data (preprocessed). */
-	ShadeContourDataPtr shadowDataPrep;
+	ShadowContourDataPtr shadowDataPrep;
 
 	/**
 	 * Initializes fields shadowDataInit and shadowDataPrep
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	void initData(ShadeContourDataPtr SCData);
+	void initData(ShadowContourDataPtr SCData);
 
 	/**
 	 * Preprocesses the shadow contour data before the algorithm.
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	void preprocessSCData(ShadeContourDataPtr SCData);
+	void preprocessSCData(ShadowContourDataPtr SCData);
 
 	/**
 	 * Extracts support planes from shadow contours.
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	vector<Plane> extractSupportPlanes(ShadeContourDataPtr SCData);
+	vector<Plane> extractSupportPlanes(ShadowContourDataPtr SCData);
 
 	/**
 	 * Extracts support planes from one shadow contour.
@@ -227,14 +227,14 @@ private:
 	 * @param SCData	Shadow contour data
 	 * @param shift		Vector displacement
 	 */
-	void shiftAllContours(ShadeContourDataPtr SCData, Vector3d shift);
+	void shiftAllContours(ShadowContourDataPtr SCData, Vector3d shift);
 
 	/**
 	 * Balances contours so that their common mass center lies right at the
 	 * center of coordinate system. We assume that contours are displaced from
 	 * this position only on a vertical vector and report error otherwise.
 	 */
-	void balanceAllContours(ShadeContourDataPtr SCData);
+	void balanceAllContours(ShadowContourDataPtr SCData);
 
 	/**
 	 * Builds polyhedron consisting of facets constructed from shadow contours,
@@ -244,7 +244,7 @@ private:
 	 * @param SCData	Shadow contour data
 	 */
 	PolyhedronPtr buildMaybeDualContours(bool ifDual,
-			ShadeContourDataPtr SCData);
+			ShadowContourDataPtr SCData);
 
 	/**
 	 * Finds IDs of vertices that have maximal coordinates of polyhedron's
@@ -364,7 +364,7 @@ public:
 	 *
 	 * @param SCData	Shadow contours data.
 	 */
-	void buildNaiveMatrix(ShadeContourDataPtr SCData);
+	void buildNaiveMatrix(ShadowContourDataPtr SCData);
 
 	/**
 	 * Builds naive polyhedron from support planes
@@ -379,7 +379,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr buildNaivePolyhedron(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildNaivePolyhedron(ShadowContourDataPtr SCData);
 
 	/**
 	 * Builds non-convex polyhedron in dual space that contains all dual images
@@ -389,7 +389,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr buildDualNonConvexPolyhedron(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildDualNonConvexPolyhedron(ShadowContourDataPtr SCData);
 
 	/**
 	 * Builds polyhedron consisting of facets constructed from shadow contours
@@ -397,7 +397,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr buildContours(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildContours(ShadowContourDataPtr SCData);
 
 	/**
 	 * Build polyhedron consisting of facets constructed from dual images of
@@ -406,7 +406,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr buildDualContours(ShadeContourDataPtr SCData);
+	PolyhedronPtr buildDualContours(ShadowContourDataPtr SCData);
 
 	/**
 	 * Build data for support function estimation problem.
@@ -414,7 +414,7 @@ public:
 	 * @param SCData	Shadow contour data
 	 */
 	SupportFunctionEstimationData* buildSFEData(
-			ShadeContourDataPtr SCData);
+			ShadowContourDataPtr SCData);
 
 	/**
 	 * Sets the estimator that will be used for support function estimation.
@@ -444,7 +444,7 @@ public:
 	 * 			estimator
 	 * @param estimate	The result of SFE's work
 	 */
-	ShadeContourDataPtr produceCorrectedData(
+	ShadowContourDataPtr produceCorrectedData(
 		SupportFunctionEstimationData *estData, VectorXd estimate);
 
 	/**
@@ -452,7 +452,7 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr run(ShadeContourDataPtr SCData);
+	PolyhedronPtr run(ShadowContourDataPtr SCData);
 };
 
 typedef shared_ptr<Recoverer> RecovererPtr;

@@ -26,14 +26,14 @@
 #include "Vector3d.h"
 #include "DataContainers/EdgeData/EdgeData.h"
 #include "Polyhedron/Polyhedron.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
 
 enum Orientation
 {
 	ORIENTATION_LEFT, ORIENTATION_RIGHT
 };
 
-class GSAssociator: public GlobalShadeCorrector
+class GSAssociator: public GlobalShadowCorrector
 {
 private:
 	int iContour;
@@ -73,7 +73,7 @@ private:
 	double calculateWeight();
 
 public:
-	GSAssociator(GlobalShadeCorrector* corrector);
+	GSAssociator(GlobalShadowCorrector* corrector);
 	~GSAssociator();
 
 	void preinit();

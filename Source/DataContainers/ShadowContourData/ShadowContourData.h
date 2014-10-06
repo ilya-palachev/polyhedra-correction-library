@@ -19,7 +19,7 @@
  */
 
 /**
- * @file ShadeContourData.h
+ * @file ShadowContourData.h
  * @brief Declaration of class that contains array of shadow contours.
  */
 
@@ -34,14 +34,14 @@ class SContour;
 /**
  * Shared pointer to the shadow contour data.
  */
-typedef std::shared_ptr<ShadeContourData> ShadeContourDataPtr;
+typedef std::shared_ptr<ShadowContourData> ShadowContourDataPtr;
 
 /**
  * Container of shadow contour data used for polyhedral reconstruction.
  * Usually this data is obtained from experimental measurements or from
  * synthetic generation from simple models.
  */
-class ShadeContourData : public PData
+class ShadowContourData : public PData
 {
 public:
 	/**
@@ -60,28 +60,28 @@ public:
 	 *
 	 * @param p	The reference to the parent polyhedron
 	 *
-	 * TODO: shade contour data can be not associated with any polyhedron!
+	 * TODO: shadow contour data can be not associated with any polyhedron!
 	 */
-	ShadeContourData(shared_ptr<Polyhedron> p);
+	ShadowContourData(shared_ptr<Polyhedron> p);
 
 	/**
 	 * Copy constructor from shared pointer
 	 *
 	 * @param data	The data to be copied
 	 */
-	ShadeContourData(const ShadeContourDataPtr data);
+	ShadowContourData(const ShadowContourDataPtr data);
 
 	/**
 	 * Copy constructor from reference
 	 *
 	 * @param data	The data to be copied
 	 */
-	ShadeContourData(const ShadeContourData& data);
+	ShadowContourData(const ShadowContourData& data);
 
 	/**
 	 * Destructor for the freeing of data.
 	 */
-	~ShadeContourData();
+	~ShadowContourData();
 
 	/**
 	 * Scans shadow contour data from the file specified by its name.
@@ -126,14 +126,14 @@ public:
 	 *
 	 * @param contourData	Shadow contour data to be compared with.
 	 */
-	bool operator ==(const ShadeContourData& contourData) const;
+	bool operator ==(const ShadowContourData& contourData) const;
 
 	/**
 	 * Overloaded operator "!=" for comparing of shadow contour data.
 	 *
 	 * @param contourData	Shadow contour data to be compared with.
 	 */
-	bool operator !=(const ShadeContourData& contourData) const;
+	bool operator !=(const ShadowContourData& contourData) const;
 
 };
 

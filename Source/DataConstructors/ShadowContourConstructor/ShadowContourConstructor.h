@@ -23,15 +23,15 @@
 
 #include "Vector3d.h"
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/EdgeData/EdgeData.h"
 
 class SContour;
 
-class ShadeContourConstructor: public PDataConstructor
+class ShadowContourConstructor: public PDataConstructor
 {
 private:
-	shared_ptr<ShadeContourData> data;
+	shared_ptr<ShadowContourData> data;
 	bool* bufferBool;
 	int* bufferInt0;
 	int* bufferInt1;
@@ -45,12 +45,12 @@ private:
 			Plane planeOfProjection, int ifacet);
 
 public:
-	ShadeContourConstructor(shared_ptr<Polyhedron> p,
-			shared_ptr<ShadeContourData> d);
-	~ShadeContourConstructor();
+	ShadowContourConstructor(shared_ptr<Polyhedron> p,
+			shared_ptr<ShadowContourData> d);
+	~ShadowContourConstructor();
 	void run(int numContoursNeeded, double firstAngle);
 };
 
-typedef std::shared_ptr<ShadeContourConstructor> ShadeContourConstructorPtr;
+typedef std::shared_ptr<ShadowContourConstructor> ShadowContourConstructorPtr;
 
 #endif /* SHADECONTOURCONSTRUCTOR_H_ */

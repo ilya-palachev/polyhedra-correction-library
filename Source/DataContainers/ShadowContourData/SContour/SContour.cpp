@@ -27,7 +27,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
 SContour::SContour() :
 	id(-1),
@@ -91,7 +91,7 @@ SContour::~SContour()
 {
 	DEBUG_START;
 
-	DEBUG_PRINT("Attention! shade contour %d is being deleted now...\n", this->id);
+	DEBUG_PRINT("Attention! shadow contour %d is being deleted now...\n", this->id);
 	DEBUG_PRINT("polyhedron use count: %ld", poly.use_count());
 
 	if (sides != NULL)

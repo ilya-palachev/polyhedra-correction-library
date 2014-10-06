@@ -20,7 +20,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+#include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 
 void SideOfContour::my_fprint(FILE* file)
 {

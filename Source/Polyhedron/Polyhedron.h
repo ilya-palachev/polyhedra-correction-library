@@ -43,7 +43,7 @@ class VertexInfo;
 class TreeClusterNorm;
 class TreeClusterNormNode;
 class MatrixDistNorm;
-class ShadeContourData;
+class ShadowContourData;
 class EdgeData;
 
 struct _GSCorrectorParameters;
@@ -800,7 +800,7 @@ public:
 	 * @param facetsCorrected	The list of facets to be corrected (for partial
 	 * correction)
 	 */
-	void correctGlobal(shared_ptr<ShadeContourData> contourData,
+	void correctGlobal(shared_ptr<ShadowContourData> contourData,
 			GSCorrectorParameters* parameters, list<int>* facetsCorrected);
 
 	/*

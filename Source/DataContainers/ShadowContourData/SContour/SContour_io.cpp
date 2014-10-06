@@ -20,12 +20,12 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
 void SContour::my_fprint(FILE* file)
 {
 	DEBUG_START;
-	REGULAR_PRINT(file, "Printing content of shade contour #%d\n", id);
+	REGULAR_PRINT(file, "Printing content of shadow contour #%d\n", id);
 	REGULAR_PRINT(file, "id = %d (id of the contour)\n", id);
 	REGULAR_PRINT(file, "ns = %d (number of sides)\n", ns);
 	REGULAR_PRINT(file, "plane = ((%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n",

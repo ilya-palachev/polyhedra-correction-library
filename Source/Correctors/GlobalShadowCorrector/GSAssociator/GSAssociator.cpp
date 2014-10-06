@@ -23,10 +23,10 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
-#include "Correctors/GlobalShadeCorrector/GSAssociator/GSAssociator.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GSAssociator/GSAssociator.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 
 const double ASSOCIATOR_MIN_PORTION_REL = 0.1;
@@ -49,8 +49,8 @@ static double weightForAssociations(double x)
 const double MIN_DIST_MIN = 0.1;
 const int NO_SIDE_FOUND = -1;
 
-GSAssociator::GSAssociator(GlobalShadeCorrector* corrector) :
-				GlobalShadeCorrector(*corrector),
+GSAssociator::GSAssociator(GlobalShadowCorrector* corrector) :
+				GlobalShadowCorrector(*corrector),
 				iContour(INT_NOT_INITIALIZED),
 				iFacet(INT_NOT_INITIALIZED),
 				iEdge(INT_NOT_INITIALIZED),
@@ -153,7 +153,7 @@ void GSAssociator::run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn)
 
 	if (areaTotal < EPSILON_FOR_DIVISION)
 	{
-		ERROR_PRINT("Too small shade contour, total area = %le", areaTotal);
+		ERROR_PRINT("Too small shadow contour, total area = %le", areaTotal);
 		DEBUG_END;
 		return;
 	}

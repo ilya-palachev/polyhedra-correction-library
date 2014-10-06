@@ -38,7 +38,7 @@
 #include "Constants.h"
 #include "Vector3d.h"
 #include "Polyhedron/Polyhedron.h"
-#include "DataContainers/ShadeContourData/SideOfContour/SideOfContour.h"
+#include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 
 typedef PCLKernel<double> PCL_K;
 typedef CGAL::Filtered_kernel_adaptor<PCL_K> K;

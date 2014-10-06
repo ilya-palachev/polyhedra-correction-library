@@ -23,14 +23,14 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Constants.h"
-#include "DataConstructors/ShadeContourConstructor/ShadeContourConstructor.h"
+#include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
-#include "DataContainers/ShadeContourData/ShadeContourData.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 
-ShadeContourConstructor::ShadeContourConstructor(shared_ptr<Polyhedron> p,
-		shared_ptr<ShadeContourData> d) :
+ShadowContourConstructor::ShadowContourConstructor(shared_ptr<Polyhedron> p,
+		shared_ptr<ShadowContourData> d) :
 				PDataConstructor(p),
 				data(d),
 				bufferBool(NULL),
@@ -42,7 +42,7 @@ ShadeContourConstructor::ShadeContourConstructor(shared_ptr<Polyhedron> p,
 	DEBUG_END;
 }
 
-ShadeContourConstructor::~ShadeContourConstructor()
+ShadowContourConstructor::~ShadowContourConstructor()
 {
 	DEBUG_START;
 	if (bufferBool != NULL)
@@ -63,7 +63,7 @@ ShadeContourConstructor::~ShadeContourConstructor()
 	DEBUG_END;
 }
 
-void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
+void ShadowContourConstructor::run(int numContoursNeeded, double firstAngle)
 {
 	DEBUG_START;
 	polyhedron->preprocessAdjacency();
@@ -99,7 +99,7 @@ void ShadeContourConstructor::run(int numContoursNeeded, double firstAngle)
 	DEBUG_END;
 }
 
-void ShadeContourConstructor::createContour(int idOfContour,
+void ShadowContourConstructor::createContour(int idOfContour,
 		Plane planeOfProjection, SContour* outputContour)
 {
 	DEBUG_START;
@@ -199,7 +199,7 @@ void ShadeContourConstructor::createContour(int idOfContour,
 	DEBUG_END;
 }
 
-bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
+bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		Plane planeOfProjection)
 {
 	DEBUG_START;
@@ -263,7 +263,7 @@ bool ShadeContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 	}
 }
 
-bool ShadeContourConstructor::collinearVisibility(int v0processed,
+bool ShadowContourConstructor::collinearVisibility(int v0processed,
 		int v1processed, Plane planeOfProjection, int ifacet)
 {
 	DEBUG_START;
