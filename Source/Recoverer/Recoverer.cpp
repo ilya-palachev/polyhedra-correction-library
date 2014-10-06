@@ -1649,6 +1649,45 @@ Polyhedron_3 Recoverer::makePolyhedronOfDirections(SupportItemSet supportItems)
 	return polyhedron;
 }
 
+/**
+ * Creates vectors of support values (support vector) and the vector of support
+ * directions.
+ *
+ * @param polyhedron	The polyhedron of support directions
+ * @param supportItems	The set of support items.
+ */
+static std::tuple<VectorXd, std::vector<Vector3d>> makeOrderedSupportData(
+	Polyhedron_3 polyhedron, SupportItemSet supportItems)
+{
+	DEBUG_START;
+	VectorXd supportVector(polyhedron.size_of_vertices());
+	
+	int i = 0;
+	std::vector<Vector3d> supportDirections;
+	for (auto vertex = polyhedron.vertices_begin();
+		vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		auto point = vertex->point();
+		Vector3d v(point.x(), point.y(), point.z());
+		SupportItem item = {v, 0};
+		auto result = supportItems.find(item);
+		ASSERT(result != supportItems.end() && "Cannot found an item");
+		ASSERT(fpclassify(v.x - result->u.x) == FP_ZERO);
+		ASSERT(fpclassify(v.y - result->u.y) == FP_ZERO);
+		ASSERT(fpclassify(v.z - result->u.z) == FP_ZERO);
+		supportVector(i) = result->h;
+		supportDirections.push_back(result->u);
+		DEBUG_PRINT("   constructed hvalue = %lf for direction "
+			"(%lf, %lf, %lf)", result->h, result->u.x,
+			result->u.y, result->u.z);
+		++i;
+	}
+	ASSERT(supportDirections.size() == polyhedron.size_of_vertices());
+	
+	DEBUG_END;
+	return std::make_tuple(supportVector, supportDirections);
+}
+
 SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
@@ -1669,41 +1708,24 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	/* 5. Build matrix by the polyhedron. */
 	auto Q = buildMatrixByPolyhedron(polyhedron);
 
-	/* 
-	 * 5.1. Build vector of support values associated with new order of
-	 * vertices.
-	 */
-	VectorXd hvalues(Q.cols());
-	
-	int i = 0;
-	std::vector<Vector3d> supportDirections;
-	vector<Plane> supportPlanesProcessed;
-	for (auto vertex = polyhedron.vertices_begin();
-		vertex != polyhedron.vertices_end(); ++vertex)
-	{
-		auto point = vertex->point();
-		Vector3d v(point.x(), point.y(), point.z());
-		SupportItem item = {v, 0};
-		auto result = supportItems.find(item);
-		ASSERT(result != supportItems.end() && "Cannot found an item");
-		ASSERT(fpclassify(v.x - result->u.x) == FP_ZERO);
-		ASSERT(fpclassify(v.y - result->u.y) == FP_ZERO);
-		ASSERT(fpclassify(v.z - result->u.z) == FP_ZERO);
-		hvalues(i) = result->h;
-		supportDirections.push_back(result->u);
-		supportPlanesProcessed.push_back(Plane(result->u, -result->h));
-		DEBUG_PRINT("   constructed hvalue = %lf for direction "
-			"(%lf, %lf, %lf)", result->h, result->u.x,
-			result->u.y, result->u.z);
-		++i;
-	}
-	ASSERT(supportDirections.size() == polyhedron.size_of_vertices());
+	/* 6. Make ordered support vector and vector of support directions. */
+	auto orderedSupportData = makeOrderedSupportData(polyhedron,
+		supportItems);
+	auto supportVector = std::get<0>(orderedSupportData);
+	auto supportDirections = std::get<1>(orderedSupportData);
 
 	/*
 	 * 5.2. Build strting point for support function estimation.
 	 * To do this, we construct naive polyhedron and calculate its support
 	 * values
 	 */
+
+	std::vector<Plane> supportPlanesProcessed;
+	for (int i = 0; i < supportDirections.size(); ++i)
+	{
+		supportPlanesProcessed.push_back(Plane(supportDirections[i],
+			-supportVector(i)));
+	}
 
 	PolyhedronPtr p = buildPolyhedronFromPlanes(supportPlanesProcessed);
 #ifndef NDEBUG
@@ -1733,13 +1755,13 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		++iValue;
 	}
 	DEBUG_PRINT("============== Preliminary estimation =================");
-	printEstimationReport(Q, hvalues, startingVector, estimator);
+	printEstimationReport(Q, supportVector, startingVector, estimator);
 	DEBUG_PRINT("========== End of preliminary estimation ==============");
 
 	DEBUG_PRINT("Q is %d x %d matrix", Q.rows(), Q.cols());
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			Q, hvalues, startingVector, supportDirections);
+			Q, supportVector, startingVector, supportDirections);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
