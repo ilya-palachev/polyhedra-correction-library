@@ -72,7 +72,7 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	ASSERT(m_supportMatrix.cols() == m_numValues);
 	ASSERT(m_numValues == m_supportVector.rows());
 	ASSERT(m_numValues == m_startingVector.rows());
-	ASSERT(m_numValues == m_supportDirections.size());
+	ASSERT(m_numValues == (int) m_supportDirections.size());
 	/*
 	 * TODO: Check also that number of conditions (i. e. number of edges in the
 	 * sphere triangulation) satisfies bounds arrising from Euler's theorem.

@@ -1701,7 +1701,7 @@ VectorXd Recoverer::makeStartingVector(VectorXd supportVector,
 {
 	DEBUG_START;
 	std::vector<Plane> supportPlanesProcessed;
-	for (int i = 0; i < supportDirections.size(); ++i)
+	for (unsigned i = 0; i < supportDirections.size(); ++i)
 	{
 		supportPlanesProcessed.push_back(Plane(supportDirections[i],
 			-supportVector(i)));
