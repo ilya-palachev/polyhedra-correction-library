@@ -156,6 +156,13 @@ private:
 	void initData(ShadeContourDataPtr SCData);
 
 	/**
+	 * Preprocesses the shadow contour data before the algorithm.
+	 *
+	 * @param SCData	Shadow contour data
+	 */
+	void preprocessSCData(ShadeContourDataPtr SCData);
+
+	/**
 	 * Extracts support planes from shadow contours.
 	 *
 	 * @param SCData	Shadow contour data

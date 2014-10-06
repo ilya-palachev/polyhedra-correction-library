@@ -178,6 +178,30 @@ void Recoverer::setDistDirectionMinimal(double dist)
 	DEBUG_END;
 }
 
+void Recoverer::preprocessSCData(ShadeContourDataPtr SCData)
+{
+	DEBUG_START;
+	
+#ifndef NDEBUG
+	char *name = makeNameWithSuffix(outputName,
+		".contours_initial.dat");
+	SCData->fprintDefault(name);
+	free(name);
+#endif
+
+	if (ifBalancing)
+	{
+		balanceAllContours(SCData);
+#ifndef NDEBUG
+		name = makeNameWithSuffix(outputName,
+			".contours_initial_preprocessed.dat");
+		SCData->fprintDefault(name);
+		free(name);
+#endif
+	}
+	DEBUG_END;
+}
+
 void Recoverer::buildNaiveMatrix(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
@@ -226,11 +250,8 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
-	/* 1. Balance contours if it is required. */
-	if (ifBalancing)
-	{
-		balanceAllContours(SCData);
-	}
+	/* 1. Preprocess shadow contour data */
+	preprocessSCData(SCData);
 
 	initData(SCData);
 
@@ -251,12 +272,9 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadeContourDataPtr
 {
 	DEBUG_START;
 
-	/* 1. Balance contours if it is required. */
-	if (ifBalancing)
-	{
-		balanceAllContours(SCData);
-	}
-
+	/* 1. Preprocess shadow contour data */
+	preprocessSCData(SCData);
+	
 	initData(SCData);
 
 	/* 2. Extract support planes from shadow contour data. */
@@ -343,11 +361,8 @@ PolyhedronPtr Recoverer::buildDualContours(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
-	/* Balance contours if it is required. */
-	if (ifBalancing)
-	{
-		balanceAllContours(SCData);
-	}
+	/* 1. Preprocess shadow contour data */
+	preprocessSCData(SCData);
 
 	PolyhedronPtr p = buildMaybeDualContours(true, SCData);
 
@@ -359,11 +374,8 @@ PolyhedronPtr Recoverer::buildContours(ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
 
-	/* Balance contours if it is required. */
-	if (ifBalancing)
-	{
-		balanceAllContours(SCData);
-	}
+	/* 1. Preprocess shadow contour data */
+	preprocessSCData(SCData);
 
 	PolyhedronPtr p = buildMaybeDualContours(false, SCData);
 
@@ -1642,18 +1654,9 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
 	DEBUG_START;
-#ifndef NDEBUG
-	char *name = makeNameWithSuffix(outputName,
-		".contours_initial.dat");
-	SCData->fprintDefault(name);
-	free(name);
-#endif
 
-	/* 1. Balance contours if it is required. */
-	if (ifBalancing)
-	{
-		balanceAllContours(SCData);
-	}
+	/* 1. Preprocess contours if it is required. */
+	preprocessSCData(SCData);
 
 	/* 2. Extract support planes from shadow contour data. */
 	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
@@ -1673,7 +1676,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 
 #ifndef NDEBUG
 	ofstream fileMatrix;
-	name = makeNameWithSuffix(outputName, ".support-matrix.mat");
+	char *name = makeNameWithSuffix(outputName, ".support-matrix.mat");
 	DEBUG_PRINT("Printing to %s", name);
 	fileMatrix.open(name);
 	ASSERT(fileMatrix);
