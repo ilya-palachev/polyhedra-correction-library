@@ -1741,7 +1741,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	DEBUG_PRINT("Q is %d x %d matrix", Q.rows(), Q.cols());
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			Q.cols(), Q.rows(), Q, hvalues, startingVector);
+			Q, hvalues, startingVector);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */

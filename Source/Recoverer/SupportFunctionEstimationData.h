@@ -74,16 +74,12 @@ public:
 	/**
 	 * Default constructor.
 	 *
-	 * @param numValues		The number of support function
-	 * 	measurements.
-	 * @param numConditions	The number of consistency conditions to be
-	 * 	verified to provide consistent estimation.
 	 * @param supportMatrix	The support matrix of problem.
 	 * @param supportVector	The support vector, i. e. the vector of support
 	 * 	function measurements.
+	 * @param startingVector The starting vector of the algorithm.
 	 */
-	SupportFunctionEstimationData(int numValues,
-		int numConditions, SparseMatrix supportMatrix,
+	SupportFunctionEstimationData(SparseMatrix supportMatrix,
 		VectorXd supportVector, VectorXd startingVector);
 
 	/** Default destructor. */

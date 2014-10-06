@@ -55,11 +55,11 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	DEBUG_END;
 }
 
-SupportFunctionEstimationData::SupportFunctionEstimationData(int numValues,
-	int numConditions, SparseMatrix supportMatrix,
-	VectorXd supportVector, VectorXd startingVector) :
-	m_numValues(numValues),
-	m_numConditions(numConditions),
+SupportFunctionEstimationData::SupportFunctionEstimationData(
+	SparseMatrix supportMatrix, VectorXd supportVector,
+	VectorXd startingVector) :
+	m_numValues(supportMatrix.cols()),
+	m_numConditions(supportMatrix.rows()),
 	m_supportMatrix(supportMatrix),
 	m_supportVector(supportVector),
 	m_startingVector(startingVector)
