@@ -145,9 +145,6 @@ private:
 	/** Shadow contour data (preprocessed). */
 	ShadeContourDataPtr shadowDataPrep;
 
-	/** Support directions. */
-	vector<Vector3d> supportDirections;
-
 	/**
 	 * Initializes fields shadowDataInit and shadowDataPrep
 	 *

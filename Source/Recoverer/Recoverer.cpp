@@ -96,8 +96,7 @@ Recoverer::Recoverer() :
 	mapIDsize(0),
 	mapIDinverse(NULL),
 	shadowDataInit(NULL),
-	shadowDataPrep(NULL),
-	supportDirections()
+	shadowDataPrep(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -1677,8 +1676,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	VectorXd hvalues(Q.cols());
 	
 	int i = 0;
-	supportDirections.clear();
-	ASSERT(supportDirections.empty());
+	std::vector<Vector3d> supportDirections;
 	vector<Plane> supportPlanesProcessed;
 	for (auto vertex = polyhedron.vertices_begin();
 		vertex != polyhedron.vertices_end(); ++vertex)
@@ -1741,7 +1739,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	DEBUG_PRINT("Q is %d x %d matrix", Q.rows(), Q.cols());
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			Q, hvalues, startingVector);
+			Q, hvalues, startingVector, supportDirections);
 	checkPolyhedronIDs(polyhedron);
 
 	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
@@ -1871,7 +1869,8 @@ PolyhedronPtr Recoverer::produceFinalPolyhedron(
 	int numValues = estData->numValues();
 	for (int i = 0; i < numValues; ++i)
 	{
-		points.push_back(supportDirections[i] / estimate(i));
+		points.push_back(estData->supportDirections()[i]
+			/ estimate(i));
 	}
 
 	/* Construct convex hull in the dual space. */
