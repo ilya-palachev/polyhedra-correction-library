@@ -1743,6 +1743,35 @@ VectorXd Recoverer::makeStartingVector(VectorXd supportVector,
 	return startingVector;
 }
 
+void Recoverer::postprocessSFEData(SupportFunctionEstimationData *data,
+		Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	/*
+	 * Regularize the undefinite matrix using known 3 kernel basis vectors.
+	 * v1 = (u1x, ..., uMx)
+	 * v2 = (u1y, ..., uMy)
+	 * v3 = (u1z, ..., uMz)
+	 *
+	 * TODO: Regularization is not supported in Ipopt solver for now. We need
+	 * to fix it.
+	 */
+	if (ifRegularize)
+	{
+#ifdef USE_IPOPT
+		if (estimator == IPOPT_ESTIMATOR)
+		{
+			ERROR_PRINT("Regularization of support matrix for "
+				"Ipopt estimator is not implemented yet.");
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+		}
+#endif
+		regularizeSupportMatrix(data, polyhedron);
+	}
+	DEBUG_END;
+}
+
 SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ShadeContourDataPtr SCData)
 {
@@ -1773,32 +1802,12 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	auto startingVector = makeStartingVector(supportVector,
 		supportDirections, Q);
 
+	/* 8. Call constructor of support function estimation data. */
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			Q, supportVector, startingVector, supportDirections);
 
-
-	/*
-	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
-	 * v1 = (u1x, ..., uMx)
-	 * v2 = (u1y, ..., uMy)
-	 * v3 = (u1z, ..., uMz)
-	 *
-	 * TODO: Regularization is not supported in Ipopt solver for now. We need
-	 * to fix it.
-	 */
-	if (ifRegularize)
-	{
-#ifdef USE_IPOPT
-		if (estimator == IPOPT_ESTIMATOR)
-		{
-			ERROR_PRINT("Regularization of support matrix for "
-				"Ipopt estimator is not implemented yet.");
-			DEBUG_END;
-			exit(EXIT_FAILURE);
-		}
-#endif
-		regularizeSupportMatrix(data, polyhedron);
-	}
+	/* 9. Post-process the constructed data. */
+	postprocessSFEData(data, polyhedron);
 
 	DEBUG_END;
 	return data;

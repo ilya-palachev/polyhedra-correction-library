@@ -297,6 +297,15 @@ private:
 	VectorXd makeStartingVector(VectorXd supportVector,
 		std::vector<Vector3d> supportDirections,
 		SparseMatrix supportMatrix);
+	/**
+	 * Post-processes the support function estimation data.
+	 *
+	 * @param data		Support function estimation data recently
+	 * 			constructed.
+	 * @param polyhedron	The polyhedron of support directions.
+	 */
+	void postprocessSFEData(SupportFunctionEstimationData *data,
+		Polyhedron_3 polyhedron);
 
 public:
 
