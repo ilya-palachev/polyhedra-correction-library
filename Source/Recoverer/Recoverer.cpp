@@ -1790,7 +1790,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	auto polyhedron = makePolyhedronOfDirections(supportItems);
 
 	/* 5. Build matrix by the polyhedron. */
-	auto Q = buildMatrixByPolyhedron(polyhedron);
+	auto supportMatrix = buildMatrixByPolyhedron(polyhedron);
 
 	/* 6. Make ordered support vector and vector of support directions. */
 	auto orderedSupportData = makeOrderedSupportData(polyhedron,
@@ -1800,11 +1800,12 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 
 	/* 7. Create starting point for the estimation algorithm. */
 	auto startingVector = makeStartingVector(supportVector,
-		supportDirections, Q);
+		supportDirections, supportMatrix);
 
 	/* 8. Call constructor of support function estimation data. */
-	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
-			Q, supportVector, startingVector, supportDirections);
+	SupportFunctionEstimationData *data = new
+		SupportFunctionEstimationData(supportMatrix, supportVector,
+		startingVector,	supportDirections);
 
 	/* 9. Post-process the constructed data. */
 	postprocessSFEData(data, polyhedron);
