@@ -43,6 +43,8 @@ using namespace std;
 static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	RecovererEstimator estimator);
 
+static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Q);
+
 char *makeNameWithSuffix(const char *outputName, const char *suffix)
 {
 	char *name = (char*) malloc(strlen(outputName) + strlen(suffix) + 1);
@@ -1381,6 +1383,11 @@ SparseMatrix Recoverer::buildMatrixByPolyhedron(Polyhedron_3 polyhedron)
 	fileMatrix << matrix;
 	fileMatrix.close();
 #endif
+
+	/* Check that vx, vy, and vz are really eigenvectors of our matrix. */
+	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, matrix);
+	ASSERT_PRINT(ifCheckSuccessful, "Bad matrix.");
+
 	return matrix;
 }
 
@@ -1517,6 +1524,7 @@ void Recoverer::regularizeSupportMatrix(
 
 	Q.transpose();
 
+	checkPolyhedronIDs(polyhedron);
 	DEBUG_END;
 	return;
 }
@@ -1768,9 +1776,6 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			Q, supportVector, startingVector, supportDirections);
 
-	/* 5.1. Check that vx, vy, and vz are really eigenvectors of our matrix. */
-	bool ifCheckSuccessful = checkSupportMatrix(polyhedron, Q);
-	ASSERT_PRINT(ifCheckSuccessful, "Bad matrix.");
 
 	/*
 	 * 6. Regularize the undefinite matrix using known 3 kernel basis vectors.
@@ -1793,7 +1798,6 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		}
 #endif
 		regularizeSupportMatrix(data, polyhedron);
-		checkPolyhedronIDs(polyhedron);
 	}
 
 	DEBUG_END;
