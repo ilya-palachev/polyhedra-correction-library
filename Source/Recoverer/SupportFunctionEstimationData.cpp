@@ -44,7 +44,8 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	m_numConditions(data->numConditions()),
 	m_supportMatrix(data->supportMatrix()),
 	m_supportVector(data->supportVector()),
-	m_startingVector(data->startingVector())
+	m_startingVector(data->startingVector()),
+	m_supportDirections(data->supportDirections())
 {
 	DEBUG_START;
 	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
@@ -57,12 +58,13 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(
 	SparseMatrix supportMatrix, VectorXd supportVector,
-	VectorXd startingVector) :
+	VectorXd startingVector, std::vector<Vector3d> supportDirections) :
 	m_numValues(supportMatrix.cols()),
 	m_numConditions(supportMatrix.rows()),
 	m_supportMatrix(supportMatrix),
 	m_supportVector(supportVector),
-	m_startingVector(startingVector)
+	m_startingVector(startingVector),
+	m_supportDirections(supportDirections)
 {
 	DEBUG_START;
 	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
@@ -70,6 +72,7 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	ASSERT(m_supportMatrix.cols() == m_numValues);
 	ASSERT(m_numValues == m_supportVector.rows());
 	ASSERT(m_numValues == m_startingVector.rows());
+	ASSERT(m_numValues == m_supportDirections.size());
 	/*
 	 * TODO: Check also that number of conditions (i. e. number of edges in the
 	 * sphere triangulation) satisfies bounds arrising from Euler's theorem.
@@ -117,3 +120,11 @@ VectorXd SupportFunctionEstimationData::startingVector(void)
 	DEBUG_END;
 	return m_startingVector;
 }
+
+std::vector<Vector3d> SupportFunctionEstimationData::supportDirections(void)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return m_supportDirections;
+}
+

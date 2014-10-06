@@ -28,6 +28,7 @@
 #define SUPPORTFUNCTIONESTIMATIONDATA_H_
 
 #include "SparseMatrixEigen.h"
+#include "Vector3d.h"
 
 /** Each condition has exactly not more than  4 non-zero coefficients. */
 #define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
@@ -54,8 +55,6 @@ private:
 	/**
 	 * The support vector, i. e. the vector of support function
 	 * measurements.
-	 *
-	 * TODO: Do we need to use some useful Eigen class here?
 	 */
 	VectorXd m_supportVector;
 
@@ -63,6 +62,11 @@ private:
 	 * Starting point of the algorith (rude estimate)
 	 */
 	VectorXd m_startingVector;
+
+	/**
+	 * Support directions of data.
+	 */
+	std::vector<Vector3d> m_supportDirections;
 
 public:
 	/** Default empty constructor. */
@@ -74,13 +78,15 @@ public:
 	/**
 	 * Default constructor.
 	 *
-	 * @param supportMatrix	The support matrix of problem.
-	 * @param supportVector	The support vector, i. e. the vector of support
-	 * 	function measurements.
-	 * @param startingVector The starting vector of the algorithm.
+	 * @param supportMatrix		The support matrix of problem.
+	 * @param supportVector		The support vector, i. e. the vector
+	 * 				of support function measurements.
+	 * @param startingVector	The starting vector of the algorithm.
+	 * @param supportDirections	The vector of support directions
 	 */
 	SupportFunctionEstimationData(SparseMatrix supportMatrix,
-		VectorXd supportVector, VectorXd startingVector);
+		VectorXd supportVector, VectorXd startingVector,
+		std::vector<Vector3d> supportDirections);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();
@@ -99,6 +105,9 @@ public:
 
 	/** Getter for member m_startingVector */
 	VectorXd startingVector(void);
+
+	/** Getter for member m_supportDirections */
+	std::vector<Vector3d> supportDirections(void);
 
 	/* FIXME: Do we need to have setters here? */
 };
