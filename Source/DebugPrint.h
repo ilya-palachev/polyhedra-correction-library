@@ -21,7 +21,7 @@
 #ifndef DEBUGPRINT_H
 #define DEBUGPRINT_H
 
-#include <cstdio>
+#include <stdio.h>
 
 #define OUTPUT
 #define GLOBAL_CORRECTION_DERIVATIVE_TESTING

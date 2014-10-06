@@ -21,7 +21,7 @@
 #ifndef DEBUGASSERT_H_
 #define DEBUGASSERT_H_
 
-#include <cassert>
+#include <assert.h>
 
 #ifndef NDEBUG
 #define ASSERT(x) assert(x)

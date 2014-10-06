@@ -49,6 +49,7 @@ class EdgeData;
 struct _GSCorrectorParameters;
 
 using namespace std;
+using std::shared_ptr;
 
 typedef struct _GSCorrectorParameters GSCorrectorParameters;
 typedef shared_ptr<EdgeData> EdgeDataPtr;
