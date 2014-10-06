@@ -94,7 +94,6 @@ Recoverer::Recoverer() :
 	vectorRegularizing(0., 0., 0.),
 	mapID(NULL),
 	mapIDsize(0),
-	hvaluesInit(NULL),
 	mapIDinverse(NULL),
 	shadowDataInit(NULL),
 	shadowDataPrep(NULL),
@@ -109,8 +108,6 @@ Recoverer::~Recoverer()
 	DEBUG_START;
 	if (mapID != NULL)
 		delete[] mapID;
-	if (hvaluesInit != NULL)
-		delete[] hvaluesInit;
 	if (mapIDinverse != NULL)
 		delete[] mapIDinverse;
 	DEBUG_END;
@@ -1606,8 +1603,6 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	/* 3. Get normal vectors of support planes and normalize them. */
 	vector<Vector3d> directions;
 	int iValue = 0;
-	long int numHvaluesInit = supportPlanes.size();
-	hvaluesInit = new double[numHvaluesInit];
 	SupportItemSet supportItems(supportItem_comparer);
 	for (auto &plane : supportPlanes)
 	{
@@ -1632,7 +1627,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 		ASSERT(supportValue > 0.);
 		DEBUG_PRINT("Adding %d-th support value %lf",
 			iValue, supportValue);
-		hvaluesInit[iValue++] = supportValue;
+		++iValue;
 
 		/*
 		 * Save new support direction (will be used in
@@ -1740,32 +1735,7 @@ SupportFunctionEstimationData* Recoverer::buildSFEData(
 	printEstimationReport(Q, hvalues, startingVector, estimator);
 	DEBUG_PRINT("========== End of preliminary estimation ==============");
 
-/* TODO: Fix this method and use it. */
-#if 0
-
-	for (long int i = 0; i < numHvalues; ++i)
-	{
-		DEBUG_PRINT("Constructing hvalue #%ld.", i);
-		double hvalue = 0.;
-		auto it = mapIDinverse[i].begin();
-		while (it != mapIDinverse[i].end())
-		{
-			ASSERT(*it >= 0);
-			ASSERT(*it < numHvaluesInit);
-			DEBUG_PRINT("   id %ld, hvalue = %lf", *it, hvaluesInit[*it]);
-			hvalue += hvaluesInit[*it];
-			++it;
-		}
-		hvalue /= mapIDinverse[i].size();
-		Vector3d u = supportDirections[i];
-		DEBUG_PRINT("   constructed hvalue = %lf for direction "
-			"(%lf, %lf, %lf)", hvalue, u.x, u.y, u.z);
-		hvalues(i) = hvalue;
-	}
-#endif /* 0 */
-	
-	DEBUG_PRINT("Q is %d x %d matrix, numHvaluesInit = %ld", Q.rows(), Q.cols(),
-		numHvaluesInit);
+	DEBUG_PRINT("Q is %d x %d matrix", Q.rows(), Q.cols());
 	
 	SupportFunctionEstimationData *data = new SupportFunctionEstimationData(
 			numHvalues, Q.rows(), Q, hvalues, startingVector);

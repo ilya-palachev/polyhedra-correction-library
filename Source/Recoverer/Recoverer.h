@@ -135,9 +135,6 @@ private:
 	/** The size of map. */
 	long int mapIDsize;
 
-	/** Support values in initial (before hull construction) order. */
-	double *hvaluesInit;
-
 	/** Inverse map of the previous map (not a function). */
 	std::list<long int> *mapIDinverse;
 
