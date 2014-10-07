@@ -119,6 +119,7 @@ class GraphDumperGEXF;
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
