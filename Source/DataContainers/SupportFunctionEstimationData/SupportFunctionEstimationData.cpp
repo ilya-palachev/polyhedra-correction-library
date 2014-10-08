@@ -26,7 +26,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "SupportFunctionEstimationData.h"
+#include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 
 /** The theory works only when number of measurements is >= 5 */
 #define MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS 5

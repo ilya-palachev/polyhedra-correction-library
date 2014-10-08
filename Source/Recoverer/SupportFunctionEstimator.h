@@ -26,7 +26,7 @@
 #ifndef SUPPORTFUNCTIONESTIMATOR_H_
 #define SUPPORTFUNCTIONESTIMATOR_H_
 
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 
 /** The generic support function estimator. */
 class SupportFunctionEstimator : public SupportFunctionEstimationData

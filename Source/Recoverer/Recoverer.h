@@ -37,7 +37,7 @@
 
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 #include "Recoverer/SupportItemSet.h"
 
 
