@@ -78,14 +78,3 @@ SupportFunctionDataItem &SupportFunctionData::operator[] (const int iPosition)
 	DEBUG_END;
 	return items[iPosition];
 }
-
-SupportFunctionData *SupportFunctionData::extractCanonicalData()
-{
-	DEBUG_START;
-	DEBUG_END;
-	/*
-	 * Inhereted classes should re-implement this method, so it'll be not
-	 * so trivial for them as here.
-	 */
-	return this;
-}

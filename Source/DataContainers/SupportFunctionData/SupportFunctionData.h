@@ -54,9 +54,6 @@ public:
 
 	/** Subscription operator. */
 	SupportFunctionDataItem &operator[] (const int iPosition);
-
-	/** Extracts data in canonical form. */
-	virtual SupportFunctionData *extractCanonicalData();
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
