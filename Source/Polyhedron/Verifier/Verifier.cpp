@@ -722,16 +722,19 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	}
 
 #ifndef NDEBUG
-	double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
+	double DEBUG_VARIABLE distance
+		= sqrt(qmod(polyhedron->vertices[edge->v0] -
 			polyhedron->vertices[edge->v1]));
 	DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
 			distance);
 
-	double movement0 = sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
+	double DEBUG_VARIABLE movement0
+		= sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
 	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v0, edge->v0,
 			movement0);
 
-	double movement1 = sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
+	double DEBUG_VARIABLE movement1
+		= sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
 	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v1, edge->v1,
 			movement1);
 #endif
