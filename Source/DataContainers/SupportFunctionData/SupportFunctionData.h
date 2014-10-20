@@ -27,6 +27,7 @@
 #define SUPPORT_FUNCTION_DATA_H
 
 #include <vector>
+#include <memory>
 
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 
@@ -55,5 +56,7 @@ public:
 	/** Subscription operator. */
 	SupportFunctionDataItem &operator[] (const int iPosition);
 };
+
+typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
