@@ -63,6 +63,7 @@ set (SOURCE_pcl
 	Source/DataConstructors/ShadowContourConstructor/ShadowContourConstructor.cpp
 	#	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.cpp
+	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.cpp
 	Source/DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.cpp
 	Source/DataContainers/EdgeData/EdgeData.cpp
@@ -235,6 +236,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Gtest")
 	set(COMMON_FLAGS "${COMMON_FLAGS} -g")
 	set (SOURCE_gtests
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane_test.cpp
+		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints_test.cpp
 		UnitTests/AllGtestsDriver.cpp
 	)
 	add_executable(gtests ${SOURCE_gtests})
