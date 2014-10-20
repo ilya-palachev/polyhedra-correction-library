@@ -26,6 +26,21 @@
 #ifndef VECTOR3D_H
 #define VECTOR3D_H
 
+#include <cmath>
+#include <ostream>
+
+/**
+ * Checks the FP equality of double numbers
+ *
+ * @param a	1st number
+ * @param b	2nd number
+ * @return true, if fpclassify is FP_ZERO.
+ */
+static inline bool equal(const double a, const double b)
+{
+	return std::fpclassify(a - b) == FP_ZERO;
+}
+
 /** Simple 3D vector class.*/
 class Vector3d
 {
@@ -62,7 +77,7 @@ public:
 	 * @param v	The vector that should be assigned from.
 	 * @return The result of the assignment.
 	 */
-	Vector3d& operator =(const Vector3d& v)
+	Vector3d &operator =(const Vector3d &v)
 	{
 		x = v.x;
 		y = v.y;
@@ -76,7 +91,7 @@ public:
 	 * @param v	Reference to 2nd vector
 	 * @return	The result of the comparison.
 	 */
-	bool operator <(const Vector3d& v) const
+	bool operator <(const Vector3d &v) const
 	{
 		if (x < v.x)
 			return true;
@@ -84,7 +99,7 @@ public:
 		{
 			if (y < v.y)
 				return true;
-			else if ((y <= v.y) && z < v.z)
+			else if ((y <= v.y) &&z < v.z)
 				return true;
 		}
 		return false;
@@ -96,7 +111,7 @@ public:
 	 * @param v	Reference to 2nd vector
 	 * @return	The result of the comparison.
 	 */
-	bool operator >(const Vector3d& v) const
+	bool operator >(const Vector3d &v) const
 	{
 		if (x > v.x)
 			return true;
@@ -104,7 +119,7 @@ public:
 		{
 			if (y > v.y)
 				return true;
-			else if ((y >= v.y) && z > v.z)
+			else if ((y >= v.y) &&z > v.z)
 				return true;
 		}
 		return false;
@@ -116,7 +131,7 @@ public:
 	 * @param v	Reference to 2nd vector
 	 * @return	The result of the comparison.
 	 */
-	bool operator >=(const Vector3d& v) const
+	bool operator >=(const Vector3d &v) const
 	{
 		return !(this->operator<(v));
 	}
@@ -127,7 +142,7 @@ public:
 	 * @param v	Reference to 2nd vector
 	 * @return	The result of the comparison.
 	 */
-	bool operator <=(const Vector3d& v) const
+	bool operator <=(const Vector3d &v) const
 	{
 		return !(this->operator>(v));
 	}
@@ -138,7 +153,7 @@ public:
 		return Vector3d(-x, -y, -z);
 	}
 
-	Vector3d & operator +=(const Vector3d & v)
+	Vector3d &operator +=(const Vector3d &v)
 	{
 		x += v.x;
 		y += v.y;
@@ -146,7 +161,7 @@ public:
 		return *this;
 	}
 
-	Vector3d & operator -=(const Vector3d & v)
+	Vector3d &operator -=(const Vector3d &v)
 	{
 		x -= v.x;
 		y -= v.y;
@@ -154,7 +169,7 @@ public:
 		return *this;
 	}
 
-	Vector3d & operator *=(const double d)
+	Vector3d &operator *=(const double d)
 	{
 		x *= d;
 		y *= d;
@@ -162,7 +177,7 @@ public:
 		return *this;
 	}
 
-	Vector3d & operator /=(const double d)
+	Vector3d &operator /=(const double d)
 	{
 		x /= d;
 		y /= d;
@@ -170,7 +185,7 @@ public:
 		return *this;
 	}
 
-	Vector3d & null()
+	Vector3d &null()
 	{
 		x = y = z = 0.;
 		return *this;
@@ -178,81 +193,73 @@ public:
 
 	bool operator !() const
 	{
-		return fpclassify(x) == FP_ZERO &&
-			fpclassify(y) == FP_ZERO &&
-			fpclassify(z) == FP_ZERO;
+		return equal(x, 0.) && equal (y, 0.) && equal(z, 0.);
 	}
 
-	Vector3d& norm(double d);
+	Vector3d &norm(double d);
+
+	Vector3d perpendicular() const;
+
+	friend std::ostream &operator <<(std::ostream &stream,
+			const Vector3d &a)
+	{
+		stream << "(" << a.x << ", " << a.y << ", " << a.z << ")";
+		return stream;
+	}
 };
 
-inline Vector3d operator +(const Vector3d& a, const Vector3d& b)
+inline Vector3d operator +(const Vector3d &a, const Vector3d &b)
 {
 	return Vector3d(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-inline Vector3d operator -(const Vector3d& a, const Vector3d& b)
+inline Vector3d operator -(const Vector3d &a, const Vector3d &b)
 {
 	return Vector3d(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-inline Vector3d operator *(const Vector3d& a, double d)
+inline Vector3d operator *(const Vector3d &a, double d)
 {
 	return Vector3d(a.x * d, a.y * d, a.z * d);
 }
 
-inline Vector3d operator /(const Vector3d& a, double d)
+inline Vector3d operator /(const Vector3d &a, double d)
 {
 	return Vector3d(a.x / d, a.y / d, a.z / d);
 }
 
-inline Vector3d operator *(double d, const Vector3d& a)
+inline Vector3d operator *(double d, const Vector3d &a)
 {
 	return Vector3d(a.x * d, a.y * d, a.z * d);
 }
 
-inline double operator *(const Vector3d& a, const Vector3d& b)
+inline double operator *(const Vector3d &a, const Vector3d &b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline double qmod(const Vector3d& a)
+inline double qmod(const Vector3d &a)
 {
 	return a.x * a.x + a.y * a.y + a.z * a.z;
 }
 
-inline Vector3d operator %(const Vector3d& a, const Vector3d& b)
+inline Vector3d operator %(const Vector3d &a, const Vector3d &b)
 {
 	return Vector3d(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z,
 			a.x * b.y - a.y * b.x);
 }
 
-inline bool operator !=(const Vector3d& a, const Vector3d& b)
+inline bool operator ==(const Vector3d &a, const Vector3d &b)
 {
-	return _nequal(a.x,b.x) || _nequal(a.y,b.y) || _nequal(a.z,b.z);
+	return !(a - b);
 }
 
-inline bool operator ==(const Vector3d& a, const Vector3d& b)
+inline bool operator !=(const Vector3d &a, const Vector3d &b)
 {
-	return _equal(a.x,b.x) && _equal(a.y,b.y) && _equal(a.z,b.z);
+	return !(a == b);
 }
 
-double length(const Vector3d & v);
-
-inline bool operator !=(const Segment3d & s1, const Segment3d & s2)
-{
-	return (s1.a != s2.a) || (s1.b != s2.b);
-}
-
-inline bool operator ==(const Segment3d & s1, const Segment3d & s2)
-{
-	return (s1.a == s2.a) && (s1.b == s2.b);
-}
-
-inline double length(const Segment3d & s)
-{
-	return length(s.b - s.a);
-}
+double length(const Vector3d &v);
 
 class Plane
 {
@@ -261,7 +268,7 @@ public:
 	double dist;
 
 	Plane() :
-		norm(Vector3d(0., 0., 0.));
+		norm(Vector3d(0., 0., 0.)),
 		dist(0.)
 	{
 	}
@@ -285,16 +292,24 @@ public:
 	}
 
 	Vector3d project(const Vector3d &v) const;
+
+	friend std::ostream &operator <<(std::ostream &stream,
+			const Plane &a)
+	{
+		stream << "{(" << a.norm.x << ")x + (" << a.norm.y << ")y +("
+			<< a.norm.z << ")z + (" << a.dist << ") == 0}";
+		return stream;
+	}
 };
 
 inline bool operator ==(const Plane &p1, const Plane &p2)
 {
-	return p1.norm == p2.norm && _equal(p1.dist, p2.dist);
+	return p1.norm == p2.norm && equal(p1.dist, p2.dist);
 }
 
 inline bool operator !=(const Plane &p1, const Plane &p2)
 {
-	return p1.norm != p2.norm || _nequal(p1.dist,p2.dist);
+	return p1.norm != p2.norm || !equal(p1.dist, p2.dist);
 }
 
 bool intersection(const Plane &plane1, const Plane &plane2,
@@ -305,6 +320,35 @@ bool intersection(const Plane &plane1, const Plane &plane2, Vector3d &dir,
 
 bool intersection(const Plane &plane, const Vector3d &dir,
 		const Vector3d &point, Vector3d &res);
+
+/**
+ * Checks that double are equal under given precision.
+ *
+ * @param a		1st number
+ * @param b		2nd number
+ * @param precision	The precision
+ * @return true, if the absolute difference is not greater than precision.
+ */
+static inline bool equal(const double a, const double b, const double precision)
+{
+	return fabs(a - b) <= precision;
+}
+
+/**
+ * Checks that 3d vectors are equal under given precision.
+ *
+ * @param a		1st vector
+ * @param b		2nd vector
+ * @param precision	The precision
+ * @return true, if the L-inf norm of the difference is not greater than the
+ * precision.
+ */
+static inline bool equal(const Vector3d a, const Vector3d b,
+		const double precision)
+{
+	return equal(a.x, b.x, precision) && equal(a.y, b.y, precision)
+		&& equal(a.z, b.z, precision);
+}
 
 #endif /* VECTOR3D_H */
 

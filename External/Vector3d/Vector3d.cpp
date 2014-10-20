@@ -26,7 +26,7 @@
 Vector3d &Vector3d::norm(double d)
 {
 	double t = x * x + y * y + z * z;
-	if (fpclassify(t) = FP_ZERO)
+	if (!equal(t, 0.))
 	{
 		d /= sqrt(t);
 		x *= d;
@@ -34,6 +34,33 @@ Vector3d &Vector3d::norm(double d)
 		z *= d;
 	}
 	return *this;
+}
+
+Vector3d Vector3d::perpendicular() const
+{
+	double ax = fabs(x);
+	double ay = fabs(y);
+	double az = fabs(z);
+	if (ax >= ay)
+	{
+		if (ax >= az)
+		{
+			if (equal(ax, 0))
+				return Vector3d(1., 0., 0.);
+			double d = 1. / sqrt(ax * ax + ay * ay);
+			return Vector3d(-y * d, x * d, 0.);
+		}
+	}
+	else
+	{
+		if (ay >= az)
+		{
+			double d = 1. / sqrt(ay * ay + az * az);
+			return Vector3d(0., -z * d, y * d);
+		}
+	}
+	double d = 1. / sqrt(ax * ax + az * az);
+	return Vector3d(z * d, 0., -x * d);
 }
 
 double length(const Vector3d &v)
@@ -64,7 +91,7 @@ Plane::Plane(const Vector3d &x, const Vector3d &y, const Vector3d &z)
 			norm = zx.perpendicular();
 	}
 	else
-		norm.norm();
+		norm.norm(1.);
 	dist = ((x + y + z) * norm) / -3.;
 }
 
