@@ -396,7 +396,7 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	{
 		SContour *contourConv = contour->convexify();
 		ASSERT(contour->id >= 0);
-		ASSERT(shadowDataPrep);
+		ASSERT(shadowDataPrep != NULL);
 		ASSERT(contour->id < shadowDataPrep->numContours);
 		shadowDataPrep->contours[contour->id] = *contourConv;
 		contour = contourConv;
@@ -657,7 +657,7 @@ static Polyhedron_3 convexHullCGAL(CGALpointsSet pointsCGAL)
 			point.x(), point.y(), point.z());
 
 		/* Check that all generated points are equal. */
-		long iPrev = 0;
+		long DEBUG_VARIABLE iPrev = 0;
 		for (auto vertexPrev = poly.vertices_begin();
 			vertexPrev != vertex; ++vertexPrev)
 		{
