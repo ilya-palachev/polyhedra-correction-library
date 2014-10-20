@@ -91,7 +91,7 @@ void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
 	{
 		SContour* contourCurr = &contourData->contours[iContour];
 		Vector3d normal = contourCurr->plane.norm;
-		normal.norm();
+		normal.norm(1.);
 		double angle = atan2(normal * ey, normal * ex);
 		
 		/* Iterate via the array of sides of the current contour. */
