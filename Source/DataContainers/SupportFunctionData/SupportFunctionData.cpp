@@ -46,7 +46,15 @@ SupportFunctionData::SupportFunctionData(const SupportFunctionData *data) :
 	items()
 {
 	DEBUG_START;
-	std::copy(data->items.begin(), data->items.end(), items.begin());
+	items = data->items;
+	DEBUG_END;
+}
+
+SupportFunctionData::SupportFunctionData(
+		const std::vector<SupportFunctionDataItem> itemsGiven)
+{
+	DEBUG_START;
+	items = itemsGiven;
 	DEBUG_END;
 }
 

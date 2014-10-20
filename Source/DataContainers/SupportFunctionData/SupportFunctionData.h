@@ -47,6 +47,14 @@ public:
 	/** Copy constructor from pointer. */
 	SupportFunctionData(const SupportFunctionData *data);
 
+	/**
+	 * Constructor from the vector of items.
+	 *
+	 * @param itemsGiven	Support function data items.
+	 */
+	SupportFunctionData(
+			const std::vector<SupportFunctionDataItem> itemsGiven);
+
 	/** Assignment operator. */
 	SupportFunctionData &operator= (const SupportFunctionData &data);
 
