@@ -71,7 +71,8 @@ void GlobalShadowCorrector::preprocessAssociations()
 			edge != edgeData->edges.end(); ++edge)
 	{
 		edge->my_fprint(stdout);
-		double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
+		double DEBUG_VARIABLE distance
+			= sqrt(qmod(polyhedron->vertices[edge->v0] -
 				polyhedron->vertices[edge->v1]));
 		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
 				distance);
