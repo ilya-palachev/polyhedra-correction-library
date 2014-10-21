@@ -26,6 +26,7 @@
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
 Polyhedron::Polyhedron() :
 				numVertices(0),
@@ -129,7 +130,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 	int iFacet = 0;
 	auto plane = p.planes_begin();
 	auto facet = p.facets_begin();
-	/* Iterate through the lists of planes and facets. */
+	/* Iterate through the std::lists of planes and facets. */
 	do
 	{
 		facets[iFacet].id = iFacet;
@@ -139,7 +140,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 			plane->c()), plane->d());
 
 		/*
-		 * Iterate through the list of halfedges incident to the curent CGAL
+		 * Iterate through the std::list of halfedges incident to the curent CGAL
 		 * facet.
 		 */
 		auto halfedge = facet->facet_begin();
@@ -173,6 +174,53 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 
 	} while (++plane != p.planes_end() && ++facet != p.facets_end());
 
+	DEBUG_END;
+}
+
+Polyhedron::Polyhedron(ShadowContourDataPtr data)
+{
+	DEBUG_START;
+
+	ASSERT(data);
+	ASSERT(data->numContours > 0);
+	numFacets = data->numContours;
+	facets = new Facet[numFacets];
+
+	/* Get vertices from contours. */
+	std::vector<Vector3d> verticesAll;
+	numVertices = 0;
+	int iVertex = 0;
+	for (int iContour = 0; iContour < data->numContours; ++iContour)
+	{
+		SContour* contour = &data->contours[iContour];
+		auto verticesPortion = contour->getPoints();
+		
+		Facet *facet = new Facet(iContour, verticesPortion.size(),
+			contour->plane, NULL);
+		for (int iVertexLocal = 0;
+				(unsigned) iVertexLocal < verticesPortion.size();
+				++iVertexLocal)
+		{
+			facet->indVertices[iVertexLocal] = iVertex++;
+		}
+		/* Cycle vertices. */
+		facet->indVertices[facet->numVertices] = facet->indVertices[0];
+		facets[iContour] = *facet;
+
+		numVertices += verticesPortion.size();
+
+		verticesAll.insert(verticesAll.end(), verticesPortion.begin(),
+				verticesPortion.end());
+	}
+
+	vertices = new Vector3d[numVertices];
+	iVertex = 0;
+	for (auto &vertex: verticesAll)
+	{
+		vertices[iVertex++] = vertex;
+	}
+
+	set_parent_polyhedron_in_facets();
 	DEBUG_END;
 }
 
@@ -275,7 +323,7 @@ void Polyhedron::set_parent_polyhedron_in_facets()
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
 		DEBUG_PRINT("Setting parent polyhedron in facet #%d", iFacet);
-		shared_ptr<Polyhedron> this_shared = shared_from_this();
+		PolyhedronPtr this_shared = shared_from_this();
 		DEBUG_PRINT("Polyhedron use count = %ld",
 					this_shared.use_count());
 		facets[iFacet].set_poly(this_shared);
