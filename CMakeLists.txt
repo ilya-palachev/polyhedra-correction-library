@@ -61,7 +61,7 @@ set (SOURCE_pcl
 	Source/DataConstructors/EdgeConstructor/EdgeConstructor.cpp
 	Source/DataConstructors/PDataConstructor/PDataConstructor.cpp
 	Source/DataConstructors/ShadowContourConstructor/ShadowContourConstructor.cpp
-	#	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.cpp
+	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.cpp
