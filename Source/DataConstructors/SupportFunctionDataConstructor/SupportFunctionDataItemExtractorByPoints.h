@@ -25,8 +25,8 @@
  * declaration.
  */
 
-#ifndef SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_PLANE_H
-#define SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_PLANE_H
+#ifndef SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_POINTS_H
+#define SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_POINTS_H
 
 #include "DebugPrint.h"
 #include "Vector3d.h"
@@ -55,4 +55,4 @@ public:
 	virtual SupportFunctionDataItem run(SideOfContour *side);
 };
 
-#endif /* SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_PLANE_H */
+#endif /* SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_POINTS_H */
