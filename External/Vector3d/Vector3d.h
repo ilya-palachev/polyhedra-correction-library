@@ -20,7 +20,7 @@
 
 /**
  * @file Vector3d.h
- * @brief 3D vectors and planes declaration, with their intersections.
+ * @brief 3D std::vectors and planes declaration, with their intersections.
  */
 
 #ifndef VECTOR3D_H
@@ -34,14 +34,14 @@
  *
  * @param a	1st number
  * @param b	2nd number
- * @return true, if fpclassify is FP_ZERO.
+ * @return true, if std::fpclassify is FP_ZERO.
  */
 static inline bool equal(const double a, const double b)
 {
 	return std::fpclassify(a - b) == FP_ZERO;
 }
 
-/** Simple 3D vector class.*/
+/** Simple 3D std::vector class.*/
 class Vector3d
 {
 public:
@@ -74,7 +74,7 @@ public:
 	/**
 	 * Simple assignment operator
 	 *
-	 * @param v	The vector that should be assigned from.
+	 * @param v	The std::vector that should be assigned from.
 	 * @return The result of the assignment.
 	 */
 	Vector3d &operator =(const Vector3d &v)
@@ -86,9 +86,9 @@ public:
 	}
 
 	/**
-	 * Compares 2 vectors in lexicographical order.
+	 * Compares 2 std::vectors in lexicographical order.
 	 *
-	 * @param v	Reference to 2nd vector
+	 * @param v	Reference to 2nd std::vector
 	 * @return	The result of the comparison.
 	 */
 	bool operator <(const Vector3d &v) const
@@ -106,9 +106,9 @@ public:
 	}
 
 	/**
-	 * Compares 2 vectors in lexicographical order.
+	 * Compares 2 std::vectors in lexicographical order.
 	 *
-	 * @param v	Reference to 2nd vector
+	 * @param v	Reference to 2nd std::vector
 	 * @return	The result of the comparison.
 	 */
 	bool operator >(const Vector3d &v) const
@@ -126,9 +126,9 @@ public:
 	}
 
 	/**
-	 * Compares 2 vectors in lexicographical order.
+	 * Compares 2 std::vectors in lexicographical order.
 	 *
-	 * @param v	Reference to 2nd vector
+	 * @param v	Reference to 2nd std::vector
 	 * @return	The result of the comparison.
 	 */
 	bool operator >=(const Vector3d &v) const
@@ -137,9 +137,9 @@ public:
 	}
 
 	/**
-	 * Compares 2 vectors in lexicographical order.
+	 * Compares 2 std::vectors in lexicographical order.
 	 *
-	 * @param v	Reference to 2nd vector
+	 * @param v	Reference to 2nd std::vector
 	 * @return	The result of the comparison.
 	 */
 	bool operator <=(const Vector3d &v) const
@@ -335,10 +335,10 @@ static inline bool equal(const double a, const double b, const double precision)
 }
 
 /**
- * Checks that 3d vectors are equal under given precision.
+ * Checks that 3d std::vectors are equal under given precision.
  *
- * @param a		1st vector
- * @param b		2nd vector
+ * @param a		1st std::vector
+ * @param b		2nd std::vector
  * @param precision	The precision
  * @return true, if the L-inf norm of the difference is not greater than the
  * precision.

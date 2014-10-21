@@ -23,7 +23,7 @@
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 
-ShadowContourData::ShadowContourData(shared_ptr<Polyhedron> p) :
+ShadowContourData::ShadowContourData(PolyhedronPtr p) :
 				PData(p),
 				numContours(0),
 				contours(NULL)
@@ -57,6 +57,15 @@ ShadowContourData::ShadowContourData(const ShadowContourDataPtr data) :
 	{
 		contours[i] = data->contours[i];
 	}
+	DEBUG_END;
+}
+
+ShadowContourData::ShadowContourData(const int numContoursNeeded) :
+	PData(),
+	numContours(numContoursNeeded),
+	contours(new SContour[numContoursNeeded])
+{
+	DEBUG_START;
 	DEBUG_END;
 }
 

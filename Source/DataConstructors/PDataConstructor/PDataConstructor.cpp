@@ -22,7 +22,7 @@
 #include "DebugAssert.h"
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
 
-PDataConstructor::PDataConstructor(shared_ptr<Polyhedron> p) :
+PDataConstructor::PDataConstructor(PolyhedronPtr p) :
 				polyhedron(p)
 {
 	DEBUG_START;

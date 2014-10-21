@@ -25,8 +25,8 @@
 
 #include "DataContainers/EdgeData/Edge/Edge.h"
 
-typedef set<Edge, EdgeComparison> EdgeSet;
-typedef set<Edge, EdgeComparison>::iterator EdgeSetIterator;
+typedef std::set<Edge, EdgeComparison> EdgeSet;
+typedef std::set<Edge, EdgeComparison>::iterator EdgeSetIterator;
 
 class EdgeData
 {

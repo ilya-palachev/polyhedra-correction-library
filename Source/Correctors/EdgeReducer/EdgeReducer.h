@@ -30,9 +30,9 @@
 class EdgesWorkingSets
 {
 public:
-	set<pair<int, int>> edgesErased;
-	set<pair<int, int>> edgesAdded;
-	set<pair<int, int>> edgesEdited;
+	std::set<pair<int, int>> edgesErased;
+	std::set<pair<int, int>> edgesAdded;
+	std::set<pair<int, int>> edgesEdited;
 };
 
 class EdgeReducer: public PCorrector
@@ -45,7 +45,7 @@ private:
 	int iVertexStayed;
 	VertexInfo* vertexInfoReduced;
 	VertexInfo* vertexInfoStayed;
-	set<int> facetsUpdated;
+	std::set<int> facetsUpdated;
 
 	EdgesWorkingSets edgesWS;
 
@@ -61,7 +61,7 @@ private:
 
 public:
 	EdgeReducer();
-	EdgeReducer(shared_ptr<Polyhedron> p);
+	EdgeReducer(PolyhedronPtr p);
 	~EdgeReducer();
 
 	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,

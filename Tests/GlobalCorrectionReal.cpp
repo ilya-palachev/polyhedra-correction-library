@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	shared_ptr<Polyhedron> polyhedron(new Polyhedron());
+	PolyhedronPtr polyhedron(new Polyhedron());
 	if (!polyhedron->fscan_default_1_2(parameters.fileNamePolyhedron))
 	{
 		DEBUG_END;
@@ -67,10 +67,10 @@ int main(int argc, char** argv)
 	gsParameters = {parameters.method, parameters.epsLoopStop,
 			parameters.deltaGardientStep};
 	
-	list< FacetWithArea > listSortedFacets =
+	std::list<FacetWithArea> listSortedFacets =
 		polyhedron->getSortedByAreaFacets();
 		
-	list<int> facetsCorrected;
+	std::list<int> facetsCorrected;
 	auto itFacet = listSortedFacets.rend();
 	++itFacet;
 	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected; ++itFacet,

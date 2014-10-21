@@ -37,7 +37,7 @@ Coalescer::Coalescer() :
 	DEBUG_END;
 }
 
-Coalescer::Coalescer(shared_ptr<Polyhedron> p) :
+Coalescer::Coalescer(PolyhedronPtr p) :
 		PCorrector(p),
 		plane(),
 		coalescedFacet()

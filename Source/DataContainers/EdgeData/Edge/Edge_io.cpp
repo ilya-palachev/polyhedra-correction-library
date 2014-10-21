@@ -44,7 +44,7 @@ void Edge::my_fprint(FILE* file) const
 
 	int i = 0;
 	int numContoursEssential = 0;
-	for (list<EdgeContourAssociation>::iterator iter = assocList.begin();
+	for (std::list<EdgeContourAssociation>::iterator iter = assocList.begin();
 			iter != assocList.end(); ++iter, ++i)
 	{
 		REGULAR_PRINT(file, "\t%d\t|\t%d\t\t|\t%d\t\t|\t%d\t\t|\t%lf\n", i,

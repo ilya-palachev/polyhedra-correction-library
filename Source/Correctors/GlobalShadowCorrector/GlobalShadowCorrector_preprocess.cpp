@@ -47,7 +47,7 @@ void GlobalShadowCorrector::preprocessAssociations()
 
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
-		for (list<int>::iterator itFacet = facetsCorrected.begin();
+		for (std::list<int>::iterator itFacet = facetsCorrected.begin();
 				itFacet != facetsCorrected.end(); ++itFacet)
 		{
 			int iFacet = *itFacet;

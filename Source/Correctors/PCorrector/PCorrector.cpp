@@ -29,7 +29,7 @@ PCorrector::PCorrector() :
 	DEBUG_END;
 }
 
-PCorrector::PCorrector(shared_ptr<Polyhedron> p) :
+PCorrector::PCorrector(PolyhedronPtr p) :
 				polyhedron(p)
 {
 	DEBUG_START;

@@ -83,7 +83,7 @@
 #define OPTION_OUTPUT_NAME 'o'
 
 /**
- * Option "-p" enable the mode of printing the problem, i.e. the support vector
+ * Option "-p" enable the mode of printing the problem, i.e. the support std::vector
  * and the matrix of conditions.
  */
 #define OPTION_PRINT_PROBLEM 'p'
@@ -127,7 +127,7 @@
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdg:l:o:pr:svxz"
 
 /**
- * The definition of corresponding long options list.
+ * The definition of corresponding long options std::list.
  */
 static struct option optionsLong[] =
 {
@@ -435,7 +435,7 @@ void printUsage(int argc, char** argv)
 		"contour.\n", OPTION_LIMIT_RANDOM, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tThe name of output file(s).\n",
 		OPTION_OUTPUT_NAME, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues vector "
+	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues std::vector "
 		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
 		OPTION_RECOVER, optionsLong[i++].name);
@@ -912,10 +912,10 @@ static double genRandomDouble(double maxDelta)
 }
 
 /**
- * Shifts all points of contours on random double vectors
+ * Shifts all points of contours on random double std::vectors
  *
  * @param data		Shadow contours data
- * @param maxDelta	maximum delta in shift vectors' coordinates
+ * @param maxDelta	maximum delta in shift std::vectors' coordinates
  */
 void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 {
@@ -973,7 +973,7 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	constructor->run(options->input.model.numContours,
 			options->input.model.shiftAngleFirst);
 
-	/* Shift points contours on random vectors. */
+	/* Shift points contours on random std::vectors. */
 	shiftContoursRandom(SCData, options->input.model.limitRandom);
 
 	DEBUG_END;
@@ -1063,7 +1063,7 @@ static void makeRequestedOutput(CommandLineOptions* options,
 
 	if (options->ifPrintProblem)
 	{
-		/* Just print naive matrix and vector of hvalues. */
+		/* Just print naive matrix and std::vector of hvalues. */
 		recoverer->buildNaiveMatrix(data);
 	}
 

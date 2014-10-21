@@ -42,11 +42,11 @@ void GlobalShadowCorrector::derivativeTest_all()
 void GlobalShadowCorrector::derivativeTest_1()
 {
 	DEBUG_START;
-	list<int>::iterator iIteratorNotAssociated = facetsNotAssociated.begin();
+	std::list<int>::iterator iIteratorNotAssociated = facetsNotAssociated.begin();
 	int iCountNotAssociated = 0;
 
 	int iFacetLocal = 0;
-	for (list<int>::iterator itFacet = facetsCorrected.begin();
+	for (std::list<int>::iterator itFacet = facetsCorrected.begin();
 			itFacet != facetsCorrected.end(); ++itFacet, ++iFacetLocal)
 	{
 		int iFacet = *itFacet;

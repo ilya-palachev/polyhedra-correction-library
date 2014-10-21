@@ -23,18 +23,26 @@
  * @brief Declaration of class that contains array of shadow contours.
  */
 
+#ifndef SHADECONTOURDATA_H_FORWARD
+#define SHADECONTOURDATA_H_FORWARD
+
+#include <memory>
+class ShadowContourData;
+/**
+ * Shared pointer to the shadow contour data.
+ */
+typedef std::shared_ptr<ShadowContourData> ShadowContourDataPtr;
+
+#endif /* SHADECONTOURDATA_H_FORWARD */
+
 #ifndef SHADECONTOURDATA_H_
 #define SHADECONTOURDATA_H_
 
 #include "DataContainers/PData/PData.h"
 
-/* Forward declaration. */
+/* Forward declarations. */
 class SContour;
-
-/**
- * Shared pointer to the shadow contour data.
- */
-typedef std::shared_ptr<ShadowContourData> ShadowContourDataPtr;
+class Polyhedron;
 
 /**
  * Container of shadow contour data used for polyhedral reconstruction.
@@ -62,7 +70,7 @@ public:
 	 *
 	 * TODO: shadow contour data can be not associated with any polyhedron!
 	 */
-	ShadowContourData(shared_ptr<Polyhedron> p);
+	ShadowContourData(PolyhedronPtr p);
 
 	/**
 	 * Copy constructor from shared pointer
@@ -77,6 +85,13 @@ public:
 	 * @param data	The data to be copied
 	 */
 	ShadowContourData(const ShadowContourData& data);
+
+	/**
+	 * Constructor of empty data set by the number of contours.
+	 *
+	 * @param numContoursNeeded	The needed number of contours.
+	 */
+	ShadowContourData(const int numContoursNeeded);
 
 	/**
 	 * Destructor for the freeing of data.

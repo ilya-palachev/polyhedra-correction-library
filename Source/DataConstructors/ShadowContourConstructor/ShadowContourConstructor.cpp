@@ -29,7 +29,7 @@
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 
-ShadowContourConstructor::ShadowContourConstructor(shared_ptr<Polyhedron> p,
+ShadowContourConstructor::ShadowContourConstructor(PolyhedronPtr p,
 		shared_ptr<ShadowContourData> d) :
 				PDataConstructor(p),
 				data(d),

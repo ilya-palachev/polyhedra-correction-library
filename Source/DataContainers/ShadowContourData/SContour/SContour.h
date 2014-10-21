@@ -72,7 +72,7 @@ public:
 	 * Pointer to parent polyhedon which given contour from which the
 	 * contour was generated (for synthetically generated contours).
 	 */
-	shared_ptr<Polyhedron> poly;
+	PolyhedronPtr poly;
 
 	/** The array of contour sides. */
 	SideOfContour* sides;
@@ -90,10 +90,10 @@ public:
 	SContour(const SContour& orig);
 
 	/**
-	 * Creates shadow contour from the vector of its points and from its
+	 * Creates shadow contour from the std::vector of its points and from its
 	 * plane
 	 */
-	SContour(vector<Point_3> points, Plane plane);
+	SContour(std::vector<Point_3> points, Plane plane);
 
 	/** The destructor. */
 	~SContour();
@@ -141,10 +141,10 @@ public:
 	void fprintDefault(FILE* file);
 
 	/**
-	 * Gets the vector of all points of the contour (all non-equal
+	 * Gets the std::vector of all points of the contour (all non-equal
 	 * points).
 	 */
-	vector<Vector3d> getPoints();
+	std::vector<Vector3d> getPoints();
 };
 
 #endif	/* SCONTOUR_H */

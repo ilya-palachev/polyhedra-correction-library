@@ -45,7 +45,7 @@ private:
 			Plane planeOfProjection, int ifacet);
 
 public:
-	ShadowContourConstructor(shared_ptr<Polyhedron> p,
+	ShadowContourConstructor(PolyhedronPtr p,
 			shared_ptr<ShadowContourData> d);
 	~ShadowContourConstructor();
 	void run(int numContoursNeeded, double firstAngle);

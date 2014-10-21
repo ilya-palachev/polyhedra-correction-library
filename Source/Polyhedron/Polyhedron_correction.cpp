@@ -23,8 +23,8 @@
 #include "Polyhedron/Polyhedron.h"
 #include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
 
-void Polyhedron::correctGlobal(shared_ptr<ShadowContourData> contourData,
-		GSCorrectorParameters* parameters, list<int>* facetsCorrected)
+void Polyhedron::correctGlobal(ShadowContourDataPtr contourData,
+		GSCorrectorParameters* parameters, std::list<int>* facetsCorrected)
 {
 	DEBUG_START;
 	preprocessAdjacency();

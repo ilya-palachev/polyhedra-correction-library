@@ -71,7 +71,7 @@ ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-		shared_ptr<Polyhedron> poly_orig) :
+		PolyhedronPtr poly_orig) :
 				num(num_orig),
 				numMax(numMax_orig),
 				P(P_orig),
@@ -83,7 +83,7 @@ ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-		int* indexFacet_orig, shared_ptr<Polyhedron> poly_orig) :
+		int* indexFacet_orig, PolyhedronPtr poly_orig) :
 				num(num_orig),
 				numMax(numMax_orig),
 				P(P_orig),

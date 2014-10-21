@@ -45,7 +45,7 @@ private:
 	void leastSquaresMethodWeighted(int nv, int* vertex_list, Plane* plane);
 public:
 	Coalescer();
-	Coalescer(shared_ptr<Polyhedron> p);
+	Coalescer(PolyhedronPtr p);
 	Coalescer(Polyhedron* p);
 	~Coalescer();
 	void run(int fid0, int fid1);

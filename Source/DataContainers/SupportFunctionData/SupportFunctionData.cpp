@@ -26,6 +26,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "Analyzers/SizeCalculator/SizeCalculator.h"
 
 SupportFunctionData::SupportFunctionData() :
 	items()

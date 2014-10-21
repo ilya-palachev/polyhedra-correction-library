@@ -48,7 +48,7 @@ public:
 	SupportFunctionData(const SupportFunctionData *data);
 
 	/**
-	 * Constructor from the vector of items.
+	 * Constructor from the std::vector of items.
 	 *
 	 * @param itemsGiven	Support function data items.
 	 */

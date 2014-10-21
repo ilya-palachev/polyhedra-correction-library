@@ -33,8 +33,8 @@ void SContour::my_fprint(FILE* file)
 	REGULAR_PRINT(file, "These are that sides:\n");
 	REGULAR_PRINT(file, "confidence\t"
 			"type\t"
-			"vector A1\t"
-			"vector A2\t\n");
+			"std::vector A1\t"
+			"std::vector A2\t\n");
 	for (int i = 0; i < ns; ++i)
 	{
 		sides[i].my_fprint_short(file);

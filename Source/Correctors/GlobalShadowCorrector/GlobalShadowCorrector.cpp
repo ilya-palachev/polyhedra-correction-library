@@ -52,7 +52,7 @@ GlobalShadowCorrector::GlobalShadowCorrector() :
 	DEBUG_END;
 }
 
-GlobalShadowCorrector::GlobalShadowCorrector(shared_ptr<Polyhedron> p,
+GlobalShadowCorrector::GlobalShadowCorrector(PolyhedronPtr p,
 		ShadowContourDataPtr scd, GSCorrectorParameters* _parameters) :
 				PCorrector(p),
 				edgeData(),
@@ -101,8 +101,8 @@ void GlobalShadowCorrector::init()
 	DEBUG_START;
 
 	/*
-	 * By default, before beginning the algorithm we set the list of corrected
-	 * facets to full list, so the default correction mode is correction of all
+	 * By default, before beginning the algorithm we set the std::list of corrected
+	 * facets to full std::list, so the default correction mode is correction of all
 	 * facets.
 	 */
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
@@ -155,7 +155,7 @@ GlobalShadowCorrector::~GlobalShadowCorrector()
 	DEBUG_END;
 }
 
-void GlobalShadowCorrector::setFacetsCorrected(list<int> _facetsCorrected)
+void GlobalShadowCorrector::setFacetsCorrected(std::list<int> _facetsCorrected)
 {
 	DEBUG_START;
 	facetsCorrected = _facetsCorrected;
@@ -279,7 +279,7 @@ GSCorrectorStatus GlobalShadowCorrector::runCorrectionDo()
 	findNotAssociatedFacets();
 #ifndef NDEBUG
 	DEBUG_PRINT("The following facets have no associations:");
-	for (list<int>::iterator iter = facetsNotAssociated.begin();
+	for (std::list<int>::iterator iter = facetsNotAssociated.begin();
 			iter != facetsNotAssociated.end(); ++iter)
 	{
 		DEBUG_PRINT("%d", *iter);
@@ -334,7 +334,7 @@ GSCorrectorStatus GlobalShadowCorrector::runCorrectionDo()
 		runCorrectionIteration();
 
 		double movement = 0.;
-		for (list<int>::iterator itFacet = facetsCorrected.begin();
+		for (std::list<int>::iterator itFacet = facetsCorrected.begin();
 				itFacet != facetsCorrected.end(); ++itFacet)
 		{
 			DEBUG_PRINT(
@@ -413,7 +413,7 @@ GSCorrectorStatus GlobalShadowCorrector::runCorrectionDo()
 void GlobalShadowCorrector::findNotAssociatedFacets()
 {
 	DEBUG_START;
-	for (list<int>::iterator itFacet = facetsCorrected.begin();
+	for (std::list<int>::iterator itFacet = facetsCorrected.begin();
 			itFacet != facetsCorrected.end(); ++itFacet)
 	{
 		int* indVertices = polyhedron->facets[*itFacet].indVertices;
@@ -480,7 +480,7 @@ double GlobalShadowCorrector::calculateFunctional()
 		Plane planePrev0 = prevPlanes[f0];
 		Plane planePrev1 = prevPlanes[f1];
 
-		for (list<EdgeContourAssociation>::const_iterator itCont =
+		for (std::list<EdgeContourAssociation>::const_iterator itCont =
 				edge->assocList.begin();
 				itCont != edge->assocList.end(); ++itCont)
 		{
@@ -537,7 +537,7 @@ void GlobalShadowCorrector::shiftCoefficients(double delta)
 {
 	DEBUG_START;
 
-	list<int>::iterator iterNotAssociated = facetsNotAssociated.begin();
+	std::list<int>::iterator iterNotAssociated = facetsNotAssociated.begin();
 	int countNotAssociated = 0;
 
 #ifndef NDEBUG
@@ -548,7 +548,7 @@ void GlobalShadowCorrector::shiftCoefficients(double delta)
 #endif /* NDEBUG */
 
 	int iFacetLocal = 0;
-	for (list<int>::iterator itFacet = facetsCorrected.begin();
+	for (std::list<int>::iterator itFacet = facetsCorrected.begin();
 			itFacet != facetsCorrected.end(); ++itFacet, ++iFacetLocal)
 	{
 		int iFacet = *itFacet;
@@ -734,11 +734,11 @@ void GlobalShadowCorrector::calculateGradient()
 		gradient[i] = 0.;
 	}
 
-	list<int>::iterator iterNotAssocicated = facetsNotAssociated.begin();
+	std::list<int>::iterator iterNotAssocicated = facetsNotAssociated.begin();
 	int countNotAssociated = 0;
 
 	int iFacetLocal = 0;
-	for (list<int>::iterator itFacet = facetsCorrected.begin();
+	for (std::list<int>::iterator itFacet = facetsCorrected.begin();
 			itFacet != facetsCorrected.end(); ++itFacet, ++iFacetLocal)
 	{
 		int iFacet = *itFacet;
@@ -825,7 +825,7 @@ void GlobalShadowCorrector::calculateGradient()
 			ASSERT((edge->v0 == v0 && edge->v1 == v1) ||
 					(edge->v0 == v1 && edge->v1 == v0));
 
-			for (list<EdgeContourAssociation>::const_iterator itCont =
+			for (std::list<EdgeContourAssociation>::const_iterator itCont =
 					edge->assocList.begin();
 					itCont != edge->assocList.end(); ++itCont)
 			{

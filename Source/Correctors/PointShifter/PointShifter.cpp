@@ -41,7 +41,7 @@ PointShifter::PointShifter() :
 	DEBUG_END;
 }
 
-PointShifter::PointShifter(shared_ptr<Polyhedron> p) :
+PointShifter::PointShifter(PolyhedronPtr p) :
 		PCorrector(p),
 		x(),
 		x1(),

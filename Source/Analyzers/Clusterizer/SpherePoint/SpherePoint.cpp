@@ -121,7 +121,7 @@ SpherePoint& MassCentre(int n, SpherePoint* points, SpherePoint& newSpherePoint)
 	return newSpherePoint;
 }
 
-SpherePoint& MassCentre(int n, int* indexFacet, shared_ptr<Polyhedron> poly)
+SpherePoint& MassCentre(int n, int* indexFacet, PolyhedronPtr poly)
 {
 	DEBUG_START;
 	SpherePoint newSpherePoint;

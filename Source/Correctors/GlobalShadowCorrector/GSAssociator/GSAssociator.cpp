@@ -35,7 +35,7 @@ const double EPSILON_EDGE_CONTOUR_VISIBILITY = 1e-6;
 
 static double distVertexEdge(
 // this routine calculates distance
-		Vector3d A, // from this vector
+		Vector3d A, // from this std::vector
 		Vector3d A1, // to the edge [A1, A2]
 		Vector3d A2, Vector3d& A_nearest);
 
@@ -292,7 +292,7 @@ double GSAssociator::calculateVisibility()
 int GSAssociator::checkAlreadyAdded()
 {
 	DEBUG_START;
-// Check whether this association has been already added to the list
+// Check whether this association has been already added to the std::list
 	int numAlreadyPushedAssocs = edge->assocList.size();
 	if (numAlreadyPushedAssocs == 0)
 	{
@@ -382,7 +382,7 @@ int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d& v_nearest,
 
 static double distVertexEdge(
 // this routine calculates distance
-		Vector3d A, // from this vector
+		Vector3d A, // from this std::vector
 		Vector3d A1, // to the edge [A1, A2]
 		Vector3d A2, Vector3d& A_nearest)
 {
@@ -561,14 +561,14 @@ void GSAssociator::add(Orientation orientation)
 	{
 		Vector3d side = sides[iSide].A2 - sides[iSide].A1;
 		bool ifDirectionIsProper = edgeVector * side > 0;
-		DEBUG_PRINT("Adding contour # %d to the assoc list of edgeVector %d",
+		DEBUG_PRINT("Adding contour # %d to the assoc std::list of edgeVector %d",
 				iContour, iEdge);
 		DEBUG_PRINT("\tadding side # %d", iSide);
 		// Create new association
 		EdgeContourAssociation assocForCurrentEdge =
 				EdgeContourAssociation(iContour, iSide, ifDirectionIsProper,
 						weight);
-		// Push it to the list
+		// Push it to the std::list
 		edge->assocList.push_back(assocForCurrentEdge);
 	}
 	DEBUG_PRINT("Addition done");

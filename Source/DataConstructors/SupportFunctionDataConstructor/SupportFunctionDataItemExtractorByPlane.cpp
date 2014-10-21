@@ -56,7 +56,7 @@ SupportFunctionDataItem SupportFunctionDataItemExtractorByPlane::run(
 	ASSERT(ifPointLiesInPlane(A2, plane));
 
 	/*
-	 * Calculate the vector that is orthogonal both to the normal of contour
+	 * Calculate the std::vector that is orthogonal both to the normal of contour
 	 * plane and the contour side.
 	 */
 	Vector3d normal = (A1 - A2) % plane.norm;

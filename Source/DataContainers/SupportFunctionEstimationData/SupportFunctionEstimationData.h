@@ -53,7 +53,7 @@ private:
 	SparseMatrix m_supportMatrix;
 
 	/**
-	 * The support vector, i. e. the vector of support function
+	 * The support vector, i. e. the std::vector of support function
 	 * measurements.
 	 */
 	VectorXd m_supportVector;
@@ -79,10 +79,10 @@ public:
 	 * Default constructor.
 	 *
 	 * @param supportMatrix		The support matrix of problem.
-	 * @param supportVector		The support vector, i. e. the vector
+	 * @param supportVector		The support vector, i. e. the std::vector
 	 * 				of support function measurements.
-	 * @param startingVector	The starting vector of the algorithm.
-	 * @param supportDirections	The vector of support directions
+	 * @param startingVector	The starting std::vector of the algorithm.
+	 * @param supportDirections	The std::vector of support directions
 	 */
 	SupportFunctionEstimationData(SparseMatrix supportMatrix,
 		VectorXd supportVector, VectorXd startingVector,

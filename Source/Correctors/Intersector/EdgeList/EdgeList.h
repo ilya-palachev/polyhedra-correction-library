@@ -45,12 +45,12 @@ private:
 	int* id_v_new;
 	bool* isUsed;
 
-	shared_ptr<Polyhedron> poly;
+	PolyhedronPtr poly;
 
 public:
 	//EdgeList.cpp
 	EdgeList();
-	EdgeList(int id_orig, int len_orig, shared_ptr<Polyhedron> poly_orig);
+	EdgeList(int id_orig, int len_orig, PolyhedronPtr poly_orig);
 	EdgeList(const EdgeList& orig);
 	~EdgeList();
 	EdgeList& operator =(const EdgeList& orig);
@@ -85,7 +85,7 @@ public:
 	void send(EdgeSetIntersected* edge_set);
 	void send_edges(EdgeSetIntersected* edge_set);
 
-	void set_poly(shared_ptr<Polyhedron> poly_orig);
+	void set_poly(PolyhedronPtr poly_orig);
 
 	//EdgeList_io,cpp
 	void my_fprint(FILE* file);

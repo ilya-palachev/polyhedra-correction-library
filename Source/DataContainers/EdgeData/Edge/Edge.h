@@ -37,7 +37,7 @@ public:
 	mutable int f0;
 	mutable int f1;
 
-	mutable list<EdgeContourAssociation> assocList;
+	mutable std::list<EdgeContourAssociation> assocList;
 
 	// Edge.cpp :
 	Edge();
@@ -49,10 +49,10 @@ public:
 	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig);
 
 	Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
-			list<EdgeContourAssociation> accocList_orig);
+			std::list<EdgeContourAssociation> accocList_orig);
 
 	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig,
-			list<EdgeContourAssociation> accocList_orig);
+			std::list<EdgeContourAssociation> accocList_orig);
 
 	Edge(const Edge& orig);
 	~Edge();

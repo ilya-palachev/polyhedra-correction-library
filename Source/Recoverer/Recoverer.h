@@ -124,7 +124,7 @@ private:
 	/** ID of vertex with maximal Z coordinate. */
 	int iZmax;
 
-	/** Regularizing vector. */
+	/** Regularizing std::vector. */
 	Vector_3 vectorRegularizing;
 
 	/** Vector with saved 3 h-values that correspond to iXmax, iYmax, iZmax */
@@ -164,14 +164,14 @@ private:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	vector<Plane> extractSupportPlanes(ShadowContourDataPtr SCData);
+	std::vector<Plane> extractSupportPlanes(ShadowContourDataPtr SCData);
 
 	/**
 	 * Extracts support planes from one shadow contour.
 	 *
 	 * @param contour	Shadow contour
 	 */
-	vector<Plane> extractSupportPlanes(SContour* contour);
+	std::vector<Plane> extractSupportPlanes(SContour* contour);
 
 	/**
 	 * Performs the transformation of polar duality for the given set of planes,
@@ -179,9 +179,9 @@ private:
 	 *
 	 * (ax + by + cz + d = 0) |--> (-a/d, -b/d, -c/d)
 	 *
-	 * @param planes	The vector of planes
+	 * @param planes	The std::vector of planes
 	 */
-	vector<Vector3d> mapPlanesToDualSpace(vector<Plane> planes);
+	std::vector<Vector3d> mapPlanesToDualSpace(std::vector<Plane> planes);
 
 	/**
 	 * Constructs ID maps (used in constructHullAndIDmaps)
@@ -198,21 +198,21 @@ private:
 	 *
 	 * @param points	Vector of points
 	 */
-	Polyhedron_3 constructHullAndIDmaps(vector<Vector3d> pointsPCL);
+	Polyhedron_3 constructHullAndIDmaps(std::vector<Vector3d> pointsPCL);
 
 	/**
 	 * Constructs convex hull of the point set using CGAL API
 	 *
 	 * @param points	Vector of points
 	 */
-	Polyhedron_3 constructConvexHullCGAL(vector<Vector3d> pointsPCL);
+	Polyhedron_3 constructConvexHullCGAL(std::vector<Vector3d> pointsPCL);
 
 	/**
 	 * Constructs convex hull of the point set using CGAL API.
 	 *
 	 * @param points	Vector of points
 	 */
-	PolyhedronPtr constructConvexHull(vector<Vector3d> pointsPCL);
+	PolyhedronPtr constructConvexHull(std::vector<Vector3d> pointsPCL);
 
 	/**
 	 * Builds dual polyhedron to the given polyhedron.
@@ -222,7 +222,7 @@ private:
 	PolyhedronPtr buildDualPolyhedron(PolyhedronPtr p);
 
 	/**
-	 * Shifts all points to the given vector displacement.
+	 * Shifts all points to the given std::vector displacement.
 	 *
 	 * @param SCData	Shadow contour data
 	 * @param shift		Vector displacement
@@ -232,7 +232,7 @@ private:
 	/**
 	 * Balances contours so that their common mass center lies right at the
 	 * center of coordinate system. We assume that contours are displaced from
-	 * this position only on a vertical vector and report error otherwise.
+	 * this position only on a vertical std::vector and report error otherwise.
 	 */
 	void balanceAllContours(ShadowContourDataPtr SCData);
 
@@ -260,7 +260,7 @@ private:
 	
 	/**
 	 * Regularizes support matrix by eliminating columns that have IDs equal to
-	 * iXmax, iYmax, iZmax and regularizes also the h-values vector.
+	 * iXmax, iYmax, iZmax and regularizes also the h-values std::vector.
 	 * 
 	 * @param matrix		The transpose of support matrix
 	 * @param polyhedron	The polyhedron (convex hull of supporting
@@ -288,9 +288,9 @@ private:
 	/**
 	 * Creates the starting point for the estimation algoeithm.
 	 *
-	 * @param supportVector		The support vector of the estimation
+	 * @param supportVector		The support std::vector of the estimation
 	 * 				algorithm.
-	 * @param supportDirections	The vector of support directions.
+	 * @param supportDirections	The std::vector of support directions.
 	 * @param supportMatrix		The support matrix.
 	 * @param estimator		The mode of estimation.
 	 */
@@ -343,7 +343,7 @@ public:
 
 	/**
 	 * Enables the regularization of support matrix based on knowledge about
-	 * eigenvectors eigenvalues of support matrix Q
+	 * eigenstd::vectors eigenvalues of support matrix Q
 	 */
 	void enableRegularization(void);
 
@@ -371,7 +371,7 @@ public:
 	 *
 	 * @param supportPlanes	Vector of support planes
 	 */
-	PolyhedronPtr buildPolyhedronFromPlanes(vector<Plane> supportPlanes);
+	PolyhedronPtr buildPolyhedronFromPlanes(std::vector<Plane> supportPlanes);
 
 	/**
 	 * Builds naive polyhedron using naive approach that intersect half-spaces
@@ -424,7 +424,7 @@ public:
 	void setEstimator(RecovererEstimator e);
 
 	/**
-	 * Recovers final polyhedron from initial data and vector
+	 * Recovers final polyhedron from initial data and std::vector
 	 * of estimated support values
 	 *
 	 * @param estData       Support function estimation data used by
@@ -435,7 +435,7 @@ public:
 		SupportFunctionEstimationData *estData, VectorXd estimate);
 
 	/**
-	 * Produces corrected shadow contour data from initial data and vector
+	 * Produces corrected shadow contour data from initial data and std::vector
 	 * of estimated support values
 	 *
 	 * FIXME: It does not work correctly for now!!!
@@ -455,7 +455,7 @@ public:
 	PolyhedronPtr run(ShadowContourDataPtr SCData);
 };
 
-typedef shared_ptr<Recoverer> RecovererPtr;
+typedef std::shared_ptr<Recoverer> RecovererPtr;
 
 char *makeNameWithSuffix(const char *outputName, const char *suffix);
 

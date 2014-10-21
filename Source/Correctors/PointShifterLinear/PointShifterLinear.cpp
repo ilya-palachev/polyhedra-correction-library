@@ -50,7 +50,7 @@ PointShifterLinear::PointShifterLinear() :
 	DEBUG_END;
 }
 
-PointShifterLinear::PointShifterLinear(shared_ptr<Polyhedron> p) :
+PointShifterLinear::PointShifterLinear(PolyhedronPtr p) :
 		PCorrector(p),
 		id(),
 		x(new double[polyhedron->numVertices]),

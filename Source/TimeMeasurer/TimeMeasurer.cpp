@@ -118,7 +118,7 @@ bool TimeMeasurer::operator!=(const TimeMeasurer& other) const
 }
 
 /**
- * Start new timer and push it to the list of timers
+ * Start new timer and push it to the std::list of timers
  */
 void TimeMeasurer::pushTimer()
 {
@@ -135,7 +135,7 @@ void TimeMeasurer::pushTimer()
 #define MILLION 1000000
 
 /**
- * Stop the last timer in the list and print calculated time for it.
+ * Stop the last timer in the std::list and print calculated time for it.
  *
  * @return time of last timer (in seconds, precision is microsecond)
  */

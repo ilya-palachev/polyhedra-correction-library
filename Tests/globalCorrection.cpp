@@ -49,9 +49,9 @@ MethodCorrector parse_methodName(char* methodNameInput);
 
 int parse_commandLine(int argc, char** argv, TestParameters& parameters);
 
-shared_ptr<Polyhedron> makePolyhedron(NameFigure figureParsed);
+PolyhedronPtr makePolyhedron(NameFigure figureParsed);
 
-inline void moveFacetRandom(shared_ptr<Polyhedron> polyhedron,
+inline void moveFacetRandom(PolyhedronPtr polyhedron,
 		double maxMoveDelta, int ifacet);
 
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 	if (parse_commandLine(argc, argv, parameters) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	shared_ptr<Polyhedron> polyhedron(makePolyhedron(parameters.figure));
+	PolyhedronPtr polyhedron(makePolyhedron(parameters.figure));
 	
 	polyhedron->set_parent_polyhedron_in_facets();
 
@@ -221,35 +221,35 @@ MethodCorrector parse_methodName(char* methodNameInput)
 	return ret;
 }
 
-shared_ptr<Polyhedron> makePolyhedron(NameFigure figureParsed)
+PolyhedronPtr makePolyhedron(NameFigure figureParsed)
 {
 	DEBUG_START;
 	switch (figureParsed)
 	{
 	case FIGURE_CUBE:
 	{
-		shared_ptr<Polyhedron> ret = make_shared<Cube>(1., 0., 0., 0.);
+		PolyhedronPtr ret = make_shared<Cube>(1., 0., 0., 0.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_PYRAMID:
 	{
-		shared_ptr<Polyhedron> ret = make_shared<Pyramid>(3, 1., 1.);
+		PolyhedronPtr ret = make_shared<Pyramid>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_PRISM:
 	{
-		shared_ptr<Polyhedron> ret = make_shared<Prism>(3, 1., 1.);
+		PolyhedronPtr ret = make_shared<Prism>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_CUBE_CUTTED:
 	{
-		shared_ptr<Polyhedron> ret = make_shared<CubeCutted>();
+		PolyhedronPtr ret = make_shared<CubeCutted>();
 		DEBUG_END;
 		return ret;
 	}
@@ -279,7 +279,7 @@ static double genRandomDouble(double maxDelta)
 	return randomDouble;
 }
 
-inline void moveFacetRandom(shared_ptr<Polyhedron> polyhedron, double maxMoveDelta,
+inline void moveFacetRandom(PolyhedronPtr polyhedron, double maxMoveDelta,
 		int ifacet)
 {
 	DEBUG_START;

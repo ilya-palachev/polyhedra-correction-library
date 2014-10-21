@@ -42,7 +42,7 @@ private:
 	/**
 	 * Calculates the sum of lengths of line segments of intersection between
 	 * the polyhedron and the line. The line is always collinear with Ox axis,
-	 * i. e. its directing vector looks as (1., 0., 0.) and it intersects plane
+	 * i. e. its directing std::vector looks as (1., 0., 0.) and it intersects plane
 	 * Oyz in the point (0., y, z), where y and z are the parameters of the
 	 * function.
 	 *
@@ -63,7 +63,7 @@ public:
 	 *
 	 * @param p	Shared pointer to the associated polyhedron.
 	 */
-	SizeCalculator(shared_ptr<Polyhedron> p);
+	SizeCalculator(PolyhedronPtr p);
 
 	/**
 	 * Empty destructor.
@@ -120,15 +120,15 @@ public:
 	void get_center(double& xc, double& yc, double& zc);
 
 	/**
-	 * Calculates eigenvalues and eigenvectors of the matrix of inertia of the
+	 * Calculates eigenvalues and eigenstd::vectors of the matrix of inertia of the
 	 * polyhedron.
 	 *
 	 * @param l0	Output reference to the 1st eigenvalue.
 	 * @param l1	Output reference to the 2nd eigenvalue.
 	 * @param l2	Output reference to the 3rd eigenvalue.
-	 * @param v0	Output reference to the 1st eigenvector.
-	 * @param v1	Output reference to the 2nd eigenvector.
-	 * @param v2	Output reference to the 3rd eigenvector.
+	 * @param v0	Output reference to the 1st eigenstd::vector.
+	 * @param v1	Output reference to the 2nd eigenstd::vector.
+	 * @param v2	Output reference to the 3rd eigenstd::vector.
 	 *
 	 * NOTE: (As well as i remember) They are sorted so that l0 >= l1 => l2
 	 */
@@ -136,14 +136,14 @@ public:
 			Vector3d& v2);
 
 	/**
-	 * Prints the list of facets sorted by their areas.
+	 * Prints the std::list of facets sorted by their areas.
 	 */
 	void printSortedByAreaFacets(void);
 
 	/**
-	 * Calculates the list of facets with their areas sorted by their areas.
+	 * Calculates the std::list of facets with their areas sorted by their areas.
 	 */
-	list<struct FacetWithArea> getSortedByAreaFacets(void);
+	std::list<struct FacetWithArea> getSortedByAreaFacets(void);
 
 	/**
 	 * Calculates the mass center of facet considered as a solid object.

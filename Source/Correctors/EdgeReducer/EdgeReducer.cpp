@@ -32,7 +32,7 @@ EdgeReducer::EdgeReducer() :
 	DEBUG_END;
 }
 
-EdgeReducer::EdgeReducer(shared_ptr<Polyhedron> p) :
+EdgeReducer::EdgeReducer(PolyhedronPtr p) :
 		PCorrector(p)
 {
 	DEBUG_START;
@@ -148,7 +148,7 @@ bool EdgeReducer::updateFacets()
 		/* 1). In case when "stayed" vertex LAYS in the current facet, delete
 		 * "removed" vertex from facet. */
 
-		/* 1a). The "stayed" vertex is EARLIER in the list of vertices than
+		/* 1a). The "stayed" vertex is EARLIER in the std::list of vertices than
 		 * the "reduced" vertex. */
 		if (facetCurr->indVertices[iPositionPrev] == iVertexStayed)
 		{
@@ -202,7 +202,7 @@ bool EdgeReducer::updateFacets()
 			--facetCurr->numVertices;
 		}
 
-		/* 1b). The "stayed" vertex is LATER in the list of vertices than
+		/* 1b). The "stayed" vertex is LATER in the std::list of vertices than
 		 * the "reduced" vertex. */
 		else if (facetCurr->indVertices[iPositionNext] == iVertexStayed)
 		{
@@ -447,13 +447,13 @@ bool EdgeReducer::rePreprocessFacets()
 
 	DEBUG_PRINT("Stage 2. Re-preprocess all neighbors of updated facets");
 
-	set<int> facetsPreprocessed;
+	std::set<int> facetsPreprocessed;
 	/* 1). Add set "facetsUpdated" to set "facetsPreprocessed". */
 	facetsPreprocessed.insert(facetsUpdated.begin(), facetsUpdated.end());
 
 	/* 2). Add neighbors of facets inside set "facetsUpdated" to set
 	 * "facetsPreprocessed". */
-	for (set<int>::iterator itFacetUpdated = facetsUpdated.begin();
+	for (std::set<int>::iterator itFacetUpdated = facetsUpdated.begin();
 			itFacetUpdated != facetsUpdated.end(); ++itFacetUpdated)
 	{
 		Facet* facetUpdated = &polyhedron->facets[*itFacetUpdated];
@@ -466,7 +466,7 @@ bool EdgeReducer::rePreprocessFacets()
 	}
 
 	/* 3). Re-process all facets collected to the set "facetsPreprocessed". */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("*itFacet = %d", *itFacet);
@@ -486,7 +486,7 @@ bool EdgeReducer::rePreprocessFacets()
 	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
 #endif /* USE_GRAPH_DUMPER */
 
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		Facet* facetCurr = &polyhedron->facets[*itFacet];
@@ -763,8 +763,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 		cutDegeneratedFacet(facet1->id);
 	}
 
-	/* 2). Add all the neighbors of facets to the list. */
-	set<int> facetsPreprocessed;
+	/* 2). Add all the neighbors of facets to the std::list. */
+	std::set<int> facetsPreprocessed;
 	facetsPreprocessed.insert(iFacet0);
 	facetsPreprocessed.insert(iFacet1);
 
@@ -787,8 +787,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 				                    + 1 + i]);
 	}
 
-	/* 3). Re-preprocess all the facets in the list. */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	/* 3). Re-preprocess all the facets in the std::list. */
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("Re-preprocessing facet #%d", *itFacet);
@@ -797,7 +797,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	}
 
 	/* Verify incidence structure after removal. */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		ASSERT(polyhedron->facets[*itFacet].verifyIncidenceStructure());
@@ -848,7 +848,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	 * one.
 	 *
 	 * FIXME: In case when edge "edge" already exists in the set, we need to
-	 * merge the lists of associations, because otherwise we will get some
+	 * merge the std::lists of associations, because otherwise we will get some
 	 * associations more than one time.
 	 */
 	DEBUG_VARIABLE int numAssociationsBefore = edgeNew->assocList.size();

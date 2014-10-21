@@ -34,7 +34,7 @@ FacetIntersector::FacetIntersector() :
 	DEBUG_END;
 }
 
-FacetIntersector::FacetIntersector(shared_ptr<Polyhedron> p, Facet* f) :
+FacetIntersector::FacetIntersector(PolyhedronPtr p, Facet* f) :
 		Intersector(p),
 		facet(f)
 {

@@ -21,17 +21,15 @@
 #ifndef PCORRECTOR_H_
 #define PCORRECTOR_H_
 
-#include <memory>
-
 #include "Polyhedron/Polyhedron.h"
 
 class PCorrector
 {
 public:
-	shared_ptr<Polyhedron> polyhedron;
+	PolyhedronPtr polyhedron;
 
 	PCorrector();
-	PCorrector(shared_ptr<Polyhedron> p);
+	PCorrector(PolyhedronPtr p);
 	PCorrector(Polyhedron* p);
 	virtual ~PCorrector();
 };

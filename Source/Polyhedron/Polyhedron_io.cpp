@@ -749,7 +749,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 //      property float y
 //      property float z
 //      element face <numf>
-//      property list uchar int vertex_index
+//      property std::list uchar int vertex_index
 //      end_header
 //
 // x_i y_i z_i
@@ -979,7 +979,7 @@ void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
 	ALWAYS_PRINT(file, "property float ny\n");
 	ALWAYS_PRINT(file, "property float nz\n");
 	ALWAYS_PRINT(file, "element face %d\n", numFacets);
-	ALWAYS_PRINT(file, "property list uchar uint vertex_indices\n");
+	ALWAYS_PRINT(file, "property std::list uchar uint vertex_indices\n");
 	ALWAYS_PRINT(file, "end_header\n");
 
 	for (int i = 0; i < numFacets; ++i)
@@ -1035,7 +1035,7 @@ void Polyhedron::fprint_ply_scale(double scale, const char *filename,
 	ALWAYS_PRINT(file, "property float y\n");
 	ALWAYS_PRINT(file, "property float z\n");
 	ALWAYS_PRINT(file, "element face %d\n", numFacets);
-	ALWAYS_PRINT(file, "property list uchar uint vertex_indices\n");
+	ALWAYS_PRINT(file, "property std::list uchar uint vertex_indices\n");
 	ALWAYS_PRINT(file, "property uchar red\n");
 	ALWAYS_PRINT(file, "property uchar green\n");
 	ALWAYS_PRINT(file, "property uchar blue\n");

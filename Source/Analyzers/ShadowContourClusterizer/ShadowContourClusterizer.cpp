@@ -38,7 +38,7 @@ ShadowContourClusterizer::ShadowContourClusterizer() :
 	DEBUG_END;
 }
 
-ShadowContourClusterizer::ShadowContourClusterizer(shared_ptr<Polyhedron> p) :
+ShadowContourClusterizer::ShadowContourClusterizer(PolyhedronPtr p) :
 		PAnalyzer(p)
 {
 	DEBUG_START;

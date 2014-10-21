@@ -232,11 +232,11 @@ void Recoverer::buildNaiveMatrix(ShadowContourDataPtr SCData)
 	DEBUG_END;
 }
 
-PolyhedronPtr Recoverer::buildPolyhedronFromPlanes(vector<Plane> supportPlanes)
+PolyhedronPtr Recoverer::buildPolyhedronFromPlanes(std::vector<Plane> supportPlanes)
 {
 	DEBUG_START;
 	/* 1. Map planes to dual space to obtain the set of points in it. */
-	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
+	std::vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
 	/* 2. Construct convex hull in the dual space. */
 	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
@@ -257,7 +257,7 @@ PolyhedronPtr Recoverer::buildNaivePolyhedron(ShadowContourDataPtr SCData)
 	initData(SCData);
 
 	/* 2. Extract support planes from shadow contour data. */
-	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
+	std::vector<Plane> supportPlanes = extractSupportPlanes(SCData);
 
 	/* 3. Build polyhedron from extracted support planes. */
 	PolyhedronPtr polyhedron = buildPolyhedronFromPlanes(supportPlanes);
@@ -277,10 +277,10 @@ PolyhedronPtr Recoverer::buildDualNonConvexPolyhedron(ShadowContourDataPtr
 	initData(SCData);
 
 	/* 2. Extract support planes from shadow contour data. */
-	vector<Plane> supportPlanes = extractSupportPlanes(SCData);
+	std::vector<Plane> supportPlanes = extractSupportPlanes(SCData);
 
 	/* 3. Map planes to dual space to obtain the set of points in it. */
-	vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
+	std::vector<Vector3d> supportPoints = mapPlanesToDualSpace(supportPlanes);
 
 	/* 4. Construct convex hull in the dual space. */
 	PolyhedronPtr polyhedronDual = constructConvexHull(supportPoints);
@@ -298,14 +298,14 @@ PolyhedronPtr Recoverer::buildMaybeDualContours(bool ifDual,
 
 	/* Count the total number of vertices required for polyhedron. */
 	int numVertices = 0;
-	list<vector<Vector3d>> verticesAll;
+	std::list<std::vector<Vector3d>> verticesAll;
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
 		SContour* contour = &SCData->contours[iContour];
 		auto DEBUG_VARIABLE normal = contour->plane.norm;
-	        ASSERT((fpclassify(normal.x) != FP_ZERO
-	                || fpclassify(normal.y) != FP_ZERO
-	                || fpclassify(normal.z) != FP_ZERO)
+	        ASSERT((std::fpclassify(normal.x) != FP_ZERO
+	                || std::fpclassify(normal.y) != FP_ZERO
+	                || std::fpclassify(normal.z) != FP_ZERO)
 	                && "normal is null vector");
 
 		vector<Vector3d> vertices;
@@ -381,14 +381,14 @@ PolyhedronPtr Recoverer::buildContours(ShadowContourDataPtr SCData)
 }
 
 
-vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
+std::vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 {
 	DEBUG_START;
-	vector<Plane> supportPlanes;
+	std::vector<Plane> supportPlanes;
 	auto DEBUG_VARIABLE normal = contour->plane.norm;
-        ASSERT((fpclassify(normal.x) != FP_ZERO
-                || fpclassify(normal.y) != FP_ZERO
-                || fpclassify(normal.z) != FP_ZERO)
+        ASSERT((std::fpclassify(normal.x) != FP_ZERO
+                || std::fpclassify(normal.y) != FP_ZERO
+                || std::fpclassify(normal.z) != FP_ZERO)
                 && "normal is null vector");
 	ASSERT(fabs(normal.z) < EPS_MIN_DOUBLE);
 
@@ -473,10 +473,10 @@ vector<Plane> Recoverer::extractSupportPlanes(SContour* contour)
 	return supportPlanes;
 }
 
-vector<Plane> Recoverer::extractSupportPlanes(ShadowContourDataPtr SCData)
+std::vector<Plane> Recoverer::extractSupportPlanes(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
-	vector<Plane> supportPlanes;
+	std::vector<Plane> supportPlanes;
 
 	/* Iterate through the array of contours. */
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
@@ -484,12 +484,12 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadowContourDataPtr SCData)
 		DEBUG_PRINT("contour #%d", iContour);
 		SContour* contourCurr = &SCData->contours[iContour];
 		auto DEBUG_VARIABLE normal = contourCurr->plane.norm;
-	        ASSERT((fpclassify(normal.x) != FP_ZERO
-	                || fpclassify(normal.y) != FP_ZERO
-	                || fpclassify(normal.z) != FP_ZERO)
+	        ASSERT((std::fpclassify(normal.x) != FP_ZERO
+	                || std::fpclassify(normal.y) != FP_ZERO
+	                || std::fpclassify(normal.z) != FP_ZERO)
 	                && "normal is null vector");
 		/* Extract support planes from contour and try to push them */
-		vector<Plane> supportPlanesPortion =
+		std::vector<Plane> supportPlanesPortion =
 			extractSupportPlanes(contourCurr);
 		for (auto &plane : supportPlanesPortion)
 		{
@@ -532,10 +532,10 @@ vector<Plane> Recoverer::extractSupportPlanes(ShadowContourDataPtr SCData)
 	return supportPlanes;
 }
 
-vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
+std::vector<Vector3d> Recoverer::mapPlanesToDualSpace(std::vector<Plane> planes)
 {
 	DEBUG_START;
-	vector<Vector3d> vectors;
+	std::vector<Vector3d> vectors;
 	
 	for (auto &plane : planes)
 	{
@@ -549,7 +549,7 @@ vector<Vector3d> Recoverer::mapPlanesToDualSpace(vector<Plane> planes)
 		Vector3d vector = plane.norm;
 
 		/* 3 multiplications is more efficient than 3 divisions: */
-		ASSERT(fpclassify(plane.dist) != FP_ZERO);
+		ASSERT(std::fpclassify(plane.dist) != FP_ZERO);
 		ASSERT(fabs(plane.dist) > EPS_MIN_DOUBLE);
 		vector *= -1. / plane.dist;
 		vectors.push_back(vector);
@@ -586,7 +586,7 @@ struct Plane_from_facet
 	}
 };
 
-static CGALpointsSet convertPCLpointsToCGALpoints(vector<Vector3d> pointsPCL)
+static CGALpointsSet convertPCLpointsToCGALpoints(std::vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
 	/* Convert Vector3d objects to Point_3 objects. */
@@ -824,7 +824,7 @@ void Recoverer::constructIDmaps(std::set<PCL_Point_3> pointsHull,
 	DEBUG_END;
 }
 
-Polyhedron_3 Recoverer::constructHullAndIDmaps(vector<Vector3d> pointsPCL)
+Polyhedron_3 Recoverer::constructHullAndIDmaps(std::vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
 
@@ -849,7 +849,7 @@ Polyhedron_3 Recoverer::constructHullAndIDmaps(vector<Vector3d> pointsPCL)
 	return poly;
 }
 
-Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
+Polyhedron_3 Recoverer::constructConvexHullCGAL(std::vector<Vector3d> pointsPCL)
 {
 	DEBUG_START;
 
@@ -865,7 +865,7 @@ Polyhedron_3 Recoverer::constructConvexHullCGAL(vector<Vector3d> pointsPCL)
 	return poly;
 }
 
-PolyhedronPtr Recoverer::constructConvexHull (vector<Vector3d> points)
+PolyhedronPtr Recoverer::constructConvexHull (std::vector<Vector3d> points)
 {
 	DEBUG_START;
 	Polyhedron_3 poly = constructConvexHullCGAL(points);
@@ -901,13 +901,13 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 	pDual->facets = new Facet[pDual->numFacets];
 
 	/* Prepare and map the vector of planes to vector of points. */
-	vector<Plane> planes;
+	std::vector<Plane> planes;
 	for (int iFacet = 0; iFacet < p->numFacets; ++iFacet)
 	{
 		planes.push_back(p->facets[iFacet].plane);
 	}
 
-	vector<Vector3d> vertices = mapPlanesToDualSpace(planes);
+	std::vector<Vector3d> vertices = mapPlanesToDualSpace(planes);
 
 	int iVertex = 0;
 	for (auto &vertex : vertices)
@@ -947,9 +947,9 @@ PolyhedronPtr Recoverer::buildDualPolyhedron(PolyhedronPtr p)
 void Recoverer::shiftAllContours(ShadowContourDataPtr SCData, Vector3d shift)
 {
 	DEBUG_START;
-	ASSERT(isfinite(shift.x));
-	ASSERT(isfinite(shift.y));
-	ASSERT(isfinite(shift.z));
+	ASSERT(std::isfinite(shift.x));
+	ASSERT(std::isfinite(shift.y));
+	ASSERT(std::isfinite(shift.z));
 	for (int iContour = 0; iContour < SCData->numContours; ++iContour)
 	{
 		SContour* contourCurr = &SCData->contours[iContour];
@@ -1053,7 +1053,7 @@ static unsigned long int countCoveringTetrahedrons(Polyhedron_3& polyhedron)
  *
  * @param polyhedron	Convex hull of the set of directions
  */
-static list<TetrahedronVertex> findCoveringTetrahedrons(
+static std::list<TetrahedronVertex> findCoveringTetrahedrons(
 		Polyhedron_3& polyhedron)
 {
 	DEBUG_START;
@@ -1106,7 +1106,7 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 	};
 
 
-	set<TetrahedronVertex, decltype(comparer)> tetrahedrons(comparer);
+	std::set<TetrahedronVertex, decltype(comparer)> tetrahedrons(comparer);
 
 	auto vertexComparer = [](Polyhedron_3::Vertex_handle a,
 			Polyhedron_3::Vertex_handle b)
@@ -1114,7 +1114,7 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 		return a->id < b->id;
 	};
 
-	set<Polyhedron_3::Vertex_handle, decltype(vertexComparer)>
+	std::set<Polyhedron_3::Vertex_handle, decltype(vertexComparer)>
 				vertexSet(vertexComparer);
 
 	for (auto halfedge = polyhedron.halfedges_begin();
@@ -1151,7 +1151,7 @@ static list<TetrahedronVertex> findCoveringTetrahedrons(
 	/*
 	 * Construct the list from sorted set and return it.
 	 */
-	list<TetrahedronVertex> listTetrahedrons;
+	std::list<TetrahedronVertex> listTetrahedrons;
 	long int DEBUG_VARIABLE i = 0;
 	for (auto itTetrahedron = tetrahedrons.begin();
 			itTetrahedron != tetrahedrons.end(); ++itTetrahedron)
@@ -1443,7 +1443,7 @@ Vector_3 Recoverer::findMaxVertices(Polyhedron_3 polyhedron,
 	DEBUG_PRINT("%d-th vertex has maximal Z coordinate = %lf", iZmax, zmax);
 
 	/* Sort indices of vertices with maximal coordinates. */
-	set<int> iMaxes;
+	std::set<int> iMaxes;
 	iMaxes.insert(iXmax);
 	iMaxes.insert(iYmax);
 	iMaxes.insert(iZmax);
@@ -1587,7 +1587,7 @@ static bool checkSupportMatrix(Polyhedron_3 polyhedron, SparseMatrix Q)
  *
  * @param supportPlanes	The vector of support planes.
  */
-static SupportItemSet makeSupportItemSet(vector<Plane> supportPlanes)
+static SupportItemSet makeSupportItemSet(std::vector<Plane> supportPlanes)
 {
 	DEBUG_START;
 	int iValue = 0;
@@ -1600,7 +1600,7 @@ static SupportItemSet makeSupportItemSet(vector<Plane> supportPlanes)
 			plane.dist);
 
 		/* Assert that d != 0*/
-		ASSERT(fpclassify(plane.dist) != FP_ZERO);
+		ASSERT(std::fpclassify(plane.dist) != FP_ZERO);
 		ASSERT(fabs(plane.dist) > EPS_MIN_DOUBLE);
 
 		/* Assert that ||nu|| == 1 */
@@ -1636,7 +1636,7 @@ static SupportItemSet makeSupportItemSet(vector<Plane> supportPlanes)
 Polyhedron_3 Recoverer::makePolyhedronOfDirections(SupportItemSet supportItems)
 {
 	DEBUG_START;
-	vector<Vector3d> directions;
+	std::vector<Vector3d> directions;
 	for (auto &supportItem: supportItems)
 	{
 		directions.push_back(supportItem.u);
@@ -1680,9 +1680,9 @@ static std::tuple<VectorXd, std::vector<Vector3d>> makeOrderedSupportData(
 		SupportItem item = {v, 0};
 		auto result = supportItems.find(item);
 		ASSERT(result != supportItems.end() && "Cannot found an item");
-		ASSERT(fpclassify(v.x - result->u.x) == FP_ZERO);
-		ASSERT(fpclassify(v.y - result->u.y) == FP_ZERO);
-		ASSERT(fpclassify(v.z - result->u.z) == FP_ZERO);
+		ASSERT(std::fpclassify(v.x - result->u.x) == FP_ZERO);
+		ASSERT(std::fpclassify(v.y - result->u.y) == FP_ZERO);
+		ASSERT(std::fpclassify(v.z - result->u.z) == FP_ZERO);
 		supportVector(i) = result->h;
 		supportDirections.push_back(result->u);
 		DEBUG_PRINT("   constructed hvalue = %lf for direction "
@@ -1894,7 +1894,7 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 				}
 			}
 		}
-		ASSERT(fpclassify(Qh(i) - sum) == FP_ZERO);
+		ASSERT(std::fpclassify(Qh(i) - sum) == FP_ZERO);
 		ASSERT(Qh(i) >= -ACCEPTED_TOL);
 	}
 	DEBUG_END;
@@ -1905,7 +1905,7 @@ PolyhedronPtr Recoverer::produceFinalPolyhedron(
 	VectorXd estimate)
 {
 	DEBUG_START;
-	vector<Vector3d> points;
+	std::vector<Vector3d> points;
 	int numValues = estData->numValues();
 	for (int i = 0; i < numValues; ++i)
 	{
@@ -1945,9 +1945,9 @@ ShadowContourDataPtr Recoverer::produceCorrectedData(
 		ASSERT(shadowDataPrep->contours[iContour].ns > 0);
 		auto DEBUG_VARIABLE normal =
 			shadowDataPrep->contours[iContour].plane.norm;
-		ASSERT((fpclassify(normal.x) != FP_ZERO
-			|| fpclassify(normal.y) != FP_ZERO
-			|| fpclassify(normal.z) != FP_ZERO)
+		ASSERT((std::fpclassify(normal.x) != FP_ZERO
+			|| std::fpclassify(normal.y) != FP_ZERO
+			|| std::fpclassify(normal.z) != FP_ZERO)
 			&& "normal is null vector");
 	}
 #endif /* NDEBUG */
@@ -1965,9 +1965,9 @@ ShadowContourDataPtr Recoverer::produceCorrectedData(
 	{
 		SContour *contour = &data->contours[iContour];
 		auto DEBUG_VARIABLE normal = contour->plane.norm;
-		ASSERT((fpclassify(normal.x) != FP_ZERO
-			|| fpclassify(normal.y) != FP_ZERO
-			|| fpclassify(normal.z) != FP_ZERO)
+		ASSERT((std::fpclassify(normal.x) != FP_ZERO
+			|| std::fpclassify(normal.y) != FP_ZERO
+			|| std::fpclassify(normal.z) != FP_ZERO)
 			&& "normal is null vector");
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{

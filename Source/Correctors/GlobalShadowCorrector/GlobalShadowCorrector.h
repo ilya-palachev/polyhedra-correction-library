@@ -86,14 +86,14 @@ private:
 	/* Basic parameters of algorithm. */
 	GSCorrectorParameters parameters;
 
-	/* For opportunity of partial correction, we store a list with facet id's
+	/* For opportunity of partial correction, we store a std::list with facet id's
 	 * that are to be corrected. */
-	list<int> facetsCorrected;
+	std::list<int> facetsCorrected;
 
 	/* In all algorithms we process only those facets which have some
-	 * associations with contours. This list is used to store
+	 * associations with contours. This std::list is used to store
 	 * not-associated facets. */
-	list<int> facetsNotAssociated;
+	std::list<int> facetsNotAssociated;
 
 	/* Array for storing current values of gradient - used in all gradient
 	 * methods. */
@@ -126,7 +126,7 @@ private:
 
 	/* Object of type GSAssociator is needed here because it's deletion causes
 	 * the deletion of its parent object, i. e. GlobalShadowCorrector. This
-	 * deletes the list facetNotAssociated.
+	 * deletes the std::list facetNotAssociated.
 	 *
 	 * This issue has been found by the use of Valgrind (Memcheck) tool. */
 	GSAssociator* associator;
@@ -158,12 +158,12 @@ private:
 	void init();
 public:
 	GlobalShadowCorrector();
-	GlobalShadowCorrector(shared_ptr<Polyhedron> p, ShadowContourDataPtr scd,
+	GlobalShadowCorrector(PolyhedronPtr p, ShadowContourDataPtr scd,
 		GSCorrectorParameters* _parameters);
 	GlobalShadowCorrector(Polyhedron* p, ShadowContourDataPtr scd,
 				GSCorrectorParameters* _parameters);
 	virtual ~GlobalShadowCorrector();
-	void setFacetsCorrected(list<int> _facetsCorrected);
+	void setFacetsCorrected(std::list<int> _facetsCorrected);
 
 	void runCorrection();
 

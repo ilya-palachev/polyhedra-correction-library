@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	DEBUG_START;
 
 	/* Create a cube with side 1 and with center in the O = (0, 0, 0). */
-	shared_ptr<Polyhedron> cube(new Cube(1., 0., 0., 0.));
+	PolyhedronPtr cube(new Cube(1., 0., 0., 0.));
 
 	shared_ptr<ShadowContourData> contourData(new
 			ShadowContourData(cube));

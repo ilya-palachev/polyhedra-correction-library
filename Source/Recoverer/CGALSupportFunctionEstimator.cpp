@@ -140,7 +140,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 		qp.set_d(i, i, 2.); /* NOTE: We set matrix 2 * D here! */
 	}
 
-	/* Set vector c to -2 * h_0. */
+	/* Set std::vector c to -2 * h_0. */
 	double h0norm = 0.;
 	VectorXd h0 = supportVector();
 	for (int i = 0; i < numVariables; ++i)

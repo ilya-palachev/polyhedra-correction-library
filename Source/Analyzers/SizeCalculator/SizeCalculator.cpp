@@ -38,7 +38,7 @@ SizeCalculator::SizeCalculator() :
 	DEBUG_END;
 }
 
-SizeCalculator::SizeCalculator(shared_ptr<Polyhedron> p) :
+SizeCalculator::SizeCalculator(PolyhedronPtr p) :
 		PAnalyzer(p)
 {
 	DEBUG_START;
@@ -471,7 +471,7 @@ void SizeCalculator::printSortedByAreaFacets(void)
 {
 	DEBUG_START;
 
-	list< FacetWithArea > listFacetsSorted = getSortedByAreaFacets();
+	std::list< FacetWithArea > listFacetsSorted = getSortedByAreaFacets();
 	for (auto itFacet = listFacetsSorted.begin(); itFacet !=
 		listFacetsSorted.end(); ++itFacet)
 	{
@@ -482,14 +482,14 @@ void SizeCalculator::printSortedByAreaFacets(void)
 	DEBUG_END;
 }
 
-list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
+std::list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
 {
 	DEBUG_START;
 	auto comparer = [](struct FacetWithArea f0, struct FacetWithArea f1)
 	{
 		return f0.area < f1.area;
 	};
-	set<FacetWithArea, decltype(comparer)> facetsSorted(comparer);
+	std::set<FacetWithArea, decltype(comparer)> facetsSorted(comparer);
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
@@ -497,7 +497,7 @@ list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
 			areaOfFacet(iFacet)});
 	}
 
-	list< FacetWithArea > listFacetsSorted;
+	std::list< FacetWithArea > listFacetsSorted;
 	for (auto itFacet = facetsSorted.begin(); itFacet != facetsSorted.end();
 		 ++itFacet)
 	{
@@ -534,12 +534,12 @@ Vector3d SizeCalculator::calculateSurfaceCenter(void)
 		centerSurface += areaFacet * centerFacet;
 		areaSurface += areaFacet;
 	}
-	ASSERT(isfinite(areaSurface));
+	ASSERT(std::isfinite(areaSurface));
 	ASSERT(fabs(areaSurface) > EPS_MIN_DOUBLE);
 	centerSurface /= areaSurface;
-	ASSERT(isfinite(centerSurface.x));
-	ASSERT(isfinite(centerSurface.y));
-	ASSERT(isfinite(centerSurface.z));
+	ASSERT(std::isfinite(centerSurface.x));
+	ASSERT(std::isfinite(centerSurface.y));
+	ASSERT(std::isfinite(centerSurface.z));
 
 	DEBUG_END;
 	return centerSurface;

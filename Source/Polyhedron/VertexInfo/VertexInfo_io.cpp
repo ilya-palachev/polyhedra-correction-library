@@ -38,7 +38,7 @@ void VertexInfo::my_fprint_all(FILE* file)
 	REGULAR_PRINT(file, "\n------------ VertexInfo %d: ------------\n", id);
 //	REGULAR_PRINT(file, "id = %d\nnf = %d\n", id, nf);
 //	REGULAR_PRINT(file, "vector = (%.2lf, %.2lf, %.2lf)\n",
-//			vector.x, vector.y, vector.z);
+//			std::vector.x, std::vector.y, std::vector.z);
 
 	REGULAR_PRINT(file, "facets :          ");
 	for (i = 0; i < numFacets; ++i)

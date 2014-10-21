@@ -37,7 +37,7 @@ Verifier::Verifier() :
 	DEBUG_END;
 }
 
-Verifier::Verifier(shared_ptr<Polyhedron> p) :
+Verifier::Verifier(PolyhedronPtr p) :
 		polyhedron(p),
 		ifPrint(true),
 		edgesWS()
@@ -56,7 +56,7 @@ Verifier::Verifier(Polyhedron* p) :
 	DEBUG_END;
 }
 
-Verifier::Verifier(shared_ptr<Polyhedron> p, bool _ifPrint) :
+Verifier::Verifier(PolyhedronPtr p, bool _ifPrint) :
 		polyhedron(p),
 		ifPrint(_ifPrint),
 		edgesWS()
@@ -557,14 +557,14 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */
-		for (set<pair<int, int>>::iterator itPair =
+		for (std::set<pair<int, int>>::iterator itPair =
 				edgesWS.edgesAdded.begin();
 				itPair != edgesWS.edgesAdded.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
 
-		for (set<pair<int, int>>::iterator itPair =
+		for (std::set<pair<int, int>>::iterator itPair =
 				edgesWS.edgesEdited.begin();
 				itPair != edgesWS.edgesEdited.end(); ++itPair)
 		{
@@ -601,7 +601,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	Plane pi0 = polyhedron->facets[edge->f0].plane;
 	Plane pi1 = polyhedron->facets[edge->f1].plane;
 
-	/* Searching for facet f2 which is clockwise after f0 and f1 in the list
+	/* Searching for facet f2 which is clockwise after f0 and f1 in the std::list
 	 * of facets incident to the vertex edge->v0. */
 	DEBUG_PRINT("Searching for facet f2.");
 	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
@@ -644,7 +644,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	DEBUG_PRINT("Succeeded to find f2 = %d", f2);
 	Plane pi2 = polyhedron->facets[f2].plane;
 
-	/* Searching for facet f3 which is clockwise after f0 and f1 in the list
+	/* Searching for facet f3 which is clockwise after f0 and f1 in the std::list
 	 * of facets incident to the vertex edge->v1. */
 	DEBUG_PRINT("Searching for facet f3.");
 	numIncidentFacets = polyhedron->vertexInfos[edge->v1].numFacets;
