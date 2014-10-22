@@ -62,6 +62,9 @@ public:
 	 */
 	SContour* contours;
 
+	/** Empty constructor. */
+	ShadowContourData();
+
 	/**
 	 * Constructor that does nothing but setting parent polyhedron to the
 	 * given reference.

@@ -23,6 +23,15 @@
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 
+ShadowContourData::ShadowContourData() :
+	PData(),
+	numContours(0),
+	contours(NULL)
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
 ShadowContourData::ShadowContourData(PolyhedronPtr p) :
 				PData(p),
 				numContours(0),
