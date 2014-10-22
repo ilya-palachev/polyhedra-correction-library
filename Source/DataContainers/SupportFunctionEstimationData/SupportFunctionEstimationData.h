@@ -112,4 +112,8 @@ public:
 	/* FIXME: Do we need to have setters here? */
 };
 
+/** Shared pointer for support function estimation data. */
+typedef std::shared_ptr<SupportFunctionEstimationData>
+	SupportFunctionEstimationDataPtr;
+
 #endif /* SUPPORTFUNCTIONESTIMATIONDATA_H_ */
