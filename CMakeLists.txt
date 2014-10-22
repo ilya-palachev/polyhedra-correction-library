@@ -236,6 +236,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Gtest")
 	set (SOURCE_gtests
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane_test.cpp
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints_test.cpp
+		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor_test.cpp
 		UnitTests/AllGtestsDriver.cpp
 	)
 	add_executable(gtests ${SOURCE_gtests})
