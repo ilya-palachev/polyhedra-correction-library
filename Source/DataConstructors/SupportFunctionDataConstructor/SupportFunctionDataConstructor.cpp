@@ -185,7 +185,9 @@ static ShadowContourDataPtr balanceShadowContourData(ShadowContourDataPtr data)
 	DEBUG_PRINT("Center of contours = (%lf, %lf, %lf)",
 		                center.x, center.y, center.z);
 
-	/* Shift all contours on z component of the std::vector of mass center. */
+	/*
+	 * Shift all contours on z component of the std::vector of mass center.
+	 */
 	Vector3d ez(0., 0., 1.);
 	auto dataShifted = shiftShadowContourData(data, - (ez * center) * ez);
 	DEBUG_END;
@@ -216,14 +218,15 @@ static ShadowContourDataPtr shiftShadowContourData(
 			side->A2 += shift;
 		}
 		/*
-		 * If we want new plane to include point (x + xt, y + yt, z + zt) for
-		 * each point (x, y, z) that is included in plane
+		 * If we want new plane to include point
+		 * (x + xt, y + yt, z + zt) for each point (x, y, z) that is
+		 * included in plane
 		 * a * x + b * y + c * z + d = 0
 		 * then its free coefficient must become equal to
 		 * d - a * xt - b * yt - c * zt
 		 *
-		 * TODO: For our case usually we shift points in vertical planes on a
-		 * vertical vector, thus, the plane will not actually move.
+		 * TODO: For our case usually we shift points in vertical planes
+		 * on a vertical vector, thus, the plane will not actually move.
 		 */
 		contour->plane.dist -= contour->plane.norm * shift;
 	}
