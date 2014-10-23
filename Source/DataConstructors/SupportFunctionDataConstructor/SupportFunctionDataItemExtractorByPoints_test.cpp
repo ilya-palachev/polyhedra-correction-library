@@ -27,18 +27,24 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.h"
 #include "gtest/gtest.h"
 
+/** Tests class SupportFunctionDataItemExtractorByPoints */
 class SupportFunctionDataItemExtractorByPointsTest : public ::testing::Test
 {
 protected:
+	/** The tested extractor. */
 	SupportFunctionDataItemExtractorByPoints *extractor;
+
+	/** The side for which the extractor is run. */
 	SideOfContour *side;
 
+	/** Initializes the testsuite. */
 	virtual void SetUp()
 	{
 		extractor = new SupportFunctionDataItemExtractorByPoints();
 		side = new SideOfContour();
 	}
 
+	/** Finalizes the testsuite. */
 	virtual void TearDown()
 	{
 		delete extractor;
@@ -46,6 +52,7 @@ protected:
 	}
 };
 
+/** Checks for crash in case when the points of given side are equal. */
 TEST_F(SupportFunctionDataItemExtractorByPointsTest, CrashesIfPointsEqual)
 {
 	EXPECT_DEATH(
@@ -56,6 +63,10 @@ TEST_F(SupportFunctionDataItemExtractorByPointsTest, CrashesIfPointsEqual)
 	}, ".*");
 }
 
+/**
+ * Checks that extractor is adequate, i. e. checks its result with precomputed
+ * vaalue.
+ */
 TEST_F(SupportFunctionDataItemExtractorByPointsTest, Adequate)
 {
 	side->A1 = Vector3d(0., 1., 0.);
