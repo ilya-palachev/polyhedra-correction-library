@@ -27,18 +27,24 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.h"
 #include "gtest/gtest.h"
 
+/** Tests class SupportFunctionDataItemExtractorByPlane */
 class SupportFunctionDataItemExtractorByPlaneTest : public ::testing::Test
 {
 protected:
+	/** The tested extractor. */
 	SupportFunctionDataItemExtractorByPlane *extractor;
+
+	/** The side for which the extractor is run. */
 	SideOfContour *side;
 
+	/** Initializes the testsuite. */
 	virtual void SetUp()
 	{
 		extractor = new SupportFunctionDataItemExtractorByPlane();
 		side = new SideOfContour();
 	}
 
+	/** Finalizes the testsuite. */
 	virtual void TearDown()
 	{
 		delete extractor;
@@ -46,17 +52,19 @@ protected:
 	}
 };
 
+/** Checks for crash in case when the set is not set. */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPlaneNotSet)
 {
 	EXPECT_DEATH({extractor->run(side);}, ".*");
 }
 
-
+/** Checks that function setPlane works. */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, SetPlaneWorks)
 {
 	extractor->setPlane(Plane());
 }
 
+/** Checks for crash in case when the points of given side are equal. */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointsEqual)
 {
 	EXPECT_DEATH(
@@ -68,6 +76,7 @@ TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointsEqual)
 	}, ".*");
 }
 
+/** Checks for crash in case when point does not lie in the plane. */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointNotInPlane)
 {
 	EXPECT_DEATH(
@@ -80,7 +89,10 @@ TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointNotInPlane)
 	}, ".*");
 }
 
-
+/**
+ * Checks that extractor is adequate, i. e. checks its result with precomputed
+ * value.
+ */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, Adequate)
 {
 	extractor->setPlane(Plane(Vector3d(1., 0., 0.), 0.));
