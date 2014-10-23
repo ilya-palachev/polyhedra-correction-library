@@ -27,6 +27,8 @@
 #ifndef SUPPORTFUNCTIONESTIMATIONDATA_H_
 #define SUPPORTFUNCTIONESTIMATIONDATA_H_
 
+#include <memory>
+
 #include "SparseMatrixEigen.h"
 #include "Vector3d.h"
 
