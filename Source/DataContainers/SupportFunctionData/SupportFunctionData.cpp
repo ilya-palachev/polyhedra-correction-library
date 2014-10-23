@@ -20,7 +20,8 @@
 
 /**
  * @file SupportFunctionData.cpp
- * @brief General class for support function data container - implementation.
+ * @brief General class for support function data container
+ * - implementation.
  */
 
 #include "DebugPrint.h"
@@ -86,4 +87,35 @@ SupportFunctionDataItem &SupportFunctionData::operator[] (const int iPosition)
 	ASSERT(items.size() > (unsigned) iPosition);
 	DEBUG_END;
 	return items[iPosition];
+}
+
+SupportFunctionDataPtr SupportFunctionData::removeCoincidentItems()
+{
+	DEBUG_START;
+	std::vector<SupportFunctionDataItem> itemsNonCoincident;
+	for (auto item = items.begin(); item != items.end(); ++item)
+	{
+		bool ifCoincident = false;
+		for (auto itemPrev = itemsNonCoincident.begin();
+				itemPrev != itemsNonCoincident.end();
+				++itemPrev)
+		{
+			auto direction = item->direction;
+			auto directionPrev = itemPrev->direction;
+			if (equal(direction,directionPrev,
+					EPS_SUPPORT_DIRRECTION_COINCIDENCE))
+			{
+				ifCoincident = true;
+				break;
+			}
+		}
+		if (!ifCoincident)
+		{
+			itemsNonCoincident.push_back(*item);
+		}
+	}
+	SupportFunctionDataPtr dataNonCoincident(new
+			SupportFunctionData(itemsNonCoincident));
+	DEBUG_END;
+	return dataNonCoincident;
 }

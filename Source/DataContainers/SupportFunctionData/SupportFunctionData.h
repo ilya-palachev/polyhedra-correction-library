@@ -20,7 +20,8 @@
 
 /**
  * @file SupportFunctionData.h
- * @brief General class for support function data container.
+ * @brief General class for support function data container
+ * - declaration.
  */
 
 #ifndef SUPPORT_FUNCTION_DATA_H
@@ -30,6 +31,15 @@
 #include <memory>
 
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
+
+/* Forward declaration is needed to use shared pointer. */
+class SupportFunctionData;
+
+/** Shared pointer to support function data. */
+typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
+
+/** Macro for minimal distance between two support directions. */
+#define EPS_SUPPORT_DIRRECTION_COINCIDENCE 1e-15
 
 class SupportFunctionData
 {
@@ -63,8 +73,15 @@ public:
 
 	/** Subscription operator. */
 	SupportFunctionDataItem &operator[] (const int iPosition);
+
+	/**
+	 * Removes data items whose directions are coincident from the data
+	 * vector.
+	 *
+	 * @return	Support function data without any coincident items.
+	 */
+	SupportFunctionDataPtr removeCoincidentItems();
 };
 
-typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
