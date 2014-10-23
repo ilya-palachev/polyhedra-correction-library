@@ -19,32 +19,13 @@
  */
 
 /**
- * @file SupportFunctionEstimationDataConstructor.p
- * @brief Constructor of data used for support function estimation process
- * - implementation.
+ * @file SupportFunctionData.h
+ * @brief General class for support function data container
+ * - unit tests.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+
+#include <gtest/gtest.h>
 
 
-SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor()
-{
-	DEBUG_START;
-	DEBUG_END;
-}
-
-SupportFunctionEstimationDataConstructor::~SupportFunctionEstimationDataConstructor()
-{
-	DEBUG_START;
-	DEBUG_END;
-}
-
-void SupportFunctionEstimationDataConstructor::run(SupportFunctionDataPtr data)
-{
-	DEBUG_START;
-
-	auto dataNonCoincident = removeCoincidentData(data);
-	DEBUG_END;
-}
