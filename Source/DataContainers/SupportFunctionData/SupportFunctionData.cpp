@@ -89,33 +89,31 @@ SupportFunctionDataItem &SupportFunctionData::operator[] (const int iPosition)
 	return items[iPosition];
 }
 
-SupportFunctionDataPtr SupportFunctionData::removeCoincidentItems()
+SupportFunctionDataPtr SupportFunctionData::removeEqual()
 {
 	DEBUG_START;
-	std::vector<SupportFunctionDataItem> itemsNonCoincident;
+	std::vector<SupportFunctionDataItem> itemsUnequal;
+
 	for (auto item = items.begin(); item != items.end(); ++item)
 	{
-		bool ifCoincident = false;
-		for (auto itemPrev = itemsNonCoincident.begin();
-				itemPrev != itemsNonCoincident.end();
-				++itemPrev)
+		bool ifEqual = false;
+		for (auto itemPrev = itemsUnequal.begin();
+			itemPrev != itemsUnequal.end(); ++itemPrev)
 		{
-			auto direction = item->direction;
-			auto directionPrev = itemPrev->direction;
-			if (equal(direction,directionPrev,
-					EPS_SUPPORT_DIRRECTION_COINCIDENCE))
+			if (equal(item->direction, itemPrev->direction,
+				EPS_SUPPORT_DIRECTION_EQUALITY))
 			{
-				ifCoincident = true;
+				ifEqual = true;
 				break;
 			}
 		}
-		if (!ifCoincident)
+		if (!ifEqual)
 		{
-			itemsNonCoincident.push_back(*item);
+			itemsUnequal.push_back(*item);
 		}
 	}
-	SupportFunctionDataPtr dataNonCoincident(new
-			SupportFunctionData(itemsNonCoincident));
+	SupportFunctionDataPtr dataUnequal(new
+		SupportFunctionData(itemsUnequal));
 	DEBUG_END;
-	return dataNonCoincident;
+	return dataUnequal;
 }
