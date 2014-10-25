@@ -40,7 +40,7 @@ SupportFunctionData::SupportFunctionData(const SupportFunctionData &data) :
 	items()
 {
 	DEBUG_START;
-	std::copy(data.items.begin(), data.items.end(), items.begin());
+	items = data.items;
 	DEBUG_END;
 }
 
@@ -79,11 +79,7 @@ SupportFunctionData &SupportFunctionData::operator=(const SupportFunctionData
 		&data)
 {
 	DEBUG_START;
-	if (!items.empty())
-	{
-		items.clear();
-	}
-	std::copy(data.items.begin(), data.items.end(), items.begin());
+	items = data.items;
 	DEBUG_END;
 	return *this;
 }
@@ -112,11 +108,19 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 
 	for (auto item = items.begin(); item != items.end(); ++item)
 	{
+		SupportFunctionDataItem itemOrig = *item;
+
+		/*
+		 * If the item's direction was not normalized before, it is
+		 * normalized here.
+		 */
+		itemOrig.direction.norm(1.);
+		
 		bool ifEqual = false;
 		for (auto itemPrev = itemsUnequal.begin();
 			itemPrev != itemsUnequal.end(); ++itemPrev)
 		{
-			if (equal(item->direction, itemPrev->direction,
+			if (equal(itemOrig.direction, itemPrev->direction,
 				EPS_SUPPORT_DIRECTION_EQUALITY))
 			{
 				ifEqual = true;

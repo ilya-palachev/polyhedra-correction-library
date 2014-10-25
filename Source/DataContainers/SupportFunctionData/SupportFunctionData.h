@@ -107,7 +107,9 @@ public:
 	long int size();
 
 	/**
-	 * Removes equal items from the data.
+	 * Constructs support function data that consists only pairwise-inequal
+	 * data items. The constructed items are normalized before checking the
+	 * equality of items.
 	 *
 	 * @return	The data in which all items are unique.
 	 */
