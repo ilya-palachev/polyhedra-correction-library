@@ -52,6 +52,14 @@ SupportFunctionData::SupportFunctionData(const SupportFunctionData *data) :
 	DEBUG_END;
 }
 
+SupportFunctionData::SupportFunctionData(const SupportFunctionDataPtr data) :
+	items()
+{
+	DEBUG_START;
+	items = data->items;
+	DEBUG_END;
+}
+
 SupportFunctionData::SupportFunctionData(
 		const std::vector<SupportFunctionDataItem> itemsGiven)
 {
@@ -67,7 +75,7 @@ SupportFunctionData::~SupportFunctionData()
 	DEBUG_END;
 }
 
-SupportFunctionData &SupportFunctionData::operator= (const SupportFunctionData
+SupportFunctionData &SupportFunctionData::operator=(const SupportFunctionData
 		&data)
 {
 	DEBUG_START;
@@ -80,7 +88,7 @@ SupportFunctionData &SupportFunctionData::operator= (const SupportFunctionData
 	return *this;
 }
 
-SupportFunctionDataItem &SupportFunctionData::operator[] (const int iPosition)
+SupportFunctionDataItem &SupportFunctionData::operator[](const int iPosition)
 {
 	DEBUG_START;
 	ASSERT(iPosition >= 0);

@@ -20,7 +20,8 @@
 
 /**
  * @file SupportFunctionData.h
- * @brief General class for support function data container.
+ * @brief General class for support function data container
+ * - declaration.
  */
 
 #ifndef SUPPORT_FUNCTION_DATA_H
@@ -51,14 +52,29 @@ public:
 	/** Empty constructor. */
 	SupportFunctionData();
 
-	/** Copy constructor. */
+	/**
+	 * Copy constructor.
+	 *
+	 * @param data	Reference to existing data.
+	 */
 	SupportFunctionData(const SupportFunctionData &data);
 
-	/** Copy constructor from pointer. */
+	/**
+	 * Copy constructor from pointer.
+	 *
+	 * @param data	Pointer to existing data.
+	 */
 	SupportFunctionData(const SupportFunctionData *data);
 
 	/**
-	 * Constructor from the std::vector of items.
+	 * Copy constructor from shared pointer.
+	 *
+	 * @param data	Shared pointer to existing data.
+	 */
+	SupportFunctionData(const SupportFunctionDataPtr data);
+
+	/**
+	 * Constructor from the vector of items.
 	 *
 	 * @param itemsGiven	Support function data items.
 	 */
