@@ -81,14 +81,31 @@ public:
 	SupportFunctionData(
 			const std::vector<SupportFunctionDataItem> itemsGiven);
 
-	/** Assignment operator. */
+	/**
+	 * Assignment operator.
+	 *
+	 * @param data	The original data.
+	 * @return The assigned data.
+	 */
 	SupportFunctionData &operator= (const SupportFunctionData &data);
 
 	/** Destructor. */
 	virtual ~SupportFunctionData();
 
-	/** Subscription operator. */
+	/**
+	 * Subscription operator.
+	 *
+	 * @param iPosition	The ID of item that is demanded.
+	 * @return The reference to the demanded item.
+	 */
 	SupportFunctionDataItem &operator[] (const int iPosition);
+	/**
+	 * Gets the size of vector fo items.
+	 *
+	 * @return The size of vector items.
+	 */
+	long int size();
+
 	/**
 	 * Removes equal items from the data.
 	 *

@@ -97,6 +97,14 @@ SupportFunctionDataItem &SupportFunctionData::operator[](const int iPosition)
 	return items[iPosition];
 }
 
+long int SupportFunctionData::size()
+{
+	DEBUG_START;
+	long int size = items.size();
+	DEBUG_END;
+	return size;
+}
+
 SupportFunctionDataPtr SupportFunctionData::removeEqual()
 {
 	DEBUG_START;
