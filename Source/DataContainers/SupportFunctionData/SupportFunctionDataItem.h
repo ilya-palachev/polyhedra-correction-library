@@ -29,6 +29,7 @@
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_H
 #define SUPPORT_FUNCTION_DATA_ITEM_H
 
+#include "DebugPrint.h"
 #include "Vector3d.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 
@@ -63,16 +64,49 @@ public:
 	 */
 	SupportFunctionDataItem(const Vector3d d, const double v);
 
+	/** Destructor. */
+	virtual ~SupportFunctionDataItem();
+
 	/**
 	 * Assignment operator.
 	 *
 	 * @param item	The original item.
 	 */
-	SupportFunctionDataItem &operator= (const SupportFunctionDataItem
+	SupportFunctionDataItem &operator=(const SupportFunctionDataItem
 			&item);
-
-	/** Destructor. */
-	virtual ~SupportFunctionDataItem();
 };
+
+/**
+ * Equality operator.
+ *
+ * @param left	The left side of equality.
+ * @param right	The right side of equality.
+ * @return True, if they are equal.
+ */
+inline bool operator==(const SupportFunctionDataItem &left,
+	const SupportFunctionDataItem &right)
+{
+	DEBUG_START;
+	bool ifEqual = left.direction == right.direction
+		&& equal(left.value, right.value);
+	DEBUG_END;
+	return ifEqual; 
+}
+
+/**
+ * Inequality operator.
+ *
+ * @param left	The left side of inequality.
+ * @param right	The right side of inequality.
+ * @return True, if they are inequal.
+ */
+inline bool operator!=(const SupportFunctionDataItem &left,
+	const SupportFunctionDataItem &right)
+{
+	DEBUG_START;
+	bool ifInequal = !(left == right);
+	DEBUG_END;
+	return ifInequal;
+}
 
 #endif /* SUPPORT_FUNCTION_DATA_ITEM_H */

@@ -65,7 +65,7 @@ SupportFunctionDataItem::~SupportFunctionDataItem()
 	DEBUG_END;
 }
 
-SupportFunctionDataItem &SupportFunctionDataItem::operator= (
+SupportFunctionDataItem &SupportFunctionDataItem::operator=(
 		const SupportFunctionDataItem &item)
 {
 	DEBUG_START;
