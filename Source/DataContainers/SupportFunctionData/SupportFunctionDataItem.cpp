@@ -45,6 +45,15 @@ SupportFunctionDataItem::SupportFunctionDataItem(
 	DEBUG_END;
 }
 
+SupportFunctionDataItem::SupportFunctionDataItem(const Vector3d d,
+		const double v) :
+	direction(d),
+	value(v),
+	info(NULL)
+{
+	DEBUG_START;
+	DEBUG_END;
+}
 SupportFunctionDataItem::~SupportFunctionDataItem()
 {
 	DEBUG_START;

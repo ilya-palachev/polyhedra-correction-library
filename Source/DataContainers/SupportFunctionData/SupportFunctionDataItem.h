@@ -48,10 +48,26 @@ public:
 	/** Empty constructor. */
 	SupportFunctionDataItem();
 
-	/** Copy constructor. */
+	/**
+	 * Copy constructor.
+	 *
+	 * @param item	The original item.
+	 */
 	SupportFunctionDataItem(const SupportFunctionDataItem &item);
 
-	/** Assignment operator. */
+	/**
+	 * Constructor by values of direction vector and support value.
+	 *
+	 * @param d	The original support vector.
+	 * @param v	The original support value.
+	 */
+	SupportFunctionDataItem(const Vector3d d, const double v);
+
+	/**
+	 * Assignment operator.
+	 *
+	 * @param item	The original item.
+	 */
 	SupportFunctionDataItem &operator= (const SupportFunctionDataItem
 			&item);
 
