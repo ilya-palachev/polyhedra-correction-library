@@ -65,6 +65,7 @@ set (SOURCE_pcl
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.cpp
+	Source/DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.cpp
 	Source/DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.cpp
 	Source/DataContainers/EdgeData/EdgeData.cpp
 	Source/DataContainers/EdgeData/Edge/Edge.cpp
