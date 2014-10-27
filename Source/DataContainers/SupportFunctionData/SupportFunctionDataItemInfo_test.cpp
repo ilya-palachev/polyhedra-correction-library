@@ -29,6 +29,7 @@
 
 #include <gtest/gtest.h>
 
+/** Checks that empty constructor works. */
 TEST(SupportFunctionDataItemInfoTest, EmptyConstructorWorks)
 {
 	SupportFunctionDataItemInfo *info = new SupportFunctionDataItemInfo();
