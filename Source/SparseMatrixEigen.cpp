@@ -19,35 +19,43 @@
  */
 
 /**
- * @file SparseMatrixEigen.h
- * @brief Inclusions from Eigen library.
+ * @file SparseMatrixEigen.cpp
+ * @brief Inclusions from Eigen library
+ * - implementation of additional functions.
  */
 
-#ifndef SPARSEMATRIXEIGEN_H_
-#define SPARSEMATRIXEIGEN_H_
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Vector3d.h"
+#include "SparseMatrixEigen.h"
 
-#include <Eigen/Sparse>
-
-/**
- * Equality operator for comparison of sparse matrix.
- *
- * @param matrixLeft	matrix at the left side of comparison
- * @param matrixRight	matrix at the right side of comparison
- *
- * @return True, if matrix are totally equal at topological and FP sence
- */
 bool operator==(const Eigen::SparseMatrix<double> matrixLeft,
-	const Eigen::SparseMatrix<double> matrixRight);
-
-typedef Eigen::SparseMatrix<double> SparseMatrix;
-
-typedef Eigen::Triplet<double> Triplet;
-
-typedef Eigen::VectorXd VectorXd;
-
-typedef Eigen::RowVectorXd RowVectorXd;
-
-typedef Eigen::VectorXi VectorXi;
-
-
-#endif
+	const Eigen::SparseMatrix<double> matrixRight)
+{
+	DEBUG_START;
+	if (matrixLeft.outerSize() != matrixRight.outerSize())
+	{
+		DEBUG_END;
+		return false;
+	}
+	ASSERT(matrixLeft.outerSize() == matrixRight.outerSize());
+	for (int k = 0; k < matrixLeft.outerSize(); ++k)
+	{
+		SparseMatrix::InnerIterator itLeft(matrixLeft, k);
+		SparseMatrix::InnerIterator itRight(matrixRight, k);
+		while (itLeft && itRight)
+		{
+			if (!equal(itLeft.value(), itRight.value())
+				|| itLeft.row() != itRight.row()
+				|| itLeft.col() != itRight.col())
+			{
+				DEBUG_END;
+				return false;
+			}
+			++itLeft;
+			++itRight;
+		}
+	}
+	DEBUG_END;
+	return true;
+}
