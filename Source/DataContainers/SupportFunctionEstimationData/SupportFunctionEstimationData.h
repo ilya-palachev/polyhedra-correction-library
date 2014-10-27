@@ -20,8 +20,9 @@
 
 /**
  * @file SupportFunctionEstimationData.h
- * @brief Declaration of structure that represents the input data for support
- * function estimation engines.
+ * @brief Structure that represents the input data for support
+ * function estimation engines
+ * - declaration.
  */
 
 #ifndef SUPPORTFUNCTIONESTIMATIONDATA_H_
@@ -55,7 +56,7 @@ private:
 	SparseMatrix supportMatrix_;
 
 	/**
-	 * The support vector, i. e. the std::vector of support function
+	 * The support vector, i. e. the vector of support function
 	 * measurements.
 	 */
 	VectorXd supportVector_;
@@ -81,10 +82,10 @@ public:
 	 * Default constructor.
 	 *
 	 * @param supportMatrix		The support matrix of problem.
-	 * @param supportVector		The support vector, i. e. the std::vector
+	 * @param supportVector		The support vector, i. e. the vector
 	 * 				of support function measurements.
-	 * @param startingVector	The starting std::vector of the algorithm.
-	 * @param supportDirections	The std::vector of support directions
+	 * @param startingVector	The starting vector of the algorithm.
+	 * @param supportDirections	The vector of support directions
 	 */
 	SupportFunctionEstimationData(SparseMatrix supportMatrix,
 		VectorXd supportVector, VectorXd startingVector,

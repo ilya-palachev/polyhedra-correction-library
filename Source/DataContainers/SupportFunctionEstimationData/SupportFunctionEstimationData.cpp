@@ -19,9 +19,10 @@
  */
 
 /**
- * @file SupportFunctionEstimationData.h
- * @brief Definition of structure that represents the input data for support
- * function estimation engines.
+ * @file SupportFunctionEstimationData.cpp
+ * @brief Structure that represents the input data for support
+ * function estimation engines
+ * - implementation.
  */
 
 #include "DebugPrint.h"
