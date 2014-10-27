@@ -30,6 +30,8 @@
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_H
 #define SUPPORT_FUNCTION_DATA_ITEM_H
 
+#include <memory>
+
 #include "DebugPrint.h"
 #include "Vector3d.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
@@ -76,6 +78,9 @@ public:
 	SupportFunctionDataItem &operator=(const SupportFunctionDataItem
 			&item);
 };
+
+/** Shared pointer to support function data item. */
+typedef std::shared_ptr<SupportFunctionDataItem> SupportFunctionDataItemPtr;
 
 /**
  * Equality operator.
