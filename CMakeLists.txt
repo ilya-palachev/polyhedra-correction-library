@@ -235,6 +235,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Gtest")
 	set(COMMON_FLAGS "${COMMON_FLAGS} -g")
 	set (SOURCE_gtests
 		Source/DataContainers/SupportFunctionData/SupportFunctionDataItemInfo_test.cpp
+		Source/DataContainers/SupportFunctionData/SupportFunctionDataItem_test.cpp
 		Source/DataContainers/SupportFunctionData/SupportFunctionData_test.cpp
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane_test.cpp
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints_test.cpp
