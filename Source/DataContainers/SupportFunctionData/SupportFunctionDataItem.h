@@ -23,7 +23,8 @@
  * @brief Support function data items contain support value and support
  * direction assiciated with it. Also it can contain a pointer to auxiliary
  * info structure that stores the information about the origin of this value
- * (i. e. number of contour, number of side or anything else).
+ * (i. e. number of contour, number of side or anything else)
+ * - declaration.
  */
 
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_H

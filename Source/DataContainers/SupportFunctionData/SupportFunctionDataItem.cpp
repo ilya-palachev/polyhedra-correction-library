@@ -19,8 +19,12 @@
  */
 
 /**
- * @file SupportFunctionDataItem.cpp
- * @brief Support function data items implementation.
+ * @file SupportFunctionDataItem.h
+ * @brief Support function data items contain support value and support
+ * direction assiciated with it. Also it can contain a pointer to auxiliary
+ * info structure that stores the information about the origin of this value
+ * (i. e. number of contour, number of side or anything else)
+ * - implementation.
  */
 
 #include "DebugPrint.h"
