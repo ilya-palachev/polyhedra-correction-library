@@ -40,39 +40,39 @@ SupportFunctionEstimationData::SupportFunctionEstimationData()
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(
 	SupportFunctionEstimationData *data) :
-	m_numValues(data->numValues()),
-	m_numConditions(data->numConditions()),
-	m_supportMatrix(data->supportMatrix()),
-	m_supportVector(data->supportVector()),
-	m_startingVector(data->startingVector()),
-	m_supportDirections(data->supportDirections())
+	numValues_(data->numValues()),
+	numConditions_(data->numConditions()),
+	supportMatrix_(data->supportMatrix()),
+	supportVector_(data->supportVector()),
+	startingVector_(data->startingVector()),
+	supportDirections_(data->supportDirections())
 {
 	DEBUG_START;
-	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
-	ASSERT(m_supportMatrix.rows() == m_numConditions);
-	ASSERT(m_supportMatrix.cols() == m_numValues);
-	ASSERT(m_numValues == m_supportVector.rows());
-	ASSERT(m_numValues == m_startingVector.rows());
+	ASSERT(numValues_ >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
+	ASSERT(supportMatrix_.rows() == numConditions_);
+	ASSERT(supportMatrix_.cols() == numValues_);
+	ASSERT(numValues_ == supportVector_.rows());
+	ASSERT(numValues_ == startingVector_.rows());
 	DEBUG_END;
 }
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(
 	SparseMatrix supportMatrix, VectorXd supportVector,
 	VectorXd startingVector, std::vector<Vector3d> supportDirections) :
-	m_numValues(supportMatrix.cols()),
-	m_numConditions(supportMatrix.rows()),
-	m_supportMatrix(supportMatrix),
-	m_supportVector(supportVector),
-	m_startingVector(startingVector),
-	m_supportDirections(supportDirections)
+	numValues_(supportMatrix.cols()),
+	numConditions_(supportMatrix.rows()),
+	supportMatrix_(supportMatrix),
+	supportVector_(supportVector),
+	startingVector_(startingVector),
+	supportDirections_(supportDirections)
 {
 	DEBUG_START;
-	ASSERT(m_numValues >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
-	ASSERT(m_supportMatrix.rows() == m_numConditions);
-	ASSERT(m_supportMatrix.cols() == m_numValues);
-	ASSERT(m_numValues == m_supportVector.rows());
-	ASSERT(m_numValues == m_startingVector.rows());
-	ASSERT(m_numValues == (int) m_supportDirections.size());
+	ASSERT(numValues_ >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
+	ASSERT(supportMatrix_.rows() == numConditions_);
+	ASSERT(supportMatrix_.cols() == numValues_);
+	ASSERT(numValues_ == supportVector_.rows());
+	ASSERT(numValues_ == startingVector_.rows());
+	ASSERT(numValues_ == (int) supportDirections_.size());
 	/*
 	 * TODO: Check also that number of conditions (i. e. number of edges in the
 	 * sphere triangulation) satisfies bounds arrising from Euler's theorem.
@@ -90,41 +90,41 @@ int SupportFunctionEstimationData::numValues(void)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return m_numValues;
+	return numValues_;
 }
 
 int SupportFunctionEstimationData::numConditions(void)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return m_numConditions;
+	return numConditions_;
 }
 
 SparseMatrix SupportFunctionEstimationData::supportMatrix(void)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return m_supportMatrix;
+	return supportMatrix_;
 }
 
 VectorXd SupportFunctionEstimationData::supportVector(void)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return m_supportVector;
+	return supportVector_;
 }
 
 VectorXd SupportFunctionEstimationData::startingVector(void)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return m_startingVector;
+	return startingVector_;
 }
 
 std::vector<Vector3d> SupportFunctionEstimationData::supportDirections(void)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return m_supportDirections;
+	return supportDirections_;
 }
 

@@ -43,32 +43,32 @@ class SupportFunctionEstimationData
 {
 private:
 	/** The number of support function measurements. */
-	int m_numValues;
+	int numValues_;
 
 	/**
 	 * The number of consistency conditions to be verified to provide
 	 * consistent estimation.
 	 */
-	int m_numConditions;
+	int numConditions_;
 
 	/** The support matrix of problem. */
-	SparseMatrix m_supportMatrix;
+	SparseMatrix supportMatrix_;
 
 	/**
 	 * The support vector, i. e. the std::vector of support function
 	 * measurements.
 	 */
-	VectorXd m_supportVector;
+	VectorXd supportVector_;
 
 	/**
 	 * Starting point of the algorith (rude estimate)
 	 */
-	VectorXd m_startingVector;
+	VectorXd startingVector_;
 
 	/**
 	 * Support directions of data.
 	 */
-	std::vector<Vector3d> m_supportDirections;
+	std::vector<Vector3d> supportDirections_;
 
 public:
 	/** Default empty constructor. */
@@ -93,22 +93,22 @@ public:
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();
 
-	/** Getter for member m_numValues. */
+	/** Getter for member numValues_. */
 	int numValues(void);
 
-	/** Getter for member m_numConditions. */
+	/** Getter for member numConditions_. */
 	int numConditions(void);
 
-	/** Getter for member m_supportMatrix. */
+	/** Getter for member supportMatrix_. */
 	SparseMatrix supportMatrix(void);
 
-	/** Getter for member m_supportVector */
+	/** Getter for member supportVector_ */
 	VectorXd supportVector(void);
 
-	/** Getter for member m_startingVector */
+	/** Getter for member startingVector_ */
 	VectorXd startingVector(void);
 
-	/** Getter for member m_supportDirections */
+	/** Getter for member supportDirections_ */
 	std::vector<Vector3d> supportDirections(void);
 
 	/* FIXME: Do we need to have setters here? */
