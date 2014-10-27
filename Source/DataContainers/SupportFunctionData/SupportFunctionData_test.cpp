@@ -67,6 +67,7 @@ TEST_F(SupportFunctionDataTest, EmptyConstructorsWorks)
 	SupportFunctionData *dataNew = new SupportFunctionData();
 	EXPECT_TRUE(dataNew);
 	EXPECT_EQ(dataNew->size(), 0);
+	delete dataNew;
 }
 
 /** Checks that copy-by-reference constructor works. */
@@ -74,6 +75,7 @@ TEST_F(SupportFunctionDataTest, CopyByReferenceConstructorWorks)
 {
 	SupportFunctionData *dataNew = new SupportFunctionData(*data);
 	EXPECT_TRUE(dataNew);
+	delete dataNew;
 }
 
 /** Checks that copy-by-pointer constructor works. */
@@ -86,6 +88,7 @@ TEST_F(SupportFunctionDataTest, CopyByPointerConstructorWorks)
 	{
 		EXPECT_EQ((*dataNew)[i], (*data)[i]);
 	}
+	delete dataNew;
 }
 
 /** Checks that copy-by-shared-pointer constructor works. */
@@ -98,6 +101,7 @@ TEST_F(SupportFunctionDataTest, CopyBySharedPointerConstructorWorks)
 	{
 		EXPECT_EQ((*dataNew)[i], (*data)[i]);
 	}
+	delete dataNew;
 }
 
 /** Checks that data constructor works. */
@@ -110,6 +114,7 @@ TEST_F(SupportFunctionDataTest, DataConstructorWorks)
 	{
 		EXPECT_EQ((*dataNew)[i], items[i]);
 	}
+	delete dataNew;
 }
 
 /** Checks that assignment operator works. */
