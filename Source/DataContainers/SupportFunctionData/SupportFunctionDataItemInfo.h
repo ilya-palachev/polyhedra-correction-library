@@ -20,11 +20,14 @@
 
 /**
  * @file SupportFunctionDataItemInfo.h
- * @brief General information about support data item (its origin).
+ * @brief General information about support data item (its origin)
+ * - declaration.
  */
 
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_INFO_H
 #define SUPPORT_FUNCTION_DATA_ITEM_INFO_H
+
+#include <memory>
 
 class SupportFunctionDataItemInfo
 {
@@ -35,5 +38,8 @@ public:
 	/** Virtual destructor. */
 	virtual ~SupportFunctionDataItemInfo();
 };
+
+typedef std::shared_ptr<SupportFunctionDataItemInfo>
+	SupportFunctionDataItemInfoPtr;
 
 #endif /* SUPPORT_FUNCTION_DATA_ITEM_INFO_H */
