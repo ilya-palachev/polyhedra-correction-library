@@ -111,6 +111,7 @@ set (SOURCE_pcl
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp
+	Source/SparseMatrixEigen.cpp
 	Source/TimeMeasurer/TimeMeasurer.cpp
 	Source/TimeMeasurer/Timer.cpp
 )
@@ -237,6 +238,7 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Gtest")
 		Source/DataContainers/SupportFunctionData/SupportFunctionDataItemInfo_test.cpp
 		Source/DataContainers/SupportFunctionData/SupportFunctionDataItem_test.cpp
 		Source/DataContainers/SupportFunctionData/SupportFunctionData_test.cpp
+		Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData_test.cpp
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane_test.cpp
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints_test.cpp
 		Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor_test.cpp
