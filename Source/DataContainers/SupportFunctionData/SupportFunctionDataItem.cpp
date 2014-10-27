@@ -19,7 +19,7 @@
  */
 
 /**
- * @file SupportFunctionDataItem.h
+ * @file SupportFunctionDataItem.cpp
  * @brief Support function data items contain support value and support
  * direction assiciated with it. Also it can contain a pointer to auxiliary
  * info structure that stores the information about the origin of this value
@@ -61,11 +61,6 @@ SupportFunctionDataItem::SupportFunctionDataItem(const Vector3d d,
 SupportFunctionDataItem::~SupportFunctionDataItem()
 {
 	DEBUG_START;
-	if (info)
-	{
-		delete info;
-		info = NULL;
-	}
 	DEBUG_END;
 }
 
@@ -75,11 +70,6 @@ SupportFunctionDataItem &SupportFunctionDataItem::operator=(
 	DEBUG_START;
 	direction = item.direction;
 	value = item.value;
-	if (info)
-	{
-		delete info;
-		info = NULL;
-	}
 	info = item.info;
 	DEBUG_END;
 	return *this;

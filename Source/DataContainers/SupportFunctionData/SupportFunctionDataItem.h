@@ -45,7 +45,7 @@ public:
 	double value;
 
 	/** The additional information about support item. */
-	SupportFunctionDataItemInfo *info;
+	SupportFunctionDataItemInfoPtr info;
 
 	/** Empty constructor. */
 	SupportFunctionDataItem();
