@@ -39,7 +39,7 @@ protected:
 	/** Initializes the test. */
 	void SetUp()
 	{
-		SparseMatrix matrix(3, 3);
+		SparseMatrix matrix(5, 5);
 		typedef Eigen::Triplet<double> Triplet;
 		std::vector<Triplet> triple;
 		triple.reserve(12);
@@ -48,14 +48,16 @@ protected:
 		triple.push_back(Triplet(2, 2, 9.));
 		matrix.setFromTriplets(triple.begin(), triple.end());
 
-		VectorXd supportVector(3);
-		supportVector << 10., 11., 12.;
-		VectorXd startingVector(3);
-		startingVector << 13., 14, 15.;
+		VectorXd supportVector(5);
+		supportVector << 10., 11., 12., 13., 14.;
+		VectorXd startingVector(5);
+		startingVector << 13., 14, 15., 16., 17.;
 		std::vector<Vector3d> supportDirections;
 		supportDirections.push_back(Vector3d(1., 0., 0.));
 		supportDirections.push_back(Vector3d(0., 1., 0.));
 		supportDirections.push_back(Vector3d(0., 0., 1.));
+		supportDirections.push_back(Vector3d(1., 1., 0.));
+		supportDirections.push_back(Vector3d(1., 1., 1.));
 
 		data.reset(new SupportFunctionEstimationData(matrix,
 			supportVector, startingVector, supportDirections));
