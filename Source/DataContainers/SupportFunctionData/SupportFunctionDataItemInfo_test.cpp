@@ -20,7 +20,7 @@
  */
 
 /**
- * @file SupportFunctionDataItemInfo.cpp
+ * @file SupportFunctionDataItemInfo_test.cpp
  * @brief General information about support data item (its origin)
  * - unit tests.
  */
