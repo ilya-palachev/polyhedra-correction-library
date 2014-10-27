@@ -28,6 +28,7 @@
 #define SUPPORT_FUNCTION_ESTIMATION_DATA_CONSTRUCTOR_H
 
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /** Constructor of data used for support function estimation process */
 class SupportFunctionEstimationDataConstructor

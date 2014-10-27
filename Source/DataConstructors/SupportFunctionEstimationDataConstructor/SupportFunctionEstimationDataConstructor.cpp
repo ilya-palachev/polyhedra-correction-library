@@ -28,6 +28,20 @@
 #include "DebugAssert.h"
 #include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
 
+/**
+ * Builds hull of directions by given support function data.
+ *
+ * @param data	Original data.
+ * @return Hull of directions.
+ */
+static Polyhedon_3 buildDirectionsHull(SupportFunctionDataPtr data);
+
+/**
+ * Builds support matrix from given hull of support directions.
+ *
+ * @param hull	Hull of directions.
+ * @return Support matrix.
+ */
 
 SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor()
 {
@@ -41,10 +55,82 @@ SupportFunctionEstimationDataConstructor::~SupportFunctionEstimationDataConstruc
 	DEBUG_END;
 }
 
-void SupportFunctionEstimationDataConstructor::run(SupportFunctionDataPtr data)
+SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
+		SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	/* Remove equal items from data. */
+	SupportFunctionDataPtr dataNonequal = data->removeEqual();
+
+	/* Build hull of directions. */
+	Polyhedron_3 hull = buildDirectionsHull(dataNonequal);
+
+	/* Build support matrix. */
+	SparseMatrix supportMatrix = buildSupportMatrix(hull);
+
+	/* Build support vector. */
+	VectorXd supportVector = buildSupportVector(dataNonequal);
+
+	/* Build starting vector. */
+	VectorXd startingVector = buildStartingVector(dataNonequal);
+
+	/* Build support directions. */
+	std::vector<Vector3d> supportDirections;
+	for (long int i = 0; i < data->size(); ++i)
+	{
+		Vector3d v = (*data)[i];
+		supportDirections.push_back(v);
+	}
+
+	/* Construct data. */
+	SupportFunctionEstimationDataPtr estimationData = new
+		SupportFunctionEstimationData(supportMatrix, supportVector,
+				startingVector, supportDirections);
+
+	DEBUG_END;
+	return estimationData;
+}
+
+static Polyhedon_3 buildDirectionsHull(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 
-	auto dataNonCoincident = removeCoincidentData(data);
+	/* Get vector of support directions. */
+	std::vector<Point_3> directions;
+	for (long int i = 0; i < data->size(); ++i)
+	{
+		Vector3d v = (*data)[i];
+		directions.push_back(Point_3(v.x, v.y, v.z));
+	}
+
+	/* Construct convex hull of support directions. */
+	Polyhedron_3 hull;
+	CGAL::convex_hull_3(directions.begin(), directions.end(), hull);
+	ASSERT(hull.size_of_vertices() == directions.size());
+
+	/* Find correpondance between directions and vertices of polyhedron. */
+	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
+		++vertex)
+	{
+		auto point = vertex->point();
+		Vector3d vPoly(point.x(), point.y(), point.z());
+		double distMin = 0.; long int iMin = 0;
+		for (long int i = 0; i < data->size(); ++i)
+		{
+			Vector3d v = (*data)[i];
+			double dist = sqrt(qmod(vPoly - v));
+			if (dist < distMin || i == 0.)
+			{
+				distMin = dist;
+				iMin = i;
+			}
+		}
+		vertex->id = iMin;
+		DEBUG_PRINT("Minimal distance for %-th vertex of hull is %le",
+				distMin);
+		ASSERT(equal(distMin, 0.));
+	}
+
 	DEBUG_END;
+	return hull;
 }
