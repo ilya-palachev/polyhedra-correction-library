@@ -74,8 +74,6 @@ namespace internal
   halfspaces_intersection(PlaneIterator pbegin, PlaneIterator pend,
 			  Polyhedron &P, const K &k)
   {
-    typedef typename CGAL::Convex_hull_traits_3<K> Traits;
-    typedef typename Polyhedron::HalfedgeDS HalfedgeDS;
     typedef typename K::Point_3 Point;
     typedef typename CGAL::internal::Build_dual_polyhedron<Polyhedron> Builder;
 
