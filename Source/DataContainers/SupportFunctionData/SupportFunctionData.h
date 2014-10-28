@@ -32,6 +32,7 @@
 
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 #include "PolyhedronCGAL.h"
+#include "SparseMatrixEigen.h"
 
 /* Forward declararion. */
 class SupportFunctionData;
@@ -135,7 +136,7 @@ public:
 	 *
 	 * @return Vector of support values.
 	 */
-	std::vector<double> supportValues();
+	VectorXd supportValues();
 
 	/**
 	 * Gets the vector of support planes.

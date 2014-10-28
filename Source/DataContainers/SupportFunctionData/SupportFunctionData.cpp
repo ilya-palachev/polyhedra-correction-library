@@ -163,13 +163,14 @@ std::vector<Point_3> SupportFunctionData::supportDirectionsCGAL()
 	return directions;
 }
 
-std::vector<double> SupportFunctionData::supportValues()
+VectorXd SupportFunctionData::supportValues()
 {
 	DEBUG_START;
-	std::vector<double> values;
+	VectorXd values(items.size());
+	int i = 0;
 	for (auto item = items.begin(); item != items.end(); ++item)
 	{
-		values.push_back(item->value);
+		values(i++) = item->value;
 	}
 	DEBUG_END;
 	return values;
