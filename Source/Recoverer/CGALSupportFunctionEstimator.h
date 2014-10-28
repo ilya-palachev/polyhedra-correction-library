@@ -55,20 +55,14 @@ public:
 	 *
 	 * @param data	SFE data
 	 */
-	CGALSupportFunctionEstimator(SupportFunctionEstimationData *data);
+	CGALSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
+			CGALEstimationMode modeOrig);
 
 	/** Default destructor. */
 	~CGALSupportFunctionEstimator();
 
 	/** Runs the estiamtion process. */
 	virtual VectorXd run(void);
-
-	/**
-	 * Sets current mode of estimation.
-	 *
-	 * @param m	Mode to be set.
-	 */
-	void setMode(CGALEstimationMode m);
 };
 
 #endif /* CGALSUPPORTFUNCTIONESTIMATOR_H_ */
