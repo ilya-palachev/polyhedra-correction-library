@@ -162,3 +162,16 @@ std::vector<Point_3> SupportFunctionData::supportDirectionsCGAL()
 	DEBUG_END;
 	return directions;
 }
+
+std::vector<double> SupportFunctionData::supportValues()
+{
+	DEBUG_START;
+	std::vector<double> values;
+	for (auto item = items.begin(); item != items.end(); ++item)
+	{
+		values.push_back(item->value);
+	}
+	DEBUG_END;
+	return values;
+}
+

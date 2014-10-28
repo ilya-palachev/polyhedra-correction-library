@@ -129,6 +129,13 @@ public:
 	 * @return Vector of support directions as CGAL points.
 	 */
 	std::vector<Point_3> supportDirectionsCGAL();
+
+	/**
+	 * Gets the vector of support values/
+	 *
+	 * @return Vector of support values.
+	 */
+	std::vector<double> supportValues();
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
