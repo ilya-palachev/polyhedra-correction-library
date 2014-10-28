@@ -175,3 +175,16 @@ std::vector<double> SupportFunctionData::supportValues()
 	return values;
 }
 
+std::vector<Plane_3> SupportFunctionData::supportPlanes()
+{
+	DEBUG_START;
+	std::vector<Plane_3> planes;
+	for (auto item = items.begin(); item != items.end(); ++item)
+	{
+		planes.push_back(Plane_3(item->direction.x, item->direction.y,
+					item->direction.z, item->value));
+	}
+	DEBUG_END;
+	return planes;
+}
+
