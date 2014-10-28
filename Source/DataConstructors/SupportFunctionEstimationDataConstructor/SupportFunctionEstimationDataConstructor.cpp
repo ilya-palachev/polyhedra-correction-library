@@ -69,9 +69,20 @@ static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull);
  * Builds starting vector for the estimation process.
  *
  * @param data		The support function data.
+ * @param matrix	The support matrix.
  * @return		Starting vector.
  */
-static VectorXd buildStartingVector(SupportFunctionDataPtr data);
+static VectorXd buildStartingVector(SupportFunctionDataPtr data,
+		SparseMatrix matrix);
+
+/**
+ * Checks starting vector.
+ *
+ * @param vector	Starting vector.
+ * @param matrix	Support matrix.
+ * @return		True, if the starting vector is correct.
+ */
+static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix);
 
 SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor() :
 	ifScaleMatrix(false)
@@ -110,7 +121,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	VectorXd supportVector = data->supportValues();
 
 	/* Build starting vector. */
-	VectorXd startingVector = buildStartingVector(data);
+	VectorXd startingVector = buildStartingVector(data, supportMatrix);
 
 	/* Get support directions from data. */
 	std::vector<Vector3d> supportDirections = data->supportDirections();
@@ -262,7 +273,8 @@ static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull)
 	return true;
 }
 
-static VectorXd buildStartingVector(SupportFunctionDataPtr data)
+static VectorXd buildStartingVector(SupportFunctionDataPtr data,
+		SparseMatrix matrix)
 {
 	DEBUG_START;
 	VectorXd startingVector(data->size());
@@ -292,6 +304,21 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data)
 		}
 		startingVector(i++) = scalarProductMax;
 	}
+	ASSERT(checkStartingVector(startingVector, matrix));
 	DEBUG_END;
 	return startingVector;
+}
+
+static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix)
+{
+	DEBUG_START;
+	VectorXd product = matrix * startingVector;
+	for (unsigned int i = 0; i < startingVector.rows(); ++i)
+		if (product(i) < 0.)
+		{
+			DEBUG_END;
+			return false;
+		}
+	DEBUG_END;
+	return true;
 }
