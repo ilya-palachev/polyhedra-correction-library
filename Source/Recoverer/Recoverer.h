@@ -66,25 +66,7 @@ typedef enum
 
 	/** Linear CGAL estimator. */
 	CGAL_ESTIMATOR_LINEAR
-} RecovererEstimator;
-
-#define DEFAULT_MAX_COORDINATE 1000000.
-
-struct PCL_Point_3 : public Point_3
-{
-	long int id;
-	
-	PCL_Point_3(double x, double y, double z, long int i)
-		: Point_3(x, y, z), id(i)
-	{};
-};
-
-auto PCL_Point_3_comparer = [](PCL_Point_3 a, PCL_Point_3 b)
-{
-	return a < b || (a <= b && a.id < b.id);
-};
-
-typedef std::set<PCL_Point_3, decltype(PCL_Point_3_comparer)> CGALpointsSet;
+} RecovererEstimatorType;
 
 /**
  * Main recovering engine, based on support function estimation tuned for our
@@ -97,8 +79,8 @@ private:
 	/** Output file name. */
 	char *outputName;
 
-	/** Estimator to be used. */
-	RecovererEstimator estimator;
+	/** Type of estimator to be used. */
+	RecovererEstimatorType estimatorType;
 
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
@@ -106,206 +88,8 @@ private:
 	/** Whether to convexify shadow contours. */
 	bool ifConvexifyContours;
 
-	/** Whether to regularize the support matrix. */
-	bool ifRegularize;
-
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
-
-	/** The distance below which we consider support directions equal. */
-	double distDirectionMinimal;
-
-	/** ID of vertex with maximal X coordinate. */
-	int iXmax;
-
-	/** ID of vertex with maximal Y coordinate. */
-	int iYmax;
-
-	/** ID of vertex with maximal Z coordinate. */
-	int iZmax;
-
-	/** Regularizing std::vector. */
-	Vector_3 vectorRegularizing;
-
-	/** Vector with saved 3 h-values that correspond to iXmax, iYmax, iZmax */
-	Vector_3 vectorMaxHValues;
-
-	/** Map from initial support directions's ID's and points on hull. */
-	long int *mapID;
-
-	/** The size of map. */
-	long int mapIDsize;
-
-	/** Inverse map of the previous map (not a function). */
-	std::list<long int> *mapIDinverse;
-
-	/** Shadow contour data (initial data). */
-	ShadowContourDataPtr shadowDataInit;
-
-	/** Shadow contour data (preprocessed). */
-	ShadowContourDataPtr shadowDataPrep;
-
-	/**
-	 * Initializes fields shadowDataInit and shadowDataPrep
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	void initData(ShadowContourDataPtr SCData);
-
-	/**
-	 * Preprocesses the shadow contour data before the algorithm.
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	void preprocessSCData(ShadowContourDataPtr SCData);
-
-	/**
-	 * Extracts support planes from shadow contours.
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	std::vector<Plane> extractSupportPlanes(ShadowContourDataPtr SCData);
-
-	/**
-	 * Extracts support planes from one shadow contour.
-	 *
-	 * @param contour	Shadow contour
-	 */
-	std::vector<Plane> extractSupportPlanes(SContour* contour);
-
-	/**
-	 * Performs the transformation of polar duality for the given set of planes,
-	 * i. e. maps each plane as follows:
-	 *
-	 * (ax + by + cz + d = 0) |--> (-a/d, -b/d, -c/d)
-	 *
-	 * @param planes	The std::vector of planes
-	 */
-	std::vector<Vector3d> mapPlanesToDualSpace(std::vector<Plane> planes);
-
-	/**
-	 * Constructs ID maps (used in constructHullAndIDmaps)
-	 *
-	 * @param pointsHull	Obtained hull points
-	 * @param pointsCGAL	Initial CGAL points
-	 */
-	void constructIDmaps(std::set<PCL_Point_3> pointsHull,
-        	CGALpointsSet pointsCGAL);
-
-	/**
-	 * Constructs convex hull of the point set using CGAL API and calls
-	 * constructIDmaps to construct ID maps.
-	 *
-	 * @param points	Vector of points
-	 */
-	Polyhedron_3 constructHullAndIDmaps(std::vector<Vector3d> pointsPCL);
-
-	/**
-	 * Constructs convex hull of the point set using CGAL API
-	 *
-	 * @param points	Vector of points
-	 */
-	Polyhedron_3 constructConvexHullCGAL(std::vector<Vector3d> pointsPCL);
-
-	/**
-	 * Constructs convex hull of the point set using CGAL API.
-	 *
-	 * @param points	Vector of points
-	 */
-	PolyhedronPtr constructConvexHull(std::vector<Vector3d> pointsPCL);
-
-	/**
-	 * Builds dual polyhedron to the given polyhedron.
-	 *
-	 * @param p	Initial polyhedron
-	 */
-	PolyhedronPtr buildDualPolyhedron(PolyhedronPtr p);
-
-	/**
-	 * Shifts all points to the given std::vector displacement.
-	 *
-	 * @param SCData	Shadow contour data
-	 * @param shift		Vector displacement
-	 */
-	void shiftAllContours(ShadowContourDataPtr SCData, Vector3d shift);
-
-	/**
-	 * Balances contours so that their common mass center lies right at the
-	 * center of coordinate system. We assume that contours are displaced from
-	 * this position only on a vertical std::vector and report error otherwise.
-	 */
-	void balanceAllContours(ShadowContourDataPtr SCData);
-
-	/**
-	 * Builds polyhedron consisting of facets constructed from shadow contours,
-	 * or from their dual images.
-	 *
-	 * @param ifDual	Whether to build dual contours
-	 * @param SCData	Shadow contour data
-	 */
-	PolyhedronPtr buildMaybeDualContours(bool ifDual,
-			ShadowContourDataPtr SCData);
-
-	/**
-	 * Finds IDs of vertices that have maximal coordinates of polyhedron's
-	 * vertices.
-	 *
-	 * Columns of transposed support matrix which have these IDs will be then
-	 * eliminated.
-	 *
-	 * @param polyhedron	The polyhedron
-	 */
-	Vector_3 findMaxVertices(Polyhedron_3 polyhedron,
-		int& imax0, int& imax1, int& imax2);
-	
-	/**
-	 * Regularizes support matrix by eliminating columns that have IDs equal to
-	 * iXmax, iYmax, iZmax and regularizes also the h-values std::vector.
-	 * 
-	 * @param matrix		The transpose of support matrix
-	 * @param polyhedron	The polyhedron (convex hull of supporting
-	 * directions)
-	 */
-	void regularizeSupportMatrix(SupportFunctionEstimationData* data,
-			Polyhedron_3 polyhedron);
-
-	/**
-	 * Creates polyhedron of support directions from the set of support items
-	 *
-	 * @param supportItems	The set of support items.
-	 */
-	Polyhedron_3 makePolyhedronOfDirections(SupportItemSet supportItems);
-	
-	/**
-	 * Builds matrix of constraints from the polyhedron (which represents
-	 * a convex hull of the set of directions for which the support values
-	 * are given).
-	 *
-	 * @param polyhedron	Convex hull of the set of directions
-	 */
-	SparseMatrix buildMatrixByPolyhedron(Polyhedron_3 polyhedron);
-
-	/**
-	 * Creates the starting point for the estimation algoeithm.
-	 *
-	 * @param supportVector		The support std::vector of the estimation
-	 * 				algorithm.
-	 * @param supportDirections	The std::vector of support directions.
-	 * @param supportMatrix		The support matrix.
-	 * @param estimator		The mode of estimation.
-	 */
-	VectorXd makeStartingVector(VectorXd supportVector,
-		std::vector<Vector3d> supportDirections,
-		SparseMatrix supportMatrix);
-	/**
-	 * Post-processes the support function estimation data.
-	 *
-	 * @param data		Support function estimation data recently
-	 * 			constructed.
-	 * @param polyhedron	The polyhedron of support directions.
-	 */
-	void postprocessSFEData(SupportFunctionEstimationData *data,
-		Polyhedron_3 polyhedron);
 
 public:
 
@@ -327,6 +111,13 @@ public:
 	void setOutputName(char *name);
 
 	/**
+	 * Sets the type of estimator.
+	 *
+	 * @param e	The type of estimator.
+	 */
+	void setEstimatorType(RecovererEstimatorType e);
+
+	/**
 	 * Enables balancing in all functions.
 	 */
 	void enableBalancing(void);
@@ -342,110 +133,9 @@ public:
 	void disableContoursConvexification(void);
 
 	/**
-	 * Enables the regularization of support matrix based on knowledge about
-	 * eigenstd::vectors eigenvalues of support matrix Q
-	 */
-	void enableRegularization(void);
-
-	/**
 	 * Enables the scaling of the matrix of the problem.
 	 */
 	void enableMatrixScaling(void);
-
-	/**
-	 * Sets the minimal direction distance.
-	 *
-	 * @param dist	The minimal distance.
-	 */
-	void setDistDirectionMinimal(double dist);
-
-	/**
-	 * Prints the problems to files (for debugging purposes).
-	 *
-	 * @param SCData	Shadow contours data.
-	 */
-	void buildNaiveMatrix(ShadowContourDataPtr SCData);
-
-	/**
-	 * Builds naive polyhedron from support planes
-	 *
-	 * @param supportPlanes	Vector of support planes
-	 */
-	PolyhedronPtr buildPolyhedronFromPlanes(std::vector<Plane> supportPlanes);
-
-	/**
-	 * Builds naive polyhedron using naive approach that intersect half-spaces
-	 * corresponding to support planes.
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	PolyhedronPtr buildNaivePolyhedron(ShadowContourDataPtr SCData);
-
-	/**
-	 * Builds non-convex polyhedron in dual space that contains all dual images
-	 * of support planes.
-	 * It will be used for visualization to analyze the level of noise in
-	 * support planes measurements.
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	PolyhedronPtr buildDualNonConvexPolyhedron(ShadowContourDataPtr SCData);
-
-	/**
-	 * Builds polyhedron consisting of facets constructed from shadow contours
-	 * from original data. Is used for debugging purposes.
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	PolyhedronPtr buildContours(ShadowContourDataPtr SCData);
-
-	/**
-	 * Build polyhedron consisting of facets constructed from dual images of
-	 * shadow contours (more precisely, from contours that are the images of
-	 * dual cylinders).
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	PolyhedronPtr buildDualContours(ShadowContourDataPtr SCData);
-
-	/**
-	 * Build data for support function estimation problem.
-	 *
-	 * @param SCData	Shadow contour data
-	 */
-	SupportFunctionEstimationData* buildSFEData(
-			ShadowContourDataPtr SCData);
-
-	/**
-	 * Sets the estimator that will be used for support function estimation.
-	 *
-	 * @param estimator	The type of estimator
-	 */
-	void setEstimator(RecovererEstimator e);
-
-	/**
-	 * Recovers final polyhedron from initial data and std::vector
-	 * of estimated support values
-	 *
-	 * @param estData       Support function estimation data used by
-	 *                      estimator
-	 * @param estimate      The result of SFE's work
-	 */
-	PolyhedronPtr produceFinalPolyhedron(
-		SupportFunctionEstimationData *estData, VectorXd estimate);
-
-	/**
-	 * Produces corrected shadow contour data from initial data and std::vector
-	 * of estimated support values
-	 *
-	 * FIXME: It does not work correctly for now!!!
-	 *
-	 * @param estData	Support function estimation data used by
-	 * 			estimator
-	 * @param estimate	The result of SFE's work
-	 */
-	ShadowContourDataPtr produceCorrectedData(
-		SupportFunctionEstimationData *estData, VectorXd estimate);
 
 	/**
 	 * Runs the recovering procedure.
@@ -456,7 +146,5 @@ public:
 };
 
 typedef std::shared_ptr<Recoverer> RecovererPtr;
-
-char *makeNameWithSuffix(const char *outputName, const char *suffix);
 
 #endif /* RECOVERER_H */
