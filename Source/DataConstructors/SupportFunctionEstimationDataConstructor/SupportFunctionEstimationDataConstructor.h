@@ -33,12 +33,18 @@
 /** Constructor of data used for support function estimation process */
 class SupportFunctionEstimationDataConstructor
 {
+private:
+	/** Whether to scale matrix. */
+	bool ifScaleMatrix;
 public:
 	/** Empty constructor. */
 	SupportFunctionEstimationDataConstructor();
 
 	/** Destructor. */
 	~SupportFunctionEstimationDataConstructor();
+
+	/** Enables matrix scaling */
+	void enableMatrixScaling();
 
 	/**
 	 * Constructs data used for support function estimation from general
