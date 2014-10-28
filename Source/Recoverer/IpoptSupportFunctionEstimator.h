@@ -72,7 +72,8 @@ public:
 	 *
 	 * @param data	Support function estimation data (input)
 	 */
-	IpoptSupportFunctionEstimator(SupportFunctionEstimationData *data);
+	IpoptSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
+			IpoptEstimationMode mode);
 
 	/** Default destructor. */
 	~IpoptSupportFunctionEstimator();
@@ -271,13 +272,6 @@ public:
 	 *
 	 */
 	virtual VectorXd run(void);
-
-	/**
-	 * Sets current mode of estimation.
-	 *
-	 * @param m	Mode to be set.
-	 */
-	void setMode(IpoptEstimationMode m);
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */

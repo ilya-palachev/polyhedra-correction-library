@@ -36,11 +36,12 @@
  */
 
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
-		SupportFunctionEstimationData *data) :
-		SupportFunctionEstimator(data),
-	mode(IPOPT_ESTIMATION_QUADRATIC),
+		SupportFunctionEstimationDataPtr data,
+		IpoptEstimationMode modeOrig) :
+	SupportFunctionEstimator(data),
+	mode(modeOrig),
 	problemType(PROBLEM_PRIMAL),
-	solution(numValues())
+	solution(data->numValues())
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -60,15 +61,15 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 	switch (mode)
 	{
 	case IPOPT_ESTIMATION_QUADRATIC:
-		n = numValues();
-		m = numConditions();
-		nnz_jac_g = supportMatrix().nonZeros();
-		nnz_h_lag = numValues();
+		n = data->numValues();
+		m = data->numConditions();
+		nnz_jac_g = data->supportMatrix().nonZeros();
+		nnz_h_lag = data->numValues();
 		break;
 	case IPOPT_ESTIMATION_LINEAR:
-		n = numValues() + 1;
-		m = numConditions() + numValues() * 2;
-		nnz_jac_g = supportMatrix().nonZeros() + numValues() * 4;
+		n = data->numValues() + 1;
+		m = data->numConditions() + data->numValues() * 2;
+		nnz_jac_g = data->supportMatrix().nonZeros() + data->numValues() * 4;
 		nnz_h_lag = 0;
 		break;
 	}
@@ -98,11 +99,11 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 	ASSERT(g_u);
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
 
 	for (int i = 0; i < n; ++i)
@@ -128,18 +129,18 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 	ASSERT(x);
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
 	
 
 	if (init_x)
 	{
-		VectorXd x0 = startingVector();
-		int num = numValues();
+		VectorXd x0 = data->startingVector();
+		int num = data->numValues();
 		for (int i = 0; i < num; ++i)
 		{
 			x[i] = x0(i);
@@ -164,14 +165,14 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 	DEBUG_START;
 
 	ASSERT(x);
-	VectorXd x0 = supportVector();
+	VectorXd x0 = data->supportVector();
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
 
 	switch (mode)
@@ -184,7 +185,7 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 		}
 		break;
 	case IPOPT_ESTIMATION_LINEAR:
-		obj_value = x[numValues()]; /* epsilon */
+		obj_value = x[data->numValues()]; /* epsilon */
 		break;
 	}
 	DEBUG_END;
@@ -200,14 +201,14 @@ bool IpoptSupportFunctionEstimator::eval_grad_f(Index n, const Number* x,
 	ASSERT(grad_f);
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
-	VectorXd x0 = supportVector();
-	int num = numValues();
+	VectorXd x0 = data->supportVector();
+	int num = data->numValues();
 
 	switch (mode)
 	{
@@ -239,13 +240,13 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 	ASSERT(g);
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
-	int num = numValues();
+	int num = data->numValues();
 
 	VectorXd h(num);
 	for (int i = 0; i < num; ++i)
@@ -254,10 +255,10 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 	}
 
 	VectorXd Qh(m);
-	Qh = supportMatrix() * h;
-	VectorXd h0 = supportVector();
+	Qh = data->supportMatrix() * h;
+	VectorXd h0 = data->supportVector();
 
-	int numConds = numConditions();
+	int numConds = data->numConditions();
 	for (int i = 0; i < numConds; ++i)
 	{
 		g[i] = Qh[i];
@@ -290,7 +291,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	DEBUG_PRINT("   iRow = %p", (void*) iRow);
 	DEBUG_PRINT("   jCol = %p", (void*) jCol);
 	DEBUG_PRINT("   values = %p", (void*) values);\
-	int num = numValues();
+	int num = data->numValues();
 
 	if (!values)
 	{
@@ -303,14 +304,14 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	}
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
 
-	SparseMatrix Q = supportMatrix();
+	SparseMatrix Q = data->supportMatrix();
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
 		ASSERT(n_ele_jac == Q.nonZeros());
@@ -320,7 +321,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 		ASSERT(n_ele_jac == Q.nonZeros() + num * 4);
 	}
 	int nonZeros = Q.nonZeros();
-	int numConds = numConditions();
+	int numConds = data->numConditions();
 
 	/* Assign all values of sparsity structure to -1 */
 	if (!values)
@@ -423,18 +424,18 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
 		DEBUG_END;
 		return true;
 	}
-	ASSERT(n_ele_hess == numValues());
+	ASSERT(n_ele_hess == data->numValues());
 
 	if (new_x)
 		ASSERT(values);
@@ -470,18 +471,18 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 	DEBUG_START;
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
-		ASSERT(n == numValues());
+		ASSERT(n == data->numValues());
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n == numValues() + 1);
+		ASSERT(n == data->numValues() + 1);
 	}
 
 	switch (status)
 	{
 	case SUCCESS:
 		MAIN_PRINT("SUCCESS");
-		for (int i = 0; i < numValues(); ++i)
+		for (int i = 0; i < data->numValues(); ++i)
 		{
 			solution(i) = x[i];
 		}
@@ -571,13 +572,5 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	DEBUG_END;
 	return solution;
 }
-
-void IpoptSupportFunctionEstimator::setMode(IpoptEstimationMode m)
-{
-	DEBUG_START;
-	mode = m;
-	DEBUG_END;
-}
-
 
 #endif /* USE_IPOPT*/
