@@ -54,18 +54,6 @@
 #define OPTION_FIRST_ANGLE 'a'
 
 /**
- * Option "-d" forces recoverer to avoid recovering and just visualize
- * dual non-convex polyhedron.
- */
-#define OPTION_DUAL_NONCONVEX_POLYHEDRON 'd'
-
-/**
- * Option "-c" forces recoverer to build only a polyhedron consisting of
- * facets constructed from shadow contours.
- */
-#define OPTION_CONTOURS 'c'
-
-/**
  * Option "-b" enables balancing of contour data before its processing.
  */
 #define OPTION_BALANCE_DATA 'b'
@@ -81,12 +69,6 @@
  * to use the name of input file as prefix.
  */
 #define OPTION_OUTPUT_NAME 'o'
-
-/**
- * Option "-p" enable the mode of printing the problem, i.e. the support std::vector
- * and the matrix of conditions.
- */
-#define OPTION_PRINT_PROBLEM 'p'
 
 /**
  * Option "-r" runs recovering.
@@ -108,23 +90,13 @@
  */
 #define OPTION_CONVEXIFY_CONTOURS 'x'
 
-/**
- * Option "-z"enables the regualrization of support matrix.
- */
-#define OPTION_REGULARIZE_MATRIX 'z'
-
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
 /**
- * Option "-g" sets the minimal distance between support directions.
- */
-#define OPTION_DIST_DIRECTION 'g'
-
-/**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdg:l:o:pr:svxz"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bl:o:r:svx"
 
 /**
  * The definition of corresponding long options std::list.
@@ -156,18 +128,6 @@ static struct option optionsLong[] =
 		OPTION_FIRST_ANGLE
 	},
 	{
-		"dual-nonconvex-polyhedron",
-		no_argument,
-		0,
-		OPTION_DUAL_NONCONVEX_POLYHEDRON
-	},
-	{
-		"contours",
-		no_argument,
-		0,
-		OPTION_CONTOURS
-	},
-	{
 		"balance-data",
 		no_argument,
 		0,
@@ -186,12 +146,6 @@ static struct option optionsLong[] =
 		OPTION_OUTPUT_NAME
 	},
 	{
-		"print-problem",
-		no_argument,
-		0,
-		OPTION_PRINT_PROBLEM
-	},
-	{
 		"recover",
 		required_argument,
 		0,
@@ -204,12 +158,6 @@ static struct option optionsLong[] =
 		OPTION_SCALE_MATRIX
 	},
 	{
-		"dist-direction",
-		required_argument,
-		0,
-		OPTION_DIST_DIRECTION
-	},
-	{
 		"verbose",
 		no_argument,
 		0,
@@ -220,12 +168,6 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_CONVEXIFY_CONTOURS
-	},
-	{
-		"regularize-matrix",
-		no_argument,
-		0,
-		OPTION_REGULARIZE_MATRIX
 	},
 	{0, 0, 0, 0}
 };
@@ -285,23 +227,14 @@ typedef struct
 	/** The name of output file(s). */
 	char *outputName;
 
-	/** Whether to build dual non-convex polyhedron. */
-	bool ifBuildDualNonConvexPolyhedron;
-
-	/** Whether to build polyhedron consisting of contours. */
-	bool ifBuildContours;
-
 	/** Whether to balance contour data before processing. */
 	bool ifBalancing;
-
-	/** Whether the mode of problem printing is enabled. */
-	bool ifPrintProblem;
 
 	/** Whether the recovering mode is enabled. */
 	bool ifRecover;
 	
 	/** The type of estimator that will be used for recovering. */
-	RecovererEstimator estimator;
+	RecovererEstimatorType estimator;
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
@@ -312,11 +245,6 @@ typedef struct
 	/** Whether to convexify contours. */
 	bool ifConvexifyContours;
 
-	/** Whether to regaularize support matrix. */
-	bool ifRegularize;
-
-	/** The minimal distance between support directions. */
-	double distDirectionMinimal;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -357,12 +285,12 @@ RecovererTestModel recovererTestModels[] =
 /** Structure describing given estimator. */
 typedef struct
 {
-	RecovererEstimator id;		/**< The ID of estimator */
+	RecovererEstimatorType id;		/**< The ID of estimator */
 	const char *name;			/**< Name */
 	const char *description;	/**< Description */
-} RecovererEstimatorDescription;
+} RecovererEstimatorTypeDescription;
 
-RecovererEstimatorDescription estimatorDescriptions[] =
+RecovererEstimatorTypeDescription estimatorDescriptions[] =
 {
 	{
 		ZERO_ESTIMATOR,
@@ -425,30 +353,20 @@ void printUsage(int argc, char** argv)
 		"synthetic model\n", OPTION_CONTOURS_NUMBER, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tThe fist angle from which the first shadow contour is "
 		"obtained\n", OPTION_FIRST_ANGLE, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tBuild only dual non-convex polyhedron.\n",
-		OPTION_DUAL_NONCONVEX_POLYHEDRON, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tBuild polyhedron consisting of shadow contours.\n",
-		OPTION_CONTOURS, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tBalance contour data before processing.\n",
 		OPTION_BALANCE_DATA, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tThe absolute limit of random shift of modeled "
 		"contour.\n", OPTION_LIMIT_RANDOM, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tThe name of output file(s).\n",
 		OPTION_OUTPUT_NAME, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues std::vector "
-		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
 		OPTION_RECOVER, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
 		OPTION_SCALE_MATRIX, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tMinimal distance between support "
-		"directions.\n", OPTION_DIST_DIRECTION, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable verbose mode.\n",
 		OPTION_VERBOSE, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
 		OPTION_CONVEXIFY_CONTOURS, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tEnable support matrix regularization.\n",
-		OPTION_REGULARIZE_MATRIX, optionsLong[i++].name);
 	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -458,12 +376,12 @@ void printUsage(int argc, char** argv)
 	}
 	STDERR_PRINT("\nPossible estimators are:\n");
 	int numEstimators = sizeof(estimatorDescriptions)
-		/ sizeof(RecovererEstimatorDescription);
+		/ sizeof(RecovererEstimatorTypeDescription);
 	DEBUG_PRINT("Number of estimators: %d", numEstimators);
 	for (int iEstimator = 0; iEstimator < numEstimators;
 		++iEstimator)
 	{
-		RecovererEstimatorDescription *desc =
+		RecovererEstimatorTypeDescription *desc =
 			&estimatorDescriptions[iEstimator];
 		STDERR_PRINT("\t%d. \"%s\"\t - %s\n", desc->id, desc->name,
 			desc->description);
@@ -518,7 +436,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	opterr = 0;
 
 	int numEstimators = sizeof(estimatorDescriptions)
-		/ sizeof(RecovererEstimatorDescription);
+		/ sizeof(RecovererEstimatorTypeDescription);
 	DEBUG_PRINT("Number of estimators: %d", numEstimators);
 
 	/*
@@ -526,16 +444,12 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	 * See http://www.gnu.org/software/libc/manual/html_node/Getopt.html
 	 * for details.
 	 */
-	options->ifBuildDualNonConvexPolyhedron = false;
-	options->ifBuildContours = false;
 	options->ifBalancing = false;
-	options->ifPrintProblem = false;
 	options->ifRecover = false;
 	options->ifVerbose = false;
 	options->ifConvexifyContours = false;
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
-	options->distDirectionMinimal = 0.;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -640,12 +554,6 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 			ifOptionFirstAngle = true;
 			break;
-		case OPTION_DUAL_NONCONVEX_POLYHEDRON:
-			options->ifBuildDualNonConvexPolyhedron = true;
-			break;
-		case OPTION_CONTOURS:
-			options->ifBuildContours = true;
-			break;
 		case OPTION_BALANCE_DATA:
 			options->ifBalancing = true;
 			break;
@@ -679,9 +587,6 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 			options->outputName = optarg;
 			break;
-		case OPTION_PRINT_PROBLEM:
-			options->ifPrintProblem = true;
-			break;
 		case OPTION_RECOVER:
 			if (ifOptionRecover)
 			{
@@ -694,7 +599,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			{
 				if (strcmp(optarg, estimatorDescriptions[iEstimator].name) == 0)
 				{
-					options->estimator = (RecovererEstimator) iEstimator;
+					options->estimator = (RecovererEstimatorType) iEstimator;
 					ifOptionRecover = true;
 					break;
 				}
@@ -710,29 +615,11 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
 			break;
-		case OPTION_DIST_DIRECTION:
-			options->distDirectionMinimal = strtod(optarg, &charMistaken);
-			
-			/* If user gives invalid character, the charMistaken is set to it */
-			if (charMistaken && *charMistaken)
-			{
-				errorCannotParseNumber(argc, argv, charMistaken);
-			}
-
-			/* In case of underflow or overflow errno is set to ERANGE. */
-			if (errno == ERANGE)
-			{
-				errorOutOfRange(argc, argv) ;
-			}
-			break;
 		case OPTION_VERBOSE:
 			options->ifVerbose = true;
 			break;
 		case OPTION_CONVEXIFY_CONTOURS:
 			options->ifConvexifyContours = true;
-			break;
-		case OPTION_REGULARIZE_MATRIX:
-			options->ifRegularize = true;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -987,8 +874,7 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
  * @param options	Parsed command-line options
  * @param recoverer	The used recoverer
  */
-static ShadowContourDataPtr makeRequestedData(CommandLineOptions* options,
-	RecovererPtr recoverer)
+static ShadowContourDataPtr makeRequestedData(CommandLineOptions* options)
 {
 	DEBUG_START;
 	ShadowContourDataPtr SCData;
@@ -1015,9 +901,6 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 	DEBUG_START;
 	RecovererPtr recoverer(new Recoverer());
 
-	/* Set the minimal distance between support directins. */
-	recoverer->setDistDirectionMinimal(options->distDirectionMinimal);
-
 	/* Set the name of output file. */
 	recoverer->setOutputName(options->outputName);
 
@@ -1038,221 +921,8 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 	{
 		recoverer->enableContoursConvexification();
 	}
-
-	/* Enable support matrix regularization if required. */
-	if (options->ifRegularize)
-	{
-		recoverer->enableRegularization();
-	}
-
 	DEBUG_END;
 	return recoverer;
-}
-
-/**
- * Dumps given shadow contour data, if it has been requested.
- *
- * @param options	Parsed command-line options
- * @param recoverer	The recoverer to be used
- * @param data		Shadow contours data
- */
-static void makeRequestedOutput(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadowContourDataPtr data)
-{
-	DEBUG_START;
-
-	if (options->ifPrintProblem)
-	{
-		/* Just print naive matrix and std::vector of hvalues. */
-		recoverer->buildNaiveMatrix(data);
-	}
-
-	PolyhedronPtr p = NULL;
-
-	if (options->ifBuildContours &&
-			!options->ifBuildDualNonConvexPolyhedron)
-	{
-		/* Buid polyhedron consisting of shadow contours. */
-		p = recoverer->buildContours(data);
-
-		/* Print resulting polyhedron to the file. */
-		char *name = makeNameWithSuffix(options->outputName,
-			".contours.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "contours");
-		free(name);
-	}
-	else if (!options->ifBuildContours &&
-			options->ifBuildDualNonConvexPolyhedron)
-	{
-		/* Just build dual non-convex polyhedron. */
-		p = recoverer->buildDualNonConvexPolyhedron(data);
-
-		/* Print resulting polyhedron to the file. */
-		char *name = makeNameWithSuffix(options->outputName,
-			".dual-polyhedron.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "dual-polyhedron");
-		free(name);
-	}
-	else if (options->ifBuildContours &&
-			options->ifBuildDualNonConvexPolyhedron)
-	{
-		/* Buid polyhedron consisting of dual shadow contours. */
-		p = recoverer->buildDualContours(data);
-
-		/* Print resulting polyhedron to the file. */
-		char *name = makeNameWithSuffix(options->outputName,
-			".dual-contours.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "contours");
-		free(name);
-	}
-	DEBUG_END;
-}
-
-/**
- * Calculates the abolsolute maximum of polyhedron coordinates
- *
- * @param p	The polyhedron
- */
-static double maxCoord(PolyhedronPtr p)
-{
-	DEBUG_START;
-	double max = 0.;
-	double xmax = 0., ymax = 0., zmax = 0.,
-		xmin = 0., ymin = 0., zmin = 0.;
-
-	p->get_boundary(xmin, ymin, zmin, xmax, ymax, zmax);
-	xmin = fabs(xmin);
-	ymin = fabs(ymin);
-	zmin = fabs(zmin);
-	xmax = fabs(xmax);
-	ymax = fabs(ymax);
-	zmax = fabs(zmax);
-	max = xmin > max ? xmin : max;
-	max = ymin > max ? ymin : max;
-	max = zmin > max ? zmin : max;
-	max = xmax > max ? xmax : max;
-	max = ymax > max ? ymax : max;
-	max = zmax > max ? zmax : max;
-	DEBUG_END;
-	return max;
-}
-
-/**
- * Runs the recovering with verbose mode.
- *
- * @param options	Parsed command-line options
- * @param recoverer	The recoverer to be used
- * @param data		Shadow contours data
- */
-void runVerboseRecovery(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadowContourDataPtr data)
-{
-	DEBUG_START;
-	double max = 0., maxConv = 0., maxRec = 0.;
-
-	recoverer->buildNaiveMatrix(data);
-	
-	/* Buid polyhedron consisting of shadow contours. */
-	PolyhedronPtr p = recoverer->buildContours(data);
-
-	/* Print resulting polyhedron to the file. */
-	char *name = makeNameWithSuffix(options->outputName,
-		".contours.ply");
-	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "contours");
-	free(name);
-
-
-	/* Just build dual non-convex polyhedron. */
-	p = recoverer->buildDualNonConvexPolyhedron(data);
-
-	/* Print resulting polyhedron to the file. */
-	name = makeNameWithSuffix(options->outputName,
-		".dual-polyhedron.ply");
-	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "dual-polyhedron");
-	free(name);
-
-	/* Buid polyhedron consisting of dual shadow contours. */
-	p = recoverer->buildDualContours(data);
-
-	/* Print resulting polyhedron to the file. */
-	name = makeNameWithSuffix(options->outputName, ".dual-contours.ply");
-	p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-		name, "contours");
-	free(name);
-	
-	/* Run naive recovering without contours convexification. */
-	recoverer->disableContoursConvexification();
-	PolyhedronPtr pNaive = recoverer->buildNaivePolyhedron(data);
-	max = maxCoord(pNaive);
-	DEBUG_PRINT("Size of naive polyhedron: %lf.", max);
-
-	PolyhedronPtr pNaiveConv = NULL;
-	if (options->ifConvexifyContours)
-	{
-		recoverer->enableContoursConvexification();
-		pNaiveConv = recoverer->buildNaivePolyhedron(data);
-		maxConv = maxCoord(pNaiveConv);
-		DEBUG_PRINT("Size of conv-naive polyhedron: %lf.", maxConv);
-		max = maxConv > max ? maxConv : max;
-	}
-
-	if (options->ifRecover)
-	{
-		/* Run the recoverer. */
-		recoverer->setEstimator(options->estimator);
-		
-		p = recoverer->run(data);
-		maxRec = maxCoord(p);
-		DEBUG_PRINT("Size of recovered polyhedron: %lf.", maxRec);
-		max = maxRec > max ? maxRec : max;
-		
-		name = makeNameWithSuffix(options->outputName,
-			".recovered.ply");
-		p->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
-			name, "recovered-polyhedron");
-		free(name);
-		
-		/* TODO: uncomment this after completing sc-generator. */
-#if 0
-		name = makeNameWithSuffix(options->outputName,
-                        ".corrected-contours.dat");
-		dataCorr->fprintDefault(name);
-		free(name);
-		
-		/* Buid polyhedron consisting of corrected shadow contours. */
-		p = recoverer->buildContours(dataCorr);
-
-		/* Print resulting polyhedron to the file. */
-		char *name = makeNameWithSuffix(options->outputName,
-			".corrected-contours.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "corrected-contours");
-		free(name);
-
-		p = recoverer->buildNaivePolyhedron(dataCorr);
-#endif /* 0 */
-	}
-	
-	name = makeNameWithSuffix(options->outputName,
-		".naively-recovered.ply");
-	pNaive->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
-		name, "naively-recovered-polyhedron");
-	free(name);
-
-	if (options->ifConvexifyContours)
-	{
-		name = makeNameWithSuffix(options->outputName,
-		".naively-recovered-from-conv-contours.ply");
-		pNaiveConv->fprint_ply_scale(DEFAULT_MAX_COORDINATE / max,
-			name, "naively-recovered-from-conv-contours");
-		free(name);
-	}
-	DEBUG_END;
 }
 
 /**
@@ -1266,43 +936,20 @@ void runRequestedRecovery(CommandLineOptions* options,
 	RecovererPtr recoverer, ShadowContourDataPtr data)
 {
 	DEBUG_START;
-	char *name = NULL;
-
 	/* In verbose mode we dump all output and it is sync-scaled... */
 	if (options->ifVerbose)
 	{
-		runVerboseRecovery(options, recoverer, data);
-		DEBUG_END;
-		/* ...that's why we don't call makeRequestedOutput. */
-		return;
+		/* TODO: set global dumper to verbose mode. */
 	}
-
-	/* Dump some output before processing, if it's requested. */
-	makeRequestedOutput(options, recoverer, data);
 
 	if (options->ifRecover)
-	{
-		/* Run the recoverer. */
-		recoverer->setEstimator(options->estimator);
-		
-		PolyhedronPtr p = recoverer->run(data);
-		name = makeNameWithSuffix(options->outputName,
-			".recovered.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "recovered-polyhedron");
-	}
+		recoverer->setEstimatorType(options->estimator);
 	else
-	{
-		/* Run naive recovering. */
-		PolyhedronPtr p = recoverer->buildNaivePolyhedron(data);
-		name = makeNameWithSuffix(options->outputName,
-			".naively-recovered.ply");
-		p->fprint_ply_autoscale(DEFAULT_MAX_COORDINATE,
-			name, "recovered-polyhedron");
-	}
+		recoverer->setEstimatorType(ZERO_ESTIMATOR);	
 
-	if (name)
-		free(name);
+	/* Run the recoverer. */
+	PolyhedronPtr p = recoverer->run(data);
+	/* TODO: dump p to dumper. */
 	DEBUG_END;
 }
 
@@ -1321,9 +968,9 @@ int main(int argc, char** argv)
 
 	/* Create the recoverer with requested properties. */
 	RecovererPtr recoverer = makeRequestedRecoverer(options);
-
+	
 	/* Read or generate data depending on requested option. */
-	ShadowContourDataPtr data = makeRequestedData(options, recoverer);
+	ShadowContourDataPtr data = makeRequestedData(options);
 
 	/* Run the recovery. */
 	runRequestedRecovery(options, recoverer, data);
