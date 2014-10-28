@@ -137,3 +137,28 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 	DEBUG_END;
 	return dataUnequal;
 }
+
+std::vector<Vector3d> SupportFunctionData::supportDirections()
+{
+	DEBUG_START;
+	std::vector<Vector3d> directions;
+	for (auto item = items.begin(); item != items.end(); ++item)
+	{
+		directions.push_back(item->direction);
+	}
+	DEBUG_END;
+	return directions;
+}
+
+std::vector<Point_3> SupportFunctionData::supportDirectionsCGAL()
+{
+	DEBUG_START;
+	std::vector<Point_3> directions;
+	for (auto item = items.begin(); item != items.end(); ++item)
+	{
+		Vector3d v = item->direction;
+		directions.push_back(Point_3(v.x, v.y, v.z));
+	}
+	DEBUG_END;
+	return directions;
+}

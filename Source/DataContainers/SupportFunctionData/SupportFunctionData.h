@@ -31,6 +31,7 @@
 #include <memory>
 
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
+#include "PolyhedronCGAL.h"
 
 /* Forward declararion. */
 class SupportFunctionData;
@@ -114,6 +115,20 @@ public:
 	 * @return	The data in which all items are unique.
 	 */
 	SupportFunctionDataPtr removeEqual();
+
+	/**
+	 * Gets the vector of support directions.
+	 *
+	 * @return Vector of support directions.
+	 */
+	std::vector<Vector3d> supportDirections();
+
+	/**
+	 * Gets the vector of support directions represented as CGAL points.
+	 *
+	 * @return Vector of support directions as CGAL points.
+	 */
+	std::vector<Point_3> supportDirectionsCGAL();
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
