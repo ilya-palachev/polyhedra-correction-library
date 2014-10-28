@@ -29,15 +29,18 @@
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 
 /** The generic support function estimator. */
-class SupportFunctionEstimator : public SupportFunctionEstimationData
+class SupportFunctionEstimator
 {
+protected:
+	/* Data used for estimation. */
+	SupportFunctionEstimationDataPtr data;
 public:
 	/**
 	 * Constructs the estimator and sets its data.
 	 *
 	 * @param data	Support function estimation data
 	 */
-	SupportFunctionEstimator(SupportFunctionEstimationData *data);
+	SupportFunctionEstimator(SupportFunctionEstimationDataPtr dataOrig);
 
 	/** Destructs the estimator. */
 	virtual ~SupportFunctionEstimator();
