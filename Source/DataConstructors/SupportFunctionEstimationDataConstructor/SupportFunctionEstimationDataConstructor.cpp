@@ -236,9 +236,17 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix)
 			++condition)
 	{
 		auto pairs = condition->constructCondition(ifScaleMatrix);
+		double norm = 0.;
 		for (auto pair = pairs.begin(); pair != pairs.end(); ++pair)
+		{
 			triplets.push_back(Eigen::Triplet<double>(iCondition,
 						pair->first, pair->second));
+			norm += pair->second * pair->second;
+		}
+		if (ifScaleMatrix)
+		{
+			ASSERT(equal(norm, 1., 0.1));
+		}
 		++iCondition;
 	}
 	SparseMatrix matrix(conditions.size(), hull.size_of_vertices());
@@ -340,16 +348,37 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 	return startingVector;
 }
 
+const double EPS_NEGATIVE_VIOLATION = 5e-4;
+
 static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix)
 {
 	DEBUG_START;
-	VectorXd product = matrix * startingVector;
+	VectorXd product(matrix.rows());
+	VectorXd units(matrix.cols());
+	bool ifAllPositive = true;
+
+	for (unsigned int i = 0; i < units.rows(); ++i)
+		units(i) = 1.;
+	product = matrix * units;
 	for (unsigned int i = 0; i < startingVector.rows(); ++i)
 		if (product(i) < 0.)
 		{
-			DEBUG_END;
-			return false;
+			DEBUG_PRINT("product on units (%d) = %le", i,
+					product(i));
+			DEBUG_PRINT("matrix row #%d:", i);
+			std::cerr << matrix.block(i, 0, 1, matrix.cols());
+			ifAllPositive = false;
+		}
+
+	product = matrix * startingVector;
+	for (unsigned int i = 0; i < startingVector.rows(); ++i)
+		if (product(i) < -EPS_NEGATIVE_VIOLATION)
+		{
+			DEBUG_PRINT("product(%d) = %le", i, product(i));
+			DEBUG_PRINT("matrix row #%d:", i);
+			std::cerr << matrix.block(i, 0, 1, matrix.cols());
+			ifAllPositive = false;
 		}
 	DEBUG_END;
-	return true;
+	return ifAllPositive;
 }
