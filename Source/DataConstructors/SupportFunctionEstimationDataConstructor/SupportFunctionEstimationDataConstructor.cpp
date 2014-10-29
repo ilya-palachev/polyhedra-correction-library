@@ -177,9 +177,9 @@ static bool checkDirectionsHull(Polyhedron_3 hull)
 	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
 			++vertex)
 	{
-		auto vertexChecked = vertex;
-		while (vertex++ != hull.vertices_end())
-			if (vertexChecked->id == vertex->id)
+		for (auto vertexPrev = hull.vertices_begin();
+				vertexPrev != vertex; ++vertexPrev)
+			if (vertexPrev->id == vertex->id)
 			{
 				DEBUG_END;
 				return false;
