@@ -205,13 +205,29 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix)
 
 	/* Construct the set of condition constructors. */
 	std::set<SupportFunctionEstimationDataConditionConstructor> conditions;
+	int numConditionsNotInserted = 0;
 	for (auto halfedge = hull.halfedges_begin();
 			halfedge != hull.halfedges_end(); ++halfedge)
 	{
 		SupportFunctionEstimationDataConditionConstructor condition(
 				halfedge);
-		conditions.insert(condition);
+		auto pairInsertResult = conditions.insert(condition);
+		if (!pairInsertResult.second)
+		{
+			DEBUG_PRINT("condition was not inserted");
+			auto existed = *(pairInsertResult.first);
+			DEBUG_PRINT("already exists: [%ld %ld %ld %ld]",
+				existed[0]->id, existed[1]->id,
+				existed[2]->id,	existed[3]->id);
+			DEBUG_PRINT("tried to insert: [%ld %ld %ld %ld]",
+				condition[0]->id, condition[1]->id,
+				condition[2]->id, condition[3]->id);
+
+			++numConditionsNotInserted;
+		}
 	}
+	DEBUG_PRINT("=== %d conditions were not inserted.",
+			numConditionsNotInserted);
 
 	/* Construct sparse matrix from triplets. */
 	std::vector<Eigen::Triplet<double>> triplets;
@@ -225,8 +241,9 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix)
 						pair->first, pair->second));
 		++iCondition;
 	}
-	SparseMatrix matrix(triplets.size(), hull.size_of_vertices());
+	SparseMatrix matrix(conditions.size(), hull.size_of_vertices());
 	matrix.setFromTriplets(triplets.begin(), triplets.end());
+	ASSERT((unsigned int) matrix.rows() == conditions.size());
 
 	ASSERT(checkSupportMatrix(matrix, hull));
 	DEBUG_END;
@@ -239,13 +256,19 @@ static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull)
 {
 	DEBUG_START;
 	/* Check the number of conditions. */
-	int numConditions = hull.size_of_halfedges();
+	int numEdges = hull.size_of_halfedges() / 2;
+	int numTrivalentVertices = 0;
 	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
 			++vertex) /* Trivalent vertex has only 1 condition. */
 		if (vertex->is_trivalent())
-			numConditions -=2;
-	if (numConditions != matrix.rows())
+			++numTrivalentVertices;
+	if (numEdges - 2 * numTrivalentVertices != matrix.rows())
 	{
+		DEBUG_PRINT("numEdges = %d", numEdges);
+		DEBUG_PRINT("numTrivalentVertices = %d", numTrivalentVertices);
+		DEBUG_PRINT("numEdges - 2 * numTrivalentVertices = %d",
+				numEdges - 2 * numTrivalentVertices);
+		DEBUG_PRINT("matrix.rows() = %d", matrix.rows());
 		DEBUG_END;
 		return false;
 	}
@@ -265,10 +288,15 @@ static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull)
 		++i;
 	}
 
-	if ((matrix * eigenVectorX).norm() > EPS_EIGEN_CHECK_VIOLATION
-		|| (matrix * eigenVectorY).norm() > EPS_EIGEN_CHECK_VIOLATION
-		|| (matrix * eigenVectorZ).norm() > EPS_EIGEN_CHECK_VIOLATION)
+	double errorX = (matrix * eigenVectorX).norm();
+	double errorY = (matrix * eigenVectorY).norm();
+	double errorZ = (matrix * eigenVectorZ).norm();
+	if (errorX > EPS_EIGEN_CHECK_VIOLATION
+		|| errorY > EPS_EIGEN_CHECK_VIOLATION
+		|| errorZ > EPS_EIGEN_CHECK_VIOLATION)
 	{
+		DEBUG_PRINT("errorX = %le, errorY = %le, errorZ = %le", errorX,
+				errorY, errorZ);
 		DEBUG_END;
 		return false;
 	}
