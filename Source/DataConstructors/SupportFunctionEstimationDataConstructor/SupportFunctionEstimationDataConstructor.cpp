@@ -250,7 +250,7 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix)
 	return matrix;
 }
 
-const double EPS_EIGEN_CHECK_VIOLATION = 1e-6;
+const double EPS_EIGEN_CHECK_VIOLATION = 1e-4;
 
 static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull)
 {
@@ -282,9 +282,10 @@ static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull)
 			vertex != hull.vertices_end(); ++vertex)
 	{
 		auto point = vertex->point();
-		eigenVectorX(i) = point.x();
-		eigenVectorY(i) = point.y();
-		eigenVectorZ(i) = point.z();
+		int id = vertex->id;
+		eigenVectorX(id) = point.x();
+		eigenVectorY(id) = point.y();
+		eigenVectorZ(id) = point.z();
 		++i;
 	}
 
