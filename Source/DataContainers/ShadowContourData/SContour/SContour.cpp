@@ -49,10 +49,7 @@ SContour::SContour(const SContour& orig) :
 {
 	DEBUG_START;
 	auto DEBUG_VARIABLE normal = orig.plane.norm;
-	ASSERT((std::fpclassify(normal.x) != FP_ZERO
-		|| std::fpclassify(normal.y) != FP_ZERO
-		|| std::fpclassify(normal.z) != FP_ZERO)
-		&& "orig.plane.norm is null std::vector");
+	ASSERT(!!plane.norm && "orig.plane.norm is null std::vector");
 	sides = new SideOfContour[ns + 1];
 	for (int i = 0; i < ns; ++i)
 	{
@@ -238,7 +235,8 @@ std::vector<Vector3d> SContour::getPoints()
 	return points;
 }
 
-static std::vector<Point_2> mapPointsToOXYplane(std::vector<Vector3d> points, Vector3d nu)
+static std::vector<Point_2> mapPointsToOXYplane(std::vector<Vector3d> points,
+		Vector3d nu)
 {
 	DEBUG_START;
 	Vector3d ez(0., 0., 1.);
@@ -257,14 +255,12 @@ static std::vector<Point_2> mapPointsToOXYplane(std::vector<Vector3d> points, Ve
 	return pointsMapped;
 }
 
-static std::vector<Point_3> mapPointsFromOXYplane(std::vector<Point_2> points, Vector_3 nu)
+static std::vector<Point_3> mapPointsFromOXYplane(std::vector<Point_2> points,
+		Vector_3 nu)
 {
 	DEBUG_START;
 
-	ASSERT((std::fpclassify(nu.x()) != FP_ZERO
-		|| std::fpclassify(nu.y()) != FP_ZERO
-		|| std::fpclassify(nu.z()) != FP_ZERO)
-		&& "nu is null std::vector");
+	ASSERT(!!Vector3d(nu.x(), nu.y(), nu.z()) && "nu is null vector");
 
 	Vector_3 ez(0., 0, 1.);
 	double length = sqrt(nu.squared_length());
@@ -289,10 +285,7 @@ SContour *SContour::convexify()
 {
 	DEBUG_START;
 	
-	ASSERT((std::fpclassify(plane.norm.x) != FP_ZERO
-		|| std::fpclassify(plane.norm.y) != FP_ZERO
-		|| std::fpclassify(plane.norm.z) != FP_ZERO)
-		&& "nu is null std::vector");
+	ASSERT(!!plane.norm && "nu is null vector");
 
 	/*
 	 * TODO: This is a temporal workaround. In future we need to perform
@@ -300,20 +293,8 @@ SContour *SContour::convexify()
 	 * convex hull.
 	 */
 	auto points = getPoints();
-
-	ASSERT((std::fpclassify(plane.norm.x) != FP_ZERO
-		|| std::fpclassify(plane.norm.y) != FP_ZERO
-		|| std::fpclassify(plane.norm.z) != FP_ZERO)
-		&& "nu is null std::vector");
-
-
 	auto pointsMapped = mapPointsToOXYplane(points, plane.norm);
 	
-	ASSERT((std::fpclassify(plane.norm.x) != FP_ZERO
-		|| std::fpclassify(plane.norm.y) != FP_ZERO
-		|| std::fpclassify(plane.norm.z) != FP_ZERO)
-		&& "nu is null std::vector");
-
 	std::vector<Point_2> hull;
 	convex_hull_2(pointsMapped.begin(), pointsMapped.end(),
 		std::back_inserter(hull));
@@ -327,11 +308,6 @@ SContour *SContour::convexify()
 			COLOUR_NORM, id, (int) hull.size(),
 			(int) points.size());
 	}
-
-	ASSERT((std::fpclassify(plane.norm.x) != FP_ZERO
-		|| std::fpclassify(plane.norm.y) != FP_ZERO
-		|| std::fpclassify(plane.norm.z) != FP_ZERO)
-		&& "nu is null std::vector");
 
 	/* TODO: Add automatic conversion from Vector3d to Vector_3 !!! */
 	auto extremePoints = mapPointsFromOXYplane(hull,
