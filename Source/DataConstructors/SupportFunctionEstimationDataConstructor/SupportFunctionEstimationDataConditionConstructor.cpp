@@ -55,6 +55,8 @@ SupportFunctionEstimationDataConditionConstructor::SupportFunctionEstimationData
 	{
 		ASSERT(handle != handlesSorted.end());
 		handles[i] = *handle;
+		DEBUG_PRINT("Adding handle with ID = %ld", handles[i]->id);
+		++handle;
 	}
 	DEBUG_END;
 }
