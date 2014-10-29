@@ -79,6 +79,11 @@ public:
 				right.handles[2]->id,
 				right.handles[3]->id);
 	}
+
+	Polyhedron_3::Vertex_handle &operator[](const int i)
+	{
+		return handles[i];
+	}
 };
 
 
