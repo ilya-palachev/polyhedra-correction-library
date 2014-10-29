@@ -215,7 +215,7 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix)
 		if (!pairInsertResult.second)
 		{
 			DEBUG_PRINT("condition was not inserted");
-			auto existed = *(pairInsertResult.first);
+			auto DEBUG_VARIABLE existed = *(pairInsertResult.first);
 			DEBUG_PRINT("already exists: [%ld %ld %ld %ld]",
 				existed[0]->id, existed[1]->id,
 				existed[2]->id,	existed[3]->id);
@@ -314,8 +314,7 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 	/* Construct intersection of support halfspaces represented by planes */
 	std::vector<Plane_3> planes = data->supportPlanes();
 	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection<std::vector<Plane_3>::iterator,
-		Polyhedron_3, Kernel>(planes.begin(), planes.end(),
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
 
 	/* Calculate support values for known support directions. */
