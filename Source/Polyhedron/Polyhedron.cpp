@@ -195,17 +195,19 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 		SContour* contour = &data->contours[iContour];
 		auto verticesPortion = contour->getPoints();
 		
-		Facet *facet = new Facet(iContour, verticesPortion.size(),
-			contour->plane, NULL);
+		Facet *facet = &facets[iContour];
+		facet->id = iContour;
+		facet->numVertices = verticesPortion.size();
+		facet->plane = contour->plane;
+		facet->indVertices = new int[3 * facet->numVertices + 1];
 		for (int iVertexLocal = 0;
-				(unsigned) iVertexLocal < verticesPortion.size();
-				++iVertexLocal)
+			(unsigned) iVertexLocal < verticesPortion.size();
+			++iVertexLocal)
 		{
 			facet->indVertices[iVertexLocal] = iVertex++;
 		}
 		/* Cycle vertices. */
 		facet->indVertices[facet->numVertices] = facet->indVertices[0];
-		facets[iContour] = *facet;
 
 		numVertices += verticesPortion.size();
 
@@ -220,7 +222,6 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 		vertices[iVertex++] = vertex;
 	}
 
-	set_parent_polyhedron_in_facets();
 	DEBUG_END;
 }
 
