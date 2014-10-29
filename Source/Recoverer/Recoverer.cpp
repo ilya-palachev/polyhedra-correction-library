@@ -247,10 +247,16 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 
 	/* Build support function data. */
 	SupportFunctionDataConstructor constructor;
+	if (ifBalancing)
+		constructor.enableBalanceShadowContours();
+	if (ifConvexifyContours)
+		constructor.enableConvexifyShadowContour();
 	SupportFunctionDataPtr data = constructor.run(dataShadow);
 
 	/* Build support function estimation data. */
 	SupportFunctionEstimationDataConstructor constructorEstimation;
+	if (ifScaleMatrix)
+		constructorEstimation.enableMatrixScaling();
 	SupportFunctionEstimationDataPtr dataEstimation
 		= constructorEstimation.run(data);
 
