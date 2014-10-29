@@ -93,10 +93,12 @@ SupportFunctionEstimationDataConditionConstructor::constructCondition(
 	/* Scale elements if needed. */
 	if (ifScale)
 	{
+		DEBUG_PRINT("condition is scaled");
 		/* Compute L2 norm of the matrix row. */
 		double norm = 0.;
 		for (unsigned int i = 0; i < NUM_VERTICES; ++i)
 			norm += determinants[i] * determinants[i];
+		norm = sqrt(norm);
 
 		/* Normalize each element of the row. */
 		double scale = 1. / norm;
