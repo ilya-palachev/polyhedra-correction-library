@@ -31,6 +31,8 @@
 #include "SparseMatrixEigen.h"
 #include "halfspaces_intersection.h"
 
+#define UNUSED __attribute__((unused))
+
 /**
  * Builds hull of directions by given support directions.
  *
@@ -45,7 +47,7 @@ static Polyhedron_3 buildDirectionsHull(std::vector<Point_3> directions);
  * @param hull	The hull of directions.
  * @return	True, if the hull is correct.
  */
-static bool checkDirectionsHull(Polyhedron_3 hull);
+static bool checkDirectionsHull(Polyhedron_3 hull) UNUSED;
 
 /**
  * Builds support matrix from given hull of support directions.
@@ -63,7 +65,7 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix);
  * @param hull		The hull it was constructed from.
  * @return		True, if the matrix is correct.
  */
-static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull);
+static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull) UNUSED;
 
 /**
  * Builds starting vector for the estimation process.
@@ -82,7 +84,8 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
  * @param matrix	Support matrix.
  * @return		True, if the starting vector is correct.
  */
-static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix);
+static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix)
+	UNUSED;
 
 SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor() :
 	ifScaleMatrix(false)
