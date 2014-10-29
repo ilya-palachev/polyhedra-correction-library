@@ -50,7 +50,7 @@
 	} \
 	while (0)
 
-#if (defined NDEBUG && !defined GTEST_BUILD)
+#if (!defined NDEBUG && !defined GTEST_BUILD)
 #define DEBUG_PRINT(...)  \
 	do \
 	{ \
