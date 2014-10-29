@@ -81,6 +81,7 @@ set (SOURCE_pcl
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.cpp
 	Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.cpp
 	Source/Dumpers/GraphDumperGEXF/GraphDumperGEXF.cpp
+	Source/PCLDumper.cpp
 	Source/Polyhedron/Facet/Facet_area.cpp
 	Source/Polyhedron/Facet/Facet.cpp
 	Source/Polyhedron/Facet/Facet_inertia.cpp
