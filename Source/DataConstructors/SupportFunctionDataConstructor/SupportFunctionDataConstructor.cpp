@@ -212,6 +212,7 @@ static ShadowContourDataPtr shiftShadowContourData(
 	for (int iContour = 0; iContour < dataShifted->numContours; ++iContour)
 	{
 		SContour *contour = &dataShifted->contours[iContour];
+		ASSERT(!!contour->plane.norm);
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{
 			SideOfContour *side = &contour->sides[iSide];
@@ -241,14 +242,14 @@ static ShadowContourDataPtr convexifyShadowContourData(
 	DEBUG_START;
 
 	/* Allocate shadow contour data for new data. */
-	ShadowContourDataPtr dataConvexified(new ShadowContourData(
-				data->numContours));
+	ShadowContourDataPtr dataConvexified(new ShadowContourData(data));
 
 	/* Go through the array of contours and convexify each of them. */
 	for (int iContour = 0; iContour < dataConvexified->numContours;
 			++iContour)
 	{
 		SContour *contour = &dataConvexified->contours[iContour];
+		ASSERT(!!contour->plane.norm);
 		SContour *contourConvexified = contour->convexify();
 		dataConvexified->contours[iContour] = *contourConvexified;
 	}
