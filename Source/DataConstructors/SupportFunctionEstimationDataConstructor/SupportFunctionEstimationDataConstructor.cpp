@@ -368,6 +368,7 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 		intersection, Kernel());
 
 	std::vector<Point_3> points;
+	points.push_back(CGAL::ORIGIN);
 	for (auto vertex = intersection.vertices_begin();
 		vertex != intersection.vertices_end(); ++vertex)
 	{
@@ -376,6 +377,8 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 			continue;
 		Polyhedron_3 hull;
 		CGAL::convex_hull_3(points.begin(), points.end(), hull);
+		DEBUG_PRINT("points size = %ld, hull size = %ld", points.size(),
+				hull.size_of_vertices());
 		startingVector = calculateSupportValues(
 			data->supportDirectionsCGAL(), hull);
 		if (!checkStartingVector(startingVector, matrix))
