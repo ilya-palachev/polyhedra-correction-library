@@ -34,7 +34,8 @@ PCLDumper globalPCLDumper;
 PCLDumper::PCLDumper() :
 	ifVerbose_(false),
 	level_(PCL_DUMPER_LEVEL_ZERO),
-	stream_()
+	nameBase_(),
+	nameSuffix_()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -51,8 +52,7 @@ PCLDumper &PCLDumper::operator()(PCLDumperLevel level,
 {
 	DEBUG_START;
 	level_ = level;
-	stream_.open(nameBase_ + nameSuffix,
-		std::ofstream::out);
+	nameSuffix_ = nameSuffix;
 	DEBUG_END;
 	return *this;
 }

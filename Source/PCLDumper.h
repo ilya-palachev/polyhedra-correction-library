@@ -54,11 +54,11 @@ private:
 	/** Current level of dumping. */
 	PCLDumperLevel level_;
 
-	/** Current stream to be printed. */
-	std::ofstream stream_;
-
 	/** Base name for output files. */
 	std::string nameBase_;
+
+	/** Suffix name for output file. */
+	std::string nameSuffix_;
 
 public:
 	/** Empty constructor. */
@@ -70,33 +70,41 @@ public:
 	/**
 	 * Streaming operator.
 	 *
+	 * @param dumper	The dumper.
 	 * @param object	The object to be dumped.
 	 *
 	 * @return 		The dumper is not ready for printing.
 	 */
 	template<typename TPrintable>
-	PCLDumper &operator<<(TPrintable const &object)
+	friend PCLDumper &operator<<(PCLDumper &dumper,
+		TPrintable object)
 	{
 		DEBUG_START;
-		switch (level_)
+		std::ofstream stream;
+		stream.open(dumper.nameBase_ + dumper.nameSuffix_,
+			std::ofstream::out);
+
+		switch (dumper.level_)
 		{
 		case PCL_DUMPER_LEVEL_ZERO:
-			ERROR_PRINT("Please specify properties of dumping");
+			ERROR_PRINT("Please specify parameters!");
 			break;
 		case PCL_DUMPER_LEVEL_DEBUG:
-			if (ifVerbose_)
-				stream_ << object;
+			if (dumper.ifVerbose_)
+				stream << object;
 			break;
 		case PCL_DUMPER_LEVEL_OUTPUT:
-			stream_ << object;
+			stream << object;
+			break;
+		default:
 			break;
 		}
 
-		level_ = PCL_DUMPER_LEVEL_ZERO;
-		stream_.close();
-		
+		dumper.level_ = PCL_DUMPER_LEVEL_ZERO;
+		stream.close();
+
 		DEBUG_END;
-		return *this;
+		return dumper;
 	}
 
 	/**
