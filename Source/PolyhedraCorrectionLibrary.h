@@ -161,4 +161,4 @@ class GraphDumperGEXF;
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-
+#include "PCLDumper.h"
