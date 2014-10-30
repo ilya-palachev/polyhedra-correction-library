@@ -439,7 +439,7 @@ public:
 	 *
 	 * @return		The stream ready for further outputs
 	 */
-	friend std::ostream &operator<<(std::ostream &stream, Polyhedron p);
+	friend std::ostream &operator<<(std::ostream &stream, Polyhedron &p);
 
 	/*
 	 * Preprocessing

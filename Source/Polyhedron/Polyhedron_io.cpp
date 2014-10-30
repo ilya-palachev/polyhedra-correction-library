@@ -1097,7 +1097,7 @@ void Polyhedron::fprint_ply_autoscale(double maxSize, const char *filename,
 /** Default maximum coordinate of printed polyhedrons. */
 const double DEFAULT_MAX_COORDINATE = 1e+6;
 
-std::ostream &operator<<(std::ostream &stream, Polyhedron p)
+std::ostream &operator<<(std::ostream &stream, Polyhedron &p)
 {
 	DEBUG_START;
 	char *name = tmpnam(NULL);
