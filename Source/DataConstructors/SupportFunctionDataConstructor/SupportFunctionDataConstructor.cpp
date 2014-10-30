@@ -32,6 +32,7 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
+#include "PCLDumper.h"
 
 /**
  * Creates shadow contours from given shadow contours and balances
@@ -138,28 +139,30 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	DEBUG_START;
 	ASSERT(data);
 	ASSERT(data->numContours > 0);
-	/*
-	 * TODO: Dump initial version of shadow contour data to file.
-	 */
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".initial-contours.dat") << data;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".initial-contours.ply") << Polyhedron(data);
 	/* Balance shadow contour data if demanded. */
 	if (ifBalanceShadowContours)
 	{
 		auto dataBalanced = balanceShadowContourData(data);
-		/*
-		 * TODO: Dump balanced version of shadow contour data to file.
-		 */
 		data = dataBalanced;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			".balanced-contours.dat") << data;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			".balanced-contours.ply") << Polyhedron(data);
 	}
 
 	/* Convexify shadow contour data if demanded. */
 	if (ifConvexifyShadowContours)
 	{
 		auto dataConvexified = convexifyShadowContourData(data);
-		/*
-		 * TODO: Dump convexified version of shadow contour data to
-		 * file.
-		 */
 		data = dataConvexified;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			".convexified-contours.dat") << data;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			".convexified-contours.ply") << Polyhedron(data);
 	}
 
 	/* Iterate through the array of contours and get data from each. */
