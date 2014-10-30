@@ -842,6 +842,8 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 
 	/* Create polyhedron based on one of possible models. */
 	PolyhedronPtr p(makePolyhedron(options->input.model.id));
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".original-polyhedron.ply") << *p;
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
@@ -859,6 +861,10 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	/* Generate shadow contours data for given model. */
 	constructor->run(options->input.model.numContours,
 			options->input.model.shiftAngleFirst);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".original-unshifted-contours.dat") << SCData;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".original-unshifted-contours.ply") << Polyhedron(SCData);
 
 	/* Shift points contours on random std::vectors. */
 	shiftContoursRandom(SCData, options->input.model.limitRandom);
@@ -936,10 +942,10 @@ void runRequestedRecovery(CommandLineOptions* options,
 	RecovererPtr recoverer, ShadowContourDataPtr data)
 {
 	DEBUG_START;
-	/* In verbose mode we dump all output and it is sync-scaled... */
+	/* In verbose mode we dump all output. */
 	if (options->ifVerbose)
 	{
-		/* TODO: set global dumper to verbose mode. */
+		globalPCLDumper.enableVerboseMode();
 	}
 
 	if (options->ifRecover)
@@ -949,7 +955,7 @@ void runRequestedRecovery(CommandLineOptions* options,
 
 	/* Run the recoverer. */
 	PolyhedronPtr p = recoverer->run(data);
-	/* TODO: dump p to dumper. */
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, ".recovered.ply") << *p;
 	DEBUG_END;
 }
 
