@@ -30,6 +30,8 @@
 #include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConditionConstructor.h"
 #include "SparseMatrixEigen.h"
 #include "halfspaces_intersection.h"
+#include "PCLDumper.h"
+#include "Polyhedron/Polyhedron.h"
 
 #define UNUSED __attribute__((unused))
 
@@ -122,6 +124,8 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".support-vector.mat") << supportVector;
 
 	/* Build starting vector. */
 	VectorXd startingVector = buildStartingVector(data, supportMatrix);
@@ -165,6 +169,8 @@ static Polyhedron_3 buildDirectionsHull(std::vector<Point_3> directions)
 		vertex->id = iMin; /* Save ID of nearest direction in vertex */
 		ASSERT(equal(distMin, 0.));
 	}
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".directions-hull.ply") << Polyhedron(hull);
 	ASSERT(checkDirectionsHull(hull));
 	DEBUG_END;
 	return hull;
@@ -253,6 +259,8 @@ static SparseMatrix buildSupportMatrix(Polyhedron_3 hull, bool ifScaleMatrix)
 	matrix.setFromTriplets(triplets.begin(), triplets.end());
 	ASSERT((unsigned int) matrix.rows() == conditions.size());
 
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".support-matrix.mat") << matrix;
 	ASSERT(checkSupportMatrix(matrix, hull));
 	DEBUG_END;
 	return matrix;
@@ -343,6 +351,9 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 		}
 		startingVector(i++) = scalarProductMax;
 	}
+
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		".starting-vector.mat") << startingVector;
 	ASSERT(checkStartingVector(startingVector, matrix));
 	DEBUG_END;
 	return startingVector;
