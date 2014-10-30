@@ -231,9 +231,8 @@ static PolyhedronPtr produceFinalPolyhedron(
 
 	/* Intersect halfspaces corresponding to corrected planes. */
 	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection<std::vector<Plane_3>::iterator,
-		Polyhedron_3, Kernel>(planes.begin(), planes.end(),
-		intersection, Kernel());
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel());
 
 	/* Construct final polyhedron. */
 	PolyhedronPtr polyhedron(new Polyhedron(intersection));
