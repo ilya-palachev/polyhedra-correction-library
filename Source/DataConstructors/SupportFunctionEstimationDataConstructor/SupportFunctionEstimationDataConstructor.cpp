@@ -367,8 +367,22 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
 
-	startingVector = calculateSupportValues(data->supportDirectionsCGAL(),
-		intersection);
+	std::vector<Point_3> points;
+	for (auto vertex = intersection.vertices_begin();
+		vertex != intersection.vertices_end(); ++vertex)
+	{
+		points.push_back(vertex->point());
+		if (points.size() < 4)
+			continue;
+		Polyhedron_3 hull;
+		CGAL::convex_hull_3(points.begin(), points.end(), hull);
+		startingVector = calculateSupportValues(
+			data->supportDirectionsCGAL(), hull);
+		if (!checkStartingVector(startingVector, matrix))
+			points.pop_back();
+	}
+	DEBUG_PRINT("%ld of %ld vertices produce correct vector",
+		points.size(), intersection.size_of_vertices());
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".starting-vector.mat") << startingVector;
@@ -395,7 +409,6 @@ static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix)
 			DEBUG_PRINT("product on units (%d) = %le", i,
 					product(i));
 			DEBUG_PRINT("matrix row #%d:", i);
-			std::cerr << matrix.block(i, 0, 1, matrix.cols());
 			ifAllPositive = false;
 		}
 
@@ -405,7 +418,6 @@ static bool checkStartingVector(VectorXd startingVector, SparseMatrix matrix)
 		{
 			DEBUG_PRINT("product(%d) = %le", i, product(i));
 			DEBUG_PRINT("matrix row #%d:", i);
-			std::cerr << matrix.block(i, 0, 1, matrix.cols());
 			ifAllPositive = false;
 		}
 	DEBUG_END;
