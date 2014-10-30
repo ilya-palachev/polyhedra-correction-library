@@ -47,8 +47,15 @@ SupportFunctionEstimationDataConditionConstructor::SupportFunctionEstimationData
 	handlesSorted.insert(halfedge->prev()->vertex());
 	handlesSorted.insert(halfedge->next()->vertex());
 	handlesSorted.insert(halfedge->opposite()->next()->vertex());
+
+	ASSERT(halfedge->next()->next()->vertex()->id
+			== halfedge->prev()->vertex()->id);
+	ASSERT(halfedge->opposite()->next()->next()->vertex()->id
+			== halfedge->vertex()->id);
+	ASSERT(halfedge->facet()->is_triangle());
+	ASSERT(halfedge->opposite()->facet()->is_triangle());
 	ASSERT(handlesSorted.size() == NUM_VERTICES);
-	
+
 	auto handle = handlesSorted.begin();
 	/* Save sorted vertex handles. */
 	for (unsigned int i = 0; i < NUM_VERTICES; ++i)
