@@ -18,6 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <fstream>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/Polyhedron.h"
@@ -1089,4 +1092,21 @@ void Polyhedron::fprint_ply_autoscale(double maxSize, const char *filename,
 	fprint_ply_scale(scaleFactor, filename, comment);
 
 	DEBUG_END;
+}
+
+/** Default maximum coordinate of printed polyhedrons. */
+const double DEFAULT_MAX_COORDINATE = 1e+6;
+
+std::ostream &operator<<(std::ostream &stream, Polyhedron p)
+{
+	DEBUG_START;
+	char *name = tmpnam(NULL);
+	p.fprint_ply_autoscale(DEFAULT_MAX_COORDINATE, name,
+		"generated-from-polyhedron");
+	std::ifstream tmpstream;
+	tmpstream.open(name, std::ifstream::in);
+	stream << tmpstream.rdbuf();
+	tmpstream.close();
+	DEBUG_END;
+	return stream;
 }

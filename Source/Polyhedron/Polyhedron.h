@@ -431,6 +431,16 @@ public:
 	void fprint_ply_autoscale(double maxSize, const char *filename,
 			const char *comment);
 
+	/**
+	 * Writes polyhedron to stream in PLY format, using autoscaling.
+	 *
+	 * @param stream	Output stream
+	 * @param p		The polyhedron
+	 *
+	 * @return		The stream ready for further outputs
+	 */
+	friend std::ostream &operator<<(std::ostream &stream, Polyhedron p);
+
 	/*
 	 * Preprocessing
 	 * ========================================================================
