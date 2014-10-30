@@ -321,6 +321,40 @@ static bool checkSupportMatrix(SparseMatrix matrix, Polyhedron_3 hull)
 	return true;
 }
 
+/**
+ * Calculates support values for known support directions.
+ *
+ * @param directions	Support directions
+ * @param p		Polyhedron
+ *
+ * @return		Support values
+ */
+static VectorXd calculateSupportValues(std::vector<Point_3> directions,
+	Polyhedron_3 p)
+{
+	DEBUG_START;
+	VectorXd values(directions.size());
+
+	int i = 0;
+	for (auto direction = directions.begin(); direction != directions.end();
+			++direction)
+	{
+		Vector_3 vDirection = *direction - CGAL::ORIGIN;
+		double scalarProductMax = 0.;
+		for (auto vertex = p.vertices_begin();
+			vertex != p.vertices_end(); ++vertex)
+		{
+			Vector_3 vVertex = vertex->point() - CGAL::ORIGIN;
+			double scalarProduct = vDirection * vVertex;
+			if (scalarProduct > scalarProductMax)
+				scalarProductMax = scalarProduct;
+		}
+		values(i++) = scalarProductMax;
+	}
+	DEBUG_END;
+	return values;
+}
+
 static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 		SparseMatrix matrix)
 {
@@ -333,24 +367,8 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
 
-	/* Calculate support values for known support directions. */
-	std::vector<Point_3> directions = data->supportDirectionsCGAL();
-	int i = 0;
-	for (auto direction = directions.begin(); direction != directions.end();
-			++direction)
-	{
-		Vector_3 vDirection = *direction - CGAL::ORIGIN;
-		double scalarProductMax = 0.;
-		for (auto vertex = intersection.vertices_begin();
-				vertex != intersection.vertices_end(); ++vertex)
-		{
-			Vector_3 vVertex = vertex->point() - CGAL::ORIGIN;
-			double scalarProduct = vDirection * vVertex;
-			if (scalarProduct > scalarProductMax)
-				scalarProductMax = scalarProduct;
-		}
-		startingVector(i++) = scalarProductMax;
-	}
+	startingVector = calculateSupportValues(data->supportDirectionsCGAL(),
+		intersection);
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".starting-vector.mat") << startingVector;
