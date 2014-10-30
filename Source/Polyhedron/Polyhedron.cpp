@@ -221,6 +221,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 	{
 		vertices[iVertex++] = vertex;
 	}
+	vertexInfos = new VertexInfo[numVertices];
 
 	DEBUG_END;
 }
@@ -246,7 +247,6 @@ Polyhedron::~Polyhedron()
 	}
 	DEBUG_END;
 }
-
 
 const double EPS_SIGNUM = 1e-15;
 
