@@ -573,4 +573,4 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	return solution;
 }
 
-#endif /* USE_IPOPT*/
+#endif /* USE_IPOPT */
