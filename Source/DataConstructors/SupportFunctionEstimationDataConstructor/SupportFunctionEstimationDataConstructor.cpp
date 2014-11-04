@@ -184,7 +184,7 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data)
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
-	ASSERT(intersection.is_strongly_convex());
+	ASSERT(is_strongly_convex_3(intersection));
 
 	startingVector = calculateSupportValues(
 		data->supportDirectionsCGAL(), intersection);
