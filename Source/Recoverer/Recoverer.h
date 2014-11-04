@@ -91,6 +91,9 @@ private:
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
 
+	/** Support matrix type. */
+	SupportMatrixType supportMatrixType_;
+
 public:
 
 	/**
@@ -136,6 +139,13 @@ public:
 	 * Enables the scaling of the matrix of the problem.
 	 */
 	void enableMatrixScaling(void);
+
+	/**
+	 * Sets support matrix type.
+	 *
+	 * @param type	The type of support matrix that is to be used.
+	 */
+	void setSupportMatrixType(SupportMatrixType type);
 
 	/**
 	 * Runs the recovering procedure.

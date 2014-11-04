@@ -95,6 +95,13 @@ void Recoverer::setEstimatorType(RecovererEstimatorType e)
 	DEBUG_END;
 }
 
+void Recoverer::setSupportMatrixType(SupportMatrixType type)
+{
+	DEBUG_START;
+	supportMatrixType_ = type;
+	DEBUG_END;
+}
+
 #define ACCEPTED_TOL 1e-6
 
 static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
@@ -257,7 +264,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
 	SupportFunctionEstimationDataPtr dataEstimation
-		= constructorEstimation.run(data);
+		= constructorEstimation.run(data, supportMatrixType_);
 
 	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
