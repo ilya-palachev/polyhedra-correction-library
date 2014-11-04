@@ -80,6 +80,8 @@ set (SOURCE_pcl
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItem.cpp
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.cpp
 	Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.cpp
+	Source/DataContainers/SupportFunctionEstimationData/SupportMatrix.cpp
+	Source/DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.cpp
 	Source/Dumpers/GraphDumperGEXF/GraphDumperGEXF.cpp
 	Source/PCLDumper.cpp
 	Source/Polyhedron/Facet/Facet_area.cpp
