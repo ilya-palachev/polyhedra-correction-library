@@ -96,7 +96,7 @@ inline bool operator==(const SupportFunctionDataItem &left,
 	bool ifEqual = left.direction == right.direction
 		&& equal(left.value, right.value);
 	DEBUG_END;
-	return ifEqual; 
+	return ifEqual;
 }
 
 /**
