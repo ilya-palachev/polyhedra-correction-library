@@ -58,7 +58,7 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 }
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(
-	SparseMatrix supportMatrix, VectorXd supportVector,
+	SupportMatrix supportMatrix, VectorXd supportVector,
 	VectorXd startingVector, std::vector<Vector3d> supportDirections) :
 	numValues_(supportMatrix.cols()),
 	numConditions_(supportMatrix.rows()),
@@ -101,7 +101,7 @@ int SupportFunctionEstimationData::numConditions(void)
 	return numConditions_;
 }
 
-SparseMatrix SupportFunctionEstimationData::supportMatrix(void)
+SupportMatrix SupportFunctionEstimationData::supportMatrix(void)
 {
 	DEBUG_START;
 	DEBUG_END;

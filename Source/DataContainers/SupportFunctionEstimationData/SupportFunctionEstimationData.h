@@ -32,9 +32,30 @@
 
 #include "SparseMatrixEigen.h"
 #include "Vector3d.h"
+#include "SupportMatrix.h"
 
 /** Each condition has exactly not more than  4 non-zero coefficients. */
 #define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
+
+/** Type of support matrix. */
+typedef enum
+{
+	/** Karl-Kulkarni-Verghese-Willsky conditions. */
+	SUPPORT_MATRIX_TYPE_KKVW,
+
+	/** Optimized Karl-Kulkarni-Verghese-Willsky conditions. */
+	SUPPORT_MATRIX_TYPE_KKVW_OPT,
+
+	/** Gardner-Kiderlen conditions. */
+	SUPPORT_MATRIX_TYPE_GK,
+
+	/** Optimized Gardner-Kiderlen conditions. */
+	SUPPORT_MATRIX_TYPE_GK_OPT
+} SupportMatrixType;
+
+/** Support matrix type that is used by default. */
+const SupportMatrixType DEFAULT_SUPPORT_MATRIX_TYPE =
+	SUPPORT_MATRIX_TYPE_GK_OPT;
 
 /**
  * Structure that represents the input data for support function estimation
@@ -53,7 +74,7 @@ private:
 	int numConditions_;
 
 	/** The support matrix of problem. */
-	SparseMatrix supportMatrix_;
+	SupportMatrix supportMatrix_;
 
 	/**
 	 * The support vector, i. e. the vector of support function
@@ -62,7 +83,7 @@ private:
 	VectorXd supportVector_;
 
 	/**
-	 * Starting point of the algorith (rude estimate)
+	 * Starting point of the algorithm (rude estimate)
 	 */
 	VectorXd startingVector_;
 
@@ -87,7 +108,7 @@ public:
 	 * @param startingVector	The starting vector of the algorithm.
 	 * @param supportDirections	The vector of support directions
 	 */
-	SupportFunctionEstimationData(SparseMatrix supportMatrix,
+	SupportFunctionEstimationData(SupportMatrix supportMatrix,
 		VectorXd supportVector, VectorXd startingVector,
 		std::vector<Vector3d> supportDirections);
 
@@ -101,7 +122,7 @@ public:
 	int numConditions(void);
 
 	/** Getter for member supportMatrix_. */
-	SparseMatrix supportMatrix(void);
+	SupportMatrix supportMatrix(void);
 
 	/** Getter for member supportVector_ */
 	VectorXd supportVector(void);
@@ -111,8 +132,6 @@ public:
 
 	/** Getter for member supportDirections_ */
 	std::vector<Vector3d> supportDirections(void);
-
-	/* FIXME: Do we need to have setters here? */
 };
 
 /** Shared pointer for support function estimation data. */
