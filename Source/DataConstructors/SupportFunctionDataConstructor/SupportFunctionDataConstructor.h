@@ -62,7 +62,7 @@ public:
 
 	
 	/**
-	 * Generates support function data from shadow contour data. 
+	 * Generates support function data from shadow contour data.
 	 *
 	 * @param data	Shadow contour data
 	 */
