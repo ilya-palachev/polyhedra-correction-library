@@ -50,9 +50,11 @@ public:
 	 * Constructs data used for support function estimation from general
 	 * support function data.
 	 *
-	 * @param data	Support function data in general form.
+	 * @param data			Support function data in general form.
+	 * @param supportMatrixType	Support function type.
 	 */
-	SupportFunctionEstimationDataPtr run(SupportFunctionDataPtr data);
+	SupportFunctionEstimationDataPtr run(SupportFunctionDataPtr data,
+		SupportMatrixType supportMatrixType);
 };
 
 #endif /* SUPPORT_FUNCTION_ESTIMATION_DATA_CONSTRUCTOR_H */
