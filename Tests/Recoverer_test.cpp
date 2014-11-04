@@ -81,6 +81,11 @@
 #define OPTION_SCALE_MATRIX 's'
 
 /**
+ * Option "-t" sets the type of support matrix.
+ */
+#define OPTION_SUPPORT_MATRIX_TYPE 't'
+
+/**
  * Option "-v" enables verbose mode.
  */
 #define OPTION_VERBOSE 'v'
@@ -96,7 +101,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bl:o:r:svx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bl:o:r:st:vx"
 
 /**
  * The definition of corresponding long options std::list.
@@ -156,6 +161,12 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_SCALE_MATRIX
+	},
+	{
+		"support-matrix-type",
+		required_argument,
+		0,
+		OPTION_SUPPORT_MATRIX_TYPE
 	},
 	{
 		"verbose",
@@ -239,6 +250,9 @@ typedef struct
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
 
+	/** The type of support matrix. */
+	SupportMatrixType supportMatrixType;
+
 	/** Whether to produce output data. */
 	bool ifVerbose;
 
@@ -285,8 +299,8 @@ RecovererTestModel recovererTestModels[] =
 /** Structure describing given estimator. */
 typedef struct
 {
-	RecovererEstimatorType id;		/**< The ID of estimator */
-	const char *name;			/**< Name */
+	RecovererEstimatorType id;	/**< The ID of estimator */
+	const char *name;		/**< Name */
 	const char *description;	/**< Description */
 } RecovererEstimatorTypeDescription;
 
@@ -328,6 +342,38 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 	}
 };
 
+/** Structure describing given support matrix type. */
+typedef struct
+{
+	SupportMatrixType id;	/**< Support matric type ID. */
+	const char *name;		/**< Name */
+	const char *description;	/**< Description */
+} SupportMatrixTypeDescription;
+
+SupportMatrixTypeDescription supportMatrixTypeDescriptions[] =
+{
+	{
+		SUPPORT_MATRIX_TYPE_KKVW,
+		"kkvw",
+		"Karl-Kulkarni-Verhese-Willsky conditions"
+	},
+	{
+		SUPPORT_MATRIX_TYPE_KKVW_OPT,
+		"kkvw-opt",
+		"Optimized Karl-Kulkarni-Verhese-Willsky conditions"
+	},
+	{
+		SUPPORT_MATRIX_TYPE_GK,
+		"gk",
+		"Gardner-Kiderlen conditions"
+	},
+	{
+		SUPPORT_MATRIX_TYPE_GK_OPT,
+		"gk-opt",
+		"Optimized Gardner-Kiderlen conditions"
+	}
+};
+
 /**
  * Prints the usage of the program.
  *
@@ -363,6 +409,8 @@ void printUsage(int argc, char** argv)
 		OPTION_RECOVER, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
 		OPTION_SCALE_MATRIX, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tSet type of support matrix.\n",
+		OPTION_SUPPORT_MATRIX_TYPE, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable verbose mode.\n",
 		OPTION_VERBOSE, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
@@ -385,6 +433,21 @@ void printUsage(int argc, char** argv)
 			&estimatorDescriptions[iEstimator];
 		STDERR_PRINT("\t%d. \"%s\"\t - %s\n", desc->id, desc->name,
 			desc->description);
+	}
+
+	STDERR_PRINT("\nPossible types of support matrix are:\n");
+	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
+		/ sizeof(SupportMatrixTypeDescription);
+	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
+	for (int iType = 0; iType < numSupportMatrixTypes; ++iType)
+	{
+		SupportMatrixTypeDescription *desc =
+			&supportMatrixTypeDescriptions[iType];
+		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
+			desc->description);
+		if (desc->id == DEFAULT_SUPPORT_MATRIX_TYPE)
+			STDERR_PRINT(" (default)");
+		STDERR_PRINT("\n");
 	}
 	DEBUG_END;
 }
@@ -414,7 +477,7 @@ static void errorOutOfRange(int argc, char** argv)
 
 /**
  * Parses command line string to obtain options from it.
- * 
+ *
  * @param argc	Standard Linux argc
  * @param argv	Standard Linux argv
  *
@@ -431,6 +494,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionFirstAngle = false;
 	bool ifOptionLimitRandom = false;
 	bool ifOptionRecover = false;
+	bool ifOptionSupportMatrixType = false;
 	long int charCurr;
 	char *modelName = NULL;
 	opterr = 0;
@@ -438,6 +502,10 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	int numEstimators = sizeof(estimatorDescriptions)
 		/ sizeof(RecovererEstimatorTypeDescription);
 	DEBUG_PRINT("Number of estimators: %d", numEstimators);
+
+	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
+		/ sizeof(SupportMatrixTypeDescription);
+	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
 
 	/*
 	 * Iterate command line arguments using standard Libc function getopt.
@@ -615,6 +683,36 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
 			break;
+		case OPTION_SUPPORT_MATRIX_TYPE:
+			if (ifOptionSupportMatrixType)
+			{
+				errorOptionTwice(argc, argv,
+					OPTION_SUPPORT_MATRIX_TYPE);
+			}
+
+			for (int iType = 0; iType < numSupportMatrixTypes;
+				++iType)
+			{
+				if (!strcmp(optarg,
+					supportMatrixTypeDescriptions[
+						iType].name))
+				{
+					options->supportMatrixType =
+						supportMatrixTypeDescriptions[
+							iType].id;
+					ifOptionSupportMatrixType = true;
+					break;
+				}
+			}
+			if (!ifOptionSupportMatrixType)
+			{
+				STDERR_PRINT("Invalid name of support matrix "
+					"type - %s\n", optarg);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+			break;
 		case OPTION_VERBOSE:
 			options->ifVerbose = true;
 			break;
@@ -647,7 +745,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
-	/* 
+	/*
 	 * Check that all 4 options "-m", "-n", "-a" and "-l" are given
 	 * simultaneously.
 	 */
@@ -694,6 +792,11 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			ASSERT(modelName);
 			options->outputName = strdup(modelName);
 		}
+	}
+
+	if (!ifOptionSupportMatrixType)
+	{
+		options->supportMatrixType = DEFAULT_SUPPORT_MATRIX_TYPE;
 	}
 
 	if (modelName)
@@ -775,7 +878,7 @@ ShadowContourDataPtr getRealSCData(CommandLineOptions* options)
 
 /**
  * Generates random number d such that |d| <= maxDelta
- * 
+ *
  * @param maxDelta	maximum absolute limit of generated number
  */
 static double genRandomDouble(double maxDelta)
@@ -927,6 +1030,9 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 	{
 		recoverer->enableContoursConvexification();
 	}
+
+	/* Set support matrix type. */
+	recoverer->setSupportMatrixType(options->supportMatrixType);
 	DEBUG_END;
 	return recoverer;
 }
@@ -961,7 +1067,7 @@ void runRequestedRecovery(CommandLineOptions* options,
 
 /**
  * The main function of the test.
- * 
+ *
  * @param argc	Standard Linux argc
  * @param argv	Standard Linux argv
  */
