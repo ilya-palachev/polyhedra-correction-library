@@ -165,7 +165,7 @@ bool SContour::operator ==(const SContour& scontour) const
 
 	DEBUG_END;
 	return true;
-}  
+}
 
 bool SContour::operator !=(const SContour& scontour) const
 {
@@ -185,7 +185,7 @@ std::vector<Vector3d> SContour::getPoints()
 	 * FIXME: Is it true that contours are ususally not connected between first
 	 * and last sides?
 	 */
-	for (int iSide = 0; iSide < ns; ++iSide) 
+	for (int iSide = 0; iSide < ns; ++iSide)
 	{
 		SideOfContour* sideCurr = &sides[iSide];
 		ASSERT(std::isfinite(sideCurr->A1.x));
