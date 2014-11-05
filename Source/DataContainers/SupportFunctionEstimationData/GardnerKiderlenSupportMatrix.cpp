@@ -76,12 +76,37 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	return matrix;
 }
 
-/* TODO: implement this function. */
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	ASSERT(0 && "Not implemented yet!");
+	Polyhedron_3 hull = buildDirectionsHull(data->supportDirectionsCGAL());
+	ASSERT(hull.size_of_vertices() == (unsigned) data->size());
+	long int numValues = hull.size_of_vertices();
+	long int numConditions = hull.size_of_halfedges();
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			numConditions, numValues);
+
+	std::vector<Eigen::Triplet<double>> triplets;
+	int iCondition = 0;
+	for (auto halfedge = hull.halfedges_begin();
+			halfedge != hull.halfedges_end(); ++halfedge)
+	{
+		Point_3 begin = halfedge->prev()->vertex()->point();
+		int idBegin = halfedge->prev()->vertex()->id;
+		Point_3 end = halfedge->vertex()->point();
+		int idEnd = halfedge->vertex()->id;
+
+		double product = (begin - CGAL::ORIGIN) * (end - CGAL::ORIGIN);
+
+		triplets.push_back(Eigen::Triplet<double>(
+					iCondition, idBegin, 1.));
+		triplets.push_back(Eigen::Triplet<double>(
+					iCondition, idEnd, product));
+		++iCondition;
+	}
+	ASSERT(iCondition == numConditions);
+	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
-	return NULL;
+	return matrix;
 }
