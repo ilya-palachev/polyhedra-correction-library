@@ -811,35 +811,35 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
  *
  * @param id	The type of the polyhedron
  */
-PolyhedronPtr makePolyhedron(RecovererTestModelID id)
+Polyhedron *makePolyhedron(RecovererTestModelID id)
 {
 	DEBUG_START;
 	switch (id)
 	{
 	case MODEL_CUBE:
 	{
-		PolyhedronPtr p = make_shared<Cube>(1., 0., 0., 0.);
+		Polyhedron *p = new Cube(1., 0., 0., 0.);
 		DEBUG_END;
 		return p;
 	}
 		break;
 	case MODEL_PYRAMID:
 	{
-		PolyhedronPtr p = make_shared<Pyramid>(3, 1., 1.);
+		Polyhedron *p = new Pyramid(3, 1., 1.);
 		DEBUG_END;
 		return p;
 	}
 		break;
 	case MODEL_PRISM:
 	{
-		PolyhedronPtr p = make_shared<Prism>(3, 1., 1.);
+		Polyhedron *p = new Prism(3, 1., 1.);
 		DEBUG_END;
 		return p;
 	}
 		break;
 	case MODEL_CUBE_CUTTED:
 	{
-		PolyhedronPtr p = make_shared<CubeCutted>();
+		Polyhedron *p = new CubeCutted();
 		DEBUG_END;
 		return p;
 	}
@@ -945,7 +945,7 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 
 	/* Create polyhedron based on one of possible models. */
 	PolyhedronPtr p(makePolyhedron(options->input.model.id));
-	PolyhedronPtr pCopy(makePolyhedron(options->input.model.id));
+	Polyhedron *pCopy = makePolyhedron(options->input.model.id);
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
