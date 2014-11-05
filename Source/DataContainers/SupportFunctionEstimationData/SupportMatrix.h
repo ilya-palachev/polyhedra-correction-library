@@ -28,6 +28,7 @@
 #define SUPPORT_MATRIX_H
 
 #include "SparseMatrixEigen.h"
+#include "PolyhedronCGAL.h"
 
 /** General support matrix that contains sparse matrix. */
 class SupportMatrix : public SparseMatrix
@@ -47,4 +48,23 @@ public:
 	/** Destructor. */
 	virtual ~SupportMatrix();
 };
+
+#define UNUSED __attribute__((unused))
+
+/**
+ * Builds hull of directions by given support directions.
+ *
+ * @param directions	Given support directions.
+ * @return 		Hull of directions.
+ */
+Polyhedron_3 buildDirectionsHull(std::vector<Point_3> directions);
+
+/**
+ * Checks the hull of directions for correctness.
+ *
+ * @param hull	The hull of directions.
+ * @return	True, if the hull is correct.
+ */
+bool checkDirectionsHull(Polyhedron_3 hull) UNUSED;
+
 #endif /* SUPPORT_MATRIX_H */
