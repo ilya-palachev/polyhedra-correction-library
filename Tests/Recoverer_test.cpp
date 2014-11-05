@@ -1063,7 +1063,9 @@ void runRequestedRecovery(CommandLineOptions* options,
 
 	/* Run the recoverer. */
 	PolyhedronPtr p = recoverer->run(data);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, ".recovered.ply") << *p;
+	Polyhedron *pCopy = new Polyhedron(p);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, ".recovered.ply") << *pCopy;
+	ALWAYS_PRINT(stdout, "numVertices = %d", p->numVertices);
 	DEBUG_END;
 }
 
