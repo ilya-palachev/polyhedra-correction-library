@@ -25,13 +25,33 @@
  * - implementation.
  */
 
+#include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
 
-GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(
-	SupportFunctionDataPtr data) :
-	SupportMatrix(data->size() * data->size(), data->size())
+GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(long int numRows,
+		long int numColumns) :
+	SupportMatrix(numRows, numColumns)
 {
 	DEBUG_START;
+	DEBUG_END;
+}
+
+
+GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
+GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			data->size() * data->size() - data->size(),
+			data->size());
+
 	std::vector<Vector3d> directions = data->supportDirections();
 	VectorXd values = data->supportValues();
 
@@ -40,28 +60,24 @@ GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(
 	{
 		for (int j = 0; j < data->size(); ++j)
 		{
+			if (j == i)
+				continue;
 			triplets.push_back(Eigen::Triplet<double>(i, i, 1.));
 			triplets.push_back(Eigen::Triplet<double>(i, j,
 				-directions[i] * directions[j]));
 		}
 	}
-	setFromTriplets(triplets.begin(), triplets.end());
+	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
+	return matrix;
 }
 
-GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
+/* TODO: implement this function. */
+GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
+	ASSERT(0 && "Not implemented yet!");
 	DEBUG_END;
-}
-
-/*
- * Currently no conditions are eliminated.
- *
- * TODO: eliminate all redundant rows.
- */
-void GardnerKiderlenSupportMatrix::eliminateRedundantRows()
-{
-	DEBUG_START;
-	DEBUG_END;
+	return NULL;
 }

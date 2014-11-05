@@ -44,17 +44,36 @@ class GardnerKiderlenSupportMatrix : public SupportMatrix
 {
 public:
 	/**
-	 * Constructs matrix by support function data.
+	 * Constructor by the size of matrix.
 	 *
-	 * @param data	Support function data.
+	 * @param numRows	The number of rows
+	 * @param numColumns	The number of columns
 	 */
-	GardnerKiderlenSupportMatrix(SupportFunctionDataPtr data);
+	GardnerKiderlenSupportMatrix(long int numRows, long int numColumns);
 
 	/** Destructor. */
-	~GardnerKiderlenSupportMatrix();
-
-	/** Eliminates redundant rows. */
-	virtual void eliminateRedundantRows();
+	virtual ~GardnerKiderlenSupportMatrix();
 };
+
+/**
+ * Constructs Gardner-Kiderlen support matrix.
+ *
+ * @param data	Support function data.
+ *
+ * @return	Gardner-Kiderlen support matrix.
+ */
+GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data);
+
+/**
+ * Constructs reduced Gardner-Kiderlen support matrix (i. e. in which redundant
+ * conditions are eliminated).
+ *
+ * @param data	Support function data.
+ *
+ * @return	Reduced Gardner-Kiderlen support matrix.
+ */
+GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data);
 
 #endif /* GARDNER_KIDERLEN_SUPPORT_MATRIX_H */
