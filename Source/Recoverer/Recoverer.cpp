@@ -111,9 +111,9 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 		L2 += delta * delta;
 		Linf = delta > Linf ? delta : Linf;
 	}
-	MAIN_PRINT("L1 = %lf", L1);
-	MAIN_PRINT("L2 = %lf", L2);
-	MAIN_PRINT("Linf = %lf", Linf);
+	MAIN_PRINT("L1 = %lf = %le", L1, L1);
+	MAIN_PRINT("L2 = %lf = %le", L2, L2);
+	MAIN_PRINT("Linf = %lf = %le", Linf, Linf);
 
 	DEBUG_PRINT("-------------------------------");
 	VectorXd Qh0 = Q * h0;
