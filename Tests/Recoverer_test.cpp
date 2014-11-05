@@ -924,6 +924,7 @@ void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 				"(%lf, %lf, %lf)",
 				A1_backup.x, A1_backup.y, A1_backup.z,
 				side->A1.x, side->A1.y, side->A1.z);
+			side->A1 = contour->plane.project(side->A1);
 		}
 		for (int iSide = 0; iSide < contour->ns - 1; ++iSide)
 		{
