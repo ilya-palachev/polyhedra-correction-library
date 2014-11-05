@@ -34,7 +34,6 @@
 #include "halfspaces_intersection.h"
 
 Recoverer::Recoverer() :
-	outputName(NULL),
 	estimatorType(CGAL_ESTIMATOR),
 	ifBalancing(false),
 	ifConvexifyContours(false),
@@ -47,16 +46,6 @@ Recoverer::Recoverer() :
 Recoverer::~Recoverer()
 {
 	DEBUG_START;
-	DEBUG_END;
-}
-
-void Recoverer::setOutputName(char *name)
-{
-	DEBUG_START;
-	ASSERT(name);
-	if (outputName)
-		free(outputName);
-	outputName = name;
 	DEBUG_END;
 }
 

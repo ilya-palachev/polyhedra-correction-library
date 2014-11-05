@@ -76,9 +76,6 @@ class Recoverer
 {
 private:
 
-	/** Output file name. */
-	char *outputName;
-
 	/** Type of estimator to be used. */
 	RecovererEstimatorType estimatorType;
 
@@ -105,13 +102,6 @@ public:
 	 * Empty destructor.
 	 */
 	~Recoverer();
-
-	/**
-	 * Sets output file name.
-	 *
-	 * @param name	The name of output file
-	 */
-	void setOutputName(char *name);
 
 	/**
 	 * Sets the type of estimator.
