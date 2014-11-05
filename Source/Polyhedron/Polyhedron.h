@@ -169,6 +169,13 @@ public:
 	Polyhedron(ShadowContourDataPtr data);
 
 	/**
+	 * Copy-by-shared-pointer constructor.
+	 *
+	 * @param p	Shared pointer to polyhedron.
+	 */
+	Polyhedron(PolyhedronPtr p);
+
+	/**
 	 * Deletes the polyhedron.
 	 */
 	~Polyhedron();

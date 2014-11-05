@@ -226,6 +226,24 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 	DEBUG_END;
 }
 
+Polyhedron::Polyhedron(PolyhedronPtr p) :
+				numVertices(p->numVertices),
+				numFacets(p->numFacets),
+				vertices(NULL),
+				facets(NULL),
+				vertexInfos(NULL)
+
+{
+	DEBUG_START;
+	vertices = new Vector3d[numVertices];
+	for (int i = 0; i < numVertices; ++i)
+		vertices[i] = p->vertices[i];
+	facets = new Facet[numFacets];
+	for (int i = 0; i < numFacets; ++i)
+		facets[i] = p->facets[i];
+	DEBUG_END;
+}
+
 Polyhedron::~Polyhedron()
 {
 	DEBUG_START;
