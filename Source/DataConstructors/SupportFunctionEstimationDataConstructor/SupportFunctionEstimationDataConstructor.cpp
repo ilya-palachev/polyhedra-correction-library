@@ -175,24 +175,66 @@ static VectorXd calculateSupportValues(std::vector<Point_3> directions,
 	return values;
 }
 
+std::ostream &operator<<(std::ostream &stream, std::vector<Plane_3> planes)
+{
+	DEBUG_START;
+	for (auto plane = planes.begin(); plane != planes.end(); ++plane)
+		stream << plane->a() << " " << plane->b() << " " << plane->c()
+			<< " " << plane->d() << std::endl;
+	DEBUG_END;
+	return stream;
+}
+
 static VectorXd buildStartingVector(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	VectorXd startingVector(data->size());
 
+#if 0	
 	/* Construct intersection of support halfspaces represented by planes */
 	std::vector<Plane_3> planes = data->supportPlanes();
 	Polyhedron_3 intersection;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			".support-planes-for-halfspaces_intersection.txt")
+		<< planes;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
+
+	ASSERT(is_strongly_convex_3(intersection));
+
 	/*
 	 * TODO: This assertion fails:
 	 * ASSERT(is_strongly_convex_3(intersection));
 	 * Why?
+	 *
+	 * As a workaround for this issue the hull is called.
 	 */
+	Polyhedron_3 hull;
+	std::vector<Point_3> points;
+	for (auto vertex = intersection.vertices_begin();
+			vertex != intersection.vertices_end(); ++vertex)
+	{
+		points.push_back(vertex->point());
+	}
+	CGAL::convex_hull_3(points.begin(), points.end(), hull);
+	ASSERT(is_strongly_convex_3(hull));
+#endif
+	
+	VectorXd supportVector = data->supportValues();
+	std::vector<Vector3d> supportDirections = data->supportDirections();
+	std::vector<Point_3> points;
+	for (unsigned int i = 0; i < supportDirections.size(); ++i)
+	{
+		Vector3d point = supportDirections[i] * supportVector(i);
+		points.push_back(Point_3(point.x, point.y, point.z));
+	}
+	Polyhedron_3 hull;
+
+	CGAL::convex_hull_3(points.begin(), points.end(), hull);
+	ASSERT(is_strongly_convex_3(hull));
 
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), intersection);
+		data->supportDirectionsCGAL(), hull);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".starting-vector.mat") << startingVector;
 	DEBUG_END;
@@ -218,17 +260,24 @@ static bool checkStartingVector(VectorXd startingVector, SupportMatrix matrix)
 			DEBUG_PRINT("product on units (%d) = %le", i,
 					product(i));
 			DEBUG_PRINT("matrix row #%d:", i);
+			std::cerr << std::setprecision(16)
+				<< matrix.block(i, 0, 1, matrix.cols());
 			ifAllPositive = false;
 		}
 
 	product = matrix * startingVector;
 	for (unsigned int i = 0; i < startingVector.rows(); ++i)
+	{
+		DEBUG_PRINT("matrix row #%d:", i);
+		std::cerr << std::setprecision(16)
+			<< matrix.block(i, 0, 1, matrix.cols());
 		if (product(i) < -EPS_NEGATIVE_VIOLATION)
 		{
-			DEBUG_PRINT("product(%d) = %le", i, product(i));
-			DEBUG_PRINT("matrix row #%d:", i);
+			DEBUG_PRINT(COLOUR_RED "product(%d) = %le" COLOUR_NORM,
+					i, product(i));
 			ifAllPositive = false;
 		}
+	}
 	DEBUG_END;
 	return ifAllPositive;
 }
