@@ -28,7 +28,6 @@
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
 #include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
-#include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConditionConstructor.h"
 #include "SparseMatrixEigen.h"
 #include "halfspaces_intersection.h"
 #include "PCLDumper.h"
@@ -127,11 +126,13 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 	{
 	case SUPPORT_MATRIX_TYPE_KKVW:
 	case SUPPORT_MATRIX_TYPE_KKVW_OPT:
-	case SUPPORT_MATRIX_TYPE_GK_OPT:
 		ASSERT(0 && "Not implemented yet!");
 		break;
+	case SUPPORT_MATRIX_TYPE_GK_OPT:
+		matrix = constructReducedGardnerKiderlenSupportMatrix(data);
+		break;
 	case SUPPORT_MATRIX_TYPE_GK:
-		matrix = new GardnerKiderlenSupportMatrix(data);
+		matrix = constructGardnerKiderlenSupportMatrix(data);
 		break;
 	}
 	if (!matrix)
