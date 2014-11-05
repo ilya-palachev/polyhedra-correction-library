@@ -57,15 +57,18 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	VectorXd values = data->supportValues();
 
 	std::vector<Eigen::Triplet<double>> triplets;
+	int iCondition = 0;
 	for (int i = 0; i < numValues; ++i)
 	{
 		for (int j = 0; j < numValues; ++j)
 		{
 			if (j == i)
 				continue;
-			triplets.push_back(Eigen::Triplet<double>(i, i, 1.));
-			triplets.push_back(Eigen::Triplet<double>(i, j,
-				-directions[i] * directions[j]));
+			triplets.push_back(Eigen::Triplet<double>(
+				iCondition, i, 1.));
+			triplets.push_back(Eigen::Triplet<double>(
+				iCondition, j, -directions[i] * directions[j]));
+			++iCondition;
 		}
 	}
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
