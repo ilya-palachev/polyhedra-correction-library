@@ -140,6 +140,17 @@ public:
 	void fprintDefault(const char *fileName);
 
 	/**
+	 * Writes shadow contour data to the file in standard format.
+	 *
+	 * @param stream	Output stream.
+	 * @param data		The data.
+	 *
+	 * @return		The stream ready for further outputs.
+	 */
+	friend std::ostream &operator<<(std::ostream &stream,
+			ShadowContourData &data);
+
+	/**
 	 * Overloaded operator "==" for comparing of shadow contour data.
 	 *
 	 * @param contourData	Shadow contour data to be compared with.

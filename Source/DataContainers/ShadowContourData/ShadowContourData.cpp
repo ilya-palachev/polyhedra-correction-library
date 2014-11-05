@@ -18,6 +18,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iostream>
+#include <fstream>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
@@ -280,6 +283,19 @@ void ShadowContourData::fprintDefault(const char* fileName)
 	fprintDefault(fd);
 	fclose(fd);
 	DEBUG_END;
+}
+
+std::ostream &operator<<(std::ostream &stream, ShadowContourData &data)
+{
+	DEBUG_START;
+	char *name = tmpnam(NULL);
+	data.fprintDefault(name);
+	std::ifstream tmpstream;
+	tmpstream.open(name, std::ifstream::in);
+	stream << tmpstream.rdbuf();
+	tmpstream.close();
+	DEBUG_END;
+	return stream;
 }
 
 bool ShadowContourData::operator ==(const ShadowContourData& contourData) const
