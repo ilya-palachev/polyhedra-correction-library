@@ -24,6 +24,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "Recoverer/Recoverer.h"
 #include "Recoverer/CGALSupportFunctionEstimator.h"
@@ -270,8 +271,16 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 			dataEstimation->supportVector(), estimate,
 			estimatorType);
 
+	/* Now produce final polyhedron from the estimate. */
 	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
 			estimate);
+
+	/* Also produce naive polyhedron (to compare recovered one with it). */
+	PolyhedronPtr polyhedronNaive = produceFinalPolyhedron(dataEstimation,
+			dataEstimation->supportVector());
+	Polyhedron *pCopy = new Polyhedron(polyhedron);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".naively-recovered.ply")
+		<< *pCopy;
 
 	DEBUG_END;
 	return polyhedron;
