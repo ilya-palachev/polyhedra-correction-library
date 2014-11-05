@@ -1013,7 +1013,7 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 	RecovererPtr recoverer(new Recoverer());
 
 	/* Set the name of output file. */
-	recoverer->setOutputName(options->outputName);
+	globalPCLDumper.setNameBase(options->outputName);
 
 	/* Enable balancing if required. */
 	if (options->ifBalancing)
