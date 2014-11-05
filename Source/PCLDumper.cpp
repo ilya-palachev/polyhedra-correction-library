@@ -33,6 +33,7 @@ PCLDumper globalPCLDumper;
 
 PCLDumper::PCLDumper() :
 	ifVerbose_(false),
+	iCurrentDumpCount_(0),
 	level_(PCL_DUMPER_LEVEL_ZERO),
 	nameBase_(),
 	nameSuffix_()

@@ -51,6 +51,9 @@ private:
 	/** Whether debug dumps are done. */
 	bool ifVerbose_;
 
+	/** The number of the current dump. */
+	int iCurrentDumpCount_;
+
 	/** Current level of dumping. */
 	PCLDumperLevel level_;
 
@@ -81,7 +84,9 @@ public:
 	{
 		DEBUG_START;
 		std::ofstream stream;
-		std::string filename = dumper.nameBase_ + dumper.nameSuffix_;
+		std::string filename = dumper.nameBase_ + "."
+			+ std::to_string(dumper.iCurrentDumpCount_)
+			+ dumper.nameSuffix_;
 		std::cerr << "Dumping to file " << filename << std::endl;
 		stream.open(filename, std::ofstream::out);
 
@@ -103,6 +108,8 @@ public:
 
 		dumper.level_ = PCL_DUMPER_LEVEL_ZERO;
 		stream.close();
+
+		++dumper.iCurrentDumpCount_;
 
 		DEBUG_END;
 		return dumper;
