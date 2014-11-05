@@ -48,17 +48,18 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
+	long int numValues = data->size();
+	long int numConditions = numValues * numValues - numValues;
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
-			data->size() * data->size() - data->size(),
-			data->size());
+			numConditions, numValues);
 
 	std::vector<Vector3d> directions = data->supportDirections();
 	VectorXd values = data->supportValues();
 
 	std::vector<Eigen::Triplet<double>> triplets;
-	for (int i = 0; i < data->size(); ++i)
+	for (int i = 0; i < numValues; ++i)
 	{
-		for (int j = 0; j < data->size(); ++j)
+		for (int j = 0; j < numValues; ++j)
 		{
 			if (j == i)
 				continue;
