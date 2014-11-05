@@ -140,7 +140,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	ASSERT(data);
 	ASSERT(data->numContours > 0);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".initial-contours.dat") << data;
+		".initial-contours.dat") << *data;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".initial-contours.ply") << Polyhedron(data);
 	/* Balance shadow contour data if demanded. */
@@ -149,7 +149,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 		auto dataBalanced = balanceShadowContourData(data);
 		data = dataBalanced;
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			".balanced-contours.dat") << data;
+			".balanced-contours.dat") << *data;
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			".balanced-contours.ply") << Polyhedron(data);
 	}
@@ -160,7 +160,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 		auto dataConvexified = convexifyShadowContourData(data);
 		data = dataConvexified;
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			".convexified-contours.dat") << data;
+			".convexified-contours.dat") << *data;
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			".convexified-contours.ply") << Polyhedron(data);
 	}
