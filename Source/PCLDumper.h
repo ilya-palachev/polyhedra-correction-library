@@ -81,8 +81,9 @@ public:
 	{
 		DEBUG_START;
 		std::ofstream stream;
-		stream.open(dumper.nameBase_ + dumper.nameSuffix_,
-			std::ofstream::out);
+		std::string filename = dumper.nameBase_ + dumper.nameSuffix_;
+		std::cerr << "Dumping to file " << filename << std::endl;
+		stream.open(filename, std::ofstream::out);
 
 		switch (dumper.level_)
 		{
