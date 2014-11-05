@@ -46,10 +46,5 @@ public:
 
 	/** Destructor. */
 	virtual ~SupportMatrix();
-
-	/**
-	 * Eliminates redundant rows from the support matrix.
-	 */
-	virtual void eliminateRedundantRows();
 };
 #endif /* SUPPORT_MATRIX_H */

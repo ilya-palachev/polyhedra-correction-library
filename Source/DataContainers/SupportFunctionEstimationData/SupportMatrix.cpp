@@ -47,10 +47,3 @@ SupportMatrix::~SupportMatrix()
 	DEBUG_START;
 	DEBUG_END;
 }
-
-void SupportMatrix::eliminateRedundantRows()
-{
-	DEBUG_START;
-	ASSERT(0 && "unreachable!");
-	DEBUG_END;
-}
