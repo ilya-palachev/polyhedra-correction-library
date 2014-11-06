@@ -266,7 +266,8 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		estimate = estimator->run();
 	else
 		estimate = dataEstimation->supportVector();
-
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".support-vector-estimate.mat")
+		<< estimate;
 	printEstimationReport(dataEstimation->supportMatrix(),
 			dataEstimation->supportVector(), estimate,
 			estimatorType);
