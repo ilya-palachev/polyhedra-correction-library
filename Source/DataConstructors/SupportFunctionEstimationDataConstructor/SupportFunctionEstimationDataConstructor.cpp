@@ -98,7 +98,12 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".support-vector.mat") << supportVector;
+		".support-vector-original.mat") << supportVector;
+	if (checkStartingVector(supportVector, *supportMatrix))
+	{
+		std::cerr << "Original support vector satisfies consistency "
+			<< "conditions!" << std::endl;
+	}
 
 	/* Build starting vector. */
 	VectorXd startingVector = buildStartingVector(data);
@@ -260,8 +265,10 @@ static bool checkStartingVector(VectorXd startingVector, SupportMatrix matrix)
 			DEBUG_PRINT("product on units (%d) = %le", i,
 					product(i));
 			DEBUG_PRINT("matrix row #%d:", i);
+#ifndef NDEBUG
 			std::cerr << std::setprecision(16)
 				<< matrix.block(i, 0, 1, matrix.cols());
+#endif
 			ifAllPositive = false;
 		}
 
@@ -269,8 +276,10 @@ static bool checkStartingVector(VectorXd startingVector, SupportMatrix matrix)
 	for (unsigned int i = 0; i < startingVector.rows(); ++i)
 	{
 		DEBUG_PRINT("matrix row #%d:", i);
+#ifndef NDEBUG
 		std::cerr << std::setprecision(16)
 			<< matrix.block(i, 0, 1, matrix.cols());
+#endif
 		if (product(i) < -EPS_NEGATIVE_VIOLATION)
 		{
 			DEBUG_PRINT(COLOUR_RED "product(%d) = %le" COLOUR_NORM,
