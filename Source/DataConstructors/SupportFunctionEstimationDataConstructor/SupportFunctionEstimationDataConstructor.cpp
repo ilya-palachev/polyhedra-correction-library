@@ -142,6 +142,8 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 	}
 	if (!matrix)
 		exit(EXIT_FAILURE);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".support-matrix.mat")
+		<< *matrix;
 	DEBUG_END;
 	return matrix;
 }
