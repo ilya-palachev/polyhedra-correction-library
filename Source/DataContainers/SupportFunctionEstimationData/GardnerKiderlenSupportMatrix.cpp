@@ -102,7 +102,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		triplets.push_back(Eigen::Triplet<double>(
 					iCondition, idBegin, 1.));
 		triplets.push_back(Eigen::Triplet<double>(
-					iCondition, idEnd, product));
+					iCondition, idEnd, -product));
 		++iCondition;
 	}
 	ASSERT(iCondition == numConditions);
