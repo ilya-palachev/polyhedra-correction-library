@@ -284,7 +284,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		<< *pCopy;
 
 	/* Also produce polyhedron from starting point of the algorithm. */
-	Polyhedron polyhedronStart = produceFinalPolyhedron(dataEstimation,
+	PolyhedronPtr polyhedronStart = produceFinalPolyhedron(dataEstimation,
 			dataEstimation->startingVector());
 	Polyhedron *pCopy2 = new Polyhedron(polyhedronStart);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".starting-polyhedron.ply")
