@@ -59,10 +59,11 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data);
  *
  * @param vector	Starting vector.
  * @param matrix	Support matrix.
- * @return		True, if the starting vector is correct.
+ * @param data		Support function data.
+ * @return		Number of incorrect (negative) elements in product.
  */
-static bool checkStartingVector(VectorXd startingVector, SupportMatrix matrix)
-	UNUSED;
+static long int checkStartingVector(VectorXd startingVector,
+		SupportMatrix matrix, SupportFunctionDataPtr data) UNUSED;
 
 SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor() :
 	ifScaleMatrix(false)
@@ -99,7 +100,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	VectorXd supportVector = data->supportValues();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".support-vector-original.mat") << supportVector;
-	if (checkStartingVector(supportVector, *supportMatrix))
+	if (checkStartingVector(supportVector, *supportMatrix, data) == 0)
 	{
 		std::cerr << "Original support vector satisfies consistency "
 			<< "conditions!" << std::endl;
@@ -107,7 +108,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 
 	/* Build starting vector. */
 	VectorXd startingVector = buildStartingVector(data);
-	ASSERT(checkStartingVector(startingVector, *supportMatrix));
+	ASSERT(checkStartingVector(startingVector, *supportMatrix, data) == 0);
 
 	/* Get support directions from data. */
 	std::vector<Vector3d> supportDirections = data->supportDirections();
@@ -248,20 +249,37 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data)
 	return startingVector;
 }
 
+static std::set<int> findNonZeroElementsInRow(SupportMatrix &matrix, int idRow)
+{
+	std::set<int> idColNonZero;
+	for (int k = 0; k < matrix.outerSize(); ++k)
+	{
+		for (Eigen::SparseMatrix<double>::InnerIterator
+			it(matrix, k); it; ++it)
+		{
+			if (it.row() == idRow)
+			{
+				DEBUG_PRINT("Nonzero element [%d][%d]",
+						it.row(), it.col());
+				idColNonZero.insert(it.col());
+			}
+		}
+	}
+	return idColNonZero;
+}
 
-const double EPS_NEGATIVE_VIOLATION = 5e-4;
-
-static bool checkStartingVector(VectorXd startingVector, SupportMatrix matrix)
+static long int checkStartingVector(VectorXd startingVector,
+		SupportMatrix matrix, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	VectorXd product(matrix.rows());
 	VectorXd units(matrix.cols());
-	bool ifAllPositive = true;
+	long int numNegative = 0;
 
 	for (unsigned int i = 0; i < units.rows(); ++i)
 		units(i) = 1.;
 	product = matrix * units;
-	for (unsigned int i = 0; i < startingVector.rows(); ++i)
+	for (unsigned int i = 0; i < product.rows(); ++i)
 		if (product(i) < 0.)
 		{
 			DEBUG_PRINT("product on units (%d) = %le", i,
@@ -271,24 +289,41 @@ static bool checkStartingVector(VectorXd startingVector, SupportMatrix matrix)
 			std::cerr << std::setprecision(16)
 				<< matrix.block(i, 0, 1, matrix.cols());
 #endif
-			ifAllPositive = false;
 		}
 
+	auto directions = data->supportDirections();
 	product = matrix * startingVector;
-	for (unsigned int i = 0; i < startingVector.rows(); ++i)
+	for (unsigned int i = 0; i < product.rows(); ++i)
 	{
-		DEBUG_PRINT("matrix row #%d:", i);
-#ifndef NDEBUG
-		std::cerr << std::setprecision(16)
-			<< matrix.block(i, 0, 1, matrix.cols());
-#endif
-		if (product(i) < -EPS_NEGATIVE_VIOLATION)
+		if (product(i) < 0.)
 		{
 			DEBUG_PRINT(COLOUR_RED "product(%d) = %le" COLOUR_NORM,
 					i, product(i));
-			ifAllPositive = false;
+			DEBUG_PRINT("matrix row #%d:", i);
+			std::set<int> idColNonZero =
+				findNonZeroElementsInRow(matrix, i);
+			for (auto &iCol: idColNonZero)
+			{
+				DEBUG_PRINT("+ (%.16le) * (%.16le) # iCol = %d",
+						matrix.coeffRef(i, iCol),
+						startingVector(iCol), iCol);
+				std::cerr << directions[iCol];
+			}
+			DEBUG_PRINT("= (%.16le)", product(i));
+#ifndef NDEBUG
+			std::cerr << std::setprecision(16)
+				<< matrix.block(i, 0, 1, matrix.cols());
+#endif
+			++numNegative;
 		}
 	}
+
+	DEBUG_PRINT("(%d x %d) * (%ld x %ld) = (%ld x %ld)",
+			matrix.rows(), matrix.cols(),
+			startingVector.rows(), startingVector.cols(),
+			product.rows(), product.cols());
+	DEBUG_PRINT("Check: %ld of %ld product elements are negative",
+			numNegative, product.rows());
 	DEBUG_END;
-	return ifAllPositive;
+	return numNegative;
 }
