@@ -30,6 +30,31 @@
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
+/**
+ * Type of body from which the starting vector of estimation process is
+ * constructed.
+ */
+typedef enum
+{
+	/** Body is intersection of halfspaces formed by shadow cylinders. */
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION,
+
+	/** Body is convex hull of support points (u_i * h_i). */
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_POINTS_HULL,
+
+	/** Body is sphere (each support value is = 1). */
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_SPHERE,
+
+	/** Body is cube. */
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CUBE,
+
+	/** Body is pyramid. */
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PYRAMID,
+
+	/** Body is prism. */
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM,
+} SupportFunctionEstimationStartingBodyType;
+
 /** Constructor of data used for support function estimation process */
 class SupportFunctionEstimationDataConstructor
 {
