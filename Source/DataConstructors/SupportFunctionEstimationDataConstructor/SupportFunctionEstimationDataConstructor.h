@@ -55,6 +55,10 @@ typedef enum
 	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM,
 } SupportFunctionEstimationStartingBodyType;
 
+/** Default type of the starting body. */
+#define DEFAULT_STARTING_BODY_TYPE \
+	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION
+
 /** Constructor of data used for support function estimation process */
 class SupportFunctionEstimationDataConstructor
 {
@@ -77,9 +81,14 @@ public:
 	 *
 	 * @param data			Support function data in general form.
 	 * @param supportMatrixType	Support function type.
+	 * @param startingBodyType	Starting body type
+	 *
+	 * @return			Support function estimation data ready
+	 * 				to be processed.
 	 */
 	SupportFunctionEstimationDataPtr run(SupportFunctionDataPtr data,
-		SupportMatrixType supportMatrixType);
+		SupportMatrixType supportMatrixType,
+		SupportFunctionEstimationStartingBodyType startingBodyType);
 };
 
 #endif /* SUPPORT_FUNCTION_ESTIMATION_DATA_CONSTRUCTOR_H */

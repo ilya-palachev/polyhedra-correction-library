@@ -49,10 +49,13 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 /**
  * Builds starting vector for the estimation process.
  *
- * @param data		The support function data.
- * @return		Starting vector.
+ * @param data			The support function data.
+ * @param startingBodyType	Starting bod type.
+ *
+ * @return			Starting vector.
  */
-static VectorXd buildStartingVector(SupportFunctionDataPtr data);
+static VectorXd buildStartingVector(SupportFunctionDataPtr data,
+		SupportFunctionEstimationStartingBodyType startingBodyType);
 
 /**
  * Checks starting vector.
@@ -86,7 +89,8 @@ void SupportFunctionEstimationDataConstructor::enableMatrixScaling()
 }
 
 SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
-	SupportFunctionDataPtr data, SupportMatrixType supportMatrixType)
+	SupportFunctionDataPtr data, SupportMatrixType supportMatrixType,
+	SupportFunctionEstimationStartingBodyType startingBodyType)
 {
 	DEBUG_START;
 	/* Remove equal items from data (and normalize all items). */
@@ -107,7 +111,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	}
 
 	/* Build starting vector. */
-	VectorXd startingVector = buildStartingVector(data);
+	VectorXd startingVector = buildStartingVector(data, startingBodyType);
 	ASSERT(checkStartingVector(startingVector, *supportMatrix, data) == 0);
 
 	/* Get support directions from data. */
@@ -193,12 +197,10 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Plane_3> planes)
 	return stream;
 }
 
-static VectorXd buildStartingVector(SupportFunctionDataPtr data)
+static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	VectorXd startingVector(data->size());
-
-#if 0	
 	/* Construct intersection of support halfspaces represented by planes */
 	std::vector<Plane_3> planes = data->supportPlanes();
 	Polyhedron_3 intersection;
@@ -208,26 +210,16 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data)
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
 
-	ASSERT(is_strongly_convex_3(intersection));
+	startingVector = calculateSupportValues(
+		data->supportDirectionsCGAL(), intersection);
+	DEBUG_END;
+	return startingVector;
+}
 
-	/*
-	 * TODO: This assertion fails:
-	 * ASSERT(is_strongly_convex_3(intersection));
-	 * Why?
-	 *
-	 * As a workaround for this issue the hull is called.
-	 */
-	Polyhedron_3 hull;
-	std::vector<Point_3> points;
-	for (auto vertex = intersection.vertices_begin();
-			vertex != intersection.vertices_end(); ++vertex)
-	{
-		points.push_back(vertex->point());
-	}
-	CGAL::convex_hull_3(points.begin(), points.end(), hull);
-	ASSERT(is_strongly_convex_3(hull));
-#endif
-	
+static VectorXd buildPointsHull(SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	VectorXd startingVector(data->size());
 	VectorXd supportVector = data->supportValues();
 	std::vector<Vector3d> supportDirections = data->supportDirections();
 	std::vector<Point_3> points;
@@ -240,9 +232,75 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data)
 
 	CGAL::convex_hull_3(points.begin(), points.end(), hull);
 	ASSERT(is_strongly_convex_3(hull));
-
 	startingVector = calculateSupportValues(
 		data->supportDirectionsCGAL(), hull);
+	DEBUG_END;
+	return startingVector;
+}
+
+static VectorXd buildVectorOfUnits(SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	VectorXd startingVector(data->size());
+	for (int i = 0; i < data->size(); ++i)
+		startingVector(i) = 1.;
+	DEBUG_END;
+	return startingVector;
+}
+
+static VectorXd buildVectorFromCube(SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	VectorXd startingVector(data->size());
+
+	std::vector<Point_3> points;
+	points.push_back(Point_3(-1., -1., -1.));
+	points.push_back(Point_3(-1., -1.,  1.));
+	points.push_back(Point_3(-1.,  1., -1.));
+	points.push_back(Point_3(-1.,  1.,  1.));
+	points.push_back(Point_3( 1., -1., -1.));
+	points.push_back(Point_3( 1., -1.,  1.));
+	points.push_back(Point_3( 1.,  1., -1.));
+	points.push_back(Point_3( 1.,  1.,  1.));
+	Polyhedron_3 cube;
+	CGAL::convex_hull_3(points.begin(), points.end(), cube);
+	ASSERT(is_strongly_convex_3(cube));
+
+	startingVector = calculateSupportValues(
+		data->supportDirectionsCGAL(), cube);
+
+	DEBUG_END;
+	return startingVector;
+}
+
+static VectorXd buildStartingVector(SupportFunctionDataPtr data,
+		SupportFunctionEstimationStartingBodyType startingBodyType)
+{
+	DEBUG_START;
+	VectorXd startingVector(data->size());
+
+	switch (startingBodyType)
+	{
+	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION:
+		startingVector = buildCylindersIntersection(data);
+		break;
+	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_POINTS_HULL:
+		startingVector = buildPointsHull(data);
+		break;
+	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_SPHERE:
+		startingVector = buildVectorOfUnits(data);
+		break;
+	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CUBE:
+		startingVector = buildVectorFromCube(data);
+		break;
+	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PYRAMID:
+	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM:
+	default:
+		ERROR_PRINT("This type of starting body is not implemented "
+				"yet!");
+		exit(EXIT_FAILURE);
+	}
+
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".starting-vector.mat") << startingVector;
 	DEBUG_END;
