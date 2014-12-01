@@ -506,7 +506,7 @@ void printUsage(int argc, char** argv)
 	STDERR_PRINT("\nPossible types of starting body of the estimation "
 			"process are:\n");
 	int numStartingPointTypes = sizeof(recovererStartingBodies)
-		/ sizeof(SupportFunctionEstimationStartingBodyType);
+		/ sizeof(RecovererStartingBody);
 	DEBUG_PRINT("Number of types of starting body of the estimation "
 			"process: %d", numStartingPointTypes);
 	for (int iType = 0; iType < numStartingPointTypes; ++iType)
@@ -579,7 +579,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
 
 	int numStartingPointTypes = sizeof(recovererStartingBodies)
-		/ sizeof(SupportFunctionEstimationStartingBodyType);
+		/ sizeof(RecovererStartingBody);
 	DEBUG_PRINT("Number of types of starting body of the estimation "
 			"process: %d", numStartingPointTypes);
 
@@ -811,7 +811,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 					options->startingBodyType =
 						recovererStartingBodies[
 							iType].id;
-					ifOptionSupportMatrixType = true;
+					ifOptionStartingBodyType = true;
 					break;
 				}
 			}
