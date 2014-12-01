@@ -31,7 +31,6 @@
 #include "Recoverer/IpoptSupportFunctionEstimator.h"
 #include "Recoverer/TsnnlsSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
-#include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
 #include "halfspaces_intersection.h"
 
 Recoverer::Recoverer() :
@@ -89,6 +88,13 @@ void Recoverer::setSupportMatrixType(SupportMatrixType type)
 {
 	DEBUG_START;
 	supportMatrixType_ = type;
+	DEBUG_END;
+}
+void Recoverer::setStartingBodyType(
+		SupportFunctionEstimationStartingBodyType type)
+{
+	DEBUG_START;
+	startingBodyType_ = type;
 	DEBUG_END;
 }
 
@@ -254,7 +260,8 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
 	SupportFunctionEstimationDataPtr dataEstimation
-		= constructorEstimation.run(data, supportMatrixType_);
+		= constructorEstimation.run(data, supportMatrixType_,
+				startingBodyType_);
 
 	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,

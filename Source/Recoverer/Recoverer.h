@@ -38,8 +38,8 @@
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
+#include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
 #include "Recoverer/SupportItemSet.h"
-
 
 /**
  * Sets the estimator to be used for support function estimation.
@@ -91,6 +91,9 @@ private:
 	/** Support matrix type. */
 	SupportMatrixType supportMatrixType_;
 
+	/** Starting body type. */
+	SupportFunctionEstimationStartingBodyType startingBodyType_;
+
 public:
 
 	/**
@@ -136,6 +139,14 @@ public:
 	 * @param type	The type of support matrix that is to be used.
 	 */
 	void setSupportMatrixType(SupportMatrixType type);
+
+	/**
+	 * Sets starting body type.
+	 *
+	 * @param type	The type of starting body that is to be used.
+	 */
+	void setStartingBodyType(
+			SupportFunctionEstimationStartingBodyType type);
 
 	/**
 	 * Runs the recovering procedure.
