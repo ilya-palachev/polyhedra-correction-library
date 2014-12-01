@@ -30,24 +30,6 @@
 #include "Constants.h"
 #include "PolyhedraCorrectionLibrary.h"
 
-/** The name of the test. */
-#define TEST_NAME			"./Recoverer_test"
-
-/** The number of command line arguments expected. */
-#define NUM_ARGS_EXPECTED	2
-
-/** Option "-f" takes the argument with file name. */
-#define OPTION_FILE_NAME 'f'
-
-/** Option "-m" takes the argument with synthetic model name */
-#define OPTION_MODEL_NAME 'm'
-
-/*
- * Option "-n" takes the argument with the number of generated contours (for
- * synthetic testing mode).
- */
-#define OPTION_CONTOURS_NUMBER 'n'
-
 /**
  * Option "-a" takes the angle from which the 1st shadow contour is generated.
  */
@@ -58,11 +40,28 @@
  */
 #define OPTION_BALANCE_DATA 'b'
 
+/** Option "-f" takes the argument with file name. */
+#define OPTION_FILE_NAME 'f'
+
+/**
+ * Options "-i" sets the body used as starting point of the estimation process.
+ */
+#define OPTION_STARTING_BODY 'i'
+
 /**
  * Option "-l" controls the absolute limit of random shift of modeled contour
  * points.
  */
 #define OPTION_LIMIT_RANDOM 'l'
+
+/** Option "-m" takes the argument with synthetic model name */
+#define OPTION_MODEL_NAME 'm'
+
+/*
+ * Option "-n" takes the argument with the number of generated contours (for
+ * synthetic testing mode).
+ */
+#define OPTION_CONTOURS_NUMBER 'n'
 
 /**
  * Option "-o" is used to control output file name(s). The default behaviour is
@@ -101,7 +100,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bl:o:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:bf:i:l:m:n:o:r:st:vx"
 
 /**
  * The definition of corresponding long options std::list.
@@ -179,6 +178,12 @@ static struct option optionsLong[] =
 		no_argument,
 		0,
 		OPTION_CONVEXIFY_CONTOURS
+	},
+	{
+		"starting-body",
+		required_argument,
+		0,
+		OPTION_STARTING_BODY
 	},
 	{0, 0, 0, 0}
 };
@@ -259,6 +264,8 @@ typedef struct
 	/** Whether to convexify contours. */
 	bool ifConvexifyContours;
 
+	/** The type of starting body of the estimation process. */
+	SupportFunctionEstimationStartingBodyType startingBodyType;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -293,6 +300,48 @@ RecovererTestModel recovererTestModels[] =
 		MODEL_CUBE_CUTTED,
 		"cube_cutted",
 		"The cube with a whole cutted out from it"
+	}
+};
+
+/** Structure describing starting body of the estimation process. */
+typedef struct
+{
+	SupportFunctionEstimationStartingBodyType id;	/**< The ID of body */
+	const char *name;				/**< Name */
+	const char *description;			/**< Description */
+} RecovererStartingBody;
+
+RecovererStartingBody recovererStartingBodies[] =
+{
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION,
+		"intersection",
+		"Body is intersection of halfspaces formed by shadow cylinders."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_POINTS_HULL,
+		"hull",
+		"Body is convex hull of support points (u_i * h_i)."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_SPHERE,
+		"sphere",
+		"Body is sphere (each support value is = 1)."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CUBE,
+		"cube",
+		"Body is cube."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PYRAMID,
+		"pyramid",
+		"Body is pyramid."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM,
+		"prism",
+		"Body is prism."
 	}
 };
 
@@ -384,10 +433,10 @@ void printUsage(int argc, char** argv)
 {
 	DEBUG_START;
 	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.\n\n",
-		TEST_NAME);
+		argv[0]);
 	STDERR_PRINT("Usage:\n");
 	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number of "
-		"contours>]\n", TEST_NAME, OPTION_FILE_NAME, OPTION_MODEL_NAME,
+		"contours>]\n", argv[0], OPTION_FILE_NAME, OPTION_MODEL_NAME,
 		OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("Options:\n");
 	int i = 0;
@@ -415,6 +464,9 @@ void printUsage(int argc, char** argv)
 		OPTION_VERBOSE, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
 		OPTION_CONVEXIFY_CONTOURS, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tType of starting body of the estimation "
+		"process.\n", OPTION_STARTING_BODY, optionsLong[i++].name);
+
 	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -438,7 +490,8 @@ void printUsage(int argc, char** argv)
 	STDERR_PRINT("\nPossible types of support matrix are:\n");
 	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
 		/ sizeof(SupportMatrixTypeDescription);
-	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
+	DEBUG_PRINT("Number of support matrix types: %d",
+			numSupportMatrixTypes);
 	for (int iType = 0; iType < numSupportMatrixTypes; ++iType)
 	{
 		SupportMatrixTypeDescription *desc =
@@ -446,6 +499,23 @@ void printUsage(int argc, char** argv)
 		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
 			desc->description);
 		if (desc->id == DEFAULT_SUPPORT_MATRIX_TYPE)
+			STDERR_PRINT(" (default)");
+		STDERR_PRINT("\n");
+	}
+
+	STDERR_PRINT("\nPossible types of starting body of the estimation "
+			"process are:\n");
+	int numStartingPointTypes = sizeof(recovererStartingBodies)
+		/ sizeof(SupportFunctionEstimationStartingBodyType);
+	DEBUG_PRINT("Number of types of starting body of the estimation "
+			"process: %d", numStartingPointTypes);
+	for (int iType = 0; iType < numStartingPointTypes; ++iType)
+	{
+		RecovererStartingBody *desc =
+			&recovererStartingBodies[iType];
+		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
+			desc->description);
+		if (desc->id == DEFAULT_STARTING_BODY_TYPE)
 			STDERR_PRINT(" (default)");
 		STDERR_PRINT("\n");
 	}
@@ -495,6 +565,7 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionLimitRandom = false;
 	bool ifOptionRecover = false;
 	bool ifOptionSupportMatrixType = false;
+	bool ifOptionStartingBodyType = false;
 	long int charCurr;
 	char *modelName = NULL;
 	opterr = 0;
@@ -506,6 +577,11 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
 		/ sizeof(SupportMatrixTypeDescription);
 	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
+
+	int numStartingPointTypes = sizeof(recovererStartingBodies)
+		/ sizeof(SupportFunctionEstimationStartingBodyType);
+	DEBUG_PRINT("Number of types of starting body of the estimation "
+			"process: %d", numStartingPointTypes);
 
 	/*
 	 * Iterate command line arguments using standard Libc function getopt.
@@ -719,6 +795,35 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_CONVEXIFY_CONTOURS:
 			options->ifConvexifyContours = true;
 			break;
+		case OPTION_STARTING_BODY:
+			if (ifOptionStartingBodyType)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_STARTING_BODY);
+			}
+
+			for (int iType = 0; iType < numStartingPointTypes;
+					++iType)
+			{
+				if (!strcmp(optarg, recovererStartingBodies[
+							iType].name))
+				{
+					options->startingBodyType =
+						recovererStartingBodies[
+							iType].id;
+					ifOptionSupportMatrixType = true;
+					break;
+				}
+			}
+			if (!ifOptionStartingBodyType)
+			{
+				STDERR_PRINT("Invalid name of startin body "
+						"type.");
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
 				" (or there is unknown error...).\n", optopt);
@@ -797,6 +902,11 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	if (!ifOptionSupportMatrixType)
 	{
 		options->supportMatrixType = DEFAULT_SUPPORT_MATRIX_TYPE;
+	}
+
+	if (!ifOptionStartingBodyType)
+	{
+		options->startingBodyType = DEFAULT_STARTING_BODY_TYPE;
 	}
 
 	if (modelName)
@@ -1035,6 +1145,10 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 
 	/* Set support matrix type. */
 	recoverer->setSupportMatrixType(options->supportMatrixType);
+
+	/* Set starting body type. */
+	recoverer->setStartingBodyType(options->startingBodyType);
+
 	DEBUG_END;
 	return recoverer;
 }
