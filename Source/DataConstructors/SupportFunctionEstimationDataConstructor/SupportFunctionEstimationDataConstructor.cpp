@@ -181,6 +181,7 @@ static VectorXd calculateSupportValues(std::vector<Point_3> directions,
 			if (scalarProduct > scalarProductMax)
 				scalarProductMax = scalarProduct;
 		}
+		ASSERT(scalarProductMax > 0);
 		values(i++) = scalarProductMax;
 	}
 	DEBUG_END;

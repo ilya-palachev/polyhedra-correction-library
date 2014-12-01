@@ -94,10 +94,17 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	{
 		Point_3 begin = halfedge->prev()->vertex()->point();
 		int idBegin = halfedge->prev()->vertex()->id;
+
+		int idOppositeEnd DEBUG_VARIABLE = halfedge->opposite()->vertex()->id;
+		ASSERT(idBegin == idOppositeEnd);
+
 		Point_3 end = halfedge->vertex()->point();
 		int idEnd = halfedge->vertex()->id;
 
 		double product = (begin - CGAL::ORIGIN) * (end - CGAL::ORIGIN);
+		double productChecked DEBUG_VARIABLE = begin.x() * end.x()
+			+ begin.y() * end.y() + begin.z() * end.z();
+		ASSERT(equal(product, productChecked));
 
 		triplets.push_back(Eigen::Triplet<double>(
 					iCondition, idBegin, 1.));
