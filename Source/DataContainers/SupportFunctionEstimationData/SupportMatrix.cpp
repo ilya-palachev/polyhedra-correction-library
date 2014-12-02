@@ -76,6 +76,9 @@ Polyhedron_3 buildDirectionsHull(std::vector<Point_3> directions)
 		}
 		vertex->id = iMin; /* Save ID of nearest direction in vertex */
 		ASSERT(equal(distMin, 0.));
+		ASSERT(equal(point.x(), directions[iMin].x()));
+		ASSERT(equal(point.y(), directions[iMin].y()));
+		ASSERT(equal(point.z(), directions[iMin].z()));
 	}
 	ASSERT(checkDirectionsHull(hull));
 	DEBUG_END;
