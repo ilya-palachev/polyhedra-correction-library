@@ -184,8 +184,49 @@ static VectorXd calculateSupportValues(std::vector<Point_3> directions,
 		ASSERT(scalarProductMax > 0);
 		values(i++) = scalarProductMax;
 	}
+
+	std::vector<Vector_3> antibasicDirections;
+	i = 0;
+	for (auto direction = directions.begin(); direction != directions.end();
+			++direction)
+	{
+		ASSERT(i >= 0);
+		ASSERT(i < values.size());
+		antibasicDirections.push_back((*direction - CGAL::ORIGIN)
+				* values(i));
+		++i;
+	}
+
+	VectorXd antibasicValues(directions.size());
+
+	i = 0;
+	for (auto direction = directions.begin(); direction != directions.end();
+			++direction)
+	{
+		Vector_3 vDirection = *direction - CGAL::ORIGIN;
+		double scalarProductMax = 0.;
+		for (auto d = antibasicDirections.begin();
+				d != antibasicDirections.end(); ++d)
+		{
+			double scalarProduct = vDirection * *d;
+			if (scalarProduct > scalarProductMax)
+				scalarProductMax = scalarProduct;
+		}
+		ASSERT(scalarProductMax > 0);
+		antibasicValues(i++) = scalarProductMax;
+	}
+
+	/*
+	 * It's interesting that x_k_i is not the same as h_i * u_i, as the
+	 * following code shows:
+	 *
+	for (unsigned int i = 0; i < directions.size(); ++i)
+	{
+		ASSERT(equal(values(i), antibasicValues(i)));
+	}
+	*/
 	DEBUG_END;
-	return values;
+	return antibasicValues;
 }
 
 std::ostream &operator<<(std::ostream &stream, std::vector<Plane_3> planes)
