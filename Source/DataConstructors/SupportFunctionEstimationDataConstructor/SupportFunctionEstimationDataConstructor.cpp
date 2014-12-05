@@ -157,12 +157,12 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
  * Calculates support values for known support directions.
  *
  * @param directions	Support directions
- * @param p		Polyhedron
+ * @param vertices	Vertices of the polyhedron.
  *
  * @return		Support values
  */
 static VectorXd calculateSupportValues(std::vector<Point_3> directions,
-	Polyhedron_3 p)
+	std::vector<Vector_3> vertices)
 {
 	DEBUG_START;
 	VectorXd values(directions.size());
@@ -173,60 +173,18 @@ static VectorXd calculateSupportValues(std::vector<Point_3> directions,
 	{
 		Vector_3 vDirection = *direction - CGAL::ORIGIN;
 		double scalarProductMax = 0.;
-		for (auto vertex = p.vertices_begin();
-			vertex != p.vertices_end(); ++vertex)
+		for (auto vertex = vertices.begin();
+			vertex != vertices.end(); ++vertex)
 		{
-			Vector_3 vVertex = vertex->point() - CGAL::ORIGIN;
-			double scalarProduct = vDirection * vVertex;
+			double scalarProduct = vDirection * *vertex;
 			if (scalarProduct > scalarProductMax)
 				scalarProductMax = scalarProduct;
 		}
 		ASSERT(scalarProductMax > 0);
 		values(i++) = scalarProductMax;
 	}
-
-	std::vector<Vector_3> antibasicDirections;
-	i = 0;
-	for (auto direction = directions.begin(); direction != directions.end();
-			++direction)
-	{
-		ASSERT(i >= 0);
-		ASSERT(i < values.size());
-		antibasicDirections.push_back((*direction - CGAL::ORIGIN)
-				* values(i));
-		++i;
-	}
-
-	VectorXd antibasicValues(directions.size());
-
-	i = 0;
-	for (auto direction = directions.begin(); direction != directions.end();
-			++direction)
-	{
-		Vector_3 vDirection = *direction - CGAL::ORIGIN;
-		double scalarProductMax = 0.;
-		for (auto d = antibasicDirections.begin();
-				d != antibasicDirections.end(); ++d)
-		{
-			double scalarProduct = vDirection * *d;
-			if (scalarProduct > scalarProductMax)
-				scalarProductMax = scalarProduct;
-		}
-		ASSERT(scalarProductMax > 0);
-		antibasicValues(i++) = scalarProductMax;
-	}
-
-	/*
-	 * It's interesting that x_k_i is not the same as h_i * u_i, as the
-	 * following code shows:
-	 *
-	for (unsigned int i = 0; i < directions.size(); ++i)
-	{
-		ASSERT(equal(values(i), antibasicValues(i)));
-	}
-	*/
 	DEBUG_END;
-	return antibasicValues;
+	return values;
 }
 
 std::ostream &operator<<(std::ostream &stream, std::vector<Plane_3> planes)
@@ -253,7 +211,7 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 		intersection, Kernel());
 
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), intersection);
+		data->supportDirectionsCGAL(), intersection.getVertices());
 	DEBUG_END;
 	return startingVector;
 }
@@ -275,7 +233,7 @@ static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 	CGAL::convex_hull_3(points.begin(), points.end(), hull);
 	ASSERT(is_strongly_convex_3(hull));
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), hull);
+		data->supportDirectionsCGAL(), hull.getVertices());
 	DEBUG_END;
 	return startingVector;
 }
@@ -309,7 +267,7 @@ static VectorXd buildVectorFromCube(SupportFunctionDataPtr data)
 	ASSERT(is_strongly_convex_3(cube));
 
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), cube);
+		data->supportDirectionsCGAL(), cube.getVertices());
 
 	DEBUG_END;
 	return startingVector;
