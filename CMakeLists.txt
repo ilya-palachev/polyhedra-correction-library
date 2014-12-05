@@ -110,6 +110,7 @@ set (SOURCE_pcl
 	Source/Polyhedron/VertexInfo/VertexInfo_intersection.cpp
 	Source/Polyhedron/VertexInfo/VertexInfo_io.cpp
 	Source/Polyhedron/VertexInfo/VertexInfo_preprocess.cpp
+	Source/PolyhedronCGAL.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
