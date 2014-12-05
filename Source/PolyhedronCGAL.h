@@ -115,7 +115,11 @@ struct ItemsIndexed : public CGAL::Polyhedron_items_3
 };
 
 
-typedef CGAL::Polyhedron_3<Kernel, ItemsIndexed, CGAL::HalfedgeDS_vector>
-	Polyhedron_3;
+class Polyhedron_3 : public CGAL::Polyhedron_3<Kernel, ItemsIndexed,
+	CGAL::HalfedgeDS_vector>
+{
+public:
+	std::vector<Vector_3> getVertices();
+};
 
 #endif /* POLYHEDRONCGAL_H_ */
