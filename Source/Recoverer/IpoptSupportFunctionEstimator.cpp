@@ -61,16 +61,66 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 	switch (mode)
 	{
 	case IPOPT_ESTIMATION_QUADRATIC:
+		/*
+		 * The number of variables is equal to the number of "values".
+		 */
 		n = data->numValues();
+
+		/*
+		 * The number of conditions is also saved in data structure.
+		 */
 		m = data->numConditions();
+
+		/*
+		 * The Jacobian of conditions is actually equal to the support
+		 * matrix, thus they have the same number of non-zero elements.
+		 */
 		nnz_jac_g = data->supportMatrix().nonZeros();
-		nnz_h_lag = data->numValues();
+
+		/*
+		 * The Hessian of Lagrangian is a quadratic functional. Its 1st
+		 * partial derivative is a linear functional that has non-zero
+		 * coefficients corresponding to each variable. Thus, there are
+		 * n * n non-zero elements in it.
+		 */
+		nnz_h_lag = data->numValues() * data->numValues();
 		break;
 	case IPOPT_ESTIMATION_LINEAR:
+		/*
+		 * For linear problem there is 1 additional variable - 
+		 * \varepsilon
+		 */
 		n = data->numValues() + 1;
-		m = data->numConditions() + data->numValues() * 2;
-		nnz_jac_g = data->supportMatrix().nonZeros() + data->numValues() * 4;
-		nnz_h_lag = 0;
+
+		/*
+		 * For linear problem there are 2 additional conditions for each
+		 * support direction u_i:
+		 *
+		 * |(u_i, x_i) - h_i| < \varepsilon, which is equal to
+		 *
+		 * (u_i, x_i) - h_i > -\varepsilon
+		 * (u_i, x_i) - h_i <  \varepsilon
+		 *
+		 * The number if directions is n / 3, so
+		 * there are (n / 3) * 2 additional conditions.
+		 */
+		m = data->numConditions() + (data->numValues() / 3) * 2;
+
+		/*
+		 * The Jacobian of conditions is actually a support matrix
+		 * extended with additional rows. Each row has 4 non-zero
+		 * coefficients: u_i_x, u_i_y, u_i_z, \varepsilon.
+		 *
+		 * Thus we have (n / 3) * 4 additional non-zero values in the
+		 * Jacobian of conditions.
+		 */
+		nnz_jac_g = data->supportMatrix().nonZeros()
+			+ (data->numValues() / 3) * 4;
+
+		/*
+		 * The same as in the quadratic case.
+		 */
+		nnz_h_lag = data->numValues() * data->numValues();
 		break;
 	}
 
@@ -106,11 +156,14 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 		ASSERT(n == data->numValues() + 1);
 	}
 
+	/* There are no restrictions on variables: */
 	for (int i = 0; i < n; ++i)
 	{
 		x_l[i] = -TNLP_INFINITY;
 		x_u[i] = +TNLP_INFINITY;
 	}
+
+	/* All conditions are tranformed to the form (*) > 0: */
 	for (int i = 0; i < m; ++i)
 	{
 		g_l[i] = 0.;
@@ -147,7 +200,25 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 		}
 		if (mode == IPOPT_ESTIMATION_LINEAR)
 		{
-			x[num] = 1.; /* epsilon_0 */
+			std::vector<Vector3d> directions =
+				data->supportDirections();
+			/*
+			 * It is supposed that given starting point lies in the 
+			 * consistency area, thus we can get estimate for
+			 * \varepsilon from it.
+			 */
+			double maxDifference = 0.;
+			for (int i = 0; i < num / 3; ++i)
+			{
+				difference = directions[i].x * x0(3 * i)
+					+ directions[i].y * x0(3 * i + 1)
+					+ directions[i].z * x0(3 * i + 2);
+				if (difference > maxDifference)
+				{
+					maxDifference = difference;
+				}
+			}
+			x[num] = maxDifference;
 		}
 		
 	}
@@ -166,6 +237,7 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 
 	ASSERT(x);
 	VectorXd x0 = data->supportVector();
+	std::vector<Vector3d> directions = data->supportDirections();
 	if (mode == IPOPT_ESTIMATION_QUADRATIC)
 	{
 		ASSERT(n == data->numValues());
@@ -179,9 +251,12 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 	{
 	case IPOPT_ESTIMATION_QUADRATIC:
 		obj_value = 0.;
-		for (int i = 0; i < n; ++i)
+		for (int i = 0; i < n / 3; ++i)
 		{
-			obj_value += (x[i] - x0(i)) * (x[i] - x0(i));
+			difference = directions[i].x * x[3 * i]
+				+ directions[i].y * x[3 * i + 1]
+				+ directions[i].z * x[3 * i + 2] - x0(i);
+			obj_value += difference * difference;
 		}
 		break;
 	case IPOPT_ESTIMATION_LINEAR:
@@ -209,13 +284,19 @@ bool IpoptSupportFunctionEstimator::eval_grad_f(Index n, const Number* x,
 	}
 	VectorXd x0 = data->supportVector();
 	int num = data->numValues();
+	std::vector<Vector3d> directions = data->supportDirections();
 
 	switch (mode)
 	{
 	case IPOPT_ESTIMATION_QUADRATIC:
-		for (int i = 0; i < num; ++i)
+		for (int i = 0; i < num / 3; ++i)
 		{
-			grad_f[i] = 2. * (x[i] - x0(i));
+			double multiplier = 2. * (directions[i].x * x[3 * i]
+				+ directions[i].y * x[3 * i + 1]
+				+ directions[i].z * x[3 * i + 2] - x0(i));
+			grad_f[3 * i] = multiplier * directions[i].x;
+			grad_f[3 * i + 1] = multiplier * directions[i].y;
+			grad_f[3 * i + 2] = multiplier * directions[i].z;
 		}
 		break;
 	case IPOPT_ESTIMATION_LINEAR:
@@ -257,6 +338,7 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 	VectorXd Qh(m);
 	Qh = data->supportMatrix() * h;
 	VectorXd h0 = data->supportVector();
+	std::vector<Vector3d> directions = data->supportDirections();
 
 	int numConds = data->numConditions();
 	for (int i = 0; i < numConds; ++i)
@@ -265,10 +347,13 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		for (int i = 0 ; i < num; ++i)
+		for (int i = 0 ; i < num / 3; ++i)
 		{
-			g[numConds + 2 * i] = h(i) + x[num] - h0(i);
-			g[numConds + 2 * i + 1] = -h(i) + x[num] + h0(i);
+			double product = directions[i].x * h(3 * i)
+				+ directions[i].y * h(3 * i + 1)
+				+ directions[i].z * h(3 * i + 2);
+			g[numConds + 2 * i] = product + x[num] - h0(i);
+			g[numConds + 2 * i + 1] = -product + x[num] + h0(i);
 		}
 	}
 
@@ -323,7 +408,10 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	int nonZeros = Q.nonZeros();
 	int numConds = data->numConditions();
 
-	/* Assign all values of sparsity structure to -1 */
+	/*
+	 * Assign all values of sparsity structure to -1 - this will be used for
+	 * further checks that all values where correctly initialized.
+	 */
 	if (!values)
 	{
 		for (int i = 0; i < n_ele_jac; ++i)
@@ -343,41 +431,61 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			}
 			else
 			{
-				/* Inform about the sparsity structure of the Lagrangian of g */
+				/*
+				 * Inform about the sparsity structure of the 
+				 * Lagrangian of g
+				 */
 				iRow[i] = it.row();
 				jCol[i] = it.col();
 			}
 			++i;
 		}
+	ASSERT(i == nonZeros);
 
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		for (i = 0; i < num; ++i)
+		directions = data->supportDirections();
+		for (i = 0; i < num / 3; ++i)
 		{
 			if (values)
 			{
-				values[nonZeros + 4 * i] = 1.;	
-				values[nonZeros + 4 * i + 1] = 1.;	
-				values[nonZeros + 4 * i + 2] = -1.;	
-				values[nonZeros + 4 * i + 3] = 1.;	
+				values[nonZeros + 8 * i] = directions[i].x;
+				values[nonZeros + 8 * i + 1] = directions[i].y;
+				values[nonZeros + 8 * i + 2] = directions[i].z;
+				values[nonZeros + 8 * i + 3] = 1.;
+				values[nonZeros + 8 * i + 4] = -directions[i].x;
+				values[nonZeros + 8 * i + 5] = -directions[i].y;
+				values[nonZeros + 8 * i + 6] = -directions[i].z;
+				values[nonZeros + 8 * i + 7] = 1.;
 			}
 			else
 			{
-				iRow[nonZeros + 4 * i] = numConds + 2 * i;
-				jCol[nonZeros + 4 * i] = i;
-				iRow[nonZeros + 4 * i + 1] = numConds + 2 * i;
-				jCol[nonZeros + 4 * i + 1] = num;
-				iRow[nonZeros + 4 * i + 2] = numConds + 2 * i
-					+ 1;
-				jCol[nonZeros + 4 * i + 2] = i;
-				iRow[nonZeros + 4 * i + 3] = numConds + 2 * i
-					+ 1;
-				jCol[nonZeros + 4 * i + 3] = num;
+				iRow[nonZeros + 8 * i] =
+					iRow[nonZeros + 8 * i + 1] =
+					iRow[nonZeros + 8 * i + 2] =
+					iRow[nonZeros + 8 * i + 3] =
+					numConds + 2 * i;
+				jCol[nonZeros + 8 * i] = 3 * i;
+				jCol[nonZeros + 8 * i + 1] = 3 * i + 1;
+				jCol[nonZeros + 8 * i + 2] = 3 * i + 2;
+				jCol[nonZeros + 8 * i + 3] = num; /* epsilon */
+
+				iRow[nonZeros + 8 * i + 4] =
+					iRow[nonZeros + 8 * i + 1] =
+					iRow[nonZeros + 8 * i + 2] =
+					iRow[nonZeros + 8 * i + 3] =
+					numConds + 2 * i + 1;
+				jCol[nonZeros + 8 * i + 4] = 3 * i;
+				jCol[nonZeros + 8 * i + 1] = 3 * i + 1;
+				jCol[nonZeros + 8 * i + 2] = 3 * i + 2;
+				jCol[nonZeros + 8 * i + 3] = num; /* epsilon */
 			}
 		}
 	}
 
-	/* Check that all values of sparsity structure have been correctly set. */
+	/*
+	 * Check that all values of sparsity structure have been correctly set.
+	 */
 	if (!values)
 	{
 		for (int i = 0; i < n_ele_jac; ++i)
@@ -394,7 +502,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			}
 			if (mode == IPOPT_ESTIMATION_LINEAR)
 			{
-				ASSERT(iRow[i] < Q.rows() + 4 * num);
+				ASSERT(iRow[i] < Q.rows() + 2 * (num / 3));
 				ASSERT(jCol[i] < Q.cols() + 1);
 			}
 		}
@@ -403,9 +511,15 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	return true;
 }
 
+static inline calculate_lambda_number(int num, int i, int j)
+{
+	return num * i + j - (j > i) - i;
+}
+
 bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
-		Number obj_factor, Index m, const Number* lambda, bool new_lambda,
-		Index n_ele_hess, Index* iRow, Index* jCol, Number* values)
+		Number obj_factor, Index m, const Number* lambda,
+		bool new_lambda, Index n_ele_hess, Index* iRow, Index* jCol,
+		Number* values)
 {
 	DEBUG_START;
 
