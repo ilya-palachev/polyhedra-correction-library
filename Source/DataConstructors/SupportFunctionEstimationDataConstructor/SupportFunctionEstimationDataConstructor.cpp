@@ -165,23 +165,33 @@ static VectorXd calculateSupportValues(std::vector<Point_3> directions,
 	std::vector<Vector_3> vertices)
 {
 	DEBUG_START;
-	VectorXd values(directions.size());
+	std::vector<Vector_3> points;
 
-	int i = 0;
 	for (auto direction = directions.begin(); direction != directions.end();
 			++direction)
 	{
 		Vector_3 vDirection = *direction - CGAL::ORIGIN;
 		double scalarProductMax = 0.;
+		Vector_3 supportPoint;
 		for (auto vertex = vertices.begin();
 			vertex != vertices.end(); ++vertex)
 		{
 			double scalarProduct = vDirection * *vertex;
 			if (scalarProduct > scalarProductMax)
+			{
 				scalarProductMax = scalarProduct;
+				supportPoint = *vertex;
+			}
 		}
 		ASSERT(scalarProductMax > 0);
-		values(i++) = scalarProductMax;
+		points.push_back(supportPoint);
+	}
+	VectorXd values(3 * points.size());
+	for (unsigned int i = 0; i < points.size(); ++i)
+	{
+		values(3 * i) = points[i].x();
+		values(3 * i + 1) = points[i].y();
+		values(3 * i + 2) = points[i].z();
 	}
 	DEBUG_END;
 	return values;
@@ -200,7 +210,7 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Plane_3> planes)
 static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	VectorXd startingVector(data->size());
+	VectorXd startingVector(3 * data->size());
 	/* Construct intersection of support halfspaces represented by planes */
 	std::vector<Plane_3> planes = data->supportPlanes();
 	Polyhedron_3 intersection;
@@ -219,7 +229,7 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	VectorXd startingVector(data->size());
+	VectorXd startingVector(3 * data->size());
 	VectorXd supportVector = data->supportValues();
 	std::vector<Vector3d> supportDirections = data->supportDirections();
 	std::vector<Point_3> points;
@@ -241,9 +251,14 @@ static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 static VectorXd buildVectorOfUnits(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	VectorXd startingVector(data->size());
+	VectorXd startingVector(3 * data->size());
+	std::vector<Vector3d> supportDirections = data->supportDirections();
 	for (int i = 0; i < data->size(); ++i)
-		startingVector(i) = 1.;
+	{
+		startingVector(3 * i) = supportDirections[i].x;
+		startingVector(3 * i + 1) = supportDirections[i].y;
+		startingVector(3 * i + 2) = supportDirections[i].z;
+	}
 	DEBUG_END;
 	return startingVector;
 }
@@ -251,7 +266,7 @@ static VectorXd buildVectorOfUnits(SupportFunctionDataPtr data)
 static VectorXd buildVectorFromCube(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	VectorXd startingVector(data->size());
+	VectorXd startingVector(3 * data->size());
 
 	std::vector<Point_3> points;
 	points.push_back(Point_3(-1., -1., -1.));
