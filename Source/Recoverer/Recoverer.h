@@ -39,7 +39,6 @@
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 #include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
-#include "Recoverer/SupportItemSet.h"
 
 /**
  * Sets the estimator to be used for support function estimation.
