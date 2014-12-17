@@ -48,13 +48,13 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	long int numValues = data->size();
-	long int numConditions = numValues * numValues - numValues;
+	long int numDirections = data->size();
+	long int numValues = 3 * numDirections;
+	long int numConditions = numDirections * numDirections - numDirections;
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
 
 	std::vector<Vector3d> directions = data->supportDirections();
-	VectorXd values = data->supportValues();
 
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
@@ -65,9 +65,17 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 			if (j == i)
 				continue;
 			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, i, 1.));
+				iCondition, 3 * i, directions[i].x));
 			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, j, -directions[i] * directions[j]));
+				iCondition, 3 * i + 1, directions[i].y));
+			triplets.push_back(Eigen::Triplet<double>(
+				iCondition, 3 * i + 2, directions[i].z));
+			triplets.push_back(Eigen::Triplet<double>(
+				iCondition, 3 * j, -directions[j].x));
+			triplets.push_back(Eigen::Triplet<double>(
+				iCondition, 3 * j + 1, -directions[j].y));
+			triplets.push_back(Eigen::Triplet<double>(
+				iCondition, 3 * j + 2, -directions[j].z));
 			++iCondition;
 		}
 	}
@@ -80,40 +88,8 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	Polyhedron_3 hull = buildDirectionsHull(data->supportDirectionsCGAL());
-	ASSERT(hull.size_of_vertices() == (unsigned) data->size());
-	long int numValues = hull.size_of_vertices();
-	long int numConditions = hull.size_of_halfedges();
-	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
-			numConditions, numValues);
-
-	std::vector<Eigen::Triplet<double>> triplets;
-	int iCondition = 0;
-	for (auto halfedge = hull.halfedges_begin();
-			halfedge != hull.halfedges_end(); ++halfedge)
-	{
-		Point_3 begin = halfedge->prev()->vertex()->point();
-		int idBegin = halfedge->prev()->vertex()->id;
-
-		int idOppositeEnd DEBUG_VARIABLE = halfedge->opposite()->vertex()->id;
-		ASSERT(idBegin == idOppositeEnd);
-
-		Point_3 end = halfedge->vertex()->point();
-		int idEnd = halfedge->vertex()->id;
-
-		double product = (begin - CGAL::ORIGIN) * (end - CGAL::ORIGIN);
-		double productChecked DEBUG_VARIABLE = begin.x() * end.x()
-			+ begin.y() * end.y() + begin.z() * end.z();
-		ASSERT(equal(product, productChecked));
-
-		triplets.push_back(Eigen::Triplet<double>(
-					iCondition, idBegin, 1.));
-		triplets.push_back(Eigen::Triplet<double>(
-					iCondition, idEnd, -product));
-		++iCondition;
-	}
-	ASSERT(iCondition == numConditions);
-	matrix->setFromTriplets(triplets.begin(), triplets.end());
+	ERROR_PRINT("Not implemented yet. Use non-optimized GK conditions.");
+	exit(EXIT_FAILURE);
 	DEBUG_END;
-	return matrix;
+	return NULL;
 }
