@@ -346,23 +346,7 @@ static long int checkStartingVector(VectorXd startingVector,
 {
 	DEBUG_START;
 	VectorXd product(matrix.rows());
-	VectorXd units(matrix.cols());
 	long int numNegative = 0;
-
-	for (unsigned int i = 0; i < units.rows(); ++i)
-		units(i) = 1.;
-	product = matrix * units;
-	for (unsigned int i = 0; i < product.rows(); ++i)
-		if (product(i) < 0.)
-		{
-			DEBUG_PRINT("product on units (%d) = %le", i,
-					product(i));
-			DEBUG_PRINT("matrix row #%d:", i);
-#ifndef NDEBUG
-			std::cerr << std::setprecision(16)
-				<< matrix.block(i, 0, 1, matrix.cols());
-#endif
-		}
 
 	auto directions = data->supportDirections();
 	product = matrix * startingVector;
