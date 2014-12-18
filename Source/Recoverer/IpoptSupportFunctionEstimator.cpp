@@ -213,7 +213,7 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 			double maxDifference = 0.;
 			for (int i = 0; i < num / 3; ++i)
 			{
-				difference = directions[i].x * x0(3 * i)
+				double difference = directions[i].x * x0(3 * i)
 					+ directions[i].y * x0(3 * i + 1)
 					+ directions[i].z * x0(3 * i + 2);
 				if (difference > maxDifference)
@@ -256,7 +256,7 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 		obj_value = 0.;
 		for (int i = 0; i < n / 3; ++i)
 		{
-			difference = directions[i].x * x[3 * i]
+			double difference = directions[i].x * x[3 * i]
 				+ directions[i].y * x[3 * i + 1]
 				+ directions[i].z * x[3 * i + 2] - x0(i);
 			obj_value += difference * difference;
@@ -447,7 +447,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		directions = data->supportDirections();
+		auto directions = data->supportDirections();
 		for (i = 0; i < num / 3; ++i)
 		{
 			if (values)
@@ -512,11 +512,6 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	}
 	DEBUG_END;
 	return true;
-}
-
-static inline calculate_lambda_number(int num, int i, int j)
-{
-	return num * i + j - (j > i) - i;
 }
 
 bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
