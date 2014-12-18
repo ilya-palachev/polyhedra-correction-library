@@ -362,6 +362,8 @@ static std::set<int> findNonZeroElementsInRow(SupportMatrix &matrix, int idRow)
 	return idColNonZero;
 }
 
+const double EPS_SUPPORT_CONSISTENCY_LIMIT = 1e-15;
+
 static long int checkStartingVector(VectorXd startingVector,
 		SupportMatrix matrix, SupportFunctionDataPtr data)
 {
@@ -375,7 +377,7 @@ static long int checkStartingVector(VectorXd startingVector,
 	product = matrix * startingVector;
 	for (unsigned int i = 0; i < product.rows(); ++i)
 	{
-		if (product(i) < 0.)
+		if (product(i) < -EPS_SUPPORT_CONSISTENCY_LIMIT)
 		{
 			DEBUG_PRINT(COLOUR_RED "product(%d) = %le" COLOUR_NORM,
 					i, product(i));
