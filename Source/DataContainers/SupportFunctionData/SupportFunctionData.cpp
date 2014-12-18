@@ -182,8 +182,13 @@ std::vector<Plane_3> SupportFunctionData::supportPlanes()
 	std::vector<Plane_3> planes;
 	for (auto item = items.begin(); item != items.end(); ++item)
 	{
-		planes.push_back(Plane_3(item->direction.x, item->direction.y,
-					item->direction.z, item->value));
+		Plane_3 plane(item->direction.x, item->direction.y,
+				item->direction.z, -item->value);
+		ASSERT(equal(plane.a(), item->direction.x));
+		ASSERT(equal(plane.b(), item->direction.y));
+		ASSERT(equal(plane.c(), item->direction.z));
+		ASSERT(equal(plane.d(), -item->value));
+		planes.push_back(plane);
 	}
 	DEBUG_END;
 	return planes;
