@@ -58,9 +58,9 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
-	for (int i = 0; i < numValues; ++i)
+	for (int i = 0; i < numDirections; ++i)
 	{
-		for (int j = 0; j < numValues; ++j)
+		for (int j = 0; j < numDirections; ++j)
 		{
 			if (j == i)
 				continue;
@@ -79,6 +79,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 			++iCondition;
 		}
 	}
+	ASSERT(triplets.size() == 6 * (unsigned) numConditions);
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
 	return matrix;
