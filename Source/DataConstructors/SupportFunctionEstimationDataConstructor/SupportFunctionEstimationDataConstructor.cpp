@@ -88,6 +88,27 @@ void SupportFunctionEstimationDataConstructor::enableMatrixScaling()
 	DEBUG_END;
 }
 
+static bool supportVectorAlreadyConsistent(VectorXd supportVector,
+		SupportMatrix supportMatrix, SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	auto directions = data->supportDirections();
+	VectorXd startingFromSupportVector(3 * directions.size());
+	for (unsigned int i = 0; i < directions.size(); ++i)
+	{
+		startingFromSupportVector(3 * i) = directions[i].x
+			* supportVector(i);
+		startingFromSupportVector(3 * i + 1) = directions[i].y
+			* supportVector(i);
+		startingFromSupportVector(3 * i + 2) = directions[i].z
+			* supportVector(i);
+	}
+	int numNegative = checkStartingVector(startingFromSupportVector,
+			supportMatrix, data);
+	DEBUG_END;
+	return numNegative == 0;
+}
+
 SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	SupportFunctionDataPtr data, SupportMatrixType supportMatrixType,
 	SupportFunctionEstimationStartingBodyType startingBodyType)
@@ -104,7 +125,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	VectorXd supportVector = data->supportValues();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		".support-vector-original.mat") << supportVector;
-	if (checkStartingVector(supportVector, *supportMatrix, data) == 0)
+	if (supportVectorAlreadyConsistent(supportVector, *supportMatrix, data))
 	{
 		std::cerr << "Original support vector satisfies consistency "
 			<< "conditions!" << std::endl;
@@ -349,6 +370,8 @@ static long int checkStartingVector(VectorXd startingVector,
 	long int numNegative = 0;
 
 	auto directions = data->supportDirections();
+	ASSERT(directions.size() * 3 == (unsigned) matrix.cols());
+	ASSERT(directions.size() * 3 == (unsigned) startingVector.rows());
 	product = matrix * startingVector;
 	for (unsigned int i = 0; i < product.rows(); ++i)
 	{
