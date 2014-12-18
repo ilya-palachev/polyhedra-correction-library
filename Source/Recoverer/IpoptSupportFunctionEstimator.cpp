@@ -111,12 +111,13 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 		 * The Jacobian of conditions is actually a support matrix
 		 * extended with additional rows. Each row has 4 non-zero
 		 * coefficients: u_i_x, u_i_y, u_i_z, \varepsilon.
+		 * Each support direction has 2 corresponding conditions.
 		 *
-		 * Thus we have (n / 3) * 4 additional non-zero values in the
-		 * Jacobian of conditions.
+		 * Thus we have (n / 3) * 4 * 2 additional non-zero values in
+		 * the Jacobian of conditions.
 		 */
 		nnz_jac_g = data->supportMatrix().nonZeros()
-			+ (data->numValues() / 3) * 4;
+			+ (data->numValues() / 3) * 4 * 2;
 
 		/*
 		 * Th Lagrangian is a linear function of x_i_s and \varepsilon.
@@ -406,7 +407,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
-		ASSERT(n_ele_jac == Q.nonZeros() + num * 4);
+		ASSERT(n_ele_jac == Q.nonZeros() + (num / 3) * 4 * 2);
 	}
 	int nonZeros = Q.nonZeros();
 	int numConds = data->numConditions();
@@ -444,6 +445,8 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			++i;
 		}
 	ASSERT(i == nonZeros);
+	if (jCol)
+		ASSERT(jCol[0] < Q.cols());
 
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
@@ -474,17 +477,19 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 				jCol[nonZeros + 8 * i + 3] = num; /* epsilon */
 
 				iRow[nonZeros + 8 * i + 4] =
-					iRow[nonZeros + 8 * i + 1] =
-					iRow[nonZeros + 8 * i + 2] =
-					iRow[nonZeros + 8 * i + 3] =
+					iRow[nonZeros + 8 * i + 5] =
+					iRow[nonZeros + 8 * i + 6] =
+					iRow[nonZeros + 8 * i + 7] =
 					numConds + 2 * i + 1;
 				jCol[nonZeros + 8 * i + 4] = 3 * i;
-				jCol[nonZeros + 8 * i + 1] = 3 * i + 1;
-				jCol[nonZeros + 8 * i + 2] = 3 * i + 2;
-				jCol[nonZeros + 8 * i + 3] = num; /* epsilon */
+				jCol[nonZeros + 8 * i + 5] = 3 * i + 1;
+				jCol[nonZeros + 8 * i + 6] = 3 * i + 2;
+				jCol[nonZeros + 8 * i + 7] = num; /* epsilon */
 			}
 		}
 	}
+	if (jCol)
+		ASSERT(jCol[0] < Q.cols());
 
 	/*
 	 * Check that all values of sparsity structure have been correctly set.
@@ -506,6 +511,8 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			if (mode == IPOPT_ESTIMATION_LINEAR)
 			{
 				ASSERT(iRow[i] < Q.rows() + 2 * (num / 3));
+				DEBUG_PRINT("jCol[%d] = %d", i, jCol[i]);
+				DEBUG_PRINT("Q.cols() = %d", Q.cols());
 				ASSERT(jCol[i] < Q.cols() + 1);
 			}
 		}
