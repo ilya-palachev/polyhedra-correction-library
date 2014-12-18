@@ -122,58 +122,6 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	MAIN_PRINT("Linf = %lf = %le", Linf, Linf);
 
 	DEBUG_PRINT("-------------------------------");
-	VectorXd Qh0 = Q * h0;
-	VectorXd Qh  = Q * h;
-	ASSERT(Qh0.size() == Qh.size());
-	for (int i = 0; i < Qh.size(); ++i)
-	{
-		if (fabs (Qh0(i)) > ACCEPTED_TOL
-			|| fabs (Qh(i)) > ACCEPTED_TOL)
-		{
-			if (Qh0(i) < 0. && Qh(i) >= 0)
-				DEBUG_PRINT("Q * h[%d] : " COLOUR_RED "%le"
-					COLOUR_NORM " -> %le", i,
-					Qh0(i), Qh(i));
-			else if (Qh0(i) >= 0. && Qh(i) < 0)
-				DEBUG_PRINT("Q * h[%d] : %le" COLOUR_RED
-					" -> %le" COLOUR_NORM, i,
-					Qh0(i), Qh(i));
-			else if (Qh0(i) < 0. && Qh(i) < 0)
-				DEBUG_PRINT("Q * h[%d] : " COLOUR_RED "%le"
-					" -> %le" COLOUR_NORM, i,
-					Qh0(i), Qh(i));
-			else
-				DEBUG_PRINT("Q * h[%d] : %le -> %le", i,
-					Qh0(i), Qh(i));
-		}
-		if (Qh(i) >= -ACCEPTED_TOL || estimatorType == ZERO_ESTIMATOR)
-		{
-			continue;
-		}
-		double sum = 0.;
-		for (int k = 0; k < Q.outerSize(); ++k)
-		{
-			for (Eigen::SparseMatrix<double>::InnerIterator
-				it(Q, k); it; ++it)
-			{
-				if (it.row() == i)
-				{
-					double local = it.value()
-						* h(it.col());
-					DEBUG_PRINT("Q[%d][%d] = %le",
-						it.row(), it.col(),
-						it.value());
-					DEBUG_PRINT(" *   h[%d] = %le",
-						it.col(), h(it.col()));
-					DEBUG_PRINT(" = %le", local);
-					DEBUG_PRINT("---------------");
-					sum += local;
-				}
-			}
-		}
-		ASSERT(equal(Qh(i), sum));
-		ASSERT(Qh(i) >= -ACCEPTED_TOL);
-	}
 	DEBUG_END;
 }
 
@@ -243,6 +191,23 @@ static PolyhedronPtr produceFinalPolyhedron(
 	return polyhedron;
 }
 
+static VectorXd supportValuesFromPoints(std::vector<Vector3d> directions,
+	VectorXd v)
+{
+	DEBUG_START;
+	VectorXd values(directions.size());
+	ASSERT(3 * directions.size() == (unsigned) v.rows());
+	int num = directions.size();
+	for (int i = 0; i < num; ++i)
+	{
+		values(i) = directions[i].x * v(3 * i)
+			+ directions[i].y * v(3 * i + 1)
+			+ directions[i].z * v(3 * i + 2);
+	}
+	DEBUG_END;
+	return values;
+}
+
 PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
@@ -275,24 +240,30 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		estimate = dataEstimation->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".support-vector-estimate.mat")
 		<< estimate;
-	printEstimationReport(dataEstimation->supportMatrix(),
-			dataEstimation->supportVector(), estimate,
-			estimatorType);
+
+	auto h0 = dataEstimation->supportVector();
+	auto h = supportValuesFromPoints(dataEstimation->supportDirections(),
+		estimate);
+	auto hStarting = supportValuesFromPoints(
+		dataEstimation->supportDirections(),
+		dataEstimation->startingVector());	
+
+	printEstimationReport(dataEstimation->supportMatrix(), h0, h,
+		estimatorType);
 
 	/* Now produce final polyhedron from the estimate. */
-	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
-			estimate);
+	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation, h);
 
 	/* Also produce naive polyhedron (to compare recovered one with it). */
 	PolyhedronPtr polyhedronNaive = produceFinalPolyhedron(dataEstimation,
-			dataEstimation->supportVector());
+			h0);
 	Polyhedron *pCopy = new Polyhedron(polyhedronNaive);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".naively-recovered.ply")
 		<< *pCopy;
 
 	/* Also produce polyhedron from starting point of the algorithm. */
 	PolyhedronPtr polyhedronStart = produceFinalPolyhedron(dataEstimation,
-			dataEstimation->startingVector());
+			hStarting);
 	Polyhedron *pCopy2 = new Polyhedron(polyhedronStart);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".starting-polyhedron.ply")
 		<< *pCopy2;
