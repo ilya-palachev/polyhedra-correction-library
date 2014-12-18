@@ -195,6 +195,7 @@ endif()
 if (ENABLE_IPOPT)
 	target_link_libraries(pcl dl ipopt coinmumps coinhsl blas lapack)
 	add_definitions(-DUSE_IPOPT)
+	add_definitions(-DHAVE_CSTDDEF)
 	message("!!! Ipopt solver is enabled !!!")
 endif()
 
