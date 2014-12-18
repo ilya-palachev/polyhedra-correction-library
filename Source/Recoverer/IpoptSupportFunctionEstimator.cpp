@@ -590,7 +590,7 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	else
 	{
 		auto directions = data->supportDirections();
-		ASSERT(directions.size() == numSupportDirections);
+		ASSERT(directions.size() == (unsigned) numSupportDirections);
 		/* Set values of the Hessian. */
 		for (int i = 0; i < numSupportDirections; ++i)
 		{
