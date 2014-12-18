@@ -71,11 +71,11 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 			triplets.push_back(Eigen::Triplet<double>(
 				iCondition, 3 * i + 2, directions[i].z));
 			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * j, -directions[j].x));
+				iCondition, 3 * j, -directions[i].x));
 			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * j + 1, -directions[j].y));
+				iCondition, 3 * j + 1, -directions[i].y));
 			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * j + 2, -directions[j].z));
+				iCondition, 3 * j + 2, -directions[i].z));
 			++iCondition;
 		}
 	}
