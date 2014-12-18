@@ -384,6 +384,7 @@ static long int checkStartingVector(VectorXd startingVector,
 			DEBUG_PRINT("matrix row #%d:", i);
 			std::set<int> idColNonZero =
 				findNonZeroElementsInRow(matrix, i);
+#ifndef NDEBUG
 			for (auto &iCol: idColNonZero)
 			{
 				DEBUG_PRINT("(%.16le) * (%.16le) = (%.16le)",
@@ -391,13 +392,7 @@ static long int checkStartingVector(VectorXd startingVector,
 						startingVector(iCol),
 						matrix.coeffRef(i, iCol)
 						* startingVector(iCol));
-				std::cerr << "u[" << iCol << "] = "
-					<< directions[iCol] << std::endl;
-				std::cerr << "uh0[" << iCol << "] = "
-					<< directions[iCol]
-					* startingVector(iCol) << std::endl;
 			}
-#ifndef NDEBUG
 			std::cerr << std::setprecision(16)
 				<< matrix.block(i, 0, 1, matrix.cols());
 #endif
