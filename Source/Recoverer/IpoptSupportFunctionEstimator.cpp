@@ -78,12 +78,13 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 		nnz_jac_g = data->supportMatrix().nonZeros();
 
 		/*
-		 * The Hessian of Lagrangian is a quadratic functional. Its 1st
-		 * partial derivative is a linear functional that has non-zero
-		 * coefficients corresponding to each variable. Thus, there are
-		 * n * n non-zero elements in it.
+		 * The Hessian of Lagrangian is a quadratci functional, which
+		 * quadratic part is the sum of ((u_i, x_i) - h_i)^2. Thus, the
+		 * partial derivative on x_i_s and x_i_t is 2 * u_i_s * u_i_t.
+		 * That means that the Hessian is consisted of blocks of size
+		 * 3x3 for each support direction.
 		 */
-		nnz_h_lag = data->numValues() * data->numValues();
+		nnz_h_lag = (data->numValues() / 3) * 9;
 		break;
 	case IPOPT_ESTIMATION_LINEAR:
 		/*
@@ -118,9 +119,11 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 			+ (data->numValues() / 3) * 4;
 
 		/*
-		 * The same as in the quadratic case.
+		 * Th Lagrangian is a linear function of x_i_s and \varepsilon.
+		 * Thus, all its partial derivatives of 2nd order are zero. That
+		 * means that the Hessian of Lagrangian is a zero matrix.
 		 */
-		nnz_h_lag = data->numValues() * data->numValues();
+		nnz_h_lag = 0;
 		break;
 	}
 
@@ -546,30 +549,74 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 	}
 	if (mode == IPOPT_ESTIMATION_LINEAR)
 	{
+		/* Hessian is zero matrix in linear case. */
 		DEBUG_END;
 		return true;
 	}
-	ASSERT(n_ele_hess == data->numValues());
+	ASSERT(n_ele_hess == data->numValues() * 3);
 
 	if (new_x)
 		ASSERT(values);
 
+	int numSupportDirections = data->numValues() / 3;
 	if (!values)
 	{
 		/* Set sparsity structure of the Hessian. */
 		ASSERT(iRow);
 		ASSERT(jCol);
-		for (int i = 0; i < n_ele_hess; ++i)
+		for (int i = 0; i < numSupportDirections; ++i)
 		{
-			iRow[i] = jCol[i] = i;
+			/*
+			 * The Hessian consists of 3x3 blocks for each support
+			 * direction.
+			 */
+			iRow[9 * i] = 3 * i;
+			jCol[9 * i] = 3 * i;
+			iRow[9 * i + 1] = 3 * i;
+			jCol[9 * i + 1] = 3 * i + 1;
+			iRow[9 * i + 2] = 3 * i;
+			jCol[9 * i + 2] = 3 * i + 2;
+
+			iRow[9 * i + 3] = 3 * i + 1;
+			jCol[9 * i + 3] = 3 * i;
+			iRow[9 * i + 4] = 3 * i + 1;
+			jCol[9 * i + 4] = 3 * i + 1;
+			iRow[9 * i + 5] = 3 * i + 1;
+			jCol[9 * i + 5] = 3 * i + 2;
+
+			iRow[9 * i + 6] = 3 * i + 2;
+			jCol[9 * i + 6] = 3 * i;
+			iRow[9 * i + 7] = 3 * i + 2;
+			jCol[9 * i + 7] = 3 * i + 1;
+			iRow[9 * i + 8] = 3 * i + 2;
+			jCol[9 * i + 8] = 3 * i + 2;
 		}
 	}
 	else
 	{
+		auto directions = data->supportDirections();
+		ASSERT(directions.size() == numSupportDirections);
 		/* Set values of the Hessian. */
-		for (int i = 0; i < n_ele_hess; ++i)
+		for (int i = 0; i < numSupportDirections; ++i)
 		{
-			values[i] = 2. * obj_factor;
+			values[9 * i] = 2. * obj_factor *
+				directions[i].x * directions[i].x;
+			values[9 * i + 1] = 2. * obj_factor *
+				directions[i].x * directions[i].y;
+			values[9 * i + 2] = 2. * obj_factor *
+				directions[i].x * directions[i].z;
+			values[9 * i + 3] = 2. * obj_factor *
+				directions[i].y * directions[i].x;
+			values[9 * i + 4] = 2. * obj_factor *
+				directions[i].y * directions[i].y;
+			values[9 * i + 5] = 2. * obj_factor *
+				directions[i].y * directions[i].z;
+			values[9 * i + 6] = 2. * obj_factor *
+				directions[i].z * directions[i].x;
+			values[9 * i + 7] = 2. * obj_factor *
+				directions[i].z * directions[i].y;
+			values[9 * i + 8] = 2. * obj_factor *
+				directions[i].z * directions[i].z;
 		}
 	}
 
