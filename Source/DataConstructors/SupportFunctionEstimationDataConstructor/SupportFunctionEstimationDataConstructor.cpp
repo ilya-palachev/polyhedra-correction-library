@@ -124,7 +124,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".support-vector-original.mat") << supportVector;
+		"support-vector-original.mat") << supportVector;
 	if (supportVectorAlreadyConsistent(supportVector, *supportMatrix, data))
 	{
 		std::cerr << "Original support vector satisfies consistency "
@@ -168,7 +168,7 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 	}
 	if (!matrix)
 		exit(EXIT_FAILURE);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".support-matrix.mat")
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-matrix.mat")
 		<< *matrix;
 	DEBUG_END;
 	return matrix;
@@ -236,7 +236,7 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 	std::vector<Plane_3> planes = data->supportPlanes();
 	Polyhedron_3 intersection;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			".support-planes-for-halfspaces_intersection.txt")
+			"support-planes-for-halfspaces_intersection.txt")
 		<< planes;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
@@ -338,7 +338,7 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
 	}
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".starting-vector.mat") << startingVector;
+		"starting-vector.mat") << startingVector;
 	DEBUG_END;
 	return startingVector;
 }

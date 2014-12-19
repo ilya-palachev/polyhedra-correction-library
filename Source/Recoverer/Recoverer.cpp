@@ -238,7 +238,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		estimate = estimator->run();
 	else
 		estimate = dataEstimation->supportVector();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".support-vector-estimate.mat")
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
 
 	auto h0 = dataEstimation->supportVector();
@@ -258,14 +258,14 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	PolyhedronPtr polyhedronNaive = produceFinalPolyhedron(dataEstimation,
 			h0);
 	Polyhedron *pCopy = new Polyhedron(polyhedronNaive);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".naively-recovered.ply")
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naively-recovered.ply")
 		<< *pCopy;
 
 	/* Also produce polyhedron from starting point of the algorithm. */
 	PolyhedronPtr polyhedronStart = produceFinalPolyhedron(dataEstimation,
 			hStarting);
 	Polyhedron *pCopy2 = new Polyhedron(polyhedronStart);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, ".starting-polyhedron.ply")
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
 		<< *pCopy2;
 
 	DEBUG_END;

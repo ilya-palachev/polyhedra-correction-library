@@ -85,7 +85,7 @@ public:
 		DEBUG_START;
 		std::ofstream stream;
 		std::string filename = dumper.nameBase_ + "."
-			+ std::to_string(dumper.iCurrentDumpCount_)
+			+ std::to_string(dumper.iCurrentDumpCount_) + "."
 			+ dumper.nameSuffix_;
 		std::cerr << "Dumping to file " << filename << std::endl;
 		stream.open(filename, std::ofstream::out);

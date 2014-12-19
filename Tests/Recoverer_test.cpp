@@ -1061,7 +1061,7 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".original-polyhedron.ply") << *pCopy;
+		"original-polyhedron.ply") << *pCopy;
 
 	/* Create shadow contour data and associate p with it. */
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
@@ -1077,9 +1077,9 @@ ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	constructor->run(options->input.model.numContours,
 			options->input.model.shiftAngleFirst);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".original-unshifted-contours.dat") << SCData;
+		"original-unshifted-contours.dat") << SCData;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		".original-unshifted-contours.ply") << Polyhedron(SCData);
+		"original-unshifted-contours.ply") << Polyhedron(SCData);
 
 	/* Shift points contours on random std::vectors. */
 	shiftContoursRandom(SCData, options->input.model.limitRandom);
@@ -1178,7 +1178,7 @@ void runRequestedRecovery(CommandLineOptions* options,
 	/* Run the recoverer. */
 	PolyhedronPtr p = recoverer->run(data);
 	Polyhedron *pCopy = new Polyhedron(p);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, ".recovered.ply") << *pCopy;
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << *pCopy;
 	ALWAYS_PRINT(stdout, "numVertices = %d", p->numVertices);
 	DEBUG_END;
 }
