@@ -87,19 +87,27 @@ public:
 		std::string filename = dumper.nameBase_ + "."
 			+ std::to_string(dumper.iCurrentDumpCount_) + "."
 			+ dumper.nameSuffix_;
-		std::cerr << "Dumping to file " << filename << std::endl;
 		stream.open(filename, std::ofstream::out);
 
 		switch (dumper.level_)
 		{
 		case PCL_DUMPER_LEVEL_ZERO:
+			DEBUG_PRINT("PCL_DUMPER_LEVEL_ZERO");
 			ERROR_PRINT("Please specify parameters!");
 			break;
 		case PCL_DUMPER_LEVEL_DEBUG:
+			DEBUG_PRINT("PCL_DUMPER_LEVEL_DEBUG");
 			if (dumper.ifVerbose_)
+			{
+				std::cerr << "Dumping to file " << filename
+					<< std::endl;
 				stream << object;
+			}
 			break;
 		case PCL_DUMPER_LEVEL_OUTPUT:
+			DEBUG_PRINT("PCL_DUMPER_LEVEL_OUTPUT");
+			std::cerr << "Dumping to file " << filename
+				<< std::endl;
 			stream << object;
 			break;
 		default:
