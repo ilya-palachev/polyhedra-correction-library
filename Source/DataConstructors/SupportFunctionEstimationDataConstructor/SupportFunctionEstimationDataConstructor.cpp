@@ -393,10 +393,18 @@ static long int checkStartingVector(VectorXd startingVector,
 						matrix.coeffRef(i, iCol)
 						* startingVector(iCol));
 			}
+#if 0
 			std::cerr << std::setprecision(16)
 				<< matrix.block(i, 0, 1, matrix.cols());
+#endif /* 0 */
 #endif
 			++numNegative;
+#ifdef NDEBUG
+			std::cout
+				<< "Stop check after 1st fail for release run."
+				<< std::endl;
+			return numNegative;
+#endif
 		}
 	}
 
