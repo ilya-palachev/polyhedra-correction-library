@@ -60,6 +60,11 @@ typedef enum
 	IPOPT_ESTIMATOR_LINEAR,
 #endif /* USE_IPOPT */
 
+#ifdef USE_GLPK
+	/** Linear Glpk estimator.  */
+	GLPK_ESTIMATOR,
+#endif /* USE_GLPK */
+
 	/** Quadratic primal CGAL estimator.  */
 	CGAL_ESTIMATOR,
 

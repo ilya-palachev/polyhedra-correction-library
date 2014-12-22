@@ -30,6 +30,7 @@
 #include "Recoverer/CGALSupportFunctionEstimator.h"
 #include "Recoverer/IpoptSupportFunctionEstimator.h"
 #include "Recoverer/TsnnlsSupportFunctionEstimator.h"
+#include "Recoverer/GlpkSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "halfspaces_intersection.h"
 
@@ -152,6 +153,11 @@ static SupportFunctionEstimator *constructEstimator(
 				IPOPT_ESTIMATION_LINEAR);
 		break;
 #endif /* USE_IPOPT */
+#ifdef USE_GLPK
+	case GLPK_ESTIMATOR:
+		estimator = new GlpkSupportFunctionEstimator(data);
+		break;
+#endif /* USE_GLPK */
 	case CGAL_ESTIMATOR:
 		estimator = new CGALSupportFunctionEstimator(data,
 				CGAL_ESTIMATION_QUADRATIC);
