@@ -379,6 +379,13 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		"Ipopt interior-point method for linear programming"
 	},
 #endif /* USE_IPOPT */
+#ifdef USE_GLPK
+	{
+		GLPK_ESTIMATOR,
+		"glpk",
+		"Glpk linear programming solver"
+	},
+#endif /* USE_GLPK */
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
