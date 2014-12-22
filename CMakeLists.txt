@@ -113,6 +113,7 @@ set (SOURCE_pcl
 	Source/PolyhedronCGAL.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
+	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp
@@ -175,6 +176,7 @@ add_library(pcl SHARED ${SOURCE_pcl})
 
 option(ENABLE_TSNNLS "Enable tsnnls solver (does not work)" OFF)
 option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
+option(ENABLE_GLPK "Enable Glpk solver" OFF)
 option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 
 target_link_libraries(pcl 
@@ -197,6 +199,12 @@ if (ENABLE_IPOPT)
 	add_definitions(-DUSE_IPOPT)
 	add_definitions(-DHAVE_CSTDDEF)
 	message("!!! Ipopt solver is enabled !!!")
+endif()
+
+if (ENABLE_GLPK)
+	target_link_libraries(pcl glpk)
+	add_definitions(-DUSE_GLPK)
+	message("!!! Glpk solver is enabled !!!")
 endif()
 
 if (ENABLE_GRAPH_DUMPER)
