@@ -105,20 +105,23 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 	glp_set_obj_coef(problem, data->numValues(), 1.0);
 
 	/* Translate Eigen matrix to triple-form. */
-	int *iRows = new int[matrix.nonZeros()];
-	int *iCols = new int[matrix.nonZeros()];
-	double *values = new double[matrix.nonZeros()];
+	int numArrayLength = matrix.nonZeros() + 1;
+	int *iRows = new int[numArrayLength];
+	int *iCols = new int[numArrayLength];
+	double *values = new double[numArrayLength];
+	DEBUG_PRINT("Allocated iRows, iCols, values arrays of length %d",
+			numArrayLength);
 	int i = 0;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
 		for (SparseMatrix::InnerIterator it(matrix, k); it;
 				++it)
 		{
-			iRows[i] = it.row() + 1;
-			ASSERT(iRows[i] > 0);
-			iCols[i] = it.col() + 1;
-			ASSERT(iCols[i] > 0);
-			values[i] = it.value();
+			iRows[i + 1] = it.row() + 1;
+			ASSERT(iRows[i + 1] > 0);
+			iCols[i + 1] = it.col() + 1;
+			ASSERT(iCols[i + 1] > 0);
+			values[i + 1] = it.value();
 			++i;
 		}
 	}
