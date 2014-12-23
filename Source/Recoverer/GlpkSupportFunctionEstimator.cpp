@@ -60,6 +60,7 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 	int numConsistencyConstraints = matrix.rows();
 	int numEpsConstraints = numDirections * 2;
 	int numConstraints = numConsistencyConstraints + numEpsConstraints;
+	int iEpsilon = data->numValues() + 1;
 
 	/* Add rows. */
 	glp_add_rows(problem, numConstraints);
@@ -71,7 +72,6 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 		glp_set_row_bnds(problem, i + 1, GLP_LO, 0.0, 0.0);
 	}
 
-	auto directions = data->supportDirections();
 	VectorXd h = data->supportVector();
 	for (int i = 0; i < numDirections; ++i)
 	{
@@ -81,8 +81,10 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 				nameLower.c_str());
 		glp_set_row_name(problem, numConsistencyConstraints + 2 * i + 2,
 				nameUpper.c_str());
+		/*  (u_i, x_i) + \varepsilon > h_i */
 		glp_set_row_bnds(problem, numConsistencyConstraints + 2 * i + 1,
 				GLP_LO, h(i), 0.0);
+		/* -(u_i, x_i) + \varepsilon > -h_i */
 		glp_set_row_bnds(problem, numConsistencyConstraints + 2 * i + 2,
 				GLP_LO, -h(i), 0.0);
 	}
@@ -102,15 +104,17 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 #endif
 		glp_set_obj_coef(problem, i + 1, 0.0);
 	}
-	glp_set_obj_coef(problem, data->numValues(), 1.0);
+	glp_set_obj_coef(problem, iEpsilon, 1.0);
+
+	/* Allocate memory for arrays of matrix triplets. */
+	int numNonZerosTotal = matrix.nonZeros() + 2 * 4 * numDirections;
+	int *iRows = new int[numNonZerosTotal + 1];
+	int *iCols = new int[numNonZerosTotal + 1];
+	double *values = new double[numNonZerosTotal + 1];
+	DEBUG_PRINT("Allocated iRows, iCols, values arrays of length %d",
+			numNonZerosTotal + 1);
 
 	/* Translate Eigen matrix to triple-form. */
-	int numArrayLength = matrix.nonZeros() + 1;
-	int *iRows = new int[numArrayLength];
-	int *iCols = new int[numArrayLength];
-	double *values = new double[numArrayLength];
-	DEBUG_PRINT("Allocated iRows, iCols, values arrays of length %d",
-			numArrayLength);
 	int i = 0;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
@@ -125,7 +129,56 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 			++i;
 		}
 	}
-	glp_load_matrix(problem, matrix.nonZeros(), iRows, iCols, values);
+
+	/* Fill the bottom part of the matrix. */
+	auto directions = data->supportDirections();
+	int numTopPart = matrix.nonZeros();
+	for (int i = 0; i < numDirections; ++i)
+	{
+		/*  (u_i, x_i) + \varepsilon > h_i */
+		iRows[numTopPart + 8 * i + 1] = numConsistencyConstraints
+			+ 2 * i + 1;
+		iCols[numTopPart + 8 * i + 1] = 3 * i + 1;
+		values[numTopPart + 8 * i + 1] = directions[i].x;
+
+		iRows[numTopPart + 8 * i + 2] = numConsistencyConstraints
+			+ 2 * i + 1;
+		iCols[numTopPart + 8 * i + 2] = 3 * i + 2;
+		values[numTopPart + 8 * i + 2] = directions[i].y;
+
+		iRows[numTopPart + 8 * i + 3] = numConsistencyConstraints
+			+ 2 * i + 1;
+		iCols[numTopPart + 8 * i + 3] = 3 * i + 3;
+		values[numTopPart + 8 * i + 3] = directions[i].z;
+
+		iRows[numTopPart + 8 * i + 4] = numConsistencyConstraints
+			+ 2 * i + 1;
+		iCols[numTopPart + 8 * i + 4] = iEpsilon;
+		values[numTopPart + 8 * i + 4] = 1.;
+
+		/* -(u_i, x_i) + \varepsilon > -h_i */
+		iRows[numTopPart + 8 * i + 5] = numConsistencyConstraints
+			+ 2 * i + 2;
+		iCols[numTopPart + 8 * i + 5] = 3 * i + 1;
+		values[numTopPart + 8 * i + 5] = -directions[i].x;
+
+		iRows[numTopPart + 8 * i + 6] = numConsistencyConstraints
+			+ 2 * i + 2;
+		iCols[numTopPart + 8 * i + 6] = 3 * i + 2;
+		values[numTopPart + 8 * i + 6] = -directions[i].y;
+
+		iRows[numTopPart + 8 * i + 7] = numConsistencyConstraints
+			+ 2 * i + 2;
+		iCols[numTopPart + 8 * i + 7] = 3 * i + 3;
+		values[numTopPart + 8 * i + 7] = -directions[i].z;
+
+		iRows[numTopPart + 8 * i + 8] = numConsistencyConstraints
+			+ 2 * i + 2;
+		iCols[numTopPart + 8 * i + 8] = iEpsilon;
+		values[numTopPart + 8 * i + 8] = 1.;
+	}
+
+	glp_load_matrix(problem, numNonZerosTotal, iRows, iCols, values);
 
 	/* Run the simplex solver. */
 	glp_simplex(problem, NULL);
