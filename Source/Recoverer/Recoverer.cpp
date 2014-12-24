@@ -226,6 +226,15 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		constructor.enableConvexifyShadowContour();
 	SupportFunctionDataPtr data = constructor.run(dataShadow);
 
+	PolyhedronPtr p = run(data);
+
+	DEBUG_END;
+	return p;
+}
+
+PolyhedronPtr run(SupportFunctionDataPtr data)
+{
+	DEBUG_START;
 	/* Build support function estimation data. */
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)

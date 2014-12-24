@@ -153,11 +153,18 @@ public:
 			SupportFunctionEstimationStartingBodyType type);
 
 	/**
-	 * Runs the recovering procedure.
+	 * Runs the recovering procedure for shadow contours.
 	 *
 	 * @param SCData	Shadow contour data
 	 */
 	PolyhedronPtr run(ShadowContourDataPtr SCData);
+
+	/**
+	 * Runs the recovering procedure for support function data.
+	 *
+	 * @param data		Support function data
+	 */
+	PolyhedronPtr run(SupportFunctionDataPtr data);
 };
 
 typedef std::shared_ptr<Recoverer> RecovererPtr;
