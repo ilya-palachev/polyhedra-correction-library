@@ -40,6 +40,11 @@
  */
 #define OPTION_BALANCE_DATA 'b'
 
+/**
+ * Option "-d" sets the name of file with support directions.
+ */
+#define OPTION_FILE_DIRECTIONS 'd'
+
 /** Option "-f" takes the argument with file name. */
 #define OPTION_FILE_NAME 'f'
 
@@ -100,7 +105,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:bf:i:l:m:n:o:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:bd:f:i:l:m:n:o:r:st:vx"
 
 /**
  * The definition of corresponding long options std::list.
@@ -185,6 +190,12 @@ static struct option optionsLong[] =
 		0,
 		OPTION_STARTING_BODY
 	},
+	{
+		"directions",
+		required_argument,
+		0,
+		OPTION_FILE_DIRECTIONS
+	},
 	{0, 0, 0, 0}
 };
 
@@ -212,9 +223,46 @@ enum ModeOfRecovererTesting
 	/** Test on real shadow contour data written to file. */
 	RECOVERER_REAL_TESTING,
 
-	/** Test on synthetic model based shadow contour data. */
+	/** Test on syntheically generated data. */
 	RECOVERER_SYNTHETIC_TESTING
 };
+
+/** Bit for marking that model is generated from polyhedron in file. */
+const int MODEL_FROM_FILE = 1 << 0;
+
+/** Bit for marking that synthetic noise on data is added in axial sense. */
+const int MODEL_AXIAL_NOISE = 1 << 1;
+
+/**
+ * Bit for marking that contour data is generated (instead of support function
+ * data
+ */
+const int MODEL_CONTOUR_DATA = 1 << 2;
+
+typedef struct
+{
+	/** Properties of model (stored in bits). */
+	int properties;
+			
+	/** The ID of model */
+	RecovererTestModelID id;
+
+	/** The name of file with model. */
+	char *fileName;
+			
+	/**  The number of generated contours */
+	int numContours;
+
+	/** The value of first angle */
+	double shiftAngleFirst;
+
+	/** The name of file with support directions. */
+	char *directionsFileName;
+
+	/** The limit of random shift */
+	double limitRandom;
+
+} SyntheticModelDescription;
 
 /**
  * The result of command line option parsing.
@@ -230,14 +278,8 @@ typedef struct
 		/** File name with existent shadow contour data. */
 		char *fileName;
 
-		/** Parameters of synthetic geometric figure. */
-		struct
-		{
-			RecovererTestModelID id;	/**< The ID of model */
-			int numContours;			/**< The number of generated contours */
-			double shiftAngleFirst;		/**< The value of first angle */
-			double limitRandom;		/**< The limit of random shift */
-		} model;
+		/** Parameters of synthetically generated data. */
+		SyntheticModelDescription model;
 	} input;
 
 	/** The name of output file(s). */
@@ -442,23 +484,25 @@ void printUsage(int argc, char** argv)
 	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.\n\n",
 		argv[0]);
 	STDERR_PRINT("Usage:\n");
-	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number of "
-		"contours>]\n", argv[0], OPTION_FILE_NAME, OPTION_MODEL_NAME,
-		OPTION_CONTOURS_NUMBER);
+	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number"
+		" of contours>]\n", argv[0], OPTION_FILE_NAME,
+		OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("Options:\n");
 	int i = 0;
 	STDERR_PRINT("\t-%c --%s\tThe name of file with shadow contours to be "
 		"processed\n", OPTION_FILE_NAME, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tThe name of synthetic model to be tested on.\n",
-		OPTION_MODEL_NAME, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tThe number of contours to be generated from the "
-		"synthetic model\n", OPTION_CONTOURS_NUMBER, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tThe fist angle from which the first shadow contour is "
-		"obtained\n", OPTION_FIRST_ANGLE, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tThe name of synthetic model to be tested on."
+		"\n", OPTION_MODEL_NAME, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tThe number of contours to be generated from"
+		" the synthetic model\n", OPTION_CONTOURS_NUMBER,
+		optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tThe fist angle from which the first shadow"
+		" contour is obtained\n", OPTION_FIRST_ANGLE,
+		optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tBalance contour data before processing.\n",
 		OPTION_BALANCE_DATA, optionsLong[i++].name);
-	STDERR_PRINT("\t-%c --%s\tThe absolute limit of random shift of modeled "
-		"contour.\n", OPTION_LIMIT_RANDOM, optionsLong[i++].name);
+	STDERR_PRINT("\t-%c --%s\tThe absolute limit of random shift of modeled"
+		" contour.\n", OPTION_LIMIT_RANDOM, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tThe name of output file(s).\n",
 		OPTION_OUTPUT_NAME, optionsLong[i++].name);
 	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
@@ -583,7 +627,8 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
 		/ sizeof(SupportMatrixTypeDescription);
-	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
+	DEBUG_PRINT("Number of support matrix types: %d",
+			numSupportMatrixTypes);
 
 	int numStartingPointTypes = sizeof(recovererStartingBodies)
 		/ sizeof(RecovererStartingBody);
@@ -633,19 +678,23 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			options->mode = RECOVERER_SYNTHETIC_TESTING;
-			for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER;
+			for (int iModel = 0;
+				iModel < RECOVERER_TEST_MODELS_NUMBER;
 				++iModel)
 			{
-				if (strcmp(optarg, recovererTestModels[iModel].name) == 0)
+				if (strcmp(optarg,
+					recovererTestModels[iModel].name) == 0)
 				{
-					options->input.model.id = (RecovererTestModelID) iModel;
+					options->input.model.id
+						= (RecovererTestModelID) iModel;
 					ifOptionModelName = true;
 					break;
 				}
 			}
 			if (!ifOptionModelName)
 			{
-				STDERR_PRINT("Invalid name of model - %s\n", optarg);
+				STDERR_PRINT("Invalid name of model - %s\n",
+						optarg);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
@@ -655,26 +704,35 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_CONTOURS_NUMBER:
 			if (ifOptionNumContours)
 			{
-				errorOptionTwice(argc, argv, OPTION_CONTOURS_NUMBER);
+				errorOptionTwice(argc, argv,
+						OPTION_CONTOURS_NUMBER);
 			}
 
 			/* Parse digital number from input argument. */
 			options->input.model.numContours =
 					strtol(optarg, &charMistaken, 10);
 
-			/* If user gives invalid character, the charMistaken is set to it */
+			/*
+			 *  If user gives invalid character, the charMistaken is
+			 *  set to it
+			 */
+
 			/*
 			 * From "man strtol":
 			 *
-			 * In particular, if *nptr is not '\0' but **endptr is '\0' on
-			 * return, the entire string is valid.
+			 * In particular, if *nptr is not '\0' but **endptr is
+			 * '\0' on return, the entire string is valid.
 			 */
 			if (charMistaken && *charMistaken)
 			{
-				errorCannotParseNumber(argc, argv, charMistaken);
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
 			}
 
-			/* In case of underflow or overflow errno is set to ERANGE. */
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
 			if (errno == ERANGE)
 			{
 				errorOutOfRange(argc, argv);
@@ -685,19 +743,27 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_FIRST_ANGLE:
 			if (ifOptionFirstAngle)
 			{
-				errorOptionTwice(argc, argv, OPTION_FIRST_ANGLE);
+				errorOptionTwice(argc, argv,
+						OPTION_FIRST_ANGLE);
 			}
 			/* Parse floating-point number from input argument. */
 			options->input.model.shiftAngleFirst =
 					strtod(optarg, &charMistaken);
 
-			/* If user gives invalid character, the charMistaken is set to it */
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
 			if (charMistaken && *charMistaken)
 			{
-				errorCannotParseNumber(argc, argv, charMistaken);
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
 			}
 			
-			/* In case of underflow or overflow errno is set to ERANGE. */
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
 			if (errno == ERANGE)
 			{
 				errorOutOfRange(argc, argv);
@@ -711,19 +777,27 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_LIMIT_RANDOM:
 			if (ifOptionLimitRandom)
 			{
-				errorOptionTwice(argc, argv, OPTION_LIMIT_RANDOM);
+				errorOptionTwice(argc, argv,
+						OPTION_LIMIT_RANDOM);
 			}
 			/* Parse floating-point number from input argument. */
 			options->input.model.limitRandom =
 					strtod(optarg, &charMistaken);
 
-			/* If user gives invalid character, the charMistaken is set to it */
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
 			if (charMistaken && *charMistaken)
 			{
-				errorCannotParseNumber(argc, argv, charMistaken);
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
 			}
 
-			/* In case of underflow or overflow errno is set to ERANGE. */
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
 			if (errno == ERANGE)
 			{
 				errorOutOfRange(argc, argv) ;
@@ -734,7 +808,8 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_OUTPUT_NAME:
 			if (options->outputName)
 			{
-				errorOptionTwice(argc, argv, OPTION_OUTPUT_NAME);
+				errorOptionTwice(argc, argv,
+						OPTION_OUTPUT_NAME);
 			}
 			options->outputName = optarg;
 			break;
@@ -748,16 +823,21 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			for (int iEstimator = 0; iEstimator < numEstimators;
 				++iEstimator)
 			{
-				if (strcmp(optarg, estimatorDescriptions[iEstimator].name) == 0)
+				if (strcmp(optarg,
+					estimatorDescriptions[iEstimator].name)
+						== 0)
 				{
-					options->estimator = (RecovererEstimatorType) iEstimator;
+					options->estimator
+						= (RecovererEstimatorType)
+						iEstimator;
 					ifOptionRecover = true;
 					break;
 				}
 			}
 			if (!ifOptionRecover)
 			{
-				STDERR_PRINT("Invalid name of estimator - %s\n", optarg);
+				STDERR_PRINT("Invalid name of estimator - %s\n",
+						optarg);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
@@ -851,7 +931,8 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 	if (ifOptionFileName && ifOptionModelName)
 	{
 		STDERR_PRINT("Options \"-%c\" and \"-%c\" cannot be given"
-			" simultaneously.\n", OPTION_FILE_NAME, OPTION_MODEL_NAME);
+			" simultaneously.\n", OPTION_FILE_NAME,
+			OPTION_MODEL_NAME);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -878,8 +959,9 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 	if (!ifOptionFileName && !ifOptionModelName)
 	{
-		STDERR_PRINT("At least one of options \"-%c\" and \"-%c\" must be "
-			"specified.\n", OPTION_FILE_NAME, OPTION_MODEL_NAME);
+		STDERR_PRINT("At least one of options \"-%c\" and \"-%c\" must"
+			" be specified.\n", OPTION_FILE_NAME,
+			OPTION_MODEL_NAME);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
