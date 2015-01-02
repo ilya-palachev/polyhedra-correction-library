@@ -113,19 +113,18 @@
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:bd:f:i:l:m:M:n:o:r:st:vx"
 
-struct Pble matrix scalingCLOption: public option
+struct PCLOption: public option
 {
 public:
-	char *comment;
+	const char *comment;
 
 	PCLOption(): option(), comment(NULL) {}
 
-	~PCLOption()
-	{
-		if (comment)
-			delete comment;
-	}
-}
+	PCLOption(option o, const char *s) :
+		option(o), comment(s) {}
+
+	~PCLOption() {}
+};
 
 /**
  * The definition of corresponding long options list.
@@ -133,119 +132,167 @@ public:
 static PCLOption optionsLong[] =
 {
 	{
-		"file-name",
-		required_argument,
-		0,
-		OPTION_FILE_NAME,
+		option
+		{
+			"file-name",
+			required_argument,
+			0,
+			OPTION_FILE_NAME
+		},
 		"The name of file with shadow contours to be processed"
 	},
 	{
-		"model-name",
-		required_argument,
-		0,
-		OPTION_MODEL_NAME,
+		option
+		{
+			"model-name",
+			required_argument,
+			0,
+			OPTION_MODEL_NAME
+		},
 		"The name of synthetic model to be tested on"
 	},
 	{
-		"contours-number",
-		required_argument,
-		0,
-		OPTION_CONTOURS_NUMBER,
+		option
+		{
+			"contours-number",
+			required_argument,
+			0,
+			OPTION_CONTOURS_NUMBER
+		},
 		"The number of contours to be generated from the synthetic "
 			"model"
 	},
 	{
-		"first-angle",
-		required_argument,
-		0,
-		OPTION_FIRST_ANGLE,
+		option
+		{
+			"first-angle",
+			required_argument,
+			0,
+			OPTION_FIRST_ANGLE
+		},
 		"The fist angle from which the first shadow contour is obtained"
 	},
 	{
-		"balance-data",
-		no_argument,
-		0,
-		OPTION_BALANCE_DATA,
+		option
+		{
+			"balance-data",
+			no_argument,
+			0,
+			OPTION_BALANCE_DATA
+		},
 		"Balance contour data before processing"
 	},
 	{
-		"limit-random",
-		required_argument,
-		0,
-		OPTION_LIMIT_RANDOM,
+		option
+		{
+			"limit-random",
+			required_argument,
+			0,
+			OPTION_LIMIT_RANDOM
+		},
 		"The absolute limit of random shift of modeled contour"
 	},
 	{
-		"output-name",
-		required_argument,
-		0,
-		OPTION_OUTPUT_NAME,
+		option
+		{
+			"output-name",
+			required_argument,
+			0,
+			OPTION_OUTPUT_NAME
+		},
 		"The name of output file(s)"
 	},
 	{
-		"recover",
-		required_argument,
-		0,
-		OPTION_RECOVER,
+		option
+		{
+			"recover",
+			required_argument,
+			0,
+			OPTION_RECOVER
+		},
 		"Recover polyhedron using some estimator"
 	},
 	{
-		"scale-matrix",
-		no_argument,
-		0,
-		OPTION_SCALE_MATRIX,
+		option
+		{
+			"scale-matrix",
+			no_argument,
+			0,
+			OPTION_SCALE_MATRIX
+		},
 		"Enable matrix scaling"
 	},
 	{
-		"support-matrix-type",
-		required_argument,
-		0,
-		OPTION_SUPPORT_MATRIX_TYPE,
+		option
+		{
+			"support-matrix-type",
+			required_argument,
+			0,
+			OPTION_SUPPORT_MATRIX_TYPE
+		},
 		"Set type of support matrix"
 	},
 	{
-		"verbose",
-		no_argument,
-		0,
-		OPTION_VERBOSE,
+		option
+		{
+			"verbose",
+			no_argument,
+			0,
+			OPTION_VERBOSE
+		},
 		"Enable verbose mode"
 	},
 	{
-		"convexify-contours",
-		no_argument,
-		0,
-		OPTION_CONVEXIFY_CONTOURS,
+		option
+		{
+			"convexify-contours",
+			no_argument,
+			0,
+			OPTION_CONVEXIFY_CONTOURS
+		},
 		"Enable contours convexification"
 	},
 	{
-		"starting-body",
-		required_argument,
-		0,
-		OPTION_STARTING_BODY,
+		option
+		{
+			"starting-body",
+			required_argument,
+			0,
+			OPTION_STARTING_BODY
+		},
 		"Type of starting body of the estimation process"
 	},
 	{
-		"directions",
-		required_argument,
-		0,
-		OPTION_FILE_DIRECTIONS,
+		option
+		{
+			"directions",
+			required_argument,
+			0,
+			OPTION_FILE_DIRECTIONS
+		},
 		"The name of file with support directions"
 	},
 	{
-		"file-model",
-		required_argument,
-		0,
-		OPTION_FILE_MODEL,
+		option
+		{
+			"file-model",
+			required_argument,
+			0,
+			OPTION_FILE_MODEL
+		},
 		"The name of file with model for synthetic data construction"
 	},
 	{
-		"axial",
-		no_argument,
-		0,
-		OPTION_AXIAL_TESTING,
+		option
+		{
+			"axial",
+			no_argument,
+			0,
+			OPTION_AXIAL_TESTING
+		},
 		"Axial testing: move support values, non points"
-	}
-	{0, 0, 0, 0}
+	},
+	{option{0, 0, 0, 0}, 0}
 };
 
 
@@ -509,7 +556,8 @@ SupportMatrixTypeDescription supportMatrixTypeDescriptions[] =
 	}
 };
 
-static void printUsageOption(char option, char *longOption, char *comment)
+static void printUsageOption(char option, const char *longOption,
+	const char *comment)
 {
 	DEBUG_START;
 	STDERR_PRINT("\t-%c --%s\t%s\n", option, longOption, comment);
@@ -941,7 +989,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 				errorOptionTwice(argc, argv,
 						OPTION_FILE_DIRECTIONS);
 			}
-			options->model.directionsFileName = optarg;
+			options->input.model.directionsFileName = optarg;
 			ifOptionFileDirections = true;
 			break;
 		case OPTION_FILE_MODEL:
@@ -951,11 +999,11 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 						OPTION_FILE_MODEL);
 			}
 			options->mode = RECOVERER_SYNTHETIC_TESTING;
-			options->model.fileName = optarg;
+			options->input.model.fileName = optarg;
 			ifOptionFileModel = true;
 			break;
 		case OPTION_AXIAL_TESTING:
-			options->model.ifAxialTesting = true;
+			options->input.model.ifAxialTesting = true;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -979,12 +1027,13 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 		|| ifOptionLimitRandom
 		|| ifOptionFileModel
 		|| ifOptionFileDirections
-		|| options->model.ifAxialTesting;
+		|| options->input.model.ifAxialTesting;
 
 	if (ifOptionFileName && ifAnyOptionSynthetic)
 	{
 		STDERR_PRINT("Option \"-%c\" cannot be used with any option "
-				"related with synthetic testing.");
+				"related with synthetic testing.",
+				OPTION_FILE_NAME);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -1018,7 +1067,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 	if (!ifValidSyntheticOptions && ifAnyOptionSynthetic)
 	{
-		STDERR_PRINT("Invalid option set for synthetic testing.")
+		STDERR_PRINT("Invalid option set for synthetic testing.");
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -1057,6 +1106,12 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 		}
 	}
 
+	if (options->mode == RECOVERER_SYNTHETIC_TESTING
+		&& !ifOptionNumContours)
+	{
+		options->input.model.numContours = 0;
+	}
+
 	if (!ifOptionSupportMatrixType)
 	{
 		options->supportMatrixType = DEFAULT_SUPPORT_MATRIX_TYPE;
@@ -1078,7 +1133,7 @@ static Polyhedron *readPolyhedron(char *fileName)
 {
 	DEBUG_START;
 	Polyhedron *p = new Polyhedron();
-	p.scan_ply(fileName);
+	p->fscan_ply(fileName);
 	DEBUG_END;
 	return p;
 }
@@ -1240,7 +1295,7 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 
 	/* Create polyhedron based on one of possible models. */
 	PolyhedronPtr p(makeModel(options));
-	Polyhedron *pCopy = makePolyhedron(makeModel(options));
+	Polyhedron *pCopy = makeModel(options);
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
@@ -1296,30 +1351,64 @@ static ShadowContourDataPtr makeShadowData(CommandLineOptions* options)
 	return SCData;
 }
 
-static std::vector<Vector3d> readDirections(char *fileName);
+static std::vector<Vector3d> readDirections(char *fileName)
 {
 	DEBUG_START;
-	std::ifstream (fileName);
+	std::ifstream input(fileName);
 
-	std::istream_iterator<Vector3d> start(is), end;
+	std::istream_iterator<Vector3d> start(input), end;
+	std::vector<Vector3d> vectors(start, end);
 
-	//http://stackoverflow.com/questions/15138785/c-reading-file-into-vector
+	DEBUG_PRINT("Read %d vectors from file %s.", vectors.size(), fileName);
+
 	DEBUG_END;
+	return vectors;
 }
 
-static SupportFunctionData makeSupportData(CommandLineOptions* options)
+static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 {
 	DEBUG_START;
 	/* Create polyhedron based on one of possible models. */
 	PolyhedronPtr p(makeModel(options));
-	Polyhedron *pCopy = makePolyhedron(makeModel(options));
+	Polyhedron *pCopy = makeModel(options);
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"original-polyhedron.ply") << *pCopy;
 
+	std::vector<Vector3d> directions;
+	if (options->input.model.directionsFileName)
+	{
+		directions = readDirections(options->input.model.directionsFileName);
+	}
+	else
+	{
+		auto shadows = generateSyntheticSCData(options);
+		directions = extractDirectionsFromShadows(shadows);
+	}
+	ASSERT(!directions.empty());
+
+	std::vector<SupportFunctionDataItem> items;
+	for (auto &direction: directions)
+	{
+		double productMax = 0.;
+		for (int i = 0; i < p->numVertices; ++i)
+		{
+			Vector3d vertex = p->vertices[i];
+			product = vertex * direction;
+			if (product > productMax)
+			{
+				productMax = product;
+			}
+		}
+		SupportFunctionDataItem item(direction, productMax);
+		items.push_back(item);
+	}
 	DEBUG_END;
+
+	SupportFunctionDataPtr data(new SupportFunctionData(items))
+	return data;
 }
 
 /**
@@ -1364,14 +1453,15 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 }
 
 /**
- * Runs the recovering with requested mode.
+ * Runs the recovering from shadow contours with requested mode.
  *
  * @param options	Parsed command-line options
  * @param recoverer	The recoverer to be used
- * @param data		Shadow contours data
+ * @param data		The data
  */
-static void runShadowRecovery(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadowContourDataPtr data)
+template<typename DataPtr>
+static void runRecovery(CommandLineOptions* options,
+	RecovererPtr recoverer, DataPtr data)
 {
 	DEBUG_START;
 	/* In verbose mode we dump all output. */
@@ -1411,19 +1501,22 @@ int main(int argc, char** argv)
 	
 	if (options->mode == RECOVERER_REAL_TESTING
 			|| (options->mode == RECOVERER_SYNTHETIC_TESTING
-				&& options->model.numContours))
+				&& options->input.model.numContours))
 	{
-		/* Read or generate data depending on requested option. */
-		ShadowContourDataPtr data = makeShadowData(options);
-
-		/* Run the recovery. */
-		runShadowRecovery(options, recoverer, data);
+		/*
+		 * Read or generate shadow contour data depending on requested
+		 * option.
+		 */
+		auto data = makeShadowData(options);
 	}
 	else
 	{
-
+		/* Make support function data. */
+		auto data = makeSupportData(options);
 	}
 
+	/* Run the recovery. */
+	runRecovery(options, recoverer, data);
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
