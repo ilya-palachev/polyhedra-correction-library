@@ -232,7 +232,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	return p;
 }
 
-PolyhedronPtr run(SupportFunctionDataPtr data)
+PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	/* Build support function estimation data. */
