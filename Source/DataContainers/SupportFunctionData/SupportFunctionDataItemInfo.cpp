@@ -25,6 +25,7 @@
  */
 
 #include "DebugPrint.h"
+#include "Vector3d.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 
 SupportFunctionDataItemInfo::SupportFunctionDataItemInfo()

@@ -32,6 +32,9 @@
 class SupportFunctionDataItemInfo
 {
 public:
+	/** The support point (tangient point). */
+	Vector3d point;
+
 	/** Empty constructor. */
 	SupportFunctionDataItemInfo();
 
