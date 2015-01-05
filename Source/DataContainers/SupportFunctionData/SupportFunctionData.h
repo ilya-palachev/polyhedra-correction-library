@@ -144,6 +144,13 @@ public:
 	 * @return Vector of support planes.
 	 */
 	std::vector<Plane_3> supportPlanes();
+
+	/**
+	 * Gets the vector of support points.
+	 *
+	 * @return Vector of support points.
+	 */
+	std::vector<Vector3d> supportPoints();
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */

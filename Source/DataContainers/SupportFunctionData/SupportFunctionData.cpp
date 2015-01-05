@@ -195,3 +195,21 @@ std::vector<Plane_3> SupportFunctionData::supportPlanes()
 	return planes;
 }
 
+std::vector<Vector3d> SupportFunctionData::supportPoints()
+{
+	DEBUG_START;
+	std::vector<Vector3d> points;
+	for (auto &item: items)
+	{
+		ASSERT(item.info);
+		if (!item.info)
+		{
+			ERROR_PRINT("Support points were not kept.");
+			exit(EXIT_FAILURE);
+		}
+		points.push_back(item.info.point);
+	}
+	DEBUG_END;
+	return points;
+}
+
