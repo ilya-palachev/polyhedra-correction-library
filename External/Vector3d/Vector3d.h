@@ -29,7 +29,7 @@
 #include <cmath>
 #include <ostream>
 
-#include "PolyhedronCGAL.h"
+#include "KernelCGAL.h"
 
 /**
  * Checks the FP equality of double numbers
