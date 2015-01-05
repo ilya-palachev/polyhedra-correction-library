@@ -29,6 +29,8 @@
 #include <cmath>
 #include <ostream>
 
+#include "PolyhedronCGAL.h"
+
 /**
  * Checks the FP equality of double numbers
  *
@@ -68,6 +70,30 @@ public:
 		x(a),
 		y(b),
 		z(c)
+	{
+	}
+
+	/**
+	 * Constructor by CGAL Point_3 object.
+	 *
+	 * @param p	The CGAL point.
+	 */
+	Vector3d(Point_3 p) :
+		x(p.x()),
+		y(p.y()),
+		z(p.z())
+	{
+	}
+
+	/**
+	 * Constructor by CGAL Vector_3 object.
+	 *
+	 * @param v	The CGAL vector.
+	 */
+	Vector3d(Vector_3 v) :
+		x(v.x()),
+		y(v.y()),
+		z(v.z())
 	{
 	}
 
