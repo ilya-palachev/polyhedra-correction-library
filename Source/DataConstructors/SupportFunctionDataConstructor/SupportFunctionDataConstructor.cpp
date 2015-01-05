@@ -348,3 +348,37 @@ bool checkSupportFunctionDataItemsInequality(
 	DEBUG_END;
 	return true;
 }
+
+SupportFunctionDataPtr SupportFunctionDataConstructor::run(
+	std::vector<Point_3> directions,
+	Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	std::vector<Vector_3> vertices = polyhedron.getVertices();
+
+	std::vector<SupportFunctionDataItem> items;
+
+	for (auto &direction: directions)
+	{
+		Vector_3 vDirection = direction - CGAL::ORIGIN;
+		double scalarProductMax = 0.;
+		Vector_3 supportPoint(0., 0., 0.);
+		for (auto &vertex: vertices)
+		{
+			double scalarProduct = vDirection * vertex;
+			if (scalarProduct > scalarProductMax)
+			{
+				scalarProductMax = scalarProduct;
+				supportPoint = vertex;
+			}
+		}
+		ASSERT(scalarProductMax > 0);
+		SupportFunctionDataItem item(direction, scalarProductMax);
+		item.info = SupportFunctionDataItemInfoPtr(
+			new SupportFunctionDataItemInfo());
+		item.info->point = supportPoint;
+		items.push_back(item);
+	}
+	DEBUG_END;
+	return SupportFunctionDataPtr(new SupportFunctionData(items));
+}

@@ -65,8 +65,23 @@ public:
 	 * Generates support function data from shadow contour data.
 	 *
 	 * @param data	Shadow contour data
+	 *
+	 * @return The support function data generated from shadow contours
 	 */
 	SupportFunctionDataPtr run(ShadowContourDataPtr data);
+
+	/**
+	 * Generates support function data from polyhedron and support
+	 * directions by the definition of support function.
+	 *
+	 * @param polyhedron	The polyhedron
+	 * @param directions	The vector of support directions
+	 *
+	 * @return The support function data generated for given polyhedron and
+	 * support direcitons.
+	 */
+	SupportFunctionDataPtr run(std::vector<Point_3> directions,
+		Polyhedron_3 polyhedron);
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_CONSTRUCTOR_H */
