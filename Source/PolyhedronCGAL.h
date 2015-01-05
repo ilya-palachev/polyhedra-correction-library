@@ -32,20 +32,15 @@
 #ifndef POLYHEDRONCGAL_H_
 #define POLYHEDRONCGAL_H_
 
-
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include "KernelCGAL.h"
 #include <CGAL/HalfedgeDS_vector.h>
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
-
-typedef Kernel::Point_3 Point_3;
-typedef Kernel::Vector_3 Vector_3;
-typedef Kernel::Segment_3 Segment_3;
-typedef Kernel::Plane_3 Plane_3;
+#include "SparseMatrixEigen.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /** Define point creator */
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
@@ -119,7 +114,46 @@ class Polyhedron_3 : public CGAL::Polyhedron_3<Kernel, ItemsIndexed,
 	CGAL::HalfedgeDS_vector>
 {
 public:
+	/**
+	 * Gets the vector of vertices from the polyhedron.
+	 *
+	 * @return The vector of all vertices.
+	 */
 	std::vector<Vector_3> getVertices();
+
+	/**
+	 * Generates the support values corresponding to the given support
+	 * directions.
+	 *
+	 * @param directions	Given support directions.
+	 *
+	 * @return Support values constructed for given polyhedron and
+	 * directions.
+	 */
+	VectorXd calculateSupportValues(std::vector<Point_3> directions);
+
+	/**
+	 * Generates the support points corresponding to the given support
+	 * directions.
+	 *
+	 * @param directions	Given support directions.
+	 *
+	 * @return Support points constructed for given polyhedron and
+	 * directions.
+	 */
+	std::vector<Vector3d> calculateSupportPoints(std::vector<Point_3> directions);
+
+
+	/**
+	 * Generates the support data corresponding to the given support
+	 * directions.
+	 *
+	 * @param directions	Given support directions.
+	 *
+	 * @return Support data constructed for given polyhedron and
+	 * directions.
+	 */
+	SupportFunctionDataPtr calculateSupportData(std::vector<Point_3> directions);
 };
 
 #endif /* POLYHEDRONCGAL_H_ */

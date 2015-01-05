@@ -25,6 +25,7 @@
 
 #include "PolyhedronCGAL.h"
 #include "DebugPrint.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 
 std::vector<Vector_3> Polyhedron_3::getVertices()
 {
@@ -36,4 +37,34 @@ std::vector<Vector_3> Polyhedron_3::getVertices()
 	}
 	DEBUG_END;
 	return vertices;
+}
+
+
+VectorXd Polyhedron_3::calculateSupportValues(std::vector<Point_3> directions)
+{
+	DEBUG_START;
+	SupportFunctionDataPtr data = calculateSupportData(directions);
+	VectorXd values = data->supportValues();
+	DEBUG_END;
+	return values;
+}
+
+std::vector<Vector3d> Polyhedron_3::calculateSupportPoints(
+	std::vector<Point_3> directions)
+{
+	DEBUG_START;
+	SupportFunctionDataPtr data = calculateSupportData(directions);
+	std::vector<Vector3d> points = data->supportPoints();
+	DEBUG_END;
+	return points;
+}
+
+SupportFunctionDataPtr Polyhedron_3::calculateSupportData(
+	std::vector<Point_3> directions)
+{
+	DEBUG_START;
+	SupportFunctionDataConstructor ctor;
+	SupportFunctionDataPtr data = ctor.run(*this, directions);
+	DEBUG_END;
+	return data;
 }
