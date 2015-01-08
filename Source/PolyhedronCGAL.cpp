@@ -64,7 +64,7 @@ SupportFunctionDataPtr Polyhedron_3::calculateSupportData(
 {
 	DEBUG_START;
 	SupportFunctionDataConstructor ctor;
-	SupportFunctionDataPtr data = ctor.run(*this, directions);
+	SupportFunctionDataPtr data = ctor.run(directions, *this);
 	DEBUG_END;
 	return data;
 }
