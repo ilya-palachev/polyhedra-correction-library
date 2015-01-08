@@ -207,7 +207,7 @@ std::vector<Vector3d> SupportFunctionData::supportPoints()
 			ERROR_PRINT("Support points were not kept.");
 			exit(EXIT_FAILURE);
 		}
-		points.push_back(item.info.point);
+		points.push_back(item.info->point);
 	}
 	DEBUG_END;
 	return points;
