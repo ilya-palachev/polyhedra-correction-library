@@ -24,21 +24,27 @@
  * - declaration.
  */
 
-#ifndef SUPPORT_FUNCTION_DATA_H
-#define SUPPORT_FUNCTION_DATA_H
+#ifndef SUPPORT_FUNCTION_DATA_H_FORWARD
+#define SUPPORT_FUNCTION_DATA_H_FORWARD
 
-#include <vector>
 #include <memory>
-
-#include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
-#include "PolyhedronCGAL.h"
-#include "SparseMatrixEigen.h"
-
 /* Forward declararion. */
 class SupportFunctionData;
 
 /** Shared pointer to support function data. */
 typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
+
+#endif /* SUPPORT_FUNCTION_DATA_H_FORWARD */
+
+#ifndef SUPPORT_FUNCTION_DATA_H
+#define SUPPORT_FUNCTION_DATA_H
+
+#include <vector>
+
+#include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
+#include "PolyhedronCGAL.h"
+#include "SparseMatrixEigen.h"
+
 
 /** Minimal limit under which support firections are considered to be equal. */
 const double EPS_SUPPORT_DIRECTION_EQUALITY = 1e-15;
