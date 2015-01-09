@@ -42,7 +42,7 @@ typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
 #include <vector>
 
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
-#include "PolyhedronCGAL.h"
+#include "KernelCGAL/KernelCGAL.h"
 #include "SparseMatrixEigen.h"
 
 
