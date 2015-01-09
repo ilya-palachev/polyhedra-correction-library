@@ -1377,38 +1377,20 @@ static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"original-polyhedron.ply") << *pCopy;
 
-	std::vector<Vector3d> directions;
 	if (options->input.model.directionsFileName)
 	{
-		directions = readDirections(options->input.model.directionsFileName);
+		auto directions = readDirections(options->input.model.directionsFileName);
+		auto data = p->calculateSupportData(directions);
+		DEBUG_END;
+		return data;
 	}
 	else
 	{
 		auto shadows = generateSyntheticSCData(options);
-		directions = extractDirectionsFromShadows(shadows);
+		auto data = shadows->calculateSupportData();
+		DEBUG_END;
+		return data;
 	}
-	ASSERT(!directions.empty());
-
-	std::vector<SupportFunctionDataItem> items;
-	for (auto &direction: directions)
-	{
-		double productMax = 0.;
-		for (int i = 0; i < p->numVertices; ++i)
-		{
-			Vector3d vertex = p->vertices[i];
-			product = vertex * direction;
-			if (product > productMax)
-			{
-				productMax = product;
-			}
-		}
-		SupportFunctionDataItem item(direction, productMax);
-		items.push_back(item);
-	}
-	DEBUG_END;
-
-	SupportFunctionDataPtr data(new SupportFunctionData(items))
-	return data;
 }
 
 /**
