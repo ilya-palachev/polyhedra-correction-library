@@ -75,18 +75,18 @@ bool EdgeData::operator !=(EdgeData& e)
 }
 
 
-pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
+std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge std::list", v0, v1);
-	pair<EdgeSetIterator, bool> returnValue;
+	std::pair<EdgeSetIterator, bool> returnValue;
 
 	if (v0 < 0 || v1 < 0 || f0 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
 				v0, v1, f0);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0));
-		returnValue = pair<EdgeSetIterator, bool> (edges.end(), false);
+		returnValue = std::pair<EdgeSetIterator, bool> (edges.end(), false);
 		DEBUG_END;
 		return returnValue;
 	}
@@ -143,7 +143,7 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 			DEBUG_PRINT("Edge [%d, %d] already presents in the std::list,"
 					"facet values are non-empty, skipping...", v0, v1);
 		}
-		returnValue = pair<EdgeSetIterator, bool> (edgeFound, false);
+		returnValue = std::pair<EdgeSetIterator, bool> (edgeFound, false);
 	}
 	else
 	{
@@ -164,11 +164,11 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 	return returnValue;
 }
 
-pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
+std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge std::list", v0, v1);
-	pair<EdgeSetIterator, bool> returnValue;
+	std::pair<EdgeSetIterator, bool> returnValue;
 
 	DEBUG_PRINT("\tnumEdges = %d", numEdges);
 	if (v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0)
@@ -176,7 +176,7 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
 				v0, v1, f0, f1);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0));
-		returnValue = pair<EdgeSetIterator, bool> (edges.end(), false);
+		returnValue = std::pair<EdgeSetIterator, bool> (edges.end(), false);
 		return returnValue;
 	}
 
@@ -210,10 +210,10 @@ pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
 	return returnValue;
 }
 
-pair<EdgeSetIterator, bool> EdgeData::addEdge(Edge& edge)
+std::pair<EdgeSetIterator, bool> EdgeData::addEdge(Edge& edge)
 {
 	DEBUG_START;
-	pair<EdgeSetIterator, bool> returnValue = addEdge(edge.v0, edge.v1,
+	std::pair<EdgeSetIterator, bool> returnValue = addEdge(edge.v0, edge.v1,
 			edge.f0, edge.f1);
 
 	/* Append associations to the edge in set. */

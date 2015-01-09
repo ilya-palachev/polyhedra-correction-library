@@ -31,7 +31,7 @@ class SContour;
 class ShadowContourConstructor: public PDataConstructor
 {
 private:
-	shared_ptr<ShadowContourData> data;
+	std::shared_ptr<ShadowContourData> data;
 	bool* bufferBool;
 	int* bufferInt0;
 	int* bufferInt1;
@@ -46,7 +46,7 @@ private:
 
 public:
 	ShadowContourConstructor(PolyhedronPtr p,
-			shared_ptr<ShadowContourData> d);
+			std::shared_ptr<ShadowContourData> d);
 	~ShadowContourConstructor();
 	void run(int numContoursNeeded, double firstAngle);
 };

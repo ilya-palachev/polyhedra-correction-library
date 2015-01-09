@@ -35,7 +35,6 @@
 #include <queue>
 #include <algorithm>
 #include <memory>
-using namespace std;
 
 /* Includes from auxiliary external libraries (built-in): */
 #include "Vector3d.h"

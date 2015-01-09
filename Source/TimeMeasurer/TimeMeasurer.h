@@ -33,8 +33,6 @@
 
 #include "Timer.h"
 
-using namespace std;
-
 /**
  * time measurer is a data structure of stack of timeval structures
  * When new timer is pushed, it is placed to the stack, and its value will be

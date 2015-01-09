@@ -30,9 +30,9 @@
 class EdgesWorkingSets
 {
 public:
-	std::set<pair<int, int>> edgesErased;
-	std::set<pair<int, int>> edgesAdded;
-	std::set<pair<int, int>> edgesEdited;
+	std::set<std::pair<int, int>> edgesErased;
+	std::set<std::pair<int, int>> edgesAdded;
+	std::set<std::pair<int, int>> edgesEdited;
 };
 
 class EdgeReducer: public PCorrector
@@ -55,7 +55,7 @@ private:
 	bool rePreprocessFacets();
 	bool updateEdges();
 	bool updateVertexInfos();
-	void cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue);
+	void cutDegeneratedVertex(int iVertex, std::queue<int>& facetsQueue);
 
 	bool verifyEdgeData();
 

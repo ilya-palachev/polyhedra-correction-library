@@ -32,7 +32,7 @@ void GlobalShadowCorrector::preprocess()
 {
 	DEBUG_START;
 	edgeData.reset(new EdgeData());
-	shared_ptr<EdgeConstructor> edgeConstructor(new
+	std::shared_ptr<EdgeConstructor> edgeConstructor(new
 			EdgeConstructor(polyhedron));
 	edgeConstructor->run(edgeData);
 	preprocessAssociations();

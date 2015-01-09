@@ -27,8 +27,6 @@
 #include "Polyhedron/Polyhedron.h"
 #include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
 
-using namespace std;
-
 class ClusterNorm
 {
 public:

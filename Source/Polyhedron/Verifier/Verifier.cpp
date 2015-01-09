@@ -513,11 +513,11 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 
-	queue<pair<int, int>> edgesQueue;
+	std::queue<std::pair<int, int>> edgesQueue;
 	for (EdgeSetIterator edge = edgeData->edges.begin();
 			edge != edgeData->edges.end(); ++edge)
 	{
-		edgesQueue.push(pair<int, int> (edge->v0, edge->v1));
+		edgesQueue.push(std::pair<int, int> (edge->v0, edge->v1));
 	}
 
 	int numEdgesDesctructed = 0;
@@ -529,7 +529,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 		DEBUG_PRINT("Iteration %d - start. Number of edges is queue = %ld",
 				iIteration++, (long int) edgesQueue.size());
 
-		pair<int, int> vertexPair = edgesQueue.front();
+		std::pair<int, int> vertexPair = edgesQueue.front();
 		DEBUG_PRINT("Processed edge: [%d, %d]", vertexPair.first,
 				vertexPair.second);
 
@@ -557,14 +557,14 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */
-		for (std::set<pair<int, int>>::iterator itPair =
+		for (std::set<std::pair<int, int>>::iterator itPair =
 				edgesWS.edgesAdded.begin();
 				itPair != edgesWS.edgesAdded.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
 
-		for (std::set<pair<int, int>>::iterator itPair =
+		for (std::set<std::pair<int, int>>::iterator itPair =
 				edgesWS.edgesEdited.begin();
 				itPair != edgesWS.edgesEdited.end(); ++itPair)
 		{

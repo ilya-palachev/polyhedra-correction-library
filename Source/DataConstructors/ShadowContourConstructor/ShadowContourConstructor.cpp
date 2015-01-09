@@ -30,7 +30,7 @@
 #include "Polyhedron/Facet/Facet.h"
 
 ShadowContourConstructor::ShadowContourConstructor(PolyhedronPtr p,
-		shared_ptr<ShadowContourData> d) :
+		std::shared_ptr<ShadowContourData> d) :
 				PDataConstructor(p),
 				data(d),
 				bufferBool(NULL),

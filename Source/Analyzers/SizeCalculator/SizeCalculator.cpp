@@ -29,8 +29,6 @@
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 #include "Polyhedron/Facet/Facet.h"
 
-using namespace std;
-
 SizeCalculator::SizeCalculator() :
 		PAnalyzer()
 {
