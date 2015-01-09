@@ -96,7 +96,7 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 	DEBUG_END;
 }
 
-Polyhedron::Polyhedron(Polyhedron_3 p)
+Polyhedron::Polyhedron(BasePolyhedron_3 p)
 {
 	DEBUG_START;
 
