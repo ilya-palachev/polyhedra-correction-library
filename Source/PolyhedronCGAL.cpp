@@ -23,9 +23,19 @@
  * @brief Inclusions from CGAL library (implementation of additional features).
  */
 
+#include <CGAL/Polyhedron_incremental_builder_3.h>
+
 #include "PolyhedronCGAL.h"
 #include "DebugPrint.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
+#include "Polyhedron/Polyhedron.h"
+
+Polyhedron_3::Polyhedron_3(Polyhedron p)
+{
+	DEBUG_START;
+	
+	DEBUG_END;
+}
 
 std::vector<Vector_3> Polyhedron_3::getVertices()
 {
@@ -40,7 +50,7 @@ std::vector<Vector_3> Polyhedron_3::getVertices()
 }
 
 
-VectorXd Polyhedron_3::calculateSupportValues(std::vector<Point_3> directions)
+VectorXd Polyhedron_3::calculateSupportValues(std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr data = calculateSupportData(directions);
@@ -50,7 +60,7 @@ VectorXd Polyhedron_3::calculateSupportValues(std::vector<Point_3> directions)
 }
 
 std::vector<Vector3d> Polyhedron_3::calculateSupportPoints(
-	std::vector<Point_3> directions)
+	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr data = calculateSupportData(directions);
@@ -60,7 +70,7 @@ std::vector<Vector3d> Polyhedron_3::calculateSupportPoints(
 }
 
 SupportFunctionDataPtr Polyhedron_3::calculateSupportData(
-	std::vector<Point_3> directions)
+	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	SupportFunctionDataConstructor ctor;

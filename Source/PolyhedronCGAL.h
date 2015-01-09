@@ -32,88 +32,35 @@
 #ifndef POLYHEDRONCGAL_H_
 #define POLYHEDRONCGAL_H_
 
-#include "KernelCGAL.h"
-#include <CGAL/HalfedgeDS_vector.h>
+#include "KernelCGAL/KernelCGAL.h"
+typedef Point_3 PCLPoint_3;
+
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
-#include <CGAL/Polyhedron_3.h>
 #include <CGAL/convex_hull_3.h>
 
 #include "SparseMatrixEigen.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "Polyhedron/Polyhedron.h"
 
 /** Define point creator */
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
-/** A vertex type with an ID member variable. */
-template <class Refs, class Point>
-class VertexIndexed : public CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true,
-	Point>
+class Polyhedron_3 : public BasePolyhedron_3
 {
 public:
-	long int id;
+	/**
+	 * Constructs empty CGAL polyhedron from nothing.
+	 */
+	Polyhedron_3(): BasePolyhedron_3() {}
 
-	VertexIndexed() :
-		CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(),
-		id(-1) {}
+	/**
+	 * Constructs CGAL polyhedron from PCL polyhedron.
+	 *
+	 * @param p	The PCL polyhedron.
+	 */
+	Polyhedron_3(Polyhedron p);
 
-	VertexIndexed(const Point_3& point) :
-		CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(point),
-		id(-1) {}
-};
-
-/** A face type with an ID member variable. */
-template <class Refs, class Plane>
-class FaceIndexed : public CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true,
-	Plane>
-{
-public:
-	long int id;
-
-	FaceIndexed() :
-		CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>(),
-		id(-1) {}
-
-	FaceIndexed(const Plane_3& plane) :
-		CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>(plane),
-		id(-1) {}
-};
-
-/** A halfedge type with an ID member variable. */
-template <class Refs>
-class HalfedgeIndexed : public CGAL::HalfedgeDS_halfedge_base<Refs>
-{
-public:
-	long int id;
-};
-
-/** An items type using My_face and My_vertex. */
-struct ItemsIndexed : public CGAL::Polyhedron_items_3
-{
-
-	template <class Refs, class Traits>
-	struct Vertex_wrapper {
-		typedef typename Traits::Point_3 Point;
-		typedef VertexIndexed<Refs, Point> Vertex;
-	};
-
-	template < class Refs, class Traits>
-	struct Halfedge_wrapper {
-		typedef HalfedgeIndexed<Refs> Halfedge;
-	};
-
-	template <class Refs, class Traits>
-	struct Face_wrapper {
-		typedef typename Traits::Plane_3 Plane;
-		typedef FaceIndexed<Refs, Plane> Face;
-	};
-};
-
-
-class Polyhedron_3 : public CGAL::Polyhedron_3<Kernel, ItemsIndexed,
-	CGAL::HalfedgeDS_vector>
-{
-public:
 	/**
 	 * Gets the vector of vertices from the polyhedron.
 	 *
@@ -130,7 +77,8 @@ public:
 	 * @return Support values constructed for given polyhedron and
 	 * directions.
 	 */
-	VectorXd calculateSupportValues(std::vector<Point_3> directions);
+	VectorXd calculateSupportValues(
+			std::vector<PCLPoint_3> directions);
 
 	/**
 	 * Generates the support points corresponding to the given support
@@ -141,7 +89,8 @@ public:
 	 * @return Support points constructed for given polyhedron and
 	 * directions.
 	 */
-	std::vector<Vector3d> calculateSupportPoints(std::vector<Point_3> directions);
+	std::vector<Vector3d> calculateSupportPoints(
+			std::vector<PCLPoint_3> directions);
 
 
 	/**
@@ -153,7 +102,8 @@ public:
 	 * @return Support data constructed for given polyhedron and
 	 * directions.
 	 */
-	SupportFunctionDataPtr calculateSupportData(std::vector<Point_3> directions);
+	SupportFunctionDataPtr calculateSupportData(
+			std::vector<PCLPoint_3> directions);
 };
 
 #endif /* POLYHEDRONCGAL_H_ */
