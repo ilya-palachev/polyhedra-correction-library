@@ -30,6 +30,7 @@
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
+#include "PolyhedronCGAL.h"
 
 /** Constructs support function data from different types of related data. */
 class SupportFunctionDataConstructor
