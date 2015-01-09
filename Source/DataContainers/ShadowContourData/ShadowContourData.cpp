@@ -25,6 +25,7 @@
 #include "DebugAssert.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 
 ShadowContourData::ShadowContourData() :
 	PData(),
@@ -325,4 +326,14 @@ bool ShadowContourData::operator !=(const ShadowContourData& contourData) const
 	bool returnValue = !(*this == contourData);
 	DEBUG_END;
 	return returnValue;
+}
+
+
+SupportFunctionDataPtr ShadowContourData::calculateSupportData()
+{
+	DEBUG_START;
+	SupportFunctionDataConstructor constructor;
+	auto data = constructor.run(this->shared_from_this());
+	DEBUG_END;
+	return data;
 }

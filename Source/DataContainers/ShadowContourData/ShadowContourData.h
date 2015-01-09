@@ -39,6 +39,7 @@ typedef std::shared_ptr<ShadowContourData> ShadowContourDataPtr;
 #define SHADECONTOURDATA_H_
 
 #include "DataContainers/PData/PData.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /* Forward declarations. */
 class SContour;
@@ -49,7 +50,9 @@ class Polyhedron;
  * Usually this data is obtained from experimental measurements or from
  * synthetic generation from simple models.
  */
-class ShadowContourData : public PData
+class ShadowContourData :
+	public std::enable_shared_from_this<ShadowContourData>,
+	public PData
 {
 public:
 	/**
@@ -164,6 +167,13 @@ public:
 	 */
 	bool operator !=(const ShadowContourData& contourData) const;
 
+	/**
+	 * Calculates support function data based on contours that are
+	 * contained in this data.
+	 *
+	 * @return Support function data from contours.
+	 */
+	SupportFunctionDataPtr calculateSupportData();
 };
 
 #endif /* SHADECONTOURDATA_H_ */
