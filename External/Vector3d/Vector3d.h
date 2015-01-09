@@ -29,7 +29,8 @@
 #include <cmath>
 #include <ostream>
 
-#include "KernelCGAL.h"
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+typedef CGAL::Exact_predicates_inexact_constructions_kernel KernelVector3dLocal;
 
 /**
  * Checks the FP equality of double numbers
@@ -78,7 +79,7 @@ public:
 	 *
 	 * @param p	The CGAL point.
 	 */
-	Vector3d(Point_3 p) :
+	Vector3d(KernelVector3dLocal::Point_3 p) :
 		x(p.x()),
 		y(p.y()),
 		z(p.z())
@@ -90,7 +91,7 @@ public:
 	 *
 	 * @param v	The CGAL vector.
 	 */
-	Vector3d(Vector_3 v) :
+	Vector3d(KernelVector3dLocal::Vector_3 v) :
 		x(v.x()),
 		y(v.y()),
 		z(v.z())
