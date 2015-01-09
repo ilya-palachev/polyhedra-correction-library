@@ -26,14 +26,20 @@
 #ifndef KERNELCGAL_H_
 #define KERNELCGAL_H_
 
-
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
-typedef Kernel::Point_3 Point_3;
-typedef Kernel::Vector_3 Vector_3;
+#include "KernelCGAL/Vector_3.h"
+#include "KernelCGAL/Point_3.h"
+#include "KernelCGAL/Plane_3.h"
+
 typedef Kernel::Segment_3 Segment_3;
-typedef Kernel::Plane_3 Plane_3;
+
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/HalfedgeDS_vector.h>
+
+#include "KernelCGAL/ItemsIndexed.h"
+typedef CGAL::Polyhedron_3<Kernel, ItemsIndexed,
+	CGAL::HalfedgeDS_vector> BasePolyhedron_3;
 
 #endif /* KERNELCGAL_H_ */
