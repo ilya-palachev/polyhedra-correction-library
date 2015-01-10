@@ -73,10 +73,9 @@ int main(int argc, char** argv)
 	
 	polyhedron->printSortedByAreaFacets();
 
-	shared_ptr<ShadowContourData> contourData(new ShadowContourData(polyhedron));
-	shared_ptr<ShadowContourConstructor> scConstructor(new ShadowContourConstructor(
-			polyhedron, contourData));
-	scConstructor->run(parameters.numContours, parameters.shiftAngleFirst);
+	ShadowContourDataPtr contourData(new ShadowContourData(polyhedron));
+	ShadowContourConstructor scConstructor(polyhedron, contourData);
+	scConstructor.run(parameters.numContours, parameters.shiftAngleFirst);
 	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
 
 	polyhedron->fprint_ply_scale(1000.,
@@ -228,28 +227,28 @@ PolyhedronPtr makePolyhedron(NameFigure figureParsed)
 	{
 	case FIGURE_CUBE:
 	{
-		PolyhedronPtr ret = make_shared<Cube>(1., 0., 0., 0.);
+		PolyhedronPtr ret = std::make_shared<Cube>(1., 0., 0., 0.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_PYRAMID:
 	{
-		PolyhedronPtr ret = make_shared<Pyramid>(3, 1., 1.);
+		PolyhedronPtr ret = std::make_shared<Pyramid>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_PRISM:
 	{
-		PolyhedronPtr ret = make_shared<Prism>(3, 1., 1.);
+		PolyhedronPtr ret = std::make_shared<Prism>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
 		break;
 	case FIGURE_CUBE_CUTTED:
 	{
-		PolyhedronPtr ret = make_shared<CubeCutted>();
+		PolyhedronPtr ret = std::make_shared<CubeCutted>();
 		DEBUG_END;
 		return ret;
 	}

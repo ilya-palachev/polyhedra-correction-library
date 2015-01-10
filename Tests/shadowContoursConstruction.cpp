@@ -35,11 +35,9 @@ int main(int argc, char** argv)
 	/* Create a cube with side 1 and with center in the O = (0, 0, 0). */
 	PolyhedronPtr cube(new Cube(1., 0., 0., 0.));
 
-	shared_ptr<ShadowContourData> contourData(new
-			ShadowContourData(cube));
-	shared_ptr<ShadowContourConstructor> scConstructor(new
-			ShadowContourConstructor(cube, contourData));
-	scConstructor->run(NUM_CONTOURS, SHIFT_ANGLE_FIRST);
+	ShadowContourDataPtr contourData(new ShadowContourData(cube));
+	ShadowContourConstructor scConstructor(cube, contourData);
+	scConstructor.run(NUM_CONTOURS, SHIFT_ANGLE_FIRST);
 
 	/* In case when environmental variable
 	 * "SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN" is defined, do printing of
@@ -55,7 +53,7 @@ int main(int argc, char** argv)
 	{
 		DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 
-		shared_ptr<ShadowContourData> contourDataOriginal(new
+		ShadowContourDataPtr contourDataOriginal(new
 				ShadowContourData(cube));
 		bool ifScanSucceeded =
 				contourDataOriginal->fscanDefault(nameFileOriginal);
