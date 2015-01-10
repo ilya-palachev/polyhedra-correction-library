@@ -1186,7 +1186,7 @@ static Polyhedron *makePolyhedron(RecovererTestModelID id)
 	return NULL;
 }
 
-static Polyhedron *makeModel(CommandLineOptions *options)
+static Polyhedron_3 makeModel(CommandLineOptions *options)
 {
 	DEBUG_START;
 	Polyhedron *p = NULL;
@@ -1199,8 +1199,9 @@ static Polyhedron *makeModel(CommandLineOptions *options)
 	{
 		p = makePolyhedron(options->input.model.id);
 	}
+	Polyhedron_3 pCGAL(*p);
 	DEBUG_END;
-	return p;
+	return pCGAL;
 }
 
 /**
@@ -1294,8 +1295,8 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	DEBUG_START;
 
 	/* Create polyhedron based on one of possible models. */
-	PolyhedronPtr p(makeModel(options));
-	Polyhedron *pCopy = makeModel(options);
+	PolyhedronPtr p(new Polyhedron(makeModel(options)));
+	Polyhedron *pCopy = new Polyhedron(makeModel(options));
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
@@ -1351,7 +1352,7 @@ static ShadowContourDataPtr makeShadowData(CommandLineOptions* options)
 	return SCData;
 }
 
-static std::vector<Vector3d> readDirections(char *fileName)
+static std::vector<Point_3> readDirections(char *fileName)
 {
 	DEBUG_START;
 	std::ifstream input(fileName);
@@ -1361,26 +1362,29 @@ static std::vector<Vector3d> readDirections(char *fileName)
 
 	DEBUG_PRINT("Read %d vectors from file %s.", vectors.size(), fileName);
 
+	std::vector<Point_3> points;
+	for (auto &v: vectors)
+	{
+		Point_3 p = v;
+		points.push_back(p);
+	}
 	DEBUG_END;
-	return vectors;
+	return points;
 }
 
 static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 {
 	DEBUG_START;
 	/* Create polyhedron based on one of possible models. */
-	PolyhedronPtr p(makeModel(options));
-	Polyhedron *pCopy = makeModel(options);
-
-	/* Set the pointer to the parent polyhedron in facets. */
-	p->set_parent_polyhedron_in_facets();
+	Polyhedron_3 p = makeModel(options);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		"original-polyhedron.ply") << *pCopy;
+		"original-polyhedron.ply") << p;
 
 	if (options->input.model.directionsFileName)
 	{
-		auto directions = readDirections(options->input.model.directionsFileName);
-		auto data = p->calculateSupportData(directions);
+		auto directions = readDirections(
+				options->input.model.directionsFileName);
+		auto data = p.calculateSupportData(directions);
 		DEBUG_END;
 		return data;
 	}
@@ -1490,15 +1494,19 @@ int main(int argc, char** argv)
 		 * option.
 		 */
 		auto data = makeShadowData(options);
+
+		/* Run the recovery. */
+		runRecovery(options, recoverer, data);
 	}
 	else
 	{
 		/* Make support function data. */
 		auto data = makeSupportData(options);
+
+		/* Run the recovery. */
+		runRecovery(options, recoverer, data);
 	}
 
-	/* Run the recovery. */
-	runRecovery(options, recoverer, data);
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
