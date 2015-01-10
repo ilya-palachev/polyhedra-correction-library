@@ -19,7 +19,7 @@
  */
 
 /**
- * @file PolyhedronCGAL.h
+ * @file Polyhedron_3.h
  * @brief Inclusions from CGAL library.
  *
  * Based on official CGAL tutorial available at

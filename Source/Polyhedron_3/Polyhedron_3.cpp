@@ -25,7 +25,7 @@
 
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 
-#include "PolyhedronCGAL.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 #include "DebugPrint.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Polyhedron/Polyhedron.h"

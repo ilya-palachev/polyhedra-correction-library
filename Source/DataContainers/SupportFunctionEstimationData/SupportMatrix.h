@@ -28,7 +28,7 @@
 #define SUPPORT_MATRIX_H
 
 #include "SparseMatrixEigen.h"
-#include "PolyhedronCGAL.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 
 /** General support matrix that contains sparse matrix. */
 class SupportMatrix : public SparseMatrix
