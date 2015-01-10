@@ -50,7 +50,8 @@ std::vector<Vector_3> Polyhedron_3::getVertices()
 }
 
 
-VectorXd Polyhedron_3::calculateSupportValues(std::vector<PCLPoint_3> directions)
+VectorXd Polyhedron_3::calculateSupportValues(
+	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr data = calculateSupportData(directions);
@@ -77,4 +78,13 @@ SupportFunctionDataPtr Polyhedron_3::calculateSupportData(
 	SupportFunctionDataPtr data = ctor.run(directions, *this);
 	DEBUG_END;
 	return data;
+}
+
+std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
+{
+	DEBUG_START;
+	PolyhedronPtr polyhedronPCL(new Polyhedron(p));
+	stream << polyhedronPCL;
+	DEBUG_END;
+	return stream;
 }

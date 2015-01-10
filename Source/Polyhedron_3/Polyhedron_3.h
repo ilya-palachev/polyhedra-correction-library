@@ -104,6 +104,17 @@ public:
 	 */
 	SupportFunctionDataPtr calculateSupportData(
 			std::vector<PCLPoint_3> directions);
+
+	/**
+	 * Writes polyhedron to stream in PLY format, by converting it to PCL
+	 * polyhedron and then printing it in PLY format.
+	 *
+	 * @param stream	Output stream
+	 * @param p		The polyhedron
+	 *
+	 * @return		The stream ready for further outputs
+	 */
+	friend std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p);
 };
 
 #endif /* POLYHEDRONCGAL_H_ */
