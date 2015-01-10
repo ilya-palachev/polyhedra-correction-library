@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 	}
 	polyhedron->my_fprint(stderr);
 
-	shared_ptr<ShadowContourData> contourData(new ShadowContourData(polyhedron));
+	ShadowContourDataPtr contourData(new ShadowContourData(polyhedron));
 	if (!contourData->fscanDefault(parameters.fileNameShadowContours))
 	{
 		DEBUG_END;
