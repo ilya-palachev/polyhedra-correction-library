@@ -227,11 +227,36 @@ public:
 
 	Vector3d perpendicular() const;
 
+	/**
+	 * Prints vector to the stream.
+	 *
+	 * @param stream	The output stream
+	 * @param a		The vector
+	 *
+	 * @return The stream ready for further printing
+	 */
 	friend std::ostream &operator <<(std::ostream &stream,
 			const Vector3d &a)
 	{
 		stream << "(" << a.x << ", " << a.y << ", " << a.z << ")";
 		return stream;
+	}
+
+	/**
+	 * Scans vector from the stream.
+	 *
+	 * @param stream	The input stream
+	 * @param a		The vector
+	 *
+	 * @return The stream ready for further scanning
+	 */
+	friend std::istream &operator >>(std::istream &stream,
+			Vector3d &a)
+	{
+		 stream >> a.x;
+		 stream >> a.y;
+		 stream >> a.z;
+		 return stream;
 	}
 };
 
