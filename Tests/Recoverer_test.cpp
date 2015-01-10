@@ -580,12 +580,12 @@ static void printUsage(int argc, char** argv)
 		" of contours>]\n", argv[0], OPTION_FILE_NAME,
 		OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("Options:\n");
-	int i = 0;
-	PCLOption *option = &optionsLong[i];
+	PCLOption *option = optionsLong;
 	while (option->name)
 	{
 		printUsageOption((char) option->val, option->name,
 				option->comment);
+		++option;
 	}
 
 	STDERR_PRINT("\nPossible synthetic models are:\n");
