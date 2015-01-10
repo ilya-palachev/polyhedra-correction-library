@@ -23,17 +23,83 @@
  * @brief Inclusions from CGAL library (implementation of additional features).
  */
 
-#include <CGAL/Polyhedron_incremental_builder_3.h>
-
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DebugPrint.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
+
+#include <CGAL/Polyhedron_incremental_builder_3.h>
+
+/**
+ * Builds CGAL polyhedron from PCL polyhedron.
+ *
+ * Based on example described at
+ * http://doc.cgal.org/latest/Polyhedron/classCGAL_1_1Polyhedron__incremental__builder__3.html
+ */
+template <class HDS>
+class BuilderFromPCLPolyhedron: public CGAL::Modifier_base<HDS>
+{
+public:
+	/** The PCL polyhedron. */
+	const Polyhedron polyhedron;
+
+	/**
+	 * Constructs the builder.
+	 *
+	 * @param p	The PCL polyhedron
+	 */
+	BuilderFromPCLPolyhedron(const Polyhedron p): polyhedron(p) {}
+
+	/**
+	 * Builds CGAL polyhedron from PCL polyhedron.
+	 *
+	 * @param hds	TODO: I don't understand what it means...
+	 */
+	void operator()(HDS& hds)
+	{
+		CGAL::Polyhedron_incremental_builder_3<HDS> builder(hds, true);
+
+		/* Count edges of polyhedron. */
+		int numHalfedges = 0;
+		for (int i = 0; i < polyhedron.numFacets; ++i)
+			numHalfedges += polyhedron.facets[i].numVertices;
+		
+		/* TODO: Add assertion of Euler's rule. */
+
+		builder.begin_surface(polyhedron.numVertices,
+				polyhedron.numFacets, numHalfedges);
+		typedef typename HDS::Vertex Vertex;
+		typedef typename Vertex::Point Point;
+
+		for (int i = 0; i < polyhedron.numVertices; ++i)
+		{
+			Vector3d vertice = polyhedron.vertices[i];
+			builder.add_vertex(Point(vertice.x, vertice.y,
+						vertice.z));
+		}
+
+		for (int i = 0; i < polyhedron.numFacets; ++i)
+		{
+			Facet *facet = &polyhedron.facets[i];
+			builder.begin_facet();
+			for (int j = 0; j < facet->numVertices; ++j)
+			{
+				builder.add_vertex_to_facet(
+						facet->indVertices[j]);
+			}
+			builder.end_facet();
+		}
+
+		builder.end_surface();
+	}
+};
 
 Polyhedron_3::Polyhedron_3(Polyhedron p)
 {
 	DEBUG_START;
-	
+	BuilderFromPCLPolyhedron<HalfedgeDS> builder(p);
+	this->delegate(builder);
 	DEBUG_END;
 }
 
