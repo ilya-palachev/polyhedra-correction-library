@@ -25,6 +25,7 @@
 
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
@@ -32,7 +33,7 @@
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 
 /**
- * Builds CGAL polyhedron from PCL polyhedron.
+ * Builds CGAL polyhedron from PCL polyhedron->
  *
  * Based on example described at
  * http://doc.cgal.org/latest/Polyhedron/classCGAL_1_1Polyhedron__incremental__builder__3.html
@@ -41,64 +42,81 @@ template <class HDS>
 class BuilderFromPCLPolyhedron: public CGAL::Modifier_base<HDS>
 {
 public:
-	/** The PCL polyhedron. */
-	const Polyhedron polyhedron;
+	/** The PCL polyhedron-> */
+	Polyhedron *polyhedron;
 
 	/**
 	 * Constructs the builder.
 	 *
 	 * @param p	The PCL polyhedron
 	 */
-	BuilderFromPCLPolyhedron(const Polyhedron p): polyhedron(p) {}
+	BuilderFromPCLPolyhedron(Polyhedron *p): polyhedron(p)
+	{
+		DEBUG_START;
+		DEBUG_END;
+	}
 
 	/**
-	 * Builds CGAL polyhedron from PCL polyhedron.
+	 * Builds CGAL polyhedron from PCL polyhedron->
 	 *
 	 * @param hds	TODO: I don't understand what it means...
 	 */
 	void operator()(HDS& hds)
 	{
+		DEBUG_START;
 		CGAL::Polyhedron_incremental_builder_3<HDS> builder(hds, true);
 
-		/* Count edges of polyhedron. */
+		ASSERT(polyhedron->numVertices > 0);
+		ASSERT(polyhedron->numFacets > 0);
+
+		/* Count edges of polyhedron-> */
 		int numHalfedges = 0;
-		for (int i = 0; i < polyhedron.numFacets; ++i)
-			numHalfedges += polyhedron.facets[i].numVertices;
+		for (int i = 0; i < polyhedron->numFacets; ++i)
+			numHalfedges += polyhedron->facets[i].numVertices;
+		ASSERT(numHalfedges > 0);
 		
 		/* TODO: Add assertion of Euler's rule. */
 
-		builder.begin_surface(polyhedron.numVertices,
-				polyhedron.numFacets, numHalfedges);
+		builder.begin_surface(polyhedron->numVertices,
+				polyhedron->numFacets, numHalfedges);
 		typedef typename HDS::Vertex Vertex;
 		typedef typename Vertex::Point Point;
 
-		for (int i = 0; i < polyhedron.numVertices; ++i)
+		for (int i = 0; i < polyhedron->numVertices; ++i)
 		{
-			Vector3d vertice = polyhedron.vertices[i];
+			Vector3d vertice = polyhedron->vertices[i];
 			builder.add_vertex(Point(vertice.x, vertice.y,
 						vertice.z));
 		}
 
-		for (int i = 0; i < polyhedron.numFacets; ++i)
+		for (int i = 0; i < polyhedron->numFacets; ++i)
 		{
-			Facet *facet = &polyhedron.facets[i];
+			Facet *facet = &polyhedron->facets[i];
+			DEBUG_PRINT("Constructing facet #%d, number = %d", i,
+					facet->numVertices);
+			if (facet->numVertices <= 0)
+				continue;
 			builder.begin_facet();
 			for (int j = 0; j < facet->numVertices; ++j)
 			{
-				builder.add_vertex_to_facet(
-						facet->indVertices[j]);
+				int ind = facet->indVertices[j];
+				ASSERT(ind >= 0);
+				ASSERT(ind < polyhedron->numVertices);
+				builder.add_vertex_to_facet(ind);
 			}
 			builder.end_facet();
 		}
 
 		builder.end_surface();
+		DEBUG_END;
 	}
 };
 
 Polyhedron_3::Polyhedron_3(Polyhedron p)
 {
 	DEBUG_START;
-	BuilderFromPCLPolyhedron<HalfedgeDS> builder(p);
+	Polyhedron *copy = new Polyhedron(p);
+	BuilderFromPCLPolyhedron<HalfedgeDS> builder(copy);
 	this->delegate(builder);
 	DEBUG_END;
 }
