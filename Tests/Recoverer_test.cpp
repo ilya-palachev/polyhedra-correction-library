@@ -111,7 +111,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:bd:f:i:l:m:M:n:o:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:f:i:l:m:M:n:o:r:st:vx"
 
 struct PCLOption: public option
 {
