@@ -169,6 +169,8 @@ Polyhedron::Polyhedron(BasePolyhedron_3 p)
 		facets[iFacet].indVertices[facets[iFacet].numVertices] =
 			facets[iFacet].indVertices[0];
 
+		ASSERT(facets[iFacet].correctPlane());
+
 		/* Increment the ID of facet. */
 		++iFacet;
 
