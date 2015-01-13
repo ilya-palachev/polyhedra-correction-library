@@ -130,6 +130,13 @@ public:
 	void test_pair_neighbours();
 	bool verifyUniqueValues(void);
 
+	/**
+	 * Checks whether the plane of facet is correct.
+	 *
+	 * @return true/false if the plane is correct or not.
+	 */
+	bool correctPlane();
+
 };
 
 #endif	/* FACET_H */

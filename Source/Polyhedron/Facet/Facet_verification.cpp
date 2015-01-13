@@ -145,3 +145,11 @@ bool Facet::verifyUniqueValues(void)
 	return (vertices.size() == (unsigned) numVertices)
 		&& (facets.size() == (unsigned) numVertices);
 }
+
+bool Facet::correctPlane()
+{
+	DEBUG_START;
+	bool result = !equal(plane.norm, Vector3d(0., 0., 0.), EPS_MIN_DOUBLE);
+	DEBUG_END;
+	return result;
+}
