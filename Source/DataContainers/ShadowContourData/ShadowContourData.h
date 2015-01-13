@@ -174,6 +174,13 @@ public:
 	 * @return Support function data from contours.
 	 */
 	SupportFunctionDataPtr calculateSupportData();
+
+	/**
+	 * Reports whether the data is empty.
+	 *
+	 * @return true/false if data is empty or not.
+	 */
+	bool empty();
 };
 
 #endif /* SHADECONTOURDATA_H_ */

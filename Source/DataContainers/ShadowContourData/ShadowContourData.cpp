@@ -337,3 +337,26 @@ SupportFunctionDataPtr ShadowContourData::calculateSupportData()
 	DEBUG_END;
 	return data;
 }
+
+bool ShadowContourData::empty()
+{
+	DEBUG_START;
+	if (numContours <= 0)
+	{
+		DEBUG_END;
+		return false;
+	}
+
+	int numSidesTotal = 0;
+	for (int i = 0; i < numContours; ++i)
+	{
+		int numSides = contours[i].ns;
+		ASSERT(numSides >= 0);
+		numSidesTotal += numSides;
+	}
+	DEBUG_PRINT("Total number of sides = %d", numSidesTotal);
+	bool result = (numSidesTotal <= 0);
+	DEBUG_PRINT("Result: %d", result);
+	DEBUG_END;
+	return result;
+}
