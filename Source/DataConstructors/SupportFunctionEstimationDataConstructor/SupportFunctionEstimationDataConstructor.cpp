@@ -236,8 +236,14 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 	std::vector<Plane_3> planes = data->supportPlanes();
 	Polyhedron_3 intersection;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			"support-planes-for-halfspaces_intersection.txt")
-		<< planes;
+		"support-planes-for-halfspaces_intersection.txt") << planes;
+
+	if (planes.empty())
+	{
+		ERROR_PRINT("No support planes are given!");
+		exit(EXIT_FAILURE);
+	}
+
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
 
@@ -253,6 +259,13 @@ static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 	VectorXd startingVector(3 * data->size());
 	VectorXd supportVector = data->supportValues();
 	std::vector<Vector3d> supportDirections = data->supportDirections();
+
+	if (supportDirections.empty())
+	{
+		ERROR_PRINT("No support directions are given!");
+		exit(EXIT_FAILURE);
+	}
+
 	std::vector<Point_3> points;
 	for (unsigned int i = 0; i < supportDirections.size(); ++i)
 	{
