@@ -46,6 +46,13 @@ double Facet::calculateAreaAndMaybeCenter(bool ifCalculateCenter,
 	Vector3d centerLocal(0., 0., 0.);
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
+		if (polyhedron->numVertices <= 0)
+		{
+			ERROR_PRINT("The polyhedron is empty!");
+			DEBUG_END;
+			return 0.;
+		}
+
 		/* The vertex of observation is chosen as the 0th vertex. */
 		Vector3d A0 = polyhedron->vertices[indVertices[0]];
 
