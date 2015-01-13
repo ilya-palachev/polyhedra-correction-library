@@ -87,6 +87,7 @@ public:
 		std::string filename = dumper.nameBase_ + "."
 			+ std::to_string(dumper.iCurrentDumpCount_) + "."
 			+ dumper.nameSuffix_;
+		DEBUG_PRINT("file name = %s", filename.c_str());
 		stream.open(filename, std::ofstream::out);
 
 		switch (dumper.level_)
