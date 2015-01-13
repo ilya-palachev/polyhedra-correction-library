@@ -183,6 +183,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 
 	ASSERT(data);
 	ASSERT(data->numContours > 0);
+	ASSERT(!data->empty());
 	numFacets = data->numContours;
 	facets = new Facet[numFacets];
 
@@ -194,6 +195,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 	{
 		SContour* contour = &data->contours[iContour];
 		auto verticesPortion = contour->getPoints();
+		ASSERT(!verticesPortion.empty());
 		
 		Facet *facet = &facets[iContour];
 		facet->id = iContour;
@@ -223,6 +225,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 	}
 	vertexInfos = new VertexInfo[numVertices];
 
+	ASSERT(numVertices > 0);
 	DEBUG_END;
 }
 
