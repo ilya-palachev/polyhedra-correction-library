@@ -118,6 +118,10 @@ Polyhedron_3::Polyhedron_3(Polyhedron p)
 	Polyhedron *copy = new Polyhedron(p);
 	BuilderFromPCLPolyhedron<HalfedgeDS> builder(copy);
 	this->delegate(builder);
+	ASSERT(size_of_vertices() == (unsigned) p.numVertices);
+	ASSERT(size_of_facets() == (unsigned) p.numFacets);
+	ASSERT(size_of_vertices() > 0);
+	ASSERT(size_of_facets() > 0);
 	DEBUG_END;
 }
 
