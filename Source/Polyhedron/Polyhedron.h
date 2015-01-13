@@ -883,6 +883,13 @@ public:
 	 * @retval	The number of detected self-intersections.
 	 */
 	int checkEdges(EdgeDataPtr edgeData);
+
+	/**
+	 * Checks whether the planes of facets are all non-zero.
+	 *
+	 * @return true, if all planes are non-zero
+	 */
+	bool nonZeroPlanes();
 };
 
 #endif	/* POLYHEDRON_H */
