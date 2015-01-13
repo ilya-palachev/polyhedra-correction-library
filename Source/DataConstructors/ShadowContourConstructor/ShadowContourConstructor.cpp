@@ -140,6 +140,12 @@ void ShadowContourConstructor::createContour(int idOfContour,
 	DEBUG_PRINT("Number of visible edges = %ld",
 		(long unsigned int) edgesVisible.size());
 
+	if (edgesVisible.empty())
+	{
+		DEBUG_END;
+		return;
+	}
+
 	EdgeSetIterator edgeCurr = edgesVisible.begin();
 	int iVertexCurr = edgeCurr->v1;
 	for (int iSide = 0; iSide < (int) edgesVisible.size(); ++iSide)
@@ -149,16 +155,16 @@ void ShadowContourConstructor::createContour(int idOfContour,
 		for (EdgeSetIterator edgeNext = edgesVisible.begin();
 				edgeNext != edgesVisible.end(); ++edgeNext)
 		{
-			DEBUG_PRINT("edgeCurr = edge #%d (i. e. [%d, %d])", edgeCurr->id,
-				edgeCurr->v0, edgeCurr->v1);
-			DEBUG_PRINT("edgeNext = edge #%d (i. e. [%d, %d])", edgeNext->id,
-				edgeNext->v0, edgeNext->v1);
+			DEBUG_PRINT("edgeCurr = edge #%d (i. e. [%d, %d])",
+				edgeCurr->id, edgeCurr->v0, edgeCurr->v1);
+			DEBUG_PRINT("edgeNext = edge #%d (i. e. [%d, %d])",
+				edgeNext->id, edgeNext->v0, edgeNext->v1);
 			if ((edgeNext->v0 != iVertexCurr &&
-							edgeNext->v1 != iVertexCurr) ||
-					(edgeCurr->v0 == edgeNext->v0 &&
-							edgeCurr->v1 == edgeNext->v1) ||
-					(edgeCurr->v0 == edgeNext->v1 &&
-							edgeCurr->v1 == edgeNext->v0))
+				edgeNext->v1 != iVertexCurr) ||
+				(edgeCurr->v0 == edgeNext->v0 &&
+						edgeCurr->v1 == edgeNext->v1) ||
+				(edgeCurr->v0 == edgeNext->v1 &&
+						edgeCurr->v1 == edgeNext->v0))
 			{
 				DEBUG_PRINT("Continuing...");
 				continue;
@@ -167,7 +173,8 @@ void ShadowContourConstructor::createContour(int idOfContour,
 			Vector3d A1, A2;
 			if (edgeNext->v0 == iVertexCurr)
 			{
-				DEBUG_PRINT("Projection of edge [%d, %d] is added to contour",
+				DEBUG_PRINT("Projection of edge [%d, %d] is "
+					"added to contour",
 					edgeNext->v0, edgeNext->v1);
 				A1 = polyhedron->vertices[edgeNext->v0];
 				A2 = polyhedron->vertices[edgeNext->v1];
@@ -175,7 +182,8 @@ void ShadowContourConstructor::createContour(int idOfContour,
 			}
 			else
 			{
-				DEBUG_PRINT("Projection of edge [%d, %d] is added to contour",
+				DEBUG_PRINT("Projection of edge [%d, %d] is "
+					"added to contour",
 					edgeNext->v1, edgeNext->v0);
 				A1 = polyhedron->vertices[edgeNext->v1];
 				A2 = polyhedron->vertices[edgeNext->v0];
