@@ -33,6 +33,19 @@
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 
 /**
+ * A functor computing the plane containing a triangular facet
+ */
+struct Plane_from_facet
+{
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
+	{
+		Polyhedron_3::Halfedge_handle h = f.halfedge();
+		return Polyhedron_3::Plane_3(h->vertex()->point(),
+				h->next()->vertex()->point(), h->opposite()->vertex()->point());
+	}
+};
+
+/**
  * Builds CGAL polyhedron from PCL polyhedron->
  *
  * Based on example described at
@@ -115,9 +128,18 @@ public:
 Polyhedron_3::Polyhedron_3(Polyhedron p)
 {
 	DEBUG_START;
+
 	Polyhedron *copy = new Polyhedron(p);
 	BuilderFromPCLPolyhedron<HalfedgeDS> builder(copy);
 	this->delegate(builder);
+	
+	/*
+	 * assign a plane equation to each polyhedron facet using functor
+	 * Plane_from_facet
+	 */
+	std::transform(facets_begin(), facets_end(), planes_begin(),
+		Plane_from_facet());
+
 	ASSERT(size_of_vertices() == (unsigned) p.numVertices);
 	ASSERT(size_of_facets() == (unsigned) p.numFacets);
 	ASSERT(size_of_vertices() > 0);
