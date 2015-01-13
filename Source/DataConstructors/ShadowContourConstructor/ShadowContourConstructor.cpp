@@ -66,6 +66,8 @@ ShadowContourConstructor::~ShadowContourConstructor()
 void ShadowContourConstructor::run(int numContoursNeeded, double firstAngle)
 {
 	DEBUG_START;
+	ASSERT(polyhedron->nonZeroPlanes());
+
 	polyhedron->preprocessAdjacency();
 	EdgeConstructor* edgeConstructor = new EdgeConstructor(polyhedron);
 	edgeConstructor->run(edgeData);
