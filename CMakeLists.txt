@@ -153,7 +153,7 @@ set (INCLUDE_DIRS_all
 )
 
 # Common compiler flags used for build:
-set(COMMON_FLAGS "")
+set(COMMON_FLAGS "-g")
 # Enable C++11:
 set(COMMON_FLAGS "${COMMON_FLAGS} -std=c++11")
 # Enable the most strict compiler errors:
