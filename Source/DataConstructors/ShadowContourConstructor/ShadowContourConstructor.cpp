@@ -219,6 +219,13 @@ bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 	Plane pi1 = polyhedron->facets[f1].plane;
 	double sign0 = pi0.norm * planeOfProjection.norm;
 	double sign1 = pi1.norm * planeOfProjection.norm;
+#ifndef NDEBUG
+	std::cout << pi0 << std::endl << pi1 << std::endl;
+#endif /* NDEBUG */
+	ASSERT(!!pi0.norm);
+	ASSERT(!!pi1.norm);
+	ASSERT(!equal(pi0.norm, Vector3d(0., 0., 0.), EPS_MIN_DOUBLE));
+	ASSERT(!equal(pi1.norm, Vector3d(0., 0., 0.), EPS_MIN_DOUBLE));
 
 	if ((sign0 > EPS_COLLINEARITY && sign1 > EPS_COLLINEARITY)
 			|| (sign0 < EPS_COLLINEARITY && sign1 < EPS_COLLINEARITY))
