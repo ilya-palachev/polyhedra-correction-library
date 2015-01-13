@@ -288,6 +288,14 @@ void Polyhedron::get_boundary(double& xmin, double& xmax, double& ymin,
 	int i;
 	double tmp;
 
+	if (numVertices <= 0)
+	{
+		ERROR_PRINT("Number of vertices is %d, so getting boundary is "
+				"aborted!", numVertices);
+		xmin = xmax = ymin = ymax = zmin = zmax = 0.;
+		DEBUG_END;
+		return;
+	}
 	xmin = xmax = vertices[0].x;
 	ymin = ymax = vertices[0].y;
 	zmin = zmax = vertices[0].z;
