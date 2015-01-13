@@ -1199,6 +1199,7 @@ static Polyhedron_3 makeModel(CommandLineOptions *options)
 	{
 		p = makePolyhedron(options->input.model.id);
 	}
+	ASSERT(p->numVertices > 0);
 	Polyhedron_3 pCGAL(*p);
 	DEBUG_END;
 	return pCGAL;
@@ -1319,13 +1320,18 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	/* Generate shadow contours data for given model. */
 	constructor->run(options->input.model.numContours,
 			options->input.model.shiftAngleFirst);
+	ASSERT(!SCData->empty());
+
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"original-unshifted-contours.dat") << SCData;
+	ASSERT(!SCData->empty());
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"original-unshifted-contours.ply") << Polyhedron(SCData);
+	ASSERT(!SCData->empty());
 
 	/* Shift points contours on random std::vectors. */
 	shiftContoursRandom(SCData, options->input.model.limitRandom);
+	ASSERT(!SCData->empty());
 
 	DEBUG_END;
 	return SCData;
