@@ -1300,6 +1300,7 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 
 	/* Create polyhedron based on one of possible models. */
 	PolyhedronPtr p(new Polyhedron(makeModel(options)));
+	ASSERT(p->nonZeroPlanes());
 	Polyhedron *pCopy = new Polyhedron(makeModel(options));
 
 	/* Set the pointer to the parent polyhedron in facets. */
@@ -1314,6 +1315,7 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	 * Create shadow contour constructor and associate p and SCData with
 	 * them.
 	 */
+	ASSERT(p->nonZeroPlanes());
 	ShadowContourConstructorPtr constructor(new ShadowContourConstructor(p,
 			SCData));
 
