@@ -1263,6 +1263,9 @@ static void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
 		SContour* contour = &data->contours[iContour];
+		if (contour->ns <= 0)
+			continue;
+
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{
 			SideOfContour* side = &contour->sides[iSide];
