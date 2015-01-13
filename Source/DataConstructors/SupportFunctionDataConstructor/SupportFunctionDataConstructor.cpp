@@ -139,6 +139,8 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	DEBUG_START;
 	ASSERT(data);
 	ASSERT(data->numContours > 0);
+	ASSERT(!data->empty());
+
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"initial-contours.dat") << *data;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
