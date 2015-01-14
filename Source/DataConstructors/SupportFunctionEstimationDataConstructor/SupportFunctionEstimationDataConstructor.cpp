@@ -244,6 +244,8 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 		exit(EXIT_FAILURE);
 	}
 
+	DEBUG_PRINT("Computing intersection of %ld halfspaces.", planes.size());
+	ASSERT(planes.size() > 3);
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 		intersection, Kernel());
 
