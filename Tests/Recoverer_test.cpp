@@ -1388,6 +1388,13 @@ static std::vector<Point_3> readDirections(char *fileName)
 	DEBUG_START;
 	std::ifstream input(fileName);
 
+	if (!input.is_open())
+	{
+		ERROR_PRINT("File %s does not exist!", fileName);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
 	std::istream_iterator<Vector3d> start(input), end;
 	std::vector<Vector3d> vectors(start, end);
 	ASSERT(!vectors.empty());
