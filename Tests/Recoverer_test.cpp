@@ -1390,6 +1390,7 @@ static std::vector<Point_3> readDirections(char *fileName)
 
 	std::istream_iterator<Vector3d> start(input), end;
 	std::vector<Vector3d> vectors(start, end);
+	ASSERT(!vectors.empty());
 
 	DEBUG_PRINT("Read %d vectors from file %s.", (int) vectors.size(),
 			fileName);
