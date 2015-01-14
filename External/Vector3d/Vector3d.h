@@ -32,6 +32,8 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 typedef CGAL::Exact_predicates_inexact_constructions_kernel KernelVector3dLocal;
 
+#include "DebugPrint.h"
+
 /**
  * Checks the FP equality of double numbers
  *
@@ -238,7 +240,9 @@ public:
 	friend std::ostream &operator <<(std::ostream &stream,
 			const Vector3d &a)
 	{
+		DEBUG_START;
 		stream << "(" << a.x << ", " << a.y << ", " << a.z << ")";
+		DEBUG_END;
 		return stream;
 	}
 
@@ -253,10 +257,12 @@ public:
 	friend std::istream &operator >>(std::istream &stream,
 			Vector3d &a)
 	{
-		 stream >> a.x;
-		 stream >> a.y;
-		 stream >> a.z;
-		 return stream;
+		DEBUG_START;
+		stream >> a.x;
+		stream >> a.y;
+		stream >> a.z;
+		DEBUG_END;
+		return stream;
 	}
 };
 
