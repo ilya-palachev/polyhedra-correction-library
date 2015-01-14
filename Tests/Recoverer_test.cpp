@@ -1048,8 +1048,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
-	bool ifAnyOptionContours = ifOptionNumContours || ifOptionFirstAngle
-		|| ifOptionLimitRandom;
+	bool ifAnyOptionContours = ifOptionNumContours || ifOptionFirstAngle;
 
 	if (ifOptionFileDirections && ifAnyOptionContours)
 	{
@@ -1062,12 +1061,12 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 	bool ifValidSyntheticOptions = (ifOptionModelName || ifOptionFileModel)
 		&& (ifOptionFileDirections
-				|| (ifOptionNumContours && ifOptionFirstAngle
-					&& ifOptionLimitRandom));
+				|| (ifOptionNumContours && ifOptionFirstAngle))
+		&& ifOptionLimitRandom;
 
 	if (!ifValidSyntheticOptions && ifAnyOptionSynthetic)
 	{
-		STDERR_PRINT("Invalid option set for synthetic testing.");
+		STDERR_PRINT("Invalid option set for synthetic testing.\n");
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -1253,10 +1252,10 @@ static double genRandomDouble(double maxDelta)
 }
 
 /**
- * Shifts all points of contours on random double std::vectors
+ * Shifts all points of contours on random double vectors
  *
  * @param data		Shadow contours data
- * @param maxDelta	maximum delta in shift std::vectors' coordinates
+ * @param maxDelta	Maximum delta in shift vectors' coordinates
  */
 static void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 {
@@ -1285,6 +1284,27 @@ static void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 			contour->sides[iSide].A2 = contour->sides[iSide + 1].A1;
 		}
 		contour->sides[contour->ns - 1].A2 = contour->sides[0].A1;
+	}
+	DEBUG_END;
+}
+
+/**
+ * Shifts all support values of support data on random numbers.
+ *
+ * @param data		Support function data
+ * @param maxDelta	Maximum delta in shift numbers
+ */
+static void shiftSupportValuesRandom(SupportFunctionDataPtr data,
+		double maxDelta)
+{
+	DEBUG_START;
+	for (int i = 0; i < data->size(); ++i)
+	{
+		auto item = (*data)[i];
+		double randomDouble = genRandomDouble(maxDelta);
+		DEBUG_PRINT("Changing value %lf to %lf", item.value,
+				item.value + randomDouble);
+		item.value += randomDouble;
 	}
 	DEBUG_END;
 }
@@ -1397,6 +1417,8 @@ static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 		auto directions = readDirections(
 				options->input.model.directionsFileName);
 		auto data = p.calculateSupportData(directions);
+		shiftSupportValuesRandom(data,
+				options->input.model.limitRandom);
 		DEBUG_END;
 		return data;
 	}
@@ -1404,6 +1426,8 @@ static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 	{
 		auto shadows = generateSyntheticSCData(options);
 		auto data = shadows->calculateSupportData();
+		shiftSupportValuesRandom(data,
+				options->input.model.limitRandom);
 		DEBUG_END;
 		return data;
 	}
