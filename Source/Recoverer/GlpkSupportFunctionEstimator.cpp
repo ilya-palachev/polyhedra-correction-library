@@ -108,6 +108,7 @@ static void declareColumnsAndObjective(glp_prob *problem,
 #endif
 		glp_set_obj_coef(problem, i + 1, 0.0);
 	}
+	glp_set_col_name(problem, data->numValues() + 1, "epsilon");
 	glp_set_obj_coef(problem, iEpsilon, 1.0);
 	DEBUG_END;
 }
