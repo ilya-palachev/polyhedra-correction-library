@@ -1289,27 +1289,6 @@ static void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 }
 
 /**
- * Shifts all support values of support data on random numbers.
- *
- * @param data		Support function data
- * @param maxDelta	Maximum delta in shift numbers
- */
-static void shiftSupportValuesRandom(SupportFunctionDataPtr data,
-		double maxDelta)
-{
-	DEBUG_START;
-	for (int i = 0; i < data->size(); ++i)
-	{
-		auto item = (*data)[i];
-		double randomDouble = genRandomDouble(maxDelta);
-		DEBUG_PRINT("Changing value %lf to %lf", item.value,
-				item.value + randomDouble);
-		item.value += randomDouble;
-	}
-	DEBUG_END;
-}
-
-/**
  * Generates synthetic shadow contour data.
  *
  * @param options	The result of command-line parsing.
@@ -1425,8 +1404,7 @@ static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 		auto directions = readDirections(
 				options->input.model.directionsFileName);
 		auto data = p.calculateSupportData(directions);
-		shiftSupportValuesRandom(data,
-				options->input.model.limitRandom);
+		data->shiftValues(options->input.model.limitRandom);
 		DEBUG_END;
 		return data;
 	}
@@ -1434,8 +1412,7 @@ static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
 	{
 		auto shadows = generateSyntheticSCData(options);
 		auto data = shadows->calculateSupportData();
-		shiftSupportValuesRandom(data,
-				options->input.model.limitRandom);
+		data->shiftValues(options->input.model.limitRandom);
 		DEBUG_END;
 		return data;
 	}
