@@ -26,9 +26,13 @@
 
 #ifdef USE_GLPK
 
+#include <iostream>
+#include <fstream>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Recoverer/GlpkSupportFunctionEstimator.h"
+#include "PCLDumper.h"
 
 GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
@@ -233,12 +237,35 @@ static glp_prob *constructProblem(SupportFunctionEstimationDataPtr data)
 	return problem;
 }
 
+struct glp_prob_wrapper
+{
+	glp_prob *problem;
+
+	glp_prob_wrapper(glp_prob *p): problem(p) {}
+
+	friend std::ostream &operator<<(std::ostream &stream,
+			glp_prob_wrapper &p)
+	{
+		DEBUG_START;
+		char *name= tmpnam(NULL);
+		glp_write_lp(p.problem, NULL, name);
+	        std::ifstream tmpstream;
+		tmpstream.open(name, std::ifstream::in);
+		stream << tmpstream.rdbuf();
+		tmpstream.close();
+		DEBUG_END;
+		return stream;
+	}
+};
+
 VectorXd GlpkSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 
 	/* Construct the GLPK problem. */
 	glp_prob *problem = constructProblem(data);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "glpk-problem.lp")
+		<< glp_prob_wrapper(problem);
 
 	/* Run the simplex solver. */
 	glp_simplex(problem, NULL);
