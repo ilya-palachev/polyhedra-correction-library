@@ -157,6 +157,14 @@ public:
 	 * @return Vector of support points.
 	 */
 	std::vector<Vector3d> supportPoints();
+
+	/**
+	 * Shifts all support values to random number that are not bigger than
+	 * given limit.
+	 *
+	 * @param maxDelta	The maximum of absolute value of shift.
+	 */
+	void shiftValues(double maxDelta);
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */

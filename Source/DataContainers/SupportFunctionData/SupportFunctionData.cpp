@@ -24,6 +24,8 @@
  * - implementation.
  */
 
+#include <sys/time.h>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
@@ -213,3 +215,54 @@ std::vector<Vector3d> SupportFunctionData::supportPoints()
 	return points;
 }
 
+/**
+ * Generates random number d such that |d| <= maxDelta
+ *
+ * @param maxDelta	maximum absolute limit of generated number
+ */
+static double genRandomDouble(double maxDelta)
+{
+	DEBUG_START;
+	//srand((unsigned) time(0));
+	struct timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
+
+	int randomInteger = rand();
+	double randomDouble = randomInteger;
+	const double halfRandMax = RAND_MAX * 0.5;
+	randomDouble -= halfRandMax;
+	randomDouble /= halfRandMax;
+
+	randomDouble *= maxDelta;
+
+	DEBUG_END;
+	return randomDouble;
+}
+
+
+void SupportFunctionData::shiftValues(double maxDelta)
+{
+	DEBUG_START;
+#ifndef NDEBUG
+	for (auto &item: items)
+	{
+		DEBUG_PRINT("old value: %lf", item.value);
+	}
+#endif /* NDEBUG */
+	for (auto &item: items)
+	{
+		double randomDouble = genRandomDouble(maxDelta);
+		double DEBUG_VARIABLE oldValue = item.value;
+		item.value += randomDouble;
+		DEBUG_PRINT("Changed value from %lf to %lf", oldValue,
+				item.value);
+	}
+#ifndef NDEBUG
+	for (auto &item: items)
+	{
+		DEBUG_PRINT("new value: %lf", item.value);
+	}
+#endif /* NDEBUG */
+	DEBUG_END;
+}
