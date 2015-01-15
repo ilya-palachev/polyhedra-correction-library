@@ -102,6 +102,7 @@ static void declareColumnsAndObjective(glp_prob *problem,
 		std::string name = "x_" + std::to_string(i / 3) + "_"
 			+ std::to_string(i % 3);
 		glp_set_col_name(problem, i + 1, name.c_str());
+		glp_set_col_bnds(problem, i + 1, GLP_FR, 0.0, 0.0);
 #if 0
 		/* TODO: test algorithm with and without this feature. */
 		glp_set_col_bnds(problem, i, GLP_LO, 0.0, 0.0);
@@ -109,6 +110,8 @@ static void declareColumnsAndObjective(glp_prob *problem,
 		glp_set_obj_coef(problem, i + 1, 0.0);
 	}
 	glp_set_col_name(problem, data->numValues() + 1, "epsilon");
+	/* epsilnon should be positive */
+	glp_set_col_bnds(problem, data->numValues() + 1, GLP_LO, 0.0, 0.0);
 	glp_set_obj_coef(problem, iEpsilon, 1.0);
 	DEBUG_END;
 }
