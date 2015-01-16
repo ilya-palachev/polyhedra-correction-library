@@ -186,6 +186,7 @@ target_link_libraries(pcl
 	vector3d
 	CGAL
 	gmp
+	mpfr
 )
 
 if (ENABLE_TSNNLS)
