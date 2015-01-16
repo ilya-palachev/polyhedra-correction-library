@@ -38,13 +38,14 @@
 /**
  * Builds support matrix.
  *
- * @param data	The support function data.
- * @param type	The requested type of support matrix.
+ * @param data			The support function data.
+ * @param type			The requested type of support matrix.
+ * @param startingVector	The starting vector of the algorithm.
  *
  * @return	Support matrix.
  */
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-	SupportMatrixType type);
+	SupportMatrixType type, VectorXd startingVector);
 
 /**
  * Builds starting vector for the estimation process.
@@ -117,9 +118,12 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	/* Remove equal items from data (and normalize all items). */
 	data = data->removeEqual();
 
+	/* Build starting vector. */
+	VectorXd startingVector = buildStartingVector(data, startingBodyType);
+
 	/** Build support matrix. */
 	SupportMatrix *supportMatrix = buildSupportMatrix(data,
-		supportMatrixType);
+		supportMatrixType, startingVector);
 
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
@@ -131,8 +135,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 			<< "conditions!" << std::endl;
 	}
 
-	/* Build starting vector. */
-	VectorXd startingVector = buildStartingVector(data, startingBodyType);
+	/* Check starting vector. */
 	ASSERT(checkStartingVector(startingVector, *supportMatrix, data) == 0);
 
 	/* Get support directions from data. */
@@ -147,12 +150,37 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	return estimationData;
 }
 
+static double calculateEpsilon(SupportFunctionDataPtr data,
+		VectorXd startingVector)
+{
+	DEBUG_START;
+	std::vector<Vector3d> directions = data->supportDirections();
+	VectorXd supportVector = data->supportValues();
+	int numDirections = directions.size();
+	double max = 0.;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		Vector3d point(startingVector(3 * i), startingVector(3 * i + 1),
+				startingVector(3 * i + 2));
+		double difference = fabs(supportVector(i)
+				- point * directions[i]);
+		if (difference > max)
+		{
+			max = difference;
+		}
+	}
+	DEBUG_PRINT("result: %lf", max);
+	DEBUG_END;
+	return max;
+}
+
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-	SupportMatrixType type)
+	SupportMatrixType type, VectorXd startingVector)
 {
 	DEBUG_START;
 	SupportMatrix *matrix = NULL;
 	
+	double epsilon = 0.;
 	switch (type)
 	{
 	case SUPPORT_MATRIX_TYPE_KKVW:
@@ -160,7 +188,9 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 		ASSERT(0 && "Not implemented yet!");
 		break;
 	case SUPPORT_MATRIX_TYPE_GK_OPT:
-		matrix = constructReducedGardnerKiderlenSupportMatrix(data);
+		epsilon = calculateEpsilon(data, startingVector);
+		matrix = constructReducedGardnerKiderlenSupportMatrix(data,
+				epsilon);
 		break;
 	case SUPPORT_MATRIX_TYPE_GK:
 		matrix = constructGardnerKiderlenSupportMatrix(data);
