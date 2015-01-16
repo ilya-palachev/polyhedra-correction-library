@@ -25,9 +25,12 @@
  * - implementation.
  */
 
+#include <CGAL/Nef_polyhedron_3.h>
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
+#include "halfspaces_intersection.h"
 
 GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(long int numRows,
 		long int numColumns) :
@@ -43,6 +46,33 @@ GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
 	DEBUG_START;
 	DEBUG_END;
 }
+
+static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
+		int &iCondition, int i, int j, Vector3d direction)
+{
+	DEBUG_START;
+	if (i == j)
+	{
+		DEBUG_END;
+		return;
+	}
+
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i,
+				direction.x));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i + 1,
+				direction.y));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i + 2,
+				direction.z));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j,
+				-direction.x));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j + 1,
+				-direction.y));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j + 2,
+				-direction.z));
+	++iCondition;
+	DEBUG_END;
+}
+
 
 GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data)
@@ -62,35 +92,92 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	{
 		for (int j = 0; j < numDirections; ++j)
 		{
-			if (j == i)
-				continue;
-			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * i, directions[i].x));
-			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * i + 1, directions[i].y));
-			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * i + 2, directions[i].z));
-			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * j, -directions[i].x));
-			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * j + 1, -directions[i].y));
-			triplets.push_back(Eigen::Triplet<double>(
-				iCondition, 3 * j + 2, -directions[i].z));
-			++iCondition;
+			addCondition(triplets, iCondition, i, j, directions[i]);
 		}
 	}
+	DEBUG_PRINT("triplets.size() = %ld", triplets.size());
+	DEBUG_PRINT("numConditions = %ld", numConditions);
 	ASSERT(triplets.size() == 6 * (unsigned) numConditions);
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
 	return matrix;
 }
 
+#include <CGAL/Exact_predicates_exact_constructions_kernel.h> 
+#include <CGAL/Extended_cartesian.h> 
+typedef CGAL::Extended_cartesian< CGAL::Lazy_exact_nt<CGAL::Gmpq> > ExactKernel;
+typedef CGAL::Nef_polyhedron_3<ExactKernel> NefPolyhedron_3;
+typedef CGAL::Polyhedron_3<ExactKernel> LocalPolyhedron_3;
+
+#include "poly_copy.h"
+
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-		SupportFunctionDataPtr data)
+		SupportFunctionDataPtr data, double epsilon)
 {
 	DEBUG_START;
-	ERROR_PRINT("Not implemented yet. Use non-optimized GK conditions.");
-	exit(EXIT_FAILURE);
+
+	long int numDirections = data->size();
+	std::vector<ExactKernel::Plane_3> planes;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		auto item = (*data)[i];
+		ExactKernel::Plane_3 plane(item.direction.x, item.direction.y,
+				item.direction.z, -item.value - epsilon);
+		planes.push_back(plane);
+	}
+	CGAL::Polyhedron_3<ExactKernel> intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, ExactKernel());
+	//LocalPolyhedron_3 tmp;
+	//poly_copy(tmp, intersection);
+
+	NefPolyhedron_3 allowableAreaCommon(intersection);
+
+	std::vector<Vector3d> directions = data->supportDirections();
+	std::vector<Eigen::Triplet<double>> triplets;
+
+	int iCondition = 0;
+	int numSkipped = 0;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		auto item = (*data)[i];
+		ExactKernel::Plane_3 plane(item.direction.x, item.direction.y,
+				item.direction.z, -item.value + epsilon);
+		/* TODO: Check that halfspace is proper. */
+		NefPolyhedron_3 halfspace(plane);
+		NefPolyhedron_3 allowableArea = allowableAreaCommon * halfspace;
+
+		for (int j = 0; j < numDirections; ++j)
+		{
+			auto itemChecked = (*data)[j];
+			ExactKernel::Plane_3 planeChecked(
+					itemChecked.direction.x,
+				       	itemChecked.direction.y,
+				       	itemChecked.direction.z,
+				       	-itemChecked.value + epsilon);
+			/* TODO: Check that halfspace is proper. */
+			NefPolyhedron_3 halfspaceChecked(planeChecked);
+			NefPolyhedron_3 area = allowableArea * halfspaceChecked;
+			if (!area.is_empty())
+			{
+				addCondition(triplets, iCondition, i, j,
+						directions[i]);
+			}
+			else
+			{
+				++numSkipped;
+			}
+		}
+	}
+	long int numValues = 3 * numDirections;
+	long int numConditions = triplets.size() / 6;
+	DEBUG_PRINT("Number of skipped directions: %d (%lf from total)",
+			numSkipped, ((double) numSkipped) / numConditions);
+	DEBUG_PRINT("Number of conditions: %ld", numConditions);
+
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			numConditions, numValues);
+	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
-	return NULL;
+	return matrix;
 }

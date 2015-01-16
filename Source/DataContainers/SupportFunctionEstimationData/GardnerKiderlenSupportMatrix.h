@@ -69,11 +69,12 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
  * Constructs reduced Gardner-Kiderlen support matrix (i. e. in which redundant
  * conditions are eliminated).
  *
- * @param data	Support function data.
+ * @param data		Support function data.
+ * @param epsilon	The maximal absolute delta for starting point.
  *
  * @return	Reduced Gardner-Kiderlen support matrix.
  */
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-		SupportFunctionDataPtr data);
+		SupportFunctionDataPtr data, double epsilon);
 
 #endif /* GARDNER_KIDERLEN_SUPPORT_MATRIX_H */
