@@ -82,6 +82,7 @@ set (SOURCE_pcl
 	Source/DataContainers/SupportFunctionEstimationData/SupportMatrix.cpp
 	Source/DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.cpp
 	Source/Dumpers/GraphDumperGEXF/GraphDumperGEXF.cpp
+	Source/KernelCGAL/dual.cpp
 	Source/PCLDumper.cpp
 	Source/Polyhedron/Facet/Facet_area.cpp
 	Source/Polyhedron/Facet/Facet.cpp
