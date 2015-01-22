@@ -42,4 +42,6 @@ typedef Kernel::Segment_3 Segment_3;
 typedef CGAL::Polyhedron_3<Kernel, ItemsIndexed,
 	CGAL::HalfedgeDS_vector> BasePolyhedron_3;
 
+#include "dual.h"
+
 #endif /* KERNELCGAL_H_ */
