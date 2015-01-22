@@ -50,7 +50,6 @@ GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
 static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
 		int &iCondition, int i, int j, Vector3d direction)
 {
-	DEBUG_START;
 	if (i == j)
 	{
 		DEBUG_END;
@@ -70,7 +69,6 @@ static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
 	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j + 2,
 				-direction.z));
 	++iCondition;
-	DEBUG_END;
 }
 
 
@@ -102,6 +100,96 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	DEBUG_END;
 	return matrix;
 }
+
+/**
+ * Gets duals of support planes which free coefficients were incremented on a
+ * given number.
+ *
+ * @param data		Support dunction data.
+ * @param epsilon	The shifting number.
+ *
+ * @return		Duals of shifted support planes.
+ */
+static std::vector<Point_3> getShiftedDualPoints(SupportFunctionDataPtr data,
+		double epsilon)
+{
+	DEBUG_START;
+	std::vector<Point_3> points;
+	long int numDirections = data->size();
+	for (int i = 0; i < numDirections; ++i)
+	{
+		auto item = (*data)[i];
+		Plane_3 plane(item.direction.x, item.direction.y,
+				item.direction.z, -item.value - epsilon);
+		points.push_back(dual(plane));
+	}
+	DEBUG_END;
+	return points;
+}
+
+#include <CGAL/Delaunay_triangulation_3.h>
+typedef CGAL::Delaunay_triangulation_3<Kernel> Delaunay;
+
+GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data, double epsilon)
+{
+	DEBUG_START;
+
+	/* Get duals of higher and lower support planes */
+	auto pointsHigher = getShiftedDualPoints(data, epsilon);
+	auto pointsLower = getShiftedDualPoints(data, -epsilon);
+
+	/* Construct 3D Delaunay triangulation of points. */
+	Delaunay triangulation;
+	triangulation.insert(pointsHigher.begin(), pointsHigher.end());
+
+	/* Find needed conditions. */
+	long int numDirections = data->size();
+	std::vector<Vector3d> directions = data->supportDirections();
+	std::vector<Eigen::Triplet<double>> triplets;
+	int iCondition = 0;
+	int numSkipped = 0;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		/* Calculate the allowability body for i-th direction. */
+		auto vertex = triangulation.insert(pointsLower[i]);
+
+		for (int j = 0; j < numDirections; ++j)
+		{
+			if (j == i)
+				continue;
+			auto cell = triangulation.inexact_locate(
+					pointsLower[j]);
+			if (triangulation.is_infinite(cell))
+			{
+				addCondition(triplets, iCondition, i, j,
+						directions[i]);
+			}
+			else
+			{
+				DEBUG_PRINT("(%d, %d) condition was skipped",
+						i, j);
+				++numSkipped;
+			}
+		}
+
+		/* Return triangulation in the initial state. */
+		triangulation.remove(vertex);
+	}
+	long int numValues = 3 * numDirections;
+	long int numConditions = triplets.size() / 6;
+	DEBUG_PRINT("Number of skipped directions: %d (%lf from total)",
+			numSkipped, ((double) numSkipped) / numConditions);
+	DEBUG_PRINT("Number of conditions: %ld", numConditions);
+
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			numConditions, numValues);
+	matrix->setFromTriplets(triplets.begin(), triplets.end());
+	DEBUG_END;
+	return matrix;
+}
+
+#if 0
 
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h> 
 #include <CGAL/Extended_cartesian.h> 
@@ -181,3 +269,5 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	DEBUG_END;
 	return matrix;
 }
+
+#endif /* 0 */
