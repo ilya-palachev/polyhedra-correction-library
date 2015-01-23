@@ -25,7 +25,7 @@
  * - implementation.
  */
 
-#include <CGAL/Nef_polyhedron_3.h>
+#define CGAL_LINKED_WITH_TBB 1
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -127,8 +127,13 @@ static std::vector<Point_3> getShiftedDualPoints(SupportFunctionDataPtr data,
 	return points;
 }
 
+#include <CGAL/Bbox_3.h>
 #include <CGAL/Delaunay_triangulation_3.h>
-typedef CGAL::Delaunay_triangulation_3<Kernel> Delaunay;
+typedef CGAL::Triangulation_data_structure_3<
+	CGAL::Triangulation_vertex_base_3<Kernel>,
+	CGAL::Triangulation_cell_base_3<Kernel>,
+	CGAL::Parallel_tag> Tds;
+typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data, double epsilon)
@@ -140,8 +145,12 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	auto pointsLower = getShiftedDualPoints(data, -epsilon);
 
 	/* Construct 3D Delaunay triangulation of points. */
-	Delaunay triangulation;
-	triangulation.insert(pointsHigher.begin(), pointsHigher.end());
+	Delaunay::Lock_data_structure locking_ds(
+			CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000.,
+				1000.), 50);
+	Delaunay triangulation(pointsHigher.begin(), pointsHigher.end(),
+			&locking_ds);
+	auto infinity = triangulation.infinite_vertex();
 
 	/* Find needed conditions. */
 	long int numDirections = data->size();
@@ -153,34 +162,37 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	{
 		/* Calculate the allowability body for i-th direction. */
 		auto vertex = triangulation.insert(pointsLower[i]);
+		int numConditionsForOne = 0;
 
 		for (int j = 0; j < numDirections; ++j)
 		{
 			if (j == i)
 				continue;
-			auto cell = triangulation.inexact_locate(
-					pointsLower[j]);
+			auto cell = triangulation.locate(pointsLower[j],
+					infinity);
 			if (!triangulation.is_infinite(cell))
 			{
 				addCondition(triplets, iCondition, i, j,
 						directions[i]);
+				++numConditionsForOne;
 			}
 			else
 			{
-				DEBUG_PRINT("(%d, %d) condition was skipped",
-						i, j);
 				++numSkipped;
 			}
 		}
+		DEBUG_PRINT("Conditions for %d-th point: %d\n", i,
+				numConditionsForOne);
 
 		/* Return triangulation in the initial state. */
 		triangulation.remove(vertex);
 	}
 	long int numValues = 3 * numDirections;
 	long int numConditions = triplets.size() / 6;
-	DEBUG_PRINT("Number of skipped directions: %d (%lf from total)",
-			numSkipped, ((double) numSkipped) / numConditions);
-	DEBUG_PRINT("Number of conditions: %ld", numConditions);
+	ALWAYS_PRINT(stdout, "Number of skipped directions: %d (%lf from "
+			"total)\n", numSkipped,
+			((double) numSkipped) / (numSkipped + numConditions));
+	ALWAYS_PRINT(stdout, "Number of conditions: %ld\n", numConditions);
 
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
