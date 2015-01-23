@@ -160,7 +160,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 				continue;
 			auto cell = triangulation.inexact_locate(
 					pointsLower[j]);
-			if (triangulation.is_infinite(cell))
+			if (!triangulation.is_infinite(cell))
 			{
 				addCondition(triplets, iCondition, i, j,
 						directions[i]);
