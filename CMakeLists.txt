@@ -188,6 +188,8 @@ target_link_libraries(pcl
 	CGAL
 	gmp
 	mpfr
+	tbb
+	tbbmalloc
 )
 
 if (ENABLE_TSNNLS)
