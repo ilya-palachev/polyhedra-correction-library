@@ -477,6 +477,7 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	}
 	std::vector<Vector3d> directions = data->supportDirections();
 	int numDirections = directions.size();
+	ASSERT(3 * numDirections == estimate.size());
 
 	std::vector<Vector3d> points;
 	for (int i = 0; i < numDirections; ++i)
