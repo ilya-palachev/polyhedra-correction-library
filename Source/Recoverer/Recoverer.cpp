@@ -171,7 +171,7 @@ static SupportFunctionEstimator *constructEstimator(
 	return estimator;
 }
 
-static PolyhedronPtr produceFinalPolyhedron(
+static PolyhedronPtr producePolyhedron(
 		SupportFunctionEstimationDataPtr dataEstimation,
 		VectorXd estimate)
 {
@@ -232,6 +232,39 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	return p;
 }
 
+static PolyhedronPtr produceFinalPolyhedron(
+	SupportFunctionEstimationDataPtr data,
+	VectorXd estimate,
+	RecovererEstimatorType estimatorType)
+{
+	DEBUG_START;
+
+	auto h = supportValuesFromPoints(data->supportDirections(), estimate);
+	/* Now produce final polyhedron from the estimate. */
+	PolyhedronPtr polyhedron = producePolyhedron(data, h);
+
+	/* Additional debug prints to check the quality of the result: */
+
+	/* Also produce naive polyhedron (to compare recovered one with it). */
+	auto h0 = data->supportVector();
+	PolyhedronPtr polyhedronNaive = producePolyhedron(data,	h0);
+	Polyhedron *pCopy = new Polyhedron(polyhedronNaive);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naively-recovered.ply")
+		<< *pCopy;
+
+	/* Also produce polyhedron from starting point of the algorithm. */
+	auto hStarting = supportValuesFromPoints(data->supportDirections(),
+			data->startingVector());	
+	PolyhedronPtr polyhedronStart = producePolyhedron(data,	hStarting);
+	Polyhedron *pCopy2 = new Polyhedron(polyhedronStart);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
+		<< *pCopy2;
+
+	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
+	DEBUG_END;
+	return polyhedron;
+}
+
 PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
@@ -255,33 +288,11 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		estimate = dataEstimation->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
+	ASSERT(constructorEstimation.checkResult(dataEstimation,
+				supportMatrixType_, estimate));
 
-	auto h0 = dataEstimation->supportVector();
-	auto h = supportValuesFromPoints(dataEstimation->supportDirections(),
-		estimate);
-	auto hStarting = supportValuesFromPoints(
-		dataEstimation->supportDirections(),
-		dataEstimation->startingVector());	
-
-	printEstimationReport(dataEstimation->supportMatrix(), h0, h,
-		estimatorType);
-
-	/* Now produce final polyhedron from the estimate. */
-	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation, h);
-
-	/* Also produce naive polyhedron (to compare recovered one with it). */
-	PolyhedronPtr polyhedronNaive = produceFinalPolyhedron(dataEstimation,
-			h0);
-	Polyhedron *pCopy = new Polyhedron(polyhedronNaive);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naively-recovered.ply")
-		<< *pCopy;
-
-	/* Also produce polyhedron from starting point of the algorithm. */
-	PolyhedronPtr polyhedronStart = produceFinalPolyhedron(dataEstimation,
-			hStarting);
-	Polyhedron *pCopy2 = new Polyhedron(polyhedronStart);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
-		<< *pCopy2;
+	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
+			estimate, estimatorType);
 
 	DEBUG_END;
 	return polyhedron;
