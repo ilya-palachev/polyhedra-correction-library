@@ -179,6 +179,7 @@ option(ENABLE_TSNNLS "Enable tsnnls solver (does not work)" OFF)
 option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
 option(ENABLE_GLPK "Enable Glpk solver" OFF)
 option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
+option(DISABLE_CGAL_DEBUG "Disable all CGAL internal checks" OFF)
 
 target_link_libraries(pcl 
 	arrayOperations
@@ -216,6 +217,11 @@ if (ENABLE_GRAPH_DUMPER)
 	add_definitions(-DUSE_GRAPH_DUMPER)
 	list (APPEND INCLUDE_DIRS_all "/usr/include/libgexf")
 	list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
+endif()
+
+if (DISABLE_CGAL_DEBUG)
+	add_definitions(-DCGAL_NDEBUG)
+	message("!!! all CGAL checks are disabled.")
 endif()
 
 include_directories(${INCLUDE_DIRS_all})
