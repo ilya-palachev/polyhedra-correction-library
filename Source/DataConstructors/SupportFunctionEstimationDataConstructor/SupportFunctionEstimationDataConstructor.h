@@ -89,6 +89,19 @@ public:
 	SupportFunctionEstimationDataPtr run(SupportFunctionDataPtr data,
 		SupportMatrixType supportMatrixType,
 		SupportFunctionEstimationStartingBodyType startingBodyType);
+
+	/**
+	 * Checks the result of estimation process.
+	 *
+	 * @param data			Support function estimation data.
+	 * @param supportMatrixType     Support function type.
+	 * @param estimate		The estimate obtained from estimation
+	 * 				proces.
+	 *
+	 * @return			True, if the result is correct.
+	 */
+	bool checkResult(SupportFunctionEstimationDataPtr data,
+			SupportMatrixType supportMatrixType, VectorXd estimate);
 };
 
 #endif /* SUPPORT_FUNCTION_ESTIMATION_DATA_CONSTRUCTOR_H */

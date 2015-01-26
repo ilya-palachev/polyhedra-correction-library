@@ -462,3 +462,42 @@ static long int checkStartingVector(VectorXd startingVector,
 	DEBUG_END;
 	return numNegative;
 }
+
+bool SupportFunctionEstimationDataConstructor::checkResult(
+		SupportFunctionEstimationDataPtr data,
+		SupportMatrixType supportMatrixType, VectorXd estimate)
+{
+	DEBUG_START;
+	if (supportMatrixType != SUPPORT_MATRIX_TYPE_GK
+			&& supportMatrixType != SUPPORT_MATRIX_TYPE_GK_OPT)
+	{
+		ERROR_PRINT("Not implemented yet!");
+		DEBUG_END;
+		return true;
+	}
+	std::vector<Vector3d> directions = data->supportDirections();
+	int numDirections = directions.size();
+
+	std::vector<Vector3d> points;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		points.push_back(Vector3d(estimate(3 * i), estimate(3 * i + 1),
+					estimate(3 * i + 2)));
+	}
+
+	int numViolations = 0;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		for (int j = 0; j < numDirections; ++j)
+		{
+			if (directions[i] * points[i]
+					< directions[i] * points[j])
+				++numViolations;
+		}
+	}
+
+	DEBUG_PRINT("Number of violations = %d", numViolations);
+	DEBUG_END;
+	return numViolations == 0;
+}
+
