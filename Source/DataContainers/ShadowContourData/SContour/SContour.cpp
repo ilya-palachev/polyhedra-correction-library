@@ -225,7 +225,7 @@ std::vector<Vector3d> SContour::getPoints()
 		{
 			vCurr = plane.project(sidePrev->A2);
 			points.push_back(vCurr);
-			MAIN_PRINT(COLOUR_RED
+			DEBUG_PRINT(COLOUR_RED
 				"Warning: contour %d is not connected! "
 				"A gap found between %d-th and %d-th sides."
 				COLOUR_NORM, id, iSidePrev, iSide);
