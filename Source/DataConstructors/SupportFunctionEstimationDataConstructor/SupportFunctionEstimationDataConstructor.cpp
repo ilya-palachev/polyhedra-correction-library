@@ -487,17 +487,34 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	}
 
 	int numViolations = 0;
+	double minViolation = 0.;
 	for (int i = 0; i < numDirections; ++i)
 	{
 		for (int j = 0; j < numDirections; ++j)
 		{
-			if (directions[i] * points[i]
-					< directions[i] * points[j])
+			if (j == i)
+				continue;
+			double violation = directions[i] * points[i]
+				- directions[i] * points[j];			
+			if (violation < 0.)
+			{
+				ALWAYS_PRINT(stdout, "directions[%d] * "
+						"points[%d] = %lf ; ", i, i,
+						directions[i] * points[i]);
+				ALWAYS_PRINT(stdout, "directions[%d] * "
+						"points[%d] = %lf ; ", i, j,
+						directions[i] * points[j]);
+				ALWAYS_PRINT(stdout, "Violation in (%d, %d) "
+						"= %lf\n", i, j, violation);
 				++numViolations;
+				if (violation < minViolation)
+					minViolation = violation;
+			}
 		}
 	}
 
-	DEBUG_PRINT("Number of violations = %d", numViolations);
+	ALWAYS_PRINT(stdout, "Number of violations = %d, min = %lf\n",
+			numViolations, minViolation);
 	DEBUG_END;
 	return numViolations == 0;
 }
