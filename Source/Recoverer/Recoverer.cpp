@@ -288,8 +288,11 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		estimate = dataEstimation->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
-	ASSERT(constructorEstimation.checkResult(dataEstimation,
-				supportMatrixType_, estimate));
+	if(constructorEstimation.checkResult(dataEstimation,
+				supportMatrixType_, estimate))
+	{
+		exit(EXIT_FAILURE);
+	}
 
 	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
 			estimate, estimatorType);
