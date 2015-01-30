@@ -26,6 +26,19 @@
  */
 
 #define CGAL_LINKED_WITH_TBB 1
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+typedef CGAL::Simple_cartesian<double> K;
+typedef K::Point_3 Point;
+typedef K::Vector_3 Vector;
+typedef K::Segment_3 Segment;
+typedef CGAL::Polyhedron_3<K> CGALPolyhedron;
+typedef CGAL::AABB_face_graph_triangle_primitive<CGALPolyhedron> Primitive;
+typedef CGAL::AABB_traits<K, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> Tree;
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -110,55 +123,24 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
  *
  * @return		Duals of shifted support planes.
  */
-static std::vector<Point_3> getShiftedDualPoints(SupportFunctionDataPtr data,
+static std::vector<Point> getShiftedDualPoints(SupportFunctionDataPtr data,
 		double epsilon)
 {
 	DEBUG_START;
-	std::vector<Point_3> points;
+	std::vector<Point> points;
 	long int numDirections = data->size();
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = (*data)[i];
 		Plane_3 plane(item.direction.x, item.direction.y,
 				item.direction.z, -item.value - epsilon);
-		points.push_back(dual(plane));
+		Point_3 point = dual(plane);
+		points.push_back(Point(point.x(), point.y(), point.z()));
 	}
 	DEBUG_END;
 	return points;
 }
 
-#include <CGAL/Bbox_3.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-typedef CGAL::Triangulation_data_structure_3<
-	CGAL::Triangulation_vertex_base_3<Kernel>,
-	CGAL::Triangulation_cell_base_3<Kernel>,
-	CGAL::Parallel_tag> Tds;
-typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
-
-static void reportLocationType(Delaunay::Locate_type locationType)
-{
-	switch (locationType)
-	{
-	case Delaunay::VERTEX:
-		DEBUG_PRINT("Delaunay::VERTEX");
-		break;
-	case Delaunay::EDGE:
-		DEBUG_PRINT("Delaunay::EDGE");
-		break;
-	case Delaunay::FACET:
-		DEBUG_PRINT("Delaunay::FACET");
-		break;
-	case Delaunay::CELL:
-		DEBUG_PRINT("Delaunay::CELL");
-		break;
-	case Delaunay::OUTSIDE_CONVEX_HULL:
-		DEBUG_PRINT("Delaunay::OUTSIDE_CONVEX_HULL");
-		break;
-	case Delaunay::OUTSIDE_AFFINE_HULL:
-		DEBUG_PRINT("Delaunay::OUTSIDE_AFFINE_HULL");
-		break;
-	}
-}
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data, double epsilon)
@@ -170,13 +152,10 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	auto pointsHigher = getShiftedDualPoints(data, epsilon);
 	auto pointsLower = getShiftedDualPoints(data, -epsilon);
 
-	/* Construct 3D Delaunay triangulation of points. */
-	Delaunay::Lock_data_structure locking_ds(
-			CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000.,
-				1000.), 50);
-	Delaunay triangulation(pointsHigher.begin(), pointsHigher.end(),
-			&locking_ds);
-	//auto infinity = triangulation.infinite_vertex();
+	CGALPolyhedron hull;
+	CGAL::convex_hull_3(pointsHigher.begin(), pointsHigher.end(), hull);
+	Tree tree(faces(hull).first, faces(hull).second, hull);
+	tree.accelerate_distance_queries();
 
 	/* Find needed conditions. */
 	long int numDirections = data->size();
@@ -186,25 +165,18 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	int numSkipped = 0;
 	for (int i = 0; i < numDirections; ++i)
 	{
-		/* Calculate the allowability body for i-th direction. */
-		auto vertex = triangulation.insert(pointsLower[i]);
 		int numConditionsForOne = 0;
 
-		for (int j = 0; j < numDirections; ++j)
+		for (int j = i + 1; j < numDirections; ++j)
 		{
-			if (j == i)
-				continue;
-			DEBUG_PRINT("Checking condition for (%d, %d)", i, j);
-			int locationIndexI, locationIndexJ;
-			Delaunay::Locate_type locationType;
-			auto cell = triangulation.locate(pointsLower[j],
-					locationType, locationIndexI,
-					locationIndexJ);
-			reportLocationType(locationType);
-			if (!triangulation.is_infinite(cell))
+			Segment query(pointsLower[i], pointsLower[j]);
+
+			if (!tree.do_intersect(query))
 			{
 				addCondition(triplets, iCondition, i, j,
 						directions[i]);
+				addCondition(triplets, iCondition, j, i,
+						directions[j]);
 				++numConditionsForOne;
 			}
 			else
@@ -214,9 +186,6 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		}
 		DEBUG_PRINT("Conditions for %d-th point: %d\n", i,
 				numConditionsForOne);
-
-		/* Return triangulation in the initial state. */
-		triangulation.remove(vertex);
 	}
 	long int numValues = 3 * numDirections;
 	long int numConditions = triplets.size() / 6;
