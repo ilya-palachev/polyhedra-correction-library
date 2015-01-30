@@ -103,6 +103,7 @@ public:
 				std::cerr << "Dumping to file " << filename
 					<< std::endl;
 				stream << object;
+				std::cerr << "...dumping done" << std::endl;
 			}
 			break;
 		case PCL_DUMPER_LEVEL_OUTPUT:
@@ -110,6 +111,7 @@ public:
 			std::cerr << "Dumping to file " << filename
 				<< std::endl;
 			stream << object;
+			std::cerr << "...dumping done" << std::endl;
 			break;
 		default:
 			break;
