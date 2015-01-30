@@ -135,6 +135,31 @@ typedef CGAL::Triangulation_data_structure_3<
 	CGAL::Parallel_tag> Tds;
 typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 
+static void reportLocationType(Delaunay::Locate_type locationType)
+{
+	switch (locationType)
+	{
+	case Delaunay::VERTEX:
+		DEBUG_PRINT("Delaunay::VERTEX");
+		break;
+	case Delaunay::EDGE:
+		DEBUG_PRINT("Delaunay::EDGE");
+		break;
+	case Delaunay::FACET:
+		DEBUG_PRINT("Delaunay::FACET");
+		break;
+	case Delaunay::CELL:
+		DEBUG_PRINT("Delaunay::CELL");
+		break;
+	case Delaunay::OUTSIDE_CONVEX_HULL:
+		DEBUG_PRINT("Delaunay::OUTSIDE_CONVEX_HULL");
+		break;
+	case Delaunay::OUTSIDE_AFFINE_HULL:
+		DEBUG_PRINT("Delaunay::OUTSIDE_AFFINE_HULL");
+		break;
+	}
+}
+
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data, double epsilon)
 {
@@ -151,7 +176,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 				1000.), 50);
 	Delaunay triangulation(pointsHigher.begin(), pointsHigher.end(),
 			&locking_ds);
-	auto infinity = triangulation.infinite_vertex();
+	//auto infinity = triangulation.infinite_vertex();
 
 	/* Find needed conditions. */
 	long int numDirections = data->size();
@@ -169,8 +194,13 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		{
 			if (j == i)
 				continue;
+			DEBUG_PRINT("Checking condition for (%d, %d)", i, j);
+			int locationIndexI, locationIndexJ;
+			Delaunay::Locate_type locationType;
 			auto cell = triangulation.locate(pointsLower[j],
-					infinity);
+					locationType, locationIndexI,
+					locationIndexJ);
+			reportLocationType(locationType);
 			if (!triangulation.is_infinite(cell))
 			{
 				addCondition(triplets, iCondition, i, j,

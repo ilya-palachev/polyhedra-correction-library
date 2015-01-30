@@ -277,7 +277,10 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 	/* Get the solution vector. */
 	VectorXd solution(data->numValues());
 	for (int i = 0; i < data->numValues(); ++i)
+	{
 		solution(i) = glp_get_col_prim(problem, i + 1);
+		DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
+	}
 
 	/* Cleanup. */
 	glp_delete_prob(problem);

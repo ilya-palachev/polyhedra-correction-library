@@ -204,6 +204,12 @@ static VectorXd supportValuesFromPoints(std::vector<Vector3d> directions,
 	VectorXd values(directions.size());
 	ASSERT(3 * directions.size() == (unsigned) v.rows());
 	int num = directions.size();
+#ifndef NDEBUG
+	for (int i = 0; i < v.rows(); ++i)
+	{
+		DEBUG_PRINT("v(%d) = %lf", i, v(i));
+	}
+#endif /* NDEBUG */
 	for (int i = 0; i < num; ++i)
 	{
 		values(i) = directions[i].x * v(3 * i)

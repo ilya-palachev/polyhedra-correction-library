@@ -479,6 +479,13 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	int numDirections = directions.size();
 	ASSERT(3 * numDirections == estimate.size());
 
+#ifndef NDEBUG
+	for (int i = 0; i < estimate.rows(); ++i)
+	{
+		DEBUG_PRINT("estimate(%d) = %lf", i, estimate(i));
+	}
+#endif 
+
 	std::vector<Vector3d> points;
 	for (int i = 0; i < numDirections; ++i)
 	{
@@ -498,6 +505,12 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 				- directions[i] * points[j];			
 			if (violation < 0.)
 			{
+				std::cerr << "directions[" << i << "] = "
+					<< directions[i] << std::endl;
+				std::cerr << "point[" << i << "] = "
+					<< points[i] << std::endl;
+				std::cerr << "point[" << j << "] = "
+					<< points[j] << std::endl;
 				ALWAYS_PRINT(stdout, "directions[%d] * "
 						"points[%d] = %lf ; ", i, i,
 						directions[i] * points[i]);
