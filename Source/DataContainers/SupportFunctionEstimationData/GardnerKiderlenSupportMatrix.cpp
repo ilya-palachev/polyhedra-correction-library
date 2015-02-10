@@ -25,6 +25,7 @@
  * - implementation.
  */
 
+#if 0
 #define CGAL_LINKED_WITH_TBB 1
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/AABB_tree.h>
@@ -39,6 +40,7 @@ typedef CGAL::Polyhedron_3<K> CGALPolyhedron;
 typedef CGAL::AABB_face_graph_triangle_primitive<CGALPolyhedron> Primitive;
 typedef CGAL::AABB_traits<K, Primitive> Traits;
 typedef CGAL::AABB_tree<Traits> Tree;
+#endif
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -63,11 +65,13 @@ GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
 static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
 		int &iCondition, int i, int j, Vector3d direction)
 {
+	DEBUG_START;
 	if (i == j)
 	{
 		DEBUG_END;
 		return;
 	}
+	DEBUG_PRINT("Adding condition (%d, %d)", i, j);
 
 	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i,
 				direction.x));
@@ -82,6 +86,7 @@ static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
 	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j + 2,
 				-direction.z));
 	++iCondition;
+	DEBUG_END;
 }
 
 
@@ -114,6 +119,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	return matrix;
 }
 
+# if 0
 /**
  * Gets duals of support planes which free coefficients were incremented on a
  * given number.
@@ -147,6 +153,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 {
 	DEBUG_START;
 	std::cout << "epsilon = " << epsilon << std::endl;
+	std::cin >> epsilon;
 
 	/* Get duals of higher and lower support planes */
 	auto pointsHigher = getShiftedDualPoints(data, epsilon);
@@ -196,6 +203,60 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
+	matrix->setFromTriplets(triplets.begin(), triplets.end());
+	DEBUG_END;
+	return matrix;
+}
+#endif
+
+GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data, double epsilon)
+{
+	DEBUG_START;
+	auto directions = data->supportDirectionsCGAL();
+	Polyhedron_3 hull;
+	CGAL::convex_hull_3(directions.begin(), directions.end(), hull);
+
+	long int numDirections = data->size();
+	for (auto vertex = hull.vertices_begin();
+			vertex != hull.vertices_end(); ++vertex)
+	{
+		Point_3 point = vertex->point();
+		double minDist = 0.;
+		int iMin = -1;
+		for (int i = 0; i < numDirections; ++i)
+		{
+			double dist = (point - directions[i]).squared_length();
+			if (dist < minDist || iMin == -1)
+			{
+				iMin = i;
+				minDist = dist;
+			}
+		}
+		DEBUG_PRINT("Found closest vertex #%d, dist = %lf", iMin,
+				minDist);
+		vertex->id = iMin;
+	}
+
+	std::vector<Eigen::Triplet<double>> triplets;
+	int iCondition = 0;
+	int numConditions = 0;
+	for (auto halfedge = hull.halfedges_begin();
+			halfedge != hull.halfedges_end(); ++halfedge)
+	{
+		int i = halfedge->prev()->vertex()->id;
+		ASSERT(i >= 0);
+		int j = halfedge->vertex()->id;
+		ASSERT(j >= 0);
+		addCondition(triplets, iCondition, i, j, directions[i]);
+		++numConditions;
+	}
+
+	ALWAYS_PRINT(stdout, "Number of conditions: %d\n", numConditions);
+	ALWAYS_PRINT(stdout, "Number of directions: %ld\n", numDirections);
+
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			numConditions, numDirections * 3);
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
 	return matrix;
