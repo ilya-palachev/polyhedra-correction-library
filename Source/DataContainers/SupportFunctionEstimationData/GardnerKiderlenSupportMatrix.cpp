@@ -25,7 +25,7 @@
  * - implementation.
  */
 
-#if 0
+#if 1
 #define CGAL_LINKED_WITH_TBB 1
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/AABB_tree.h>
@@ -119,7 +119,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	return matrix;
 }
 
-# if 0
+# if 1
 /**
  * Gets duals of support planes which free coefficients were incremented on a
  * given number.
@@ -209,6 +209,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 }
 #endif
 
+#if 0
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data, double epsilon)
 {
@@ -261,3 +262,5 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	DEBUG_END;
 	return matrix;
 }
+
+#endif
