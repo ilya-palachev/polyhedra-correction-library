@@ -262,6 +262,27 @@ struct glp_prob_wrapper
 	}
 };
 
+struct glp_prob_wrapper_mps
+{
+	glp_prob *problem;
+
+	glp_prob_wrapper_mps(glp_prob *p): problem(p) {}
+
+	friend std::ostream &operator<<(std::ostream &stream,
+			glp_prob_wrapper_mps &p)
+	{
+		DEBUG_START;
+		char *name= tmpnam(NULL);
+		glp_write_mps(p.problem, GLP_MPS_FILE, NULL, name);
+	        std::ifstream tmpstream;
+		tmpstream.open(name, std::ifstream::in);
+		stream << tmpstream.rdbuf();
+		tmpstream.close();
+		DEBUG_END;
+		return stream;
+	}
+};
+
 VectorXd GlpkSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
@@ -270,6 +291,8 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 	glp_prob *problem = constructProblem(data);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "glpk-problem.lp")
 		<< glp_prob_wrapper(problem);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "glpk-problem.mps")
+		<< glp_prob_wrapper_mps(problem);
 
 	/* Run the simplex solver. */
 	glp_simplex(problem, NULL);
