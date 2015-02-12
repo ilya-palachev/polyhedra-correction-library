@@ -512,6 +512,13 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		"Glpk linear programming solver"
 	},
 #endif /* USE_GLPK */
+#ifdef USE_CLP
+	{
+		CLP_ESTIMATOR,
+		"clp",
+		"Clp linear programming solver"
+	},
+#endif /* USE_CLP */
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
