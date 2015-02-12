@@ -115,6 +115,7 @@ set (SOURCE_pcl
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
+	Source/Recoverer/GlpkSFELinfBuilder.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp
