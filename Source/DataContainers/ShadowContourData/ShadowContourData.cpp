@@ -333,7 +333,8 @@ SupportFunctionDataPtr ShadowContourData::calculateSupportData()
 {
 	DEBUG_START;
 	SupportFunctionDataConstructor constructor;
-	auto data = constructor.run(this->shared_from_this());
+	auto data = constructor.run(this->shared_from_this(),
+			IF_ANALYZE_ALL_CONTOURS);
 	DEBUG_END;
 	return data;
 }

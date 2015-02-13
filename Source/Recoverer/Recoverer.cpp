@@ -32,6 +32,7 @@
 #include "Recoverer/TsnnlsSupportFunctionEstimator.h"
 #include "Recoverer/GlpkSupportFunctionEstimator.h"
 #include "Recoverer/ClpSupportFunctionEstimator.h"
+#include "Recoverer/CPLEXSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "halfspaces_intersection.h"
 
@@ -39,7 +40,8 @@ Recoverer::Recoverer() :
 	estimatorType(CGAL_ESTIMATOR),
 	ifBalancing(false),
 	ifConvexifyContours(false),
-	ifScaleMatrix(false)
+	ifScaleMatrix(false),
+	numMaxContours(IF_ANALYZE_ALL_CONTOURS)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -164,6 +166,11 @@ static SupportFunctionEstimator *constructEstimator(
 		estimator = new ClpSupportFunctionEstimator(data);
 		break;
 #endif /* USE_CLP */
+#ifdef USE_CPLEX
+	case CPLEX_ESTIMATOR:
+		estimator = new CPLEXSupportFunctionEstimator(data);
+		break;
+#endif /* USE_CPLEX */
 	case CGAL_ESTIMATOR:
 		estimator = new CGALSupportFunctionEstimator(data,
 				CGAL_ESTIMATION_QUADRATIC);
@@ -226,6 +233,14 @@ static VectorXd supportValuesFromPoints(std::vector<Vector3d> directions,
 	return values;
 }
 
+
+void Recoverer::setNumMaxContours(int number)
+{
+	DEBUG_START;
+	numMaxContours = number;
+	DEBUG_END;
+}
+
 PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
@@ -236,7 +251,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		constructor.enableBalanceShadowContours();
 	if (ifConvexifyContours)
 		constructor.enableConvexifyShadowContour();
-	SupportFunctionDataPtr data = constructor.run(dataShadow);
+	SupportFunctionDataPtr data = constructor.run(dataShadow, numMaxContours);
 
 	PolyhedronPtr p = run(data);
 

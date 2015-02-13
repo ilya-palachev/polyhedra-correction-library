@@ -461,7 +461,7 @@ static long int checkStartingVector(VectorXd startingVector,
 	return numNegative;
 }
 
-const double EPSILON_MAX_VIOLATION = 1e-15;
+const double EPSILON_MAX_VIOLATION = 1e-7;
 
 bool SupportFunctionEstimationDataConstructor::checkResult(
 		SupportFunctionEstimationDataPtr data,
@@ -502,7 +502,9 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 			if (j == i)
 				continue;
 			double violation = directions[i] * points[i]
-				- directions[i] * points[j];			
+				- directions[i] * points[j];
+			if (violation < 0. && violation < minViolation)
+				minViolation = violation;
 			if (violation < -EPSILON_MAX_VIOLATION)
 			{
 				std::cerr << "directions[" << i << "] = "
@@ -526,7 +528,7 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 		}
 	}
 
-	ALWAYS_PRINT(stdout, "Number of violations = %d, min = %lf\n",
+	ALWAYS_PRINT(stdout, "Number of violations = %d, min = %.16lf\n",
 			numViolations, minViolation);
 	DEBUG_END;
 	return numViolations == 0;

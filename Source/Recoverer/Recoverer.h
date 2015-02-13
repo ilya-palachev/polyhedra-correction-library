@@ -70,6 +70,11 @@ typedef enum
 	CLP_ESTIMATOR,
 #endif /* USE_CLP */
 
+#ifdef USE_CPLEX
+	/** Lnear CPLEX estimator. */
+	CPLEX_ESTIMATOR,
+#endif /* USE_CPLEX */
+
 	/** Quadratic primal CGAL estimator.  */
 	CGAL_ESTIMATOR,
 
@@ -102,6 +107,9 @@ private:
 
 	/** Starting body type. */
 	SupportFunctionEstimationStartingBodyType startingBodyType_;
+
+	/** Number of analyzed contours. */
+	int numMaxContours;
 
 public:
 
@@ -156,6 +164,13 @@ public:
 	 */
 	void setStartingBodyType(
 			SupportFunctionEstimationStartingBodyType type);
+
+	/**
+	 * Sets the maximum number of analyzed contours.
+	 *
+	 * @param number	The maximum number of analyzed contours.
+	 */
+	void setNumMaxContours(int number);
 
 	/**
 	 * Runs the recovering procedure for shadow contours.

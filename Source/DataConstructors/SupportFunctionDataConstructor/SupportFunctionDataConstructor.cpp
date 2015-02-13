@@ -70,19 +70,21 @@ static ShadowContourDataPtr convexifyShadowContourData(
  *
  * @param data				Shadow contour data
  * @param ifExtractItemsByPoints	Whether to "by-points" extractor is
- * enabled
- * @return		Support fucntion data items
+ * 					enabled
+ * @param numMaxContours		The number of contours to be analyzed.
+ * @return				Support fucntion data items
  */
 static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
-		ShadowContourDataPtr data, bool ifExtractItemsByPoints);
+		ShadowContourDataPtr data, bool ifExtractItemsByPoints,
+		int numMaxContours);
 
 /**
  * Extracts support function data items from given shadow contour.
  *
- * @param contour	Shadow contour
- * @param extractor	The extractor that must be used.
- * enabled
- * @return		Support fucntion data items
+ * @param contour		Shadow contour
+ * @param extractor		The extractor that must be used.
+ * 				enabled
+ * @return			Support fucntion data items.
  */
 static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 		SContour *contour, SupportFunctionDataItemExtractor *extractor);
@@ -134,7 +136,7 @@ void SupportFunctionDataConstructor::enableExtractItemsByPoints()
 }
 
 SupportFunctionDataPtr SupportFunctionDataConstructor::run(
-		ShadowContourDataPtr data)
+		ShadowContourDataPtr data, int numMaxContours)
 {
 	DEBUG_START;
 	ASSERT(data);
@@ -169,7 +171,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 
 	/* Iterate through the array of contours and get data from each. */
 	auto items = extractSupportFunctionDataItems(data,
-			ifExtractItemsByPoints);
+			ifExtractItemsByPoints, numMaxContours);
 
 	SupportFunctionDataPtr supportFunctionData(
 			new SupportFunctionData(items));
@@ -263,7 +265,8 @@ static ShadowContourDataPtr convexifyShadowContourData(
 }
 
 static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
-		ShadowContourDataPtr data, bool ifExtractItemsByPoints)
+		ShadowContourDataPtr data, bool ifExtractItemsByPoints,
+		int numMaxContours)
 {
 	DEBUG_START;
 	ASSERT(data);
@@ -271,8 +274,18 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 
 	std::vector<SupportFunctionDataItem> items;
 
+	double factor = (double) data->numContours / (double) numMaxContours;
+	int numContoursAnalyzed = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
+		if (numMaxContours != IF_ANALYZE_ALL_CONTOURS
+			&& numMaxContours < data->numContours
+			&& iContour != (int) floor(factor * numContoursAnalyzed))
+		{
+			continue;
+		}
+		++numContoursAnalyzed;
+
 		SContour *contour = &data->contours[iContour];
 		SupportFunctionDataItemExtractor *extractor = NULL;
 		if (ifExtractItemsByPoints)
@@ -295,6 +308,8 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 		items.insert(items.end(), itemsPortion.begin(),
 				itemsPortion.end()); /* Collect items. */
 	}
+	ALWAYS_PRINT(stdout, "We are analyzing only %d contours.\n",
+			numContoursAnalyzed);
 
 	/* Check the result. */
 	ASSERT(checkSupportFunctionDataItemsInequality(items));

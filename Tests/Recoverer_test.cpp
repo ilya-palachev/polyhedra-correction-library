@@ -68,11 +68,17 @@
 /** Option "-M" sets the name of file with model. */
 #define OPTION_FILE_MODEL 'M'
 
-/*
+/**
  * Option "-n" takes the argument with the number of generated contours (for
  * synthetic testing mode).
  */
 #define OPTION_CONTOURS_NUMBER 'n'
+
+/**
+ * Option "-N" takes the argument with the maximum number of countours get from
+ * the given file with shadow contours.
+ */
+#define OPTION_MAX_CONTOUR_NUMBER 'N'
 
 /**
  * Option "-o" is used to control output file name(s). The default behaviour is
@@ -111,7 +117,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:f:i:l:m:M:n:o:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:f:i:l:m:M:n:N:o:r:st:vx"
 
 struct PCLOption: public option
 {
@@ -161,6 +167,16 @@ static PCLOption optionsLong[] =
 		},
 		"The number of contours to be generated from the synthetic "
 			"model"
+	},
+	{
+		option
+		{
+			"max-contours-number",
+			required_argument,
+			0,
+			OPTION_MAX_CONTOUR_NUMBER
+		},
+		"The maximum number of contours to be analyzed"
 	},
 	{
 		option
@@ -392,6 +408,9 @@ typedef struct
 
 	/** The type of starting body of the estimation process. */
 	SupportFunctionEstimationStartingBodyType startingBodyType;
+
+	/** Maximum number of contours to be analyzed. */
+	int numMaxContours;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -519,6 +538,13 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		"Clp linear programming solver"
 	},
 #endif /* USE_CLP */
+#ifdef USE_CPLEX
+	{
+		CPLEX_ESTIMATOR,
+		"cplex",
+		"CPLEX linear programming solver"
+	},
+#endif /* USE_CPLEX */
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
@@ -689,6 +715,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionFileName = false;
 	bool ifOptionModelName = false;
 	bool ifOptionNumContours = false;
+	bool ifOptionMaxNumContours = false;
 	bool ifOptionFirstAngle = false;
 	bool ifOptionLimitRandom = false;
 	bool ifOptionRecover = false;
@@ -817,7 +844,45 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 				errorOutOfRange(argc, argv);
 			}
 
+
 			ifOptionNumContours = true;
+			break;
+		case OPTION_MAX_CONTOUR_NUMBER:
+			if (ifOptionMaxNumContours)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_CONTOURS_NUMBER);
+			}
+
+			/* Parse digital number from input argument. */
+			options->numMaxContours = strtol(optarg, &charMistaken, 10);
+			/*
+			 *  If user gives invalid character, the charMistaken is
+			 *  set to it
+			 */
+
+			/*
+			 * From "man strtol":
+			 *
+			 * In particular, if *nptr is not '\0' but **endptr is
+			 * '\0' on return, the entire string is valid.
+			 */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			}
+
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv);
+			}
+
+			ifOptionMaxNumContours = true;
 			break;
 		case OPTION_FIRST_ANGLE:
 			if (ifOptionFirstAngle)
@@ -1126,6 +1191,11 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	if (!ifOptionStartingBodyType)
 	{
 		options->startingBodyType = DEFAULT_STARTING_BODY_TYPE;
+	}
+
+	if (!ifOptionMaxNumContours)
+	{
+		options->numMaxContours = IF_ANALYZE_ALL_CONTOURS;
 	}
 
 	if (modelName)
@@ -1461,6 +1531,9 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 
 	/* Set starting body type. */
 	recoverer->setStartingBodyType(options->startingBodyType);
+
+	/* Set number of analyzed contours. */
+	recoverer->setNumMaxContours(options->numMaxContours);
 
 	DEBUG_END;
 	return recoverer;

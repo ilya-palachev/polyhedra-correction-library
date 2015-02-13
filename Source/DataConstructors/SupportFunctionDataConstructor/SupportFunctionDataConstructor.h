@@ -65,11 +65,13 @@ public:
 	/**
 	 * Generates support function data from shadow contour data.
 	 *
-	 * @param data	Shadow contour data
+	 * @param data			Shadow contour data
+	 * @param numMaxContours	The maximum number of contours to be
+	 * 				analyzed
 	 *
 	 * @return The support function data generated from shadow contours
 	 */
-	SupportFunctionDataPtr run(ShadowContourDataPtr data);
+	SupportFunctionDataPtr run(ShadowContourDataPtr data, int numMaxContours);
 
 	/**
 	 * Generates support function data from polyhedron and support

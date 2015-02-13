@@ -113,6 +113,7 @@ set (SOURCE_pcl
 	Source/Polyhedron/VertexInfo/VertexInfo_preprocess.cpp
 	Source/Polyhedron_3/Polyhedron_3.cpp
 	Source/Recoverer/ClpSupportFunctionEstimator.cpp
+	Source/Recoverer/CPLEXSupportFunctionEstimator.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
@@ -218,6 +219,11 @@ if (ENABLE_CLP)
 	target_link_libraries(pcl Clp)
 	add_definitions(-DUSE_CLP)
 	message("!!! Clp solver is enabled !!!")
+endif()
+
+if (ENABLE_CPLEX)
+	add_definitions(-DUSE_CPLEX)
+	message("!!! CPLEX solver is enabled !!!")
 endif()
 
 if (ENABLE_GRAPH_DUMPER)
