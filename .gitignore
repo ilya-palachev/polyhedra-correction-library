@@ -11,13 +11,19 @@
 *.kate-swp
 # * Aspell backup files:
 *.bak
+# * Vim backup files:
+*.swp
+# * LibreOffice Draw backup files:
+*.odg#
+# Matlab backup files:
+*.m~
 
 # Building directories and files:
 *.o
 *.so
 *.a
 Build*
-build
+build*
 
 # Directory with output from polyhedral algorithms:
 poly-data-out
@@ -41,6 +47,7 @@ poly-data-out
 *.tex~
 *.toc
 *.dvi
+*.out
 
 # BibTEX automatically generated files:
 *.bbl
