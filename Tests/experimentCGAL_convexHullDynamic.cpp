@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 	
 	/*
 	 * generate <num_points> points randomly on a sphere of radius 100.0
-	 * and copy them to a vector
+	 * and copy them to a std::vector
 	 */
 	CGAL::cpp11::copy_n(gen, num_points, std::back_inserter(points) );
 	

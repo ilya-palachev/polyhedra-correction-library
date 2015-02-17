@@ -46,7 +46,7 @@ public:
 
 double distSpherePoint(SpherePoint& point0, SpherePoint& point1);
 
-SpherePoint& MassCentre(int n, int* indexFacet, shared_ptr<Polyhedron> poly);
+SpherePoint& MassCentre(int n, int* indexFacet, PolyhedronPtr poly);
 SpherePoint& MassCentre(int n, SpherePoint* points);
 
 #endif /* SPHEREPOINT_H */

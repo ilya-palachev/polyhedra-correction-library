@@ -28,9 +28,9 @@
 class PDataConstructor
 {
 public:
-	shared_ptr<Polyhedron> polyhedron;
+	PolyhedronPtr polyhedron;
 
-	PDataConstructor(shared_ptr<Polyhedron> p);
+	PDataConstructor(PolyhedronPtr p);
 	virtual ~PDataConstructor();
 };
 

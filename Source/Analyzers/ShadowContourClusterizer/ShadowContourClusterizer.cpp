@@ -29,7 +29,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "ShadowContourClusterizer.h"
-#include "DataContainers/ShadeContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
 ShadowContourClusterizer::ShadowContourClusterizer() :
 		PAnalyzer()
@@ -38,7 +38,7 @@ ShadowContourClusterizer::ShadowContourClusterizer() :
 	DEBUG_END;
 }
 
-ShadowContourClusterizer::ShadowContourClusterizer(shared_ptr<Polyhedron> p) :
+ShadowContourClusterizer::ShadowContourClusterizer(PolyhedronPtr p) :
 		PAnalyzer(p)
 {
 	DEBUG_START;
@@ -66,7 +66,7 @@ static double angleModulo2PI(double angle)
 	return angle;
 }
 
-void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
+void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
 										 const char* fileNamePlot)
 {
 	DEBUG_START;
@@ -91,7 +91,7 @@ void ShadowContourClusterizer::buildPlot(ShadeContourDataPtr contourData,
 	{
 		SContour* contourCurr = &contourData->contours[iContour];
 		Vector3d normal = contourCurr->plane.norm;
-		normal.norm();
+		normal.norm(1.);
 		double angle = atan2(normal * ey, normal * ex);
 		
 		/* Iterate via the array of sides of the current contour. */

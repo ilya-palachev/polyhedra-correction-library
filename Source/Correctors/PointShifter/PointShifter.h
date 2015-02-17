@@ -47,7 +47,7 @@ private:
 
 public:
 	PointShifter();
-	PointShifter(shared_ptr<Polyhedron> p);
+	PointShifter(PolyhedronPtr p);
 	PointShifter(Polyhedron* p);
 	~PointShifter();
 

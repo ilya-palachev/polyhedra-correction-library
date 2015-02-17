@@ -28,6 +28,17 @@
 
 #include <Eigen/Sparse>
 
+/**
+ * Equality operator for comparison of sparse matrix.
+ *
+ * @param matrixLeft	matrix at the left side of comparison
+ * @param matrixRight	matrix at the right side of comparison
+ *
+ * @return True, if matrix are totally equal at topological and FP sence
+ */
+bool operator==(const Eigen::SparseMatrix<double> matrixLeft,
+	const Eigen::SparseMatrix<double> matrixRight);
+
 typedef Eigen::SparseMatrix<double> SparseMatrix;
 
 typedef Eigen::Triplet<double> Triplet;
@@ -37,5 +48,6 @@ typedef Eigen::VectorXd VectorXd;
 typedef Eigen::RowVectorXd RowVectorXd;
 
 typedef Eigen::VectorXi VectorXi;
+
 
 #endif

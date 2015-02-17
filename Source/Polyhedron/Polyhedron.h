@@ -23,13 +23,23 @@
  * @brief The declaration of Polyhedron - the main class of the project.
  */
 
+#ifndef POLYHEDRON_H_FORWARD
+#define POLYHEDRON_H_FORWARD
+
+#include <memory>
+class Polyhedron;
+typedef std::shared_ptr<Polyhedron> PolyhedronPtr;
+
+#endif /* POLYHEDRON_H_FORWARD */
+
 #ifndef POLYHEDRON_H
 #define	 POLYHEDRON_H
 
 #include <memory>
 #include <list>
 
-#include "PolyhedronCGAL.h"
+#include "KernelCGAL/KernelCGAL.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
 
 /*
  * Forward declarations
@@ -43,15 +53,13 @@ class VertexInfo;
 class TreeClusterNorm;
 class TreeClusterNormNode;
 class MatrixDistNorm;
-class ShadeContourData;
+class ShadowContourData;
 class EdgeData;
 
 struct _GSCorrectorParameters;
 
-using namespace std;
-
 typedef struct _GSCorrectorParameters GSCorrectorParameters;
-typedef shared_ptr<EdgeData> EdgeDataPtr;
+typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 
 /**
  * The implementation of Polyhedron.
@@ -62,7 +70,7 @@ typedef shared_ptr<EdgeData> EdgeDataPtr;
  * Thus we have separate class for every method that does some big change or
  * correction of polyhedron.
  */
-class Polyhedron : public enable_shared_from_this<Polyhedron>
+class Polyhedron : public std::enable_shared_from_this<Polyhedron>
 {
 public:
 
@@ -97,7 +105,7 @@ protected:
 	/**
 	 * Enables "shared from this" feature.
 	 */
-	inline shared_ptr<Polyhedron> get_ptr()
+	inline PolyhedronPtr get_ptr()
 	{
 		return shared_from_this();
 	}
@@ -150,7 +158,22 @@ public:
 	 *
 	 * @param p	Standard CGAL polyhedron
 	 */
-	Polyhedron(Polyhedron_3 p);
+	Polyhedron(BasePolyhedron_3 p);
+
+	/**
+	 * Constructs polyhedron that consists of facets that are equal to given
+	 * shadow contours.
+	 *
+	 * @param shadowContourData	Shadow contour data
+	 */
+	Polyhedron(ShadowContourDataPtr data);
+
+	/**
+	 * Copy-by-shared-pointer constructor.
+	 *
+	 * @param p	Shared pointer to polyhedron.
+	 */
+	Polyhedron(PolyhedronPtr p);
 
 	/**
 	 * Deletes the polyhedron.
@@ -415,6 +438,16 @@ public:
 	void fprint_ply_autoscale(double maxSize, const char *filename,
 			const char *comment);
 
+	/**
+	 * Writes polyhedron to stream in PLY format, using autoscaling.
+	 *
+	 * @param stream	Output stream
+	 * @param p		The polyhedron
+	 *
+	 * @return		The stream ready for further outputs
+	 */
+	friend std::ostream &operator<<(std::ostream &stream, Polyhedron &p);
+
 	/*
 	 * Preprocessing
 	 * ========================================================================
@@ -525,7 +558,7 @@ public:
 	 * ========================================================================
 	 * Contained in source file Polyhedron_shift_point.cpp
 	 *
-	 * Functions for shifting one vertex on the vector displacement and then
+	 * Functions for shifting one vertex on the std::vector displacement and then
 	 * reconstructing the planarity of all facets.
 	 *
 	 * Also the are 2 functions that are used outside the coalescer. Thus, they
@@ -534,46 +567,46 @@ public:
 	 */
 
 	/**
-	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * Shifts one vertex on the std::vector displacement and then reconstructs
 	 * the planarity of all facets.
 	 *
 	 * @param id	The ID of shifted vertex
-	 * @param delta	Displacement vector
+	 * @param delta	Displacement std::vector
 	 *
 	 * TODO: This algorithm is not actually working now.
 	 */
 	void shiftPoint(int id, Vector3d delta);
 
 	/**
-	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * Shifts one vertex on the std::vector displacement and then reconstructs
 	 * the planarity of all facets. The minimized functional's summands are
 	 * used with weights.
 	 *
 	 * @param id	The ID of shifted vertex
-	 * @param delta	Displacement vector
+	 * @param delta	Displacement std::vector
 	 *
 	 * TODO: This algorithm is not actually working now.
 	 */
 	void shiftPointWeighted(int id, Vector3d delta);
 
 	/**
-	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * Shifts one vertex on the std::vector displacement and then reconstructs
 	 * the planarity of all facets, the functional is linearized in order to
 	 * simplify the algorithm.
 	 *
 	 * @param id	The ID of shifted vertex
-	 * @param delta	Displacement vector
+	 * @param delta	Displacement std::vector
 	 */
 	void shiftPointLinearGlobal(int id, Vector3d delta);
 
 	/**
-	 * Shifts one vertex on the vector displacement and then reconstructs
+	 * Shifts one vertex on the std::vector displacement and then reconstructs
 	 * the planarity of all facets, the functional is linearized in order to
 	 * simplify the algorithm, and the displacements are calculated relatively
 	 * to the previous state.
 	 *
 	 * @param id	The ID of shifted vertex
-	 * @param delta	Displacement vector
+	 * @param delta	Displacement std::vector
 	 */
 	void shiftPointLinearLocal(int id, Vector3d delta);
 
@@ -581,10 +614,10 @@ public:
 	 * Tests global linear shifting in a big number of cases.
 	 *
 	 * @param id		The ID of shifted vertex
-	 * @param delta		Displacement vector
+	 * @param delta		Displacement std::vector
 	 * @param mode		Mode of shifting
 	 * @param num_steps	Reference to the number of step required by algorithm
-	 * @param norm_sum	Sum of norms of vector displacements
+	 * @param norm_sum	Sum of norms of std::vector displacements
 	 *
 	 * TODO: mode should be enum, not integer!
 	 */
@@ -598,7 +631,7 @@ public:
 	 * detected during the minimization.
 	 *
 	 * @param id		The ID of shifted vertex
-	 * @param delta		Displacement vector
+	 * @param delta		Displacement std::vector
 	 * @param num		Number of divisions of step that must be done
 	 */
 	void shiftPointLinearPartial(int id, Vector3d delta, int num);
@@ -718,21 +751,21 @@ public:
 			Vector3d& v2);
 
 	/**
-	 * Prints the list of facets sorted by their area
+	 * Prints the std::list of facets sorted by their area
 	 */
 	void printSortedByAreaFacets(void);
 
 	/**
-	 * Gets the list of facets sorted by their area
+	 * Gets the std::list of facets sorted by their area
 	 */
-	list< struct FacetWithArea > getSortedByAreaFacets(void);
+	std::list<struct FacetWithArea> getSortedByAreaFacets(void);
 
 	/*
 	 * Clusterization
 	 * ========================================================================
 	 * Contained in source file Polyhedron_clusterize.cpp
 	 *
-	 * Functions for analyzing groups of facets that have close normal vectors.
+	 * Functions for analyzing groups of facets that have close normal std::vectors.
 	 * This is done using standard algorithms of clusterization under the set
 	 * of points contained inside the surface of unit sphere.
 	 * ========================================================================
@@ -740,7 +773,7 @@ public:
 
 	/**
 	 * Clusterizes facets in the metric of distances between their normal
-	 * vectors. Uses simple quadratic O(N^2) algorithm.
+	 * std::vectors. Uses simple quadratic O(N^2) algorithm.
 	 *
 	 * @param p	The threshold of cluster distance
 	 */
@@ -748,7 +781,7 @@ public:
 
 	/**
 	 * Clusterizes facets in the metric of distances between their normal
-	 * vectors. Uses standard algorithm of field fire.
+	 * std::vectors. Uses standard algorithm of field fire.
 	 *
 	 * @param p	The threshold of cluster distance
 	 */
@@ -796,11 +829,12 @@ public:
 	 *
 	 * @param contourData		Shadow contour data
 	 * @param parameters		The parameter set of the algorithm
-	 * @param facetsCorrected	The list of facets to be corrected (for partial
+	 * @param facetsCorrected	The std::list of facets to be corrected (for partial
 	 * correction)
 	 */
-	void correctGlobal(shared_ptr<ShadeContourData> contourData,
-			GSCorrectorParameters* parameters, list<int>* facetsCorrected);
+	void correctGlobal(ShadowContourDataPtr contourData,
+			GSCorrectorParameters* parameters,
+			std::list<int>* facetsCorrected);
 
 	/*
 	 * Verification
@@ -849,9 +883,14 @@ public:
 	 * @retval	The number of detected self-intersections.
 	 */
 	int checkEdges(EdgeDataPtr edgeData);
-};
 
-typedef shared_ptr<Polyhedron> PolyhedronPtr;
+	/**
+	 * Checks whether the planes of facets are all non-zero.
+	 *
+	 * @return true, if all planes are non-zero
+	 */
+	bool nonZeroPlanes();
+};
 
 #endif	/* POLYHEDRON_H */
 

@@ -40,7 +40,7 @@ private:
 	int prepareEdgeList(Facet* facet, Plane iplane);
 public:
 	Intersector();
-	Intersector(shared_ptr<Polyhedron> p);
+	Intersector(PolyhedronPtr p);
 	Intersector(Polyhedron* p);
 	~Intersector();
 	void run(Plane iplane);

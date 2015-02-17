@@ -45,8 +45,10 @@ typedef CGAL::Quadratic_program_solution<ET> Solution;
 #include "CGALSupportFunctionEstimator.h"
 
 CGALSupportFunctionEstimator::CGALSupportFunctionEstimator(
-		SupportFunctionEstimationData *data) :
-		SupportFunctionEstimator(data)
+		SupportFunctionEstimationDataPtr data,
+		CGALEstimationMode modeOrig) :
+		SupportFunctionEstimator(data),
+		mode(modeOrig)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -67,14 +69,14 @@ VectorXd CGALSupportFunctionEstimator::runLP(void)
 	 */
 	Program lp (CGAL::LARGER, false, 0., false, 0.);
 
-	int iEpsilon = numValues();
-	int numVariables = numValues();
-	int numConstraints = numConditions();
+	int iEpsilon = data->numValues();
+	int numVariables = data->numValues();
+	int numConstraints = data->numConditions();
 
 	lp.set_c(iEpsilon, 1.); /* Functional = \epsilon */
 
 	/* Add standard SFE constraints. */
-	SparseMatrix Q = supportMatrix();
+	SparseMatrix Q = data->supportMatrix();
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
@@ -94,7 +96,7 @@ VectorXd CGALSupportFunctionEstimator::runLP(void)
 	 *  h_{i} + \epsilon >= h_{i}^{0}
 	 * -h_{i} + \epsilon >= -h_{i}^{0}
 	 */
-	VectorXd h0 = supportVector();
+	VectorXd h0 = data->supportVector();
 	for (int i = 0; i < numVariables; ++i)
 	{
 		/*  h_{i} + \epsilon >= h_{i}^{0} */
@@ -114,7 +116,7 @@ VectorXd CGALSupportFunctionEstimator::runLP(void)
 
 	/* output solution */
 	std::cout << s;
-	VectorXd estimation(numValues()); int i = 0;
+	VectorXd estimation(data->numValues()); int i = 0;
 	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
 	{
 		estimation(i++) = d->to_double();
@@ -132,7 +134,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 	 * bounds.
 	 */
 	Program qp (CGAL::LARGER, false, 0., false, 0.);
-	int numVariables = numValues();
+	int numVariables = data->numValues();
 
 	/* Set matrix D to identity matrix. */
 	for (int i = 0; i < numVariables; ++i)
@@ -140,9 +142,9 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 		qp.set_d(i, i, 2.); /* NOTE: We set matrix 2 * D here! */
 	}
 
-	/* Set vector c to -2 * h_0. */
+	/* Set std::vector c to -2 * h_0. */
 	double h0norm = 0.;
-	VectorXd h0 = supportVector();
+	VectorXd h0 = data->supportVector();
 	for (int i = 0; i < numVariables; ++i)
 	{
 		qp.set_c(i, -2. * h0(i));
@@ -153,7 +155,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 	qp.set_c0(h0norm);
 
 	/* Set A matrix to Q. */
-	SparseMatrix Q = supportMatrix();
+	SparseMatrix Q = data->supportMatrix();
 	for (int k = 0; k < Q.outerSize(); ++k)
 		for (SparseMatrix::InnerIterator it(Q, k); it; ++it)
 		{
@@ -166,7 +168,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 
 	/* output solution */
 	std::cout << s;
-	VectorXd estimation(numValues()); int i = 0;
+	VectorXd estimation(data->numValues()); int i = 0;
 	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
 	{
 		estimation(i++) = d->to_double();
@@ -195,11 +197,4 @@ VectorXd CGALSupportFunctionEstimator::run(void)
 	__builtin_unreachable();
 	DEBUG_END;
 	return VectorXd(1);
-}
-
-void CGALSupportFunctionEstimator::setMode(CGALEstimationMode m)
-{
-	DEBUG_START;
-	mode = m;
-	DEBUG_END;
 }

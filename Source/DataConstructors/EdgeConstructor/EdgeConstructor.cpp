@@ -24,7 +24,7 @@
 #include "DataContainers/EdgeData/EdgeData.h"
 #include "Polyhedron/Facet/Facet.h"
 
-EdgeConstructor::EdgeConstructor(shared_ptr<Polyhedron> p) :
+EdgeConstructor::EdgeConstructor(PolyhedronPtr p) :
 				PDataConstructor(p)
 {
 	DEBUG_START;

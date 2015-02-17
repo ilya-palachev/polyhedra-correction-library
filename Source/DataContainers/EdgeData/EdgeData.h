@@ -25,8 +25,8 @@
 
 #include "DataContainers/EdgeData/Edge/Edge.h"
 
-typedef set<Edge, EdgeComparison> EdgeSet;
-typedef set<Edge, EdgeComparison>::iterator EdgeSetIterator;
+typedef std::set<Edge, EdgeComparison> EdgeSet;
+typedef std::set<Edge, EdgeComparison>::iterator EdgeSetIterator;
 
 class EdgeData
 {
@@ -57,7 +57,7 @@ public:
 	 * if a new element was inserted or false if an equivalent element already
 	 * existed (see c++ reference).
 	 * */
-	pair<EdgeSetIterator, bool> addEdge(int v0, int v1, int f0, int f1);
+	std::pair<EdgeSetIterator, bool> addEdge(int v0, int v1, int f0, int f1);
 
 	/* Add edge [v0, v1] with information about one incident facet f0 to the
 	 * edge data.
@@ -74,7 +74,7 @@ public:
 	 * if a new element was inserted or false if an equivalent element already
 	 * existed (see c++ reference).
 	 * */
-	pair<EdgeSetIterator, bool> addEdge(int v0, int v1, int f0);
+	std::pair<EdgeSetIterator, bool> addEdge(int v0, int v1, int f0);
 
 	/* Add edge with information about 2 incident facets and found
 	 * associations.
@@ -90,7 +90,7 @@ public:
 	 * if a new element was inserted or false if an equivalent element already
 	 * existed (see c++ reference).
 	 * */
-	pair<EdgeSetIterator, bool> addEdge(Edge& edge);
+	std::pair<EdgeSetIterator, bool> addEdge(Edge& edge);
 
 	bool operator ==(EdgeData& e);
 	bool operator !=(EdgeData& e);

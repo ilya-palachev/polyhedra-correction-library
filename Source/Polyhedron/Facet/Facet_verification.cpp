@@ -129,13 +129,13 @@ bool Facet::verifyUniqueValues(void)
 {
 	DEBUG_START;
 	
-	set<int> vertices;
+	std::set<int> vertices;
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
 		vertices.insert(indVertices[iVertex]);
 	}
 	
-	set<int> facets;
+	std::set<int> facets;
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
 		facets.insert(indVertices[numVertices + iVertex + 1]);
@@ -144,4 +144,12 @@ bool Facet::verifyUniqueValues(void)
 	DEBUG_END;
 	return (vertices.size() == (unsigned) numVertices)
 		&& (facets.size() == (unsigned) numVertices);
+}
+
+bool Facet::correctPlane()
+{
+	DEBUG_START;
+	bool result = !equal(plane.norm, Vector3d(0., 0., 0.), EPS_MIN_DOUBLE);
+	DEBUG_END;
+	return result;
 }

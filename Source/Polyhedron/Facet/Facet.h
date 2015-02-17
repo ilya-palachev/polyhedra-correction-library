@@ -38,7 +38,7 @@ public:
 	int numVertices;
 	Plane plane;
 	int* indVertices;
-	weak_ptr<Polyhedron> parentPolyhedron;
+	std::weak_ptr<Polyhedron> parentPolyhedron;
 	unsigned char rgb[3];
 
 	void init_full(const int* index_orig, const bool ifLong);
@@ -51,11 +51,12 @@ public:
 	Facet();
 
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			const int* index_orig, shared_ptr<Polyhedron> poly_orig,
+			const int* index_orig,
+			PolyhedronPtr poly_orig,
 			const bool ifLong);
 
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			shared_ptr<Polyhedron> poly_orig);
+			PolyhedronPtr poly_orig);
 
 	Facet& operator =(const Facet& facet1);
 	~Facet();
@@ -73,7 +74,7 @@ public:
 			int& v_curr);
 
 	void set_id(int id1);
-	void set_poly(shared_ptr<Polyhedron> poly_new);
+	void set_poly(PolyhedronPtr poly_new);
 	void set_rgb(unsigned char red, unsigned char gray, unsigned char blue);
 	void set_ind_vertex(int position, int value);
 
@@ -128,6 +129,13 @@ public:
 	bool verifyIncidenceStructure();
 	void test_pair_neighbours();
 	bool verifyUniqueValues(void);
+
+	/**
+	 * Checks whether the plane of facet is correct.
+	 *
+	 * @return true/false if the plane is correct or not.
+	 */
+	bool correctPlane();
 
 };
 

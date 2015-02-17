@@ -51,7 +51,7 @@ PointShifterWeighted::PointShifterWeighted() :
 	DEBUG_END;
 }
 
-PointShifterWeighted::PointShifterWeighted(shared_ptr<Polyhedron> p) :
+PointShifterWeighted::PointShifterWeighted(PolyhedronPtr p) :
 				PCorrector(p),
 				x(),
 				x1(),

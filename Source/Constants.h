@@ -40,4 +40,7 @@ const double DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS = -RAND_MAX;
 /* Minimal double number. */
 const double EPS_MIN_DOUBLE = 1e-16;
 
+/** Whether to analyze all contours. */
+const int IF_ANALYZE_ALL_CONTOURS = -1;
+
 #endif /* CONSTANTS_H */

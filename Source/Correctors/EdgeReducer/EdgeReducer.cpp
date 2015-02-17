@@ -32,7 +32,7 @@ EdgeReducer::EdgeReducer() :
 	DEBUG_END;
 }
 
-EdgeReducer::EdgeReducer(shared_ptr<Polyhedron> p) :
+EdgeReducer::EdgeReducer(PolyhedronPtr p) :
 		PCorrector(p)
 {
 	DEBUG_START;
@@ -148,7 +148,7 @@ bool EdgeReducer::updateFacets()
 		/* 1). In case when "stayed" vertex LAYS in the current facet, delete
 		 * "removed" vertex from facet. */
 
-		/* 1a). The "stayed" vertex is EARLIER in the list of vertices than
+		/* 1a). The "stayed" vertex is EARLIER in the std::list of vertices than
 		 * the "reduced" vertex. */
 		if (facetCurr->indVertices[iPositionPrev] == iVertexStayed)
 		{
@@ -202,7 +202,7 @@ bool EdgeReducer::updateFacets()
 			--facetCurr->numVertices;
 		}
 
-		/* 1b). The "stayed" vertex is LATER in the list of vertices than
+		/* 1b). The "stayed" vertex is LATER in the std::list of vertices than
 		 * the "reduced" vertex. */
 		else if (facetCurr->indVertices[iPositionNext] == iVertexStayed)
 		{
@@ -447,13 +447,13 @@ bool EdgeReducer::rePreprocessFacets()
 
 	DEBUG_PRINT("Stage 2. Re-preprocess all neighbors of updated facets");
 
-	set<int> facetsPreprocessed;
+	std::set<int> facetsPreprocessed;
 	/* 1). Add set "facetsUpdated" to set "facetsPreprocessed". */
 	facetsPreprocessed.insert(facetsUpdated.begin(), facetsUpdated.end());
 
 	/* 2). Add neighbors of facets inside set "facetsUpdated" to set
 	 * "facetsPreprocessed". */
-	for (set<int>::iterator itFacetUpdated = facetsUpdated.begin();
+	for (std::set<int>::iterator itFacetUpdated = facetsUpdated.begin();
 			itFacetUpdated != facetsUpdated.end(); ++itFacetUpdated)
 	{
 		Facet* facetUpdated = &polyhedron->facets[*itFacetUpdated];
@@ -466,7 +466,7 @@ bool EdgeReducer::rePreprocessFacets()
 	}
 
 	/* 3). Re-process all facets collected to the set "facetsPreprocessed". */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("*itFacet = %d", *itFacet);
@@ -486,7 +486,7 @@ bool EdgeReducer::rePreprocessFacets()
 	GraphDumperGEXF* graphDumper = new GraphDumperGEXF();
 #endif /* USE_GRAPH_DUMPER */
 
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		Facet* facetCurr = &polyhedron->facets[*itFacet];
@@ -565,13 +565,13 @@ bool EdgeReducer::updateEdges()
 
 			/* If succeeded to find the edge, add edge with proper values and
 			 * erase the old one. */
-			edgesWS.edgesEdited.insert(pair<int, int> (edgeNew.v0,
+			edgesWS.edgesEdited.insert(std::pair<int, int> (edgeNew.v0,
 								edgeNew.v1));
 
 			DEBUG_PRINT("Erasing edge [%d, %d] and inserting edge [%d, %d]",
 					edgeUpdated->v0, edgeUpdated->v1, edgeNew.v0, edgeNew.v1);
 			edgeData->edges.erase(edgeUpdated);
-			pair<EdgeSetIterator, bool> addResult = edgeData->addEdge(edgeNew);
+			std::pair<EdgeSetIterator, bool> addResult = edgeData->addEdge(edgeNew);
 			EdgeSetIterator edgeAdded = addResult.first;
 
 			/* These 2 assertions are added to check the validity of
@@ -609,7 +609,7 @@ bool EdgeReducer::updateEdges()
 		else
 		{
 			DEBUG_PRINT("\tThis edge must be deleted at all.");
-			edgesWS.edgesErased.insert(pair<int, int> (edgeUpdated->v0,
+			edgesWS.edgesErased.insert(std::pair<int, int> (edgeUpdated->v0,
 					edgeUpdated->v1));
 			edgeData->edges.erase(edgeUpdated);
 			--edgeData->numEdges;
@@ -624,7 +624,7 @@ bool EdgeReducer::updateEdges()
 	{
 		DEBUG_PRINT("The edge [%d, %d] has not been removed from the "
 				"set!", edgeRemoved->v0, edgeRemoved->v1);
-		edgesWS.edgesErased.insert(pair<int, int> (edgeRemoved->v0,
+		edgesWS.edgesErased.insert(std::pair<int, int> (edgeRemoved->v0,
 				edgeRemoved->v1));
 		edgeData->edges.erase(edgeRemoved);
 		--edgeData->numEdges;
@@ -646,7 +646,7 @@ bool EdgeReducer::updateVertexInfos()
 
 	/* 1). Create a queue and push indices of all facets incident to reduced vertex
 	 * into it. */
-	queue<int> facetsQueue;
+	std::queue<int> facetsQueue;
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
 		int iFacetCurr = vertexInfoReduced->indFacets[iFacet];
@@ -708,7 +708,7 @@ bool EdgeReducer::updateVertexInfos()
 }
 
 /* The routine for cutting degenerated vertices. */
-void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
+void EdgeReducer::cutDegeneratedVertex(int iVertex, std::queue<int>& facetsQueue)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Removing vetrexInfo #%d", iVertex);
@@ -763,8 +763,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 		cutDegeneratedFacet(facet1->id);
 	}
 
-	/* 2). Add all the neighbors of facets to the list. */
-	set<int> facetsPreprocessed;
+	/* 2). Add all the neighbors of facets to the std::list. */
+	std::set<int> facetsPreprocessed;
 	facetsPreprocessed.insert(iFacet0);
 	facetsPreprocessed.insert(iFacet1);
 
@@ -787,8 +787,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 				                    + 1 + i]);
 	}
 
-	/* 3). Re-preprocess all the facets in the list. */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	/* 3). Re-preprocess all the facets in the std::list. */
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("Re-preprocessing facet #%d", *itFacet);
@@ -797,7 +797,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	}
 
 	/* Verify incidence structure after removal. */
-	for (set<int>::iterator itFacet = facetsPreprocessed.begin();
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
 			itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		ASSERT(polyhedron->facets[*itFacet].verifyIncidenceStructure());
@@ -811,11 +811,11 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	EdgeSetIterator edge1 = edgeData->findEdge(iVertex, iVertex1);
 	ASSERT(edge1 != edgeData->edges.end());
 
-	pair<EdgeSetIterator, bool> returnValue =
+	std::pair<EdgeSetIterator, bool> returnValue =
 			edgeData->addEdge(iVertex0, iVertex1, iFacet0, iFacet1);
 	EdgeSetIterator edgeNew = returnValue.first;
 	ASSERT(edgeNew != edgeData->edges.end());
-	edgesWS.edgesAdded.insert(pair<int, int> (edgeNew->v0, edgeNew->v1));
+	edgesWS.edgesAdded.insert(std::pair<int, int> (edgeNew->v0, edgeNew->v1));
 
 	/* These 2 assertions are added to check the validity of
 	 * information about incident facets. */
@@ -848,7 +848,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	 * one.
 	 *
 	 * FIXME: In case when edge "edge" already exists in the set, we need to
-	 * merge the lists of associations, because otherwise we will get some
+	 * merge the std::lists of associations, because otherwise we will get some
 	 * associations more than one time.
 	 */
 	DEBUG_VARIABLE int numAssociationsBefore = edgeNew->assocList.size();
@@ -860,10 +860,10 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, queue<int>& facetsQueue)
 	ASSERT((unsigned) edgeNew->assocList.size() == numAssociationsBefore +
 			edge0->assocList.size() + edge1->assocList.size());
 
-	edgesWS.edgesErased.insert(pair<int, int> (edge0->v0, edge0->v1));
+	edgesWS.edgesErased.insert(std::pair<int, int> (edge0->v0, edge0->v1));
 	edgeData->edges.erase(edge0);
 
-	edgesWS.edgesErased.insert(pair<int, int> (edge1->v0, edge1->v1));
+	edgesWS.edgesErased.insert(std::pair<int, int> (edge1->v0, edge1->v1));
 	edgeData->edges.erase(edge1);
 
 	--edgeData->numEdges;

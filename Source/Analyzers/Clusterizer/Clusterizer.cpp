@@ -24,8 +24,8 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "Polyhedron/Facet/Facet.h"
 #include "Analyzers/Clusterizer/Clusterizer.h"
+#include "Polyhedron/Facet/Facet.h"
 #include "Analyzers/Clusterizer/SortedSetOfPairs/SortedSetOfPairs.h"
 
 Clusterizer::Clusterizer() :
@@ -35,7 +35,7 @@ Clusterizer::Clusterizer() :
 	DEBUG_END;
 }
 
-Clusterizer::Clusterizer(shared_ptr<Polyhedron> p) :
+Clusterizer::Clusterizer(PolyhedronPtr p) :
 		PAnalyzer(p), cluster(new int[polyhedron->numFacets]), A(
 				new int[polyhedron->numFacets]), inc(
 				new bool[polyhedron->numFacets * polyhedron->numFacets]), dist(

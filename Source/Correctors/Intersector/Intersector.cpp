@@ -34,7 +34,7 @@ Intersector::Intersector() :
 	DEBUG_END;
 }
 
-Intersector::Intersector(shared_ptr<Polyhedron> p) :
+Intersector::Intersector(PolyhedronPtr p) :
 		PCorrector(p)
 {
 	DEBUG_START;
@@ -189,7 +189,7 @@ int Intersector::prepareEdgeList(Facet* facet, Plane iplane)
 	bool if_intersect = intersection(iplane, facet->plane, dir, point);
 	if (!if_intersect)
 	{
-//        DEBUG_PRINT("===Facet::prepare_edge_list : cannot prepare list for facet %d because planes are parallel or equal...", id);
+//        DEBUG_PRINT("===Facet::prepare_edge_list : cannot prepare std::list for facet %d because planes are parallel or equal...", id);
 		// Написано исключительно для программы слияния хорошо сопрягающихся граней.
 		// Здесь предполагается, что в такой грани может быть нарушена плоскостность,
 		// то есть вершины могут немного не лежать в плоскости грани.

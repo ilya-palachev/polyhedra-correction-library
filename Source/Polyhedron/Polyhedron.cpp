@@ -26,6 +26,7 @@
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 
 Polyhedron::Polyhedron() :
 				numVertices(0),
@@ -95,7 +96,7 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 	DEBUG_END;
 }
 
-Polyhedron::Polyhedron(Polyhedron_3 p)
+Polyhedron::Polyhedron(BasePolyhedron_3 p)
 {
 	DEBUG_START;
 
@@ -129,7 +130,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 	int iFacet = 0;
 	auto plane = p.planes_begin();
 	auto facet = p.facets_begin();
-	/* Iterate through the lists of planes and facets. */
+	/* Iterate through the std::lists of planes and facets. */
 	do
 	{
 		facets[iFacet].id = iFacet;
@@ -139,7 +140,7 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 			plane->c()), plane->d());
 
 		/*
-		 * Iterate through the list of halfedges incident to the curent CGAL
+		 * Iterate through the std::list of halfedges incident to the curent CGAL
 		 * facet.
 		 */
 		auto halfedge = facet->facet_begin();
@@ -168,11 +169,83 @@ Polyhedron::Polyhedron(Polyhedron_3 p)
 		facets[iFacet].indVertices[facets[iFacet].numVertices] =
 			facets[iFacet].indVertices[0];
 
+		ASSERT(facets[iFacet].correctPlane());
+
 		/* Increment the ID of facet. */
 		++iFacet;
 
 	} while (++plane != p.planes_end() && ++facet != p.facets_end());
 
+	DEBUG_END;
+}
+
+Polyhedron::Polyhedron(ShadowContourDataPtr data)
+{
+	DEBUG_START;
+
+	ASSERT(data);
+	ASSERT(data->numContours > 0);
+	ASSERT(!data->empty());
+	numFacets = data->numContours;
+	facets = new Facet[numFacets];
+
+	/* Get vertices from contours. */
+	std::vector<Vector3d> verticesAll;
+	numVertices = 0;
+	int iVertex = 0;
+	for (int iContour = 0; iContour < data->numContours; ++iContour)
+	{
+		SContour* contour = &data->contours[iContour];
+		auto verticesPortion = contour->getPoints();
+		ASSERT(!verticesPortion.empty());
+		
+		Facet *facet = &facets[iContour];
+		facet->id = iContour;
+		facet->numVertices = verticesPortion.size();
+		facet->plane = contour->plane;
+		facet->indVertices = new int[3 * facet->numVertices + 1];
+		for (int iVertexLocal = 0;
+			(unsigned) iVertexLocal < verticesPortion.size();
+			++iVertexLocal)
+		{
+			facet->indVertices[iVertexLocal] = iVertex++;
+		}
+		/* Cycle vertices. */
+		facet->indVertices[facet->numVertices] = facet->indVertices[0];
+
+		numVertices += verticesPortion.size();
+
+		verticesAll.insert(verticesAll.end(), verticesPortion.begin(),
+				verticesPortion.end());
+	}
+
+	vertices = new Vector3d[numVertices];
+	iVertex = 0;
+	for (auto &vertex: verticesAll)
+	{
+		vertices[iVertex++] = vertex;
+	}
+	vertexInfos = new VertexInfo[numVertices];
+
+	ASSERT(numVertices > 0);
+	DEBUG_END;
+}
+
+Polyhedron::Polyhedron(PolyhedronPtr p) :
+				numVertices(p->numVertices),
+				numFacets(p->numFacets),
+				vertices(NULL),
+				facets(NULL),
+				vertexInfos(NULL)
+
+{
+	DEBUG_START;
+	vertices = new Vector3d[numVertices];
+	for (int i = 0; i < numVertices; ++i)
+		vertices[i] = p->vertices[i];
+	facets = new Facet[numFacets];
+	for (int i = 0; i < numFacets; ++i)
+		facets[i] = p->facets[i];
 	DEBUG_END;
 }
 
@@ -198,7 +271,6 @@ Polyhedron::~Polyhedron()
 	DEBUG_END;
 }
 
-
 const double EPS_SIGNUM = 1e-15;
 
 int Polyhedron::signum(Vector3d point, Plane plane)
@@ -221,6 +293,14 @@ void Polyhedron::get_boundary(double& xmin, double& xmax, double& ymin,
 	int i;
 	double tmp;
 
+	if (numVertices <= 0)
+	{
+		ERROR_PRINT("Number of vertices is %d, so getting boundary is "
+				"aborted!", numVertices);
+		xmin = xmax = ymin = ymax = zmin = zmax = 0.;
+		DEBUG_END;
+		return;
+	}
 	xmin = xmax = vertices[0].x;
 	ymin = ymax = vertices[0].y;
 	zmin = zmax = vertices[0].z;
@@ -275,7 +355,7 @@ void Polyhedron::set_parent_polyhedron_in_facets()
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
 		DEBUG_PRINT("Setting parent polyhedron in facet #%d", iFacet);
-		shared_ptr<Polyhedron> this_shared = shared_from_this();
+		PolyhedronPtr this_shared = shared_from_this();
 		DEBUG_PRINT("Polyhedron use count = %ld",
 					this_shared.use_count());
 		facets[iFacet].set_poly(this_shared);

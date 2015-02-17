@@ -183,7 +183,7 @@ void TsnnlsSupportFunctionEstimator::run()
 	double *hvalues = NULL;
 
 	/* 1. Build the transpose of support matrix. */
-	taucs_ccs_matrix* Qt = convertEigenToTaucs(supportMatrix());
+	taucs_ccs_matrix* Qt = convertEigenToTaucs(data->supportMatrix());
 	analyzeTaucsMatrix(Qt, false);
 	DEBUG_PRINT("Matrix has been built.");
 	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);

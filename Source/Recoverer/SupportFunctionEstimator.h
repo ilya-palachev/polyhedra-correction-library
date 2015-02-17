@@ -26,13 +26,26 @@
 #ifndef SUPPORTFUNCTIONESTIMATOR_H_
 #define SUPPORTFUNCTIONESTIMATOR_H_
 
-#include "Recoverer/SupportFunctionEstimationData.h"
+#include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 
-class SupportFunctionEstimator : public SupportFunctionEstimationData
+/** The generic support function estimator. */
+class SupportFunctionEstimator
 {
+protected:
+	/* Data used for estimation. */
+	SupportFunctionEstimationDataPtr data;
 public:
-	SupportFunctionEstimator(SupportFunctionEstimationData *data);
+	/**
+	 * Constructs the estimator and sets its data.
+	 *
+	 * @param data	Support function estimation data
+	 */
+	SupportFunctionEstimator(SupportFunctionEstimationDataPtr dataOrig);
+
+	/** Destructs the estimator. */
 	virtual ~SupportFunctionEstimator();
+
+	/** Runs the estimator (should be defined in child classes). */
 	virtual VectorXd run(void) = 0;
 };
 

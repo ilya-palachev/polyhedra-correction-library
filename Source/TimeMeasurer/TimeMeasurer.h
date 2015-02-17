@@ -33,8 +33,6 @@
 
 #include "Timer.h"
 
-using namespace std;
-
 /**
  * time measurer is a data structure of stack of timeval structures
  * When new timer is pushed, it is placed to the stack, and its value will be
@@ -47,7 +45,7 @@ private:
 	/**
 	 * Stack of started timers
 	 */
-	list<Timer> timers;
+	std::list<Timer> timers;
 
 public:
 
@@ -96,12 +94,12 @@ public:
 	bool operator!=(const TimeMeasurer& other) const;
 
 	/**
-	 * Start new timer and push it to the list of timers
+	 * Start new timer and push it to the std::list of timers
 	 */
 	void pushTimer();
 
 	/**
-	* Stop the last timer in the list and print calculated time for it.
+	* Stop the last timer in the std::list and print calculated time for it.
 	*
 	* @return time of last timer (in seconds, precision is microsecond)
 	*/

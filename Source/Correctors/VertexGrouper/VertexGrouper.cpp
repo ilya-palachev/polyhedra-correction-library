@@ -35,7 +35,7 @@ VertexGrouper::VertexGrouper() :
 	DEBUG_END;
 }
 
-VertexGrouper::VertexGrouper(shared_ptr<Polyhedron> p) :
+VertexGrouper::VertexGrouper(PolyhedronPtr p) :
 		PCorrector(p)
 {
 	DEBUG_START;

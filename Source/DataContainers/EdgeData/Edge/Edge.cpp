@@ -72,7 +72,7 @@ Edge::Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig) :
 }
 
 Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
-		list<EdgeContourAssociation> assocList_orig) :
+		std::list<EdgeContourAssociation> assocList_orig) :
 				id(id_orig),
 				v0(v0_orig),
 				v1(v1_orig),
@@ -85,7 +85,7 @@ Edge::Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
 }
 
 Edge::Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig,
-		list<EdgeContourAssociation> assocList_orig) :
+		std::list<EdgeContourAssociation> assocList_orig) :
 				id(-1),
 				v0(v0_orig),
 				v1(v1_orig),

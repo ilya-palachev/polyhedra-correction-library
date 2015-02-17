@@ -101,11 +101,11 @@ void Polyhedron::printSortedByAreaFacets(void)
 	DEBUG_END;
 }
 
-list< FacetWithArea > Polyhedron::getSortedByAreaFacets(void)
+std::list< FacetWithArea > Polyhedron::getSortedByAreaFacets(void)
 {
 	DEBUG_START;
 	SizeCalculator* sizeCalculator = new SizeCalculator(get_ptr());
-	list< FacetWithArea > list = sizeCalculator->getSortedByAreaFacets();
+	std::list<FacetWithArea> list = sizeCalculator->getSortedByAreaFacets();
 	delete sizeCalculator;
 	return list;
 	DEBUG_END;

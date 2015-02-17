@@ -46,7 +46,7 @@ private:
 	void init();
 public:
 	PointShifterWeighted();
-	PointShifterWeighted(shared_ptr<Polyhedron> p);
+	PointShifterWeighted(PolyhedronPtr p);
 	PointShifterWeighted(Polyhedron* p);
 	~PointShifterWeighted();
 

@@ -18,7 +18,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef USE_TSNNLS 
+#ifdef USE_TSNNLS
 
 #include "Recoverer/SupportFunctionEstimator.h"
 

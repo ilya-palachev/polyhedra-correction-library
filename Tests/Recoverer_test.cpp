@@ -25,46 +25,18 @@
 
 #include <getopt.h>
 #include <cstring>
-#include <fstream>
 #include <sys/time.h>
 
 #include "Constants.h"
 #include "PolyhedraCorrectionLibrary.h"
-
-/** The name of the test. */
-#define TEST_NAME			"./Recoverer_test"
-
-/** The number of command line arguments expected. */
-#define NUM_ARGS_EXPECTED	2
-
-/** Option "-f" takes the argument with file name. */
-#define OPTION_FILE_NAME 'f'
-
-/** Option "-m" takes the argument with synthetic model name */
-#define OPTION_MODEL_NAME 'm'
-
-/*
- * Option "-n" takes the argument with the number of generated contours (for
- * synthetic testing mode).
- */
-#define OPTION_CONTOURS_NUMBER 'n'
 
 /**
  * Option "-a" takes the angle from which the 1st shadow contour is generated.
  */
 #define OPTION_FIRST_ANGLE 'a'
 
-/**
- * Option "-d" forces recoverer to avoid recovering and just visualize
- * dual non-convex polyhedron.
- */
-#define OPTION_DUAL_NONCONVEX_POLYHEDRON 'd'
-
-/**
- * Option "-c" forces recoverer to build only a polyhedron consisting of
- * facets constructed from shadow contours.
- */
-#define OPTION_CONTOURS 'c'
+/** Option "-A" enable axial testing. */
+#define OPTION_AXIAL_TESTING 'A'
 
 /**
  * Option "-b" enables balancing of contour data before its processing.
@@ -72,16 +44,47 @@
 #define OPTION_BALANCE_DATA 'b'
 
 /**
- * Options "-l" controls the absolute limit of random shift of modeled contour
+ * Option "-d" sets the name of file with support directions.
+ */
+#define OPTION_FILE_DIRECTIONS 'd'
+
+/** Option "-f" takes the argument with file name. */
+#define OPTION_FILE_NAME 'f'
+
+/**
+ * Options "-i" sets the body used as starting point of the estimation process.
+ */
+#define OPTION_STARTING_BODY 'i'
+
+/**
+ * Option "-l" controls the absolute limit of random shift of modeled contour
  * points.
  */
 #define OPTION_LIMIT_RANDOM 'l'
 
+/** Option "-m" takes the argument with synthetic model name */
+#define OPTION_MODEL_NAME 'm'
+
+/** Option "-M" sets the name of file with model. */
+#define OPTION_FILE_MODEL 'M'
+
 /**
- * Option "-p" enable the mode of printing the problem, i.e. the support vector
- * and the matrix of conditions.
+ * Option "-n" takes the argument with the number of generated contours (for
+ * synthetic testing mode).
  */
-#define OPTION_PRINT_PROBLEM 'p'
+#define OPTION_CONTOURS_NUMBER 'n'
+
+/**
+ * Option "-N" takes the argument with the maximum number of countours get from
+ * the given file with shadow contours.
+ */
+#define OPTION_MAX_CONTOUR_NUMBER 'N'
+
+/**
+ * Option "-o" is used to control output file name(s). The default behaviour is
+ * to use the name of input file as prefix.
+ */
+#define OPTION_OUTPUT_NAME 'o'
 
 /**
  * Option "-r" runs recovering.
@@ -94,14 +97,19 @@
 #define OPTION_SCALE_MATRIX 's'
 
 /**
+ * Option "-t" sets the type of support matrix.
+ */
+#define OPTION_SUPPORT_MATRIX_TYPE 't'
+
+/**
+ * Option "-v" enables verbose mode.
+ */
+#define OPTION_VERBOSE 'v'
+
+/**
  * Option "-x" enables the convexification of shadow contous.
  */
 #define OPTION_CONVEXIFY_CONTOURS 'x'
-
-/**
- * Option "-z"enables the regualrization of support matrix.
- */
-#define OPTION_REGULARIZE_MATRIX 'z'
 
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
@@ -109,92 +117,198 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "f:m:n:a:bcdl:pr:sxz"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:f:i:l:m:M:n:N:o:r:st:vx"
+
+struct PCLOption: public option
+{
+public:
+	const char *comment;
+
+	PCLOption(): option(), comment(NULL) {}
+
+	PCLOption(option o, const char *s) :
+		option(o), comment(s) {}
+
+	~PCLOption() {}
+};
 
 /**
  * The definition of corresponding long options list.
  */
-static struct option optionsLong[] =
+static PCLOption optionsLong[] =
 {
 	{
-		"file-name",
-		required_argument,
-		0,
-		OPTION_FILE_NAME
+		option
+		{
+			"file-name",
+			required_argument,
+			0,
+			OPTION_FILE_NAME
+		},
+		"The name of file with shadow contours to be processed"
 	},
 	{
-		"model-name",
-		required_argument,
-		0,
-		OPTION_MODEL_NAME
+		option
+		{
+			"model-name",
+			required_argument,
+			0,
+			OPTION_MODEL_NAME
+		},
+		"The name of synthetic model to be tested on"
 	},
 	{
-		"contours-number",
-		required_argument,
-		0,
-		OPTION_CONTOURS_NUMBER
+		option
+		{
+			"contours-number",
+			required_argument,
+			0,
+			OPTION_CONTOURS_NUMBER
+		},
+		"The number of contours to be generated from the synthetic "
+			"model"
 	},
 	{
-		"first-angle",
-		required_argument,
-		0,
-		OPTION_FIRST_ANGLE
+		option
+		{
+			"max-contours-number",
+			required_argument,
+			0,
+			OPTION_MAX_CONTOUR_NUMBER
+		},
+		"The maximum number of contours to be analyzed"
 	},
 	{
-		"dual-nonconvex-polyhedron",
-		no_argument,
-		0,
-		OPTION_DUAL_NONCONVEX_POLYHEDRON
+		option
+		{
+			"first-angle",
+			required_argument,
+			0,
+			OPTION_FIRST_ANGLE
+		},
+		"The fist angle from which the first shadow contour is obtained"
 	},
 	{
-		"contours",
-		no_argument,
-		0,
-		OPTION_CONTOURS
+		option
+		{
+			"balance-data",
+			no_argument,
+			0,
+			OPTION_BALANCE_DATA
+		},
+		"Balance contour data before processing"
 	},
 	{
-		"balance-data",
-		no_argument,
-		0,
-		OPTION_BALANCE_DATA
+		option
+		{
+			"limit-random",
+			required_argument,
+			0,
+			OPTION_LIMIT_RANDOM
+		},
+		"The absolute limit of random shift of modeled contour"
 	},
 	{
-		"limit-random",
-		required_argument,
-		0,
-		OPTION_LIMIT_RANDOM
+		option
+		{
+			"output-name",
+			required_argument,
+			0,
+			OPTION_OUTPUT_NAME
+		},
+		"The name of output file(s)"
 	},
 	{
-		"print-problem",
-		no_argument,
-		0,
-		OPTION_PRINT_PROBLEM
+		option
+		{
+			"recover",
+			required_argument,
+			0,
+			OPTION_RECOVER
+		},
+		"Recover polyhedron using some estimator"
 	},
 	{
-		"recover",
-		required_argument,
-		0,
-		OPTION_RECOVER
+		option
+		{
+			"scale-matrix",
+			no_argument,
+			0,
+			OPTION_SCALE_MATRIX
+		},
+		"Enable matrix scaling"
 	},
 	{
-		"scale-matrix",
-		no_argument,
-		0,
-		OPTION_SCALE_MATRIX
+		option
+		{
+			"support-matrix-type",
+			required_argument,
+			0,
+			OPTION_SUPPORT_MATRIX_TYPE
+		},
+		"Set type of support matrix"
 	},
 	{
-		"convexify-contours",
-		no_argument,
-		0,
-		OPTION_CONVEXIFY_CONTOURS
+		option
+		{
+			"verbose",
+			no_argument,
+			0,
+			OPTION_VERBOSE
+		},
+		"Enable verbose mode"
 	},
 	{
-		"regularize-matrix",
-		no_argument,
-		0,
-		OPTION_REGULARIZE_MATRIX
+		option
+		{
+			"convexify-contours",
+			no_argument,
+			0,
+			OPTION_CONVEXIFY_CONTOURS
+		},
+		"Enable contours convexification"
 	},
-	{0, 0, 0, 0}
+	{
+		option
+		{
+			"starting-body",
+			required_argument,
+			0,
+			OPTION_STARTING_BODY
+		},
+		"Type of starting body of the estimation process"
+	},
+	{
+		option
+		{
+			"directions",
+			required_argument,
+			0,
+			OPTION_FILE_DIRECTIONS
+		},
+		"The name of file with support directions"
+	},
+	{
+		option
+		{
+			"file-model",
+			required_argument,
+			0,
+			OPTION_FILE_MODEL
+		},
+		"The name of file with model for synthetic data construction"
+	},
+	{
+		option
+		{
+			"axial",
+			no_argument,
+			0,
+			OPTION_AXIAL_TESTING
+		},
+		"Axial testing: move support values, non points"
+	},
+	{option{0, 0, 0, 0}, 0}
 };
 
 
@@ -221,9 +335,34 @@ enum ModeOfRecovererTesting
 	/** Test on real shadow contour data written to file. */
 	RECOVERER_REAL_TESTING,
 
-	/** Test on synthetic model based shadow contour data. */
+	/** Test on syntheically generated data. */
 	RECOVERER_SYNTHETIC_TESTING
 };
+
+typedef struct
+{
+	/** The ID of model */
+	RecovererTestModelID id;
+
+	/** The name of file with model. */
+	char *fileName;
+			
+	/**  The number of generated contours */
+	int numContours;
+
+	/** The value of first angle */
+	double shiftAngleFirst;
+
+	/** The name of file with support directions. */
+	char *directionsFileName;
+
+	/** The limit of random shift */
+	double limitRandom;
+
+	/** Whether to do axial testing. */
+	bool ifAxialTesting;
+
+} SyntheticModelDescription;
 
 /**
  * The result of command line option parsing.
@@ -239,42 +378,39 @@ typedef struct
 		/** File name with existent shadow contour data. */
 		char *fileName;
 
-		/** Parameters of synthetic geometric figure. */
-		struct
-		{
-			RecovererTestModelID id;	/**< The ID of model */
-			int numContours;			/**< The number of generated contours */
-			double shiftAngleFirst;		/**< The value of first angle */
-			double limitRandom;		/**< The limit of random shift */
-		} model;
+		/** Parameters of synthetically generated data. */
+		SyntheticModelDescription model;
 	} input;
 
-	/** Whether to build dual non-convex polyhedron. */
-	bool ifBuildDualNonConvexPolyhedron;
-
-	/** Whether to build polyhedron consisting of contours. */
-	bool ifBuildContours;
+	/** The name of output file(s). */
+	char *outputName;
 
 	/** Whether to balance contour data before processing. */
 	bool ifBalancing;
-
-	/** Whether the mode of problem printing is enabled. */
-	bool ifPrintProblem;
 
 	/** Whether the recovering mode is enabled. */
 	bool ifRecover;
 	
 	/** The type of estimator that will be used for recovering. */
-	RecovererEstimator estimator;
+	RecovererEstimatorType estimator;
 
 	/** Whether to scale the matrix of problem. */
 	bool ifScaleMatrix;
 
+	/** The type of support matrix. */
+	SupportMatrixType supportMatrixType;
+
+	/** Whether to produce output data. */
+	bool ifVerbose;
+
 	/** Whether to convexify contours. */
 	bool ifConvexifyContours;
 
-	/** Whether to regaularize support matrix. */
-	bool ifRegularize;
+	/** The type of starting body of the estimation process. */
+	SupportFunctionEstimationStartingBodyType startingBodyType;
+
+	/** Maximum number of contours to be analyzed. */
+	int numMaxContours;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -312,19 +448,63 @@ RecovererTestModel recovererTestModels[] =
 	}
 };
 
-/** The number of possible estimators. */
-#define RECOVERER_ESTIMATORS_NUMBER 4
+/** Structure describing starting body of the estimation process. */
+typedef struct
+{
+	SupportFunctionEstimationStartingBodyType id;	/**< The ID of body */
+	const char *name;				/**< Name */
+	const char *description;			/**< Description */
+} RecovererStartingBody;
+
+RecovererStartingBody recovererStartingBodies[] =
+{
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION,
+		"intersection",
+		"Body is intersection of halfspaces formed by shadow cylinders."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_POINTS_HULL,
+		"hull",
+		"Body is convex hull of support points (u_i * h_i)."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_SPHERE,
+		"sphere",
+		"Body is sphere (each support value is = 1)."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CUBE,
+		"cube",
+		"Body is cube."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PYRAMID,
+		"pyramid",
+		"Body is pyramid."
+	},
+	{
+		SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM,
+		"prism",
+		"Body is prism."
+	}
+};
 
 /** Structure describing given estimator. */
 typedef struct
 {
-	RecovererEstimator id;		/**< The ID of estimator */
-	const char *name;			/**< Name */
+	RecovererEstimatorType id;	/**< The ID of estimator */
+	const char *name;		/**< Name */
 	const char *description;	/**< Description */
-} RecovererEstimatorDescription;
+} RecovererEstimatorTypeDescription;
 
-RecovererEstimatorDescription estimatorDescriptions[] =
+RecovererEstimatorTypeDescription estimatorDescriptions[] =
 {
+	{
+		ZERO_ESTIMATOR,
+		"zero",
+		"Estimator that does nothing"
+	},
 #ifdef USE_TSNNLS
 	{
 		TSNNLS_ESTIMATOR,
@@ -344,6 +524,27 @@ RecovererEstimatorDescription estimatorDescriptions[] =
 		"Ipopt interior-point method for linear programming"
 	},
 #endif /* USE_IPOPT */
+#ifdef USE_GLPK
+	{
+		GLPK_ESTIMATOR,
+		"glpk",
+		"Glpk linear programming solver"
+	},
+#endif /* USE_GLPK */
+#ifdef USE_CLP
+	{
+		CLP_ESTIMATOR,
+		"clp",
+		"Clp linear programming solver"
+	},
+#endif /* USE_CLP */
+#ifdef USE_CPLEX
+	{
+		CPLEX_ESTIMATOR,
+		"cplex",
+		"CPLEX linear programming solver"
+	},
+#endif /* USE_CPLEX */
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
@@ -356,48 +557,70 @@ RecovererEstimatorDescription estimatorDescriptions[] =
 	}
 };
 
+/** Structure describing given support matrix type. */
+typedef struct
+{
+	SupportMatrixType id;	/**< Support matric type ID. */
+	const char *name;		/**< Name */
+	const char *description;	/**< Description */
+} SupportMatrixTypeDescription;
+
+SupportMatrixTypeDescription supportMatrixTypeDescriptions[] =
+{
+	{
+		SUPPORT_MATRIX_TYPE_KKVW,
+		"kkvw",
+		"Karl-Kulkarni-Verhese-Willsky conditions"
+	},
+	{
+		SUPPORT_MATRIX_TYPE_KKVW_OPT,
+		"kkvw-opt",
+		"Optimized Karl-Kulkarni-Verhese-Willsky conditions"
+	},
+	{
+		SUPPORT_MATRIX_TYPE_GK,
+		"gk",
+		"Gardner-Kiderlen conditions"
+	},
+	{
+		SUPPORT_MATRIX_TYPE_GK_OPT,
+		"gk-opt",
+		"Optimized Gardner-Kiderlen conditions"
+	}
+};
+
+static void printUsageOption(char option, const char *longOption,
+	const char *comment)
+{
+	DEBUG_START;
+	STDERR_PRINT("\t-%c --%s\t%s\n", option, longOption, comment);
+	DEBUG_END;
+}
+
 /**
  * Prints the usage of the program.
  *
  * @param argc	Standard Linux argc
  * @param argv	Standard Linux argv
  */
-void printUsage(int argc, char** argv)
+static void printUsage(int argc, char** argv)
 {
 	DEBUG_START;
 	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.\n\n",
-		TEST_NAME);
+		argv[0]);
 	STDERR_PRINT("Usage:\n");
-	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number of "
-		"contours>]\n", TEST_NAME, OPTION_FILE_NAME, OPTION_MODEL_NAME,
-		OPTION_CONTOURS_NUMBER);
+	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number"
+		" of contours>]\n", argv[0], OPTION_FILE_NAME,
+		OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("Options:\n");
-	STDERR_PRINT("\t-%c --%s\tThe name of file with shadow contours to be "
-		"processed\n", OPTION_FILE_NAME, optionsLong[0].name);
-	STDERR_PRINT("\t-%c --%s\tThe name of synthetic model to be tested on.\n",
-		OPTION_MODEL_NAME, optionsLong[1].name);
-	STDERR_PRINT("\t-%c --%s\tThe number of contours to be generated from the "
-		"synthetic model\n", OPTION_CONTOURS_NUMBER, optionsLong[2].name);
-	STDERR_PRINT("\t-%c --%s\tThe fist angle from which the first shadow contour is "
-		"obtained\n", OPTION_FIRST_ANGLE, optionsLong[3].name);
-	STDERR_PRINT("\t-%c --%s\tBuild only dual non-convex polyhedron.\n",
-		OPTION_DUAL_NONCONVEX_POLYHEDRON, optionsLong[4].name);
-	STDERR_PRINT("\t-%c --%s\tBuild polyhedron consisting of shadow contours.\n",
-		OPTION_CONTOURS, optionsLong[5].name);
-	STDERR_PRINT("\t-%c --%s\tBalance contour data before processing.\n",
-		OPTION_BALANCE_DATA, optionsLong[6].name);
-	STDERR_PRINT("\t-%c --%s\tThe absolute limit of random shift of modeled "
-		"contour.\n", OPTION_LIMIT_RANDOM, optionsLong[7].name);
-	STDERR_PRINT("\t-%c --%s\tPrint problem mode (print matrix and hvalues vector "
-		"to the file).\n", OPTION_PRINT_PROBLEM, optionsLong[8].name);
-	STDERR_PRINT("\t-%c --%s\tRecover polyhedron using some estimator.\n",
-		OPTION_RECOVER, optionsLong[9].name);
-	STDERR_PRINT("\t-%c --%s\tEnable matrix scaling.\n",
-		OPTION_SCALE_MATRIX, optionsLong[10].name);
-	STDERR_PRINT("\t-%c --%s\tEnable contours convexification.\n",
-		OPTION_CONVEXIFY_CONTOURS, optionsLong[11].name);
-	STDERR_PRINT("\t-%c --%s\tEnable support matrix regularization.\n",
-		OPTION_REGULARIZE_MATRIX, optionsLong[12].name);
+	PCLOption *option = optionsLong;
+	while (option->name)
+	{
+		printUsageOption((char) option->val, option->name,
+				option->comment);
+		++option;
+	}
+
 	STDERR_PRINT("\nPossible synthetic models are:\n");
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
@@ -406,13 +629,49 @@ void printUsage(int argc, char** argv)
 			model->description);
 	}
 	STDERR_PRINT("\nPossible estimators are:\n");
-	for (int iEstimator = 0; iEstimator < RECOVERER_ESTIMATORS_NUMBER;
+	int numEstimators = sizeof(estimatorDescriptions)
+		/ sizeof(RecovererEstimatorTypeDescription);
+	DEBUG_PRINT("Number of estimators: %d", numEstimators);
+	for (int iEstimator = 0; iEstimator < numEstimators;
 		++iEstimator)
 	{
-		RecovererEstimatorDescription *desc =
+		RecovererEstimatorTypeDescription *desc =
 			&estimatorDescriptions[iEstimator];
 		STDERR_PRINT("\t%d. \"%s\"\t - %s\n", desc->id, desc->name,
 			desc->description);
+	}
+
+	STDERR_PRINT("\nPossible types of support matrix are:\n");
+	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
+		/ sizeof(SupportMatrixTypeDescription);
+	DEBUG_PRINT("Number of support matrix types: %d",
+			numSupportMatrixTypes);
+	for (int iType = 0; iType < numSupportMatrixTypes; ++iType)
+	{
+		SupportMatrixTypeDescription *desc =
+			&supportMatrixTypeDescriptions[iType];
+		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
+			desc->description);
+		if (desc->id == DEFAULT_SUPPORT_MATRIX_TYPE)
+			STDERR_PRINT(" (default)");
+		STDERR_PRINT("\n");
+	}
+
+	STDERR_PRINT("\nPossible types of starting body of the estimation "
+			"process are:\n");
+	int numStartingPointTypes = sizeof(recovererStartingBodies)
+		/ sizeof(RecovererStartingBody);
+	DEBUG_PRINT("Number of types of starting body of the estimation "
+			"process: %d", numStartingPointTypes);
+	for (int iType = 0; iType < numStartingPointTypes; ++iType)
+	{
+		RecovererStartingBody *desc =
+			&recovererStartingBodies[iType];
+		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
+			desc->description);
+		if (desc->id == DEFAULT_STARTING_BODY_TYPE)
+			STDERR_PRINT(" (default)");
+		STDERR_PRINT("\n");
 	}
 	DEBUG_END;
 }
@@ -442,37 +701,57 @@ static void errorOutOfRange(int argc, char** argv)
 
 /**
  * Parses command line string to obtain options from it.
- * 
+ *
  * @param argc	Standard Linux argc
  * @param argv	Standard Linux argv
  *
  * TODO: We need to implement some common option parser (like in busybox)
  * to avoid such huge tons of code in test implementations.
  */
-CommandLineOptions* parseCommandLine(int argc, char** argv)
+static CommandLineOptions* parseCommandLine(int argc, char** argv)
 {
 	DEBUG_START;
 	CommandLineOptions* options = new CommandLineOptions();
 	bool ifOptionFileName = false;
 	bool ifOptionModelName = false;
 	bool ifOptionNumContours = false;
+	bool ifOptionMaxNumContours = false;
 	bool ifOptionFirstAngle = false;
 	bool ifOptionLimitRandom = false;
 	bool ifOptionRecover = false;
+	bool ifOptionSupportMatrixType = false;
+	bool ifOptionStartingBodyType = false;
+	bool ifOptionFileDirections = false;
+	bool ifOptionFileModel = false;
 	long int charCurr;
+	char *modelName = NULL;
 	opterr = 0;
+
+	int numEstimators = sizeof(estimatorDescriptions)
+		/ sizeof(RecovererEstimatorTypeDescription);
+	DEBUG_PRINT("Number of estimators: %d", numEstimators);
+
+	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions)
+		/ sizeof(SupportMatrixTypeDescription);
+	DEBUG_PRINT("Number of support matrix types: %d",
+			numSupportMatrixTypes);
+
+	int numStartingPointTypes = sizeof(recovererStartingBodies)
+		/ sizeof(RecovererStartingBody);
+	DEBUG_PRINT("Number of types of starting body of the estimation "
+			"process: %d", numStartingPointTypes);
 
 	/*
 	 * Iterate command line arguments using standard Libc function getopt.
 	 * See http://www.gnu.org/software/libc/manual/html_node/Getopt.html
 	 * for details.
 	 */
-	options->ifBuildDualNonConvexPolyhedron = false;
-	options->ifBuildContours = false;
 	options->ifBalancing = false;
-	options->ifPrintProblem = false;
 	options->ifRecover = false;
+	options->ifVerbose = false;
+	options->ifConvexifyContours = false;
 	options->ifScaleMatrix = false;
+	options->outputName = NULL;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -505,70 +784,130 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			options->mode = RECOVERER_SYNTHETIC_TESTING;
-			for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER;
+			for (int iModel = 0;
+				iModel < RECOVERER_TEST_MODELS_NUMBER;
 				++iModel)
 			{
-				if (strcmp(optarg, recovererTestModels[iModel].name) == 0)
+				if (strcmp(optarg,
+					recovererTestModels[iModel].name) == 0)
 				{
-					options->input.model.id = (RecovererTestModelID) iModel;
+					options->input.model.id
+						= (RecovererTestModelID) iModel;
 					ifOptionModelName = true;
 					break;
 				}
 			}
 			if (!ifOptionModelName)
 			{
-				STDERR_PRINT("Invalid name of model - %s\n", optarg);
+				STDERR_PRINT("Invalid name of model - %s\n",
+						optarg);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
 			}
+			modelName = strdup(optarg);
 			break;
 		case OPTION_CONTOURS_NUMBER:
 			if (ifOptionNumContours)
 			{
-				errorOptionTwice(argc, argv, OPTION_CONTOURS_NUMBER);
+				errorOptionTwice(argc, argv,
+						OPTION_CONTOURS_NUMBER);
 			}
 
 			/* Parse digital number from input argument. */
 			options->input.model.numContours =
 					strtol(optarg, &charMistaken, 10);
 
-			/* If user gives invalid character, the charMistaken is set to it */
+			/*
+			 *  If user gives invalid character, the charMistaken is
+			 *  set to it
+			 */
+
 			/*
 			 * From "man strtol":
 			 *
-			 * In particular, if *nptr is not '\0' but **endptr is '\0' on
-			 * return, the entire string is valid.
+			 * In particular, if *nptr is not '\0' but **endptr is
+			 * '\0' on return, the entire string is valid.
 			 */
 			if (charMistaken && *charMistaken)
 			{
-				errorCannotParseNumber(argc, argv, charMistaken);
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
 			}
 
-			/* In case of underflow or overflow errno is set to ERANGE. */
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
 			if (errno == ERANGE)
 			{
 				errorOutOfRange(argc, argv);
 			}
 
+
 			ifOptionNumContours = true;
+			break;
+		case OPTION_MAX_CONTOUR_NUMBER:
+			if (ifOptionMaxNumContours)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_CONTOURS_NUMBER);
+			}
+
+			/* Parse digital number from input argument. */
+			options->numMaxContours = strtol(optarg, &charMistaken, 10);
+			/*
+			 *  If user gives invalid character, the charMistaken is
+			 *  set to it
+			 */
+
+			/*
+			 * From "man strtol":
+			 *
+			 * In particular, if *nptr is not '\0' but **endptr is
+			 * '\0' on return, the entire string is valid.
+			 */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			}
+
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv);
+			}
+
+			ifOptionMaxNumContours = true;
 			break;
 		case OPTION_FIRST_ANGLE:
 			if (ifOptionFirstAngle)
 			{
-				errorOptionTwice(argc, argv, OPTION_FIRST_ANGLE);
+				errorOptionTwice(argc, argv,
+						OPTION_FIRST_ANGLE);
 			}
 			/* Parse floating-point number from input argument. */
 			options->input.model.shiftAngleFirst =
 					strtod(optarg, &charMistaken);
 
-			/* If user gives invalid character, the charMistaken is set to it */
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
 			if (charMistaken && *charMistaken)
 			{
-				errorCannotParseNumber(argc, argv, charMistaken);
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
 			}
 			
-			/* In case of underflow or overflow errno is set to ERANGE. */
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
 			if (errno == ERANGE)
 			{
 				errorOutOfRange(argc, argv);
@@ -576,31 +915,33 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 			ifOptionFirstAngle = true;
 			break;
-		case OPTION_DUAL_NONCONVEX_POLYHEDRON:
-			options->ifBuildDualNonConvexPolyhedron = true;
-			break;
-		case OPTION_CONTOURS:
-			options->ifBuildContours = true;
-			break;
 		case OPTION_BALANCE_DATA:
 			options->ifBalancing = true;
 			break;
 		case OPTION_LIMIT_RANDOM:
 			if (ifOptionLimitRandom)
 			{
-				errorOptionTwice(argc, argv, OPTION_LIMIT_RANDOM);
+				errorOptionTwice(argc, argv,
+						OPTION_LIMIT_RANDOM);
 			}
 			/* Parse floating-point number from input argument. */
 			options->input.model.limitRandom =
 					strtod(optarg, &charMistaken);
 
-			/* If user gives invalid character, the charMistaken is set to it */
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
 			if (charMistaken && *charMistaken)
 			{
-				errorCannotParseNumber(argc, argv, charMistaken);
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
 			}
 
-			/* In case of underflow or overflow errno is set to ERANGE. */
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
 			if (errno == ERANGE)
 			{
 				errorOutOfRange(argc, argv) ;
@@ -608,8 +949,13 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 			ifOptionLimitRandom = true;
 			break;
-		case OPTION_PRINT_PROBLEM:
-			options->ifPrintProblem = true;
+		case OPTION_OUTPUT_NAME:
+			if (options->outputName)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_OUTPUT_NAME);
+			}
+			options->outputName = optarg;
 			break;
 		case OPTION_RECOVER:
 			if (ifOptionRecover)
@@ -618,19 +964,24 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			options->ifRecover = true;
-			for (int iEstimator = 0; iEstimator < RECOVERER_ESTIMATORS_NUMBER;
+			for (int iEstimator = 0; iEstimator < numEstimators;
 				++iEstimator)
 			{
-				if (strcmp(optarg, estimatorDescriptions[iEstimator].name) == 0)
+				if (strcmp(optarg,
+					estimatorDescriptions[iEstimator].name)
+						== 0)
 				{
-					options->estimator = (RecovererEstimator) iEstimator;
+					options->estimator
+						= (RecovererEstimatorType)
+						iEstimator;
 					ifOptionRecover = true;
 					break;
 				}
 			}
 			if (!ifOptionRecover)
 			{
-				STDERR_PRINT("Invalid name of estimator - %s\n", optarg);
+				STDERR_PRINT("Invalid name of estimator - %s\n",
+						optarg);
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
@@ -639,59 +990,99 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		case OPTION_SCALE_MATRIX:
 			options->ifScaleMatrix = true;
 			break;
+		case OPTION_SUPPORT_MATRIX_TYPE:
+			if (ifOptionSupportMatrixType)
+			{
+				errorOptionTwice(argc, argv,
+					OPTION_SUPPORT_MATRIX_TYPE);
+			}
+
+			for (int iType = 0; iType < numSupportMatrixTypes;
+				++iType)
+			{
+				if (!strcmp(optarg,
+					supportMatrixTypeDescriptions[
+						iType].name))
+				{
+					options->supportMatrixType =
+						supportMatrixTypeDescriptions[
+							iType].id;
+					ifOptionSupportMatrixType = true;
+					break;
+				}
+			}
+			if (!ifOptionSupportMatrixType)
+			{
+				STDERR_PRINT("Invalid name of support matrix "
+					"type - %s\n", optarg);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case OPTION_VERBOSE:
+			options->ifVerbose = true;
+			break;
 		case OPTION_CONVEXIFY_CONTOURS:
 			options->ifConvexifyContours = true;
 			break;
-		case OPTION_REGULARIZE_MATRIX:
-			options->ifRegularize = true;
+		case OPTION_STARTING_BODY:
+			if (ifOptionStartingBodyType)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_STARTING_BODY);
+			}
+
+			for (int iType = 0; iType < numStartingPointTypes;
+					++iType)
+			{
+				if (!strcmp(optarg, recovererStartingBodies[
+							iType].name))
+				{
+					options->startingBodyType =
+						recovererStartingBodies[
+							iType].id;
+					ifOptionStartingBodyType = true;
+					break;
+				}
+			}
+			if (!ifOptionStartingBodyType)
+			{
+				STDERR_PRINT("Invalid name of starting body "
+						"type.");
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case OPTION_FILE_DIRECTIONS:
+			if (ifOptionFileDirections)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_FILE_DIRECTIONS);
+			}
+			options->input.model.directionsFileName = optarg;
+			ifOptionFileDirections = true;
+			break;
+		case OPTION_FILE_MODEL:
+			if (ifOptionFileModel)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_FILE_MODEL);
+			}
+			options->mode = RECOVERER_SYNTHETIC_TESTING;
+			options->input.model.fileName = optarg;
+			ifOptionFileModel = true;
+			break;
+		case OPTION_AXIAL_TESTING:
+			options->input.model.ifAxialTesting = true;
 			break;
 		case GETOPT_QUESTION:
-			switch (optopt)
-			{
-			case OPTION_FILE_NAME:
-				STDERR_PRINT("Option \"-%c\" requires an argument - the name of"
-					" input file.\n", OPTION_FILE_NAME);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
-				break;
-			case OPTION_MODEL_NAME:
-				STDERR_PRINT("Option \"-%c\" requires an argument - the name of"
-					" synthetic model to be tested.\n", OPTION_MODEL_NAME);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
-				break;
-			case OPTION_CONTOURS_NUMBER:
-				STDERR_PRINT("Option \"-%c\" requires an argument - the number "
-					"contour generated from original model (in synthetic "
-					"testing mode)\n", OPTION_CONTOURS_NUMBER);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
-				break;
-			case OPTION_FIRST_ANGLE:
-				STDERR_PRINT("Option \"-%c\" requires an argument -- the value "
-					"of the first angle from which the first shadow contour is "
-					"generated.\n", OPTION_FIRST_ANGLE);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
-				break;
-			case OPTION_RECOVER:
-				STDERR_PRINT("Option \"-%c\" requires an argument -- the name of"
-					" recoverer engine.\n", OPTION_RECOVER);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
-				break;
-			default:
-				STDERR_PRINT("Unknown option \"-%c\"\n", optopt);
-				printUsage(argc, argv);
-				DEBUG_END;
-				exit(EXIT_FAILURE);
-				break;
-			}
+			STDERR_PRINT("Option \"-%c\" requires an argument "
+				" (or there is unknown error...).\n", optopt);
+			printUsage(argc, argv);
+			DEBUG_END;
+			exit(EXIT_FAILURE);
 			break;
 		default:
 			STDERR_PRINT("Failed to parse command line.\n");
@@ -702,39 +1093,64 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		}
 	}
 
-	/* Check that options "-f" and "-m" are not given at the same time. */
-	if (ifOptionFileName && ifOptionModelName)
+	bool ifAnyOptionSynthetic = ifOptionModelName
+		|| ifOptionNumContours
+		|| ifOptionFirstAngle
+		|| ifOptionLimitRandom
+		|| ifOptionFileModel
+		|| ifOptionFileDirections
+		|| options->input.model.ifAxialTesting;
+
+	if (ifOptionFileName && ifAnyOptionSynthetic)
 	{
-		STDERR_PRINT("Options \"-%c\" and \"-%c\" cannot be given"
-			" simultaneously.\n", OPTION_FILE_NAME, OPTION_MODEL_NAME);
+		STDERR_PRINT("Option \"-%c\" cannot be used with any option "
+				"related with synthetic testing.",
+				OPTION_FILE_NAME);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
 	}
 
-	/* 
-	 * Check that all 4 options "-m", "-n", "-a" and "-l" are given
-	 * simultaneously.
-	 */
-	if (!(ifOptionModelName && ifOptionNumContours &&
-		ifOptionFirstAngle && ifOptionLimitRandom) &&
-		(ifOptionModelName || ifOptionNumContours ||
-		ifOptionFirstAngle || ifOptionLimitRandom))
+	if (ifOptionModelName && ifOptionFileModel)
 	{
-		STDERR_PRINT("Option \"-%c\" requires options \"-%c\","
-			"\"-%c\" and \"-%c\" to be specified, "
-			"and vice versa.\n",
-			OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER,
-			OPTION_FIRST_ANGLE, OPTION_LIMIT_RANDOM);
+		STDERR_PRINT("Options \"-%c\" and \"-%c\" are conflicting.",
+			OPTION_MODEL_NAME, OPTION_FILE_MODEL);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
 	}
 
-	if (!ifOptionFileName && !ifOptionModelName)
+	bool ifAnyOptionContours = ifOptionNumContours || ifOptionFirstAngle;
+
+	if (ifOptionFileDirections && ifAnyOptionContours)
 	{
-		STDERR_PRINT("At least one of options \"-%c\" and \"-%c\" must be "
-			"specified.\n", OPTION_FILE_NAME, OPTION_MODEL_NAME);
+		STDERR_PRINT("Option \"-%c\" conflict with options controlling"
+				"contours generation", OPTION_FILE_DIRECTIONS);
+		printUsage(argc, argv);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
+	bool ifValidSyntheticOptions = (ifOptionModelName || ifOptionFileModel)
+		&& (ifOptionFileDirections
+				|| (ifOptionNumContours && ifOptionFirstAngle))
+		&& ifOptionLimitRandom;
+
+	if (!ifValidSyntheticOptions && ifAnyOptionSynthetic)
+	{
+		STDERR_PRINT("Invalid option set for synthetic testing.\n");
+		printUsage(argc, argv);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
+	if (!ifOptionFileName && !ifOptionModelName && !ifOptionFileModel)
+	{
+		STDERR_PRINT("At least one of options \"-%c\", \"-%c\" "
+			"and \"-%c\" must be specified.\n",
+			OPTION_FILE_NAME,
+			OPTION_MODEL_NAME,
+			OPTION_FILE_MODEL);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -748,8 +1164,54 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
 		exit(EXIT_FAILURE);
 	}
 
+	if (!options->outputName)
+	{
+		if (ifOptionFileName)
+		{
+			options->outputName = strdup(options->input.fileName);
+		}
+		else
+		{
+			ASSERT(modelName);
+			options->outputName = strdup(modelName);
+		}
+	}
+
+	if (options->mode == RECOVERER_SYNTHETIC_TESTING
+		&& !ifOptionNumContours)
+	{
+		options->input.model.numContours = 0;
+	}
+
+	if (!ifOptionSupportMatrixType)
+	{
+		options->supportMatrixType = DEFAULT_SUPPORT_MATRIX_TYPE;
+	}
+
+	if (!ifOptionStartingBodyType)
+	{
+		options->startingBodyType = DEFAULT_STARTING_BODY_TYPE;
+	}
+
+	if (!ifOptionMaxNumContours)
+	{
+		options->numMaxContours = IF_ANALYZE_ALL_CONTOURS;
+	}
+
+	if (modelName)
+		free(modelName);
+
 	DEBUG_END;
 	return options;
+}
+
+static Polyhedron *readPolyhedron(char *fileName)
+{
+	DEBUG_START;
+	Polyhedron *p = new Polyhedron();
+	p->fscan_ply(fileName);
+	DEBUG_END;
+	return p;
 }
 
 /**
@@ -757,35 +1219,35 @@ CommandLineOptions* parseCommandLine(int argc, char** argv)
  *
  * @param id	The type of the polyhedron
  */
-PolyhedronPtr makePolyhedron(RecovererTestModelID id)
+static Polyhedron *makePolyhedron(RecovererTestModelID id)
 {
 	DEBUG_START;
 	switch (id)
 	{
 	case MODEL_CUBE:
 	{
-		PolyhedronPtr p = make_shared<Cube>(1., 0., 0., 0.);
+		Polyhedron *p = new Cube(1., 0., 0., 0.);
 		DEBUG_END;
 		return p;
 	}
 		break;
 	case MODEL_PYRAMID:
 	{
-		PolyhedronPtr p = make_shared<Pyramid>(3, 1., 1.);
+		Polyhedron *p = new Pyramid(3, 1., 1.);
 		DEBUG_END;
 		return p;
 	}
 		break;
 	case MODEL_PRISM:
 	{
-		PolyhedronPtr p = make_shared<Prism>(3, 1., 1.);
+		Polyhedron *p = new Prism(3, 1., 1.);
 		DEBUG_END;
 		return p;
 	}
 		break;
 	case MODEL_CUBE_CUTTED:
 	{
-		PolyhedronPtr p = make_shared<CubeCutted>();
+		Polyhedron *p = new CubeCutted();
 		DEBUG_END;
 		return p;
 	}
@@ -800,12 +1262,31 @@ PolyhedronPtr makePolyhedron(RecovererTestModelID id)
 	return NULL;
 }
 
+static Polyhedron_3 makeModel(CommandLineOptions *options)
+{
+	DEBUG_START;
+	Polyhedron *p = NULL;
+
+	if (options->input.model.fileName)
+	{
+		p = readPolyhedron(options->input.model.fileName);
+	}
+	else
+	{
+		p = makePolyhedron(options->input.model.id);
+	}
+	ASSERT(p->numVertices > 0);
+	Polyhedron_3 pCGAL(*p);
+	DEBUG_END;
+	return pCGAL;
+}
+
 /**
  * Gets real shadow contour data from file.
  *
  * @param options	The result of command-line parsing.
  */
-ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
+static ShadowContourDataPtr getRealSCData(CommandLineOptions* options)
 {
 	DEBUG_START;
 
@@ -813,7 +1294,7 @@ ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
 	PolyhedronPtr p(new Polyhedron());
 
 	/* Create shadow contour data and associate p with it. */
-	ShadeContourDataPtr SCData(new ShadeContourData(p));
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
 
 	/* Read shadow contours data from file. */
 	SCData->fscanDefault(options->input.fileName);
@@ -824,7 +1305,7 @@ ShadeContourDataPtr getRealSCData(CommandLineOptions* options)
 
 /**
  * Generates random number d such that |d| <= maxDelta
- * 
+ *
  * @param maxDelta	maximum absolute limit of generated number
  */
 static double genRandomDouble(double maxDelta)
@@ -851,14 +1332,17 @@ static double genRandomDouble(double maxDelta)
  * Shifts all points of contours on random double vectors
  *
  * @param data		Shadow contours data
- * @param maxDelta	maximum delta in shift vectors' coordinates
+ * @param maxDelta	Maximum delta in shift vectors' coordinates
  */
-void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
+static void shiftContoursRandom(ShadowContourDataPtr data, double maxDelta)
 {
 	DEBUG_START;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
 		SContour* contour = &data->contours[iContour];
+		if (contour->ns <= 0)
+			continue;
+
 		for (int iSide = 0; iSide < contour->ns; ++iSide)
 		{
 			SideOfContour* side = &contour->sides[iSide];
@@ -869,7 +1353,8 @@ void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
 			DEBUG_PRINT("shift: (%lf, %lf, %lf) -> "
 				"(%lf, %lf, %lf)",
 				A1_backup.x, A1_backup.y, A1_backup.z,
-				side->A1.x, side->A1.y, side->A2.z);
+				side->A1.x, side->A1.y, side->A1.z);
+			side->A1 = contour->plane.project(side->A1);
 		}
 		for (int iSide = 0; iSide < contour->ns - 1; ++iSide)
 		{
@@ -885,63 +1370,50 @@ void shiftContoursRandom(ShadeContourDataPtr data, double maxDelta)
  *
  * @param options	The result of command-line parsing.
  */
-ShadeContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
+static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 {
 	DEBUG_START;
 
 	/* Create polyhedron based on one of possible models. */
-	PolyhedronPtr p(makePolyhedron(options->input.model.id));
+	PolyhedronPtr p(new Polyhedron(makeModel(options)));
+	ASSERT(p->nonZeroPlanes());
+	Polyhedron *pCopy = new Polyhedron(makeModel(options));
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"original-polyhedron.ply") << *pCopy;
 
 	/* Create shadow contour data and associate p with it. */
-	ShadeContourDataPtr SCData(new ShadeContourData(p));
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
 
 	/*
 	 * Create shadow contour constructor and associate p and SCData with
 	 * them.
 	 */
-	ShadeContourConstructorPtr constructor(new ShadeContourConstructor(p,
+	ASSERT(p->nonZeroPlanes());
+	ShadowContourConstructorPtr constructor(new ShadowContourConstructor(p,
 			SCData));
 
 	/* Generate shadow contours data for given model. */
 	constructor->run(options->input.model.numContours,
 			options->input.model.shiftAngleFirst);
+	ASSERT(!SCData->empty());
 
-	/* Shift points contours on random vectors. */
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"original-unshifted-contours.dat") << SCData;
+	ASSERT(!SCData->empty());
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"original-unshifted-contours.ply") << Polyhedron(SCData);
+	ASSERT(!SCData->empty());
+
+	/* Shift points contours on random std::vectors. */
 	shiftContoursRandom(SCData, options->input.model.limitRandom);
+	ASSERT(!SCData->empty());
 
 	DEBUG_END;
 	return SCData;
 }
-
-/**
- * Prints the problems to files (for debugging purposes).
- *
- * @param SCData	Shadow contours data.
- * @param recoverer	The recoverer to be used.
- */
-static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
-{
-	DEBUG_START;
-
-	SupportFunctionEstimationData* data =
-			recoverer->buildSupportMatrix(SCData);
-
-	ofstream fileMatrix;
-	fileMatrix.open("../poly-data-out/support-matrix.dat");
-	fileMatrix << data->supportMatrix();
-	fileMatrix.close();
-
-	ofstream fileVector;
-	fileVector.open("../poly-data-out/support-vector.dat");
-	fileVector << data->supportVector();
-	fileVector.close();
-
-	DEBUG_END;
-}
-
 
 /**
  * Makes shadow contour data requested by user: synthetic or real, and dumps it
@@ -950,11 +1422,10 @@ static void buildNaiveMatrix(ShadeContourDataPtr SCData, RecovererPtr recoverer)
  * @param options	Parsed command-line options
  * @param recoverer	The used recoverer
  */
-static ShadeContourDataPtr makeRequestedData(CommandLineOptions* options,
-	RecovererPtr recoverer)
+static ShadowContourDataPtr makeShadowData(CommandLineOptions* options)
 {
 	DEBUG_START;
-	ShadeContourDataPtr SCData;
+	ShadowContourDataPtr SCData;
 
 	if (options->mode == RECOVERER_REAL_TESTING)
 	{
@@ -964,14 +1435,64 @@ static ShadeContourDataPtr makeRequestedData(CommandLineOptions* options,
 	{
 		SCData = generateSyntheticSCData(options);
 	}
-	
-	if (options->ifPrintProblem)
-	{
-		/* Just print naive matrix and vector of hvalues. */
-		buildNaiveMatrix(SCData, recoverer);
-	}
 	DEBUG_END;
 	return SCData;
+}
+
+static std::vector<Point_3> readDirections(char *fileName)
+{
+	DEBUG_START;
+	std::ifstream input(fileName);
+
+	if (!input.is_open())
+	{
+		ERROR_PRINT("File %s does not exist!", fileName);
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
+	std::istream_iterator<Vector3d> start(input), end;
+	std::vector<Vector3d> vectors(start, end);
+	ASSERT(!vectors.empty());
+
+	DEBUG_PRINT("Read %d vectors from file %s.", (int) vectors.size(),
+			fileName);
+
+	std::vector<Point_3> points;
+	for (auto &v: vectors)
+	{
+		Point_3 p = v;
+		points.push_back(p);
+	}
+	DEBUG_END;
+	return points;
+}
+
+static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
+{
+	DEBUG_START;
+	/* Create polyhedron based on one of possible models. */
+	Polyhedron_3 p = makeModel(options);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"original-polyhedron.ply") << p;
+
+	if (options->input.model.directionsFileName)
+	{
+		auto directions = readDirections(
+				options->input.model.directionsFileName);
+		auto data = p.calculateSupportData(directions);
+		data->shiftValues(options->input.model.limitRandom);
+		DEBUG_END;
+		return data;
+	}
+	else
+	{
+		auto shadows = generateSyntheticSCData(options);
+		auto data = shadows->calculateSupportData();
+		data->shiftValues(options->input.model.limitRandom);
+		DEBUG_END;
+		return data;
+	}
 }
 
 /**
@@ -979,10 +1500,13 @@ static ShadeContourDataPtr makeRequestedData(CommandLineOptions* options,
  *
  * @param options	Parsed command-line options
  */
-static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
+static RecovererPtr makeRecoverer(CommandLineOptions* options)
 {
 	DEBUG_START;
 	RecovererPtr recoverer(new Recoverer());
+
+	/* Set the name of output file. */
+	globalPCLDumper.setNameBase(options->outputName);
 
 	/* Enable balancing if required. */
 	if (options->ifBalancing)
@@ -1002,83 +1526,53 @@ static RecovererPtr makeRequestedRecoverer(CommandLineOptions* options)
 		recoverer->enableContoursConvexification();
 	}
 
-	/* Enable support matrix regularization if required. */
-	if (options->ifRegularize)
-	{
-		recoverer->enableRegularization();
-	}
+	/* Set support matrix type. */
+	recoverer->setSupportMatrixType(options->supportMatrixType);
+
+	/* Set starting body type. */
+	recoverer->setStartingBodyType(options->startingBodyType);
+
+	/* Set number of analyzed contours. */
+	recoverer->setNumMaxContours(options->numMaxContours);
 
 	DEBUG_END;
 	return recoverer;
 }
 
 /**
- * Dumps given shadow contour data, if it has been requested.
+ * Runs the recovering from shadow contours with requested mode.
  *
  * @param options	Parsed command-line options
  * @param recoverer	The recoverer to be used
- * @param data		Shadow contours data
+ * @param data		The data
  */
-static void makeRequestedOutput(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadeContourDataPtr data)
+template<typename DataPtr>
+static void runRecovery(CommandLineOptions* options,
+	RecovererPtr recoverer, DataPtr data)
 {
 	DEBUG_START;
-
-	if (options->ifBuildContours &&
-			!options->ifBuildDualNonConvexPolyhedron)
+	/* In verbose mode we dump all output. */
+	if (options->ifVerbose)
 	{
-		/* Buid polyhedron consisting of shadow contours. */
-		recoverer->buildContours(data);
+		globalPCLDumper.enableVerboseMode();
 	}
-	else if (!options->ifBuildContours &&
-			options->ifBuildDualNonConvexPolyhedron)
-	{
-		/* Just build dual non-convex polyhedron. */
-		recoverer->buildDualNonConvexPolyhedron(data);
-	}
-	else if (options->ifBuildContours &&
-			options->ifBuildDualNonConvexPolyhedron)
-	{
-		/* Buid polyhedron consisting of dual shadow contours. */
-		recoverer->buildDualContours(data);
-	}
-	DEBUG_END;
-}
-
-/**
- * Runs the recovering with requested mode.
- *
- * @param options	Parsed command-line options
- * @param recoverer	The recoverer to be used
- * @param data		Shadow contours data
- */
-void runRequestedRecovery(CommandLineOptions* options,
-	RecovererPtr recoverer, ShadeContourDataPtr data)
-{
-	DEBUG_START;
-
-	/* Dump some output before processing, if it's requested. */
-	makeRequestedOutput(options, recoverer, data);
 
 	if (options->ifRecover)
-	{
-		/* Run the recoverer. */
-		recoverer->setEstimator(options->estimator);
-		recoverer->run(data);
-		/* TODO: call makeRequestedOutput here, for processed data. */
-	}
+		recoverer->setEstimatorType(options->estimator);
 	else
-	{
-		/* Run naive recovering. */
-		recoverer->buildNaivePolyhedron(data);
-	}
+		recoverer->setEstimatorType(ZERO_ESTIMATOR);	
 
+	/* Run the recoverer. */
+	PolyhedronPtr p = recoverer->run(data);
+	Polyhedron *pCopy = new Polyhedron(p);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << *pCopy;
+	ALWAYS_PRINT(stdout, "numVertices = %d", p->numVertices);
 	DEBUG_END;
 }
 
 /**
  * The main function of the test.
- * 
+ *
  * @param argc	Standard Linux argc
  * @param argv	Standard Linux argv
  */
@@ -1090,13 +1584,30 @@ int main(int argc, char** argv)
 	CommandLineOptions *options = parseCommandLine(argc, argv);
 
 	/* Create the recoverer with requested properties. */
-	RecovererPtr recoverer = makeRequestedRecoverer(options);
+	RecovererPtr recoverer = makeRecoverer(options);
+	
+	if (options->mode == RECOVERER_REAL_TESTING
+			|| (options->mode == RECOVERER_SYNTHETIC_TESTING
+				&& options->input.model.numContours))
+	{
+		/*
+		 * Read or generate shadow contour data depending on requested
+		 * option.
+		 */
+		auto data = makeShadowData(options);
 
-	/* Read or generate data depending on requested option. */
-	ShadeContourDataPtr data = makeRequestedData(options, recoverer);
+		/* Run the recovery. */
+		runRecovery(options, recoverer, data);
+	}
+	else
+	{
+		/* Make support function data. */
+		auto data = makeSupportData(options);
 
-	/* Run the recovery. */
-	runRequestedRecovery(options, recoverer, data);
+		/* Run the recovery. */
+		runRecovery(options, recoverer, data);
+	}
+
 
 	DEBUG_END;
 	return EXIT_SUCCESS;

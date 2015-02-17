@@ -31,7 +31,7 @@
 class Verifier
 {
 private:
-	shared_ptr<Polyhedron> polyhedron;
+	PolyhedronPtr polyhedron;
 	bool ifPrint;
 	EdgesWorkingSets edgesWS;
 
@@ -55,9 +55,9 @@ private:
 	bool reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData);
 public:
 	Verifier();
-	Verifier(shared_ptr<Polyhedron> p);
+	Verifier(PolyhedronPtr p);
 	Verifier(Polyhedron* p);
-	Verifier(shared_ptr<Polyhedron> p, bool _ifPrint);
+	Verifier(PolyhedronPtr p, bool _ifPrint);
 	Verifier(Polyhedron* p, bool _ifPrint);
 
 	~Verifier();

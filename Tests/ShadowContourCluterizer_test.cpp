@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 	/* TODO: Here should be a good command-line parser function. */
 
 	PolyhedronPtr p(new Polyhedron());
-	ShadeContourDataPtr SCData(new ShadeContourData(p));
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
 	SCData->fscanDefault(argv[1]);
 	ShadowContourClusterizerPtr clusterizer(new ShadowContourClusterizer(p));
 	clusterizer->buildPlot(SCData, argv[2]);

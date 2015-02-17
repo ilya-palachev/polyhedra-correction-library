@@ -59,3 +59,19 @@ int Polyhedron::checkEdges(EdgeDataPtr edgeData)
 	DEBUG_END;
 	return numEdgesDestructed;
 }
+
+bool Polyhedron::nonZeroPlanes()
+{
+	DEBUG_START;
+	bool zeroExists = false;
+	for (int i = 0; i < numFacets; ++i)
+	{
+		if (!facets[i].correctPlane())
+		{
+			DEBUG_PRINT("Plane in facet #%d is zero.", i);
+			zeroExists = true;
+		}
+	}
+	DEBUG_END;
+	return !zeroExists;
+}

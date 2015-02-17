@@ -39,7 +39,7 @@ Facet::Facet() :
 }
 
 Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-		const int* index_orig, shared_ptr<Polyhedron> poly_orig = NULL,
+		const int* index_orig, PolyhedronPtr poly_orig = NULL,
 		const bool ifLong = false) :
 
 				id(id_orig),
@@ -85,7 +85,7 @@ void Facet::init_full(const int* index_orig, const bool ifLong)
 }
 
 Facet::Facet(int id_orig, int nv_orig, Plane plane_orig,
-		shared_ptr<Polyhedron> poly_orig) :
+		PolyhedronPtr poly_orig) :
 				id(id_orig),
 				numVertices(nv_orig),
 				plane(plane_orig),
@@ -140,6 +140,8 @@ Facet::~Facet()
 	DEBUG_START;
 	DEBUG_PRINT("Deleting facet[%d]", id);
 	clear();
+	DEBUG_PRINT("parent polyhedron count = %ld",
+		parentPolyhedron.use_count());
 	DEBUG_END;
 }
 
@@ -212,7 +214,7 @@ void Facet::set_id(int id1)
 	DEBUG_END;
 }
 
-void Facet::set_poly(shared_ptr<Polyhedron> poly_new)
+void Facet::set_poly(PolyhedronPtr poly_new)
 {
 	DEBUG_START;
 	parentPolyhedron = poly_new;

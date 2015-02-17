@@ -21,14 +21,14 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/Polyhedron.h"
-#include "Correctors/GlobalShadeCorrector/GlobalShadeCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
 
-void Polyhedron::correctGlobal(shared_ptr<ShadeContourData> contourData,
-		GSCorrectorParameters* parameters, list<int>* facetsCorrected)
+void Polyhedron::correctGlobal(ShadowContourDataPtr contourData,
+		GSCorrectorParameters* parameters, std::list<int>* facetsCorrected)
 {
 	DEBUG_START;
 	preprocessAdjacency();
-	GlobalShadeCorrector* gsCorrector = new GlobalShadeCorrector(get_ptr(),
+	GlobalShadowCorrector* gsCorrector = new GlobalShadowCorrector(get_ptr(),
 			contourData, parameters);
 	if (facetsCorrected)
 	{

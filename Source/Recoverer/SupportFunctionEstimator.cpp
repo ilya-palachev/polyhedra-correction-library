@@ -27,8 +27,8 @@
 #include "Recoverer/SupportFunctionEstimator.h"
 
 SupportFunctionEstimator::SupportFunctionEstimator(
-		SupportFunctionEstimationData *data) :
-		SupportFunctionEstimationData(data)
+		SupportFunctionEstimationDataPtr dataOrig) :
+		data(dataOrig)
 {
 	DEBUG_START;
 	DEBUG_END;

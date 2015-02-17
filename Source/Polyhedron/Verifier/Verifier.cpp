@@ -37,7 +37,7 @@ Verifier::Verifier() :
 	DEBUG_END;
 }
 
-Verifier::Verifier(shared_ptr<Polyhedron> p) :
+Verifier::Verifier(PolyhedronPtr p) :
 		polyhedron(p),
 		ifPrint(true),
 		edgesWS()
@@ -56,7 +56,7 @@ Verifier::Verifier(Polyhedron* p) :
 	DEBUG_END;
 }
 
-Verifier::Verifier(shared_ptr<Polyhedron> p, bool _ifPrint) :
+Verifier::Verifier(PolyhedronPtr p, bool _ifPrint) :
 		polyhedron(p),
 		ifPrint(_ifPrint),
 		edgesWS()
@@ -513,11 +513,11 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 
-	queue<pair<int, int>> edgesQueue;
+	std::queue<std::pair<int, int>> edgesQueue;
 	for (EdgeSetIterator edge = edgeData->edges.begin();
 			edge != edgeData->edges.end(); ++edge)
 	{
-		edgesQueue.push(pair<int, int> (edge->v0, edge->v1));
+		edgesQueue.push(std::pair<int, int> (edge->v0, edge->v1));
 	}
 
 	int numEdgesDesctructed = 0;
@@ -529,7 +529,7 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 		DEBUG_PRINT("Iteration %d - start. Number of edges is queue = %ld",
 				iIteration++, (long int) edgesQueue.size());
 
-		pair<int, int> vertexPair = edgesQueue.front();
+		std::pair<int, int> vertexPair = edgesQueue.front();
 		DEBUG_PRINT("Processed edge: [%d, %d]", vertexPair.first,
 				vertexPair.second);
 
@@ -557,14 +557,14 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */
-		for (set<pair<int, int>>::iterator itPair =
+		for (std::set<std::pair<int, int>>::iterator itPair =
 				edgesWS.edgesAdded.begin();
 				itPair != edgesWS.edgesAdded.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
 
-		for (set<pair<int, int>>::iterator itPair =
+		for (std::set<std::pair<int, int>>::iterator itPair =
 				edgesWS.edgesEdited.begin();
 				itPair != edgesWS.edgesEdited.end(); ++itPair)
 		{
@@ -601,7 +601,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	Plane pi0 = polyhedron->facets[edge->f0].plane;
 	Plane pi1 = polyhedron->facets[edge->f1].plane;
 
-	/* Searching for facet f2 which is clockwise after f0 and f1 in the list
+	/* Searching for facet f2 which is clockwise after f0 and f1 in the std::list
 	 * of facets incident to the vertex edge->v0. */
 	DEBUG_PRINT("Searching for facet f2.");
 	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
@@ -644,7 +644,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	DEBUG_PRINT("Succeeded to find f2 = %d", f2);
 	Plane pi2 = polyhedron->facets[f2].plane;
 
-	/* Searching for facet f3 which is clockwise after f0 and f1 in the list
+	/* Searching for facet f3 which is clockwise after f0 and f1 in the std::list
 	 * of facets incident to the vertex edge->v1. */
 	DEBUG_PRINT("Searching for facet f3.");
 	numIncidentFacets = polyhedron->vertexInfos[edge->v1].numFacets;
@@ -722,16 +722,19 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	}
 
 #ifndef NDEBUG
-	double distance = sqrt(qmod(polyhedron->vertices[edge->v0] -
+	double DEBUG_VARIABLE distance
+		= sqrt(qmod(polyhedron->vertices[edge->v0] -
 			polyhedron->vertices[edge->v1]));
 	DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
 			distance);
 
-	double movement0 = sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
+	double DEBUG_VARIABLE movement0
+		= sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
 	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v0, edge->v0,
 			movement0);
 
-	double movement1 = sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
+	double DEBUG_VARIABLE movement1
+		= sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
 	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v1, edge->v1,
 			movement1);
 #endif

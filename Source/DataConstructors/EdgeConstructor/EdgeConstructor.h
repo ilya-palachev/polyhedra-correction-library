@@ -26,7 +26,7 @@
 class EdgeConstructor : public PDataConstructor
 {
 public:
-	EdgeConstructor(shared_ptr<Polyhedron> p);
+	EdgeConstructor(PolyhedronPtr p);
 	~EdgeConstructor();
 	void run(EdgeDataPtr edgeData);
 };

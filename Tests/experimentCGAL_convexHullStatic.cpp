@@ -107,7 +107,7 @@ int main(int argc, char** argv)
 
 	/*
 	 * generate <num_points> points randomly on a sphere of radius 100.0
-	 * and copy them to a vector
+	 * and copy them to a std::vector
 	 */
 	std::vector<Point_3> points;
 	DEBUG_PRINT("2. Generating points on sphere:");
