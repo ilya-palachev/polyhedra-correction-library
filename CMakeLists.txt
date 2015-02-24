@@ -238,6 +238,8 @@ if (DISABLE_CGAL_DEBUG)
 	message("!!! all CGAL checks are disabled.")
 endif()
 
+add_definitions(-DSOURCE_DIR="${CMAKE_SOURCE_DIR}")
+
 include_directories(${INCLUDE_DIRS_all})
 
 foreach(test_source_file ${SOURCE_tests})
