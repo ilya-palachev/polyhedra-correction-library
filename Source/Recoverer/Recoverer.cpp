@@ -136,6 +136,10 @@ static SupportFunctionEstimator *constructEstimator(
 	DEBUG_START;
 
 	SupportFunctionEstimator *estimator = NULL;
+#ifdef USE_CLP
+	ClpSupportFunctionEstimator *clpEstimator = NULL;
+#endif /* USE_CLP */
+
 	switch (estimatorType)
 	{
 	case ZERO_ESTIMATOR:
@@ -164,6 +168,12 @@ static SupportFunctionEstimator *constructEstimator(
 #ifdef USE_CLP
 	case CLP_ESTIMATOR:
 		estimator = new ClpSupportFunctionEstimator(data);
+		break;
+	case CLP_COMMAND_ESTIMATOR:
+		clpEstimator = new ClpSupportFunctionEstimator(data);
+		clpEstimator->enableCommandlineMode();
+		estimator =
+			static_cast<SupportFunctionEstimator*>(clpEstimator);
 		break;
 #endif /* USE_CLP */
 #ifdef USE_CPLEX

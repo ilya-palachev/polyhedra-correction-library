@@ -66,8 +66,11 @@ typedef enum
 #endif /* USE_GLPK */
 
 #ifdef USE_CLP
-	/** Linear Clp estimator. */
+	/** Linear Clp estimator that uses CLP as shared library. */
 	CLP_ESTIMATOR,
+
+	/** Linear Clp estimator that uses CLP as a command-line program. */
+	CLP_COMMAND_ESTIMATOR,
 #endif /* USE_CLP */
 
 #ifdef USE_CPLEX

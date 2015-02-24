@@ -33,7 +33,8 @@
 
 ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
-	SupportFunctionEstimator(data)
+	SupportFunctionEstimator(data),
+	ifCommandlineMode(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -42,6 +43,13 @@ ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
 ClpSupportFunctionEstimator::~ClpSupportFunctionEstimator()
 {
 	DEBUG_START;
+	DEBUG_END;
+}
+
+void ClpSupportFunctionEstimator::enableCommandlineMode()
+{
+	DEBUG_START;
+	ifCommandlineMode = true;
 	DEBUG_END;
 }
 
@@ -62,25 +70,54 @@ VectorXd ClpSupportFunctionEstimator::run(void)
 		return solution;
 	}
 
-	ClpSimplex model;
-	if (model.readMps(mps_file_name))
+	if (ifCommandlineMode)
 	{
-		ERROR_PRINT("Failed to read MPS problem!");
-		DEBUG_END;
-		return solution;
+		char *command = (char*) malloc(1024 * sizeof(char));
+		char *solution_file_name = strdup("/tmp/solution.txt");
+		sprintf(command,
+			"%s/Scripts/run_clp_solver.sh %s %s %s",
+			SOURCE_DIR, mps_file_name, "/tmp/solution.xml",
+			solution_file_name);
+		int result = system(command);
+		std::cerr << "CLP solver wrapper script returned " << result
+			<< std::endl;
+	
+		FILE *file = fopen(solution_file_name, "r");
+	
+		for (int i = 0; i < data->numValues(); ++i)
+		{
+			double current = 0.;
+			if (fscanf(file, "%lf", &current) == 1)
+			{
+				solution(i) = current;
+			}
+			DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
+		}
+		free(solution_file_name);
+		free(command);
 	}
-
-	/* Run the solver */
-	model.primal();
-
-	/* Get the solution vector. */
-	int numColumns = model.numberColumns();
-	ASSERT(numColumns - 1 == data->numValues());
-	double *columnPrimal = model.primalColumnSolution();
-	for (int i = 0; i < numColumns - 1; ++i)
+	else
 	{
-		solution(i) = columnPrimal[i]
-		DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
+		ClpSimplex model;
+		if (model.readMps(mps_file_name))
+		{
+			ERROR_PRINT("Failed to read MPS problem!");
+			DEBUG_END;
+			return solution;
+		}
+
+		/* Run the solver */
+		model.primal();
+
+		/* Get the solution vector. */
+		int numColumns = model.numberColumns();
+		ASSERT(numColumns - 1 == data->numValues());
+		double *columnPrimal = model.primalColumnSolution();
+		for (int i = 0; i < numColumns - 1; ++i)
+		{
+			solution(i) = columnPrimal[i]
+			DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
+		}
 	}
 
 	/* Cleanup. */

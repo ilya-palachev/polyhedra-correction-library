@@ -66,8 +66,8 @@ VectorXd CPLEXSupportFunctionEstimator::run(void)
 	char *command = (char*) malloc(1024 * sizeof(char));
 	char *solution_file_name = strdup("/tmp/solution.txt");
 	sprintf(command,
-		"~/git/polyhedra-correction-library/Scripts/run_cplex_solver.sh %s %s %s",
-		mps_file_name, "/tmp/solution.xml", solution_file_name);
+		"%s/Scripts/run_cplex_solver.sh %s %s %s",
+		SOURCE_DIR, mps_file_name, "/tmp/solution.xml", solution_file_name);
 	int result = system(command);
 	std::cerr << "CPLEX solver wrapper script returned " << result << std::endl;
 
