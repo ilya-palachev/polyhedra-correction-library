@@ -44,6 +44,11 @@ class GardnerKiderlenSupportMatrix : public SupportMatrix
 {
 public:
 	/**
+	 * The factor number that is used as the multiplier for epsilon
+	 */
+	static double epsilonFactor;
+
+	/**
 	 * Constructor by the size of matrix.
 	 *
 	 * @param numRows	The number of rows
