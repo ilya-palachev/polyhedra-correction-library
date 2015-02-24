@@ -537,6 +537,11 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		"clp",
 		"Clp linear programming solver"
 	},
+	{
+		CLP_COMMAND_ESTIMATOR,
+		"clp-cmd",
+		"Clp linear programming solver (invoked from command-line)"
+	},
 #endif /* USE_CLP */
 #ifdef USE_CPLEX
 	{
