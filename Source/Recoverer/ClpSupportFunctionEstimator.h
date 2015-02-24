@@ -39,6 +39,9 @@
 class ClpSupportFunctionEstimator:
 	public SupportFunctionEstimator
 {
+private:
+	/** Whether to run the CLP as a sommand-line program. */
+	bool ifCommandlineMode;
 public:
 	/**
 	 * Default constructor
@@ -49,6 +52,11 @@ public:
 
 	/** Default destructor. */
 	~ClpSupportFunctionEstimator();
+
+	/**
+	 * Enables the command-line mode.
+	 */
+	void enableCommandlineMode();
 
 	/**
 	 * Runs the Clp algorithm.
