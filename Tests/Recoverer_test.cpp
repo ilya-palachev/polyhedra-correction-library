@@ -48,6 +48,11 @@
  */
 #define OPTION_FILE_DIRECTIONS 'd'
 
+/**
+ * Option "-e" sets the epsilon factor for reduced Gardner-Kiderlen matrix.
+ */
+#define OPTION_EPSILON_FACTOR 'e'
+
 /** Option "-f" takes the argument with file name. */
 #define OPTION_FILE_NAME 'f'
 
@@ -117,7 +122,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:f:i:l:m:M:n:N:o:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:e:f:i:l:m:M:n:N:o:r:st:vx"
 
 struct PCLOption: public option
 {
@@ -308,6 +313,16 @@ static PCLOption optionsLong[] =
 		},
 		"Axial testing: move support values, non points"
 	},
+	{
+		option
+		{
+			"epsilon-factor",
+			required_argument,
+			0,
+			OPTION_EPSILON_FACTOR
+		},
+		"Epsilon factor for reduced Gardner-Kiderlen matrix"
+	},
 	{option{0, 0, 0, 0}, 0}
 };
 
@@ -411,6 +426,9 @@ typedef struct
 
 	/** Maximum number of contours to be analyzed. */
 	int numMaxContours;
+
+	/** Epsilon factor for reduced Gardner-Kiderlen matrix. */
+	double epsilonFactor;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -728,6 +746,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionStartingBodyType = false;
 	bool ifOptionFileDirections = false;
 	bool ifOptionFileModel = false;
+	bool ifOptionEpsilonFactor = false;
 	long int charCurr;
 	char *modelName = NULL;
 	opterr = 0;
@@ -757,6 +776,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifConvexifyContours = false;
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
+	options->epsilonFactor = -1;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -1081,6 +1101,36 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_AXIAL_TESTING:
 			options->input.model.ifAxialTesting = true;
+			break;
+		case OPTION_EPSILON_FACTOR:
+			if (ifOptionEpsilonFactor)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_EPSILON_FACTOR);
+			}
+			/* Parse floating-point number from input argument. */
+			options->epsilonFactor = strtod(optarg, &charMistaken);
+
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			}
+
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv);
+			}
+
+			ifOptionEpsilonFactor = true;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1539,6 +1589,12 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 
 	/* Set number of analyzed contours. */
 	recoverer->setNumMaxContours(options->numMaxContours);
+
+	if (options->epsilonFactor > 0.)
+	{
+		GardnerKiderlenSupportMatrix::epsilonFactor =
+			options->epsilonFactor;
+	}
 
 	DEBUG_END;
 	return recoverer;
