@@ -147,13 +147,14 @@ static std::vector<Point> getShiftedDualPoints(SupportFunctionDataPtr data,
 	return points;
 }
 
+double GardnerKiderlenSupportMatrix::epsilonFactor = 1.;
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 		SupportFunctionDataPtr data, double epsilon)
 {
 	DEBUG_START;
 	std::cout << "epsilon = " << epsilon << std::endl;
-	std::cin >> epsilon;
+	epsilon *= GardnerKiderlenSupportMatrix::epsilonFactor;
 
 	/* Get duals of higher and lower support planes */
 	auto pointsHigher = getShiftedDualPoints(data, epsilon);
