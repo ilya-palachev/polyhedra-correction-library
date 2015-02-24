@@ -612,11 +612,14 @@ SupportMatrixTypeDescription supportMatrixTypeDescriptions[] =
 	}
 };
 
-static void printUsageOption(char option, const char *longOption,
+static void printUsageOption(char option, const char *longOptionName,
 	const char *comment)
 {
 	DEBUG_START;
-	STDERR_PRINT("\t-%c --%s\t%s\n", option, longOption, comment);
+	char longOption[256];
+	strcpy(longOption, "--");
+	strcat(longOption, longOptionName);
+	STDERR_PRINT("\t-%c %*s\t%s\n", option, 23, longOption, comment);
 	DEBUG_END;
 }
 
@@ -648,7 +651,7 @@ static void printUsage(int argc, char** argv)
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
 		RecovererTestModel *model = &recovererTestModels[iModel];
-		STDERR_PRINT("\t%d.  \"%s\"\t- %s\n", model->id, model->name,
+		STDERR_PRINT("\t%d. %*s - %s\n", model->id, 12, model->name,
 			model->description);
 	}
 	STDERR_PRINT("\nPossible estimators are:\n");
@@ -660,7 +663,7 @@ static void printUsage(int argc, char** argv)
 	{
 		RecovererEstimatorTypeDescription *desc =
 			&estimatorDescriptions[iEstimator];
-		STDERR_PRINT("\t%d. \"%s\"\t - %s\n", desc->id, desc->name,
+		STDERR_PRINT("\t%d. %*s - %s\n", desc->id, 12, desc->name,
 			desc->description);
 	}
 
@@ -673,7 +676,7 @@ static void printUsage(int argc, char** argv)
 	{
 		SupportMatrixTypeDescription *desc =
 			&supportMatrixTypeDescriptions[iType];
-		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
+		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name,
 			desc->description);
 		if (desc->id == DEFAULT_SUPPORT_MATRIX_TYPE)
 			STDERR_PRINT(" (default)");
@@ -690,7 +693,7 @@ static void printUsage(int argc, char** argv)
 	{
 		RecovererStartingBody *desc =
 			&recovererStartingBodies[iType];
-		STDERR_PRINT("\t%d. \"%s\"\t - %s", desc->id, desc->name,
+		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name,
 			desc->description);
 		if (desc->id == DEFAULT_STARTING_BODY_TYPE)
 			STDERR_PRINT(" (default)");
