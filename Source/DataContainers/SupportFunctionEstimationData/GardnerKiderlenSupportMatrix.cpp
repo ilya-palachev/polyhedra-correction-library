@@ -155,6 +155,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	DEBUG_START;
 	std::cout << "epsilon = " << epsilon << std::endl;
 	epsilon *= GardnerKiderlenSupportMatrix::epsilonFactor;
+	std::cout << "epsilon * factor = " << epsilon << std::endl;
 
 	/* Get duals of higher and lower support planes */
 	auto pointsHigher = getShiftedDualPoints(data, epsilon);
