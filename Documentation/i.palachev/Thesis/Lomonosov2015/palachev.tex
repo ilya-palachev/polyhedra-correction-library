@@ -1,0 +1,102 @@
+% Данные тезисы были оформлены в соответствии со следующей инструкцией:
+% http://smu.cs.msu.su/sites/default/files/attachments/instruction-thesis-lomonosov-2015.pdf
+\documentclass{lomonosov}
+ 
+\begin{thesis}
+
+\Title{О методах восстановления геометрических тел по измерениям опорной функции
+и их приложении к задаче восстановления тел по теневым
+контурам}{{Палачев\,И.\,А.}}
+
+\Author{Палачев~Илья~Александрович}{Аспирант}{Механико-математический
+факультет МГУ имени М.\,В.\,Ломоносова}{Москва}{Россия}{palachev.ilya@yandex.ru}
+
+Методы восстановления геометрических тел по измерениям опорной функции
+разрабатывались в течение почти 30 лет для различных приложений: в
+геометрической томографии [1, 5], обработке данных лазерного радара [2] и
+магнитно-резонансной визуализации [4]. В данной работе показано, что данные
+методы применимы для задачи восстановления тел по теневым контурам, которые
+можно интерпретировать как набор измерений опорной функции тела. Также
+приводится подход, позволяющий существенно оптимизировать один из этих методов.
+
+Как известно, всякое выпуклое тело $K \subset \mathbb{R}^{n}$ однозначно
+задается своей опорной функцией $h_{K}(u) = \sup \limits_{x \in K} (x, u)$,
+определенной на единичной сфере $S^{n - 1} \subset \mathbb{R}^{n}$.
+
+\begin{definition}
+Обозначим $(u_{1}, \ldots, u_{m})$ -- \textbf{опорные направления} (т. е. 
+единичные направления), $(h_{1}, \ldots, h_{m})$ -- \textbf{опорные числа} (т.
+е. измерения опорной функции тела $K$, полученные с погрешностью):
+\begin{equation}
+h_{i} = h_{K}(u_{i}) + \varepsilon_{i}
+\end{equation}
+Если существует такое выпуклое тело $K^{*}$, что $h_{K^{*}}(u_{i}) = h_{i}$, то
+набор опорных чисел $(h_{1}, \ldots, h_{m})$ называется \textbf{согласованным}.
+\end{definition}
+
+Суть вышеупомянутых методов состоит в том, чтобы по несогласованному набору
+опорных чисел получить ближайший к нему (в одной из метрик $L_{1}, L_{2},
+L_{\infty}$) согласованный набор $(h_{1}^{*}, \ldots, h_{m}^{*})$ и по нему
+восстановить тело. В работах [1-5] данная задача сводилась к задачам линейного 
+или квадратичного программирования. Основным недостатком данного метода является 
+то, что в $\mathbb{R}^{3}$ число ограничений является квадратичным. В настоящем 
+докладе приводится метод, с помощью которого можно исключить большую часть 
+ограничений как избыточные для задачи, сформулированной в метрике $L_{\infty}$
+в терминах точек касания [5]:
+
+\begin{equation}\label{PalachevProblem}
+\begin{split}
+\varepsilon &\to \inf \\
+s. t. \;\;\; (x_{i}, u_{i}) &\geq (x_{j}, u_{i}), \;\;
+1 \leq i \neq j \leq m, \\
+|(x_{i}, u_{i}) &- h^{0}_{i}| < \varepsilon, \;\;\;
+i = 1, \ldots, m
+\end{split}
+\end{equation}
+
+где $\varepsilon$ -- дополнительная переменная, а $x_{i} \in \mathbb{R}^{3}$ ---
+точки касания.
+
+\begin{theorem}\label{PalachevTheprem}
+Пусть система ограничений  в задаче (\ref{PalachevProblem}) разрешима для 
+некоторого $\varepsilon^{0}$. Обозначим многогранник
+$K = \bigcap \limits_{i = 1}^{m}\{(x, u_{i}) \leq h^{0}_{i} +
+\varepsilon^{0}\}$. Пусть $\delta$ - полярное преобразование двойственности.
+Тогда если отрезок, соединяющий точки
+$\delta(\{(x, u_{i}) = h^{0}_{i} - \varepsilon^{0}\})$ и
+$\delta(\{(x, u_{j}) = h^{0}_{j} - \varepsilon^{0}\})$ пересекает $\delta(K)$,
+то условия $(x_{i}, u_{i}) \geq (x_{j}, u_{i})$ и
+$(x_{j}, u_{j}) \geq (x_{i}, u_{j})$ избыточны в системе ограничений
+(\ref{PalachevProblem})
+\end{theorem}
+
+Данный метод был протестирован на опорных измерениях, полученных из 100 теневых
+контуров. Теорема \ref{PalachevTheprem} позволяет отбросить 85-95\% условий в
+зависимости от входных данных. Полученная задача линейного программирования
+была решена на различных солверах, наилучшее время работы составило около 30
+секунд.
+
+\begin{references}
+\Source \ENGLISH{Prince\,J.\,L., Willsky\,A.\,S. Reconstructing convex sets
+        from support line measurements // IEEE Transactions on Pattern Analysis
+        and Machine Intelligence, 12(4):377-389, 1990.}
+
+\Source \ENGLISH{Lele\,A.\,S., Kulkarni\,S.\,R., and Willsky\,A.\,S.
+        Convex-polygon estimation from support-line measurements and
+        applications to target reconstruction from laser-radar data // Journal
+        of the Optical Society America A, 9(10):1693-1714, Oct 1992.}
+
+\Source \ENGLISH{Karl\,W.\,C., Kulkarni\,S.\,R., Verghese\,G.\,C.,
+        Willsky\,A.\,S. Local tests for consistency of support hyperplane data
+        // Journal of Mathematical Imaging and Vision, 6(2-3):249-267, 1996.}
+
+\Source \ENGLISH{Gregor\,J., Rannou\,F.\,R. 3D Support Function Estimation
+        and Application for Projection MRI // International Journal for
+        Imaging Systems and Technology, 12:43-50, 2002.}
+
+\Source \ENGLISH{Gardner\,R.\,J., Kiderlen\,M. A new algorithm for 3D
+        reconstruction from support functions // IEEE Transactions on Pattern
+        Analysis and Machine Intelligence, 31(3):556-562, 2009.}
+\end{references}
+
+\end{thesis}

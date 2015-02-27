@@ -1,3 +1,4 @@
 add_subdirectory(ReportAboutReconstruction)
 add_subdirectory(ReportAboutOptimization)
 add_subdirectory(TechnicalReport)
+add_subdirectory(Lomonosov2015)
