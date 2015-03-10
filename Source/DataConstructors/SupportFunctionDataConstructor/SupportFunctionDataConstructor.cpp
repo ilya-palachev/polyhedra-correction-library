@@ -309,7 +309,7 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 				itemsPortion.end()); /* Collect items. */
 	}
 	ALWAYS_PRINT(stdout, "We are analyzing only %d contours.\n",
-			numContoursAnalyzed);
+			numContoursAnalyzed - 1);
 
 	/* Check the result. */
 	ASSERT(checkSupportFunctionDataItemsInequality(items));
