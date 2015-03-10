@@ -67,7 +67,7 @@ static VectorXd buildStartingVector(SupportFunctionDataPtr data,
  * @return		Number of incorrect (negative) elements in product.
  */
 static long int checkStartingVector(VectorXd startingVector,
-		SupportMatrix matrix, SupportFunctionDataPtr data) UNUSED;
+		SupportMatrix *matrix, SupportFunctionDataPtr data) UNUSED;
 
 SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor() :
 	ifScaleMatrix(false)
@@ -90,9 +90,14 @@ void SupportFunctionEstimationDataConstructor::enableMatrixScaling()
 }
 
 static bool supportVectorAlreadyConsistent(VectorXd supportVector,
-		SupportMatrix supportMatrix, SupportFunctionDataPtr data)
+		SupportMatrix *supportMatrix, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
+	if (!supportMatrix)
+	{
+		DEBUG_END;
+		return true;
+	}
 	auto directions = data->supportDirections();
 	VectorXd startingFromSupportVector(3 * directions.size());
 	for (unsigned int i = 0; i < directions.size(); ++i)
@@ -108,46 +113,6 @@ static bool supportVectorAlreadyConsistent(VectorXd supportVector,
 			supportMatrix, data);
 	DEBUG_END;
 	return numNegative == 0;
-}
-
-SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
-	SupportFunctionDataPtr data, SupportMatrixType supportMatrixType,
-	SupportFunctionEstimationStartingBodyType startingBodyType)
-{
-	DEBUG_START;
-	/* Remove equal items from data (and normalize all items). */
-	data = data->removeEqual();
-
-	/* Build starting vector. */
-	VectorXd startingVector = buildStartingVector(data, startingBodyType);
-
-	/** Build support matrix. */
-	SupportMatrix *supportMatrix = buildSupportMatrix(data,
-		supportMatrixType, startingVector);
-
-	/* Build support vector. */
-	VectorXd supportVector = data->supportValues();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-		"support-vector-original.mat") << supportVector;
-	if (supportVectorAlreadyConsistent(supportVector, *supportMatrix, data))
-	{
-		std::cerr << "Original support vector satisfies consistency "
-			<< "conditions!" << std::endl;
-	}
-
-	/* Check starting vector. */
-	ASSERT(checkStartingVector(startingVector, *supportMatrix, data) == 0);
-
-	/* Get support directions from data. */
-	std::vector<Vector3d> supportDirections = data->supportDirections();
-
-	/* Construct data. */
-	SupportFunctionEstimationDataPtr estimationData(new
-		SupportFunctionEstimationData(*supportMatrix, supportVector,
-				startingVector, supportDirections));
-	delete supportMatrix;
-	DEBUG_END;
-	return estimationData;
 }
 
 static double calculateEpsilon(SupportFunctionDataPtr data,
@@ -174,6 +139,55 @@ static double calculateEpsilon(SupportFunctionDataPtr data,
 	return max;
 }
 
+SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
+	SupportFunctionDataPtr data, SupportMatrixType supportMatrixType,
+	SupportFunctionEstimationStartingBodyType startingBodyType)
+{
+	DEBUG_START;
+	/* Remove equal items from data (and normalize all items). */
+	data = data->removeEqual();
+
+	/* Build starting vector. */
+	VectorXd startingVector = buildStartingVector(data, startingBodyType);
+
+	/** Build support matrix. */
+	SupportMatrix *supportMatrix = buildSupportMatrix(data,
+		supportMatrixType, startingVector);
+
+	/* Build support vector. */
+	VectorXd supportVector = data->supportValues();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"support-vector-original.mat") << supportVector;
+	if (supportVectorAlreadyConsistent(supportVector, supportMatrix, data))
+	{
+		std::cerr << "Original support vector satisfies consistency "
+			<< "conditions!" << std::endl;
+	}
+
+	/* Check starting vector. */
+	ASSERT(checkStartingVector(startingVector, supportMatrix, data) == 0);
+
+	/* Get support directions from data. */
+	std::vector<Vector3d> supportDirections = data->supportDirections();
+
+	/* Construct data. */
+	double epsilon = 0.;
+	if (!supportMatrix)
+	{
+		supportMatrix = new SupportMatrix();
+		epsilon = calculateEpsilon(data, startingVector);
+		std::cout << "Calculated starting epsilon = " << epsilon
+			<< std::endl;
+	}
+	SupportFunctionEstimationDataPtr estimationData(new
+		SupportFunctionEstimationData(*supportMatrix, supportVector,
+				startingVector, supportDirections, epsilon,
+				data));
+	delete supportMatrix;
+	DEBUG_END;
+	return estimationData;
+}
+
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 	SupportMatrixType type, VectorXd startingVector)
 {
@@ -195,9 +209,10 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 	case SUPPORT_MATRIX_TYPE_GK:
 		matrix = constructGardnerKiderlenSupportMatrix(data);
 		break;
+	case SUPPORT_MATRIX_TYPE_EMPTY:
+		matrix = NULL;
+		break;
 	}
-	if (!matrix)
-		exit(EXIT_FAILURE);
 	DEBUG_END;
 	return matrix;
 }
@@ -408,16 +423,21 @@ static std::set<int> findNonZeroElementsInRow(SupportMatrix &matrix, int idRow)
 const double EPS_SUPPORT_CONSISTENCY_LIMIT = 1e-15;
 
 static long int checkStartingVector(VectorXd startingVector,
-		SupportMatrix matrix, SupportFunctionDataPtr data)
+		SupportMatrix *matrix, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	VectorXd product(matrix.rows());
+	if (!matrix)
+	{
+		DEBUG_END;
+		return 0;
+	}
+	VectorXd product(matrix->rows());
 	long int numNegative = 0;
 
 	auto directions = data->supportDirections();
-	ASSERT(directions.size() * 3 == (unsigned) matrix.cols());
+	ASSERT(directions.size() * 3 == (unsigned) matrix->cols());
 	ASSERT(directions.size() * 3 == (unsigned) startingVector.rows());
-	product = matrix * startingVector;
+	product = (*matrix) * startingVector;
 	for (unsigned int i = 0; i < product.rows(); ++i)
 	{
 		if (product(i) < -EPS_SUPPORT_CONSISTENCY_LIMIT)
@@ -426,19 +446,19 @@ static long int checkStartingVector(VectorXd startingVector,
 					i, product(i));
 			DEBUG_PRINT("matrix row #%d:", i);
 			std::set<int> idColNonZero =
-				findNonZeroElementsInRow(matrix, i);
+				findNonZeroElementsInRow(*matrix, i);
 #ifndef NDEBUG
 			for (auto &iCol: idColNonZero)
 			{
 				DEBUG_PRINT("(%.16le) * (%.16le) = (%.16le)",
-						matrix.coeffRef(i, iCol),
+						matrix->coeffRef(i, iCol),
 						startingVector(iCol),
-						matrix.coeffRef(i, iCol)
+						matrix->coeffRef(i, iCol)
 						* startingVector(iCol));
 			}
 #if 0
 			std::cerr << std::setprecision(16)
-				<< matrix.block(i, 0, 1, matrix.cols());
+				<< matrix->block(i, 0, 1, matrix->cols());
 #endif /* 0 */
 #endif
 			++numNegative;
@@ -452,7 +472,7 @@ static long int checkStartingVector(VectorXd startingVector,
 	}
 
 	DEBUG_PRINT("(%d x %d) * (%ld x %ld) = (%ld x %ld)",
-			matrix.rows(), matrix.cols(),
+			matrix->rows(), matrix->cols(),
 			startingVector.rows(), startingVector.cols(),
 			product.rows(), product.cols());
 	DEBUG_PRINT("Check: %ld of %ld product elements are negative",
@@ -533,4 +553,3 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	DEBUG_END;
 	return numViolations == 0;
 }
-
