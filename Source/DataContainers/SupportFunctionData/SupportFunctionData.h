@@ -28,6 +28,22 @@
 #define SUPPORT_FUNCTION_DATA_H_FORWARD
 
 #include <memory>
+#define CGAL_LINKED_WITH_TBB 1
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
+typedef CGAL::Simple_cartesian<double> K;
+typedef K::Point_3 Point;
+typedef K::Vector_3 Vector;
+typedef K::Segment_3 Segment;
+typedef CGAL::Polyhedron_3<K> CGALPolyhedron;
+typedef CGAL::AABB_face_graph_triangle_primitive<CGALPolyhedron> Primitive;
+typedef CGAL::AABB_traits<K, Primitive> Traits;
+typedef CGAL::AABB_tree<Traits> Tree;
+typedef Tree::Point_and_primitive_id Point_and_primitive_id;
+
 /* Forward declararion. */
 class SupportFunctionData;
 
@@ -165,6 +181,29 @@ public:
 	 * @param maxDelta	The maximum of absolute value of shift.
 	 */
 	void shiftValues(double maxDelta);
+
+	/**
+	 * Gets duals of support planes which free coefficients were incremented
+	 * on a given number.
+	 *
+	 * @param data		Support dunction data.
+	 * @param epsilon	The shifting number.
+	 *
+	 * @return		Duals of shifted support planes.
+	 */
+	std::vector<Point> getShiftedDualPoints(double epsilon);
+
+	/**
+	 * Gets duals of support planes which free coefficients were incremented
+	 * on a given number.
+	 *
+	 * @param data		Support dunction data.
+	 * @param epsilon	The shifting number.
+	 *
+	 * @return		Duals of shifted support planes.
+	 */
+	std::vector<Point_3> getShiftedDualPoints_3(double epsilon);
+
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
