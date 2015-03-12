@@ -33,6 +33,7 @@
 #include "Recoverer/GlpkSupportFunctionEstimator.h"
 #include "Recoverer/ClpSupportFunctionEstimator.h"
 #include "Recoverer/CPLEXSupportFunctionEstimator.h"
+#include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "halfspaces_intersection.h"
 
@@ -144,6 +145,9 @@ static SupportFunctionEstimator *constructEstimator(
 	{
 	case ZERO_ESTIMATOR:
 		DEBUG_PRINT("Zero estimatorType is on!");
+		break;
+	case NATIVE_ESTIMATOR:
+		estimator = new NativeSupportFunctionEstimator(data);
 		break;
 #ifdef USE_TSNNLS
 	case TSNNLS_ESTIMATOR:
@@ -309,6 +313,8 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
+	if (estimatorType == NATIVE_ESTIMATOR)
+		supportMatrixType_ = SUPPORT_MATRIX_TYPE_EMPTY;
 	SupportFunctionEstimationDataPtr dataEstimation
 		= constructorEstimation.run(data, supportMatrixType_,
 				startingBodyType_);
