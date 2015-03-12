@@ -46,7 +46,9 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	supportMatrix_(data->supportMatrix()),
 	supportVector_(data->supportVector()),
 	startingVector_(data->startingVector()),
-	supportDirections_(data->supportDirections())
+	supportDirections_(data->supportDirections()),
+	startingEpsilon_(0.),
+	supportData_(NULL)
 {
 	DEBUG_START;
 	ASSERT(numValues_ >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
@@ -59,13 +61,16 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 
 SupportFunctionEstimationData::SupportFunctionEstimationData(
 	SupportMatrix supportMatrix, VectorXd supportVector,
-	VectorXd startingVector, std::vector<Vector3d> supportDirections) :
+	VectorXd startingVector, std::vector<Vector3d> supportDirections,
+	double epsilon, SupportFunctionDataPtr supportData) :
 	numValues_(supportMatrix.cols()),
 	numConditions_(supportMatrix.rows()),
 	supportMatrix_(supportMatrix),
 	supportVector_(supportVector),
 	startingVector_(startingVector),
-	supportDirections_(supportDirections)
+	supportDirections_(supportDirections),
+	startingEpsilon_(epsilon),
+	supportData_(supportData)
 {
 	DEBUG_START;
 	ASSERT(numValues_ >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
@@ -129,3 +134,16 @@ std::vector<Vector3d> SupportFunctionEstimationData::supportDirections(void)
 	return supportDirections_;
 }
 
+double SupportFunctionEstimationData::startingEpsilon(void)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return startingEpsilon_;
+}
+
+SupportFunctionDataPtr SupportFunctionEstimationData::supportData(void)
+{
+	DEBUG_START;
+	DEBUG_END;
+	return supportData_;
+}
