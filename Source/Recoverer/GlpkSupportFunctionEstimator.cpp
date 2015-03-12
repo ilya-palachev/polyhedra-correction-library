@@ -28,7 +28,7 @@
 
 #include "DebugPrint.h"
 #include "Recoverer/GlpkSupportFunctionEstimator.h"
-#include "Recoverer/GlpkSFELinfBuilder.h"
+#include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
@@ -49,7 +49,7 @@ VectorXd GlpkSupportFunctionEstimator::run(void)
 	DEBUG_START;
 
 	/* Construct the GLPK problem. */
-	GlpkSFELinfBuilder builder(data);
+	GlpkSFELinearProgramBuilder builder(data);
 	glp_prob *problem = builder.build();
 
 	/* Run the simplex solver. */
