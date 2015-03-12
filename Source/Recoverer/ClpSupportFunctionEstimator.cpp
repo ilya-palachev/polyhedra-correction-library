@@ -29,7 +29,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Recoverer/ClpSupportFunctionEstimator.h"
-#include "Recoverer/GlpkSFELinfBuilder.h"
+#include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
@@ -59,7 +59,7 @@ VectorXd ClpSupportFunctionEstimator::run(void)
 	VectorXd solution(data->numValues());
 
 	/* Construct the CLP problem. */
-	GlpkSFELinfBuilder builder(data);
+	GlpkSFELinearProgramBuilder builder(data);
 	glp_prob *problem = builder.build();
 
 	char *mps_file_name = strdup("/tmp/glpk-linf-problem.mps");
