@@ -52,8 +52,6 @@ typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 static bool checkEpsilon(SupportFunctionDataPtr data, double epsilon)
 {
 	DEBUG_START;
-	std::cout << "epsilon = " << epsilon << std::endl;
-
 	/* Get duals of higher and lower support planes */
 	auto pointsHigher = data->getShiftedDualPoints_3(epsilon);
 	auto pointsLower = data->getShiftedDualPoints_3(-epsilon);
@@ -92,7 +90,7 @@ static bool checkEpsilon(SupportFunctionDataPtr data, double epsilon)
 					point.z()), infinity);
 		if (!triangulation.is_infinite(cell))
 		{
-			ALWAYS_PRINT(stderr, "stop at point #%d\n", iPoint);
+			std::cerr << "stop at point #" << iPoint << std::endl;
 			result = false;
 			break;
 		}
@@ -136,11 +134,12 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 	{
 		double epsilon = badEpsilon +
 			(goodEpsilon - badEpsilon) * SEARCH_MULTIPLIER;
-		std::cout << "Native estimator: iteration #" << iIteration <<
-			": epsilon = " << epsilon << std::endl;
+		std::cerr << "Native estimator: iteration #" << iIteration <<
+			": epsilon = " << epsilon << "... ";
 		if (checkEpsilon(supportData, epsilon))
 		{
 			goodEpsilon = epsilon;
+			std::cerr << "SUCCESS" << std::endl;
 		}
 		else
 		{
