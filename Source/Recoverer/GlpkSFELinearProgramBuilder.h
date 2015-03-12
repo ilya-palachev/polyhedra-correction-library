@@ -19,8 +19,8 @@
  */
 
 /**
- * @file GlpkSFELinfBuilder.h
- * @brief Builder of GLPK L-inf support function estimation problem
+ * @file GlpkSFELinearProgramBuilder.h
+ * @brief Builder of GLPK L-inf and L-1 support function estimation problem
  * function estimation.
  */
 
@@ -29,13 +29,13 @@
 #include <glpk.h>
 #include "Recoverer/SupportFunctionEstimator.h"
 
-#ifndef GLPKSFELINFBUILDER_H_
-#define GLPKSFELINFBUILDER_H_
+#ifndef GLPKSFELINEARPROGRAMBUILDER_H_
+#define GLPKSFELINEARPROGRAMBUILDER_H_
 
 /**
  * Builder of GLPK L-inf support function estimation problem
  */
-class GlpkSFELinfBuilder
+class GlpkSFELinearProgramBuilder
 {
 public:
 	/** Support function estimation data. */
@@ -46,19 +46,26 @@ public:
 	 *
 	 * @param data	Support function estimation data (input)
 	 */
-	GlpkSFELinfBuilder(SupportFunctionEstimationDataPtr data);
+	GlpkSFELinearProgramBuilder(SupportFunctionEstimationDataPtr data);
 
 	/** Default destructor. */
-	~GlpkSFELinfBuilder();
+	~GlpkSFELinearProgramBuilder();
 
 	/**
 	 * Builds the GLPK L-inf support function estimation problem
 	 *
 	 * @return	The problem
 	 */
-	glp_prob *build(void);
+	glp_prob *buildLinfProblem(void);
+
+	/**
+	 * Builds the GLPK L-1 support function estimation problem
+	 *
+	 * @return	The problem
+	 */
+	glp_prob *buildL1Problem(void);
 };
 
-#endif /* GLPKSFELINFBUILDER_H_ */
+#endif /* GLPKSFELINEARPROGRAMBUILDER_H_ */
 #endif /* USE_GLPK */
 
