@@ -33,6 +33,7 @@
 #include "SparseMatrixEigen.h"
 #include "Vector3d.h"
 #include "SupportMatrix.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /** Each condition has exactly not more than  4 non-zero coefficients. */
 #define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
@@ -50,7 +51,10 @@ typedef enum
 	SUPPORT_MATRIX_TYPE_GK,
 
 	/** Optimized Gardner-Kiderlen conditions. */
-	SUPPORT_MATRIX_TYPE_GK_OPT
+	SUPPORT_MATRIX_TYPE_GK_OPT,
+
+	/** Empty support matrix (for native estimator). */
+	SUPPORT_MATRIX_TYPE_EMPTY
 } SupportMatrixType;
 
 /** Support matrix type that is used by default. */
@@ -92,6 +96,13 @@ private:
 	 */
 	std::vector<Vector3d> supportDirections_;
 
+	/**
+	 * Starting epsilon for native estimator.
+	 */
+	double startingEpsilon_;
+
+	/** The original support function data. */
+	SupportFunctionDataPtr supportData_;
 public:
 	/** Default empty constructor. */
 	SupportFunctionEstimationData();
@@ -107,10 +118,13 @@ public:
 	 * 				of support function measurements.
 	 * @param startingVector	The starting vector of the algorithm.
 	 * @param supportDirections	The vector of support directions
+	 * @param startingEpsilon	Starting epsilon for native estimator.
+	 * @param supportData		The original support function data.
 	 */
 	SupportFunctionEstimationData(SupportMatrix supportMatrix,
 		VectorXd supportVector, VectorXd startingVector,
-		std::vector<Vector3d> supportDirections);
+		std::vector<Vector3d> supportDirections, double epsilon,
+		SupportFunctionDataPtr supportData);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();
@@ -132,6 +146,12 @@ public:
 
 	/** Getter for member supportDirections_ */
 	std::vector<Vector3d> supportDirections(void);
+
+	/** Getter for startingEpsilon_ */
+	double startingEpsilon(void);
+
+	/** Getter for supportData_ */
+	SupportFunctionDataPtr supportData(void);
 };
 
 /** Shared pointer for support function estimation data. */

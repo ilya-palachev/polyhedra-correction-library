@@ -118,6 +118,7 @@ set (SOURCE_pcl
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSFELinfBuilder.cpp
+	Source/Recoverer/NativeSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp
@@ -194,6 +195,7 @@ target_link_libraries(pcl
 	mpfr
 	tbb
 	tbbmalloc
+	boost_system
 )
 
 if (ENABLE_TSNNLS)

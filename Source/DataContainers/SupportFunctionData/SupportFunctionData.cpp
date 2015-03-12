@@ -266,3 +266,39 @@ void SupportFunctionData::shiftValues(double maxDelta)
 #endif /* NDEBUG */
 	DEBUG_END;
 }
+
+std::vector<Point> SupportFunctionData::getShiftedDualPoints(double epsilon)
+{
+	DEBUG_START;
+	std::vector<Point> points;
+	long int numDirections = size();
+	for (int i = 0; i < numDirections; ++i)
+	{
+		auto item = items[i];
+		Plane_3 plane(item.direction.x, item.direction.y,
+				item.direction.z, -item.value - epsilon);
+		Point_3 point = dual(plane);
+		points.push_back(Point(point.x(), point.y(), point.z()));
+	}
+	DEBUG_END;
+	return points;
+}
+
+std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
+{
+	DEBUG_START;
+	std::vector<Point_3> points;
+	long int numDirections = size();
+	for (int i = 0; i < numDirections; ++i)
+	{
+		auto item = items[i];
+		Plane_3 plane(item.direction.x, item.direction.y,
+				item.direction.z, -item.value - epsilon);
+		Point_3 point = dual(plane);
+		points.push_back(point);
+	}
+	DEBUG_END;
+	return points;
+}
+
+

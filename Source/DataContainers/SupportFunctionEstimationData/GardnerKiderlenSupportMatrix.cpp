@@ -25,23 +25,6 @@
  * - implementation.
  */
 
-#if 1
-#define CGAL_LINKED_WITH_TBB 1
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/AABB_tree.h>
-#include <CGAL/AABB_traits.h>
-#include <CGAL/boost/graph/graph_traits_Polyhedron_3.h>
-#include <CGAL/AABB_face_graph_triangle_primitive.h>
-typedef CGAL::Simple_cartesian<double> K;
-typedef K::Point_3 Point;
-typedef K::Vector_3 Vector;
-typedef K::Segment_3 Segment;
-typedef CGAL::Polyhedron_3<K> CGALPolyhedron;
-typedef CGAL::AABB_face_graph_triangle_primitive<CGALPolyhedron> Primitive;
-typedef CGAL::AABB_traits<K, Primitive> Traits;
-typedef CGAL::AABB_tree<Traits> Tree;
-#endif
-
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
@@ -120,33 +103,6 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 }
 
 # if 1
-/**
- * Gets duals of support planes which free coefficients were incremented on a
- * given number.
- *
- * @param data		Support dunction data.
- * @param epsilon	The shifting number.
- *
- * @return		Duals of shifted support planes.
- */
-static std::vector<Point> getShiftedDualPoints(SupportFunctionDataPtr data,
-		double epsilon)
-{
-	DEBUG_START;
-	std::vector<Point> points;
-	long int numDirections = data->size();
-	for (int i = 0; i < numDirections; ++i)
-	{
-		auto item = (*data)[i];
-		Plane_3 plane(item.direction.x, item.direction.y,
-				item.direction.z, -item.value - epsilon);
-		Point_3 point = dual(plane);
-		points.push_back(Point(point.x(), point.y(), point.z()));
-	}
-	DEBUG_END;
-	return points;
-}
-
 double GardnerKiderlenSupportMatrix::epsilonFactor = 1.;
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
@@ -158,8 +114,8 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	std::cout << "epsilon * factor = " << epsilon << std::endl;
 
 	/* Get duals of higher and lower support planes */
-	auto pointsHigher = getShiftedDualPoints(data, epsilon);
-	auto pointsLower = getShiftedDualPoints(data, -epsilon);
+	auto pointsHigher = data->getShiftedDualPoints(epsilon);
+	auto pointsLower = data->getShiftedDualPoints(-epsilon);
 
 	CGALPolyhedron hull;
 	CGAL::convex_hull_3(pointsHigher.begin(), pointsHigher.end(), hull);

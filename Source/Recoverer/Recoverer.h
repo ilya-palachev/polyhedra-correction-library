@@ -47,6 +47,10 @@ typedef enum
 {
 	/** Estimator that does nothing */
 	ZERO_ESTIMATOR,
+
+	/** Native (builtin) estimator. */
+	NATIVE_ESTIMATOR,
+
 #ifdef USE_TSNNLS
 	/** TSNNLS estimator (not working). */
 	TSNNLS_ESTIMATOR,

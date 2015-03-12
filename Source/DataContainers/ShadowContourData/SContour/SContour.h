@@ -30,20 +30,12 @@
 #include <memory>
 #include <vector>
 
-#include <CGAL/basic.h>
-#include <CGAL/Filtered_kernel.h>
-
 #include "PCLKernel/PCLKernel.h"
 
 #include "Constants.h"
 #include "Vector3d.h"
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
-
-typedef PCLKernel<double> PCL_K;
-typedef CGAL::Filtered_kernel_adaptor<PCL_K> K;
-
-typedef K::Point_2 Point_2;
 
 /**
  * The shadow contour class.

@@ -523,6 +523,11 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		"zero",
 		"Estimator that does nothing"
 	},
+	{
+		NATIVE_ESTIMATOR,
+		"native",
+		"Built-in native estimator"
+	},
 #ifdef USE_TSNNLS
 	{
 		TSNNLS_ESTIMATOR,

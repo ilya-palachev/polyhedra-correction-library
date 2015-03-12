@@ -28,6 +28,13 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include <CGAL/basic.h>
+#include <CGAL/Filtered_kernel.h>
+typedef PCLKernel<double> PCL_K;
+typedef CGAL::Filtered_kernel_adaptor<PCL_K> LocalSContourK;
+
+typedef LocalSContourK::Point_2 Point_2;
+
 
 SContour::SContour() :
 	id(-1),
