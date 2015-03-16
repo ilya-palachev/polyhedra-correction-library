@@ -196,7 +196,7 @@ static SupportFunctionEstimator *constructEstimator(
 	case CLP_COMMAND_ESTIMATOR:
 		clpEstimator = new ClpSupportFunctionEstimator(data);
 		clpEstimator->enableCommandlineMode();
-		glpkEstimator->setProblemType(problemType);
+		clpEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(clpEstimator);
 		break;
