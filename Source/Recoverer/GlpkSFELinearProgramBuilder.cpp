@@ -136,6 +136,11 @@ static void declareL1ColumnsAndObjective(glp_prob *problem,
 	 * Set the objective function
 	 * I = \varepsilon_{1} + \ldots + \varepsilon_{m}
 	 */
+	if (data->startingEpsilon() <= 0.)
+	{
+		ERROR_PRINT("starting epsilon = %lf", data->startingEpsilon());
+		exit(EXIT_FAILURE);
+	}
 	for (int i = 0; i < data->numValues() / 3; ++i)
 	{
 		std::string name = "epsilon_" + std::to_string(i);
