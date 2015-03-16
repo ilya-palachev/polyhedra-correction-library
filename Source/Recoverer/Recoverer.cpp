@@ -131,7 +131,13 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 		Linf = delta > Linf ? delta : Linf;
 	}
 	MAIN_PRINT("L1 = %lf = %le", L1, L1);
+	double L1average = L1 / h.size();
+	MAIN_PRINT("L1 / %ld = %lf = %le", h.size(), L1average, L1average);
+	MAIN_PRINT("Sum of squares = %lf = %le", L2, L2);
+	L2 = sqrt(L2);
 	MAIN_PRINT("L2 = %lf = %le", L2, L2);
+	double L2average = L2 / sqrt(h.size());
+	MAIN_PRINT("L2 / sqrt(%ld) = %lf = %le", h.size(), L2average, L2average);
 	MAIN_PRINT("Linf = %lf = %le", Linf, Linf);
 
 	DEBUG_PRINT("-------------------------------");
