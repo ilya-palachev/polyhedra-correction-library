@@ -41,11 +41,6 @@ class GlpkSupportFunctionEstimator:
 private:
 	/** Type of problem. */
 	EstimationProblemNorm problemType_;
-private:
-	/**
-	 * The type of optimization problem.
-	 */
-
 public:
 	/**
 	 * Default constructor
