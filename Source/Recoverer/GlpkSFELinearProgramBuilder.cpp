@@ -124,7 +124,7 @@ static void declareLinfColumnsAndObjective(glp_prob *problem,
 	DEBUG_END;
 }
 
-static declareL1ColumnsAndObjective(glp_prob *problem,
+static void declareL1ColumnsAndObjective(glp_prob *problem,
 		SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -226,7 +226,6 @@ static void constructMatrix(glp_prob *problem,
 	SparseMatrix matrix = data->supportMatrix();
 	int numDirections = data->numValues() / 3;
 	int numConsistencyConstraints = matrix.rows();
-	int iEpsilon = data->numValues() + 1;
 
 	/* Allocate memory for arrays of matrix triplets. */
 	int numNonZerosTotal = matrix.nonZeros() + 2 * 4 * numDirections;
