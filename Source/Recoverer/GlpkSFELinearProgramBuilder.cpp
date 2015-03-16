@@ -203,8 +203,8 @@ static void constructMatrixLower(std::vector<Vector3d> directions,
 	for (int i = 0; i < numDirections; ++i)
 	{
 		int iEpsilon = ifLinfProblem
-			? numDirections + 1
-			: numDirections + i + 1;
+			? 3 * numDirections + 1
+			: 3 * numDirections + i + 1;
 		/*  (u_i, x_i) + \varepsilon > h_i */
 		constructMatrixLowerRow(directions[i],
 				numConsistencyConstraints + 2 * i + 1, i,
