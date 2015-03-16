@@ -61,6 +61,20 @@ typedef enum
 const SupportMatrixType DEFAULT_SUPPORT_MATRIX_TYPE =
 	SUPPORT_MATRIX_TYPE_GK_OPT;
 
+/** Type of the optimization problem. */
+typedef enum
+{
+	/** L_{\infty} problem. */
+	ESTIMATION_PROBLEM_NORM_L_INF,
+
+	/** L_{1} problem. */
+	ESTIMATION_PROBLEM_NORM_L_1
+} EstimationProblemNorm;
+
+/** Type of the optimization problem that is used by default. */
+const EstimationProblemNorm DEFAULT_ESTIMATION_PROBLEM_NORM =
+	ESTIMATION_PROBLEM_NORM_L_INF;
+
 /**
  * Structure that represents the input data for support function estimation
  * engines.
