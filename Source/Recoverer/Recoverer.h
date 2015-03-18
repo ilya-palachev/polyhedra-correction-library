@@ -59,9 +59,6 @@ typedef enum
 #ifdef USE_IPOPT
 	/** Ipopt estimator. */
 	IPOPT_ESTIMATOR,
-
-	/** Linear Ipopt estimator. */
-	IPOPT_ESTIMATOR_LINEAR,
 #endif /* USE_IPOPT */
 
 #ifdef USE_GLPK
