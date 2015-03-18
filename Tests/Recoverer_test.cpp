@@ -92,6 +92,12 @@
 #define OPTION_OUTPUT_NAME 'o'
 
 /**
+ * Option "-p" sets the problem type of the problem for estimators that support
+ * it.
+ */
+#define OPTION_PROBLEM_TYPE 'p'
+
+/**
  * Option "-r" runs recovering.
  */
 #define OPTION_RECOVER 'r'
@@ -122,7 +128,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:e:f:i:l:m:M:n:N:o:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:e:f:i:l:m:M:n:N:o:p:r:st:vx"
 
 struct PCLOption: public option
 {
@@ -222,6 +228,16 @@ static PCLOption optionsLong[] =
 			OPTION_OUTPUT_NAME
 		},
 		"The name of output file(s)"
+	},
+	{
+		option
+		{
+			"problem-type",
+			required_argument,
+			0,
+			OPTION_PROBLEM_TYPE
+		},
+		"The type of oprimization problem (not for all estimators!)"
 	},
 	{
 		option
@@ -429,6 +445,9 @@ typedef struct
 
 	/** Epsilon factor for reduced Gardner-Kiderlen matrix. */
 	double epsilonFactor;
+
+	/** The problem type. */
+	EstimationProblemNorm problemType;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -617,6 +636,28 @@ SupportMatrixTypeDescription supportMatrixTypeDescriptions[] =
 	}
 };
 
+/** Sreucture describing problem type. */
+typedef struct
+{
+	EstimationProblemNorm id;	/**< Problem type ID */
+	const char *name;		/**< Name */
+	const char *description;	/**< Description */
+} ProblemType;
+
+ProblemType problemTypes[] =
+{
+	{
+		ESTIMATION_PROBLEM_NORM_L_INF,
+		"linf",
+		"L-infinity norm problem"
+	},
+	{
+		ESTIMATION_PROBLEM_NORM_L_1,
+		"l1",
+		"L-1 norm problem"
+	}
+};
+
 static void printUsageOption(char option, const char *longOptionName,
 	const char *comment)
 {
@@ -704,6 +745,19 @@ static void printUsage(int argc, char** argv)
 			STDERR_PRINT(" (default)");
 		STDERR_PRINT("\n");
 	}
+
+	STDERR_PRINT("\nPossible type of problem:\n");
+	int numProblemTypes = sizeof(problemTypes) / sizeof(ProblemType);
+	DEBUG_PRINT("Number of problem types: %d", numProblemTypes);
+	for (int iType = 0; iType < numProblemTypes; ++iType)
+	{
+		ProblemType *desc = &problemTypes[iType];
+		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name,
+			desc->description);
+		if (desc->id == DEFAULT_ESTIMATION_PROBLEM_NORM)
+			STDERR_PRINT(" (default)");
+		STDERR_PRINT("\n");
+	}
 	DEBUG_END;
 }
 
@@ -749,6 +803,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	bool ifOptionMaxNumContours = false;
 	bool ifOptionFirstAngle = false;
 	bool ifOptionLimitRandom = false;
+	bool ifOptionProblemType = false;
 	bool ifOptionRecover = false;
 	bool ifOptionSupportMatrixType = false;
 	bool ifOptionStartingBodyType = false;
@@ -772,6 +827,9 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 		/ sizeof(RecovererStartingBody);
 	DEBUG_PRINT("Number of types of starting body of the estimation "
 			"process: %d", numStartingPointTypes);
+
+	int numProblemTypes = sizeof(problemTypes) / sizeof(ProblemType);
+	DEBUG_PRINT("Number of problem types: %d", numProblemTypes);
 
 	/*
 	 * Iterate command line arguments using standard Libc function getopt.
@@ -990,6 +1048,31 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 			options->outputName = optarg;
 			break;
+		case OPTION_PROBLEM_TYPE:
+			if (ifOptionProblemType)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_PROBLEM_TYPE);
+			}
+			for (int iType = 0; iType < numProblemTypes; ++iType)
+			{
+				if (strcmp(optarg,
+					problemTypes[iType].name) == 0)
+				{
+					options->problemType
+						= problemTypes[iType].id;
+					ifOptionProblemType = true;
+				}
+			}
+			if (!ifOptionProblemType)
+			{
+				STDERR_PRINT("Invalid name of problem type "
+						"- %s\n", optarg);
+				printUsage(argc, argv);
+				DEBUG_END;
+				exit(EXIT_FAILURE);
+			}
+			break;
 		case OPTION_RECOVER:
 			if (ifOptionRecover)
 			{
@@ -1000,9 +1083,8 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			for (int iEstimator = 0; iEstimator < numEstimators;
 				++iEstimator)
 			{
-				if (strcmp(optarg,
-					estimatorDescriptions[iEstimator].name)
-						== 0)
+				if (!strcmp(optarg,
+					estimatorDescriptions[iEstimator].name))
 				{
 					options->estimator
 						= (RecovererEstimatorType)
@@ -1259,6 +1341,11 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	if (!ifOptionMaxNumContours)
 	{
 		options->numMaxContours = IF_ANALYZE_ALL_CONTOURS;
+	}
+
+	if (!ifOptionProblemType)
+	{
+		options->problemType = DEFAULT_ESTIMATION_PROBLEM_NORM;
 	}
 
 	if (modelName)
@@ -1594,6 +1681,9 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 
 	/* Set starting body type. */
 	recoverer->setStartingBodyType(options->startingBodyType);
+
+	/* Set the problem type. */
+	recoverer->setProblemType(options->problemType);
 
 	/* Set number of analyzed contours. */
 	recoverer->setNumMaxContours(options->numMaxContours);
