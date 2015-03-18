@@ -527,19 +527,21 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 				minViolation = violation;
 			if (violation < -EPSILON_MAX_VIOLATION)
 			{
+#ifndef NDEBUG
 				std::cerr << "directions[" << i << "] = "
 					<< directions[i] << std::endl;
 				std::cerr << "point[" << i << "] = "
 					<< points[i] << std::endl;
 				std::cerr << "point[" << j << "] = "
 					<< points[j] << std::endl;
-				ALWAYS_PRINT(stdout, "directions[%d] * "
+#endif /* NDEBUG */
+				DEBUG_PRINT("directions[%d] * "
 						"points[%d] = %lf ; ", i, i,
 						directions[i] * points[i]);
-				ALWAYS_PRINT(stdout, "directions[%d] * "
+				DEBUG_PRINT("directions[%d] * "
 						"points[%d] = %lf ; ", i, j,
 						directions[i] * points[j]);
-				ALWAYS_PRINT(stdout, "Violation in (%d, %d) "
+				DEBUG_PRINT("Violation in (%d, %d) "
 						"= %.16lf\n", i, j, violation);
 				++numViolations;
 				if (violation < minViolation)
