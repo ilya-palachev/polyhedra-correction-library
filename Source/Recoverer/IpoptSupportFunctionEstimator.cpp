@@ -31,19 +31,23 @@
 #include <coin/IpIpoptApplication.hpp>
 #include "Recoverer/IpoptSupportFunctionEstimator.h"
 
-/*
- * TODO: Implement dual problem here!
- */
-
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data,
-		IpoptEstimationMode modeOrig) :
+		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	mode(modeOrig),
-	problemType(PROBLEM_PRIMAL),
-	solution(data->numValues())
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
+	numVariablesX(),
+	numVariablesEpsilon(),
+	numConsistencyConditions(),
+	numLocalityConditions(),
+	solution()
 {
 	DEBUG_START;
+	numVariablesX = data->numValues();
+	numVariablesEpsilon = 
+		(problemType_ == ESTIMATION_PROBLEM_NORM_L_INF)
+		? 1 : (numVariablesX / 3);
+	numConsistencyConditions = data->numConditions();
+	numLocalityConditions = 2 * (numVariablesX / 3);
 	DEBUG_END;
 }
 
@@ -53,87 +57,35 @@ IpoptSupportFunctionEstimator::~IpoptSupportFunctionEstimator()
 	DEBUG_END;
 }
 
+void IpoptSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
+{
+	DEBUG_START;
+	problemType_ = type;
+	numVariablesEpsilon = 
+		(problemType_ == ESTIMATION_PROBLEM_NORM_L_INF)
+		? 1 : (numVariablesX / 3);
+	DEBUG_END;
+}
+
 bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 		Index& nnz_jac_g, Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	DEBUG_START;
-
-	switch (mode)
-	{
-	case IPOPT_ESTIMATION_QUADRATIC:
-		/*
-		 * The number of variables is equal to the number of "values".
-		 */
-		n = data->numValues();
-
-		/*
-		 * The number of conditions is also saved in data structure.
-		 */
-		m = data->numConditions();
-
-		/*
-		 * The Jacobian of conditions is actually equal to the support
-		 * matrix, thus they have the same number of non-zero elements.
-		 */
-		nnz_jac_g = data->supportMatrix().nonZeros();
-
-		/*
-		 * The Hessian of Lagrangian is a quadratci functional, which
-		 * quadratic part is the sum of ((u_i, x_i) - h_i)^2. Thus, the
-		 * partial derivative on x_i_s and x_i_t is 2 * u_i_s * u_i_t.
-		 * That means that the Hessian is consisted of blocks of size
-		 * 3x3 for each support direction.
-		 */
-		nnz_h_lag = (data->numValues() / 3) * 9;
-		break;
-	case IPOPT_ESTIMATION_LINEAR:
-		/*
-		 * For linear problem there is 1 additional variable - 
-		 * \varepsilon
-		 */
-		n = data->numValues() + 1;
-
-		/*
-		 * For linear problem there are 2 additional conditions for each
-		 * support direction u_i:
-		 *
-		 * |(u_i, x_i) - h_i| < \varepsilon, which is equal to
-		 *
-		 * (u_i, x_i) - h_i > -\varepsilon
-		 * (u_i, x_i) - h_i <  \varepsilon
-		 *
-		 * The number if directions is n / 3, so
-		 * there are (n / 3) * 2 additional conditions.
-		 */
-		m = data->numConditions() + (data->numValues() / 3) * 2;
-
-		/*
-		 * The Jacobian of conditions is actually a support matrix
-		 * extended with additional rows. Each row has 4 non-zero
-		 * coefficients: u_i_x, u_i_y, u_i_z, \varepsilon.
-		 * Each support direction has 2 corresponding conditions.
-		 *
-		 * Thus we have (n / 3) * 4 * 2 additional non-zero values in
-		 * the Jacobian of conditions.
-		 */
-		nnz_jac_g = data->supportMatrix().nonZeros()
-			+ (data->numValues() / 3) * 4 * 2;
-
-		/*
-		 * Th Lagrangian is a linear function of x_i_s and \varepsilon.
-		 * Thus, all its partial derivatives of 2nd order are zero. That
-		 * means that the Hessian of Lagrangian is a zero matrix.
-		 */
-		nnz_h_lag = 0;
-		break;
-	}
-
+	n = numVariablesX + numVariablesEpsilon;
 	DEBUG_PRINT("Number of variables is set to n = %d", n);
+	
+	m = numConsistencyConditions + numLocalityConditions;
 	DEBUG_PRINT("Number of constraints is set to m = %d", m);
-	DEBUG_PRINT("Number of non-zero elements in the Jacobian of g is set to "
-			"nnz_jac_g = %d", nnz_jac_g);
-	DEBUG_PRINT("Number of non-zero elements in the Hessian is set to "
-			"nnz_h_lag = %d", nnz_h_lag);
+	
+	nnz_jac_g = data->supportMatrix().nonZeros()
+		+ 4 * numLocalityConditions;
+	DEBUG_PRINT("Number of non-zero elements in the Jacobian of g is set to"
+			" nnz_jac_g = %d", nnz_jac_g);
+	
+	nnz_h_lag = problemType_ == ESTIMATION_PROBLEM_NORM_L_2
+		? numVariablesX / 3 : 0;
+	DEBUG_PRINT("Number of non-zero elements in the Hessian is set to"
+			" nnz_h_lag = %d", nnz_h_lag);
 
 	index_style = TNLP::C_STYLE;
 	DEBUG_END;
@@ -151,26 +103,38 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 	ASSERT(x_u);
 	ASSERT(g_l);
 	ASSERT(g_u);
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	ASSERT(m = numConsistencyConditions + numLocalityConditions);
 
-	/* There are no restrictions on variables: */
-	for (int i = 0; i < n; ++i)
+	/* There are no restrictions on regular variables: */
+	for (int i = 0; i < numVariablesX; ++i)
 	{
 		x_l[i] = -TNLP_INFINITY;
 		x_u[i] = +TNLP_INFINITY;
 	}
-
-	/* All conditions are tranformed to the form (*) > 0: */
-	for (int i = 0; i < m; ++i)
+	/* But there are restrictions on epsilons: */
+	double epsilon = data->startingEpsilon();
+	for (int i = numVariablesX; i < numVariablesX + numVariablesEpsilon;
+			++i)
+	{
+		x_l[i] = 0.;
+		x_u[i] = epsilon;
+	}
+	/* All consistency conditions should only be non-negative: */
+	for (int i = 0; i < numConsistencyConditions; ++i)
 	{
 		g_l[i] = 0.;
+		g_u[i] = +TNLP_INFINITY;
+	}
+	/* All locality conditions have bounds depending on h0: */
+	auto h0 = data->supportVector();
+	for (int i = numConsistencyConditions;
+			i < numConsistencyConditions + numLocalityConditions;
+			++i)
+	{
+		int iDirection = (i - numConsistencyConditions) / 2;
+		g_l[i] = ((i - numConsistencyConditions) % 2)
+			? -h0(iDirection) : h0(iDirection);
 		g_u[i] = +TNLP_INFINITY;
 	}
 	DEBUG_END;
@@ -182,49 +146,22 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 		bool init_lambda, Number* lambda)
 {
 	DEBUG_START;
-
 	ASSERT(x);
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
-	
-
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	ASSERT(m = numConsistencyConditions + numLocalityConditions);
 	if (init_x)
 	{
 		VectorXd x0 = data->startingVector();
-		int num = data->numValues();
-		for (int i = 0; i < num; ++i)
+		double espilon = data->startingEpsilon();
+		for (int i = 0; i < numVariablesX; ++i)
 		{
 			x[i] = x0(i);
 		}
-		if (mode == IPOPT_ESTIMATION_LINEAR)
+		for (int i = numVariablesX;
+				i < numVariablesX + numVariablesEpsilon; ++i)
 		{
-			std::vector<Vector3d> directions =
-				data->supportDirections();
-			/*
-			 * It is supposed that given starting point lies in the 
-			 * consistency area, thus we can get estimate for
-			 * \varepsilon from it.
-			 */
-			double maxDifference = 0.;
-			for (int i = 0; i < num / 3; ++i)
-			{
-				double difference = directions[i].x * x0(3 * i)
-					+ directions[i].y * x0(3 * i + 1)
-					+ directions[i].z * x0(3 * i + 2);
-				if (difference > maxDifference)
-				{
-					maxDifference = difference;
-				}
-			}
-			x[num] = maxDifference;
+			x[i] = espilon;
 		}
-		
 	}
 	if (init_z || init_lambda)
 	{
@@ -238,33 +175,28 @@ bool IpoptSupportFunctionEstimator::eval_f(Index n, const Number* x, bool new_x,
 		Number& obj_value)
 {
 	DEBUG_START;
-
 	ASSERT(x);
-	VectorXd x0 = data->supportVector();
-	std::vector<Vector3d> directions = data->supportDirections();
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	switch(problemType_)
 	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
-
-	switch (mode)
-	{
-	case IPOPT_ESTIMATION_QUADRATIC:
+	case ESTIMATION_PROBLEM_NORM_L_INF:
+		obj_value = x[numVariablesX];
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_1:
 		obj_value = 0.;
-		for (int i = 0; i < n / 3; ++i)
+		for (int i = numVariablesX;
+				i < numVariablesX + numVariablesEpsilon; ++i)
 		{
-			double difference = directions[i].x * x[3 * i]
-				+ directions[i].y * x[3 * i + 1]
-				+ directions[i].z * x[3 * i + 2] - x0(i);
-			obj_value += difference * difference;
+			obj_value += x[i];
 		}
 		break;
-	case IPOPT_ESTIMATION_LINEAR:
-		obj_value = x[data->numValues()]; /* epsilon */
+	case ESTIMATION_PROBLEM_NORM_L_2:
+		obj_value = 0.;
+		for (int i = numVariablesX;
+				i < numVariablesX + numVariablesEpsilon; ++i)
+		{
+			obj_value += x[i] * x[i];
+		}
 		break;
 	}
 	DEBUG_END;
@@ -275,43 +207,41 @@ bool IpoptSupportFunctionEstimator::eval_grad_f(Index n, const Number* x,
 		bool new_x, Number* grad_f)
 {
 	DEBUG_START;
-
 	ASSERT(x);
 	ASSERT(grad_f);
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	switch(problemType_)
 	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
-	VectorXd x0 = data->supportVector();
-	int num = data->numValues();
-	std::vector<Vector3d> directions = data->supportDirections();
-
-	switch (mode)
-	{
-	case IPOPT_ESTIMATION_QUADRATIC:
-		for (int i = 0; i < num / 3; ++i)
-		{
-			double multiplier = 2. * (directions[i].x * x[3 * i]
-				+ directions[i].y * x[3 * i + 1]
-				+ directions[i].z * x[3 * i + 2] - x0(i));
-			grad_f[3 * i] = multiplier * directions[i].x;
-			grad_f[3 * i + 1] = multiplier * directions[i].y;
-			grad_f[3 * i + 2] = multiplier * directions[i].z;
-		}
-		break;
-	case IPOPT_ESTIMATION_LINEAR:
-		for (int i = 0; i < num; ++i)
+	case ESTIMATION_PROBLEM_NORM_L_INF:
+		for (int i = 0; i < numVariablesX; ++i)
 		{
 			grad_f[i] = 0.;
 		}
-		grad_f[num] = 1.;
+		grad_f[numVariablesX] = 1.;
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_1:
+		for (int i = 0; i < numVariablesX; ++i)
+		{
+			grad_f[i] = 0.;
+		}
+		for (int i = numVariablesX;
+				i < numVariablesX + numVariablesEpsilon; ++i)
+		{
+			grad_f[i] = 1.;
+		}
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_2:
+		for (int i = 0; i < numVariablesX; ++i)
+		{
+			grad_f[i] = 0.;
+		}
+		for (int i = numVariablesX;
+				i < numVariablesX + numVariablesEpsilon; ++i)
+		{
+			grad_f[i] = 2. * x[i];
+		}
 		break;
 	}
-
 	DEBUG_END;
 	return true;
 }
@@ -323,42 +253,41 @@ bool IpoptSupportFunctionEstimator::eval_g(Index n, const Number* x, bool new_x,
 
 	ASSERT(x);
 	ASSERT(g);
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
-	int num = data->numValues();
-
-	VectorXd h(num);
-	for (int i = 0; i < num; ++i)
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	ASSERT(m = numConsistencyConditions + numLocalityConditions);
+	VectorXd h(numVariablesX);
+	for (int i = 0; i < numVariablesX; ++i)
 	{
 		h(i) = x[i];
 	}
 
 	VectorXd Qh(m);
 	Qh = data->supportMatrix() * h;
-	VectorXd h0 = data->supportVector();
-	std::vector<Vector3d> directions = data->supportDirections();
 
-	int numConds = data->numConditions();
-	for (int i = 0; i < numConds; ++i)
+	for (int i = 0; i < numConsistencyConditions; ++i)
 	{
 		g[i] = Qh[i];
 	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
+	int numDirections = data->supportDirections().size();
+	auto directions = data->supportDirections();
+	for (int i = 0; i < numDirections; ++i)
 	{
-		for (int i = 0 ; i < num / 3; ++i)
+		Vector3d direction = directions[i];
+		Vector3d point(x[3 * i], x[3 * i + 1], x[3 * i + 2]);
+		double product = direction * point;
+		double epsilon = 0.;
+		switch(problemType_)
 		{
-			double product = directions[i].x * h(3 * i)
-				+ directions[i].y * h(3 * i + 1)
-				+ directions[i].z * h(3 * i + 2);
-			g[numConds + 2 * i] = product + x[num] - h0(i);
-			g[numConds + 2 * i + 1] = -product + x[num] + h0(i);
+		case ESTIMATION_PROBLEM_NORM_L_INF:
+			epsilon = x[numVariablesX];
+			break;
+		case ESTIMATION_PROBLEM_NORM_L_1:
+		case ESTIMATION_PROBLEM_NORM_L_2:
+			epsilon = x[numVariablesX + i];
+			break;
 		}
+		g[numConsistencyConditions + 2 * i] = product + epsilon;
+		g[numConsistencyConditions + 2 * i + 1] = -product + epsilon;
 	}
 
 	DEBUG_END;
@@ -370,18 +299,6 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 		Number* values)
 {
 	DEBUG_START;
-
-	DEBUG_PRINT("Input parameters:");
-	DEBUG_PRINT("   n = %d", n);
-	DEBUG_PRINT("   x = %p", (void*) x);
-	DEBUG_PRINT("   new_x = %d", new_x);
-	DEBUG_PRINT("   m = %d", m);
-	DEBUG_PRINT("   n_ele_jac = %d", n_ele_jac);
-	DEBUG_PRINT("   iRow = %p", (void*) iRow);
-	DEBUG_PRINT("   jCol = %p", (void*) jCol);
-	DEBUG_PRINT("   values = %p", (void*) values);\
-	int num = data->numValues();
-
 	if (!values)
 	{
 		ASSERT(iRow);
@@ -391,26 +308,13 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	{
 		ASSERT(values);
 	}
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	ASSERT(m = numConsistencyConditions + numLocalityConditions);
+	ASSERT(n_ele_jac == data->supportMatrix().nonZeros()
+			+ 4 * numLocalityConditions);
 
 	SparseMatrix Q = data->supportMatrix();
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n_ele_jac == Q.nonZeros());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n_ele_jac == Q.nonZeros() + (num / 3) * 4 * 2);
-	}
 	int nonZeros = Q.nonZeros();
-	int numConds = data->numConditions();
 
 	/*
 	 * Assign all values of sparsity structure to -1 - this will be used for
@@ -448,46 +352,51 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	if (jCol)
 		ASSERT(jCol[0] < Q.cols());
 
-	if (mode == IPOPT_ESTIMATION_LINEAR)
+	auto directions = data->supportDirections();
+	int numDirections = directions.size();
+	if (values)
 	{
-		auto directions = data->supportDirections();
-		for (i = 0; i < num / 3; ++i)
+		for (int i = 0; i < numDirections; ++i)
 		{
-			if (values)
-			{
-				values[nonZeros + 8 * i] = directions[i].x;
-				values[nonZeros + 8 * i + 1] = directions[i].y;
-				values[nonZeros + 8 * i + 2] = directions[i].z;
-				values[nonZeros + 8 * i + 3] = 1.;
-				values[nonZeros + 8 * i + 4] = -directions[i].x;
-				values[nonZeros + 8 * i + 5] = -directions[i].y;
-				values[nonZeros + 8 * i + 6] = -directions[i].z;
-				values[nonZeros + 8 * i + 7] = 1.;
-			}
-			else
-			{
-				iRow[nonZeros + 8 * i] =
-					iRow[nonZeros + 8 * i + 1] =
-					iRow[nonZeros + 8 * i + 2] =
-					iRow[nonZeros + 8 * i + 3] =
-					numConds + 2 * i;
-				jCol[nonZeros + 8 * i] = 3 * i;
-				jCol[nonZeros + 8 * i + 1] = 3 * i + 1;
-				jCol[nonZeros + 8 * i + 2] = 3 * i + 2;
-				jCol[nonZeros + 8 * i + 3] = num; /* epsilon */
-
-				iRow[nonZeros + 8 * i + 4] =
-					iRow[nonZeros + 8 * i + 5] =
-					iRow[nonZeros + 8 * i + 6] =
-					iRow[nonZeros + 8 * i + 7] =
-					numConds + 2 * i + 1;
-				jCol[nonZeros + 8 * i + 4] = 3 * i;
-				jCol[nonZeros + 8 * i + 5] = 3 * i + 1;
-				jCol[nonZeros + 8 * i + 6] = 3 * i + 2;
-				jCol[nonZeros + 8 * i + 7] = num; /* epsilon */
-			}
+			values[nonZeros + 8 * i] = directions[i].x;
+			values[nonZeros + 8 * i + 1] = directions[i].y;
+			values[nonZeros + 8 * i + 2] = directions[i].z;
+			values[nonZeros + 8 * i + 3] = 1.;
+			values[nonZeros + 8 * i + 4] = -directions[i].x;
+			values[nonZeros + 8 * i + 5] = -directions[i].y;
+			values[nonZeros + 8 * i + 6] = -directions[i].z;
+			values[nonZeros + 8 * i + 7] = 1.;
 		}
 	}
+	else
+	{
+		for (int i = 0; i < numDirections; ++i)
+		{
+			int iEpsilon =
+				problemType_ == ESTIMATION_PROBLEM_NORM_L_INF
+				? numVariablesX : numVariablesX + i;
+			iRow[nonZeros + 8 * i] =
+				iRow[nonZeros + 8 * i + 1] =
+				iRow[nonZeros + 8 * i + 2] =
+				iRow[nonZeros + 8 * i + 3] =
+				numConsistencyConditions + 2 * i;
+			jCol[nonZeros + 8 * i] = 3 * i;
+			jCol[nonZeros + 8 * i + 1] = 3 * i + 1;
+			jCol[nonZeros + 8 * i + 2] = 3 * i + 2;
+			jCol[nonZeros + 8 * i + 3] = iEpsilon; /* epsilon */
+
+			iRow[nonZeros + 8 * i + 4] =
+				iRow[nonZeros + 8 * i + 5] =
+				iRow[nonZeros + 8 * i + 6] =
+				iRow[nonZeros + 8 * i + 7] =
+				numConsistencyConditions + 2 * i + 1;
+			jCol[nonZeros + 8 * i + 4] = 3 * i;
+			jCol[nonZeros + 8 * i + 5] = 3 * i + 1;
+			jCol[nonZeros + 8 * i + 6] = 3 * i + 2;
+			jCol[nonZeros + 8 * i + 7] = iEpsilon; /* epsilon */
+		}
+	}
+
 	if (jCol)
 		ASSERT(jCol[0] < Q.cols());
 
@@ -498,23 +407,18 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	{
 		for (int i = 0; i < n_ele_jac; ++i)
 		{
-			DEBUG_PRINT("Checking element #%d", i);
+			DEBUG_PRINT("Checking element #%d: iRow = %d, "
+					"jCol = %d, numVariablesX = %d, "
+					"numVariablesEpsilon = %d", i, iRow[i],
+					jCol[i], numVariablesX,
+					numVariablesEpsilon);
 			ASSERT(iRow[i] != -1);
 			ASSERT(iRow[i] >= 0);
+			ASSERT(iRow[i] < numConsistencyConditions
+					+ numLocalityConditions);
 			ASSERT(jCol[i] != -1);
 			ASSERT(jCol[i] >= 0);
-			if (mode == IPOPT_ESTIMATION_QUADRATIC)
-			{
-				ASSERT(iRow[i] < Q.rows());
-				ASSERT(jCol[i] < Q.cols());
-			}
-			if (mode == IPOPT_ESTIMATION_LINEAR)
-			{
-				ASSERT(iRow[i] < Q.rows() + 2 * (num / 3));
-				DEBUG_PRINT("jCol[%d] = %d", i, jCol[i]);
-				DEBUG_PRINT("Q.cols() = %d", Q.cols());
-				ASSERT(jCol[i] < Q.cols() + 1);
-			}
+			ASSERT(jCol[i] < numVariablesX + numVariablesEpsilon);
 		}
 	}
 	DEBUG_END;
@@ -528,97 +432,37 @@ bool IpoptSupportFunctionEstimator::eval_h(Index n, const Number* x, bool new_x,
 {
 	DEBUG_START;
 
-	DEBUG_PRINT("Input parameters:");
-	DEBUG_PRINT("   n = %d", n);
-	DEBUG_PRINT("   x = %p", (void*) x);
-	DEBUG_PRINT("   new_x = %d", new_x);
-	DEBUG_PRINT("   obj_factor = %lf", obj_factor);
-	DEBUG_PRINT("   m = %d", m);
-	DEBUG_PRINT("   lambda = %p", (void*) lambda);
-	DEBUG_PRINT("   new_lambda = %d", new_lambda);
-	DEBUG_PRINT("   n_ele_hess = %d", n_ele_hess);
-	DEBUG_PRINT("   iRow = %p", (void*) iRow);
-	DEBUG_PRINT("   jCol = %p", (void*) jCol);
-	DEBUG_PRINT("   values = %p", (void*) values);
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	ASSERT(m = numConsistencyConditions + numLocalityConditions);
 
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
+	if (problemType_ != ESTIMATION_PROBLEM_NORM_L_2)
 	{
 		/* Hessian is zero matrix in linear case. */
 		DEBUG_END;
 		return true;
 	}
-	ASSERT(n_ele_hess == data->numValues() * 3);
+	ASSERT(n_ele_hess == numVariablesX / 3);
 
 	if (new_x)
 		ASSERT(values);
 
-	int numSupportDirections = data->numValues() / 3;
 	if (!values)
 	{
 		/* Set sparsity structure of the Hessian. */
 		ASSERT(iRow);
 		ASSERT(jCol);
-		for (int i = 0; i < numSupportDirections; ++i)
+		for (int i = 0; i < numVariablesEpsilon; ++i)
 		{
-			/*
-			 * The Hessian consists of 3x3 blocks for each support
-			 * direction.
-			 */
-			iRow[9 * i] = 3 * i;
-			jCol[9 * i] = 3 * i;
-			iRow[9 * i + 1] = 3 * i;
-			jCol[9 * i + 1] = 3 * i + 1;
-			iRow[9 * i + 2] = 3 * i;
-			jCol[9 * i + 2] = 3 * i + 2;
-
-			iRow[9 * i + 3] = 3 * i + 1;
-			jCol[9 * i + 3] = 3 * i;
-			iRow[9 * i + 4] = 3 * i + 1;
-			jCol[9 * i + 4] = 3 * i + 1;
-			iRow[9 * i + 5] = 3 * i + 1;
-			jCol[9 * i + 5] = 3 * i + 2;
-
-			iRow[9 * i + 6] = 3 * i + 2;
-			jCol[9 * i + 6] = 3 * i;
-			iRow[9 * i + 7] = 3 * i + 2;
-			jCol[9 * i + 7] = 3 * i + 1;
-			iRow[9 * i + 8] = 3 * i + 2;
-			jCol[9 * i + 8] = 3 * i + 2;
+			iRow[i] = numVariablesX + i;
+			jCol[i] = numVariablesX + i;
 		}
 	}
 	else
 	{
-		auto directions = data->supportDirections();
-		ASSERT(directions.size() == (unsigned) numSupportDirections);
 		/* Set values of the Hessian. */
-		for (int i = 0; i < numSupportDirections; ++i)
+		for (int i = 0; i < numVariablesEpsilon; ++i)
 		{
-			values[9 * i] = 2. * obj_factor *
-				directions[i].x * directions[i].x;
-			values[9 * i + 1] = 2. * obj_factor *
-				directions[i].x * directions[i].y;
-			values[9 * i + 2] = 2. * obj_factor *
-				directions[i].x * directions[i].z;
-			values[9 * i + 3] = 2. * obj_factor *
-				directions[i].y * directions[i].x;
-			values[9 * i + 4] = 2. * obj_factor *
-				directions[i].y * directions[i].y;
-			values[9 * i + 5] = 2. * obj_factor *
-				directions[i].y * directions[i].z;
-			values[9 * i + 6] = 2. * obj_factor *
-				directions[i].z * directions[i].x;
-			values[9 * i + 7] = 2. * obj_factor *
-				directions[i].z * directions[i].y;
-			values[9 * i + 8] = 2. * obj_factor *
-				directions[i].z * directions[i].z;
+			values[i] = 2. * obj_factor;
 		}
 	}
 
@@ -632,23 +476,18 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 		const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq)
 {
 	DEBUG_START;
-	if (mode == IPOPT_ESTIMATION_QUADRATIC)
-	{
-		ASSERT(n == data->numValues());
-	}
-	if (mode == IPOPT_ESTIMATION_LINEAR)
-	{
-		ASSERT(n == data->numValues() + 1);
-	}
+	ASSERT(n == numVariablesX + numVariablesEpsilon);
+	VectorXd result(numVariablesX);
 
 	switch (status)
 	{
 	case SUCCESS:
 		MAIN_PRINT("SUCCESS");
-		for (int i = 0; i < data->numValues(); ++i)
+		for (int i = 0; i < numVariablesX; ++i)
 		{
-			solution(i) = x[i];
+			result(i) = x[i];
 		}
+		solution = result;
 		break;
 	case MAXITER_EXCEEDED:
 		MAIN_PRINT("MAXITER_EXCEEDED");
