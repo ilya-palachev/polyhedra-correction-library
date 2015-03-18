@@ -70,6 +70,10 @@ VectorXd CPLEXSupportFunctionEstimator::run(void)
 	case ESTIMATION_PROBLEM_NORM_L_1:
 		problem = builder.buildL1Problem();
 		break;
+	case ESTIMATION_PROBLEM_NORM_L_2:
+		ERROR_PRINT("Not implemented yet!");
+		exit(EXIT_FAILURE);
+		break;
 	}
 
 	char *mps_file_name = strdup("/tmp/glpk-linf-problem.mps");
