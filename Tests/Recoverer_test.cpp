@@ -560,11 +560,6 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		"ipopt",
 		"Ipopt interior-point method for quadratic programming"
 	},
-	{
-		IPOPT_ESTIMATOR_LINEAR,
-		"ipopt-lp",
-		"Ipopt interior-point method for linear programming"
-	},
 #endif /* USE_IPOPT */
 #ifdef USE_GLPK
 	{
@@ -655,6 +650,11 @@ ProblemType problemTypes[] =
 		ESTIMATION_PROBLEM_NORM_L_1,
 		"l1",
 		"L-1 norm problem"
+	},
+	{
+		ESTIMATION_PROBLEM_NORM_L_2,
+		"l2",
+		"L-2 norm problem"
 	}
 };
 

@@ -68,7 +68,10 @@ typedef enum
 	ESTIMATION_PROBLEM_NORM_L_INF,
 
 	/** L_{1} problem. */
-	ESTIMATION_PROBLEM_NORM_L_1
+	ESTIMATION_PROBLEM_NORM_L_1,
+
+	/** L_{2} problem. */
+	ESTIMATION_PROBLEM_NORM_L_2
 } EstimationProblemNorm;
 
 /** Type of the optimization problem that is used by default. */

@@ -152,6 +152,9 @@ static SupportFunctionEstimator *constructEstimator(
 	DEBUG_START;
 
 	SupportFunctionEstimator *estimator = NULL;
+#ifdef USE_IPOPT
+	IpoptSupportFunctionEstimator *ipoptEstimator = NULL;
+#endif /* USE_IPOPT */
 #ifdef USE_GLPK
 	GlpkSupportFunctionEstimator *glpkEstimator = NULL;
 #endif /* USE_GLPK */
@@ -161,6 +164,7 @@ static SupportFunctionEstimator *constructEstimator(
 #ifdef USE_CPLEX
 	CPLEXSupportFunctionEstimator *CPLEXEstimator = NULL;
 #endif /* USE_CPLEX */
+
 	switch (estimatorType)
 	{
 	case ZERO_ESTIMATOR:
@@ -176,12 +180,10 @@ static SupportFunctionEstimator *constructEstimator(
 #endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
 	case IPOPT_ESTIMATOR:
-		estimator = new IpoptSupportFunctionEstimator(data,
-				IPOPT_ESTIMATION_QUADRATIC);
-		break;
-	case IPOPT_ESTIMATOR_LINEAR:
-		estimator = new IpoptSupportFunctionEstimator(data,
-				IPOPT_ESTIMATION_LINEAR);
+		ipoptEstimator = new IpoptSupportFunctionEstimator(data);
+		ipoptEstimator->setProblemType(problemType);
+		estimator =
+			static_cast<SupportFunctionEstimator*>(ipoptEstimator);
 		break;
 #endif /* USE_IPOPT */
 #ifdef USE_GLPK
