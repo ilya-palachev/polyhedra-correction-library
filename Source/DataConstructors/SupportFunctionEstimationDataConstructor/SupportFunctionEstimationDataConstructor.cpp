@@ -41,11 +41,14 @@
  * @param data			The support function data.
  * @param type			The requested type of support matrix.
  * @param startingVector	The starting vector of the algorithm.
+ * @param startingEpsilon	The maximum displacement of h_i for for starting
+ * 				vector.
  *
  * @return	Support matrix.
  */
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-	SupportMatrixType type, VectorXd startingVector);
+	SupportMatrixType type, VectorXd startingVector,
+	double startingEpsilon);
 
 /**
  * Builds starting vector for the estimation process.
@@ -150,9 +153,12 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	/* Build starting vector. */
 	VectorXd startingVector = buildStartingVector(data, startingBodyType);
 
+	/** Build starting epsilon. */
+	double startingEpsilon = calculateEpsilon(data, startingVector);
+
 	/** Build support matrix. */
 	SupportMatrix *supportMatrix = buildSupportMatrix(data,
-		supportMatrixType, startingVector);
+		supportMatrixType, startingVector, startingEpsilon);
 
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
@@ -171,30 +177,25 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	std::vector<Vector3d> supportDirections = data->supportDirections();
 
 	/* Construct data. */
-	double epsilon = 0.;
 	if (!supportMatrix)
 	{
 		supportMatrix = new SupportMatrix();
-		epsilon = calculateEpsilon(data, startingVector);
-		std::cout << "Calculated starting epsilon = " << epsilon
-			<< std::endl;
 	}
 	SupportFunctionEstimationDataPtr estimationData(new
 		SupportFunctionEstimationData(*supportMatrix, supportVector,
-				startingVector, supportDirections, epsilon,
-				data));
+				startingVector, supportDirections,
+				startingEpsilon, data));
 	delete supportMatrix;
 	DEBUG_END;
 	return estimationData;
 }
 
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-	SupportMatrixType type, VectorXd startingVector)
+	SupportMatrixType type, VectorXd startingVector, double startingEpsilon)
 {
 	DEBUG_START;
 	SupportMatrix *matrix = NULL;
 	
-	double epsilon = 0.;
 	switch (type)
 	{
 	case SUPPORT_MATRIX_TYPE_KKVW:
@@ -202,9 +203,8 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 		ASSERT(0 && "Not implemented yet!");
 		break;
 	case SUPPORT_MATRIX_TYPE_GK_OPT:
-		epsilon = calculateEpsilon(data, startingVector);
 		matrix = constructReducedGardnerKiderlenSupportMatrix(data,
-				epsilon);
+				startingEpsilon);
 		break;
 	case SUPPORT_MATRIX_TYPE_GK:
 		matrix = constructGardnerKiderlenSupportMatrix(data);
@@ -527,19 +527,21 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 				minViolation = violation;
 			if (violation < -EPSILON_MAX_VIOLATION)
 			{
+#ifndef NDEBUG
 				std::cerr << "directions[" << i << "] = "
 					<< directions[i] << std::endl;
 				std::cerr << "point[" << i << "] = "
 					<< points[i] << std::endl;
 				std::cerr << "point[" << j << "] = "
 					<< points[j] << std::endl;
-				ALWAYS_PRINT(stdout, "directions[%d] * "
+#endif /* NDEBUG */
+				DEBUG_PRINT("directions[%d] * "
 						"points[%d] = %lf ; ", i, i,
 						directions[i] * points[i]);
-				ALWAYS_PRINT(stdout, "directions[%d] * "
+				DEBUG_PRINT("directions[%d] * "
 						"points[%d] = %lf ; ", i, j,
 						directions[i] * points[j]);
-				ALWAYS_PRINT(stdout, "Violation in (%d, %d) "
+				DEBUG_PRINT("Violation in (%d, %d) "
 						"= %.16lf\n", i, j, violation);
 				++numViolations;
 				if (violation < minViolation)

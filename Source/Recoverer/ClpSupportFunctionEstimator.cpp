@@ -29,12 +29,13 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Recoverer/ClpSupportFunctionEstimator.h"
-#include "Recoverer/GlpkSFELinfBuilder.h"
+#include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	ifCommandlineMode(false)
+	ifCommandlineMode(false),
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -53,14 +54,35 @@ void ClpSupportFunctionEstimator::enableCommandlineMode()
 	DEBUG_END;
 }
 
+void ClpSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
+{
+	DEBUG_START;
+	problemType_ = type;
+	DEBUG_END;
+}
+
 VectorXd ClpSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	VectorXd solution(data->numValues());
 
 	/* Construct the CLP problem. */
-	GlpkSFELinfBuilder builder(data);
-	glp_prob *problem = builder.build();
+	GlpkSFELinearProgramBuilder builder(data);
+	glp_prob *problem = NULL;
+
+	switch (problemType_)
+	{
+	case ESTIMATION_PROBLEM_NORM_L_INF:
+		problem = builder.buildLinfProblem();
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_1:
+		problem = builder.buildL1Problem();
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_2:
+		ERROR_PRINT("Not implemented yet!");
+		exit(EXIT_FAILURE);
+		break;
+	}
 
 	char *mps_file_name = strdup("/tmp/glpk-linf-problem.mps");
 	if (glp_write_mps(problem, GLP_MPS_FILE, NULL, mps_file_name))

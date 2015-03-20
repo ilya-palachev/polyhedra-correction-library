@@ -28,11 +28,12 @@
 
 #include "DebugPrint.h"
 #include "Recoverer/GlpkSupportFunctionEstimator.h"
-#include "Recoverer/GlpkSFELinfBuilder.h"
+#include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
-	SupportFunctionEstimator(data)
+	SupportFunctionEstimator(data),
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -44,13 +45,34 @@ GlpkSupportFunctionEstimator::~GlpkSupportFunctionEstimator()
 	DEBUG_END;
 }
 
+void GlpkSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
+{
+	DEBUG_START;
+	problemType_ = type;
+	DEBUG_END;
+}
+
 VectorXd GlpkSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 
 	/* Construct the GLPK problem. */
-	GlpkSFELinfBuilder builder(data);
-	glp_prob *problem = builder.build();
+	GlpkSFELinearProgramBuilder builder(data);
+	glp_prob *problem = NULL;
+
+	switch (problemType_)
+	{
+	case ESTIMATION_PROBLEM_NORM_L_INF:
+		problem = builder.buildLinfProblem();
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_1:
+		problem = builder.buildL1Problem();
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_2:
+		ERROR_PRINT("Not implemented yet!");
+		exit(EXIT_FAILURE);
+		break;
+	}
 
 	/* Run the simplex solver. */
 	glp_simplex(problem, NULL);

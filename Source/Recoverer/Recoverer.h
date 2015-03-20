@@ -59,9 +59,6 @@ typedef enum
 #ifdef USE_IPOPT
 	/** Ipopt estimator. */
 	IPOPT_ESTIMATOR,
-
-	/** Linear Ipopt estimator. */
-	IPOPT_ESTIMATOR_LINEAR,
 #endif /* USE_IPOPT */
 
 #ifdef USE_GLPK
@@ -114,6 +111,9 @@ private:
 
 	/** Starting body type. */
 	SupportFunctionEstimationStartingBodyType startingBodyType_;
+
+	/** Problem type. */
+	EstimationProblemNorm problemType_;
 
 	/** Number of analyzed contours. */
 	int numMaxContours;
@@ -171,6 +171,13 @@ public:
 	 */
 	void setStartingBodyType(
 			SupportFunctionEstimationStartingBodyType type);
+
+	/**
+	 * Sets the type of problem.
+	 *
+	 * @param type	The type of problem.
+	 */
+	void setProblemType(EstimationProblemNorm type);
 
 	/**
 	 * Sets the maximum number of analyzed contours.

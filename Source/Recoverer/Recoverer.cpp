@@ -42,6 +42,7 @@ Recoverer::Recoverer() :
 	ifBalancing(false),
 	ifConvexifyContours(false),
 	ifScaleMatrix(false),
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS)
 {
 	DEBUG_START;
@@ -103,6 +104,13 @@ void Recoverer::setStartingBodyType(
 	DEBUG_END;
 }
 
+void Recoverer::setProblemType(EstimationProblemNorm type)
+{
+	DEBUG_START;
+	problemType_ = type;
+	DEBUG_END;
+}
+
 #define ACCEPTED_TOL 1e-6
 
 static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
@@ -123,7 +131,13 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 		Linf = delta > Linf ? delta : Linf;
 	}
 	MAIN_PRINT("L1 = %lf = %le", L1, L1);
+	double L1average = L1 / h.size();
+	MAIN_PRINT("L1 / %ld = %lf = %le", h.size(), L1average, L1average);
+	MAIN_PRINT("Sum of squares = %lf = %le", L2, L2);
+	L2 = sqrt(L2);
 	MAIN_PRINT("L2 = %lf = %le", L2, L2);
+	double L2average = L2 / sqrt(h.size());
+	MAIN_PRINT("L2 / sqrt(%ld) = %lf = %le", h.size(), L2average, L2average);
 	MAIN_PRINT("Linf = %lf = %le", Linf, Linf);
 
 	DEBUG_PRINT("-------------------------------");
@@ -132,14 +146,24 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 
 static SupportFunctionEstimator *constructEstimator(
 		SupportFunctionEstimationDataPtr data,
-		RecovererEstimatorType estimatorType)
+		RecovererEstimatorType estimatorType,
+		EstimationProblemNorm problemType)
 {
 	DEBUG_START;
 
 	SupportFunctionEstimator *estimator = NULL;
+#ifdef USE_IPOPT
+	IpoptSupportFunctionEstimator *ipoptEstimator = NULL;
+#endif /* USE_IPOPT */
+#ifdef USE_GLPK
+	GlpkSupportFunctionEstimator *glpkEstimator = NULL;
+#endif /* USE_GLPK */
 #ifdef USE_CLP
 	ClpSupportFunctionEstimator *clpEstimator = NULL;
 #endif /* USE_CLP */
+#ifdef USE_CPLEX
+	CPLEXSupportFunctionEstimator *CPLEXEstimator = NULL;
+#endif /* USE_CPLEX */
 
 	switch (estimatorType)
 	{
@@ -156,33 +180,41 @@ static SupportFunctionEstimator *constructEstimator(
 #endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
 	case IPOPT_ESTIMATOR:
-		estimator = new IpoptSupportFunctionEstimator(data,
-				IPOPT_ESTIMATION_QUADRATIC);
-		break;
-	case IPOPT_ESTIMATOR_LINEAR:
-		estimator = new IpoptSupportFunctionEstimator(data,
-				IPOPT_ESTIMATION_LINEAR);
+		ipoptEstimator = new IpoptSupportFunctionEstimator(data);
+		ipoptEstimator->setProblemType(problemType);
+		estimator =
+			static_cast<SupportFunctionEstimator*>(ipoptEstimator);
 		break;
 #endif /* USE_IPOPT */
 #ifdef USE_GLPK
 	case GLPK_ESTIMATOR:
-		estimator = new GlpkSupportFunctionEstimator(data);
+		glpkEstimator = new GlpkSupportFunctionEstimator(data);
+		glpkEstimator->setProblemType(problemType);
+		estimator =
+			static_cast<SupportFunctionEstimator*>(glpkEstimator);
 		break;
 #endif /* USE_GLPK */
 #ifdef USE_CLP
 	case CLP_ESTIMATOR:
-		estimator = new ClpSupportFunctionEstimator(data);
+		clpEstimator = new ClpSupportFunctionEstimator(data);
+		clpEstimator->setProblemType(problemType);
+		estimator =
+			static_cast<SupportFunctionEstimator*>(clpEstimator);
 		break;
 	case CLP_COMMAND_ESTIMATOR:
 		clpEstimator = new ClpSupportFunctionEstimator(data);
 		clpEstimator->enableCommandlineMode();
+		clpEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(clpEstimator);
 		break;
 #endif /* USE_CLP */
 #ifdef USE_CPLEX
 	case CPLEX_ESTIMATOR:
-		estimator = new CPLEXSupportFunctionEstimator(data);
+		CPLEXEstimator = new CPLEXSupportFunctionEstimator(data);
+		CPLEXEstimator->setProblemType(problemType);
+		estimator =
+			static_cast<SupportFunctionEstimator*>(CPLEXEstimator);
 		break;
 #endif /* USE_CPLEX */
 	case CGAL_ESTIMATOR:
@@ -321,7 +353,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 
 	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
-			estimatorType);
+			estimatorType, problemType_);
 
 	/* Run support function estimation. */
 	VectorXd estimate(dataEstimation->numValues());
