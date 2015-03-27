@@ -167,8 +167,6 @@ set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -pedantic")
 # TODO: For ICC we need to set -fp-model here.
 set(COMMON_FLAGS "${COMMON_FLAGS} -frounding-math")
 
-set(COMMON_FLAGS "${COMMON_FLAGS} -fopenmp")
-
 message("Compiler is ${CMAKE_C_COMPILER}")
 if (${CMAKE_C_COMPILER} MATCHES ".*clang")
 	message("Clang compiler detected")
