@@ -25,8 +25,6 @@
  * - implementation.
  */
 
-#include <tbb/concurrent_vector.h>
-
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
@@ -47,8 +45,7 @@ GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
 	DEBUG_END;
 }
 
-static void addCondition(
-		tbb::concurrent_vector<Eigen::Triplet<double>> &triplets,
+static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
 		int &iCondition, int i, int j, Vector3d direction)
 {
 	DEBUG_START;
@@ -88,7 +85,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 
 	std::vector<Vector3d> directions = data->supportDirections();
 
-	tbb::concurrent_vector<Eigen::Triplet<double>> triplets;
+	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
 	for (int i = 0; i < numDirections; ++i)
 	{
@@ -128,15 +125,13 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	/* Find needed conditions. */
 	long int numDirections = data->size();
 	std::vector<Vector3d> directions = data->supportDirections();
-	tbb::concurrent_vector<Eigen::Triplet<double>> triplets;
+	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
 	int numSkipped = 0;
-#pragma omp parallel for
 	for (int i = 0; i < numDirections; ++i)
 	{
 		int numConditionsForOne = 0;
 
-#pragma omp parallel for
 		for (int j = i + 1; j < numDirections; ++j)
 		{
 			Segment query(pointsLower[i], pointsLower[j]);
