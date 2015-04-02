@@ -53,44 +53,62 @@ void CPLEXSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
 	DEBUG_END;
 }
 
-double printSignedValue(double value, FILE *file)
+void printSignedValue(double value, FILE *file)
 {
-	if (value >= 0)
+	if (fabs(value) < 1e-16)
+		value = 0.;
+	if (value >= 0.)
 		fprintf(file, "+ ");
-	fprintf(file, "%lf ", value);
+	fprintf(file, "%.16lf ", value);
 }
 
-static void printConsistencyConstraints(SparseMatrix matrix, FILE *file)
+static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 {
 	DEBUG_START;
-	int iConstraint = 0;
+	Eigen::SparseMatrix<double, Eigen::RowMajor> matrix(matrixInput);
+	std::vector<int> rows;
+	std::vector<int> cols;
+	std::vector<double> values;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
-		SparseMatrix::InnerIterator it(matrix, k);
+		for (Eigen::SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(matrix, k); it; ++it)
+		{
+			rows.push_back(it.row());
+			cols.push_back(it.col());
+			values.push_back(it.value());
+		}
+	}	
+
+	int iConstraint = 0;
+	auto itRow = rows.begin();
+	auto itCol = cols.begin();
+	auto itValue = values.begin();
+	while (itValue != values.end())
+	{
 		fprintf(file, " c%d: ", iConstraint);
-		int iRow = it.row();
+		int DEBUG_VARIABLE iRow = *itRow;
 		for (int iProduct = 0; iProduct < 2; ++iProduct)
 		{
-			int iCol = it.col();
+			if (itValue == values.end())
+				break;
+			int iCol = *itCol;
 			ASSERT(iCol % 3 == 0);
 			int iVariable = iCol / 3;
 			for (int iDimension = 0; iDimension < 3;
 					++iDimension)
 			{
-				ASSERT(it.row() == iRow);
-				ASSERT(it.col() == iCol + iDimension);
-				printSignedValue(it.value(), file);
+				ASSERT(*itRow == iRow);
+				ASSERT(*itCol == iCol + iDimension);
+				printSignedValue(*itValue, file);
 				fprintf(file, "x_%d_%d ", iVariable,
 						iDimension);
-				++it;
-				if (!it)
-				{
-					ASSERT(iDimension == 2);
+				++itCol; ++itRow; ++itValue;
+				DEBUG_PRINT("*itRow = %d, *itCol = %d, *itValue = %lf", *itRow, *itCol, *itValue);
+				if (itValue == values.end())
 					break;
-				}
 			}
 		}
-		fprintf(file, "\n");
+		fprintf(file, " >= 0\n");
 		++iConstraint;
 	}
 	DEBUG_END;
@@ -101,15 +119,15 @@ void printLocalityConstraint(FILE *file, const char *name, Vector3d direction,
 {
 	fprintf(file, " %s%i: ", name, iVariable);
 	printSignedValue(direction.x, file);
-	fprintf(file, " x_%d_1", iVariable);
+	fprintf(file, "x_%d_0 ", iVariable);
 	printSignedValue(direction.y, file);
-	fprintf(file, " x_%d_2", iVariable);
+	fprintf(file, "x_%d_1 ", iVariable);
 	printSignedValue(direction.z, file);
-	fprintf(file, " x_%d_3", iVariable);
-	fprintf(file, " + v");
+	fprintf(file, "x_%d_2 ", iVariable);
+	fprintf(file, " + v ");
 	if (!ifLinfProblem)
 		fprintf(file, "_%d", iVariable);
-	fprintf(file, " >= %lf\n", bound);
+	fprintf(file, " >= %.16lf\n", bound);
 }
 
 void printLinfLocalityConstraints(std::vector<Vector3d> directions,
@@ -151,9 +169,9 @@ static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printLinfLocalityConstraints(data->supportDirections(),
-			data->supportVector(); file);
+			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
-	fprintf(file, " 0 <= v <= %lf\n", data->startingEpsilon());
+	fprintf(file, " 0 <= v <= %.16lf\n", data->startingEpsilon());
 	fprintf(file, "End");
 	fclose(file);
 	DEBUG_END;
@@ -176,11 +194,11 @@ static void printL1Problem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printL1L2LocalityConstraints(data->supportDirections(),
-			data->supportVector(); file);
+			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	for (int i = 0; i < numDirections; ++i)
 	{
-		fprintf(file, "0 <= v_%d <= %lf\n", i,
+		fprintf(file, "0 <= v_%d <= %.16lf\n", i,
 				data->startingEpsilon());
 	}
 	fprintf(file, "End");
@@ -205,11 +223,11 @@ static void printL2Problem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printL1L2LocalityConstraints(data->supportDirections(),
-			data->supportVector(); file);
+			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	for (int i = 0; i < numDirections; ++i)
 	{
-		fprintf(file, "0 <= v_%d <= %lf\n", i,
+		fprintf(file, "0 <= v_%d <= %.16lf\n", i,
 				data->startingEpsilon());
 	}
 	fprintf(file, "End");
@@ -260,7 +278,7 @@ VectorXd CPLEXSupportFunctionEstimator::run(void)
 		{
 			solution(i) = current;
 		}
-		DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
+		DEBUG_PRINT("solution(%d) = %.16lf", i, solution(i));
 	}
 
 	/* Cleanup. */
