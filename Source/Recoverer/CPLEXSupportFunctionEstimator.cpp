@@ -171,6 +171,12 @@ static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 	printLinfLocalityConstraints(data->supportDirections(),
 			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
+	//fprintf(file, " 0 <= v \n");
+	for (int i = 0; i < data->numValues() / 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+			fprintf(file, " x_%d_%d free\n", i, j);
+	}
 	fprintf(file, " 0 <= v <= %.16lf\n", data->startingEpsilon());
 	fprintf(file, "End");
 	fclose(file);
