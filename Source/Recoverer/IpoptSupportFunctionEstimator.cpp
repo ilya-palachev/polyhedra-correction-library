@@ -560,6 +560,7 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	//app->Options()->SetNumericValue("tol", 1e-3);
 	//app->Options()->SetNumericValue("acceptable_tol", 1e-3);
 	//app->Options()->SetIntegerValue("max_iter", 3000000);
+	app->Options()->SetStringValue("linear_solver", "ma97");
 
 	/* Ask Ipopt to solve the problem */
 	status = app->OptimizeTNLP(this);
