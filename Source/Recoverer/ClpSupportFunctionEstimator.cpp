@@ -143,7 +143,7 @@ VectorXd ClpSupportFunctionEstimator::run(void)
 		double *columnPrimal = model.primalColumnSolution();
 		for (int i = 0; i < numColumns - 1; ++i)
 		{
-			solution(i) = columnPrimal[i]
+			solution(i) = columnPrimal[i];
 			DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
 		}
 	}
