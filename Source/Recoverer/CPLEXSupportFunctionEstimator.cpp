@@ -158,6 +158,17 @@ void printL1L2LocalityConstraints(std::vector<Vector3d> directions,
 	DEBUG_END;
 }
 
+static void printVariableBounds(int numDirections, FILE *file)
+{
+	DEBUG_START;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+			fprintf(file, " x_%d_%d free\n", i, j);
+	}
+	DEBUG_END;
+}
+
 static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 		char *file_name)
 {
@@ -171,15 +182,21 @@ static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 	printLinfLocalityConstraints(data->supportDirections(),
 			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
-	//fprintf(file, " 0 <= v \n");
-	for (int i = 0; i < data->numValues() / 3; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-			fprintf(file, " x_%d_%d free\n", i, j);
-	}
+	printVariableBounds(data->numValues() / 3, file);
 	fprintf(file, " 0 <= v <= %.16lf\n", data->startingEpsilon());
 	fprintf(file, "End");
 	fclose(file);
+	DEBUG_END;
+}
+
+static void printL1L2EpsilonBounds(double epsilon, int numDirections,
+	FILE *file)
+{
+	DEBUG_START;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		fprintf(file, "0 <= v_%d <= %.16lf\n", i, epsilon);
+	}
 	DEBUG_END;
 }
 
@@ -202,11 +219,8 @@ static void printL1Problem(SupportFunctionEstimationDataPtr data,
 	printL1L2LocalityConstraints(data->supportDirections(),
 			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
-	for (int i = 0; i < numDirections; ++i)
-	{
-		fprintf(file, "0 <= v_%d <= %.16lf\n", i,
-				data->startingEpsilon());
-	}
+	printVariableBounds(numDirections, file);
+	printL1L2EpsilonBounds(data->startingEpsilon(), numDirections, file);
 	fprintf(file, "End");
 	fclose(file);
 	DEBUG_END;
@@ -219,23 +233,20 @@ static void printL2Problem(SupportFunctionEstimationDataPtr data,
 	FILE *file = (FILE*) fopen(file_name, "w");
 	fprintf(file, "\\Problem name: cplex-problem.lp\n\n");
 	fprintf(file, "Minimize\n");
-	fprintf(file, " obj: ");
+	fprintf(file, " obj: [ ");
 	int numDirections = data->numValues() / 3;
 	for (int i = 0; i < numDirections; ++i)
 	{
 		fprintf(file, "+ v_%d ^2", i);
 	}
-	fprintf(file, "\n");
+	fprintf(file, "] / 2\n");
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printL1L2LocalityConstraints(data->supportDirections(),
 			data->supportVector(), file);
 	fprintf(file, "Bounds\n");
-	for (int i = 0; i < numDirections; ++i)
-	{
-		fprintf(file, "0 <= v_%d <= %.16lf\n", i,
-				data->startingEpsilon());
-	}
+	printVariableBounds(numDirections, file);
+	printL1L2EpsilonBounds(data->startingEpsilon(), numDirections, file);
 	fprintf(file, "End");
 	fclose(file);
 	DEBUG_END;
@@ -267,6 +278,7 @@ VectorXd CPLEXSupportFunctionEstimator::run(void)
 	char *command = (char*) malloc(1024 * sizeof(char));
 	char *solution_file_name = strdup("/tmp/solution.txt");
 	unlink(solution_file_name);
+	unlink("/tmp/solution.xml");
 	sprintf(command,
 		"%s/Scripts/run_cplex_solver.sh %s %s %s",
 		SOURCE_DIR, problem_file_name, "/tmp/solution.xml",
