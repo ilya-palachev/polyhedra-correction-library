@@ -84,7 +84,8 @@ VectorXd ClpSupportFunctionEstimator::run(void)
 		break;
 	}
 
-	char *mps_file_name = strdup("/tmp/glpk-linf-problem.mps");
+	char *mps_file_name = strdup("/tmp/glpk-linear-problem.mps");
+	unlink(mps_file_name);
 	if (glp_write_mps(problem, GLP_MPS_FILE, NULL, mps_file_name))
 	{
 		ERROR_PRINT("Failed to write MPS problem!");
@@ -142,7 +143,7 @@ VectorXd ClpSupportFunctionEstimator::run(void)
 		double *columnPrimal = model.primalColumnSolution();
 		for (int i = 0; i < numColumns - 1; ++i)
 		{
-			solution(i) = columnPrimal[i]
+			solution(i) = columnPrimal[i];
 			DEBUG_PRINT("solution(%d) = %lf", i, solution(i));
 		}
 	}
