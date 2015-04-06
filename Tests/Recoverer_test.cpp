@@ -98,6 +98,11 @@
 #define OPTION_PROBLEM_TYPE 'p'
 
 /**
+ * Option "-P" sets the portion size.
+ */
+#define OPTION_PORTION_SIZE 'P'
+
+/**
  * Option "-r" runs recovering.
  */
 #define OPTION_RECOVER 'r'
@@ -128,7 +133,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:e:f:i:l:m:M:n:N:o:p:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:e:f:i:l:m:M:n:N:o:p:P:r:st:vx"
 
 struct PCLOption: public option
 {
@@ -238,6 +243,16 @@ static PCLOption optionsLong[] =
 			OPTION_PROBLEM_TYPE
 		},
 		"The type of oprimization problem (not for all estimators!)"
+	},
+	{
+		option
+		{
+			"portion-size",
+			required_argument,
+			0,
+			OPTION_PORTION_SIZE
+		},
+		"The size of portion"
 	},
 	{
 		option
@@ -448,6 +463,9 @@ typedef struct
 
 	/** The problem type. */
 	EstimationProblemNorm problemType;
+
+	/** The size of portion. */
+	int numPortionSize;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -843,6 +861,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
 	options->epsilonFactor = -1;
+	options->numPortionSize = 0;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -1071,6 +1090,37 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 				printUsage(argc, argv);
 				DEBUG_END;
 				exit(EXIT_FAILURE);
+			}
+			break;
+		case OPTION_PORTION_SIZE:
+			/* Parse digital number from input argument. */
+			options->numPortionSize = strtol(optarg, &charMistaken,
+					10);
+
+			/*
+			 *  If user gives invalid character, the charMistaken is
+			 *  set to it
+			 */
+
+			/*
+			 * From "man strtol":
+			 *
+			 * In particular, if *nptr is not '\0' but **endptr is
+			 * '\0' on return, the entire string is valid.
+			 */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			}
+
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv);
 			}
 			break;
 		case OPTION_RECOVER:
@@ -1693,6 +1743,8 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 		GardnerKiderlenSupportMatrix::epsilonFactor =
 			options->epsilonFactor;
 	}
+
+	recoverer->setNumPortion(options->numPortionSize);
 
 	DEBUG_END;
 	return recoverer;
