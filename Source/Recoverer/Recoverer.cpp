@@ -351,6 +351,8 @@ static PolyhedronPtr produceFinalPolyhedron(
 PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
+	std::cout << "Number of support function items: " << data->size()
+		<< std::endl;
 	timer.pushTimer();
 
 	/* Build support function estimation data. */
