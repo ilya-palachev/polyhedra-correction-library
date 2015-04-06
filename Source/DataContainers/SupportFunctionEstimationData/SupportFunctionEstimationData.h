@@ -169,6 +169,16 @@ public:
 
 	/** Getter for supportData_ */
 	SupportFunctionDataPtr supportData(void);
+
+	/**
+	 * Sets the starting vector.
+	 *
+	 * @param startingVectorNew	The new starting vector.
+	 */
+	void setStartingVector(VectorXd startingVectorNew)
+	{
+		startingVector_ = startingVectorNew;
+	}
 };
 
 /** Shared pointer for support function estimation data. */
