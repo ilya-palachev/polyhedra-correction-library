@@ -147,9 +147,6 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	SupportFunctionEstimationStartingBodyType startingBodyType)
 {
 	DEBUG_START;
-	/* Remove equal items from data (and normalize all items). */
-	data = data->removeEqual();
-
 	/* Build starting vector. */
 	VectorXd startingVector = buildStartingVector(data, startingBodyType);
 
