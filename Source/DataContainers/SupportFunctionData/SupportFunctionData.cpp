@@ -301,4 +301,16 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
 	return points;
 }
 
+SupportFunctionDataPtr SupportFunctionData::getInterval(int iBegin, int iEnd)
+{
+	DEBUG_START;
+	std::vector<SupportFunctionDataItem> itemsInterval;
+	if (iEnd > size())
+		iEnd = size();
+	for (int i = iBegin; i < iEnd; ++i)
+		itemsInterval.push_back(items[i]);
+	SupportFunctionDataPtr data(new SupportFunctionData(itemsInterval));
+	DEBUG_END;
+	return data;
+}
 

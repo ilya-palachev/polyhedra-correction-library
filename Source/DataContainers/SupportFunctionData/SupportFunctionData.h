@@ -203,7 +203,16 @@ public:
 	 * @return		Duals of shifted support planes.
 	 */
 	std::vector<Point_3> getShiftedDualPoints_3(double epsilon);
-
+	
+	/**
+	 * Gets items interval.
+	 *
+	 * @param iBegin	First item (included).
+	 * @param iEnd		Last item (not included).
+	 *
+	 * @return 		Items interval.
+	 */
+	SupportFunctionDataPtr getInterval(int iBegin, int iEnd);
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
