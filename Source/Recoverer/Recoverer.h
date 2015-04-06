@@ -118,6 +118,8 @@ private:
 	/** Number of analyzed contours. */
 	int numMaxContours;
 
+	/** The size of portion. */
+	int numPortion;
 public:
 
 	/**
@@ -185,6 +187,16 @@ public:
 	 * @param number	The maximum number of analyzed contours.
 	 */
 	void setNumMaxContours(int number);
+
+	/**
+	 * Sets the portion size.
+	 *
+	 * @param numPortionSize	The portion size.
+	 */
+	void setNumPortion(int numPortionSize)
+	{
+		numPortion = numPortionSize;
+	}
 
 	/**
 	 * Runs the recovering procedure for shadow contours.

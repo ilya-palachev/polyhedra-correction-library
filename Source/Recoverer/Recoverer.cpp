@@ -297,7 +297,8 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		constructor.enableBalanceShadowContours();
 	if (ifConvexifyContours)
 		constructor.enableConvexifyShadowContour();
-	SupportFunctionDataPtr data = constructor.run(dataShadow, numMaxContours);
+	SupportFunctionDataPtr data = constructor.run(dataShadow,
+			numMaxContours);
 
 	PolyhedronPtr p = run(data);
 
@@ -341,15 +342,49 @@ static PolyhedronPtr produceFinalPolyhedron(
 PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
+	data = data->removeEqual();
 	/* Build support function estimation data. */
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
 	if (estimatorType == NATIVE_ESTIMATOR)
 		supportMatrixType_ = SUPPORT_MATRIX_TYPE_EMPTY;
+
+	int iBegin = 0;
+	int iEnd = numPortion > 0 ? numPortion : data->size();
+	VectorXd startingPoint(data->size());
+	while (iBegin < data->size())
+	{
+		std::cout << "Processing portion from " << iBegin << " to "
+			<< iEnd << std::endl;
+		auto dataPortion = data->getInterval(iBegin, iEnd);
+
+		SupportFunctionEstimationDataPtr dataEstimation
+			= constructorEstimation.run(dataPortion,
+					supportMatrixType_, startingBodyType_);
+
+		/* Build support function estimator. */
+		SupportFunctionEstimator *estimator = constructEstimator(
+				dataEstimation, estimatorType, problemType_);
+
+		/* Run support function estimation. */
+		VectorXd estimate(dataEstimation->numValues());
+		if (estimator)
+			estimate = estimator->run();
+		else
+			estimate = dataEstimation->supportVector();
+
+		for (int i = iBegin; i < iEnd; ++i)
+			startingPoint(i) = estimate(i - iBegin);
+
+		iBegin += numPortion;
+		iEnd += numPortion;
+	}
+
 	SupportFunctionEstimationDataPtr dataEstimation
 		= constructorEstimation.run(data, supportMatrixType_,
 				startingBodyType_);
+	dataEstimation->setStartingVector(startingPoint);
 
 	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
