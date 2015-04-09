@@ -48,6 +48,8 @@ if __name__ == '__main__':
         l2_error = 0
         l2_error_average = 0
         linf_error = 0
+        num_conditions_total = 0
+        num_conditions = 0
         while True:
             line = run.stdout.readline()
             if line != '':
@@ -76,18 +78,21 @@ if __name__ == '__main__':
                                                   "([\.0-9]*)", line)[0]
                 if "Linf = " in line:
                     linf_error = re.findall(r"Linf = ([\.0-9]*)", line)[0]
+                if "from total " in line:
+                    num_conditions_total = re.findall(r"from total ([\.0-9]*)",
+                                                      line)[0]
+                if "Number of conditions: " in line:
+                    num_conditions = re.findall(r"Number of conditions: "
+                                                "([\.0-9]*)", line)[0]
 
             else:
                 break
-        res = "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}".format(num_contours,
-                                                               problem_size,
-                                                               preparation_time,
-                                                               estimation_time,
-                                                               l1_error,
-                                                               l1_error_average,
-                                                               l2_error_squared,
-                                                               l2_error,
-                                                               l2_error_average,
-                                                               linf_error)
+
+        res = "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}".format(
+                num_contours, problem_size, preparation_time,
+                estimation_time, l1_error, l1_error_average,
+                l2_error_squared, l2_error, l2_error_average,
+                linf_error, num_conditions_total,
+                num_conditions)
         print("{0}".format(res))
         out_file.write("{0}\n".format(res))
