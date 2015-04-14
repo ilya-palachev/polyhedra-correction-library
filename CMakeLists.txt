@@ -154,7 +154,7 @@ set (INCLUDE_DIRS_all
 	${CMAKE_SOURCE_DIR}/External/LSM
 	${CMAKE_SOURCE_DIR}/External/Vector3d
 	${CMAKE_SOURCE_DIR}/External/CGAL
-	/usr/include/eigen3
+	/usr/local/include/eigen3
 )
 
 # Common compiler flags used for build:

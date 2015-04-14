@@ -25,6 +25,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
+#include "TimeMeasurer/TimeMeasurer.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "Recoverer/Recoverer.h"
 #include "Recoverer/CGALSupportFunctionEstimator.h"
@@ -36,6 +37,8 @@
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "halfspaces_intersection.h"
+
+TimeMeasurer timer;
 
 Recoverer::Recoverer() :
 	estimatorType(CGAL_ESTIMATOR),
@@ -290,6 +293,7 @@ void Recoverer::setNumMaxContours(int number)
 PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
+	timer.pushTimer();
 
 	/* Build support function data. */
 	SupportFunctionDataConstructor constructor;
@@ -297,7 +301,10 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 		constructor.enableBalanceShadowContours();
 	if (ifConvexifyContours)
 		constructor.enableConvexifyShadowContour();
-	SupportFunctionDataPtr data = constructor.run(dataShadow, numMaxContours);
+	SupportFunctionDataPtr data = constructor.run(dataShadow,
+			numMaxContours);
+	std::cout << "Support data extraction: " << timer.popTimer()
+		<< std::endl;
 
 	PolyhedronPtr p = run(data);
 
@@ -311,6 +318,7 @@ static PolyhedronPtr produceFinalPolyhedron(
 	RecovererEstimatorType estimatorType)
 {
 	DEBUG_START;
+	timer.pushTimer();
 
 	auto h = supportValuesFromPoints(data->supportDirections(), estimate);
 	/* Now produce final polyhedron from the estimate. */
@@ -334,6 +342,8 @@ static PolyhedronPtr produceFinalPolyhedron(
 		<< *pCopy2;
 
 	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
+	std::cout << "Final polyhedron construction: " << timer.popTimer()
+		<< std::endl;
 	DEBUG_END;
 	return polyhedron;
 }
@@ -341,6 +351,10 @@ static PolyhedronPtr produceFinalPolyhedron(
 PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
+	std::cout << "Number of support function items: " << data->size()
+		<< std::endl;
+	timer.pushTimer();
+
 	/* Build support function estimation data. */
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
@@ -350,7 +364,10 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 	SupportFunctionEstimationDataPtr dataEstimation
 		= constructorEstimation.run(data, supportMatrixType_,
 				startingBodyType_);
+	std::cout << "Estimation data preparation: " << timer.popTimer()
+		<< std::endl;
 
+	timer.pushTimer();
 	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
 			estimatorType, problemType_);
@@ -363,6 +380,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		estimate = dataEstimation->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
+	std::cout << "Estimation: " << timer.popTimer() << std::endl;
 	if(!constructorEstimation.checkResult(dataEstimation,
 				supportMatrixType_, estimate))
 	{
