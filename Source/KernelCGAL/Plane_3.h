@@ -35,11 +35,24 @@ class Plane_3: public Kernel::Plane_3
 {
 public:
 	/**
+	 * Constructs the empty plane (default empty constructor).
+	 */
+	Plane_3(): Kernel::Plane_3(0., 0., 0., 0.) {}
+
+	/**
 	 * Constructs CGAL plane from PCL plane.
 	 *
 	 * @param p	The PCL plane.
 	 */
-	Plane_3(Plane p): Kernel::Plane_3(p.norm.x, p.norm.y, p.norm.z, p.dist) {}
+	Plane_3(Plane p): Kernel::Plane_3(p.norm.x, p.norm.y, p.norm.z, p.dist)
+		{}
+
+	/**
+	 * Constructs the plane from general CGAL plane.
+	 *
+	 * @param p	The CGAL plane
+	 */
+	Plane_3(Kernel::Plane_3 p): Kernel::Plane_3(p.a(), p.b(), p.c(), p.d()) {}
 
 	/**
 	 * Constructs CGAL plane from 4 values.
