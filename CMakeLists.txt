@@ -178,6 +178,9 @@ if (${CMAKE_C_COMPILER} MATCHES ".*clang")
 	set(COMMON_FLAGS "-Wno-error=gnu-zero-variadic-macro-arguments")
 endif()
 
+set(CMAKE_SHARED_LINKER_FLAGS "-L/usr/local/lib")
+set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib")
+
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
 add_library(lsm SHARED ${SOURCE_lsm})
@@ -191,6 +194,7 @@ option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 option(DISABLE_CGAL_DEBUG "Disable all CGAL internal checks" OFF)
 
 target_link_libraries(pcl 
+	pthread
 	arrayOperations
 	gaussString
 	lsm
