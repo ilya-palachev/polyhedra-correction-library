@@ -118,6 +118,8 @@ private:
 	/** Number of analyzed contours. */
 	int numMaxContours;
 
+	/** The finite number of planes to be fitted. */
+	int numFinitePlanes_;
 public:
 
 	/**
@@ -185,6 +187,14 @@ public:
 	 * @param number	The maximum number of analyzed contours.
 	 */
 	void setNumMaxContours(int number);
+
+	/**
+	 * Sets the finite number of planes to be fitted.
+	 *
+	 * @param numFinitePlanes	The finite number of planes to be
+	 * 				fitted.
+	 */
+	void setNumFinitePlanes(int numFinitePlanes);
 
 	/**
 	 * Runs the recovering procedure for shadow contours.
