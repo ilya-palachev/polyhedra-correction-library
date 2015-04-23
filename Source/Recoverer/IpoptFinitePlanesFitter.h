@@ -33,6 +33,10 @@ using namespace Ipopt;
 #ifndef IPOPTFINITEPLANESFITTER_H_
 #define IPOPTFINITEPLANESFITTER_H_
 
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
+#include "SparseMatrixEigen.h"
+
 /**
  * Iptopt-based non-linear optimizer used for finite planes fitting algorithm.
  */
@@ -321,7 +325,7 @@ public:
 	 *
 	 * @param intersection	The intersection of halfspaces formed by planes.
 	 */
-	void recalculateFunctional(CGALPolyhedron_3 intersection);
+	void recalculateFunctional(Polyhedron_3 intersection);
 
 	/**
 	 * Recalculates the constraint, its gradient and hessian.
@@ -331,7 +335,7 @@ public:
 	 * 			as the calculated constraint.
 	 * @param iConstraint	The number of constraint to be recalculated.
 	 */
-	void recalculateConstraint(CGALPolyhedron_3 intersection,
+	void recalculateConstraint(Polyhedron_3 intersection,
 			int iConstraint);
 
 	/**

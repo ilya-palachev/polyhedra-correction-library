@@ -31,10 +31,13 @@
 #include "IpTNLPAdapter.hpp"
 #include "IpOrigIpoptNLP.hpp"
 
+#undef NDEBUG
+
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include <coin/IpIpoptApplication.hpp>
 #include "Recoverer/IpoptFinitePlanesFitter.h"
+#include "halfspaces_intersection.h"
 
 IpoptFinitePlanesFitter::IpoptFinitePlanesFitter(
 		SupportFunctionDataPtr data) :
@@ -44,7 +47,6 @@ IpoptFinitePlanesFitter::IpoptFinitePlanesFitter(
 	directions_(data->size()),
 	values_(data->size()),
 	planes_(data->size())
-	solution()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -140,7 +142,7 @@ void IpoptFinitePlanesFitter::finalize_solution(SolverReturn status,
 		const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq)
 {
 	DEBUG_START;
-	int numVariables = 4 * data->size()
+	int numVariables = 4 * data_->size();
 	VectorXd result(numVariables);
 
 	switch (status)
@@ -207,15 +209,15 @@ void IpoptFinitePlanesFitter::finalize_solution(SolverReturn status,
 	return;
 }
 
-virtual bool IpoptFinitePlanesFitter::intermediate_callback(AlgorithmMode mode,
-                                   Index iter, Number obj_value,
-                                   Number inf_pr, Number inf_du,
-                                   Number mu, Number d_norm,
-                                   Number regularization_size,
-                                   Number alpha_du, Number alpha_pr,
-                                   Index ls_trials,
-                                   const IpoptData* ip_data,
-                                   IpoptCalculatedQuantities* ip_cq)
+bool IpoptFinitePlanesFitter::intermediate_callback(AlgorithmMode mode,
+		   Index iter, Number obj_value,
+		   Number inf_pr, Number inf_du,
+		   Number mu, Number d_norm,
+		   Number regularization_size,
+		   Number alpha_du, Number alpha_pr,
+		   Index ls_trials,
+		   const IpoptData* ip_data,
+		   IpoptCalculatedQuantities* ip_cq)
 {
 	DEBUG_START;
 
@@ -244,12 +246,13 @@ virtual bool IpoptFinitePlanesFitter::intermediate_callback(AlgorithmMode mode,
 	tnlp_adapter->ResortX(*ip_data->curr()->x(), variables_);
 	recalculateParameters();
 	DEBUG_END;
+	return true;
 }
 
 void IpoptFinitePlanesFitter::recalculateParameters(void)
 {
 	DEBUG_START;
-	int numDirections = data->size();
+	int numDirections = data_->size();
 	for (int i = 0; i < numDirections; ++i)
 	{
 		Vector3d direction(variables_[4 * i], variables_[4 * i + 1],
@@ -266,6 +269,7 @@ void IpoptFinitePlanesFitter::recalculateParameters(void)
 			intersection, Kernel());
 	recalculateFunctional(intersection);
 
+#if 0
 	/* FIXME: maybe we can parallelize this with openmp. */
 	for (int i = 0; i < numDirections; ++i)
 	{
@@ -279,32 +283,31 @@ void IpoptFinitePlanesFitter::recalculateParameters(void)
 		recalculateConstraint(intersectionWithoutOne, i);
 	}
 	DEBUG_END;
+#endif
 }
 
 static inline double distancePlanes(Plane_3 first, Plane_3 second)
 {
-	double deltaA = plane.a() - planes[i].a();
-	double deltaB = plane.b() - planes[i].b();
-	double deltaC = plane.c() - planes[i].c();
-	double deltaD = plane.d() - planes[i].d();
+	double deltaA = first.a() - second.a();
+	double deltaB = first.b() - second.b();
+	double deltaC = first.c() - second.c();
+	double deltaD = first.d() - second.d();
 	double distance = deltaA * deltaA + deltaB * deltaB
 		+ deltaC * deltaC + deltaD * deltaD;
 	return distance;
 }
 
-static std::vector<int> mapPlanes(CGALPolyhedron_3 intersection,
+static void initializeIndices(Polyhedron_3 intersection,
 		std::vector<Plane_3> planes)
 {
 	DEBUG_START;
-	std::vector<int> facetIDs[intersection.size_of_facets()];
-	int iFacet = 0;
 	for (auto facet = intersection.facets_begin();
 			facet != intersection.facets_end(); ++facet)
 	{
 		Plane_3 plane = facet->plane();
 		double distanceMinimal = distancePlanes(plane, planes[0]);
-		int iPlaneArgmin = 0;
-		for (int i = 1; i < planes.size(); ++i)
+		int iPlaneArgmin = 0, i = 0;
+		for (auto &plane: planes)
 		{
 			double distance = distancePlanes(plane, planes[i]);
 			if (distanceMinimal > distance)
@@ -312,22 +315,30 @@ static std::vector<int> mapPlanes(CGALPolyhedron_3 intersection,
 				distanceMinimal = distance;
 				iPlaneArgmin = i;
 			}
+			++i;
 		}
-		facetIDs[iFacet++] = iPlaneArgmin;
+		facet->id = iPlaneArgmin;
 		/* FIXME: add check that distanceMinimal is 0 */
 	}
+#ifndef NDEBUG
+	for (auto facet = intersection.facets_begin();
+			facet != intersection.facets_end(); ++facet)
+	{
+		DEBUG_PRINT("facet id: %ld", facet->id);
+	}
+#endif /* NDEBUG */
 	DEBUG_END;
 }
 
 void IpoptFinitePlanesFitter::recalculateFunctional(Polyhedron_3 intersection)
 {
 	DEBUG_START;
-	auto facetIDs = mapPlanes(intersection, planes_);
+	initializeIndices(intersection, planes_);
 	
 	DEBUG_END;
 }
 
-VectorXd IpoptFinitePlanesFitter::run(void)
+SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 {
 	DEBUG_START;
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
@@ -338,7 +349,7 @@ VectorXd IpoptFinitePlanesFitter::run(void)
 	if (status != Solve_Succeeded)
 	{
 		MAIN_PRINT("*** Error during initialization!");
-		return solution_;
+		return data_;
 	}
 
 	//app->Options()->SetNumericValue("tol", 1e-3);
@@ -358,7 +369,7 @@ VectorXd IpoptFinitePlanesFitter::run(void)
 	}
 
 	DEBUG_END;
-	return solution_;
+	return data_;
 }
 
 #endif /* USE_IPOPT */
