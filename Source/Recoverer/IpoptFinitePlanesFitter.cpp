@@ -339,7 +339,7 @@ void IpoptFinitePlanesFitter::recalculateParameters(void)
 			intersection, Kernel());
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
 			intersection.planes_begin(), Plane_from_facet());
-	recalculateFunctional(intersection);
+	recalculateFunctional(&intersection);
 
 #if 0
 	/* FIXME: maybe we can parallelize this with openmp. */
@@ -372,12 +372,12 @@ static inline double distancePlanes(Plane_3 first, Plane_3 second)
 const double EPSILON_EQUAL_PLANES = 1e-16;
 const int TAG_PLANE_OUTSIDE = -1;
 
-static void initializeIndices(Polyhedron_3 intersection,
+static void initializeIndices(Polyhedron_3 *intersection,
 		std::vector<Plane_3> planes)
 {
 	DEBUG_START;
-	for (auto facet = intersection.facets_begin();
-			facet != intersection.facets_end(); ++facet)
+	for (auto facet = intersection->facets_begin();
+			facet != intersection->facets_end(); ++facet)
 	{
 		Plane_3 planeFitted = facet->plane();
 #ifndef NDEBUG
@@ -408,19 +408,122 @@ static void initializeIndices(Polyhedron_3 intersection,
 #endif
 	}
 #ifndef NDEBUG
-	for (auto facet = intersection.facets_begin();
-			facet != intersection.facets_end(); ++facet)
+	for (auto facet = intersection->facets_begin();
+			facet != intersection->facets_end(); ++facet)
 	{
 		DEBUG_PRINT("facet id: %ld", facet->id);
 	}
 #endif /* NDEBUG */
+
+	int i = 0;
+	for (auto vertex = intersection->vertices_begin();
+			vertex != intersection->vertices_end(); ++vertex)
+	{
+		vertex->id = i++;
+	}
 	DEBUG_END;
 }
 
-void IpoptFinitePlanesFitter::recalculateFunctional(Polyhedron_3 intersection)
+/**
+ * The information about tangient points required during the re-calculating of
+ * functional and conditions of the problem.
+ */
+struct TangientPointInformation
+{
+	/** The tangient point. */
+	Vector_3 point;
+
+	/** The array of planes IDs. */
+	int indices[3];
+
+	/** The array of planes. */
+	Plane_3 planes[3];
+
+	/**
+	 * Prints the information to the stream.
+	 *
+	 * @param stream	The stream.
+	 * @param info		The information.
+	 *
+	 * @return		The srteam ready for further printing.
+	 */
+	friend std::ostream &operator <<(std::ostream &stream,
+			TangientPointInformation &info)
+	{
+		stream << "information:" << std::endl;
+		stream << "   point: " << info.point << std::endl;
+		stream << "   facets:" << std::endl;
+		for (int i = 0; i < 3; ++i)
+		{
+			stream << "      " << info.indices[i] << ": "
+				<< info.planes[i] << std::endl;
+		}
+		return stream;
+	}
+};
+
+
+static std::vector<TangientPointInformation> searchTangientVertices(
+		Polyhedron_3 *intersection, SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	int numDirections = data->size();
+	std::vector<Point_3> directions = data->supportDirectionsCGAL();
+	std::vector<TangientPointInformation> informations;
+	for (int i = 0; i < numDirections; ++i)
+	{
+		Vector_3 direction = directions[i] - CGAL::ORIGIN;
+#ifndef NDEBUG
+		std::cerr << "Searching for tangient point for direction "
+			<< direction << std::endl;
+#endif
+
+		auto vertex = intersection->vertices_begin();
+		auto vertexBest = vertex;
+		double productMaximal = (vertex->point() - CGAL::ORIGIN)
+			* direction;
+		while (vertex != intersection->vertices_end())
+		{
+			ASSERT(vertex->is_trivalent());
+			double product = (vertex->point() - CGAL::ORIGIN)
+				* direction;
+			if (product > productMaximal)
+			{
+				productMaximal = product;
+				vertexBest = vertex;
+			}
+			++vertex;
+		}
+		ASSERT(vertexBest->is_trivalent());
+		TangientPointInformation info;
+		info.point = vertexBest->point() - CGAL::ORIGIN;
+		int iHalfedge = 0;
+		auto halfedge = vertexBest->vertex_begin();
+		auto halfedgeFirst = halfedge;
+		do
+		{
+			auto facet = halfedge->facet();
+			info.indices[iHalfedge] = facet->id;
+			info.planes[iHalfedge] = facet->plane();
+			++halfedge;
+			++iHalfedge;
+		} while (halfedge != halfedgeFirst);
+		informations.push_back(info);
+#ifndef NDEBUG
+		std::cerr << "... The best is #" << vertexBest->id << " : "
+			<< info << std::endl;
+#endif
+	}
+	DEBUG_END;
+	return informations;
+}
+
+
+void IpoptFinitePlanesFitter::recalculateFunctional(Polyhedron_3 *intersection)
 {
 	DEBUG_START;
 	initializeIndices(intersection, planes_);
+	searchTangientVertices(intersection, data_);
 	
 	DEBUG_END;
 }

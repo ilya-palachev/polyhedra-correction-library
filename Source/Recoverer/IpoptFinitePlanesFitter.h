@@ -331,7 +331,7 @@ public:
 	 *
 	 * @param intersection	The intersection of halfspaces formed by planes.
 	 */
-	void recalculateFunctional(Polyhedron_3 intersection);
+	void recalculateFunctional(Polyhedron_3 *intersection);
 
 	/**
 	 * Recalculates the constraint, its gradient and hessian.
@@ -341,7 +341,7 @@ public:
 	 * 			as the calculated constraint.
 	 * @param iConstraint	The number of constraint to be recalculated.
 	 */
-	void recalculateConstraint(Polyhedron_3 intersection,
+	void recalculateConstraint(Polyhedron_3 *intersection,
 			int iConstraint);
 
 	/**
