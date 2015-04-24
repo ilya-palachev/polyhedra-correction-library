@@ -369,6 +369,9 @@ static inline double distancePlanes(Plane_3 first, Plane_3 second)
 	return distance;
 }
 
+const double EPSILON_EQUAL_PLANES = 1e-16;
+const int TAG_PLANE_OUTSIDE = -1;
+
 static void initializeIndices(Polyhedron_3 intersection,
 		std::vector<Plane_3> planes)
 {
@@ -393,14 +396,16 @@ static void initializeIndices(Polyhedron_3 intersection,
 			}
 			++i;
 		}
-		facet->id = iPlaneArgmin;
+		if (distanceMinimal < EPSILON_EQUAL_PLANES)
+			facet->id = iPlaneArgmin;
+		else
+			facet->id = TAG_PLANE_OUTSIDE;
 #ifndef NDEBUG
 		std::cerr << "... Found nearest: " << planes[iPlaneArgmin]
 			<< std::endl;
 		std::cerr << "... with minimal distance = " << distanceMinimal
 			<< std::endl;
 #endif
-		/* FIXME: add check that distanceMinimal is 0 */
 	}
 #ifndef NDEBUG
 	for (auto facet = intersection.facets_begin();
