@@ -365,7 +365,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 
 	if (numFinitePlanes_ > 0)
 	{
-		IpoptFinitePlanesFitter fitter(data);
+		IpoptFinitePlanesFitter fitter(data, numFinitePlanes_);
 		fitter.run();
 		DEBUG_END;
 		return NULL;
