@@ -47,6 +47,9 @@ private:
 	/** Support function data. */
 	SupportFunctionDataPtr data_;
 
+	/** The finite number of planes to be fitted. */
+	int numFinitePlanes_;
+
 	/** Type of problem. */
 	EstimationProblemNorm problemType_;
 
@@ -68,9 +71,12 @@ public:
 	/**
 	 * Default constructor
 	 *
-	 * @param data	Support function data (input)
+	 * @param data			Support function data (input)
+	 * @param numFinitePlanes	The finite number of planes to be
+	 * 				fitted.
 	 */
-	IpoptFinitePlanesFitter(SupportFunctionDataPtr data);
+	IpoptFinitePlanesFitter(SupportFunctionDataPtr data,
+			int numFinitePlanes);
 
 	/**
 	 * Sets the type of problem.

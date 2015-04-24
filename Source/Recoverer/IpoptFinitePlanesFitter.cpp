@@ -39,14 +39,18 @@
 #include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "halfspaces_intersection.h"
 
+#include <CGAL/point_generators_3.h>
+typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
+
 IpoptFinitePlanesFitter::IpoptFinitePlanesFitter(
-		SupportFunctionDataPtr data) :
+		SupportFunctionDataPtr data, int numFinitePlanes) :
 	data_(data),
+	numFinitePlanes_(numFinitePlanes),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
-	variables_(new double[4 * data->size()]),
-	directions_(data->size()),
-	values_(data->size()),
-	planes_(data->size())
+	variables_(new double[4 * numFinitePlanes]),
+	directions_(numFinitePlanes),
+	values_(numFinitePlanes),
+	planes_(numFinitePlanes)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -70,6 +74,14 @@ bool IpoptFinitePlanesFitter::get_nlp_info(Index& n, Index& m,
 		Index& nnz_jac_g, Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	DEBUG_START;
+	n = 4 * numFinitePlanes_; /* number of variables */
+	m = 2 * numFinitePlanes_; /* number of constraints */
+	/* Number of non-zero elements in the Jacobian of constraints: */
+	nnz_jac_g = 8 * numFinitePlanes_ * numFinitePlanes_;
+	/* Number of non-zero elements in the Hessian of the Lagrangian: */
+	nnz_h_lag = 8 * numFinitePlanes_ * numFinitePlanes_;
+	/* Use the C style indexing (0-based): */
+	index_style = TNLP::C_STYLE;
 	DEBUG_END;
 	return true;
 }
@@ -80,6 +92,29 @@ bool IpoptFinitePlanesFitter::get_bounds_info(Index n, Number* x_l,
 		Number* x_u, Index m, Number* g_l, Number* g_u)
 {
 	DEBUG_START;
+	ASSERT(n == 4 * numFinitePlanes_);
+	ASSERT(m == 2 * numFinitePlanes_);
+
+	/* All variables are free: */
+	for (Index i = 0; i < n; ++i)
+	{
+		x_l[i] = -TNLP_INFINITY;
+		x_u[i] = +TNLP_INFINITY;
+	}
+
+	/* Bounds for consistency conditions: */
+	for (Index i = 0; i < numFinitePlanes_; ++i)
+	{
+		g_l[i] = 0.;
+		g_u[i] = +TNLP_INFINITY;
+	}
+
+	/* Bounds for normality conditions: */
+	for (Index i = numFinitePlanes_; i < m; ++i)
+	{
+		g_l[i] = 1.;
+		g_u[i] = 1.;
+	}
 	DEBUG_END;
 	return true;
 }
@@ -89,6 +124,25 @@ bool IpoptFinitePlanesFitter::get_starting_point(Index n, bool init_x,
 		bool init_lambda, Number* lambda)
 {
 	DEBUG_START;
+	CGAL::Random_points_on_sphere_3<Point_3, PointCreator> generator(1.0);
+	std::vector<Point_3> points;
+	CGAL::cpp11::copy_n(generator, numFinitePlanes_,
+			std::back_inserter(points));
+	for (int i = 0; i < numFinitePlanes_; ++i)
+	{
+		DEBUG_PRINT("Generated plane #%d: %lf %lf %lf %lf", i,
+				points[i].x(), points[i].y(),
+				points[i].z(), 1.);
+		x[4 * i] = points[i].x();
+		x[4 * i + 1] = points[i].y();
+		x[4 * i + 2] = points[i].z();
+		x[4 * i + 3] = 1.;
+	}
+
+	if (init_z | init_lambda)
+	{
+		ASSERT(0 && "Not implemented yet");
+	}
 	DEBUG_END;
 	return true;
 }
@@ -142,18 +196,10 @@ void IpoptFinitePlanesFitter::finalize_solution(SolverReturn status,
 		const IpoptData* ip_data, IpoptCalculatedQuantities* ip_cq)
 {
 	DEBUG_START;
-	int numVariables = 4 * data_->size();
-	VectorXd result(numVariables);
-
 	switch (status)
 	{
 	case SUCCESS:
 		MAIN_PRINT("SUCCESS");
-		for (int i = 0; i < numVariables; ++i)
-		{
-			result(i) = x[i];
-		}
-		solution_ = result;
 		break;
 	case MAXITER_EXCEEDED:
 		MAIN_PRINT("MAXITER_EXCEEDED");
@@ -249,17 +295,41 @@ bool IpoptFinitePlanesFitter::intermediate_callback(AlgorithmMode mode,
 	return true;
 }
 
+/**
+ * A functor computing the plane containing a triangular facet
+ */
+struct Plane_from_facet
+{
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
+	{
+		Polyhedron_3::Halfedge_handle h = f.halfedge();
+		Polyhedron_3::Plane_3 plane(h->vertex()->point(),
+				h->next()->vertex()->point(),
+				h->opposite()->vertex()->point());
+		Vector_3 normal(plane.a(), plane.b(), plane.c());
+		double length = sqrt(normal.squared_length());
+		length = plane.d() > 0. ? -length : length;
+		Polyhedron_3::Plane_3 planeNormalized(plane.a() / length,
+				plane.b() / length,
+				plane.c() / length,
+				plane.d() / length);
+		return planeNormalized;
+	}
+};
+
 void IpoptFinitePlanesFitter::recalculateParameters(void)
 {
 	DEBUG_START;
-	int numDirections = data_->size();
-	for (int i = 0; i < numDirections; ++i)
+	for (int i = 0; i < numFinitePlanes_; ++i)
 	{
 		Vector3d direction(variables_[4 * i], variables_[4 * i + 1],
 				variables_[4 * i + 2]);
 		double value = variables_[4 * i + 3];
 		/* FIXME: should we check that value >= 0 here? */
 		Plane_3 plane(direction.x, direction.y, direction.z, -value);
+#ifndef NDEBUG
+		std::cerr << "Plane #" << i << ": " << plane << std::endl;
+#endif
 		directions_[i] = direction;
 		values_[i] = value;
 		planes_[i] = plane;
@@ -267,6 +337,8 @@ void IpoptFinitePlanesFitter::recalculateParameters(void)
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes_.begin(), planes_.end(),
 			intersection, Kernel());
+	std::transform(intersection.facets_begin(), intersection.facets_end(),
+			intersection.planes_begin(), Plane_from_facet());
 	recalculateFunctional(intersection);
 
 #if 0
@@ -304,12 +376,16 @@ static void initializeIndices(Polyhedron_3 intersection,
 	for (auto facet = intersection.facets_begin();
 			facet != intersection.facets_end(); ++facet)
 	{
-		Plane_3 plane = facet->plane();
-		double distanceMinimal = distancePlanes(plane, planes[0]);
+		Plane_3 planeFitted = facet->plane();
+#ifndef NDEBUG
+		std::cerr << "Searching nearest plane for " << planeFitted
+			<< std::endl;
+#endif
+		double distanceMinimal = distancePlanes(planeFitted, planes[0]);
 		int iPlaneArgmin = 0, i = 0;
 		for (auto &plane: planes)
 		{
-			double distance = distancePlanes(plane, planes[i]);
+			double distance = distancePlanes(planeFitted, plane);
 			if (distanceMinimal > distance)
 			{
 				distanceMinimal = distance;
@@ -318,6 +394,12 @@ static void initializeIndices(Polyhedron_3 intersection,
 			++i;
 		}
 		facet->id = iPlaneArgmin;
+#ifndef NDEBUG
+		std::cerr << "... Found nearest: " << planes[iPlaneArgmin]
+			<< std::endl;
+		std::cerr << "... with minimal distance = " << distanceMinimal
+			<< std::endl;
+#endif
 		/* FIXME: add check that distanceMinimal is 0 */
 	}
 #ifndef NDEBUG
@@ -341,6 +423,11 @@ void IpoptFinitePlanesFitter::recalculateFunctional(Polyhedron_3 intersection)
 SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 {
 	DEBUG_START;
+	get_starting_point(4 * numFinitePlanes_, true, variables_, false, NULL,
+			NULL, 0, false, NULL);
+	recalculateParameters();
+	
+#if 0
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 
 	/* Intialize the IpoptApplication and process the options */
@@ -367,7 +454,7 @@ SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 	{
 		MAIN_PRINT("** The problem FAILED!");
 	}
-
+#endif
 	DEBUG_END;
 	return data_;
 }
