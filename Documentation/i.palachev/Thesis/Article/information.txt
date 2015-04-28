@@ -1,0 +1,68 @@
+ФИО:
+Палачев Илья Александрович
+
+e-mail:
+palachev.ilya@yandex.ru
+
+Организация:
+Московский государственный университет им. М. В. Ломоносова,
+механико-математический факультет
+
+Адрес:
+119991, ГСП-1, Москва, Ленинские горы, МГУ, д.1, Главное здание,
+механико-математический факультет
+
+Должность:
+аспирант
+
+Название статьи:
+Метод исключения избыточных ограничений в задаче восстановления тела по
+измерениям его опорной функции
+
+Аннотация:
+Производится обзор методов восстановления геометрических тел (двумерных и
+трехмерных) по измерениям опорной функции. Рассматриваются задачи линейного
+и квадратичного программирования, лежащие в основе этих методов. Доказывается
+достаточное условие избыточности ограничений задачи, позволяющее значительно
+уменьшить число ограничений. Рассматривается интерпретация теневых контуров
+как набора измерений опорной функции. Приводятся результаты проверки
+алгоритма на реальных данных, полученных из производственных теневых контуров.
+
+Ключевые слова:
+опорная функция, восстановление геометрических тел,
+линейное программирование, квадратичное программирование, теневой контур,
+преобразование двойственности
+
+=== ENGLISH ===
+
+Name:
+Ilya Palachev
+
+e-mail:
+palachev.ilya@yandex.ru
+
+Organization:
+Lomonosov Moscow State University, Faculty of Mathematics and Mechanics
+
+Address:
+Leninskie Gory, Moscow, 119991, Russia
+
+Position:
+post-graduate student
+
+Title:
+The method of redundant constraints elimination in the problem of body recovery
+based on support function measurements
+
+Annotation:
+2D and 3D body recovery methods based on support function measurements are
+observed. Linear and quadratic programming problems underlying these methods are
+duscussed. The sufficient redundancy condition for problem constraints is
+proved. It allows to reduce the number of constraints considerably. The
+interpretation of shadow contours as a set of support function measurements is
+considered. The test results of the algorithm on real data obtained from
+industrial shadow contours are given.
+
+Keywords:
+support function, geometric bodies recovery, linear programming, quadratic
+programming, shadow contour, duality transformation

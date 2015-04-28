@@ -37,8 +37,8 @@
 \maketitle
 \begin{abstract}
  Производится обзор методов восстановления геометрических тел (двумерных и
- трехмерных) по измерениям опорной функции. Рассматривается задача линейного
- программирования, лежащая в основе одного из этих методов. Доказывается
+ трехмерных) по измерениям опорной функции. Рассматриваются задачи линейного
+ и квадратичного программирования, лежащие в основе этих методов. Доказывается
  достаточное условие избыточности ограничений задачи, позволяющее значительно
  уменьшить число ограничений. Рассматривается интерпретация теневых контуров
  как набора измерений опорной функции. Приводятся результаты проверки
@@ -109,7 +109,7 @@ $(x, u_{i}) = h_{i}$, --- \textit{опорными плоскостями}.
 
 \begin{wrapfigure}{r}{0.5\textwidth}
  \begin{center}
-  \includegraphics[scale=0.25]{images/Incosistency-example.jpg}
+  \includegraphics[scale=0.25]{images/Incosistency-example}
  \end{center}
  \caption{Пример несогласованных опорных чисел}
  \label{image:inconsistent}
@@ -942,7 +942,7 @@ $10, 20 , 30, \ldots, 180, 190, 200$ контуров и подавались в
 данных для алгоритма.
 
 \begin{figure}[hh]
- \includegraphics[width=\textwidth]{images/Problem-preparation-time-graph.jpeg}
+ \includegraphics[width=\textwidth]{images/Problem-preparation-time-graph}
  \caption{Время работы алгоритма нахождения системы неизбыточных условий.}
  \label{Problem-preparation-time-graph}
 \end{figure}
@@ -959,20 +959,20 @@ $10, 20 , 30, \ldots, 180, 190, 200$ контуров и подавались в
 образом, в рассмотренном примере удалось сократить более 80\% ограничений.
 
 \begin{figure}[hh]
- \includegraphics[width=\textwidth]{images/Reduced-constraints-count-graph.jpeg}
+ \includegraphics[width=\textwidth]{images/Reduced-constraints-count-graph}
  \caption{Количество ограничений. \textbf{Жирным цветом} помечен график общего
  числа ограничений, обычным цветом -- график числа неизбыточных ограничений.}
  \label{Reduced-constraints-count-graph}
 \end{figure}
 
 \begin{figure}[hh]
- \includegraphics[width=\textwidth]{images/Reduced-constraints-ratio-graph.jpeg}
+ \includegraphics[width=\textwidth]{images/Reduced-constraints-ratio-graph}
  \caption{Отношение числа неизбыточных ограничений к общему числу ограничений}
  \label{Reduced-constraints-ratio-graph}
 \end{figure}
 
 \begin{figure}[p]
- \includegraphics[width=\textwidth]{images/Problem-solution-time-graphs.jpeg}
+ \includegraphics[width=\textwidth]{images/Problem-solution-time-graphs}
  \captionsetup{singlelinecheck=off}
  \caption{Время решения различных типов задач оптимизации на различных
  решателях:
