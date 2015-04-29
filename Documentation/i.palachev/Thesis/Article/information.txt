@@ -20,13 +20,17 @@ palachev.ilya@yandex.ru
 измерениям его опорной функции
 
 Аннотация:
-Производится обзор методов восстановления геометрических тел (двумерных и
-трехмерных) по измерениям опорной функции. Рассматриваются задачи линейного
-и квадратичного программирования, лежащие в основе этих методов. Доказывается
-достаточное условие избыточности ограничений задачи, позволяющее значительно
-уменьшить число ограничений. Рассматривается интерпретация теневых контуров
-как набора измерений опорной функции. Приводятся результаты проверки
-алгоритма на реальных данных, полученных из производственных теневых контуров.
+Предложен новый алгоритм восстановления тел по измерениям их опорных функций,
+который представляет из себя задачу квадратичного или линейного программирования
+в форме Гарднера-Кидерлена с меньшим числом ограничений. Уменьшение числа
+ограничений достигается за счет нового метода, который позволяет исключить из
+исходной системы ограничений часть ограничений как избыточные. Предложен новый
+подход, позволяющий применять методы восстановления тел по измерениям опорной
+функции к задаче восстановления тел по теневым контурам. Представлено описание
+реализации алгоритма, а также результаты его тестирования на реальных
+промышленных теневых контурах. Предложенный метод в рассмотренном примере
+позволил сократить число ограничений на 80\% и ускорить исходный алгоритм
+Гарднера - Кидердена на порядок.
 
 Ключевые слова:
 опорная функция, восстановление геометрических тел,
@@ -55,13 +59,17 @@ The method of redundant constraints elimination in the problem of body recovery
 based on support function measurements
 
 Annotation:
-2D and 3D body recovery methods based on support function measurements are
-observed. Linear and quadratic programming problems underlying these methods are
-duscussed. The sufficient redundancy condition for problem constraints is
-proved. It allows to reduce the number of constraints considerably. The
-interpretation of shadow contours as a set of support function measurements is
-considered. The test results of the algorithm on real data obtained from
-industrial shadow contours are given.
+A novel body recovery algorithm based on support function measurements is
+proposed. The proposed algorithm represents a linear or quadratic programming
+problem in Gardner - Kiderlen form with smaller number of constraints. The
+reduction of constraints number is based on the new method that allows to
+eliminate part of initial constraints as redundant. A new approach of body
+recovery based on shadow contours is proposed. It allows to reuse body recovery
+methods based on support function measurements. The implementation of the
+algorithm is described and the results of its testing on real industrial
+controus are discussed. The proposed method caused the reduction of constraints
+number on 80% in the discussed example and also allowed to speedup the initial
+Gardner - Kiderlen algorithm up to 10 times.
 
 Keywords:
 support function, geometric bodies recovery, linear programming, quadratic
