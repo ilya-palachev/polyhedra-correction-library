@@ -39,6 +39,9 @@
 #include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "halfspaces_intersection.h"
 
+
+#include <Eigen/LU>
+
 #include <CGAL/point_generators_3.h>
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
@@ -425,37 +428,88 @@ static void initializeIndices(Polyhedron_3 *intersection,
 }
 
 /**
+ * Contains preliminary caluclated slice of gradient.
+ */
+struct GradientSlice
+{
+	/** The ID of the quadruple. */
+	int id_;
+
+	/** The values of the quadruple. */
+	double values_[4];
+};
+
+/**
  * The information about tangient points required during the re-calculating of
  * functional and conditions of the problem.
  */
 struct TangientPointInformation
 {
+	/** The ID of the point. */
+	int iPoint_;
+
 	/** The tangient point. */
-	Vector_3 point;
+	Vector_3 point_;
+
+	/** The ID of the direction. */
+	int iDirection_;
 
 	/** The support direction. */
-	Vector_3 direction;
+	Vector_3 direction_;
 
 	/** The array of planes IDs. */
-	int indices[3];
+	int indices_[3];
 
 	/** The array of planes. */
-	Plane_3 planes[3];
+	Plane_3 planes_[3];
 
-	TangientPointInformation(Vector_3 direction,
+	/** The inverse of the planes normals matrix. */
+	Eigen::Matrix3d inverse_;
+
+	/**
+	 * Calculates the inverse of the planes normals matrix.
+	 *
+	 * @return		The inverse of the planes normals matrix.
+	 */
+	Eigen::Matrix3d calculateInverse(void)
+	{
+		DEBUG_START;
+		Eigen::Matrix3d fromDirections;
+		for (int i = 0; i < 3; ++i)
+		{
+			fromDirections(i, 0) = planes_[i].a();
+			fromDirections(i, 1) = planes_[i].b();
+			fromDirections(i, 2) = planes_[i].c();
+		}
+
+		Eigen::Matrix3d inverse = fromDirections.inverse();
+		DEBUG_END;
+		return inverse;
+	}
+
+	/**
+	 * Creates the information about tangient points.
+	 *
+	 * @param iDirection	The ID of the direction.
+	 * @param direction	The direction.
+	 * @param vertex	The vertex iterator pointing to the vertex.
+	 */
+	TangientPointInformation(int iDirection, Vector_3 direction,
 			Polyhedron_3::Vertex_iterator vertex)
 	{
 		DEBUG_START;
-		point = vertex->point() - CGAL::ORIGIN;
-		direction = direction;
+		iPoint_ = vertex->id;
+		iDirection_ = iDirection;
+		point_ = vertex->point() - CGAL::ORIGIN;
+		direction_ = direction;
 		int iHalfedge = 0;
 		auto halfedge = vertex->vertex_begin();
 		auto halfedgeFirst = halfedge;
 		do
 		{
 			auto facet = halfedge->facet();
-			indices[iHalfedge] = facet->id;
-			planes[iHalfedge] = facet->plane();
+			indices_[iHalfedge] = facet->id;
+			planes_[iHalfedge] = facet->plane();
 			++halfedge;
 			++iHalfedge;
 		} while (halfedge != halfedgeFirst);
@@ -463,6 +517,7 @@ struct TangientPointInformation
 		std::cerr << "... The best is #" << vertex->id << " : "
 			<< *this << std::endl;
 #endif
+		inverse_ = calculateInverse();
 		DEBUG_END;
 	}
 
@@ -479,17 +534,51 @@ struct TangientPointInformation
 	{
 		DEBUG_START;
 		stream << "information:" << std::endl;
-		stream << "   tangient point: " << info.point << std::endl;
-		stream << "   support direction: " << info.direction
-			<< std::endl;
+		stream << "   tangient point is #" << info.iPoint_ << ": "
+			<< info.point_ << std::endl;
+		stream << "   support direction is #" << info.iDirection_
+			<< ": " << info.direction_ << std::endl;
 		stream << "   facets:" << std::endl;
 		for (int i = 0; i < 3; ++i)
 		{
-			stream << "      " << info.indices[i] << ": "
-				<< info.planes[i] << std::endl;
+			stream << "      " << info.indices_[i] << ": "
+				<< info.planes_[i] << std::endl;
 		}
 		DEBUG_END;
 		return stream;
+	}
+
+	/**
+	 * Calculates 4 slices (consecutive qeuadruples of the gradient
+	 * components) of the gradient.
+	 *
+	 * @return 		The pointer to slices array.
+	 */
+	GradientSlice *calculateFirstDerivative(void)
+	{
+		DEBUG_START;
+
+		double products[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			Vector_3 column = Vector_3(inverse_(0, i),
+					inverse_(1, i),
+					inverse_(2, i));
+			products[i] = direction_ * column;
+		}
+
+		GradientSlice *result = new GradientSlice[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			result[i].id_ = indices_[i];
+			result[i].values_[0] = -point_.x() * products[i];
+			result[i].values_[1] = -point_.y() * products[i];
+			result[i].values_[2] = -point_.z() * products[i];
+			result[i].values_[3] = products[i];
+		}
+
+		DEBUG_END;
+		return result;
 	}
 };
 
@@ -526,7 +615,7 @@ static std::vector<TangientPointInformation> searchTangientVertices(
 			++vertex;
 		}
 		ASSERT(vertexBest->is_trivalent());
-		TangientPointInformation info(direction, vertexBest);
+		TangientPointInformation info(i, direction, vertexBest);
 		informations.push_back(info);
 	}
 	DEBUG_END;
