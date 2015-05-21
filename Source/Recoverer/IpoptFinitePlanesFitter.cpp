@@ -433,11 +433,38 @@ struct TangientPointInformation
 	/** The tangient point. */
 	Vector_3 point;
 
+	/** The support direction. */
+	Vector_3 direction;
+
 	/** The array of planes IDs. */
 	int indices[3];
 
 	/** The array of planes. */
 	Plane_3 planes[3];
+
+	TangientPointInformation(Vector_3 direction,
+			Polyhedron_3::Vertex_iterator vertex)
+	{
+		DEBUG_START;
+		point = vertex->point() - CGAL::ORIGIN;
+		direction = direction;
+		int iHalfedge = 0;
+		auto halfedge = vertex->vertex_begin();
+		auto halfedgeFirst = halfedge;
+		do
+		{
+			auto facet = halfedge->facet();
+			indices[iHalfedge] = facet->id;
+			planes[iHalfedge] = facet->plane();
+			++halfedge;
+			++iHalfedge;
+		} while (halfedge != halfedgeFirst);
+#ifndef NDEBUG
+		std::cerr << "... The best is #" << vertex->id << " : "
+			<< *this << std::endl;
+#endif
+		DEBUG_END;
+	}
 
 	/**
 	 * Prints the information to the stream.
@@ -450,14 +477,18 @@ struct TangientPointInformation
 	friend std::ostream &operator <<(std::ostream &stream,
 			TangientPointInformation &info)
 	{
+		DEBUG_START;
 		stream << "information:" << std::endl;
-		stream << "   point: " << info.point << std::endl;
+		stream << "   tangient point: " << info.point << std::endl;
+		stream << "   support direction: " << info.direction
+			<< std::endl;
 		stream << "   facets:" << std::endl;
 		for (int i = 0; i < 3; ++i)
 		{
 			stream << "      " << info.indices[i] << ": "
 				<< info.planes[i] << std::endl;
 		}
+		DEBUG_END;
 		return stream;
 	}
 };
@@ -495,24 +526,8 @@ static std::vector<TangientPointInformation> searchTangientVertices(
 			++vertex;
 		}
 		ASSERT(vertexBest->is_trivalent());
-		TangientPointInformation info;
-		info.point = vertexBest->point() - CGAL::ORIGIN;
-		int iHalfedge = 0;
-		auto halfedge = vertexBest->vertex_begin();
-		auto halfedgeFirst = halfedge;
-		do
-		{
-			auto facet = halfedge->facet();
-			info.indices[iHalfedge] = facet->id;
-			info.planes[iHalfedge] = facet->plane();
-			++halfedge;
-			++iHalfedge;
-		} while (halfedge != halfedgeFirst);
+		TangientPointInformation info(direction, vertexBest);
 		informations.push_back(info);
-#ifndef NDEBUG
-		std::cerr << "... The best is #" << vertexBest->id << " : "
-			<< info << std::endl;
-#endif
 	}
 	DEBUG_END;
 	return informations;
