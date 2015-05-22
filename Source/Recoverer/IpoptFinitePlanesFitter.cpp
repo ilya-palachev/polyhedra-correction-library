@@ -78,11 +78,11 @@ bool IpoptFinitePlanesFitter::get_nlp_info(Index& n, Index& m,
 {
 	DEBUG_START;
 	n = 4 * numFinitePlanes_; /* number of variables */
-	m = 2 * numFinitePlanes_; /* number of constraints */
+	m = numFinitePlanes_; /* number of constraints */
 	/* Number of non-zero elements in the Jacobian of constraints: */
-	nnz_jac_g = 8 * numFinitePlanes_ * numFinitePlanes_;
+	nnz_jac_g = 3 * numFinitePlanes_;
 	/* Number of non-zero elements in the Hessian of the Lagrangian: */
-	nnz_h_lag = 8 * numFinitePlanes_ * numFinitePlanes_;
+	nnz_h_lag = 16 * numFinitePlanes_ * numFinitePlanes_;
 	/* Use the C style indexing (0-based): */
 	index_style = TNLP::C_STYLE;
 	DEBUG_END;
