@@ -440,6 +440,21 @@ struct GradientSlice
 };
 
 /**
+ * Contains preliminary calculated slice of the hessian.
+ */
+struct HessianSlice
+{
+	/** The ID of the block row. */
+	int idRow_;
+
+	/** The Id of the block column. */
+	int idColumn_;
+
+	/** The matrix block. */
+	Eigen::Matrix4d values_;
+};
+
+/**
  * The information about tangient points required during the re-calculating of
  * functional and conditions of the problem.
  */
@@ -549,7 +564,7 @@ struct TangientPointInformation
 	}
 
 	/**
-	 * Calculates 4 slices (consecutive qeuadruples of the gradient
+	 * Calculates 3 slices (consecutive qeuadruples of the gradient
 	 * components) of the gradient.
 	 *
 	 * @return 		The pointer to slices array.
@@ -575,6 +590,81 @@ struct TangientPointInformation
 			result[i].values_[1] = -point_.y() * products[i];
 			result[i].values_[2] = -point_.z() * products[i];
 			result[i].values_[3] = products[i];
+		}
+
+		DEBUG_END;
+		return result;
+	}
+
+	/**
+	 * Calculates 9 slices (4x4 matrix blocks) of the hessian.
+	 *
+	 * @return		The pointer to the slices array.
+	 */
+	HessianSlice *calculateSecondDerivative(void)
+	{
+		DEBUG_START;
+
+		/* FIXME: make this part of code static. */
+		Eigen::Matrix3d **E = new Eigen::Matrix3d*[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			E[i] = new Eigen::Matrix3d[3];
+			for (int j = 0; j < 3; ++j)
+			{
+				for (int k = 0; k < 3; ++k)
+					for (int l = 0; l < 3; ++l)
+						E[i][j](k, l) = 0.;
+				E[i][j](i, j) = 1.;
+			}
+		}
+
+		Eigen::Vector3d *e = new Eigen::Vector3d[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			for (int j = 0; j < 3; ++j)
+			{
+				e[i](j) = 0.;
+			}
+			e[i](i) = 1.;
+		}
+
+		HessianSlice *result = new HessianSlice[9];
+
+		Eigen::Vector3d tangient;
+		tangient(0) = point_.x();
+		tangient(1) = point_.y();
+		tangient(2) = point_.z();
+		Eigen::Matrix3d matrix;
+		for (int s = 0; s < 3; ++s)
+		{
+			for (int t = 0; t < 3; ++t)
+			{
+				auto slice = &result[3 * s + t];
+				slice->idRow_ = s;
+				slice->idColumn_ = t;
+				for (int i = 0; i < 3; ++i)
+				{
+					for (int j = 0; j < 3; ++j)
+					{
+						matrix = E[s][i] * inverse_
+							* E[t][j] + E[t][j]
+							* inverse_ * E[s][i];
+						matrix = inverse_ * matrix;
+						auto v = matrix * tangient;
+						double value = -direction_
+							* Vector_3(v(0), v(1),
+									v(2));
+						slice->values_(i, j) = value;
+					}
+					matrix = inverse_ * E[s][i] * inverse_;
+					auto v = matrix * e[t];
+					double value = direction_
+						* Vector_3(v(0), v(1), v(2));
+					slice->values_(i, 3) = value;
+				}
+				slice->values_(3, 3) = 0.;
+			}
 		}
 
 		DEBUG_END;
