@@ -36,6 +36,7 @@ using namespace Ipopt;
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
 #include "SparseMatrixEigen.h"
+#include "Recoverer/TangientPointInformation.h"
 
 /**
  * Iptopt-based non-linear optimizer used for finite planes fitting algorithm.

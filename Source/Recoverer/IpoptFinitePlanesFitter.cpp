@@ -40,7 +40,6 @@
 #include "halfspaces_intersection.h"
 
 
-#include <Eigen/LU>
 
 #include <CGAL/point_generators_3.h>
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
@@ -96,7 +95,7 @@ bool IpoptFinitePlanesFitter::get_bounds_info(Index n, Number* x_l,
 {
 	DEBUG_START;
 	ASSERT(n == 4 * numFinitePlanes_);
-	ASSERT(m == 2 * numFinitePlanes_);
+	ASSERT(m == numFinitePlanes_);
 
 	/* All variables are free: */
 	for (Index i = 0; i < n; ++i)
@@ -105,19 +104,12 @@ bool IpoptFinitePlanesFitter::get_bounds_info(Index n, Number* x_l,
 		x_u[i] = +TNLP_INFINITY;
 	}
 
-	/* Bounds for consistency conditions: */
-	for (Index i = 0; i < numFinitePlanes_; ++i)
-	{
-		g_l[i] = 0.;
-		g_u[i] = +TNLP_INFINITY;
-	}
-
-	/* Bounds for normality conditions: */
-	for (Index i = numFinitePlanes_; i < m; ++i)
+	for (Index i = 0; i < m; ++i)
 	{
 		g_l[i] = 1.;
 		g_u[i] = 1.;
 	}
+
 	DEBUG_END;
 	return true;
 }
@@ -426,251 +418,6 @@ static void initializeIndices(Polyhedron_3 *intersection,
 	}
 	DEBUG_END;
 }
-
-/**
- * Contains preliminary caluclated slice of gradient.
- */
-struct GradientSlice
-{
-	/** The ID of the quadruple. */
-	int id_;
-
-	/** The values of the quadruple. */
-	double values_[4];
-};
-
-/**
- * Contains preliminary calculated slice of the hessian.
- */
-struct HessianSlice
-{
-	/** The ID of the block row. */
-	int idRow_;
-
-	/** The Id of the block column. */
-	int idColumn_;
-
-	/** The matrix block. */
-	Eigen::Matrix4d values_;
-};
-
-/**
- * The information about tangient points required during the re-calculating of
- * functional and conditions of the problem.
- */
-struct TangientPointInformation
-{
-	/** The ID of the point. */
-	int iPoint_;
-
-	/** The tangient point. */
-	Vector_3 point_;
-
-	/** The ID of the direction. */
-	int iDirection_;
-
-	/** The support direction. */
-	Vector_3 direction_;
-
-	/** The array of planes IDs. */
-	int indices_[3];
-
-	/** The array of planes. */
-	Plane_3 planes_[3];
-
-	/** The inverse of the planes normals matrix. */
-	Eigen::Matrix3d inverse_;
-
-	/**
-	 * Calculates the inverse of the planes normals matrix.
-	 *
-	 * @return		The inverse of the planes normals matrix.
-	 */
-	Eigen::Matrix3d calculateInverse(void)
-	{
-		DEBUG_START;
-		Eigen::Matrix3d fromDirections;
-		for (int i = 0; i < 3; ++i)
-		{
-			fromDirections(i, 0) = planes_[i].a();
-			fromDirections(i, 1) = planes_[i].b();
-			fromDirections(i, 2) = planes_[i].c();
-		}
-
-		Eigen::Matrix3d inverse = fromDirections.inverse();
-		DEBUG_END;
-		return inverse;
-	}
-
-	/**
-	 * Creates the information about tangient points.
-	 *
-	 * @param iDirection	The ID of the direction.
-	 * @param direction	The direction.
-	 * @param vertex	The vertex iterator pointing to the vertex.
-	 */
-	TangientPointInformation(int iDirection, Vector_3 direction,
-			Polyhedron_3::Vertex_iterator vertex)
-	{
-		DEBUG_START;
-		iPoint_ = vertex->id;
-		iDirection_ = iDirection;
-		point_ = vertex->point() - CGAL::ORIGIN;
-		direction_ = direction;
-		int iHalfedge = 0;
-		auto halfedge = vertex->vertex_begin();
-		auto halfedgeFirst = halfedge;
-		do
-		{
-			auto facet = halfedge->facet();
-			indices_[iHalfedge] = facet->id;
-			planes_[iHalfedge] = facet->plane();
-			++halfedge;
-			++iHalfedge;
-		} while (halfedge != halfedgeFirst);
-#ifndef NDEBUG
-		std::cerr << "... The best is #" << vertex->id << " : "
-			<< *this << std::endl;
-#endif
-		inverse_ = calculateInverse();
-		DEBUG_END;
-	}
-
-	/**
-	 * Prints the information to the stream.
-	 *
-	 * @param stream	The stream.
-	 * @param info		The information.
-	 *
-	 * @return		The srteam ready for further printing.
-	 */
-	friend std::ostream &operator <<(std::ostream &stream,
-			TangientPointInformation &info)
-	{
-		DEBUG_START;
-		stream << "information:" << std::endl;
-		stream << "   tangient point is #" << info.iPoint_ << ": "
-			<< info.point_ << std::endl;
-		stream << "   support direction is #" << info.iDirection_
-			<< ": " << info.direction_ << std::endl;
-		stream << "   facets:" << std::endl;
-		for (int i = 0; i < 3; ++i)
-		{
-			stream << "      " << info.indices_[i] << ": "
-				<< info.planes_[i] << std::endl;
-		}
-		DEBUG_END;
-		return stream;
-	}
-
-	/**
-	 * Calculates 3 slices (consecutive qeuadruples of the gradient
-	 * components) of the gradient.
-	 *
-	 * @return 		The pointer to slices array.
-	 */
-	GradientSlice *calculateFirstDerivative(void)
-	{
-		DEBUG_START;
-
-		double products[3];
-		for (int i = 0; i < 3; ++i)
-		{
-			Vector_3 column = Vector_3(inverse_(0, i),
-					inverse_(1, i),
-					inverse_(2, i));
-			products[i] = direction_ * column;
-		}
-
-		GradientSlice *result = new GradientSlice[3];
-		for (int i = 0; i < 3; ++i)
-		{
-			result[i].id_ = indices_[i];
-			result[i].values_[0] = -point_.x() * products[i];
-			result[i].values_[1] = -point_.y() * products[i];
-			result[i].values_[2] = -point_.z() * products[i];
-			result[i].values_[3] = products[i];
-		}
-
-		DEBUG_END;
-		return result;
-	}
-
-	/**
-	 * Calculates 9 slices (4x4 matrix blocks) of the hessian.
-	 *
-	 * @return		The pointer to the slices array.
-	 */
-	HessianSlice *calculateSecondDerivative(void)
-	{
-		DEBUG_START;
-
-		/* FIXME: make this part of code static. */
-		Eigen::Matrix3d **E = new Eigen::Matrix3d*[3];
-		for (int i = 0; i < 3; ++i)
-		{
-			E[i] = new Eigen::Matrix3d[3];
-			for (int j = 0; j < 3; ++j)
-			{
-				for (int k = 0; k < 3; ++k)
-					for (int l = 0; l < 3; ++l)
-						E[i][j](k, l) = 0.;
-				E[i][j](i, j) = 1.;
-			}
-		}
-
-		Eigen::Vector3d *e = new Eigen::Vector3d[3];
-		for (int i = 0; i < 3; ++i)
-		{
-			for (int j = 0; j < 3; ++j)
-			{
-				e[i](j) = 0.;
-			}
-			e[i](i) = 1.;
-		}
-
-		HessianSlice *result = new HessianSlice[9];
-
-		Eigen::Vector3d tangient;
-		tangient(0) = point_.x();
-		tangient(1) = point_.y();
-		tangient(2) = point_.z();
-		Eigen::Matrix3d matrix;
-		for (int s = 0; s < 3; ++s)
-		{
-			for (int t = 0; t < 3; ++t)
-			{
-				auto slice = &result[3 * s + t];
-				slice->idRow_ = s;
-				slice->idColumn_ = t;
-				for (int i = 0; i < 3; ++i)
-				{
-					for (int j = 0; j < 3; ++j)
-					{
-						matrix = E[s][i] * inverse_
-							* E[t][j] + E[t][j]
-							* inverse_ * E[s][i];
-						matrix = inverse_ * matrix;
-						auto v = matrix * tangient;
-						double value = -direction_
-							* Vector_3(v(0), v(1),
-									v(2));
-						slice->values_(i, j) = value;
-					}
-					matrix = inverse_ * E[s][i] * inverse_;
-					auto v = matrix * e[t];
-					double value = direction_
-						* Vector_3(v(0), v(1), v(2));
-					slice->values_(i, 3) = value;
-				}
-				slice->values_(3, 3) = 0.;
-			}
-		}
-
-		DEBUG_END;
-		return result;
-	}
-};
 
 
 static std::vector<TangientPointInformation> searchTangientVertices(

@@ -122,6 +122,7 @@ set (SOURCE_pcl
 	Source/Recoverer/NativeSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
+	Source/Recoverer/TangientPointInformation.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp
 	Source/SparseMatrixEigen.cpp
 	Source/TimeMeasurer/TimeMeasurer.cpp
