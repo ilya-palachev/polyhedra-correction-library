@@ -66,6 +66,9 @@ private:
 	/** The vector of planes. */
 	std::vector<Plane_3> planes_;
 
+	/** The vector of tangient points informations. */
+	std::vector<TangientPointInformation> tangients_;
+
 	/** The solution returned by Ipopt. */
 	VectorXd solution_;
 public:

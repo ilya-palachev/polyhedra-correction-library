@@ -39,8 +39,6 @@
 #include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "halfspaces_intersection.h"
 
-
-
 #include <CGAL/point_generators_3.h>
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
@@ -52,7 +50,8 @@ IpoptFinitePlanesFitter::IpoptFinitePlanesFitter(
 	variables_(new double[4 * numFinitePlanes]),
 	directions_(numFinitePlanes),
 	values_(numFinitePlanes),
-	planes_(numFinitePlanes)
+	planes_(numFinitePlanes),
+	tangients_(data->size())
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -146,6 +145,16 @@ bool IpoptFinitePlanesFitter::eval_f(Index n, const Number* x, bool new_x,
 		Number& obj_value)
 {
 	DEBUG_START;
+
+	auto values = data_->supportValues;
+	int numValues = data_->size();
+
+	obj_value = 0.;
+	for (int i = 0; i < numValues; ++i)
+	{
+		delta = values[i] - tangients_[i].supportValue_;
+		obj_value += delta * delta;
+	}
 	DEBUG_END;
 	return true;
 }
@@ -154,6 +163,28 @@ bool IpoptFinitePlanesFitter::eval_grad_f(Index n, const Number* x,
 		bool new_x, Number* grad_f)
 {
 	DEBUG_START;
+	for (int i = 0; i < n; ++i)
+	{
+		grad_f[i] = 0.;
+	}
+
+	auto values = data_->supportValues;
+	int numValues = data_->size();
+
+	for (int i = 0; i < numValues; ++i)
+	{
+		delta = values[i] - tangients_[i].supportValue_;
+		auto slices = tangients_[i].calculateFirstDerivative();
+		for (int iSlice = 0; iSlice < 3; ++iSlice)
+		{
+			int id = slices[iSlice].id_;
+			for (int iValue; iValue < 4; ++iValue)
+			{
+				grad_f[4 * iSlice + iValue] += delta
+					* slices[iSlice].values_[iValue];
+			}
+		}
+	}
 	DEBUG_END;
 	return true;
 }
@@ -162,6 +193,11 @@ bool IpoptFinitePlanesFitter::eval_g(Index n, const Number* x, bool new_x,
 		Index m, Number* g)
 {
 	DEBUG_START;
+	for (int i = 0; i < m; ++i)
+	{
+		g[i] = x[4 * m] * x[4 * m] + x[4 * m + 1] * x[4 * m + 1]
+			+ x[4 * m + 2] * x[4 * m + 2];
+	}
 	DEBUG_END;
 	return true;
 }
@@ -171,6 +207,17 @@ bool IpoptFinitePlanesFitter::eval_jac_g(Index n, const Number* x,
 		Number* values)
 {
 	DEBUG_START;
+	int iNonzero = 0;
+	for (int iPlane = 0; iPlane < numFinitePlanes_; ++iPlane)
+	{
+		for (int iValue = 0; iValue < 3; ++iValue)
+		{
+			iRow[iNonzero] = iPlane;
+			jCol[iNonzero] = 4 * iPlane + iValue;
+			values[iNonzero] = 2. * x[4 * iPlane + iValue];
+			++iNonzero;
+		}
+	}
 	DEBUG_END;
 	return true;
 }
@@ -464,7 +511,7 @@ void IpoptFinitePlanesFitter::recalculateFunctional(Polyhedron_3 *intersection)
 {
 	DEBUG_START;
 	initializeIndices(intersection, planes_);
-	searchTangientVertices(intersection, data_);
+	tangients_ = searchTangientVertices(intersection, data_);
 	
 	DEBUG_END;
 }
@@ -472,11 +519,12 @@ void IpoptFinitePlanesFitter::recalculateFunctional(Polyhedron_3 *intersection)
 SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 {
 	DEBUG_START;
+#if 0
 	get_starting_point(4 * numFinitePlanes_, true, variables_, false, NULL,
 			NULL, 0, false, NULL);
 	recalculateParameters();
+#endif
 	
-#if 0
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 
 	/* Intialize the IpoptApplication and process the options */
@@ -503,7 +551,6 @@ SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 	{
 		MAIN_PRINT("** The problem FAILED!");
 	}
-#endif
 	DEBUG_END;
 	return data_;
 }
