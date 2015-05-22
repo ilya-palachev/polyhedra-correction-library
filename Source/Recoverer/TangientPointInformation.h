@@ -82,6 +82,9 @@ struct TangientPointInformation
 	/** The array of planes. */
 	Plane_3 planes_[3];
 
+	/** The support value. */
+	double supportValue;
+
 	/** The inverse of the planes normals matrix. */
 	Eigen::Matrix3d inverse_;
 
@@ -91,6 +94,16 @@ struct TangientPointInformation
 	 * @return		The inverse of the planes normals matrix.
 	 */
 	Eigen::Matrix3d calculateInverse(void);
+
+	/**
+	 * Creates an empty information structure.
+	 */
+	TangientPointInformation();
+
+	/**
+	 * Destroys the information structure.
+	 */
+	~TangientPointInformation();
 
 	/**
 	 * Creates the information about tangient points.

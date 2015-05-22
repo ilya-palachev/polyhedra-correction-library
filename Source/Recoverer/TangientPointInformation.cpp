@@ -20,6 +20,28 @@
 
 #include "Recoverer/TangientPointInformation.h"
 
+#define NOT_INITIALIZED
+
+TangientPointInformation::TangientPointInformation():
+	iPoint_(NOT_INITIALIZED),
+	point_(),
+	iDirection_(NOT_INITIALIZED),
+	direction_(),
+	indices_(),
+	planes_(),
+	supportValue(0.),
+	inverse_()
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
+TangientPointInformation::~TangientPointInformation()
+{
+	DEBUG_START;
+	DEBUG_END;
+}
+
 Eigen::Matrix3d TangientPointInformation::calculateInverse(void)
 {
 	DEBUG_START;
@@ -60,6 +82,7 @@ TangientPointInformation::TangientPointInformation(int iDirection,
 	std::cerr << "... The best is #" << vertex->id << " : "
 		<< *this << std::endl;
 #endif
+	supportValue = direction * vertex->point();
 	inverse_ = calculateInverse();
 	DEBUG_END;
 }
