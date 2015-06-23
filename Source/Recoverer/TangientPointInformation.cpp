@@ -29,7 +29,7 @@ TangientPointInformation::TangientPointInformation():
 	direction_(),
 	indices_(),
 	planes_(),
-	supportValue(0.),
+	supportValue_(0.),
 	inverse_()
 {
 	DEBUG_START;
@@ -82,7 +82,7 @@ TangientPointInformation::TangientPointInformation(int iDirection,
 	std::cerr << "... The best is #" << vertex->id << " : "
 		<< *this << std::endl;
 #endif
-	supportValue = direction * vertex->point();
+	supportValue_ = direction * vertex->point();
 	inverse_ = calculateInverse();
 	DEBUG_END;
 }

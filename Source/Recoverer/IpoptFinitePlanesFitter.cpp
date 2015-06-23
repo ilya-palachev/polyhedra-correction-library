@@ -31,7 +31,7 @@
 #include "IpTNLPAdapter.hpp"
 #include "IpOrigIpoptNLP.hpp"
 
-#undef NDEBUG
+//#undef NDEBUG
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -146,13 +146,15 @@ bool IpoptFinitePlanesFitter::eval_f(Index n, const Number* x, bool new_x,
 {
 	DEBUG_START;
 
-	auto values = data_->supportValues;
+	recalculateParametersIfChanged(x);
+
+	auto values = data_->supportValues();
 	int numValues = data_->size();
 
 	obj_value = 0.;
 	for (int i = 0; i < numValues; ++i)
 	{
-		delta = values[i] - tangients_[i].supportValue_;
+		double delta = values[i] - tangients_[i].supportValue_;
 		obj_value += delta * delta;
 	}
 	DEBUG_END;
@@ -163,24 +165,27 @@ bool IpoptFinitePlanesFitter::eval_grad_f(Index n, const Number* x,
 		bool new_x, Number* grad_f)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	for (int i = 0; i < n; ++i)
 	{
 		grad_f[i] = 0.;
 	}
 
-	auto values = data_->supportValues;
+	auto values = data_->supportValues();
 	int numValues = data_->size();
 
 	for (int i = 0; i < numValues; ++i)
 	{
-		delta = values[i] - tangients_[i].supportValue_;
+		double delta = values[i] - tangients_[i].supportValue_;
 		auto slices = tangients_[i].calculateFirstDerivative();
 		for (int iSlice = 0; iSlice < 3; ++iSlice)
 		{
 			int id = slices[iSlice].id_;
 			for (int iValue; iValue < 4; ++iValue)
 			{
-				grad_f[4 * iSlice + iValue] += delta
+				grad_f[4 * id + iValue] += delta
 					* slices[iSlice].values_[iValue];
 			}
 		}
@@ -193,6 +198,9 @@ bool IpoptFinitePlanesFitter::eval_g(Index n, const Number* x, bool new_x,
 		Index m, Number* g)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	for (int i = 0; i < m; ++i)
 	{
 		g[i] = x[4 * m] * x[4 * m] + x[4 * m + 1] * x[4 * m + 1]
@@ -207,15 +215,32 @@ bool IpoptFinitePlanesFitter::eval_jac_g(Index n, const Number* x,
 		Number* values)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	int iNonzero = 0;
-	for (int iPlane = 0; iPlane < numFinitePlanes_; ++iPlane)
+	if (!values)
 	{
-		for (int iValue = 0; iValue < 3; ++iValue)
+		for (int iPlane = 0; iPlane < numFinitePlanes_; ++iPlane)
 		{
-			iRow[iNonzero] = iPlane;
-			jCol[iNonzero] = 4 * iPlane + iValue;
-			values[iNonzero] = 2. * x[4 * iPlane + iValue];
-			++iNonzero;
+			for (int iValue = 0; iValue < 3; ++iValue)
+			{
+				iRow[iNonzero] = iPlane;
+				jCol[iNonzero] = 4 * iPlane + iValue;
+				++iNonzero;
+			}
+		}
+
+	}
+	else
+	{
+		for (int iPlane = 0; iPlane < numFinitePlanes_; ++iPlane)
+		{
+			for (int iValue = 0; iValue < 3; ++iValue)
+			{
+				values[iNonzero] = 2. * x[4 * iPlane + iValue];
+				++iNonzero;
+			}
 		}
 	}
 	DEBUG_END;
@@ -228,6 +253,67 @@ bool IpoptFinitePlanesFitter::eval_h(Index n, const Number* x, bool new_x,
 		Number* values)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
+	int iNonzero = 0;
+	if (!values)
+	{
+		for (int i = 0; i < 4 * numFinitePlanes_; ++i)
+		{
+			for (int j = 0; j < 4 * numFinitePlanes_; ++j)
+			{
+				iRow[iNonzero] = i;
+				jCol[iNonzero] = j;
+				++iNonzero;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 4 * numFinitePlanes_; ++i)
+		{
+			for (int j = 0; j < 4 * numFinitePlanes_; ++j)
+			{
+				values[iNonzero] = 0.;
+				++iNonzero;
+			}
+		}
+		for (int i = 0; i < numFinitePlanes_; ++i)
+		{
+			for (int j = 0; j < 3; ++j)
+			{
+				values[4 * numFinitePlanes_ * (i + j) + j]
+					+= lambda[i] * 2.;
+			}
+		}
+		int numValues = data_->size();
+
+		for (int iValue = 0; iValue < numValues; ++iValue)
+		{
+			auto slices = tangients_[
+				iValue].calculateSecondDerivative();
+			for (int iSlice = 0; iSlice < 9; ++iSlice)
+			{
+				int idRow = slices[iSlice].idRow_;
+				int idColumn = slices[iSlice].idColumn_;
+				auto matrix = slices[iSlice].values_;
+				for (int i = 0; i < 4; ++i)
+				{
+					for (int j = 0; j < 4; ++j)
+					{
+						values[(4 * idRow  + i)
+							* numFinitePlanes_
+							* + 4 * idColumn + j]
+							+= obj_factor
+							* matrix(i, j);
+					}
+				}
+			}
+
+		}
+		
+	}
 	DEBUG_END;
 	return true;
 }
@@ -320,21 +406,50 @@ bool IpoptFinitePlanesFitter::intermediate_callback(AlgorithmMode mode,
 	orignlp = dynamic_cast<OrigIpoptNLP*>(GetRawPtr(ip_cq->GetIpoptNLP()));
 	if (!orignlp)
 	{
-		ERROR_PRINT("dynamic_cast failed!");
+		DEBUG_PRINT("dynamic_cast failed!");
 		DEBUG_END;
 		return true;
 	}
 	tnlp_adapter = dynamic_cast<TNLPAdapter*>(GetRawPtr(orignlp->nlp()));
 	if (orignlp)
 	{
-		ERROR_PRINT("dynamic_cast failed!");
+		DEBUG_PRINT("dynamic_cast failed!");
 		DEBUG_END;
 		return true;
 	}
 	tnlp_adapter->ResortX(*ip_data->curr()->x(), variables_);
 	recalculateParameters();
+	std::cout << "callback has been called!" << std::endl;
 	DEBUG_END;
 	return true;
+}
+
+void IpoptFinitePlanesFitter::recalculateParametersIfChanged(const Number* x)
+{
+	DEBUG_START;
+
+	if (!x)
+		return;
+
+	bool ifChanged = false;
+	for (int i = 0; i < 4 * numFinitePlanes_; ++i)
+	{
+		if (!equal(x[i], variables_[i]))
+		{
+			ifChanged = true;
+			break;
+		}
+	}
+	if (ifChanged)
+	{
+		for (int i = 0; i < 4 * numFinitePlanes_; ++i)
+		{
+			variables_[i] = x[i];
+		}
+		recalculateParameters();
+	}
+
+	DEBUG_END;
 }
 
 /**
@@ -537,7 +652,7 @@ SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 	}
 
 	//app->Options()->SetNumericValue("tol", 1e-3);
-	//app->Options()->SetNumericValue("acceptable_tol", 1e-3);
+	app->Options()->SetNumericValue("tol", 1e-3);
 	//app->Options()->SetIntegerValue("max_iter", 3000000);
 	app->Options()->SetStringValue("linear_solver", "ma57");
 

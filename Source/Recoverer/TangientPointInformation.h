@@ -83,7 +83,7 @@ struct TangientPointInformation
 	Plane_3 planes_[3];
 
 	/** The support value. */
-	double supportValue;
+	double supportValue_;
 
 	/** The inverse of the planes normals matrix. */
 	Eigen::Matrix3d inverse_;
