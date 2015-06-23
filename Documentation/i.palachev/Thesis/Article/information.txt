@@ -1,0 +1,76 @@
+ФИО:
+Палачев Илья Александрович
+
+e-mail:
+palachev.ilya@yandex.ru
+
+Организация:
+Московский государственный университет им. М. В. Ломоносова,
+механико-математический факультет
+
+Адрес:
+119991, ГСП-1, Москва, Ленинские горы, МГУ, д.1, Главное здание,
+механико-математический факультет
+
+Должность:
+аспирант
+
+Название статьи:
+Метод исключения избыточных ограничений в задаче восстановления тела по
+измерениям его опорной функции
+
+Аннотация:
+Предложен новый алгоритм восстановления тел по измерениям их опорных функций,
+который представляет из себя задачу квадратичного или линейного программирования
+в форме Гарднера-Кидерлена с меньшим числом ограничений. Уменьшение числа
+ограничений достигается за счет нового метода, который позволяет исключить из
+исходной системы ограничений часть ограничений как избыточные. Предложен новый
+подход, позволяющий применять методы восстановления тел по измерениям опорной
+функции к задаче восстановления тел по теневым контурам. Представлено описание
+реализации алгоритма, а также результаты его тестирования на реальных
+промышленных теневых контурах. Предложенный метод в рассмотренном примере
+позволил сократить число ограничений на 80\% и ускорить исходный алгоритм
+Гарднера - Кидердена на порядок.
+
+Ключевые слова:
+опорная функция, восстановление геометрических тел,
+линейное программирование, квадратичное программирование, теневой контур,
+преобразование двойственности
+
+=== ENGLISH ===
+
+Name:
+Ilya Palachev
+
+e-mail:
+palachev.ilya@yandex.ru
+
+Organization:
+Lomonosov Moscow State University, Faculty of Mathematics and Mechanics
+
+Address:
+Leninskie Gory, Moscow, 119991, Russia
+
+Position:
+post-graduate student
+
+Title:
+The method of redundant constraints elimination in the problem of body recovery
+based on support function measurements
+
+Annotation:
+A novel body recovery algorithm based on support function measurements is
+proposed. The proposed algorithm represents a linear or quadratic programming
+problem in Gardner - Kiderlen form with smaller number of constraints. The
+reduction of constraints number is based on the new method that allows to
+eliminate part of initial constraints as redundant. A new approach of body
+recovery based on shadow contours is proposed. It allows to reuse body recovery
+methods based on support function measurements. The implementation of the
+algorithm is described and the results of its testing on real industrial
+controus are discussed. The proposed method caused the reduction of constraints
+number on 80% in the discussed example and also allowed to speedup the initial
+Gardner - Kiderlen algorithm up to 10 times.
+
+Keywords:
+support function, geometric bodies recovery, linear programming, quadratic
+programming, shadow contour, duality transformation
