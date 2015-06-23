@@ -146,6 +146,8 @@ bool IpoptFinitePlanesFitter::eval_f(Index n, const Number* x, bool new_x,
 {
 	DEBUG_START;
 
+	recalculateParametersIfChanged(x);
+
 	auto values = data_->supportValues();
 	int numValues = data_->size();
 
@@ -163,6 +165,9 @@ bool IpoptFinitePlanesFitter::eval_grad_f(Index n, const Number* x,
 		bool new_x, Number* grad_f)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	for (int i = 0; i < n; ++i)
 	{
 		grad_f[i] = 0.;
@@ -193,6 +198,9 @@ bool IpoptFinitePlanesFitter::eval_g(Index n, const Number* x, bool new_x,
 		Index m, Number* g)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	for (int i = 0; i < m; ++i)
 	{
 		g[i] = x[4 * m] * x[4 * m] + x[4 * m + 1] * x[4 * m + 1]
@@ -207,6 +215,9 @@ bool IpoptFinitePlanesFitter::eval_jac_g(Index n, const Number* x,
 		Number* values)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	int iNonzero = 0;
 	if (!values)
 	{
@@ -242,6 +253,9 @@ bool IpoptFinitePlanesFitter::eval_h(Index n, const Number* x, bool new_x,
 		Number* values)
 {
 	DEBUG_START;
+
+	recalculateParametersIfChanged(x);
+
 	int iNonzero = 0;
 	if (!values)
 	{
@@ -392,21 +406,50 @@ bool IpoptFinitePlanesFitter::intermediate_callback(AlgorithmMode mode,
 	orignlp = dynamic_cast<OrigIpoptNLP*>(GetRawPtr(ip_cq->GetIpoptNLP()));
 	if (!orignlp)
 	{
-		ERROR_PRINT("dynamic_cast failed!");
+		DEBUG_PRINT("dynamic_cast failed!");
 		DEBUG_END;
 		return true;
 	}
 	tnlp_adapter = dynamic_cast<TNLPAdapter*>(GetRawPtr(orignlp->nlp()));
 	if (orignlp)
 	{
-		ERROR_PRINT("dynamic_cast failed!");
+		DEBUG_PRINT("dynamic_cast failed!");
 		DEBUG_END;
 		return true;
 	}
 	tnlp_adapter->ResortX(*ip_data->curr()->x(), variables_);
 	recalculateParameters();
+	std::cout << "callback has been called!" << std::endl;
 	DEBUG_END;
 	return true;
+}
+
+void IpoptFinitePlanesFitter::recalculateParametersIfChanged(const Number* x)
+{
+	DEBUG_START;
+
+	if (!x)
+		return;
+
+	bool ifChanged = false;
+	for (int i = 0; i < 4 * numFinitePlanes_; ++i)
+	{
+		if (!equal(x[i], variables_[i]))
+		{
+			ifChanged = true;
+			break;
+		}
+	}
+	if (ifChanged)
+	{
+		for (int i = 0; i < 4 * numFinitePlanes_; ++i)
+		{
+			variables_[i] = x[i];
+		}
+		recalculateParameters();
+	}
+
+	DEBUG_END;
 }
 
 /**
@@ -609,7 +652,7 @@ SupportFunctionDataPtr IpoptFinitePlanesFitter::run(void)
 	}
 
 	//app->Options()->SetNumericValue("tol", 1e-3);
-	//app->Options()->SetNumericValue("acceptable_tol", 1e-3);
+	app->Options()->SetNumericValue("tol", 1e-3);
 	//app->Options()->SetIntegerValue("max_iter", 3000000);
 	app->Options()->SetStringValue("linear_solver", "ma57");
 

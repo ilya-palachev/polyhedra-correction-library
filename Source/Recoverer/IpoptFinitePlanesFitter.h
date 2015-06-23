@@ -325,6 +325,16 @@ public:
                                    Index ls_trials,
                                    const IpoptData* ip_data,
                                    IpoptCalculatedQuantities* ip_cq);
+
+	/**
+	 * Recalculates parameters of the problem if the array of variables
+	 * has been changed.
+	 *
+	 * @param x	The array of variables.
+	 */
+	void recalculateParametersIfChanged(const Number* x);
+
+
 	/**
 	 * Recalculates parameters of the problem.
 	 */
