@@ -56,6 +56,9 @@
 /** Option "-f" takes the argument with file name. */
 #define OPTION_FILE_NAME 'f'
 
+/** Option "-F" controls the finite number of planes to be fitted. */
+#define OPTION_FINITE_PLANES 'F'
+
 /**
  * Options "-i" sets the body used as starting point of the estimation process.
  */
@@ -128,7 +131,8 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abd:e:f:i:l:m:M:n:N:o:p:r:st:vx"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
+	"a:Abd:e:f:F:i:l:m:M:n:N:o:p:r:st:vx"
 
 struct PCLOption: public option
 {
@@ -339,6 +343,16 @@ static PCLOption optionsLong[] =
 		},
 		"Epsilon factor for reduced Gardner-Kiderlen matrix"
 	},
+	{
+		option
+		{
+			"finite-planes",
+			required_argument,
+			0,
+			OPTION_FINITE_PLANES
+		},
+		"The finite number of planes to be fitted."
+	},
 	{option{0, 0, 0, 0}, 0}
 };
 
@@ -448,6 +462,9 @@ typedef struct
 
 	/** The problem type. */
 	EstimationProblemNorm problemType;
+
+	/** The finite number of planes to be fitted. */
+	int numFinitePlanes;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -843,6 +860,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
 	options->epsilonFactor = -1;
+	options->numFinitePlanes = 0;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -946,7 +964,8 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			/* Parse digital number from input argument. */
-			options->numMaxContours = strtol(optarg, &charMistaken, 10);
+			options->numMaxContours = strtol(optarg, &charMistaken,
+					10);
 			/*
 			 *  If user gives invalid character, the charMistaken is
 			 *  set to it
@@ -1221,6 +1240,28 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			ifOptionEpsilonFactor = true;
+			break;
+		case OPTION_FINITE_PLANES:
+			options->numFinitePlanes = strtol(optarg,
+					&charMistaken, 10);
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			}
+
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv);
+			}
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1693,6 +1734,9 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 		GardnerKiderlenSupportMatrix::epsilonFactor =
 			options->epsilonFactor;
 	}
+
+	/* Set the finite number of planes to be fitted. */
+	recoverer->setNumFinitePlanes(options->numFinitePlanes);
 
 	DEBUG_END;
 	return recoverer;

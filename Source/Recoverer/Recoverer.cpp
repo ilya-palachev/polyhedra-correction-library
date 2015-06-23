@@ -36,6 +36,7 @@
 #include "Recoverer/CPLEXSupportFunctionEstimator.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
+#include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "halfspaces_intersection.h"
 
 TimeMeasurer timer;
@@ -46,7 +47,8 @@ Recoverer::Recoverer() :
 	ifConvexifyContours(false),
 	ifScaleMatrix(false),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
-	numMaxContours(IF_ANALYZE_ALL_CONTOURS)
+	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
+	numFinitePlanes_(0)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -111,6 +113,13 @@ void Recoverer::setProblemType(EstimationProblemNorm type)
 {
 	DEBUG_START;
 	problemType_ = type;
+	DEBUG_END;
+}
+
+void Recoverer::setNumFinitePlanes(int numFinitePlanes)
+{
+	DEBUG_START;
+	numFinitePlanes_ = numFinitePlanes;
 	DEBUG_END;
 }
 
@@ -353,6 +362,15 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 	DEBUG_START;
 	std::cout << "Number of support function items: " << data->size()
 		<< std::endl;
+
+	if (numFinitePlanes_ > 0)
+	{
+		IpoptFinitePlanesFitter fitter(data, numFinitePlanes_);
+		fitter.run();
+		DEBUG_END;
+		return NULL;
+	}
+
 	timer.pushTimer();
 
 	/* Build support function estimation data. */

@@ -116,11 +116,13 @@ set (SOURCE_pcl
 	Source/Recoverer/CPLEXSupportFunctionEstimator.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
+	Source/Recoverer/IpoptFinitePlanesFitter.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSFELinearProgramBuilder.cpp
 	Source/Recoverer/NativeSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
+	Source/Recoverer/TangientPointInformation.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp
 	Source/SparseMatrixEigen.cpp
 	Source/TimeMeasurer/TimeMeasurer.cpp
@@ -155,6 +157,10 @@ set (INCLUDE_DIRS_all
 	${CMAKE_SOURCE_DIR}/External/Vector3d
 	${CMAKE_SOURCE_DIR}/External/CGAL
 	/usr/local/include/eigen3
+	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Algorithm
+	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Common
+	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/LinAlg
+	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Interfaces
 )
 
 # Common compiler flags used for build:
@@ -173,6 +179,9 @@ if (${CMAKE_C_COMPILER} MATCHES ".*clang")
 	set(COMMON_FLAGS "-Wno-error=gnu-zero-variadic-macro-arguments")
 endif()
 
+set(CMAKE_SHARED_LINKER_FLAGS "-L/usr/local/lib")
+set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib")
+
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
 add_library(lsm SHARED ${SOURCE_lsm})
@@ -186,6 +195,7 @@ option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 option(DISABLE_CGAL_DEBUG "Disable all CGAL internal checks" OFF)
 
 target_link_libraries(pcl 
+	pthread
 	arrayOperations
 	gaussString
 	lsm
@@ -208,6 +218,7 @@ if (ENABLE_IPOPT)
 	target_link_libraries(pcl dl ipopt coinmumps coinhsl blas lapack)
 	add_definitions(-DUSE_IPOPT)
 	add_definitions(-DHAVE_CSTDDEF)
+	add_definitions(-DFORTRAN_INTEGER_TYPE=int)
 	message("!!! Ipopt solver is enabled !!!")
 endif()
 

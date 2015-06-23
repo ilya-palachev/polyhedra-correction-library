@@ -20,7 +20,7 @@
 
 /**
  * @file IpoptSupportFunctionEstimator.h
- * @brief Definition of Iptopt-based non-linear optimizer in case of support
+ * @brief Definition of Ipopt-based non-linear optimizer in case of support
  * function estimation.
  */
 
