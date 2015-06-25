@@ -49,19 +49,13 @@ typedef CGAL::Triangulation_data_structure_3<
 			CGAL::Parallel_tag> Tds;
 typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 
-static bool checkEpsilon(SupportFunctionDataPtr data, double epsilon)
+static bool countOuterPlanes(SupportFunctionDataPtr data, double epsilon)
 {
 	DEBUG_START;
 	/* Get duals of higher and lower support planes */
 	auto pointsHigher = data->getShiftedDualPoints_3(epsilon);
 	auto pointsLower = data->getShiftedDualPoints_3(-epsilon);
 
-#if 0
-	CGALPolyhedron hull;
-	CGAL::convex_hull_3(pointsHigher.begin(), pointsHigher.end(), hull);
-	Tree tree(faces(hull).first, faces(hull).second, hull);
-	tree.accelerate_distance_queries();
-#endif
 	/* Construct 3D Delaunay triangulation of points. */
 	Delaunay::Lock_data_structure locking_ds(
 			CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000.,
@@ -70,35 +64,17 @@ static bool checkEpsilon(SupportFunctionDataPtr data, double epsilon)
 			&locking_ds);
 	auto infinity = triangulation.infinite_vertex();
 
-	bool result = true;
-	int DEBUG_VARIABLE iPoint = 0;
+	int numInnerPoints = 0;
 	for (auto &point: pointsLower)
 	{
-#if 0
-		Point query(point);
-		Point_and_primitive_id pp = tree.closest_point_and_primitive(
-				query);
-		CGALPolyhedron::Face_handle f = pp.second;
-		if (f->plane().oriented_side(query) == CGAL::ON_NEGATIVE_SIDE)
-		{
-			ALWAYS_PRINT(stderr, "stop at point #%d\n", iPoint);
-			result = false;
-			break;
-		}
-#endif
 		auto cell = triangulation.locate(Point_3(point.x(), point.y(),
 					point.z()), infinity);
-		if (!triangulation.is_infinite(cell))
-		{
-			std::cerr << "stop at point #" << iPoint << std::endl;
-			result = false;
-			break;
-		}
-		++iPoint;
+		numInnerPoints += !triangulation.is_infinite(cell);
 	}
-
+	std::cerr << "Number of inner points: " << numInnerPoints
+		<< std::endl;
 	DEBUG_END;
-	return result;
+	return numInnerPoints;
 }
 
 static VectorXd calculateSolution(SupportFunctionDataPtr data, double epsilon)
@@ -136,7 +112,7 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 			(goodEpsilon - badEpsilon) * SEARCH_MULTIPLIER;
 		std::cerr << "Native estimator: iteration #" << iIteration <<
 			": epsilon = " << epsilon << "... ";
-		if (checkEpsilon(supportData, epsilon))
+		if (countOuterPlanes(supportData, epsilon) == 0)
 		{
 			goodEpsilon = epsilon;
 			std::cerr << "SUCCESS" << std::endl;
