@@ -33,6 +33,10 @@
  */
 class NativeSupportFunctionEstimator : public SupportFunctionEstimator
 {
+private:	
+	/** Type of problem. */
+	EstimationProblemNorm problemType_;
+
 public:
 	/**
 	 * Default constructor

@@ -49,7 +49,27 @@ typedef CGAL::Triangulation_data_structure_3<
 			CGAL::Parallel_tag> Tds;
 typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 
-static bool countOuterPlanes(SupportFunctionDataPtr data, double epsilon)
+int findPoint(std::vector<Point_3> points, Point_3 query)
+{
+	DEBUG_START;
+	int iMinimum = 0;
+	double distanceMinimal = (query - points[0]).squared_length();
+	int numPoints = points.size();
+	for (int i = 0; i < numPoints; ++i)
+	{
+		double distance = (query - points[i]).squared_length();
+		if (distance < distanceMinimal)
+		{
+			distanceMinimal = distance;
+			iMinimum = i;
+		}
+	}
+	DEBUG_END;
+	return iMinimum;
+}
+
+static std::vector<int> collectOuterPlanesIDs(SupportFunctionDataPtr data,
+		double epsilon)
 {
 	DEBUG_START;
 	/* Get duals of higher and lower support planes */
@@ -64,17 +84,25 @@ static bool countOuterPlanes(SupportFunctionDataPtr data, double epsilon)
 			&locking_ds);
 	auto infinity = triangulation.infinite_vertex();
 
-	int numInnerPoints = 0;
-	for (auto &point: pointsLower)
+	std::vector<int> outerPlanesIDs;
+	int numPlanes = data->size();
+	for (int i = 0; i < numPlanes; ++i)
 	{
-		auto cell = triangulation.locate(Point_3(point.x(), point.y(),
-					point.z()), infinity);
-		numInnerPoints += !triangulation.is_infinite(cell);
+		Point_3 point = pointsLower[i];
+		auto cell = triangulation.locate(point, infinity);
+		if (!triangulation.is_infinite(cell))
+		{
+			outerPlanesIDs.push_back(i);
+		}
 	}
-	std::cerr << "Number of inner points: " << numInnerPoints
-		<< std::endl;
+	std::cerr << "IDs of outer planes: ";
+	for (int &id: outerPlanesIDs)
+	{
+		std::cerr << id << " ";
+	}
+	std::cerr << std::endl;
 	DEBUG_END;
-	return numInnerPoints;
+	return outerPlanesIDs;
 }
 
 static VectorXd calculateSolution(SupportFunctionDataPtr data, double epsilon)
@@ -112,7 +140,9 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 			(goodEpsilon - badEpsilon) * SEARCH_MULTIPLIER;
 		std::cerr << "Native estimator: iteration #" << iIteration <<
 			": epsilon = " << epsilon << "... ";
-		if (countOuterPlanes(supportData, epsilon) == 0)
+		std::vector<int> outerPlanesIDs =
+			collectOuterPlanesIDs(supportData, epsilon);
+		if (outerPlanesIDs.size() == 0)
 		{
 			goodEpsilon = epsilon;
 			std::cerr << "SUCCESS" << std::endl;
