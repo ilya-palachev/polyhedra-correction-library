@@ -26,6 +26,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
+#include "halfspaces_intersection.h"
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
@@ -132,7 +133,7 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, double epsilon)
 const double BEST_EPSILON_PRECISION = 1e-6;
 const double SEARCH_MULTIPLIER = 0.5;
 
-VectorXd NativeSupportFunctionEstimator::run(void)
+VectorXd runLinfEstimation(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr supportData = data->supportData();
@@ -165,4 +166,176 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 	VectorXd solution = calculateSolution(supportData, goodEpsilon);
 	DEBUG_END;
 	return solution;
+}
+
+int countInnerPoints(std::vector<Point_3> points)
+{
+	DEBUG_START;
+	Delaunay::Lock_data_structure locking_ds(
+			CGAL::Bbox_3(-1000., -1000., -1000., 1000.,
+				1000., 1000.), 50);
+	Delaunay triangulation(points.begin(), points.end(),
+			&locking_ds);
+	auto infinity = triangulation.infinite_vertex();
+
+	std::vector<int> outerPlanesIDs;
+	int numPlanes = points.size();
+	for (int i = 0; i < numPlanes; ++i)
+	{
+		Point_3 point = points[i];
+		Delaunay::Locate_type lt;
+		int li, lj;
+		Delaunay::Cell_handle c = triangulation.locate(point,
+				lt, li, lj);
+
+		auto vertex = c->vertex(li);
+		ASSERT(!(lt == Delaunay::VERTEX
+					&& vertex->point() == point));
+		if (!triangulation.is_edge(vertex, infinity, c, li, lj))
+		{
+			outerPlanesIDs.push_back(i);
+		}
+	}
+	DEBUG_END;
+	return outerPlanesIDs.size();
+}
+
+#if 0
+std::vector<double> calculateGradient(SupportFunctionDataPtr data)
+
+VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
+{
+	DEBUG_START;
+	SupportFunctionDataPtr supportData = data->supportData();
+	double startingEpsilon = data->startingEpsilon();
+
+	std::vector<double> epsilons;
+	for (int i = 0; i < supportData.size(); ++i)
+	{
+		epsilons.push_back(startingEpsilon);
+	}
+
+
+
+
+	DEBUG_END;
+}
+#endif
+
+struct Plane_from_facet
+{
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
+	{
+		Polyhedron_3::Halfedge_handle h = f.halfedge();
+		return Polyhedron_3::Plane_3(h->vertex()->point(),
+				h->next()->vertex()->point(),
+				h->opposite()->vertex()->point());
+	}
+};
+
+VectorXd NativeSupportFunctionEstimator::run(void)
+{
+	DEBUG_START;
+	VectorXd solution;
+	
+
+	switch(problemType_)
+	{
+	case ESTIMATION_PROBLEM_NORM_L_INF:
+		DEBUG_END;
+		solution = runLinfEstimation(data);
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_1:
+	case ESTIMATION_PROBLEM_NORM_L_2:
+	default:
+		SupportFunctionDataPtr supportData = data->supportData();
+		auto planes = supportData->supportPlanes();
+
+		Polyhedron_3 intersection;
+		CGAL::internal::halfspaces_intersection(planes.begin(),
+				planes.end(), intersection, Kernel());
+
+		std::transform(intersection.facets_begin(),
+			intersection.facets_end(), intersection.planes_begin(),
+			Plane_from_facet());
+		int iFacet = 0;
+		for (auto facet = intersection.facets_begin();
+				facet != intersection.facets_end(); ++facet)
+		{
+			double minimum = 0.;
+			int iBestPlane = planes.size();
+			auto plane = facet->plane();
+			std::cerr << std::endl
+				<< "Searching best for " << plane <<std::endl;
+			double norm = plane.a() * plane.a()
+				+ plane.b() * plane.b() + plane.c() * plane.c();
+			double a = plane.a() / norm;
+			double b = plane.b() / norm;
+			double c = plane.c() / norm;
+			double d = plane.d() / norm;
+			for (int iPlane = 0; iPlane < (int) planes.size();
+					++iPlane)
+			{
+				auto candidate = planes[iPlane];
+				norm = candidate.a() * candidate.a()
+					+ candidate.b() * candidate.b()
+					+ candidate.c() * candidate.c();
+				if (a * candidate.a() < 0.)
+				{
+					a *= -1.;
+					b *= -1.;
+					c *= -1.;
+					d *= -1.;
+				}
+				a -= candidate.a() / norm;
+				b -= candidate.b() / norm;
+				c -= candidate.c() / norm;
+				d -= candidate.d() / norm;
+				double distance = a * a + b * b + c * c
+					+ d * d;
+				if (iBestPlane == (int) planes.size()
+					|| distance < minimum)
+				{
+					minimum = distance;
+					iBestPlane = iPlane;
+				}
+			}
+			std::cerr << "For facet " << iFacet
+				<< " best plane is " << iBestPlane
+				<< " with distance " << minimum << std::endl;
+			++iFacet;
+		}
+
+
+#if 0
+		auto points = supportData->getShiftedDualPoints_3(0.);
+		int numPoints = points.size();
+		int numInnerPoints = countInnerPoints(points);
+		std::vector<int> saved;
+		for (int i = 0; i < numPoints; ++i)
+			saved.push_back(0);
+
+		for (int i = 0; i < numPoints; ++i)
+		{
+			std::vector<Point_3> pointsTested = points;
+			pointsTested.erase(pointsTested.begin() + i);
+			int numInnerPointsTested = countInnerPoints(
+					pointsTested);
+			int numSavedPoints = numInnerPoints
+				- numInnerPointsTested;
+			saved[numSavedPoints]++;
+		}
+
+		for (int i = 0; i < numPoints; ++i)
+			if (saved[i] > 0)
+				std::cerr << saved[i] << " points can save "
+					<< i << " points." << std::endl;
+#endif 
+
+		ERROR_PRINT("Not implemented yet!");
+		exit(EXIT_FAILURE);
+		break;
+	}
+	return solution;
+	DEBUG_END;
 }
