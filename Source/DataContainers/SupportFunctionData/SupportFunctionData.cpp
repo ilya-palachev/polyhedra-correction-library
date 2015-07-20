@@ -301,4 +301,21 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
 	return points;
 }
 
-
+std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
+		std::vector<double> epsilons)
+{
+	DEBUG_START;
+	ASSERT(epsilons.size() == size());
+	std::vector<Point_3> points;
+	long int numDirections = size();
+	for (int i = 0; i < numDirections; ++i)
+	{
+		auto item = items[i];
+		Plane_3 plane(item.direction.x, item.direction.y,
+				item.direction.z, -item.value - epsilons[i]);
+		Point_3 point = dual(plane);
+		points.push_back(point);
+	}
+	DEBUG_END;
+	return points;
+}

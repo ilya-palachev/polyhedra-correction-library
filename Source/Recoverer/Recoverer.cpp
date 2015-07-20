@@ -164,6 +164,7 @@ static SupportFunctionEstimator *constructEstimator(
 	DEBUG_START;
 
 	SupportFunctionEstimator *estimator = NULL;
+	NativeSupportFunctionEstimator *nativeEstimator = NULL;
 #ifdef USE_IPOPT
 	IpoptSupportFunctionEstimator *ipoptEstimator = NULL;
 #endif /* USE_IPOPT */
@@ -183,7 +184,11 @@ static SupportFunctionEstimator *constructEstimator(
 		DEBUG_PRINT("Zero estimatorType is on!");
 		break;
 	case NATIVE_ESTIMATOR:
-		estimator = new NativeSupportFunctionEstimator(data);
+		nativeEstimator = new NativeSupportFunctionEstimator(data);
+		nativeEstimator->setProblemType(problemType);
+		estimator =
+			static_cast<SupportFunctionEstimator*>(
+					nativeEstimator);
 		break;
 #ifdef USE_TSNNLS
 	case TSNNLS_ESTIMATOR:

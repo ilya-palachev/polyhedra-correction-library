@@ -204,6 +204,18 @@ public:
 	 */
 	std::vector<Point_3> getShiftedDualPoints_3(double epsilon);
 
+	/**
+	 * Gets duals of support planes which free coefficients were incremented
+	 * on given numbers.
+	 *
+	 * @param data		Support dunction data.
+	 * @param epsilons	Shifting numbers.
+	 *
+	 * @return		Duals of shifted support planes.
+	 */
+	std::vector<Point_3> getShiftedDualPoints_3(
+			std::vector<double> epsilons);
+
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */
