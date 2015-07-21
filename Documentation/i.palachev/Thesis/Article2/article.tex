@@ -5,7 +5,28 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[english,russian]{babel}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{amsmath,amssymb}
 
+% Package that enables usage of theorems and definition designed in a 
+% standard way.
+% http://en.wikibooks.org/wiki/LaTeX/Theorems
+\usepackage{amsthm}
+
+% Create environment for smart definitions
+\theoremstyle{definition}
+\newtheorem{SmartDefinition}{Определение}
+
+% Create environment for smart theorems
+\theoremstyle{plain}
+\newtheorem{SmartTheorem}{Теорема}
+
+% Create environment for smart lemmas
+\theoremstyle{plain}
+\newtheorem{SmartLemma}{Лемма}
+
+\usepackage{caption,wasysym}
 \usepackage{hyperref}
 
 \title{БЫСТРЫЙ МЕТОД СОГЛАСОВАНИЯ ОПОРНЫХ ЧИСЕЛ}
@@ -52,6 +73,72 @@
 согласования опорных чисел, с помощью которого можно задачу в метрике
 $L_{\infty}$ за линейное время, без использования линейного программирования.
 
+\textbf{2. Основные понятия.}
+Главным понятием, которое используется в данное статье, является понятие
+\textit{опорной функции выпуклого тела}:
+
+\begin{SmartDefinition}
+ \label{def:support-function}
+ \textbf{Опорной функцией} выпуклого тела $K \subset \mathbb{R}^{n}$
+ называется
+ $h_{K}: \mathbb{R}^{n} \to \mathbb{R}_{+}$:
+
+ \begin{equation*}h_{K}(u) = \sup \limits_{x \in K}(x, u)\end{equation*}
+\end{SmartDefinition}
+
+В ряде практических задач, возникающих в компьютерной томографии
+\cite{PrinceWillsky}, магнитно-резонансной визуализации
+\cite{GregorRannou2001, GregorRannou2002} и обработке данных лазерного радара
+\cite{LeleKulkarniWillsky}, встречаются такие, которые можно интерпретировать
+как восстановление геометрической структуры выпуклого тела по измерениям его
+опорной функции. А именно, речь идёт о следующей задаче: пусть имеется
+некоторое реальное физическое тело $K$ и производятся эмпирические измерения
+его опорной функции на конечном наборе единичных векторов
+$u_{1}, u_{2}, \ldots, u_{m}$:
+
+\begin{equation*}
+ h_{i} = h_{K}(u_{i}) + \varepsilon_{i}, \;\; i = 1, 2, \ldots, m,
+\end{equation*}
+
+где $\varepsilon_{i}$ --- погрешность измерения величины $h_{i}$. Общепринятой
+является следующая терминология: $h_{1}, h_{2}, \ldots, h_{m}$ суть
+\textit{опорные числа} тела $K$ по \textit{опорным направлениям}
+$u_{1}, u_{2}, \ldots, u_{m}$.
+
+\begin{SmartDefinition}
+ \label{def:consistency}
+ Опорные числа $h_{1}, h_{2}, \ldots, h_{m}$ по направлениям \\
+ $u_{1}, u_{2}, \ldots, u_{m}$ называются \textbf{согласованными}, если
+ существует такое выпуклое тело  $K^{*} \subset \mathbb{R}^{n}$, что
+ $h_{K^{*}}(u_{i}) = h_{i}$
+\end{SmartDefinition}
+
+Таким образом, поскольку не всякий набор действительных чисел является
+согласованным набором опорных чисел некоторого выпуклого тела, естественным
+образом возникает задача \textit{согласования опорных чисел}: по набору опорных
+чисел $h^{0}_{1}, h^{0}_{2}, \ldots, h^{0}_{m}$ и опорным направлениям
+$u_{1}, u_{2}, \ldots, u_{m}$ строится такой согласованный набор опорных чисел
+$h^{*}_{1}, h^{*}_{2}, \ldots, h^{*}_{m}$, который реализует минимум функционала
+
+\begin{equation*}
+ I = || h - h^{0} ||_{X}
+\end{equation*}
+
+где $X$ -- одна из метрик  в $\mathbb{R}^{m}$, например,
+$L_{2}, L_{1}, L_{\infty}$.
+
+В работе \cite{GardnerKiderlen} задача согласования опорных чисел сводится к
+следующей задаче математического программирования:
+
+\begin{equation}
+\label{equation:gardner-kiderlen}
+ ||\{(x_{i}, u_{i})\}_{i = 1}^{m} - h^{0}||_{X} \to \inf \;\;\; s. t. \;\;
+ (x_{i}, u_{i}) \geq (x_{j}, u_{i}), 1 \leq i \neq j \leq m
+\end{equation}
+
+где $x_{i} \in \mathbb{R}^{3}$ --- точки касания тела с опорной плоскостью,
+имеющей нормаль $u_{i}$. В статье \cite{palachev} приводится метод, позволяющий
+уменьшить число ограничений в задаче \ref{equation:gardner-kiderlen}.
 
 
 \begin{thebibliography}{50}
@@ -64,6 +151,52 @@ $L_{\infty}$ за линейное время, без использования
 2015.
 \textbf{16}.
 348--359.
+
+\bibitem{PrinceWillsky}
+\emph{Prince~J.L., Willsky~A.S.}
+Reconstructing convex sets from support line measurements //
+IEEE Transactions on Pattern Analysis and Machine Intelligence.
+1990.
+\textbf{12},
+N 4.
+377--389.
+
+\bibitem{LeleKulkarniWillsky}
+\emph{Lele~A.S., Kulkarni~S.R., Willsky~A.S.}
+Convex-polygon estimation from support-line measurements and applications to
+target reconstruction from laser-radar data //
+Journal of the Optical Society of America A.
+1992
+\textbf{9},
+N 10.
+1693--1714.
+
+\bibitem{GregorRannou2001}
+\emph{Gregor~J., Rannou~F.R.}
+Least-squares framework for projection {MRI} reconstruction //
+Proceedings of SPIE.
+2001.
+\textbf{4322}.
+888-898.
+
+\bibitem{GregorRannou2002}
+\emph{Gregor~J., Rannou~F.R.}
+Three-dimensional support function estimation and application for projection
+magnetic resonance imaging //
+International Journal of Imaging Systems and Technology.
+2002.
+\textbf{12},
+N 1.
+43--50.
+
+\bibitem{GardnerKiderlen}
+\emph{Gardner~R.J., Kiderlen~M.}
+A new algorithm for 3D reconstruction from support functions //
+IEEE Transactions on Pattern Analysis and Machine Intelligence.
+2009.
+\textbf{31},
+N 3.
+556--562.
 
 \end{thebibliography}
 
