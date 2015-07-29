@@ -227,11 +227,164 @@ struct Plane_from_facet
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
-		return Polyhedron_3::Plane_3(h->vertex()->point(),
+		auto plane = Polyhedron_3::Plane_3(h->vertex()->point(),
 				h->next()->vertex()->point(),
 				h->opposite()->vertex()->point());
+		double a = plane.a();
+		double b = plane.b();
+		double c = plane.c();
+		double d = plane.d();
+		double norm = sqrt(a * a + b * b + c * c);
+		a /= norm;
+		b /= norm;
+		c /= norm;
+		d /= norm;
+		if (d > 0.)
+		{
+			a = -a;
+			b = -b;
+			c = -c;
+			d = -d;
+		}
+		plane = Plane_3(a, b, c, d);
+		return plane;
 	}
 };
+
+std::vector<int> constructPlanesIndex(Polyhedron_3 polyhedron,
+		std::vector<Plane_3> planes)
+{
+	DEBUG_START;
+	int iFacet = 0;
+ 	std::vector<int> index(polyhedron.size_of_facets());
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		double minimum = 1.;
+		int iBestPlane = 0;
+		auto plane = facet->plane();
+		for (int iPlane = 0; iPlane < (int) planes.size();
+				++iPlane)
+		{
+			auto candidate = planes[iPlane];
+			double a = plane.a() - candidate.a();
+			double b = plane.b() - candidate.b();
+			double c = plane.c() - candidate.c();
+			double d = plane.d() - candidate.d();
+			double distance = a * a + b * b + c * c
+				+ d * d;
+			if (distance < minimum)
+			{
+				minimum = distance;
+				iBestPlane = iPlane;
+			}
+		}
+		if (minimum > 1e-16)
+			std::cerr << "For facet " << iFacet
+				<< " best plane is " << iBestPlane
+				<< " with distance " << minimum
+				<< std::endl;
+		index[iFacet] = iBestPlane;
+		++iFacet;
+	}
+	DEBUG_END;
+	return index;
+}
+
+void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
+		std::vector<int> index)
+{
+	DEBUG_START;
+	SupportFunctionDataPtr supportData = data->supportData();
+	auto planes = supportData->supportPlanes();
+	std::vector<int> contoursCounter(planes.size());
+	for (int i = 0; i < (int) planes.size(); ++i)
+	{
+		contoursCounter[i] = -1;
+	}
+	std::vector<int> contoursNumSides(planes.size());
+	for (auto &i: index)
+	{
+		auto item = (*supportData)[i];
+		int iContour = item.info->iContour;
+		if (contoursCounter[iContour] < 0)
+		{
+			contoursCounter[iContour] = 1;
+			contoursNumSides[iContour] = item.info->numSidesContour;
+		}
+		else
+		{
+			contoursCounter[iContour] += 1;
+			if (contoursNumSides[iContour]
+					!= item.info->numSidesContour)
+			{
+				std::cerr << "Wrong info about sides number "
+					<< "in contour" << iContour
+					<< std::endl;
+			}
+		}
+	}
+
+	for (int i = 0; i < (int) contoursCounter.size(); ++i)
+	{
+		if (contoursCounter[i] > 0)
+			std::cerr << "Contour " << i << " has "
+				<< contoursCounter[i] << " consistent of "
+				<< contoursNumSides[i] << " sides."
+				<< std::endl;
+	}
+	DEBUG_END;
+}
+
+void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
+{
+	DEBUG_START;
+	SupportFunctionDataPtr supportData = data->supportData();
+	auto planes = supportData->supportPlanes();
+
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel());
+
+	std::transform(intersection.facets_begin(), intersection.facets_end(),
+		intersection.planes_begin(), Plane_from_facet());
+	auto index = constructPlanesIndex(intersection, planes);
+	std::cerr << "Intersection contains " << intersection.size_of_facets()
+		<< " of " << planes.size() << " planes." << std::endl;
+
+	if (getenv("PCL_DEEP_DEBUG"))
+		runContoursCounterDiagnostics(data, index);
+	DEBUG_END;
+}
+
+void runBadPlanesSearch(SupportFunctionEstimationDataPtr data)
+{
+	DEBUG_START;
+	SupportFunctionDataPtr supportData = data->supportData();
+	auto points = supportData->getShiftedDualPoints_3(0.);
+	int numPoints = points.size();
+	int numInnerPoints = countInnerPoints(points);
+	std::vector<int> saved;
+	for (int i = 0; i < numPoints; ++i)
+		saved.push_back(0);
+
+	for (int i = 0; i < numPoints; ++i)
+	{
+		std::vector<Point_3> pointsTested = points;
+		pointsTested.erase(pointsTested.begin() + i);
+		int numInnerPointsTested = countInnerPoints(
+				pointsTested);
+		int numSavedPoints = numInnerPoints
+			- numInnerPointsTested;
+		saved[numSavedPoints]++;
+	}
+
+	for (int i = 0; i < numPoints; ++i)
+		if (saved[i] > 0)
+			std::cerr << saved[i] << " points can save "
+				<< i << " points." << std::endl;
+	DEBUG_END;
+}
 
 VectorXd NativeSupportFunctionEstimator::run(void)
 {
@@ -248,90 +401,9 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 	case ESTIMATION_PROBLEM_NORM_L_1:
 	case ESTIMATION_PROBLEM_NORM_L_2:
 	default:
-		SupportFunctionDataPtr supportData = data->supportData();
-		auto planes = supportData->supportPlanes();
-
-		Polyhedron_3 intersection;
-		CGAL::internal::halfspaces_intersection(planes.begin(),
-				planes.end(), intersection, Kernel());
-
-		std::transform(intersection.facets_begin(),
-			intersection.facets_end(), intersection.planes_begin(),
-			Plane_from_facet());
-		int iFacet = 0;
-		for (auto facet = intersection.facets_begin();
-				facet != intersection.facets_end(); ++facet)
-		{
-			double minimum = 0.;
-			int iBestPlane = planes.size();
-			auto plane = facet->plane();
-			std::cerr << std::endl
-				<< "Searching best for " << plane <<std::endl;
-			double norm = plane.a() * plane.a()
-				+ plane.b() * plane.b() + plane.c() * plane.c();
-			double a = plane.a() / norm;
-			double b = plane.b() / norm;
-			double c = plane.c() / norm;
-			double d = plane.d() / norm;
-			for (int iPlane = 0; iPlane < (int) planes.size();
-					++iPlane)
-			{
-				auto candidate = planes[iPlane];
-				norm = candidate.a() * candidate.a()
-					+ candidate.b() * candidate.b()
-					+ candidate.c() * candidate.c();
-				if (a * candidate.a() < 0.)
-				{
-					a *= -1.;
-					b *= -1.;
-					c *= -1.;
-					d *= -1.;
-				}
-				a -= candidate.a() / norm;
-				b -= candidate.b() / norm;
-				c -= candidate.c() / norm;
-				d -= candidate.d() / norm;
-				double distance = a * a + b * b + c * c
-					+ d * d;
-				if (iBestPlane == (int) planes.size()
-					|| distance < minimum)
-				{
-					minimum = distance;
-					iBestPlane = iPlane;
-				}
-			}
-			std::cerr << "For facet " << iFacet
-				<< " best plane is " << iBestPlane
-				<< " with distance " << minimum << std::endl;
-			++iFacet;
-		}
-
-
-#if 0
-		auto points = supportData->getShiftedDualPoints_3(0.);
-		int numPoints = points.size();
-		int numInnerPoints = countInnerPoints(points);
-		std::vector<int> saved;
-		for (int i = 0; i < numPoints; ++i)
-			saved.push_back(0);
-
-		for (int i = 0; i < numPoints; ++i)
-		{
-			std::vector<Point_3> pointsTested = points;
-			pointsTested.erase(pointsTested.begin() + i);
-			int numInnerPointsTested = countInnerPoints(
-					pointsTested);
-			int numSavedPoints = numInnerPoints
-				- numInnerPointsTested;
-			saved[numSavedPoints]++;
-		}
-
-		for (int i = 0; i < numPoints; ++i)
-			if (saved[i] > 0)
-				std::cerr << saved[i] << " points can save "
-					<< i << " points." << std::endl;
-#endif 
-
+		runSupportDataDiagnostics(data);
+		if (getenv("PCL_DEEP_DEBUG"))
+			runBadPlanesSearch(data);
 		ERROR_PRINT("Not implemented yet!");
 		exit(EXIT_FAILURE);
 		break;
