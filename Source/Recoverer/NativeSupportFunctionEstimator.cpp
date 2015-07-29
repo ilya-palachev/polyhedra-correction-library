@@ -168,7 +168,7 @@ VectorXd runLinfEstimation(SupportFunctionEstimationDataPtr data)
 	return solution;
 }
 
-int countInnerPoints(std::vector<Point_3> points)
+std::vector<int> collectInnerPointsIDs(std::vector<Point_3> points)
 {
 	DEBUG_START;
 	Delaunay::Lock_data_structure locking_ds(
@@ -197,7 +197,15 @@ int countInnerPoints(std::vector<Point_3> points)
 		}
 	}
 	DEBUG_END;
-	return outerPlanesIDs.size();
+	return outerPlanesIDs;
+}
+
+int countInnerPoints(std::vector<Point_3> points)
+{
+	DEBUG_START;
+	int numInnerPoints = collectInnerPointsIDs(points).size();
+	DEBUG_END;
+	return numInnerPoints;
 }
 
 #if 0
@@ -336,6 +344,54 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 	DEBUG_END;
 }
 
+double calculateSupportValue(Polyhedron_3 polyhedron, Vector_3 direction)
+{
+	DEBUG_START;
+	double value = -1e100;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		auto point = vertex->point();
+		double product = direction * (point - CGAL::ORIGIN);
+		if (product > value)
+		{
+			value = product;
+		}
+	}
+	DEBUG_END;
+	return value;
+}
+
+void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
+		Polyhedron_3 intersection, std::vector<int> index)
+{
+	DEBUG_START;
+
+	auto outerIndex = collectInnerPointsIDs(
+			data->getShiftedDualPoints_3(0.));
+	auto directions = data->supportDirections();
+	auto values = data->supportValues();
+	
+	double minimal = 0.;
+	int iWorst = -1;
+	for (int &iOuter: outerIndex)
+	{
+		double value = calculateSupportValue(intersection,
+				directions[iOuter]);
+		double difference = value - values(iOuter);
+		std::cerr << iOuter << " : " << value << " " << values(iOuter)
+			<< " " << difference << std::endl;
+		if (difference < minimal)
+		{
+			minimal = difference;
+			iWorst = iOuter;
+		}
+	}
+	std::cerr << "Worst plane: " << iWorst << " " << minimal << std::endl;
+
+	DEBUG_END;
+}
+
 void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -354,6 +410,9 @@ void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 
 	if (getenv("PCL_DEEP_DEBUG"))
 		runContoursCounterDiagnostics(data, index);
+
+	runInconsistencyDiagnostics(supportData, intersection, index);
+
 	DEBUG_END;
 }
 
