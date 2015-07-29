@@ -35,8 +35,18 @@ public:
 	/** The support point (tangient point). */
 	Vector3d point;
 
+	/** The ID of the item in the shadow contour (if it is from contour). */
+	int iContour;
+
+	/** The number of sides in the mother contour. */
+	int numSidesContour;
+
 	/** Empty constructor. */
 	SupportFunctionDataItemInfo();
+
+	/** Assignment operator. */
+	SupportFunctionDataItemInfo &operator=(
+			const SupportFunctionDataItemInfo &i);
 
 	/** Virtual destructor. */
 	virtual ~SupportFunctionDataItemInfo();
