@@ -28,6 +28,8 @@
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "halfspaces_intersection.h"
 
+#include <Eigen/LU>
+
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
@@ -344,22 +346,102 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 	DEBUG_END;
 }
 
-double calculateSupportValue(Polyhedron_3 polyhedron, Vector_3 direction)
+std::pair<Polyhedron_3::Vertex_iterator, double> findTangientVertex(
+		Polyhedron_3 polyhedron,
+		Vector_3 direction)
 {
 	DEBUG_START;
-	double value = -1e100;
+	double maximum  = -1e100;
+	auto tangient = polyhedron.vertices_end();
 	for (auto vertex = polyhedron.vertices_begin();
 			vertex != polyhedron.vertices_end(); ++vertex)
 	{
 		auto point = vertex->point();
 		double product = direction * (point - CGAL::ORIGIN);
-		if (product > value)
+		if (product > maximum)
 		{
-			value = product;
+			maximum = product;
+			tangient = vertex;
 		}
 	}
 	DEBUG_END;
-	return value;
+	return std::pair<Polyhedron_3::Vertex_iterator, double>(tangient,
+			maximum);
+}
+
+std::vector<int> findTangientPointPlanesIDs(
+		Polyhedron_3 polyhedron, Polyhedron_3::Vertex_iterator vertex,
+		std::vector<int> index)
+{
+	DEBUG_START;
+	auto circulatorFirst = vertex->vertex_begin();
+	auto circulator = circulatorFirst;
+	std::vector<int> planesIDs;
+	do
+	{
+		int iFacet = std::distance(polyhedron.facets_begin(),
+				circulator->facet());
+		planesIDs.push_back(index[iFacet]);
+		++circulator;
+	} while (circulator != circulatorFirst);
+
+	std::cerr << "Incident planes IDs: ";
+	for (int &id: planesIDs)
+	{
+		std::cerr << id << " ";
+	}
+	std::cerr << std::endl;
+
+	if (planesIDs.size() != 3)
+	{
+		ERROR_PRINT("%d != %d", (int) planesIDs.size(), 3);
+		exit(EXIT_FAILURE);
+	}
+	DEBUG_END;
+	return planesIDs;
+}
+
+double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
+		std::vector<int> planesIDs)
+{
+	DEBUG_START;
+	auto directions = data->supportDirections();
+	auto values = data->supportValues();
+
+	Eigen::Matrix3d matrix;
+	for (int i = 0; i < 3; ++i)
+	{
+		auto direction = directions[planesIDs[i]];
+		matrix(0, i) = direction.x;
+		matrix(1, i) = direction.y;
+		matrix(2, i) = direction.z;
+	}
+	Eigen::Matrix3d inverse = matrix.inverse();
+
+	auto direction = directions[planeID];
+	Eigen::Vector3d vector;
+	vector(0) = direction.x;
+	vector(1) = direction.y;
+	vector(2) = direction.z;
+
+	Eigen::Vector3d solution = inverse * vector;
+
+	double numerator = values(planeID);
+	for (int i = 0; i < 3; ++i)
+	{
+		numerator -= solution(i) * values(planesIDs[i]);
+	}
+
+	double denominator = 1.;
+	for (int i = 0; i < 3; ++i)
+	{
+		denominator += solution(i);
+	}
+
+	double epsilon = numerator / denominator;
+
+	DEBUG_END;
+	return epsilon;
 }
 
 void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
@@ -374,10 +456,18 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 	
 	double minimal = 0.;
 	int iWorst = -1;
+	Polyhedron_3::Vertex_iterator tangient;
 	for (int &iOuter: outerIndex)
 	{
-		double value = calculateSupportValue(intersection,
+		auto pair = findTangientVertex(intersection,
 				directions[iOuter]);
+		auto vertex = pair.first;
+		if (!vertex->is_trivalent())
+		{
+			ERROR_PRINT("Not implemented yet!");
+			exit(EXIT_FAILURE);
+		}
+		double value = pair.second;
 		double difference = value - values(iOuter);
 		std::cerr << iOuter << " : " << value << " " << values(iOuter)
 			<< " " << difference << std::endl;
@@ -385,9 +475,14 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 		{
 			minimal = difference;
 			iWorst = iOuter;
+			tangient = vertex;
 		}
 	}
 	std::cerr << "Worst plane: " << iWorst << " " << minimal << std::endl;
+	auto planesIDs = findTangientPointPlanesIDs(intersection, tangient,
+			index);
+	double epsilon = calculateMinimalShift(data, iWorst, planesIDs);
+	std::cerr << "epsilon = " << epsilon << std::endl;
 
 	DEBUG_END;
 }
