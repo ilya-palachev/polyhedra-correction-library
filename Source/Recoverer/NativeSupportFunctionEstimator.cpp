@@ -491,6 +491,7 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	Polyhedron_3::Vertex_iterator tangient;
 	for (int &iOuter: outerIndex)
 	{
+		rightSide(iOuter) = 0.;
 		auto pair = findTangientVertex(intersection,
 				directions[iOuter]);
 		auto tangient = pair.first;
@@ -502,7 +503,7 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 		for (int iPlane: planesIDs)
 		{
 			rightSide(iPlane) += coefficients[i] * values(iOuter);
-			Triplet triplet(iOuter, iPlane, coefficients[i]);
+			Triplet triplet(iOuter, iPlane, -coefficients[i]);
 			triplets.insert(triplet);
 			int j = 0;
 			for (int jPlane: planesIDs)
