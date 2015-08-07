@@ -363,6 +363,10 @@ static PolyhedronPtr produceFinalPolyhedron(
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
 		<< *pCopy2;
 
+	MAIN_PRINT("===== Starting point: =====");
+	printEstimationReport(data->supportMatrix(), h0, hStarting,
+			estimatorType);
+	MAIN_PRINT("======== Solution: ========");
 	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
