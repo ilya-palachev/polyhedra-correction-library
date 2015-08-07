@@ -27,6 +27,7 @@
 #include "DebugAssert.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "halfspaces_intersection.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 
 #include <Eigen/LU>
 
@@ -347,14 +348,14 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 }
 
 std::pair<Polyhedron_3::Vertex_iterator, double> findTangientVertex(
-		Polyhedron_3 polyhedron,
+		Polyhedron_3 *polyhedron,
 		Vector_3 direction)
 {
 	DEBUG_START;
 	double maximum  = -1e100;
-	auto tangient = polyhedron.vertices_end();
-	for (auto vertex = polyhedron.vertices_begin();
-			vertex != polyhedron.vertices_end(); ++vertex)
+	auto tangient = polyhedron->vertices_end();
+	for (auto vertex = polyhedron->vertices_begin();
+			vertex != polyhedron->vertices_end(); ++vertex)
 	{
 		auto point = vertex->point();
 		double product = direction * (point - CGAL::ORIGIN);
@@ -369,28 +370,72 @@ std::pair<Polyhedron_3::Vertex_iterator, double> findTangientVertex(
 			maximum);
 }
 
-std::vector<int> findTangientPointPlanesIDs(
-		Polyhedron_3 polyhedron, Polyhedron_3::Vertex_iterator vertex,
+#if 0
+int searchVertexID(Polyhedron_3 polyhedron,
+		Polyhedron_3::vertex_iterator vertex)
+{
+	DEBUG_START;
+	auto searcher = polyhedron.vertices_begin();
+	auto end = polyhedron.vertices_end();
+	int iVertex = 0;
+	while (searcher != vertex && searcher != end)
+	{
+		++searcher;
+		++iVertex;
+	}
+	DEBUG_END;
+	return iVertex;
+}
+#endif
+
+std::set<int> findTangientPointPlanesIDs(
+		Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
 		std::vector<int> index)
 {
 	DEBUG_START;
 	auto circulatorFirst = vertex->vertex_begin();
 	auto circulator = circulatorFirst;
-	std::vector<int> planesIDs;
+	std::set<int> planesIDs;
+	std::cerr << "--Start circulating facets--" << std::endl;
+	std::cerr << "  badness: " << (vertex == polyhedron->vertices_end())
+		<< std::endl;
+	int iVertex = std::distance(polyhedron->vertices_begin(), vertex);
+	std::cerr << "  vertex " << iVertex << " from " <<
+		polyhedron->size_of_vertices() << std::endl;
+	std::cerr << "  degree: " << vertex->vertex_degree() << std::endl;
+#if 0
+	if (iVertex >= (int) polyhedron.size_of_vertices())
+	{
+		ERROR_PRINT("Too big vertex id.");
+		exit(EXIT_FAILURE);
+	}
+#endif
+	std::cerr << vertex->point() << std::endl;
+	std::cerr << "  circulator size: " << CGAL::circulator_size(circulator)
+		<< std::endl;
 	do
 	{
-		int iFacet = std::distance(polyhedron.facets_begin(),
-				circulator->facet());
-		planesIDs.push_back(index[iFacet]);
+#if 0
+		auto begin = polyhedron.facets_begin();
+		std::cerr << "begin: " << begin->plane() << std::endl;
+		auto facet = circulator->facet();
+		std::cerr << "facet: " << facet->plane() << std::endl;
+		int iFacet = std::distance(begin, facet);
+#endif
+		int iFacet = circulator->facet()->id;
+		planesIDs.insert(index[iFacet]);
 		++circulator;
 	} while (circulator != circulatorFirst);
 
-	std::cerr << "Incident planes IDs: ";
-	for (int &id: planesIDs)
+	if (getenv("PCL_DEEP_DEBUG"))
 	{
-		std::cerr << id << " ";
+		std::cerr << "Incident planes IDs: ";
+		for (int id: planesIDs)
+		{
+			std::cerr << id << " ";
+		}
+		std::cerr << std::endl;
 	}
-	std::cerr << std::endl;
 
 	if (planesIDs.size() != 3)
 	{
@@ -401,20 +446,21 @@ std::vector<int> findTangientPointPlanesIDs(
 	return planesIDs;
 }
 
-double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
-		std::vector<int> planesIDs)
+Eigen::Vector3d decomposeDirection(SupportFunctionDataPtr data, int planeID,
+		std::set<int> planesIDs)
 {
 	DEBUG_START;
 	auto directions = data->supportDirections();
-	auto values = data->supportValues();
 
 	Eigen::Matrix3d matrix;
-	for (int i = 0; i < 3; ++i)
+	int i = 0;
+	for (int id: planesIDs)
 	{
-		auto direction = directions[planesIDs[i]];
+		auto direction = directions[id];
 		matrix(0, i) = direction.x;
 		matrix(1, i) = direction.y;
 		matrix(2, i) = direction.z;
+		++i;
 	}
 	Eigen::Matrix3d inverse = matrix.inverse();
 
@@ -426,10 +472,24 @@ double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
 
 	Eigen::Vector3d solution = inverse * vector;
 
+	DEBUG_END;
+	return solution;
+}
+
+double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
+		std::set<int> planesIDs)
+{
+	DEBUG_START;
+	auto values = data->supportValues();
+
+	Eigen::Vector3d solution = decomposeDirection(data, planeID, planesIDs);
+
 	double numerator = values(planeID);
-	for (int i = 0; i < 3; ++i)
+	int i = 0;
+	for (int id: planesIDs)
 	{
-		numerator -= solution(i) * values(planesIDs[i]);
+		numerator -= solution(i) * values(id);
+		++i;
 	}
 
 	double denominator = 1.;
@@ -444,8 +504,87 @@ double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
 	return epsilon;
 }
 
+
+std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
+		Polyhedron_3 *intersection, std::vector<int> index)
+{
+	DEBUG_START;
+	auto outerIndex = collectInnerPointsIDs(
+			data->getShiftedDualPoints_3(0.));
+	auto directions = data->supportDirections();
+	auto values = data->supportValues();
+
+	auto begin = intersection->vertices_begin();
+	std::cerr << "  first vertex id: " << begin->id << std::endl;
+
+	typedef Eigen::Triplet<double> Triplet;
+	auto comparison = [](Triplet a, Triplet b)
+	{
+		return a.row() < b.row() ||
+			(a.row() == b.row() && a.col() < b.col());
+	};
+	std::set<Triplet, decltype(comparison)> triplets(comparison);
+	int numValues = values.size();
+	VectorXd rightSide(numValues);
+	for (int i = 0; i < numValues; ++i)
+	{
+		rightSide(i) = values(i);
+		triplets.insert(Triplet(i, i, 1.));
+	}
+
+	Polyhedron_3::Vertex_iterator tangient;
+	for (int &iOuter: outerIndex)
+	{
+		auto pair = findTangientVertex(intersection,
+				directions[iOuter]);
+		auto tangient = pair.first;
+
+		int iVertex = std::distance(intersection->vertices_begin(),
+				tangient);
+		std::cerr << "  tangient " << iVertex << " from "
+			<< intersection->size_of_vertices() << std::endl;
+		int idVertex = tangient->id;
+		std::cerr << "  id: " << idVertex << std::endl;
+		auto planesIDs = findTangientPointPlanesIDs(intersection,
+				tangient, index);
+		auto coefficients = decomposeDirection(data, iOuter, planesIDs);
+		int i = 0;
+		for (int iPlane: planesIDs)
+		{
+			rightSide(iPlane) += coefficients[i] * values(iOuter);
+			Triplet triplet(iOuter, iPlane, coefficients[i]);
+			triplets.insert(triplet);
+			int j = 0;
+			for (int jPlane: planesIDs)
+			{
+				double value = coefficients[i]
+					* coefficients[j];
+				Triplet triplet(iPlane, jPlane, value);
+				auto iterator = triplets.find(triplet);
+				if (iterator == triplets.end())
+				{
+					triplets.insert(triplet);
+				}
+				else
+				{
+					value += iterator->value();
+					Triplet triplet(iPlane, jPlane, value);
+					triplets.erase(iterator);
+					triplets.insert(triplet);
+				}
+				++j;
+			}
+			++i;
+		}
+	}
+	SparseMatrix matrix(numValues, numValues);
+	matrix.setFromTriplets(triplets.begin(), triplets.end());
+	DEBUG_END;
+	return std::pair<SparseMatrix, VectorXd>(matrix, rightSide);
+}
+
 void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
-		Polyhedron_3 intersection, std::vector<int> index)
+		Polyhedron_3 *intersection, std::vector<int> index)
 {
 	DEBUG_START;
 
@@ -453,7 +592,7 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 			data->getShiftedDualPoints_3(0.));
 	auto directions = data->supportDirections();
 	auto values = data->supportValues();
-	
+
 	double minimal = 0.;
 	int iWorst = -1;
 	Polyhedron_3::Vertex_iterator tangient;
@@ -469,8 +608,6 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 		}
 		double value = pair.second;
 		double difference = value - values(iOuter);
-		std::cerr << iOuter << " : " << value << " " << values(iOuter)
-			<< " " << difference << std::endl;
 		if (difference < minimal)
 		{
 			minimal = difference;
@@ -487,6 +624,25 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 	DEBUG_END;
 }
 
+void initialize_indices(Polyhedron_3 *polyhedron)
+{
+	DEBUG_START;
+	auto vertex = polyhedron->vertices_begin();
+	for (int i = 0; i < (int) polyhedron->size_of_vertices(); ++i)
+	{
+		vertex->id = i;
+		++vertex;
+	}
+
+	auto facet = polyhedron->facets_begin();
+	for (int i = 0; i < (int) polyhedron->size_of_facets(); ++i)
+	{
+		facet->id = i;
+		++facet;
+	}
+	DEBUG_END;
+}
+
 void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -496,6 +652,7 @@ void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
+	initialize_indices(&intersection);
 
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
 		intersection.planes_begin(), Plane_from_facet());
@@ -505,8 +662,28 @@ void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 
 	if (getenv("PCL_DEEP_DEBUG"))
 		runContoursCounterDiagnostics(data, index);
+	if (getenv("PCL_DEBUG"))
+		runInconsistencyDiagnostics(supportData, &intersection, index);
 
-	runInconsistencyDiagnostics(supportData, intersection, index);
+	auto begin = intersection.vertices_begin();
+	std::cerr << "  first vertex id: " << begin->id << std::endl;
+	auto problem = buildMatrix(supportData, &intersection, index);
+	auto matrix = problem.first;
+	auto rightSide = problem.second;
+
+	Eigen::SparseLU<SparseMatrix> solver;
+	solver.compute(matrix);
+	if (solver.info() != Eigen::Success)
+	{
+		ERROR_PRINT("Decomposition failed!");
+		exit(EXIT_FAILURE);
+	}
+	VectorXd solution = solver.solve(rightSide);
+	if (solver.info() != Eigen::Success)
+	{
+		ERROR_PRINT("Solving failed!");
+		exit(EXIT_FAILURE);
+	}
 
 	DEBUG_END;
 }
