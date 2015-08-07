@@ -643,7 +643,8 @@ void initialize_indices(Polyhedron_3 *polyhedron)
 	DEBUG_END;
 }
 
-void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
+
+VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr supportData = data->supportData();
@@ -686,8 +687,15 @@ void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 	}
 
 	DEBUG_END;
+	return solution;
 }
 
+void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
+{
+	DEBUG_START;
+	auto solution = runL2Estimation(data);
+	DEBUG_END;
+}
 void runBadPlanesSearch(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -730,12 +738,17 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 		solution = runLinfEstimation(data);
 		break;
 	case ESTIMATION_PROBLEM_NORM_L_1:
-	case ESTIMATION_PROBLEM_NORM_L_2:
-	default:
 		runSupportDataDiagnostics(data);
 		if (getenv("PCL_DEEP_DEBUG"))
 			runBadPlanesSearch(data);
 		ERROR_PRINT("Not implemented yet!");
+		exit(EXIT_FAILURE);
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_2:
+		solution = runL2Estimation(data);
+		break;
+	default:
+		ERROR_PRINT("Unknown problem type!");
 		exit(EXIT_FAILURE);
 		break;
 	}
