@@ -28,10 +28,24 @@
 #include "Vector3d.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 
-SupportFunctionDataItemInfo::SupportFunctionDataItemInfo()
+SupportFunctionDataItemInfo::SupportFunctionDataItemInfo() :
+	point(Vector3d(0., 0., 0.)),
+	iContour(-1),
+	numSidesContour(-1)
 {
 	DEBUG_START;
 	DEBUG_END;
+}
+
+SupportFunctionDataItemInfo &SupportFunctionDataItemInfo::operator=(
+			const SupportFunctionDataItemInfo &info)
+{
+	DEBUG_START;
+	point = info.point;
+	iContour = info.iContour;
+	numSidesContour = info.numSidesContour;
+	DEBUG_END;
+	return *this;
 }
 
 SupportFunctionDataItemInfo::~SupportFunctionDataItemInfo()

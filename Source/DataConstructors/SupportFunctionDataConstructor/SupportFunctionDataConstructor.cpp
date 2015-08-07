@@ -336,6 +336,10 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 		SideOfContour *side = &contour->sides[iSide];
 
 		SupportFunctionDataItem item = extractor->run(side);
+		item.info = SupportFunctionDataItemInfoPtr(new
+				SupportFunctionDataItemInfo());
+		item.info->iContour = contour->id;
+		item.info->numSidesContour = contour->ns;
 		items.push_back(item);
 	}
 	DEBUG_END;

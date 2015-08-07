@@ -136,8 +136,7 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	ASSERT(h0.size() == h.size());
 	for (int i = 0; i < h.size(); ++i)
 	{
-		double DEBUG_VARIABLE delta = h0(i) - h(i);
-		DEBUG_PRINT("h[%d] :  %lf - %lf = %lf", i, h0(i), h(i), delta);
+		double delta = h0(i) - h(i);
 		L1 += fabs(delta);
 		L2 += delta * delta;
 		Linf = delta > Linf ? delta : Linf;
@@ -151,6 +150,15 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	double L2average = L2 / sqrt(h.size());
 	MAIN_PRINT("L2 / sqrt(%ld) = %lf = %le", h.size(), L2average, L2average);
 	MAIN_PRINT("Linf = %lf = %le", Linf, Linf);
+	if (getenv("PCL_PRINT_VARIABLE_CHANGE"))
+	{
+		for (int i = 0; i < h.size(); ++i)
+		{
+			double delta = h0(i) - h(i);
+			MAIN_PRINT("h[%d] :  %lf - %lf = %lf", i, h0(i), h(i),
+					delta);
+		}
+	}
 
 	DEBUG_PRINT("-------------------------------");
 	DEBUG_END;
@@ -355,6 +363,10 @@ static PolyhedronPtr produceFinalPolyhedron(
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
 		<< *pCopy2;
 
+	MAIN_PRINT("===== Starting point: =====");
+	printEstimationReport(data->supportMatrix(), h0, hStarting,
+			estimatorType);
+	MAIN_PRINT("======== Solution: ========");
 	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
