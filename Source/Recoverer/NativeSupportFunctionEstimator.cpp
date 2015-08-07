@@ -596,6 +596,48 @@ void initialize_indices(Polyhedron_3 *polyhedron)
 	DEBUG_END;
 }
 
+static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
+{
+	DEBUG_START;
+	VectorXd difference = values - data->supportValues();
+	std::vector<double> epsilons;
+	for (int i = 0; i < (int) difference.size(); ++i)
+	{
+		epsilons.push_back(difference(i));
+	}
+
+	auto points = data->getShiftedDualPoints_3(epsilons);
+	auto innerIndex = collectInnerPointsIDs(points);
+	std::cerr << innerIndex.size() << " points are inner" << std::endl;
+
+	std::vector<Plane_3> planes;
+	auto directions = data->supportDirections();
+	for (int i = 0; i < (int) directions.size(); ++i)
+	{
+		auto direction = directions[i];
+		Plane_3 plane(direction.x, direction.y, direction.z,
+				-values(i));
+		planes.push_back(plane);
+	}
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel());
+
+	VectorXd solution(3 * directions.size());
+	for (int i = 0; i < (int) directions.size(); ++i)
+	{
+		 auto direction = directions[i];
+		 auto pair = findTangientVertex(&intersection, direction);
+		 auto vertex = pair.first;
+		 auto point = vertex->point();
+		 solution(3 * i) = point.x();
+		 solution(3 * i + 1) = point.y();
+		 solution(3 * i + 2) = point.z();
+	}
+
+	DEBUG_END;
+	return solution;
+}
 
 VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 {
@@ -632,13 +674,13 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 		ERROR_PRINT("Decomposition failed!");
 		exit(EXIT_FAILURE);
 	}
-	VectorXd solution = solver.solve(rightSide);
+	VectorXd values = solver.solve(rightSide);
 	if (solver.info() != Eigen::Success)
 	{
 		ERROR_PRINT("Solving failed!");
 		exit(EXIT_FAILURE);
 	}
-
+	auto solution = calculateSolution(supportData, values);
 	DEBUG_END;
 	return solution;
 }
@@ -683,7 +725,6 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 	DEBUG_START;
 	VectorXd solution;
 	
-
 	switch(problemType_)
 	{
 	case ESTIMATION_PROBLEM_NORM_L_INF:
