@@ -25,6 +25,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "halfspaces_intersection.h"
 #include "Polyhedron_3/Polyhedron_3.h"
@@ -552,6 +553,8 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 		auto vertex = pair.first;
 		if (!vertex->is_trivalent())
 		{
+			ERROR_PRINT("vertex has %ld degree %d",
+					vertex->id, (int) vertex->degree());
 			ERROR_PRINT("Not implemented yet!");
 			exit(EXIT_FAILURE);
 		}
@@ -615,11 +618,11 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	if (getenv("PCL_DEBUG"))
 		runInconsistencyDiagnostics(supportData, &intersection, index);
 
-	auto begin = intersection.vertices_begin();
-	std::cerr << "  first vertex id: " << begin->id << std::endl;
 	auto problem = buildMatrix(supportData, &intersection, index);
 	auto matrix = problem.first;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "matrix.mat") << matrix;
 	auto rightSide = problem.second;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "right-side.mat") << rightSide;
 
 	Eigen::SparseLU<SparseMatrix> solver;
 	solver.compute(matrix);
