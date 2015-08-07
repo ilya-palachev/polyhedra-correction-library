@@ -342,7 +342,8 @@ static PolyhedronPtr produceFinalPolyhedron(
 	DEBUG_START;
 	timer.pushTimer();
 
-	auto h = supportValuesFromPoints(data->supportDirections(), estimate);
+	auto h = estimatorType == NATIVE_ESTIMATOR ? estimate
+		: supportValuesFromPoints(data->supportDirections(), estimate);
 	/* Now produce final polyhedron from the estimate. */
 	PolyhedronPtr polyhedron = producePolyhedron(data, h);
 
