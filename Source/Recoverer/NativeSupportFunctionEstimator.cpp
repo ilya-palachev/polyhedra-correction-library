@@ -370,24 +370,6 @@ std::pair<Polyhedron_3::Vertex_iterator, double> findTangientVertex(
 			maximum);
 }
 
-#if 0
-int searchVertexID(Polyhedron_3 polyhedron,
-		Polyhedron_3::vertex_iterator vertex)
-{
-	DEBUG_START;
-	auto searcher = polyhedron.vertices_begin();
-	auto end = polyhedron.vertices_end();
-	int iVertex = 0;
-	while (searcher != vertex && searcher != end)
-	{
-		++searcher;
-		++iVertex;
-	}
-	DEBUG_END;
-	return iVertex;
-}
-#endif
-
 std::set<int> findTangientPointPlanesIDs(
 		Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
 		std::vector<int> index)
@@ -396,32 +378,8 @@ std::set<int> findTangientPointPlanesIDs(
 	auto circulatorFirst = vertex->vertex_begin();
 	auto circulator = circulatorFirst;
 	std::set<int> planesIDs;
-	std::cerr << "--Start circulating facets--" << std::endl;
-	std::cerr << "  badness: " << (vertex == polyhedron->vertices_end())
-		<< std::endl;
-	int iVertex = std::distance(polyhedron->vertices_begin(), vertex);
-	std::cerr << "  vertex " << iVertex << " from " <<
-		polyhedron->size_of_vertices() << std::endl;
-	std::cerr << "  degree: " << vertex->vertex_degree() << std::endl;
-#if 0
-	if (iVertex >= (int) polyhedron.size_of_vertices())
-	{
-		ERROR_PRINT("Too big vertex id.");
-		exit(EXIT_FAILURE);
-	}
-#endif
-	std::cerr << vertex->point() << std::endl;
-	std::cerr << "  circulator size: " << CGAL::circulator_size(circulator)
-		<< std::endl;
 	do
 	{
-#if 0
-		auto begin = polyhedron.facets_begin();
-		std::cerr << "begin: " << begin->plane() << std::endl;
-		auto facet = circulator->facet();
-		std::cerr << "facet: " << facet->plane() << std::endl;
-		int iFacet = std::distance(begin, facet);
-#endif
 		int iFacet = circulator->facet()->id;
 		planesIDs.insert(index[iFacet]);
 		++circulator;
@@ -514,9 +472,6 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	auto directions = data->supportDirections();
 	auto values = data->supportValues();
 
-	auto begin = intersection->vertices_begin();
-	std::cerr << "  first vertex id: " << begin->id << std::endl;
-
 	typedef Eigen::Triplet<double> Triplet;
 	auto comparison = [](Triplet a, Triplet b)
 	{
@@ -539,12 +494,6 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 				directions[iOuter]);
 		auto tangient = pair.first;
 
-		int iVertex = std::distance(intersection->vertices_begin(),
-				tangient);
-		std::cerr << "  tangient " << iVertex << " from "
-			<< intersection->size_of_vertices() << std::endl;
-		int idVertex = tangient->id;
-		std::cerr << "  id: " << idVertex << std::endl;
 		auto planesIDs = findTangientPointPlanesIDs(intersection,
 				tangient, index);
 		auto coefficients = decomposeDirection(data, iOuter, planesIDs);
