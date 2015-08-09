@@ -157,6 +157,7 @@ set (INCLUDE_DIRS_all
 	${CMAKE_SOURCE_DIR}/External/Vector3d
 	${CMAKE_SOURCE_DIR}/External/CGAL
 	/usr/local/include/eigen3
+	/usr/local/include/coin/
 	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Algorithm
 	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Common
 	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/LinAlg
