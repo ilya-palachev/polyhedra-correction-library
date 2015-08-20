@@ -44,6 +44,12 @@
 #define OPTION_BALANCE_DATA 'b'
 
 /**
+ * Option "-c" is used to specify the name of file that contains the polyhedron
+ * that was constructed with some third-party software.
+ */
+#define OPTION_COMPARE_WITH_FILE 'c'
+
+/**
  * Option "-d" sets the name of file with support directions.
  */
 #define OPTION_FILE_DIRECTIONS 'd'
@@ -132,7 +138,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abd:e:f:F:i:l:m:M:n:N:o:p:r:st:vx"
+	"a:Abc:d:e:f:F:i:l:m:M:n:N:o:p:r:st:vx"
 
 struct PCLOption: public option
 {
@@ -353,6 +359,17 @@ static PCLOption optionsLong[] =
 		},
 		"The finite number of planes to be fitted."
 	},
+	{
+		option
+		{
+			"compare",
+			required_argument,
+			0,
+			OPTION_COMPARE_WITH_FILE
+		},
+		"The name of file that contains the polyhedron constructed "
+		"with some third-party software."
+	},
 	{option{0, 0, 0, 0}, 0}
 };
 
@@ -465,6 +482,9 @@ typedef struct
 
 	/** The finite number of planes to be fitted. */
 	int numFinitePlanes;
+
+	/** The name of file with 3rd-party constructed polyhedron. */
+	char *fileNamePolyhedron;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -861,6 +881,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->outputName = NULL;
 	options->epsilonFactor = -1;
 	options->numFinitePlanes = 0;
+	options->fileNamePolyhedron = NULL;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -1262,6 +1283,14 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			{
 				errorOutOfRange(argc, argv);
 			}
+			break;
+		case OPTION_COMPARE_WITH_FILE:
+			if (options->fileNamePolyhedron)
+			{
+				errorOptionTwice(argc, argv,
+						OPTION_COMPARE_WITH_FILE);
+			}
+			options->fileNamePolyhedron = optarg;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1737,6 +1766,8 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 
 	/* Set the finite number of planes to be fitted. */
 	recoverer->setNumFinitePlanes(options->numFinitePlanes);
+
+	recoverer->setFileNamePolyhedron(options->fileNamePolyhedron);
 
 	DEBUG_END;
 	return recoverer;

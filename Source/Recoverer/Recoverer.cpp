@@ -48,7 +48,8 @@ Recoverer::Recoverer() :
 	ifScaleMatrix(false),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
-	numFinitePlanes_(0)
+	numFinitePlanes_(0),
+	fileNamePolyhedron_(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -120,6 +121,13 @@ void Recoverer::setNumFinitePlanes(int numFinitePlanes)
 {
 	DEBUG_START;
 	numFinitePlanes_ = numFinitePlanes;
+	DEBUG_END;
+}
+
+void Recoverer::setFileNamePolyhedron(char *fileNamePolyhedron)
+{
+	DEBUG_START;
+	fileNamePolyhedron_ = fileNamePolyhedron;
 	DEBUG_END;
 }
 
@@ -337,6 +345,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 static PolyhedronPtr produceFinalPolyhedron(
 	SupportFunctionEstimationDataPtr data,
 	VectorXd estimate,
+	char *fileNamePolyhedron,
 	RecovererEstimatorType estimatorType)
 {
 	DEBUG_START;
@@ -370,6 +379,12 @@ static PolyhedronPtr produceFinalPolyhedron(
 	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
+
+	if (fileNamePolyhedron)
+	{
+		MAIN_PRINT("===== 3rd-party polyhedron %s =====", fileNamePolyhedron);
+	}
+
 	DEBUG_END;
 	return polyhedron;
 }
@@ -423,7 +438,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 	}
 
 	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
-			estimate, estimatorType);
+			estimate, fileNamePolyhedron_, estimatorType);
 
 	DEBUG_END;
 	return polyhedron;

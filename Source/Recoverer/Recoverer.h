@@ -120,6 +120,9 @@ private:
 
 	/** The finite number of planes to be fitted. */
 	int numFinitePlanes_;
+
+	/** File name of 3rd-party constructed polyhedron. */
+	char *fileNamePolyhedron_;
 public:
 
 	/**
@@ -195,6 +198,14 @@ public:
 	 * 				fitted.
 	 */
 	void setNumFinitePlanes(int numFinitePlanes);
+
+	/**
+	 * Sets the file name of 3rd-party constructed polyhedron.
+	 *
+	 * @param fileNamePolyheedron	The file name of 3rd-party constructed
+	 * 				polyhedron.
+	 */
+	void setFileNamePolyhedron(char *fileNamePolyhedron);
 
 	/**
 	 * Runs the recovering procedure for shadow contours.
