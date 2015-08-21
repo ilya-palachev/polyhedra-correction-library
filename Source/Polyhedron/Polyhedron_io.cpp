@@ -503,27 +503,42 @@ bool Polyhedron::fscan_default_1_2(const char *filename)
 
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
-		Facet* currFacet = &facets[iFacet];
-		if (fscanf(fd, "%d", &currFacet->numVertices) != 1
-			|| currFacet->numVertices < 0
-			|| fscanf(fd, "%lf", &currFacet->plane.norm.x) != 1
-			|| fscanf(fd, "%lf", &currFacet->plane.norm.y) != 1
-			|| fscanf(fd, "%lf", &currFacet->plane.norm.z) != 1
-			|| fscanf(fd, "%lf", &currFacet->plane.dist) != 1)
+		int indFacet;
+		if (fscanf(fd, "%d", &indFacet) != 1)
 		{
 			ERROR_PRINT("Wrong format, in description of facet #%d", iFacet);
 			_fini_fscan_default_1_2(fd, scannedString, edgeData);
 			DEBUG_END;
 			return false;
 		}
+		Facet* currFacet = &facets[indFacet];
+		int numVerticesFacet;
+		Plane plane;
+		if (fscanf(fd, "%d", &numVerticesFacet) != 1
+			|| numVerticesFacet < 0
+			|| fscanf(fd, "%lf", &plane.norm.x) != 1
+			|| fscanf(fd, "%lf", &plane.norm.y) != 1
+			|| fscanf(fd, "%lf", &plane.norm.z) != 1
+			|| fscanf(fd, "%lf", &plane.dist) != 1)
+		{
+			ERROR_PRINT("Wrong format, in description of facet #%d", iFacet);
+			_fini_fscan_default_1_2(fd, scannedString, edgeData);
+			DEBUG_END;
+			return false;
+		}
+		DEBUG_PRINT("numVerticesFacet: %d", numVerticesFacet);
+		int *index = new int[3 * (numVerticesFacet + 1)];
 
-		*currFacet = Facet(iFacet, currFacet->numVertices, currFacet->plane,
-				get_ptr());
+		*currFacet = Facet(iFacet, numVerticesFacet, plane,
+				index, get_ptr(), false);
 
 		for (int iVertex = 0; iVertex < currFacet->numVertices; ++iVertex)
 		{
 			int* currVertex = &currFacet->indVertices[iVertex];
-			if (fscanf(fd, "%d", currVertex) != 1
+			int result = fscanf(fd, "%d", currVertex);
+			DEBUG_PRINT("result: %d", result);
+			DEBUG_PRINT("currVertex: %d", *currVertex);
+			if (result != 1
 					|| *currVertex < 0 || *currVertex >= numVertices)
 			{
 				ERROR_PRINT("Wrong format, in vertex #%d of facet #%d",
