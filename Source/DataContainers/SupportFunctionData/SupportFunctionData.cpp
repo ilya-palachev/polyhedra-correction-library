@@ -305,7 +305,7 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
 		std::vector<double> epsilons)
 {
 	DEBUG_START;
-	ASSERT(epsilons.size() == size());
+	ASSERT((int) epsilons.size() == size());
 	std::vector<Point_3> points;
 	long int numDirections = size();
 	for (int i = 0; i < numDirections; ++i)
