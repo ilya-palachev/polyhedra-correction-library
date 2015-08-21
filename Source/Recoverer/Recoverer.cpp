@@ -382,7 +382,18 @@ static PolyhedronPtr produceFinalPolyhedron(
 
 	if (fileNamePolyhedron)
 	{
-		MAIN_PRINT("===== 3rd-party polyhedron %s =====", fileNamePolyhedron);
+		MAIN_PRINT("===== 3rd-party polyhedron %s =====",
+				fileNamePolyhedron);
+		PolyhedronPtr p(new Polyhedron());
+		p->fscan_default_1_2(fileNamePolyhedron);
+		Polyhedron_3 polyhedron(p);
+		SupportFunctionDataConstructor constructor;
+		auto data3rdParty = constructor.run(
+				data->supportData()->supportDirectionsCGAL(),
+				polyhedron);
+		auto h3rdParty = data3rdParty->supportValues();
+		printEstimationReport(data->supportMatrix(), h0, h3rdParty,
+				estimatorType);
 	}
 
 	DEBUG_END;
