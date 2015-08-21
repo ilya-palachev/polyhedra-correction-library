@@ -37,13 +37,16 @@ class SupportFunctionDataConstructor
 {
 private:
 	/** Whether to balance or not shadow contours before processing. */
-	bool ifBalanceShadowContours;
+	bool ifBalanceShadowContours_;
 
 	/** Whether to convexify or not shadow contours before processing. */
-	bool ifConvexifyShadowContours;
+	bool ifConvexifyShadowContours_;
 
 	/** Whether to extract support function data items only by points. */
-	bool ifExtractItemsByPoints;
+	bool ifExtractItemsByPoints_;
+
+	/** The vector used for shifting during balancing. */
+	Vector3d balancingVector_;
 
 public:
 	/** Empty constructor. */
@@ -61,7 +64,11 @@ public:
 	/** Enables the extraction of support function data items by points. */
 	void enableExtractItemsByPoints();
 
-	
+	Vector3d balancingVector()
+	{
+		return balancingVector_;
+	}
+
 	/**
 	 * Generates support function data from shadow contour data.
 	 *

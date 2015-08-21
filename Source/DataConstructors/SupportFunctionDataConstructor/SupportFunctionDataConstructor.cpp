@@ -42,7 +42,7 @@
  * @param data	Shadow contour data
  * @return	Balanced shadow contour data
  */
-static ShadowContourDataPtr balanceShadowContourData(
+static std::pair<ShadowContourDataPtr, Vector3d> balanceShadowContourData(
 		ShadowContourDataPtr data);
 
 /**
@@ -69,13 +69,13 @@ static ShadowContourDataPtr convexifyShadowContourData(
  * Extracts support function data items from given shadow contours.
  *
  * @param data				Shadow contour data
- * @param ifExtractItemsByPoints	Whether to "by-points" extractor is
+ * @param ifExtractItemsByPoints_	Whether to "by-points" extractor is
  * 					enabled
  * @param numMaxContours		The number of contours to be analyzed.
  * @return				Support fucntion data items
  */
 static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
-		ShadowContourDataPtr data, bool ifExtractItemsByPoints,
+		ShadowContourDataPtr data, bool ifExtractItemsByPoints_,
 		int numMaxContours);
 
 /**
@@ -99,9 +99,10 @@ bool checkSupportFunctionDataItemsInequality(
 		std::vector<SupportFunctionDataItem> items);
 
 SupportFunctionDataConstructor::SupportFunctionDataConstructor() :
-	ifBalanceShadowContours(false),
-	ifConvexifyShadowContours(false),
-	ifExtractItemsByPoints(false)
+	ifBalanceShadowContours_(false),
+	ifConvexifyShadowContours_(false),
+	ifExtractItemsByPoints_(false),
+	balancingVector_(0., 0., 0.)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -116,7 +117,7 @@ SupportFunctionDataConstructor::~SupportFunctionDataConstructor()
 void SupportFunctionDataConstructor::enableBalanceShadowContours()
 {
 	DEBUG_START;
-	ifBalanceShadowContours = true;
+	ifBalanceShadowContours_ = true;
 	DEBUG_END;
 }
 
@@ -124,14 +125,14 @@ void SupportFunctionDataConstructor::enableBalanceShadowContours()
 void SupportFunctionDataConstructor::enableConvexifyShadowContour()
 {
 	DEBUG_START;
-	ifConvexifyShadowContours = true;
+	ifConvexifyShadowContours_ = true;
 	DEBUG_END;
 }
 
 void SupportFunctionDataConstructor::enableExtractItemsByPoints()
 {
 	DEBUG_START;
-	ifExtractItemsByPoints = true;
+	ifExtractItemsByPoints_ = true;
 	DEBUG_END;
 }
 
@@ -148,9 +149,11 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"initial-contours.ply") << Polyhedron(data);
 	/* Balance shadow contour data if demanded. */
-	if (ifBalanceShadowContours)
+	if (ifBalanceShadowContours_)
 	{
-		auto dataBalanced = balanceShadowContourData(data);
+		auto pair = balanceShadowContourData(data);
+		auto dataBalanced = pair.first;
+		balancingVector_ = pair.second;
 		data = dataBalanced;
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"balanced-contours.dat") << *data;
@@ -159,7 +162,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	}
 
 	/* Convexify shadow contour data if demanded. */
-	if (ifConvexifyShadowContours)
+	if (ifConvexifyShadowContours_)
 	{
 		auto dataConvexified = convexifyShadowContourData(data);
 		data = dataConvexified;
@@ -171,7 +174,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 
 	/* Iterate through the array of contours and get data from each. */
 	auto items = extractSupportFunctionDataItems(data,
-			ifExtractItemsByPoints, numMaxContours);
+			ifExtractItemsByPoints_, numMaxContours);
 
 	SupportFunctionDataPtr supportFunctionData(
 			new SupportFunctionData(items));
@@ -180,7 +183,7 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	return supportFunctionData;
 }
 
-static ShadowContourDataPtr balanceShadowContourData(ShadowContourDataPtr data)
+static std::pair<ShadowContourDataPtr, Vector3d> balanceShadowContourData(ShadowContourDataPtr data)
 {
 	DEBUG_START;
 	/* Construct polyhedron which facets are the contours. */
@@ -197,9 +200,11 @@ static ShadowContourDataPtr balanceShadowContourData(ShadowContourDataPtr data)
 	 * Shift all contours on z component of the std::vector of mass center.
 	 */
 	Vector3d ez(0., 0., 1.);
-	auto dataShifted = shiftShadowContourData(data, - (ez * center) * ez);
+	Vector3d shiftingVector = - (ez * center) * ez;
+	auto dataShifted = shiftShadowContourData(data, shiftingVector);
 	DEBUG_END;
-	return dataShifted;
+	return std::pair<ShadowContourDataPtr, Vector3d>(dataShifted,
+			shiftingVector);
 }
 
 static ShadowContourDataPtr shiftShadowContourData(
@@ -265,7 +270,7 @@ static ShadowContourDataPtr convexifyShadowContourData(
 }
 
 static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
-		ShadowContourDataPtr data, bool ifExtractItemsByPoints,
+		ShadowContourDataPtr data, bool ifExtractItemsByPoints_,
 		int numMaxContours)
 {
 	DEBUG_START;
@@ -288,7 +293,7 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 
 		SContour *contour = &data->contours[iContour];
 		SupportFunctionDataItemExtractor *extractor = NULL;
-		if (ifExtractItemsByPoints)
+		if (ifExtractItemsByPoints_)
 		{
 			extractor =
 				static_cast<SupportFunctionDataItemExtractor*>(
