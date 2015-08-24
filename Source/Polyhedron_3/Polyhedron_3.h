@@ -62,6 +62,12 @@ public:
 	Polyhedron_3(Polyhedron p);
 
 	/**
+	 * Shifts all vertices of the polyhedron on the given vector
+	 * and recalculates the equation of its plane.
+	 */
+	void shift(Vector_3 vector);
+
+	/**
 	 * Gets the vector of vertices from the polyhedron.
 	 *
 	 * @return The vector of all vertices.

@@ -147,6 +147,16 @@ Polyhedron_3::Polyhedron_3(Polyhedron p)
 	DEBUG_END;
 }
 
+void Polyhedron_3::shift(Vector_3 vector)
+{
+	for (auto v = vertices_begin(); v != vertices_end(); ++v)
+	{
+		v->point() = v->point() + vector;
+	}
+	std::transform(facets_begin(), facets_end(), planes_begin(),
+		Plane_from_facet());
+}
+
 std::vector<Vector_3> Polyhedron_3::getVertices()
 {
 	DEBUG_START;
