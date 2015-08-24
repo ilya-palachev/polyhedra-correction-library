@@ -100,6 +100,9 @@ private:
 	/** Whether to balance the vertical center of contours. */
 	bool ifBalancing;
 
+	/** The vector on which all shadow data was shifted. */
+	Vector3d balancingVector_;
+
 	/** Whether to convexify shadow contours. */
 	bool ifConvexifyContours;
 

@@ -44,6 +44,7 @@ TimeMeasurer timer;
 Recoverer::Recoverer() :
 	estimatorType(CGAL_ESTIMATOR),
 	ifBalancing(false),
+	balancingVector_(0., 0., 0.),
 	ifConvexifyContours(false),
 	ifScaleMatrix(false),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
@@ -137,6 +138,10 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	RecovererEstimatorType estimatorType)
 {
 	DEBUG_START;
+	if (h.size() != h0.size())
+	{
+		MAIN_PRINT("no or incorrect 3rd-party data");
+	}
 	MAIN_PRINT("Estimation report:");
 	double DEBUG_VARIABLE L1 = 0.;
 	double DEBUG_VARIABLE L2 = 0.;
@@ -328,11 +333,17 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	/* Build support function data. */
 	SupportFunctionDataConstructor constructor;
 	if (ifBalancing)
+	{
 		constructor.enableBalanceShadowContours();
+	}
 	if (ifConvexifyContours)
 		constructor.enableConvexifyShadowContour();
 	SupportFunctionDataPtr data = constructor.run(dataShadow,
 			numMaxContours);
+	if (ifBalancing)
+	{
+		balancingVector_ = constructor.balancingVector();
+	}
 	std::cout << "Support data extraction: " << timer.popTimer()
 		<< std::endl;
 
@@ -345,7 +356,7 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 static PolyhedronPtr produceFinalPolyhedron(
 	SupportFunctionEstimationDataPtr data,
 	VectorXd estimate,
-	char *fileNamePolyhedron,
+	VectorXd h3rdParty,
 	RecovererEstimatorType estimatorType)
 {
 	DEBUG_START;
@@ -377,27 +388,31 @@ static PolyhedronPtr produceFinalPolyhedron(
 			estimatorType);
 	MAIN_PRINT("======== Solution: ========");
 	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
+
+	MAIN_PRINT("===== 3rd-party polyhedron =====");
+	printEstimationReport(data->supportMatrix(), h0, h3rdParty,
+			estimatorType);
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
 
-	if (fileNamePolyhedron)
-	{
-		MAIN_PRINT("===== 3rd-party polyhedron %s =====",
-				fileNamePolyhedron);
-		PolyhedronPtr p(new Polyhedron());
-		p->fscan_default_1_2(fileNamePolyhedron);
-		Polyhedron_3 polyhedron(p);
-		SupportFunctionDataConstructor constructor;
-		auto data3rdParty = constructor.run(
-				data->supportData()->supportDirectionsCGAL(),
-				polyhedron);
-		auto h3rdParty = data3rdParty->supportValues();
-		printEstimationReport(data->supportMatrix(), h0, h3rdParty,
-				estimatorType);
-	}
-
 	DEBUG_END;
 	return polyhedron;
+}
+
+VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
+		std::vector<Point_3> directions, Vector_3 shift)
+{
+	DEBUG_START;
+	PolyhedronPtr p(new Polyhedron());
+	p->fscan_default_1_2(fileNamePolyhedron);
+	Polyhedron_3 polyhedron(p);
+	polyhedron.shift(shift);
+	SupportFunctionDataConstructor constructor;
+	auto data3rdParty = constructor.run(directions, polyhedron);
+	auto h3rdParty = data3rdParty->supportValues();
+
+	DEBUG_END;
+	return h3rdParty;
 }
 
 PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
@@ -448,8 +463,15 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		exit(EXIT_FAILURE);
 	}
 
+	VectorXd h3rdParty(1);
+	if (fileNamePolyhedron_)
+	{
+		auto directions = data->supportDirectionsCGAL();
+		h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
+				directions, balancingVector_);
+	}
 	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
-			estimate, fileNamePolyhedron_, estimatorType);
+			estimate, h3rdParty, estimatorType);
 
 	DEBUG_END;
 	return polyhedron;
