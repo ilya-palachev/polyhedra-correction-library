@@ -639,6 +639,33 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	return solution;
 }
 
+void runAdjacentFacetsDiagnostics(Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	int iHalfedge = 0;
+	for (auto halfedge = polyhedron.halfedges_begin();
+			halfedge != polyhedron.halfedges_end();
+			++halfedge)
+	{
+		auto facet = halfedge->facet();
+		auto plane = facet->plane();
+		auto norm = plane.orthogonal_vector();
+		norm = norm / norm.squared_length();
+		auto facetOpposite = halfedge->opposite()->facet();
+		auto planeOpposite = facetOpposite->plane();
+		auto normOpposite = planeOpposite.orthogonal_vector();
+		normOpposite = normOpposite / normOpposite.squared_length();
+		double product = norm * normOpposite;
+		double angle = acos(product);
+		std::cerr << "halfedge " << iHalfedge << ", plane " << plane
+			<< " , opposite plane " << planeOpposite << std::endl;
+		std::cerr << "   angle " << angle << " product " << product
+			<< std::endl;
+		++iHalfedge;
+	}
+	DEBUG_END;
+}
+
 VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -660,6 +687,8 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 		runContoursCounterDiagnostics(data, index);
 	if (getenv("PCL_DEBUG"))
 		runInconsistencyDiagnostics(supportData, &intersection, index);
+	if (getenv("RUN_ADJACENT_FACETS_DIAGNOSTICS"))
+		runAdjacentFacetsDiagnostics(intersection);
 
 	auto problem = buildMatrix(supportData, &intersection, index);
 	auto matrix = problem.first;
