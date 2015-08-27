@@ -122,6 +122,11 @@
 #define OPTION_SUPPORT_MATRIX_TYPE 't'
 
 /**
+ * Option "-T" sets the value of threshold.
+ */
+#define OPTION_THRESHOLD_ADJACENT_FACETS 'T'
+
+/**
  * Option "-v" enables verbose mode.
  */
 #define OPTION_VERBOSE 'v'
@@ -138,7 +143,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abc:d:e:f:F:i:l:m:M:n:N:o:p:r:st:vx"
+	"a:Abc:d:e:f:F:i:l:m:M:n:N:o:p:r:st:T:vx"
 
 struct PCLOption: public option
 {
@@ -370,6 +375,16 @@ static PCLOption optionsLong[] =
 		"The name of file that contains the polyhedron constructed "
 		"with some third-party software."
 	},
+	{
+		option
+		{
+			"threshold",
+			required_argument,
+			0,
+			OPTION_THRESHOLD_ADJACENT_FACETS
+		},
+		"The value of threshold of angle between adjacent facets."
+	},
 	{option{0, 0, 0, 0}, 0}
 };
 
@@ -485,6 +500,9 @@ typedef struct
 
 	/** The name of file with 3rd-party constructed polyhedron. */
 	char *fileNamePolyhedron;
+
+	/** The threshold of angle between adjacent facets. */
+	double threshold;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -882,6 +900,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->epsilonFactor = -1;
 	options->numFinitePlanes = 0;
 	options->fileNamePolyhedron = NULL;
+	options->threshold = 0.;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -1291,6 +1310,32 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 						OPTION_COMPARE_WITH_FILE);
 			}
 			options->fileNamePolyhedron = optarg;
+			break;
+			break;
+		case OPTION_THRESHOLD_ADJACENT_FACETS:
+			/* Parse floating-point number from input argument. */
+			options->threshold = strtod(optarg, &charMistaken);
+
+			/*
+			 * If user gives invalid character, the charMistaken is
+			 * set to it
+			 */
+			if (charMistaken && *charMistaken)
+			{
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			}
+
+			/*
+			 * In case of underflow or overflow errno is set to
+			 * ERANGE.
+			 */
+			if (errno == ERANGE)
+			{
+				errorOutOfRange(argc, argv);
+			}
+
+			ifOptionEpsilonFactor = true;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1768,10 +1813,39 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 	recoverer->setNumFinitePlanes(options->numFinitePlanes);
 
 	recoverer->setFileNamePolyhedron(options->fileNamePolyhedron);
+	recoverer->setThreshold(options->threshold);
 
 	DEBUG_END;
 	return recoverer;
 }
+struct Plane_from_facet
+{
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
+	{
+		Polyhedron_3::Halfedge_handle h = f.halfedge();
+		auto plane = Polyhedron_3::Plane_3(h->vertex()->point(),
+				h->next()->vertex()->point(),
+				h->opposite()->vertex()->point());
+		double a = plane.a();
+		double b = plane.b();
+		double c = plane.c();
+		double d = plane.d();
+		double norm = sqrt(a * a + b * b + c * c);
+		a /= norm;
+		b /= norm;
+		c /= norm;
+		d /= norm;
+		if (d > 0.)
+		{
+			a = -a;
+			b = -b;
+			c = -c;
+			d = -d;
+		}
+		plane = Plane_3(a, b, c, d);
+		return plane;
+	}
+};
 
 /**
  * Runs the recovering from shadow contours with requested mode.
@@ -1799,6 +1873,18 @@ static void runRecovery(CommandLineOptions* options,
 	/* Run the recoverer. */
 	PolyhedronPtr p = recoverer->run(data);
 	Polyhedron *pCopy = new Polyhedron(p);
+	Polyhedron_3 intersection(p);
+	std::transform(intersection.facets_begin(), intersection.facets_end(),
+		intersection.planes_begin(), Plane_from_facet());
+	int iFacet = 0;
+	for (auto facet = intersection.facets_begin();
+			facet != intersection.facets_end(); ++facet)
+	{
+		std::cerr << "facet " << iFacet << ": " << facet->plane()
+			<< std::endl;
+		++iFacet;
+	}
+
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << *pCopy;
 	ALWAYS_PRINT(stdout, "numVertices = %d", p->numVertices);
 	DEBUG_END;

@@ -126,6 +126,9 @@ private:
 
 	/** File name of 3rd-party constructed polyhedron. */
 	char *fileNamePolyhedron_;
+
+	/** The threshold of angle betweeb adjacent facets. */
+	double threshold_;
 public:
 
 	/**
@@ -209,6 +212,16 @@ public:
 	 * 				polyhedron.
 	 */
 	void setFileNamePolyhedron(char *fileNamePolyhedron);
+
+	/**
+	 * Sets the threshold of angle between adjacent facets.
+	 *
+	 * @param thresold	The value of threshold.
+	 */
+	void setThreshold(double threshold)
+	{
+		threshold_ = threshold;
+	}
 
 	/**
 	 * Runs the recovering procedure for shadow contours.

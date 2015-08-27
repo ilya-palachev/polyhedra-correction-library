@@ -50,7 +50,8 @@ Recoverer::Recoverer() :
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
 	numFinitePlanes_(0),
-	fileNamePolyhedron_(NULL)
+	fileNamePolyhedron_(NULL),
+	threshold_(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -180,7 +181,8 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 static SupportFunctionEstimator *constructEstimator(
 		SupportFunctionEstimationDataPtr data,
 		RecovererEstimatorType estimatorType,
-		EstimationProblemNorm problemType)
+		EstimationProblemNorm problemType,
+		double threshold)
 {
 	DEBUG_START;
 
@@ -207,6 +209,7 @@ static SupportFunctionEstimator *constructEstimator(
 	case NATIVE_ESTIMATOR:
 		nativeEstimator = new NativeSupportFunctionEstimator(data);
 		nativeEstimator->setProblemType(problemType);
+		nativeEstimator->setThreshold(threshold);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(
 					nativeEstimator);
@@ -446,7 +449,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 	timer.pushTimer();
 	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
-			estimatorType, problemType_);
+			estimatorType, problemType_, threshold_);
 
 	/* Run support function estimation. */
 	VectorXd estimate(dataEstimation->numValues());
