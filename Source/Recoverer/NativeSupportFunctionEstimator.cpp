@@ -29,13 +29,17 @@
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "halfspaces_intersection.h"
 #include "Polyhedron_3/Polyhedron_3.h"
+#include <CGAL/linear_least_squares_fitting_3.h>
 
 #include <Eigen/LU>
+
+static double threshold = 0.;
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
+	threshold_(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -596,6 +600,166 @@ void initialize_indices(Polyhedron_3 *polyhedron)
 	DEBUG_END;
 }
 
+const int DELIMITER = -1;
+Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	if (threshold <= 0.)
+		return polyhedron;
+	int iHalfedge = 0;
+	int numLessThenThreshold = 0;
+	std::list<std::set<int>> clusters;
+	std::set<int> clustersUnion;
+	for (auto halfedge = polyhedron.halfedges_begin();
+			halfedge != polyhedron.halfedges_end();
+			++halfedge)
+	{
+		auto facet = halfedge->facet();
+		auto plane = facet->plane();
+		auto norm = plane.orthogonal_vector();
+		norm = norm / norm.squared_length();
+		auto facetOpposite = halfedge->opposite()->facet();
+		auto planeOpposite = facetOpposite->plane();
+		auto normOpposite = planeOpposite.orthogonal_vector();
+		normOpposite = normOpposite / normOpposite.squared_length();
+		double product = norm * normOpposite;
+		double angle = acos(product);
+
+		if (angle < threshold)
+		{
+			++numLessThenThreshold;
+			std::cerr << "Detected " << facet->id << " and "
+				<< facetOpposite->id << std::endl; 
+			bool ifOneRegistered = false;
+			for (auto &cluster: clusters)
+			{
+				if (cluster.find(facet->id) != cluster.end())
+				{
+					cluster.insert((int) facetOpposite->id);
+					clustersUnion.insert((int)
+							facetOpposite->id);
+					ifOneRegistered = true;
+					break;
+				}
+				if (cluster.find(facetOpposite->id)
+						!= cluster.end())
+				{
+					cluster.insert((int) facet->id);
+					clustersUnion.insert((int) facet->id);
+					ifOneRegistered = true;
+					break;
+				}
+			}
+			if (!ifOneRegistered)
+			{
+				std::set<int> clusterNew;
+				clusterNew.insert(facet->id);
+				clustersUnion.insert(facet->id);
+				clusterNew.insert(facetOpposite->id);
+				clustersUnion.insert(facetOpposite->id);
+				clusters.push_back(clusterNew);
+			}
+		}
+		++iHalfedge;
+	}
+	std::cerr << "threshold: " << threshold << std::endl;
+	std::cerr << "number less than threshold: " << numLessThenThreshold / 2
+		<< " (" << numLessThenThreshold % 2 << ")" << std::endl;
+	int iCluster = 0;
+	std::list<Plane_3> planes;
+	for (auto cluster: clusters)
+	{
+		std::cerr << "Cluster #" << iCluster << ": ";
+		for (int iFacet: cluster)
+		{
+			std::cerr << iFacet << " ";
+		}
+		std::cerr << std::endl;
+		std::set<int> indices;
+		std::list<Plane_3> planesCluster;
+		for (auto facet = polyhedron.facets_begin();
+				facet != polyhedron.facets_end(); ++facet)
+		{
+			if (cluster.find(facet->id) != cluster.end())
+			{
+				planesCluster.push_back(facet->plane());
+				std::cerr << "plane " << facet->plane()
+					<< std::endl;
+				auto halfedge = facet->facet_begin();
+				do
+				{
+					indices.insert(halfedge->vertex()->id);
+				}
+				while (halfedge != facet->facet_begin());
+
+			}
+		}
+		std::list<Point_3> points;
+		for (auto vertex = polyhedron.vertices_begin();
+				vertex != polyhedron.vertices_end(); ++vertex)
+		{
+			if (indices.find(vertex->id) != indices.end())
+			{
+				points.push_back(vertex->point());
+			}
+		}
+		Plane_3 planeBest;
+		double q = CGAL::linear_least_squares_fitting_3(points.begin(),
+				points.end(), planeBest, CGAL::Dimension_tag<0>());
+		for (auto plane: planesCluster)
+		{
+			if (plane.orthogonal_vector()
+					* planeBest.orthogonal_vector() < 0.)
+			{
+				planeBest = Plane_3(-planeBest.a(),
+						-planeBest.b(), -planeBest.c(),
+						-planeBest.d());
+			}
+		}
+		std::cerr << "... fitting " << q << " plane " << planeBest
+			<< std::endl;
+		if (q > 0.9)
+		{
+			std::cerr << "added!" << std::endl;
+			planes.push_back(planeBest);
+		}
+		else
+		{
+			for (auto plane: planesCluster)
+				planes.push_back(plane);
+		}
+	}
+	int iFacet = 0;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		if (clustersUnion.find(facet->id) == clustersUnion.end())
+		{
+			planes.push_back(facet->plane());
+			std::cerr << "adding facet " << iFacet << ": "
+				<< facet->plane() << std::endl;
+		}
+		++iFacet;
+	}
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel()); 
+	initialize_indices(&intersection);
+	std::transform(intersection.facets_begin(), intersection.facets_end(),
+		intersection.planes_begin(), Plane_from_facet());
+
+	iFacet = 0;
+	for (auto facet = intersection.facets_begin();
+			facet != intersection.facets_end(); ++facet)
+	{
+		std::cerr << "facet " << iFacet << ": " << facet->plane()
+			<< std::endl;
+		++iFacet;
+	}
+	DEBUG_END;
+	return intersection;
+}
+
 static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 {
 	DEBUG_START;
@@ -617,53 +781,50 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 		auto direction = directions[i];
 		Plane_3 plane(direction.x, direction.y, direction.z,
 				-values(i));
+		std::cerr << "calculated value " << i << " = " << values(i)
+			<< std::endl;
 		planes.push_back(plane);
 	}
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
+	initialize_indices(&intersection);
+	std::transform(intersection.facets_begin(), intersection.facets_end(),
+		intersection.planes_begin(), Plane_from_facet());
+	int iFacet = 0;
+	for (auto facet = intersection.facets_begin();
+			facet != intersection.facets_end(); ++facet)
+	{
+		std::cerr << "facet " << iFacet << ": " << facet->plane()
+			<< std::endl;
+		++iFacet;
+	}
+	Polyhedron *pCopy = new Polyhedron(intersection);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-union.ply") << *pCopy;
+
+	Polyhedron_3 polyhedron = rebuildPolyhedronByThreshold(intersection);
+	initialize_indices(&polyhedron);
+
+	Polyhedron *pCopy2 = new Polyhedron(polyhedron);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-union.ply") << *pCopy2;
 
 	VectorXd solution(3 * directions.size());
 	for (int i = 0; i < (int) directions.size(); ++i)
 	{
 		 auto direction = directions[i];
-		 auto pair = findTangientVertex(&intersection, direction);
+		 auto pair = findTangientVertex(&polyhedron, direction);
 		 auto vertex = pair.first;
 		 auto point = vertex->point();
 		 solution(3 * i) = point.x();
 		 solution(3 * i + 1) = point.y();
 		 solution(3 * i + 2) = point.z();
+		 std::cerr << "value " << i << " = " << direction * point
+			 << " direction " << direction
+			 << std::endl;
 	}
 
 	DEBUG_END;
 	return solution;
-}
-
-void runAdjacentFacetsDiagnostics(Polyhedron_3 polyhedron)
-{
-	DEBUG_START;
-	int iHalfedge = 0;
-	for (auto halfedge = polyhedron.halfedges_begin();
-			halfedge != polyhedron.halfedges_end();
-			++halfedge)
-	{
-		auto facet = halfedge->facet();
-		auto plane = facet->plane();
-		auto norm = plane.orthogonal_vector();
-		norm = norm / norm.squared_length();
-		auto facetOpposite = halfedge->opposite()->facet();
-		auto planeOpposite = facetOpposite->plane();
-		auto normOpposite = planeOpposite.orthogonal_vector();
-		normOpposite = normOpposite / normOpposite.squared_length();
-		double product = norm * normOpposite;
-		double angle = acos(product);
-		std::cerr << "halfedge " << iHalfedge << ", plane " << plane
-			<< " , opposite plane " << planeOpposite << std::endl;
-		std::cerr << "   angle " << angle << " product " << product
-			<< std::endl;
-		++iHalfedge;
-	}
-	DEBUG_END;
 }
 
 VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
@@ -687,8 +848,6 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 		runContoursCounterDiagnostics(data, index);
 	if (getenv("PCL_DEBUG"))
 		runInconsistencyDiagnostics(supportData, &intersection, index);
-	if (getenv("RUN_ADJACENT_FACETS_DIAGNOSTICS"))
-		runAdjacentFacetsDiagnostics(intersection);
 
 	auto problem = buildMatrix(supportData, &intersection, index);
 	auto matrix = problem.first;
@@ -753,6 +912,7 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	VectorXd solution;
+	threshold = threshold_;
 	
 	switch(problemType_)
 	{
