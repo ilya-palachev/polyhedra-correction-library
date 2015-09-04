@@ -76,6 +76,7 @@ namespace internal
   {
     typedef typename K::Point_3 Point;
     typedef typename CGAL::internal::Build_dual_polyhedron<Polyhedron> Builder;
+    typedef typename K::Plane_3 Plane;
 
     // construct dual points to apply the convex hull
     std::vector<Point> dual_points;
@@ -87,6 +88,31 @@ namespace internal
 
     Builder build_dual (ch);
     P.delegate(build_dual);
+
+    for (auto facet = P.facets_begin(); facet != P.facets_end(); ++facet)
+    {
+        double errorMinimal = 1e16;
+	Plane planeBest;
+        for (auto plane = pbegin; plane != pend; ++plane)
+        {
+            double error = 0.;
+            auto facetBegin = facet->facet_begin();
+            auto halfedge = facet->facet_begin();
+            do
+            {
+                auto point = halfedge->vertex()->point();
+                double value =  plane->a() * point.x() + plane->b() * point.y()
+                    + plane->c() * point.z() + plane->d();
+                error += value * value;
+            } while (halfedge != facetBegin);
+	    if (error < errorMinimal)
+            {
+                errorMinimal = error;
+                planeBest = *plane;
+            }
+        }
+        facet->plane() = planeBest;
+    }
   }
 }
 
