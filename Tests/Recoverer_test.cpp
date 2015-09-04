@@ -1876,6 +1876,7 @@ static void runRecovery(CommandLineOptions* options,
 	Polyhedron_3 intersection(p);
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
 		intersection.planes_begin(), Plane_from_facet());
+#ifndef NDEBUG
 	int iFacet = 0;
 	for (auto facet = intersection.facets_begin();
 			facet != intersection.facets_end(); ++facet)
@@ -1884,6 +1885,7 @@ static void runRecovery(CommandLineOptions* options,
 			<< std::endl;
 		++iFacet;
 	}
+#endif
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << *pCopy;
 	ALWAYS_PRINT(stdout, "numVertices = %d", p->numVertices);
