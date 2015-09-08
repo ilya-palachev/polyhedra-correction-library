@@ -774,6 +774,34 @@ std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 	return planes;
 }
 
+std::list<Plane_3> collectNonJoinedPlanes(Polyhedron_3 polyhedron,
+		std::list<std::set<int>> clusters)
+{
+	DEBUG_START;
+	std::list<Plane_3> planes;
+	std::set<int> clustersUnion;
+	for (auto cluster: clusters)
+	{
+		clustersUnion.insert(cluster.begin(), cluster.end());
+	}
+	int iFacet = 0;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		if (clustersUnion.find(facet->id) == clustersUnion.end())
+		{
+			planes.push_back(facet->plane());
+#ifndef NDEBUG
+			std::cerr << "adding facet " << iFacet << ": "
+				<< facet->plane() << std::endl;
+#endif
+		}
+		++iFacet;
+	}
+	DEBUG_END;
+	return planes;
+}
+
 Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
@@ -798,25 +826,9 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 		planes.insert(planes.end(), planesNew.begin(),
 				planesNew.end());
 	}
-	std::set<int> clustersUnion;
-	for (auto cluster: clusters)
-	{
-		clustersUnion.insert(cluster.begin(), cluster.end());
-	}
-	int iFacet = 0;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		if (clustersUnion.find(facet->id) == clustersUnion.end())
-		{
-			planes.push_back(facet->plane());
-#ifndef NDEBUG
-			std::cerr << "adding facet " << iFacet << ": "
-				<< facet->plane() << std::endl;
-#endif
-		}
-		++iFacet;
-	}
+	auto planesOld = collectNonJoinedPlanes(polyhedron, clusters);
+	planes.insert(planes.end(), planesOld.begin(), planesOld.end());
+
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel()); 
@@ -824,16 +836,6 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
 		intersection.planes_begin(), Plane_from_facet());
 
-#ifndef NDEBUG
-	iFacet = 0;
-	for (auto facet = intersection.facets_begin();
-			facet != intersection.facets_end(); ++facet)
-	{
-		std::cerr << "facet " << iFacet << ": " << facet->plane()
-			<< std::endl;
-		++iFacet;
-	}
-#endif
 	DEBUG_END;
 	return intersection;
 }
