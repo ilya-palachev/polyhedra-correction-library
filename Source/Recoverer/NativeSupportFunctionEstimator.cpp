@@ -786,6 +786,8 @@ std::list<Plane_3> collectNonJoinedPlanes(Polyhedron_3 polyhedron,
 		clustersUnion.insert(cluster.begin(), cluster.end());
 	}
 	int iFacet = 0;
+	std::cerr << "Total size of clusters: " << clustersUnion.size()
+		<< std::endl;
 	for (auto facet = polyhedron.facets_begin();
 			facet != polyhedron.facets_end(); ++facet)
 	{
