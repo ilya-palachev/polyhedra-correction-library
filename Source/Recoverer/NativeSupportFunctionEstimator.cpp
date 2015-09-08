@@ -401,25 +401,12 @@ std::set<int> findTangientPointPlanesIDs(
 	auto circulatorFirst = vertex->vertex_begin();
 	auto circulator = circulatorFirst;
 	std::set<int> planesIDs;
-	std::cerr << "Searching incident facets for vertex " << vertex->id
-		<< std::endl;
 	do
 	{
 		int iFacet = circulator->facet()->id;
 		planesIDs.insert(index[iFacet]);
 		++circulator;
 	} while (circulator != circulatorFirst);
-
-	if (getenv("PCL_DEEP_DEBUG"))
-	{
-		std::cerr << "Incident planes IDs for vertex "
-			<< vertex->id << ": ";
-		for (int id: planesIDs)
-		{
-			std::cerr << id << " ";
-		}
-		std::cerr << std::endl;
-	}
 
 	if (planesIDs.size() != 3)
 	{
@@ -695,8 +682,6 @@ std::list<Plane_3> collectClusterPlanes(Polyhedron_3 polyhedron,
 		if (cluster.find(facet->id) != cluster.end())
 		{
 			planes.push_back(facet->plane());
-			std::cerr << "plane " << facet->plane()
-				<< std::endl;
 		}
 	}
 	DEBUG_END;
@@ -758,8 +743,7 @@ std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 					-planeBest.d());
 		}
 	}
-	std::cerr << "... fitting " << quality << " plane " << planeBest
-		<< " ";
+	std::cerr << "... quality " << quality << " ";
 	double qualityBound = DEFAULT_QUALITY_BOUND;
 	char *qualityBoundString = getenv("PCL_QUALITY_BOUND");
 	if (qualityBoundString)
@@ -805,10 +789,6 @@ std::list<Plane_3> collectNonJoinedPlanes(Polyhedron_3 polyhedron,
 		if (clustersUnion.find(facet->id) == clustersUnion.end())
 		{
 			planes.push_back(facet->plane());
-#ifndef NDEBUG
-			std::cerr << "adding facet " << iFacet << ": "
-				<< facet->plane() << std::endl;
-#endif
 		}
 		++iFacet;
 	}
@@ -827,6 +807,7 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 		<< threshold << std::endl;
 	int iCluster = 0;
 	std::list<Plane_3> planes;
+	int numSuccessfullJoins = 0;
 	for (auto cluster: clusters)
 	{
 		std::cerr << "Cluster #" << iCluster << ": ";
@@ -834,12 +815,16 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 		{
 			std::cerr << iFacet << " ";
 		}
-		std::cerr << std::endl;
 		auto planesNew = joinClusterLeastSquaresCGAL(polyhedron,
 				cluster);
+		if (planesNew.size() == 1)
+			++numSuccessfullJoins;
 		planes.insert(planes.end(), planesNew.begin(),
 				planesNew.end());
+		++iCluster;
 	}
+	std::cerr << "Successfully joined " << numSuccessfullJoins << " of "
+		<< clusters.size() << " clusters" << std::endl;
 	auto planesOld = collectNonJoinedPlanes(polyhedron, clusters);
 	planes.insert(planes.end(), planesOld.begin(), planesOld.end());
 
@@ -945,9 +930,9 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;
 
-	if (getenv("PCL_DEEP_DEBUG"))
+	if (getenv("PCL_CONTOURS_COUNTER_DIAGNOSTICS"))
 		runContoursCounterDiagnostics(data, index);
-	if (getenv("PCL_DEBUG"))
+	if (getenv("PCL_INCONSISTENCY_DIAGNOSTICS"))
 		runInconsistencyDiagnostics(supportData, &intersection, index);
 
 	Polyhedron *pCopy = new Polyhedron(intersection);
@@ -984,6 +969,7 @@ void runSupportDataDiagnostics(SupportFunctionEstimationDataPtr data)
 	auto solution = runL2Estimation(data);
 	DEBUG_END;
 }
+
 void runBadPlanesSearch(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -1027,7 +1013,7 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 		break;
 	case ESTIMATION_PROBLEM_NORM_L_1:
 		runSupportDataDiagnostics(data);
-		if (getenv("PCL_DEEP_DEBUG"))
+		if (getenv("PCL_BAD_PLANES_SEARCH"))
 			runBadPlanesSearch(data);
 		ERROR_PRINT("Not implemented yet!");
 		exit(EXIT_FAILURE);
