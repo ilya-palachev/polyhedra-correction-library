@@ -647,7 +647,6 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 	int iHalfedge = 0;
 	int numLessThenThreshold = 0;
 	std::list<std::set<int>> clusters;
-	std::set<int> clustersUnion;
 	for (auto halfedge = polyhedron.halfedges_begin();
 			halfedge != polyhedron.halfedges_end();
 			++halfedge)
@@ -667,8 +666,6 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 				if (cluster.find(facet->id) != cluster.end())
 				{
 					cluster.insert((int) facetOpposite->id);
-					clustersUnion.insert((int)
-							facetOpposite->id);
 					ifOneRegistered = true;
 					break;
 				}
@@ -676,7 +673,6 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 						!= cluster.end())
 				{
 					cluster.insert((int) facet->id);
-					clustersUnion.insert((int) facet->id);
 					ifOneRegistered = true;
 				}
 			}
@@ -684,9 +680,7 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 			{
 				std::set<int> clusterNew;
 				clusterNew.insert(facet->id);
-				clustersUnion.insert(facet->id);
 				clusterNew.insert(facetOpposite->id);
-				clustersUnion.insert(facetOpposite->id);
 				clusters.push_back(clusterNew);
 			}
 		}
@@ -760,6 +754,11 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 			for (auto plane: planesCluster)
 				planes.push_back(plane);
 		}
+	}
+	std::set<int> clustersUnion;
+	for (auto cluster: clusters)
+	{
+		clustersUnion.insert(cluster.begin(), cluster.end());
 	}
 	int iFacet = 0;
 	for (auto facet = polyhedron.facets_begin();
