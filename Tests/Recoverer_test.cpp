@@ -1888,7 +1888,6 @@ static void runRecovery(CommandLineOptions* options,
 #endif
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << *pCopy;
-	ALWAYS_PRINT(stdout, "numVertices = %d", p->numVertices);
 	DEBUG_END;
 }
 
