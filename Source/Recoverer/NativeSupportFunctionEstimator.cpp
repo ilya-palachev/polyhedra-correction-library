@@ -736,6 +736,7 @@ std::list<Point_3> collectClusterPoints(Polyhedron_3 polyhedron,
 	return points;
 }
 
+const double DEFAULT_QUALITY_BOUND = 0.99;
 std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 		std::set<int> cluster)
 {
@@ -759,7 +760,20 @@ std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 	}
 	std::cerr << "... fitting " << quality << " plane " << planeBest
 		<< " ";
-	if (quality > 0.99 && std::isfinite(quality))
+	double qualityBound = DEFAULT_QUALITY_BOUND;
+	char *qualityBoundString = getenv("PCL_QUALITY_BOUND");
+	if (qualityBoundString)
+	{
+		char *error = NULL;
+		qualityBound = strtod(qualityBoundString, &error);
+		if (error && *error)
+		{
+			ERROR_PRINT("Failed to read PCL_QUALITY_BOUND: %s",
+					error);
+			exit(EXIT_FAILURE);
+		}
+	}
+	if (quality > qualityBound && std::isfinite(quality))
 	{
 		std::cerr << "ADDED!!!" << std::endl;
 		planes.push_back(planeBest);
