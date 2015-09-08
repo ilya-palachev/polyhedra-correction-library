@@ -639,13 +639,10 @@ double calculateEdgeAngle(Polyhedron_3::Facet_handle facet,
 	return angle;
 }
 
-Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
+std::list<std::set<int>> buildClusters(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
-	if (threshold <= 0.)
-		return polyhedron;
 	int iHalfedge = 0;
-	int numLessThenThreshold = 0;
 	std::list<std::set<int>> clusters;
 	for (auto halfedge = polyhedron.halfedges_begin();
 			halfedge != polyhedron.halfedges_end();
@@ -657,9 +654,6 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 
 		if (angle < threshold)
 		{
-			++numLessThenThreshold;
-			std::cerr << "Detected " << facet->id << " and "
-				<< facetOpposite->id << std::endl; 
 			bool ifOneRegistered = false;
 			for (auto &cluster: clusters)
 			{
@@ -686,9 +680,19 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 		}
 		++iHalfedge;
 	}
-	std::cerr << "threshold: " << threshold << std::endl;
-	std::cerr << "number less than threshold: " << numLessThenThreshold / 2
-		<< " (" << numLessThenThreshold % 2 << ")" << std::endl;
+	DEBUG_END;
+	return clusters;
+}
+
+Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	if (threshold <= 0.)
+		return polyhedron;
+	auto clusters = buildClusters(polyhedron);
+	std::cerr << "Found " << clusters.size()
+		<< " clusters for threshold: "
+		<< threshold << std::endl;
 	int iCluster = 0;
 	std::list<Plane_3> planes;
 	for (auto cluster: clusters)
