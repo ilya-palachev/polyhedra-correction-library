@@ -736,6 +736,44 @@ std::list<Point_3> collectClusterPoints(Polyhedron_3 polyhedron,
 	return points;
 }
 
+std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
+		std::set<int> cluster)
+{
+	DEBUG_START;
+	std::list<Plane_3> planes;
+	auto planesOld = collectClusterPlanes(polyhedron, cluster);
+	auto points = collectClusterPoints(polyhedron, cluster);
+	Plane_3 planeBest;
+	double quality = CGAL::linear_least_squares_fitting_3(
+			points.begin(), points.end(), planeBest,
+			CGAL::Dimension_tag<0>());
+	for (auto plane: planesOld)
+	{
+		if (plane.orthogonal_vector()
+				* planeBest.orthogonal_vector() < 0.)
+		{
+			planeBest = Plane_3(-planeBest.a(),
+					-planeBest.b(), -planeBest.c(),
+					-planeBest.d());
+		}
+	}
+	std::cerr << "... fitting " << quality << " plane " << planeBest
+		<< " ";
+	if (quality > 0.99 && std::isfinite(quality))
+	{
+		std::cerr << "ADDED!!!" << std::endl;
+		planes.push_back(planeBest);
+	}
+	else
+	{
+		std::cerr << std::endl;
+		for (auto plane: planesOld)
+			planes.push_back(plane);
+	}
+	DEBUG_END;
+	return planes;
+}
+
 Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
@@ -755,35 +793,10 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 			std::cerr << iFacet << " ";
 		}
 		std::cerr << std::endl;
-		auto planesOld = collectClusterPlanes(polyhedron, cluster);
-		auto points = collectClusterPoints(polyhedron, cluster);
-		Plane_3 planeBest;
-		double quality = CGAL::linear_least_squares_fitting_3(
-				points.begin(), points.end(), planeBest,
-				CGAL::Dimension_tag<0>());
-		for (auto plane: planesOld)
-		{
-			if (plane.orthogonal_vector()
-					* planeBest.orthogonal_vector() < 0.)
-			{
-				planeBest = Plane_3(-planeBest.a(),
-						-planeBest.b(), -planeBest.c(),
-						-planeBest.d());
-			}
-		}
-		std::cerr << "... fitting " << quality << " plane " << planeBest
-			<< " ";
-		if (quality > 0.99 && std::isfinite(quality))
-		{
-			std::cerr << "ADDED!!!" << std::endl;
-			planes.push_back(planeBest);
-		}
-		else
-		{
-			std::cerr << std::endl;
-			for (auto plane: planesOld)
-				planes.push_back(plane);
-		}
+		auto planesNew = joinClusterLeastSquaresCGAL(polyhedron,
+				cluster);
+		planes.insert(planes.end(), planesNew.begin(),
+				planesNew.end());
 	}
 	std::set<int> clustersUnion;
 	for (auto cluster: clusters)
