@@ -408,6 +408,13 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 	DEBUG_START;
 	PolyhedronPtr p(new Polyhedron());
 	p->fscan_default_1_2(fileNamePolyhedron);
+
+	Polyhedron *pCopy = new Polyhedron(p);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "3rd-party-recovered.ply")
+		<< *pCopy;
+	std::cerr << "3rd party polyhedron has " << p->numFacets << " facets"
+		<< std::endl;
+
 	Polyhedron_3 polyhedron(p);
 	polyhedron.shift(shift);
 	SupportFunctionDataConstructor constructor;

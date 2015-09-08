@@ -743,7 +743,8 @@ std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 					-planeBest.d());
 		}
 	}
-	std::cerr << "... quality " << quality << " ";
+	if (getenv("PCL_DEEP_DEBUG"))
+		std::cerr << "... quality " << quality << " ";
 	double qualityBound = DEFAULT_QUALITY_BOUND;
 	char *qualityBoundString = getenv("PCL_QUALITY_BOUND");
 	if (qualityBoundString)
@@ -759,12 +760,14 @@ std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 	}
 	if (quality > qualityBound && std::isfinite(quality))
 	{
-		std::cerr << "ADDED!!!" << std::endl;
+		if (getenv("PCL_DEEP_DEBUG"))
+			std::cerr << "ADDED!!!" << std::endl;
 		planes.push_back(planeBest);
 	}
 	else
 	{
-		std::cerr << std::endl;
+		if (getenv("PCL_DEEP_DEBUG"))
+			std::cerr << std::endl;
 		for (auto plane: planesOld)
 			planes.push_back(plane);
 	}
@@ -810,10 +813,13 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 	int numSuccessfullJoins = 0;
 	for (auto cluster: clusters)
 	{
-		std::cerr << "Cluster #" << iCluster << ": ";
-		for (int iFacet: cluster)
+		if (getenv("PCL_DEEP_DEBUG"))
 		{
-			std::cerr << iFacet << " ";
+			std::cerr << "Cluster #" << iCluster << ": ";
+			for (int iFacet: cluster)
+			{
+				std::cerr << iFacet << " ";
+			}
 		}
 		auto planesNew = joinClusterLeastSquaresCGAL(polyhedron,
 				cluster);
@@ -834,6 +840,12 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 	initialize_indices(&intersection);
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
 		intersection.planes_begin(), Plane_from_facet());
+	int numFacetsBefore = polyhedron.size_of_facets();
+	int numFacetsAfter = intersection.size_of_facets();
+	int numFacetsReduced = numFacetsBefore - numFacetsAfter;
+	std::cerr << "Number of facets reduced from " << numFacetsBefore
+		<< " to " << numFacetsAfter << " ( difference is "
+		<< numFacetsReduced << ")" << std::endl;
 
 	DEBUG_END;
 	return intersection;
