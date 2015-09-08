@@ -623,7 +623,22 @@ void initialize_indices(Polyhedron_3 *polyhedron)
 	DEBUG_END;
 }
 
-const int DELIMITER = -1;
+double calculateEdgeAngle(Polyhedron_3::Facet_handle facet,
+		Polyhedron_3::Facet_handle facetOpposite)
+{
+	DEBUG_START;
+	auto plane = facet->plane();
+	auto norm = plane.orthogonal_vector();
+	norm = norm / norm.squared_length();
+	auto planeOpposite = facetOpposite->plane();
+	auto normOpposite = planeOpposite.orthogonal_vector();
+	normOpposite = normOpposite / normOpposite.squared_length();
+	double product = norm * normOpposite;
+	double angle = acos(product);
+	DEBUG_END;
+	return angle;
+}
+
 Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
@@ -638,15 +653,8 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 			++halfedge)
 	{
 		auto facet = halfedge->facet();
-		auto plane = facet->plane();
-		auto norm = plane.orthogonal_vector();
-		norm = norm / norm.squared_length();
 		auto facetOpposite = halfedge->opposite()->facet();
-		auto planeOpposite = facetOpposite->plane();
-		auto normOpposite = planeOpposite.orthogonal_vector();
-		normOpposite = normOpposite / normOpposite.squared_length();
-		double product = norm * normOpposite;
-		double angle = acos(product);
+		double angle = calculateEdgeAngle(facet, facetOpposite);
 
 		if (angle < threshold)
 		{
