@@ -726,8 +726,9 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 			}
 		}
 		Plane_3 planeBest;
-		double q = CGAL::linear_least_squares_fitting_3(points.begin(),
-				points.end(), planeBest, CGAL::Dimension_tag<0>());
+		double quality = CGAL::linear_least_squares_fitting_3(
+				points.begin(), points.end(), planeBest,
+				CGAL::Dimension_tag<0>());
 		for (auto plane: planesCluster)
 		{
 			if (plane.orthogonal_vector()
@@ -738,15 +739,16 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 						-planeBest.d());
 			}
 		}
-		std::cerr << "... fitting " << q << " plane " << planeBest
-			<< std::endl;
-		if (q > 0.9)
+		std::cerr << "... fitting " << quality << " plane " << planeBest
+			<< " ";
+		if (quality > 0.99 && std::isfinite(quality))
 		{
-			std::cerr << "added!" << std::endl;
+			std::cerr << "ADDED!!!" << std::endl;
 			planes.push_back(planeBest);
 		}
 		else
 		{
+			std::cerr << std::endl;
 			for (auto plane: planesCluster)
 				planes.push_back(plane);
 		}
