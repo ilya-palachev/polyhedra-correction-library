@@ -717,6 +717,7 @@ Polyhedron_3 rebuildPolyhedronByThreshold(Polyhedron_3 polyhedron)
 				do
 				{
 					indices.insert(halfedge->vertex()->id);
+					++halfedge;
 				}
 				while (halfedge != facet->facet_begin());
 
