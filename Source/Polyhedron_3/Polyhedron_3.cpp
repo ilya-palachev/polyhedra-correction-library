@@ -208,3 +208,29 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	DEBUG_END;
 	return stream;
 }
+
+void Polyhedron_3::initialize_indices()
+{
+	DEBUG_START;
+	auto vertex = vertices_begin();
+	for (int i = 0; i < (int) size_of_vertices(); ++i)
+	{
+		vertex->id = i;
+		++vertex;
+	}
+
+	auto facet = facets_begin();
+	for (int i = 0; i < (int) size_of_facets(); ++i)
+	{
+		facet->id = i;
+		++facet;
+	}
+
+	auto halfedge = halfedges_begin();
+	for (int i = 0; i < (int) size_of_halfedges(); ++i)
+	{
+		halfedge->id = i;
+		++halfedge;
+	}
+	DEBUG_END;
+}
