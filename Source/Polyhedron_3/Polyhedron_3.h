@@ -121,6 +121,11 @@ public:
 	 * @return		The stream ready for further outputs
 	 */
 	friend std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p);
+
+	/**
+	 * Initializes the indices of the polyhedron.
+	 */
+	void initialize_indices();
 };
 
 #endif /* POLYHEDRONCGAL_H_ */
