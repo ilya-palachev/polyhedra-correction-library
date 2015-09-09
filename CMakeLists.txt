@@ -119,6 +119,7 @@ set (SOURCE_pcl
 	Source/Recoverer/IpoptFinitePlanesFitter.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSFELinearProgramBuilder.cpp
+	Source/Recoverer/NaiveFacetJoiner.cpp
 	Source/Recoverer/NativeSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
