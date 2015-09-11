@@ -32,15 +32,12 @@
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include "Recoverer/NaiveFacetJoiner.h"
-
-
-static double threshold = 0.;
+#include "Recoverer/PlaneFromFacet.h"
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
-	threshold_(0.)
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -215,107 +212,6 @@ int countInnerPoints(std::vector<Point_3> points)
 	int numInnerPoints = collectInnerPointsIDs(points).size();
 	DEBUG_END;
 	return numInnerPoints;
-}
-
-static std::vector<Plane_3> planesOriginal;
-
-static int findBestPlaneOriginal(Polyhedron_3::Facet& facet)
-{
-	DEBUG_START;
-	double minimum = 1e100;
-	int iPlaneBest = -1;
-	for (int i = 0; i < (int) planesOriginal.size(); ++i)
-	{
-		Plane_3 plane = planesOriginal[i];
-		auto halfedgeBegin = facet.facet_begin();
-		auto halfedge = halfedgeBegin;
-		double errorSumSquares = 0.;
-		bool ifAllOnPlane = true;
-		do
-		{
-			auto point = halfedge->vertex()->point();
-			ifAllOnPlane &= plane.has_on(point);
-			double error = point.x() * plane.a()
-				+ point.y() * plane.b()
-				+ point.z() * plane.c() + plane.d();
-			error = error * error;
-			errorSumSquares += error;
-			++halfedge;
-		}
-		while (halfedge != halfedgeBegin);
-
-		if (ifAllOnPlane)
-		{
-			std::cerr << "Found exact plane: " << plane
-				<< std::endl;
-			iPlaneBest = i;
-			break;
-		}
-
-		if (errorSumSquares < minimum)
-		{
-			iPlaneBest = i;
-			minimum = errorSumSquares;
-		}
-	}
-	if (iPlaneBest < 0)
-	{
-		ERROR_PRINT("Failed to find best plane");
-		exit(EXIT_FAILURE);
-	}
-	DEBUG_END;
-	return iPlaneBest;
-}
-
-struct Plane_from_facet
-{
-	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
-	{
-		int iPlane = findBestPlaneOriginal(facet);
-		Plane_3 planeBest = planesOriginal[iPlane];
-		double a = planeBest.a();
-		double b = planeBest.b();
-		double c = planeBest.c();
-		double d = planeBest.d();
-		double norm = sqrt(a * a + b * b + c * c);
-		a /= norm;
-		b /= norm;
-		c /= norm;
-		d /= norm;
-		if (d > 0.)
-		{
-			a = -a;
-			b = -b;
-			c = -c;
-			d = -d;
-		}
-		planeBest = Plane_3(a, b, c, d);
-		return planeBest;
-	}
-};
-
-std::vector<int> constructPlanesIndex(Polyhedron_3 polyhedron)
-{
-	DEBUG_START;
-	int iFacet = 0;
- 	std::vector<int> index(polyhedron.size_of_facets());
-	std::set<int> usedIndices;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		int iBestPlane = findBestPlaneOriginal(*facet);
-		index[iFacet] = iBestPlane;
-		usedIndices.insert(iBestPlane);
-		++iFacet;
-	}
-	if (usedIndices.size() < index.size())
-	{
-		std::cerr << "Equal indices: " << usedIndices.size() << " < "
-			<< index.size() << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	DEBUG_END;
-	return index;
 }
 
 void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
@@ -591,7 +487,8 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 }
 
 
-static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
+static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values,
+		PlaneFromFacet indexer)
 {
 	DEBUG_START;
 	VectorXd difference = values - data->supportValues();
@@ -619,24 +516,13 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 			intersection, Kernel());
 	intersection.initialize_indices();
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_facet());
-	Polyhedron *pCopy = new Polyhedron(intersection);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-union.ply") << *pCopy;
-
-	NaiveFacetJoiner joiner(threshold);
-	Polyhedron_3 polyhedron = joiner.run(intersection);
-	polyhedron.initialize_indices();
-	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
-		polyhedron.planes_begin(), Plane_from_facet());
-
-	Polyhedron *pCopy2 = new Polyhedron(polyhedron);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-union.ply") << *pCopy2;
+		intersection.planes_begin(), indexer);
 
 	VectorXd solution(3 * directions.size());
 	for (int i = 0; i < (int) directions.size(); ++i)
 	{
 		 auto direction = directions[i];
-		 auto pair = findTangientVertex(&polyhedron, direction);
+		 auto pair = findTangientVertex(&intersection, direction);
 		 auto vertex = pair.first;
 		 auto point = vertex->point();
 		 solution(3 * i) = point.x();
@@ -653,16 +539,16 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	DEBUG_START;
 	SupportFunctionDataPtr supportData = data->supportData();
 	auto planes = supportData->supportPlanes();
-	planesOriginal = planes;
 
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
 	intersection.initialize_indices();
 
+	PlaneFromFacet indexer(supportData->supportPlanes());
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_facet());
-	auto index = constructPlanesIndex(intersection);
+		intersection.planes_begin(), indexer);
+	auto index = indexer.constructPlanesIndex(intersection);
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;
 
@@ -694,7 +580,7 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 		ERROR_PRINT("Solving failed!");
 		exit(EXIT_FAILURE);
 	}
-	auto solution = calculateSolution(supportData, values);
+	auto solution = calculateSolution(supportData, values, indexer);
 	DEBUG_END;
 	return solution;
 }
@@ -739,7 +625,6 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	VectorXd solution;
-	threshold = threshold_;
 	
 	switch(problemType_)
 	{
