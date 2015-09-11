@@ -37,6 +37,8 @@
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Recoverer/IpoptFinitePlanesFitter.h"
+#include "Recoverer/NaiveFacetJoiner.h"
+#include "Recoverer/PlaneFromFacet.h"
 #include "halfspaces_intersection.h"
 
 TimeMeasurer timer;
@@ -209,7 +211,6 @@ static SupportFunctionEstimator *constructEstimator(
 	case NATIVE_ESTIMATOR:
 		nativeEstimator = new NativeSupportFunctionEstimator(data);
 		nativeEstimator->setProblemType(problemType);
-		nativeEstimator->setThreshold(threshold);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(
 					nativeEstimator);
@@ -271,7 +272,7 @@ static SupportFunctionEstimator *constructEstimator(
 	return estimator;
 }
 
-static PolyhedronPtr producePolyhedron(
+static Polyhedron_3 producePolyhedron_3(
 		SupportFunctionEstimationDataPtr dataEstimation,
 		VectorXd estimate)
 {
@@ -282,8 +283,10 @@ static PolyhedronPtr producePolyhedron(
 	std::vector<Plane_3> planes;
 	for (unsigned int i = 0; i < directions.size(); ++i)
 	{
-		planes.push_back(Plane_3(directions[i].x, directions[i].y,
-					directions[i].z, -estimate(i)));
+		Plane_3 plane(directions[i].x, directions[i].y,
+					directions[i].z, -estimate(i));
+		planes.push_back(plane);
+		std::cerr << plane << std::endl;
 	}
 
 	/* Intersect halfspaces corresponding to corrected planes. */
@@ -291,7 +294,18 @@ static PolyhedronPtr producePolyhedron(
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
 
-	/* Construct final polyhedron. */
+	DEBUG_END;
+	return intersection;
+}
+
+
+static PolyhedronPtr producePolyhedron(
+		SupportFunctionEstimationDataPtr dataEstimation,
+		VectorXd estimate)
+{
+	DEBUG_START;
+	Polyhedron_3 intersection = producePolyhedron_3(dataEstimation,
+			estimate);
 	PolyhedronPtr polyhedron(new Polyhedron(intersection));
 	DEBUG_END;
 	return polyhedron;
@@ -425,6 +439,31 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 	return h3rdParty;
 }
 
+static VectorXd joinAndRecalculate(SupportFunctionEstimationDataPtr data,
+		VectorXd estimate, double threshold)
+{
+	DEBUG_START;
+	Polyhedron_3 intersection = producePolyhedron_3(data, estimate);
+
+	Polyhedron *pCopy = new Polyhedron(intersection);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-union.ply") << *pCopy;
+
+	NaiveFacetJoiner joiner(threshold);
+	Polyhedron_3 polyhedron = joiner.run(intersection);
+	polyhedron.initialize_indices();
+	PlaneFromFacet indexer(data->supportData()->supportPlanes());
+	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
+		polyhedron.planes_begin(), indexer);
+
+	Polyhedron *pCopy2 = new Polyhedron(polyhedron);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-union.ply") << *pCopy2;
+
+	estimate = intersection.calculateSupportValues(
+			data->supportData()->supportDirectionsCGAL());
+	DEBUG_END;
+	return estimate;
+}
+
 PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
@@ -471,6 +510,12 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 				supportMatrixType_, estimate))
 	{
 		exit(EXIT_FAILURE);
+	}
+
+	if (threshold_ > 0.)
+	{
+		estimate = joinAndRecalculate(dataEstimation, estimate,
+				threshold_);
 	}
 
 	VectorXd h3rdParty(1);
