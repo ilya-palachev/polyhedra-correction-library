@@ -216,6 +216,12 @@ public:
 	std::vector<Point_3> getShiftedDualPoints_3(
 			std::vector<double> epsilons);
 
+	/**
+	 * Searches trusted edges that are depicted by support data.
+	 *
+	 * @param threshold	The value controlling the closeness of lines.
+	 */
+	void searchTrustedEdges(double threshold);
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_H */

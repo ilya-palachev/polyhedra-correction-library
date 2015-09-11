@@ -30,6 +30,7 @@
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 
 SupportFunctionData::SupportFunctionData() :
 	items()
@@ -318,4 +319,58 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
 	}
 	DEBUG_END;
 	return points;
+}
+
+void SupportFunctionData::searchTrustedEdges(double threshold)
+{
+	DEBUG_START;
+	std::cerr << "SupportFunctionData::searchTrustedEdges is called!"
+		<< std::endl;
+	std::cerr << "threshold = " << threshold << std::endl;
+
+	auto directions = supportDirectionsCGAL();
+	std::cerr << "There are " << directions.size() << " directions"
+		<< std::endl;
+	Polyhedron_3 hull;
+	CGAL::convex_hull_3(directions.begin(), directions.end(), hull);
+	std::cerr << "Convex hull contains " << hull.size_of_vertices() <<
+		" vertices" << std::endl;
+
+	Point_3 origin(0., 0., 0.);
+	int iHalfedge = 0;
+	for (auto halfedge = hull.halfedges_begin();
+			halfedge != hull.halfedges_end(); ++halfedge)
+	{
+		std::cerr << "-- halfedge " << iHalfedge << std::endl;
+		auto vertex_to = halfedge->vertex();
+		Point_3 point_to = vertex_to->point();
+		std::cerr << " point to " << point_to << std::endl;
+		auto vertex_from = halfedge->opposite()->vertex();
+		Point_3 point_from = vertex_from->point();
+		std::cerr << " point from " << point_from << std::endl;
+
+		std::vector<Point_3> points;
+		auto halfedgeNext = vertex_to->vertex_begin();
+		do
+		{
+			auto vertex = halfedgeNext->opposite()->vertex();
+			if (vertex != vertex_from)
+			{
+				points.push_back(vertex->point());
+			}
+			++halfedgeNext;
+		}
+		while(halfedgeNext != vertex_to->vertex_begin());
+
+		for (auto point: points)
+		{
+			std::cerr << " point " << point << std::endl;
+			double volume = CGAL::volume(origin, point_from,
+					point_to, point);
+			std::cerr << "volume " << std::setprecision(16)
+				<< std::fixed << fabs(volume) << std::endl;
+		}
+		++iHalfedge;
+	}
+	DEBUG_END;
 }
