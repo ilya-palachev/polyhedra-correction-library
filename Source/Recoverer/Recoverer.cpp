@@ -439,6 +439,16 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		return NULL;
 	}
 
+	char *trustedEdgesThesholdString = getenv("TRUSTED_EDGES_THRESHOLD");
+	if (trustedEdgesThesholdString)
+	{
+
+		double trustedEdgesThreshold = strtod(
+				trustedEdgesThesholdString, NULL);
+		data->searchTrustedEdges(trustedEdgesThreshold);
+	}
+
+
 	timer.pushTimer();
 
 	/* Build support function estimation data. */
