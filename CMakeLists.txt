@@ -121,6 +121,7 @@ set (SOURCE_pcl
 	Source/Recoverer/GlpkSFELinearProgramBuilder.cpp
 	Source/Recoverer/NaiveFacetJoiner.cpp
 	Source/Recoverer/NativeSupportFunctionEstimator.cpp
+	Source/Recoverer/PlaneFromFacet.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
 	Source/Recoverer/TangientPointInformation.cpp
