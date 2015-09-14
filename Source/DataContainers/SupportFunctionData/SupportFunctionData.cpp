@@ -490,7 +490,6 @@ void addTripletToClusters(int threshold, std::vector<std::set<int>> &clusters,
 			{
 				cluster = clustersUnion;
 				ifFound = true;
-				std::cerr << "Merging clusters!" << std::endl;
 			}
 		}
 	}
@@ -499,6 +498,23 @@ void addTripletToClusters(int threshold, std::vector<std::set<int>> &clusters,
 		clusters.push_back(triplet);
 	}
 	DEBUG_END;
+}
+
+std::vector<std::set<int>> getTriplets(std::vector<int> a, std::vector<int> b,
+		std::vector<int> c)
+{
+	std::vector<std::set<int>> triplets;
+	for (int id: a)
+		for (int idPrev: b)
+			for (int idNext: c)
+			{
+				std::set<int> triplet;
+				triplet.insert(id);
+				triplet.insert(idPrev);
+				triplet.insert(idNext);
+				triplets.push_back(triplet);
+			}
+	return triplets;
 }
 
 void SupportFunctionData::searchTrustedEdges(double threshold)
@@ -512,39 +528,46 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	printColouredIntersection(planes, contoursIndices);
 	int numTriplets = 0;
 	std::vector<std::set<int>> clusters;
-	for (int iContour = 0; iContour < (int) contoursIndices.size();
-			++iContour)
-	{
-		int iContourPrev = iContour - 1;
-		int iContourNext = iContour + 1;
-		if (iContourPrev < 0)
-			iContourPrev = contoursIndices.size() - 1;
-		if (iContourNext >= (int) contoursIndices.size())
-			iContourNext = 0;
-		for (auto id: contoursIndices[iContour])
-			for (auto idPrev: contoursIndices[iContourPrev])
-				for (auto idNext: contoursIndices[iContourNext])
-				{
-					std::set<int> triplet;
-					triplet.insert(id);
-					triplet.insert(idPrev);
-					triplet.insert(idNext);
-					int rank = calculateRank(threshold,
-							planes, triplet);
-					if (rank == 2)
-					{
-						std::cerr << "Found triplet ";
-						for (int id: triplet)
-							std::cerr << id << " ";
-						std::cerr << std::endl;
-						++numTriplets;
-						addTripletToClusters(threshold,
-							clusters, triplet,
-							planes);
-					}
-				}
+	std::vector<std::set<int>> triplets;
+	char *depthString = getenv("DEPTH");
+	int depth = 1;
+	if (depthString)
+		depth = atoi(depthString);
 
+	int numContours = contoursIndices.size();
+	for (int iContour = 0; iContour < numContours; ++iContour)
+	{
+		for (int i = 0; i < depth; ++i)
+		{
+			int iContourPrev = (numContours + iContour - i)
+				% numContours;
+			for (int j = 0; j < depth; ++j)
+			{
+				int iContourNext = (numContours + iContour + j)
+					% numContours;
+				auto tripletsPortion = getTriplets(
+						contoursIndices[iContourPrev],
+						contoursIndices[iContour],
+						contoursIndices[iContourNext]);
+				for (auto triplet: tripletsPortion)
+					triplets.push_back(triplet);
+			}
+		}
 	}
+	int iTriplet = 0;
+	for (auto triplet: triplets)
+	{
+		std::cerr << "Processing triplet " << iTriplet++
+			<< " of " << triplets.size() << "        " << '\r';
+		int rank = calculateRank(threshold, planes, triplet);
+		if (rank == 2)
+		{
+			++numTriplets;
+			addTripletToClusters(threshold,	clusters, triplet,
+						planes);
+		}
+	}
+	std::cerr << std::endl;
 	std::cerr << "Found " << numTriplets << " degenerate triplets."
 		<< std::endl;
 	std::cerr << "Found " << clusters.size() << " clusters" << std::endl;
