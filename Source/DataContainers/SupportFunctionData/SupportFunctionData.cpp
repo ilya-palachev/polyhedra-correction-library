@@ -464,6 +464,37 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 	DEBUG_END;
 }
 
+void addTripletToClusters(std::vector<std::set<int>> &clusters,
+		std::set<int> triplet)
+{
+	DEBUG_START;
+	bool ifFound = false;
+	for (auto &cluster: clusters)
+	{
+		for (int id: triplet)
+		{
+			if (cluster.find(id) != cluster.end())
+			{
+				ifFound = true;
+				break;
+			}
+		}
+		if (ifFound)
+		{
+			for (int id: triplet)
+			{
+				cluster.insert(id);
+			}
+			break;
+		}
+	}
+	if (!ifFound)
+	{
+		clusters.push_back(triplet);
+	}
+	DEBUG_END;
+}
+
 void SupportFunctionData::searchTrustedEdges(double threshold)
 {
 	DEBUG_START;
@@ -474,6 +505,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	auto contoursIndices = getContoursIndices(items);
 	printColouredIntersection(planes, contoursIndices);
 	int numTriplets = 0;
+	std::vector<std::set<int>> clusters;
 	for (int iContour = 0; iContour < (int) contoursIndices.size();
 			++iContour)
 	{
@@ -487,17 +519,45 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 			for (auto idPrev: contoursIndices[iContourPrev])
 				for (auto idNext: contoursIndices[iContourNext])
 				{
+					std::set<int> triplet;
+					triplet.insert(id);
+					triplet.insert(idPrev);
+					triplet.insert(idNext);
 					int rank = calculateRank(threshold,
 							planes[id],
 							planes[idPrev],
 							planes[idNext]);
 					if (rank == 2)
+					{
+						std::cerr << "Found triplet ";
+						for (int id: triplet)
+							std::cerr << id << " ";
+						std::cerr << std::endl;
 						++numTriplets;
+						addTripletToClusters(clusters,
+								triplet);
+					}
 				}
 
 	}
 	std::cerr << "Found " << numTriplets << " degenerate triplets."
 		<< std::endl;
-
+	std::cerr << "Found " << clusters.size() << " clusters" << std::endl;
+	std::vector<std::vector<int>> semiContours;
+	int iCluster = 0;
+	for (auto cluster: clusters)
+	{
+		std::vector<int> semiContour;
+		std::cerr << "Cluster #" << iCluster << ": ";
+		for (int id: cluster)
+		{
+			std::cerr << id << " ";
+			semiContour.push_back(id);
+		}
+		std::cerr << std::endl;
+		semiContours.push_back(semiContour);
+		++iCluster;
+	}
+	printColouredIntersection(planes, semiContours);
 	DEBUG_END;
 }
