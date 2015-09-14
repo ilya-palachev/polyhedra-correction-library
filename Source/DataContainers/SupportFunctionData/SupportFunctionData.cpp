@@ -364,16 +364,22 @@ std::vector<std::vector<int>> getContoursIndices(
 	return contoursIndices;
 }
 
-int calculateRank(double threshold, Plane_3 alpha, Plane_3 beta, Plane_3 gamma)
+int calculateRank(double threshold, std::vector<Plane_3> planes,
+		std::set<int> cluster)
 {
 	DEBUG_START;
-	typedef Eigen::Matrix<double, 3, 4> PlaneTripletMatrix;
-	PlaneTripletMatrix matrix;
-	matrix << alpha.a(), alpha.b(), alpha.c(), alpha.d(),
-	       beta.a(), beta.b(), beta.c(), beta.d(),
-	       gamma.a(), gamma.b(), gamma.c(), gamma.d();
-
-	Eigen::FullPivLU<PlaneTripletMatrix> decomposition(matrix);
+	Eigen::MatrixXd matrix;
+	matrix.resize(cluster.size(), 4);
+	int iPlane = 0;
+	for (int id: cluster)
+	{
+		matrix(iPlane, 0) = planes[id].a();
+		matrix(iPlane, 1) = planes[id].b();
+		matrix(iPlane, 2) = planes[id].c();
+		matrix(iPlane, 3) = planes[id].d();
+		++iPlane;
+	}
+	Eigen::FullPivLU<Eigen::MatrixXd> decomposition(matrix);
 	decomposition.setThreshold(threshold);
 	int rank = decomposition.rank();
 	DEBUG_END;
@@ -464,28 +470,28 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 	DEBUG_END;
 }
 
-void addTripletToClusters(std::vector<std::set<int>> &clusters,
-		std::set<int> triplet)
+void addTripletToClusters(int threshold, std::vector<std::set<int>> &clusters,
+		std::set<int> triplet, std::vector<Plane_3> planes)
 {
 	DEBUG_START;
 	bool ifFound = false;
 	for (auto &cluster: clusters)
 	{
+		std::set<int> clustersUnion;
+		for (int id: cluster)
+			clustersUnion.insert(id);
 		for (int id: triplet)
+			clustersUnion.insert(id);
+		if (clustersUnion.size() < cluster.size() + triplet.size())
 		{
-			if (cluster.find(id) != cluster.end())
+			int rank = calculateRank(threshold, planes,
+					clustersUnion);
+			if (rank == 2)
 			{
+				cluster = clustersUnion;
 				ifFound = true;
-				break;
+				std::cerr << "Merging clusters!" << std::endl;
 			}
-		}
-		if (ifFound)
-		{
-			for (int id: triplet)
-			{
-				cluster.insert(id);
-			}
-			break;
 		}
 	}
 	if (!ifFound)
@@ -524,9 +530,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 					triplet.insert(idPrev);
 					triplet.insert(idNext);
 					int rank = calculateRank(threshold,
-							planes[id],
-							planes[idPrev],
-							planes[idNext]);
+							planes, triplet);
 					if (rank == 2)
 					{
 						std::cerr << "Found triplet ";
@@ -534,8 +538,9 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 							std::cerr << id << " ";
 						std::cerr << std::endl;
 						++numTriplets;
-						addTripletToClusters(clusters,
-								triplet);
+						addTripletToClusters(threshold,
+							clusters, triplet,
+							planes);
 					}
 				}
 
