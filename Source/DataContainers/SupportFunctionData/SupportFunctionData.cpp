@@ -500,20 +500,36 @@ void addTripletToClusters(int threshold, std::vector<std::set<int>> &clusters,
 	DEBUG_END;
 }
 
-std::vector<std::set<int>> getTriplets(std::vector<int> a, std::vector<int> b,
+std::vector<std::set<int>> getTriplets(
+		std::vector<Point_3> directions,
+		double height,
+		std::vector<int> a,
+		std::vector<int> b,
 		std::vector<int> c)
 {
 	std::vector<std::set<int>> triplets;
 	for (int id: a)
+	{
 		for (int idPrev: b)
+		{
+			if (fabs(directions[id].z()
+					- directions[idPrev].z())
+					> height)
+				continue;
 			for (int idNext: c)
 			{
+				if (fabs(directions[id].z()
+						- directions[idNext].z())
+						> height)
+					continue;
 				std::set<int> triplet;
 				triplet.insert(id);
 				triplet.insert(idPrev);
 				triplet.insert(idNext);
 				triplets.push_back(triplet);
 			}
+		}
+	}
 	return triplets;
 }
 
@@ -535,6 +551,11 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 		depth = atoi(depthString);
 
 	int numContours = contoursIndices.size();
+	char *heightString = getenv("HEIGHT");
+	double height = 1e-1;
+	if (heightString)
+		height = strtod(heightString, NULL);
+	auto directions = supportDirectionsCGAL();
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		for (int i = 0; i < depth; ++i)
@@ -546,6 +567,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 				int iContourNext = (numContours + iContour + j)
 					% numContours;
 				auto tripletsPortion = getTriplets(
+						directions, height,
 						contoursIndices[iContourPrev],
 						contoursIndices[iContour],
 						contoursIndices[iContourNext]);
