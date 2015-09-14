@@ -25,6 +25,7 @@
  */
 
 #include <sys/time.h>
+#include <Eigen/Dense>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -321,56 +322,94 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
 	return points;
 }
 
+std::vector<std::vector<int>> getContoursIndices(
+		std::vector<SupportFunctionDataItem> items)
+{
+	DEBUG_START;
+	/* Find the number of contours. */
+	int iContourMax = 0;
+	for (auto item: items)
+	{
+		int iContour = item.info->iContour;
+		if (iContour > iContourMax)
+			iContourMax = iContour;
+	}
+	int numContours = iContourMax + 1;
+	std::cerr << "Found " << numContours << " contours in support "
+		<< "function data. " << std::endl;
+
+	/* Construct arrays of contours' item IDs. */
+	std::vector<std::vector<int>> contoursIndices(numContours);
+	int iItem = 0;
+	for (auto item: items)
+	{
+		contoursIndices[item.info->iContour].push_back(iItem);
+		++iItem;
+	}
+	int iContour = 0;
+	for (auto contourIndices: contoursIndices)
+	{
+		std::cerr << "Contour #" << iContour << ": ";
+		for (auto iItem: contourIndices)
+		{
+			std::cerr << iItem << " ";
+		}
+		std::cerr << std::endl;
+		++iContour;
+	}
+	DEBUG_END;
+	return contoursIndices;
+}
+
+int calculateRank(double threshold, Plane_3 alpha, Plane_3 beta, Plane_3 gamma)
+{
+	DEBUG_START;
+	typedef Eigen::Matrix<double, 3, 4> PlaneTripletMatrix;
+	PlaneTripletMatrix matrix;
+	matrix << alpha.a(), alpha.b(), alpha.c(), alpha.d(),
+	       beta.a(), beta.b(), beta.c(), beta.d(),
+	       gamma.a(), gamma.b(), gamma.c(), gamma.d();
+
+	Eigen::FullPivLU<PlaneTripletMatrix> decomposition(matrix);
+	decomposition.setThreshold(threshold);
+	int rank = decomposition.rank();
+	DEBUG_END;
+	return rank;
+}
+
 void SupportFunctionData::searchTrustedEdges(double threshold)
 {
 	DEBUG_START;
 	std::cerr << "SupportFunctionData::searchTrustedEdges is called!"
 		<< std::endl;
 	std::cerr << "threshold = " << threshold << std::endl;
-
-	auto directions = supportDirectionsCGAL();
-	std::cerr << "There are " << directions.size() << " directions"
-		<< std::endl;
-	Polyhedron_3 hull;
-	CGAL::convex_hull_3(directions.begin(), directions.end(), hull);
-	std::cerr << "Convex hull contains " << hull.size_of_vertices() <<
-		" vertices" << std::endl;
-
-	Point_3 origin(0., 0., 0.);
-	int iHalfedge = 0;
-	for (auto halfedge = hull.halfedges_begin();
-			halfedge != hull.halfedges_end(); ++halfedge)
+	auto planes = supportPlanes();
+	auto contoursIndices = getContoursIndices(items);
+	int numTriplets = 0;
+	for (int iContour = 0; iContour < (int) contoursIndices.size();
+			++iContour)
 	{
-		std::cerr << "-- halfedge " << iHalfedge << std::endl;
-		auto vertex_to = halfedge->vertex();
-		Point_3 point_to = vertex_to->point();
-		std::cerr << " point to " << point_to << std::endl;
-		auto vertex_from = halfedge->opposite()->vertex();
-		Point_3 point_from = vertex_from->point();
-		std::cerr << " point from " << point_from << std::endl;
+		int iContourPrev = iContour - 1;
+		int iContourNext = iContour + 1;
+		if (iContourPrev < 0)
+			iContourPrev = contoursIndices.size() - 1;
+		if (iContourNext >= (int) contoursIndices.size())
+			iContourNext = 0;
+		for (auto id: contoursIndices[iContour])
+			for (auto idPrev: contoursIndices[iContourPrev])
+				for (auto idNext: contoursIndices[iContourNext])
+				{
+					int rank = calculateRank(threshold,
+							planes[id],
+							planes[idPrev],
+							planes[idNext]);
+					if (rank == 2)
+						++numTriplets;
+				}
 
-		std::vector<Point_3> points;
-		auto halfedgeNext = vertex_to->vertex_begin();
-		do
-		{
-			auto vertex = halfedgeNext->opposite()->vertex();
-			if (vertex != vertex_from)
-			{
-				points.push_back(vertex->point());
-			}
-			++halfedgeNext;
-		}
-		while(halfedgeNext != vertex_to->vertex_begin());
-
-		for (auto point: points)
-		{
-			std::cerr << " point " << point << std::endl;
-			double volume = CGAL::volume(origin, point_from,
-					point_to, point);
-			std::cerr << "volume " << std::setprecision(16)
-				<< std::fixed << fabs(volume) << std::endl;
-		}
-		++iHalfedge;
 	}
+	std::cerr << "Found " << numTriplets << " degenerate triplets."
+		<< std::endl;
+
 	DEBUG_END;
 }
