@@ -560,11 +560,12 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	{
 		for (int i = 0; i < depth; ++i)
 		{
-			int iContourPrev = (numContours + iContour - i)
+			int iContourPrev = (numContours + iContour - i - 1)
 				% numContours;
 			for (int j = 0; j < depth; ++j)
 			{
-				int iContourNext = (numContours + iContour + j)
+				int iContourNext = (numContours + iContour + j
+						+ 1)
 					% numContours;
 				auto tripletsPortion = getTriplets(
 						directions, height,
