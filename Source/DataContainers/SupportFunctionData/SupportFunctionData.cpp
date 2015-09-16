@@ -25,12 +25,16 @@
  */
 
 #include <sys/time.h>
+#include <Eigen/Dense>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Polyhedron_3/Polyhedron_3.h"
+#include "halfspaces_intersection.h"
+
 
 SupportFunctionData::SupportFunctionData() :
 	items()
@@ -321,56 +325,289 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
 	return points;
 }
 
+std::vector<std::vector<int>> getContoursIndices(
+		std::vector<SupportFunctionDataItem> items)
+{
+	DEBUG_START;
+	/* Find the number of contours. */
+	int iContourMax = 0;
+	for (auto item: items)
+	{
+		int iContour = item.info->iContour;
+		if (iContour > iContourMax)
+			iContourMax = iContour;
+	}
+	int numContours = iContourMax + 1;
+	std::cerr << "Found " << numContours << " contours in support "
+		<< "function data. " << std::endl;
+
+	/* Construct arrays of contours' item IDs. */
+	std::vector<std::vector<int>> contoursIndices(numContours);
+	int iItem = 0;
+	for (auto item: items)
+	{
+		contoursIndices[item.info->iContour].push_back(iItem);
+		++iItem;
+	}
+	int iContour = 0;
+	for (auto contourIndices: contoursIndices)
+	{
+		std::cerr << "Contour #" << iContour << ": ";
+		for (auto iItem: contourIndices)
+		{
+			std::cerr << iItem << " ";
+		}
+		std::cerr << std::endl;
+		++iContour;
+	}
+	DEBUG_END;
+	return contoursIndices;
+}
+
+int calculateRank(double threshold, std::vector<Plane_3> planes,
+		std::set<int> cluster)
+{
+	DEBUG_START;
+	Eigen::MatrixXd matrix;
+	matrix.resize(cluster.size(), 4);
+	int iPlane = 0;
+	for (int id: cluster)
+	{
+		matrix(iPlane, 0) = planes[id].a();
+		matrix(iPlane, 1) = planes[id].b();
+		matrix(iPlane, 2) = planes[id].c();
+		matrix(iPlane, 3) = planes[id].d();
+		++iPlane;
+	}
+	Eigen::FullPivLU<Eigen::MatrixXd> decomposition(matrix);
+	decomposition.setThreshold(threshold);
+	int rank = decomposition.rank();
+	DEBUG_END;
+	return rank;
+}
+
+int findBestPlaneID(Plane_3 plane, std::vector<Plane_3> planes)
+{
+	DEBUG_START;
+	double minimal = 1e100;
+	int iPlaneMinimal = 0;
+	for (int iPlane = 0; iPlane < (int) planes.size(); ++iPlane)
+	{
+		double a = plane.a() - planes[iPlane].a();
+		double b = plane.b() - planes[iPlane].b();
+		double c = plane.c() - planes[iPlane].c();
+		double d = plane.d() - planes[iPlane].d();
+		double difference = a * a + b * b + c * c + d * d;
+		if (difference < minimal)
+		{
+			minimal = difference;
+			iPlaneMinimal = iPlane;
+		}
+	}
+	DEBUG_END;
+	return iPlaneMinimal;
+}
+
+std::vector<std::vector<int>> getContoursFacetsIndices(PolyhedronPtr polyhedron,
+		std::vector<Plane_3> planes,
+		std::vector<std::vector<int>> contoursIndices)
+{
+	DEBUG_START;
+	std::vector<std::vector<int>> contoursFacetsIDs(contoursIndices.size());
+	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
+	{
+		Facet *facet = &polyhedron->facets[iFacet];
+		Plane_3 plane(facet->plane);
+		int id = findBestPlaneID(plane, planes);
+		int iContour = 0;
+		for (auto contourIndices: contoursIndices)
+		{
+			bool ifFound = false;
+			for (int iItem = 0; iItem < (int) contourIndices.size();
+					++iItem)
+			{	if (contourIndices[iItem] == id)
+				{
+					ifFound = true;
+					break;
+				}
+			}
+			if (ifFound)
+			{
+				contoursFacetsIDs[iContour].push_back(iFacet);
+				break;
+			}
+			++iContour;
+		}
+	}
+	DEBUG_END;
+	return contoursFacetsIDs;
+}
+
+void printColouredIntersection(std::vector<Plane_3> planes,
+		std::vector<std::vector<int>> contoursIndices)
+{
+	DEBUG_START;
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel());
+	PolyhedronPtr polyhedron(new Polyhedron(intersection));
+	auto contoursFacetsIDs = getContoursFacetsIndices(polyhedron, planes,
+			contoursIndices);
+	srand(time(NULL));
+	for (auto contourFacetsIDs: contoursFacetsIDs)
+	{
+		unsigned char red = rand() % 256;
+		unsigned char green = rand() % 256;
+		unsigned char blue = rand() % 256;
+		for (int iFacet: contourFacetsIDs)
+		{
+			polyhedron->facets[iFacet].set_rgb(red, green, blue);
+		}
+	}
+	Polyhedron *polyhedronCopy = new Polyhedron(polyhedron);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"naively-recovered-coloured.ply") << *polyhedronCopy;
+	DEBUG_END;
+}
+
+void addTripletToClusters(int threshold, std::vector<std::set<int>> &clusters,
+		std::set<int> triplet, std::vector<Plane_3> planes)
+{
+	DEBUG_START;
+	bool ifFound = false;
+	for (auto &cluster: clusters)
+	{
+		std::set<int> clustersUnion;
+		for (int id: cluster)
+			clustersUnion.insert(id);
+		for (int id: triplet)
+			clustersUnion.insert(id);
+		if (clustersUnion.size() < cluster.size() + triplet.size())
+		{
+			int rank = calculateRank(threshold, planes,
+					clustersUnion);
+			if (rank == 2)
+			{
+				cluster = clustersUnion;
+				ifFound = true;
+			}
+		}
+	}
+	if (!ifFound)
+	{
+		clusters.push_back(triplet);
+	}
+	DEBUG_END;
+}
+
+std::vector<std::set<int>> getTriplets(
+		std::vector<Point_3> directions,
+		double height,
+		std::vector<int> a,
+		std::vector<int> b,
+		std::vector<int> c)
+{
+	std::vector<std::set<int>> triplets;
+	for (int id: a)
+	{
+		for (int idPrev: b)
+		{
+			if (fabs(directions[id].z()
+					- directions[idPrev].z())
+					> height)
+				continue;
+			for (int idNext: c)
+			{
+				if (fabs(directions[id].z()
+						- directions[idNext].z())
+						> height)
+					continue;
+				std::set<int> triplet;
+				triplet.insert(id);
+				triplet.insert(idPrev);
+				triplet.insert(idNext);
+				triplets.push_back(triplet);
+			}
+		}
+	}
+	return triplets;
+}
+
 void SupportFunctionData::searchTrustedEdges(double threshold)
 {
 	DEBUG_START;
 	std::cerr << "SupportFunctionData::searchTrustedEdges is called!"
 		<< std::endl;
 	std::cerr << "threshold = " << threshold << std::endl;
+	auto planes = supportPlanes();
+	auto contoursIndices = getContoursIndices(items);
+	printColouredIntersection(planes, contoursIndices);
+	int numTriplets = 0;
+	std::vector<std::set<int>> clusters;
+	std::vector<std::set<int>> triplets;
+	char *depthString = getenv("DEPTH");
+	int depth = 1;
+	if (depthString)
+		depth = atoi(depthString);
 
+	int numContours = contoursIndices.size();
+	char *heightString = getenv("HEIGHT");
+	double height = 1e-1;
+	if (heightString)
+		height = strtod(heightString, NULL);
 	auto directions = supportDirectionsCGAL();
-	std::cerr << "There are " << directions.size() << " directions"
-		<< std::endl;
-	Polyhedron_3 hull;
-	CGAL::convex_hull_3(directions.begin(), directions.end(), hull);
-	std::cerr << "Convex hull contains " << hull.size_of_vertices() <<
-		" vertices" << std::endl;
-
-	Point_3 origin(0., 0., 0.);
-	int iHalfedge = 0;
-	for (auto halfedge = hull.halfedges_begin();
-			halfedge != hull.halfedges_end(); ++halfedge)
+	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
-		std::cerr << "-- halfedge " << iHalfedge << std::endl;
-		auto vertex_to = halfedge->vertex();
-		Point_3 point_to = vertex_to->point();
-		std::cerr << " point to " << point_to << std::endl;
-		auto vertex_from = halfedge->opposite()->vertex();
-		Point_3 point_from = vertex_from->point();
-		std::cerr << " point from " << point_from << std::endl;
-
-		std::vector<Point_3> points;
-		auto halfedgeNext = vertex_to->vertex_begin();
-		do
+		for (int i = 0; i < depth; ++i)
 		{
-			auto vertex = halfedgeNext->opposite()->vertex();
-			if (vertex != vertex_from)
+			int iContourPrev = (numContours + iContour - i)
+				% numContours;
+			for (int j = 0; j < depth; ++j)
 			{
-				points.push_back(vertex->point());
+				int iContourNext = (numContours + iContour + j)
+					% numContours;
+				auto tripletsPortion = getTriplets(
+						directions, height,
+						contoursIndices[iContourPrev],
+						contoursIndices[iContour],
+						contoursIndices[iContourNext]);
+				for (auto triplet: tripletsPortion)
+					triplets.push_back(triplet);
 			}
-			++halfedgeNext;
 		}
-		while(halfedgeNext != vertex_to->vertex_begin());
-
-		for (auto point: points)
-		{
-			std::cerr << " point " << point << std::endl;
-			double volume = CGAL::volume(origin, point_from,
-					point_to, point);
-			std::cerr << "volume " << std::setprecision(16)
-				<< std::fixed << fabs(volume) << std::endl;
-		}
-		++iHalfedge;
 	}
+	int iTriplet = 0;
+	for (auto triplet: triplets)
+	{
+		std::cerr << "Processing triplet " << iTriplet++
+			<< " of " << triplets.size() << "        " << '\r';
+		int rank = calculateRank(threshold, planes, triplet);
+		if (rank == 2)
+		{
+			++numTriplets;
+			addTripletToClusters(threshold,	clusters, triplet,
+						planes);
+		}
+	}
+	std::cerr << std::endl;
+	std::cerr << "Found " << numTriplets << " degenerate triplets."
+		<< std::endl;
+	std::cerr << "Found " << clusters.size() << " clusters" << std::endl;
+	std::vector<std::vector<int>> semiContours;
+	int iCluster = 0;
+	for (auto cluster: clusters)
+	{
+		std::vector<int> semiContour;
+		std::cerr << "Cluster #" << iCluster << ": ";
+		for (int id: cluster)
+		{
+			std::cerr << id << " ";
+			semiContour.push_back(id);
+		}
+		std::cerr << std::endl;
+		semiContours.push_back(semiContour);
+		++iCluster;
+	}
+	printColouredIntersection(planes, semiContours);
 	DEBUG_END;
 }
