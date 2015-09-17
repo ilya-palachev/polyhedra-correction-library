@@ -29,6 +29,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Recoverer/NaiveFacetJoiner.h"
+#include "Recoverer/Colouring.h"
 
 static double threshold = 0.;
 
@@ -61,11 +62,11 @@ double calculateEdgeAngle(Polyhedron_3::Facet_handle facet,
 	return angle;
 }
 
-std::list<std::set<int>> buildClusters(Polyhedron_3 polyhedron)
+std::vector<std::set<int>> buildClusters(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 	int iHalfedge = 0;
-	std::list<std::set<int>> clusters;
+	std::vector<std::set<int>> clusters;
 	for (auto halfedge = polyhedron.halfedges_begin();
 			halfedge != polyhedron.halfedges_end();
 			++halfedge)
@@ -211,7 +212,7 @@ std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
 }
 
 std::list<Plane_3> collectNonJoinedPlanes(Polyhedron_3 polyhedron,
-		std::list<std::set<int>> clusters)
+		std::vector<std::set<int>> clusters)
 {
 	DEBUG_START;
 	std::list<Plane_3> planes;
@@ -242,6 +243,8 @@ Polyhedron_3 NaiveFacetJoiner::run(Polyhedron_3 polyhedron)
 	if (threshold <= 0.)
 		return polyhedron;
 	auto clusters = buildClusters(polyhedron);
+	printColouredPolyhedron(polyhedron, clusters,
+			"recovered-coloured-by-plane-clusters.ply");
 	std::cerr << "Found " << clusters.size()
 		<< " clusters for threshold: "
 		<< threshold << std::endl;
