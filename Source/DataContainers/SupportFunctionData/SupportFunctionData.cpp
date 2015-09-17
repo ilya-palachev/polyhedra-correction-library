@@ -34,6 +34,7 @@
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "halfspaces_intersection.h"
+#include "Recoverer/Colouring.h"
 
 
 SupportFunctionData::SupportFunctionData() :
@@ -386,90 +387,6 @@ int calculateRank(double threshold, std::vector<Plane_3> planes,
 	return rank;
 }
 
-int findBestPlaneID(Plane_3 plane, std::vector<Plane_3> planes)
-{
-	DEBUG_START;
-	double minimal = 1e100;
-	int iPlaneMinimal = 0;
-	for (int iPlane = 0; iPlane < (int) planes.size(); ++iPlane)
-	{
-		double a = plane.a() - planes[iPlane].a();
-		double b = plane.b() - planes[iPlane].b();
-		double c = plane.c() - planes[iPlane].c();
-		double d = plane.d() - planes[iPlane].d();
-		double difference = a * a + b * b + c * c + d * d;
-		if (difference < minimal)
-		{
-			minimal = difference;
-			iPlaneMinimal = iPlane;
-		}
-	}
-	DEBUG_END;
-	return iPlaneMinimal;
-}
-
-std::vector<std::vector<int>> getContoursFacetsIndices(PolyhedronPtr polyhedron,
-		std::vector<Plane_3> planes,
-		std::vector<std::vector<int>> contoursIndices)
-{
-	DEBUG_START;
-	std::vector<std::vector<int>> contoursFacetsIDs(contoursIndices.size());
-	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
-	{
-		Facet *facet = &polyhedron->facets[iFacet];
-		Plane_3 plane(facet->plane);
-		int id = findBestPlaneID(plane, planes);
-		int iContour = 0;
-		for (auto contourIndices: contoursIndices)
-		{
-			bool ifFound = false;
-			for (int iItem = 0; iItem < (int) contourIndices.size();
-					++iItem)
-			{	if (contourIndices[iItem] == id)
-				{
-					ifFound = true;
-					break;
-				}
-			}
-			if (ifFound)
-			{
-				contoursFacetsIDs[iContour].push_back(iFacet);
-				break;
-			}
-			++iContour;
-		}
-	}
-	DEBUG_END;
-	return contoursFacetsIDs;
-}
-
-void printColouredIntersection(std::vector<Plane_3> planes,
-		std::vector<std::vector<int>> contoursIndices)
-{
-	DEBUG_START;
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
-	PolyhedronPtr polyhedron(new Polyhedron(intersection));
-	auto contoursFacetsIDs = getContoursFacetsIndices(polyhedron, planes,
-			contoursIndices);
-	srand(time(NULL));
-	for (auto contourFacetsIDs: contoursFacetsIDs)
-	{
-		unsigned char red = rand() % 256;
-		unsigned char green = rand() % 256;
-		unsigned char blue = rand() % 256;
-		for (int iFacet: contourFacetsIDs)
-		{
-			polyhedron->facets[iFacet].set_rgb(red, green, blue);
-		}
-	}
-	Polyhedron *polyhedronCopy = new Polyhedron(polyhedron);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			"naively-recovered-coloured.ply") << *polyhedronCopy;
-	DEBUG_END;
-}
-
 void addTripletToClusters(int threshold, std::vector<std::set<int>> &clusters,
 		std::set<int> triplet, std::vector<Plane_3> planes)
 {
@@ -541,7 +458,8 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	std::cerr << "threshold = " << threshold << std::endl;
 	auto planes = supportPlanes();
 	auto contoursIndices = getContoursIndices(items);
-	printColouredIntersection(planes, contoursIndices);
+	printColouredIntersection(planes, contoursIndices,
+			"naive-coloured-by-contours.ply");
 	int numTriplets = 0;
 	std::vector<std::set<int>> clusters;
 	std::vector<std::set<int>> triplets;
@@ -594,21 +512,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	std::cerr << "Found " << numTriplets << " degenerate triplets."
 		<< std::endl;
 	std::cerr << "Found " << clusters.size() << " clusters" << std::endl;
-	std::vector<std::vector<int>> semiContours;
-	int iCluster = 0;
-	for (auto cluster: clusters)
-	{
-		std::vector<int> semiContour;
-		std::cerr << "Cluster #" << iCluster << ": ";
-		for (int id: cluster)
-		{
-			std::cerr << id << " ";
-			semiContour.push_back(id);
-		}
-		std::cerr << std::endl;
-		semiContours.push_back(semiContour);
-		++iCluster;
-	}
-	printColouredIntersection(planes, semiContours);
+	printColouredIntersection(planes, clusters,
+			"naive-coloured-by-edge-clusters.ply");
 	DEBUG_END;
 }
