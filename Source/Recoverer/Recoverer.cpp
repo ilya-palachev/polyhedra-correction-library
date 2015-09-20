@@ -409,17 +409,17 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 	PolyhedronPtr p(new Polyhedron());
 	p->fscan_default_1_2(fileNamePolyhedron);
 
-	Polyhedron *pCopy = new Polyhedron(p);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "3rd-party-recovered.ply")
-		<< *pCopy;
-	std::cerr << "3rd party polyhedron has " << p->numFacets << " facets"
-		<< std::endl;
-
 	Polyhedron_3 polyhedron(p);
 	polyhedron.shift(shift);
 	SupportFunctionDataConstructor constructor;
 	auto data3rdParty = constructor.run(directions, polyhedron);
 	auto h3rdParty = data3rdParty->supportValues();
+
+	Polyhedron *pCopy = new Polyhedron(polyhedron);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "3rd-party-recovered.ply")
+		<< *pCopy;
+	std::cerr << "3rd party polyhedron has " << p->numFacets << " facets"
+		<< std::endl;
 
 	DEBUG_END;
 	return h3rdParty;
@@ -438,6 +438,16 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		DEBUG_END;
 		return NULL;
 	}
+
+	char *trustedEdgesThesholdString = getenv("TRUSTED_EDGES_THRESHOLD");
+	if (trustedEdgesThesholdString)
+	{
+
+		double trustedEdgesThreshold = strtod(
+				trustedEdgesThesholdString, NULL);
+		data->searchTrustedEdges(trustedEdgesThreshold);
+	}
+
 
 	timer.pushTimer();
 

@@ -113,6 +113,7 @@ set (SOURCE_pcl
 	Source/Polyhedron/VertexInfo/VertexInfo_preprocess.cpp
 	Source/Polyhedron_3/Polyhedron_3.cpp
 	Source/Recoverer/ClpSupportFunctionEstimator.cpp
+	Source/Recoverer/Colouring.cpp
 	Source/Recoverer/CPLEXSupportFunctionEstimator.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp

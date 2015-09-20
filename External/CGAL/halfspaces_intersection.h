@@ -1,6 +1,7 @@
 #ifndef CGAL_HALFSPACES_INTERSECTION_HPP
 #define CGAL_HALFSPACES_INTERSECTION_HPP
 
+#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Convex_hull_traits_3.h>
 #include <CGAL/convex_hull_3.h>
 #include <CGAL/Polyhedron_incremental_builder_3.h>
