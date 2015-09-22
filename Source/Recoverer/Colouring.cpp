@@ -149,12 +149,20 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
 		const char *suffix)
 {
 	DEBUG_START;
-	std::vector<Plane_3> planes;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
+	PolyhedronPtr polyhedronPCL(new Polyhedron(polyhedron));
+	srand(time(NULL));
+	for (auto clusterIndices: clustersIndices)
 	{
-		planes.push_back(facet->plane());
+		unsigned char red = rand() % 256;
+		unsigned char green = rand() % 256;
+		unsigned char blue = rand() % 256;
+
+		for (int iFacet: clusterIndices)
+		{
+			polyhedronPCL->facets[iFacet].set_rgb(red, green, blue);
+		}
 	}
-	printColouredIntersection(planes, clustersIndices, suffix);
+	Polyhedron *polyhedronCopy = new Polyhedron(polyhedronPCL);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, suffix) << *polyhedronCopy;
 	DEBUG_END;
 }

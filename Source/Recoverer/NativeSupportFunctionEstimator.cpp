@@ -32,6 +32,7 @@
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include "Recoverer/NaiveFacetJoiner.h"
+#include "Recoverer/Colouring.h"
 
 
 static double threshold = 0.;
@@ -648,6 +649,77 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	return solution;
 }
 
+double calculateFacetArea(Polyhedron_3::Facet facet)
+{
+	DEBUG_START;
+	auto halfedge = facet.facet_begin();
+	auto halfedgeNext = halfedge;
+	++halfedgeNext;
+	Point_3 pointBegin = facet.facet_begin()->vertex()->point();
+	double areaFacet = 0.;
+	do
+	{
+		Point_3 point = halfedge->vertex()->point();
+		Point_3 pointNext = halfedgeNext->vertex()->point();
+		CGAL::Triangle_3<Kernel> triangle(pointBegin, point,
+				pointNext);
+		double areaTriangle = sqrt(triangle.squared_area());
+		areaFacet += areaTriangle;
+		++halfedge;
+		++halfedgeNext;
+	}
+	while (halfedgeNext != facet.facet_begin());
+	areaFacet = fabs(areaFacet);
+	DEBUG_END;
+	return areaFacet;
+}
+
+void printFacetsArea(Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	int iFacet = 0;
+	std::vector<std::pair<int, double>> areas;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		double area = calculateFacetArea(*facet);
+		areas.push_back(std::make_pair(iFacet, area));
+		++iFacet;
+	}
+	std::sort(areas.begin(), areas.end(),
+			[](std::pair<int, double> a,
+				std::pair<int, double> b) -> bool
+	{
+		return a.second > b.second;
+	});
+	for (auto info: areas)
+	{
+		std::cerr << "facet " << info.first << " has area "
+			<< info.second << std::endl;
+	}
+	char *thresholdBigFacetString = getenv("BIG_FACET_THRESHOLD");
+	std::set<int> indicesBigFacets;
+	if (thresholdBigFacetString)
+	{
+		double thresholdBigFacet = strtod(thresholdBigFacetString,
+				NULL);
+		for (auto info: areas)
+		{
+			if (info.second >= thresholdBigFacet)
+			{
+				indicesBigFacets.insert(info.first);
+			}
+		}
+	}
+	std::cerr << indicesBigFacets.size() << " of "
+		<< polyhedron.size_of_facets() << " facets are big"
+		<< std::endl;
+	std::vector<std::set<int>> cluster;
+	cluster.push_back(indicesBigFacets);
+	printColouredPolyhedron(polyhedron, cluster, "big-facets-cluster.ply");
+	DEBUG_END;
+}
+
 VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -665,6 +737,7 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	auto index = constructPlanesIndex(intersection);
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;
+	printFacetsArea(intersection);
 
 	if (getenv("PCL_CONTOURS_COUNTER_DIAGNOSTICS"))
 		runContoursCounterDiagnostics(data, index);
