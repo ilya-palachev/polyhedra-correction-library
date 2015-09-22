@@ -664,10 +664,6 @@ double calculateFacetArea(Polyhedron_3::Facet facet)
 		CGAL::Triangle_3<Kernel> triangle(pointBegin, point,
 				pointNext);
 		double areaTriangle = sqrt(triangle.squared_area());
-		if ((point - pointBegin) * (pointNext - pointBegin) < 0.)
-		{
-			areaTriangle = -areaTriangle;
-		}
 		areaFacet += areaTriangle;
 		++halfedge;
 		++halfedgeNext;
