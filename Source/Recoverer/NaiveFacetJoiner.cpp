@@ -31,12 +31,56 @@
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
 
-static double threshold = 0.;
-
-NaiveFacetJoiner::NaiveFacetJoiner(double thresholdInput)
+NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
+	polyhedron_(polyhedron),
+	facets_(polyhedron.size_of_facets()),
+	vertices_(polyhedron.size_of_vertices()),
+	thresholdBigFacet_(),
+	thresholdLeastSquaresQuality_()
 {
 	DEBUG_START;
-	threshold = thresholdInput;
+	int iFacet = 0;
+	for (auto facet = polyhedron_.facets_begin();
+			facet != polyhedron_.facets_end(); ++facet)
+	{
+		facets_[iFacet] = facet;
+		facet->id = iFacet;
+		++iFacet;
+	}
+
+	int iVertex = 0;
+	for (auto vertex = polyhedron_.vertices_begin();
+			vertex != polyhedron_.vertices_end(); ++vertex)
+	{
+		vertices_[iVertex] = vertex;
+		vertex->id = iVertex;
+		++iVertex;
+	}
+
+	char *thresholdBigFacetString = getenv("THRESHOLD_BIG_FACET");
+	std::set<int> indicesBigFacets;
+	if (thresholdBigFacetString)
+	{
+		thresholdBigFacet_ = strtod(thresholdBigFacetString, NULL);
+	}
+	else
+	{
+		thresholdBigFacet_ = THRESHOLD_BIG_FACET_DEFAULT;
+	}
+
+	char *thresholdLeastSquaresQualityString = getenv(
+			"THRESHOLD_LEAST_SQUARES_QUALITY");
+	std::set<int> indicesLeastSquaresQualitys;
+	if (thresholdLeastSquaresQualityString)
+	{
+		thresholdLeastSquaresQuality_ = strtod(
+				thresholdLeastSquaresQualityString, NULL);
+	}
+	else
+	{
+		thresholdLeastSquaresQuality_
+			= THRESHOLD_LEAST_SQUARES_QUALITY_DEFAULT;
+	}
 	DEBUG_END;
 }
 
@@ -46,245 +90,196 @@ NaiveFacetJoiner::~NaiveFacetJoiner()
 	DEBUG_END;
 }
 
-double calculateEdgeAngle(Polyhedron_3::Facet_handle facet,
-		Polyhedron_3::Facet_handle facetOpposite)
+double calculateFacetArea(Polyhedron_3::Facet facet)
 {
 	DEBUG_START;
-	auto plane = facet->plane();
-	auto norm = plane.orthogonal_vector();
-	norm = norm / norm.squared_length();
-	auto planeOpposite = facetOpposite->plane();
-	auto normOpposite = planeOpposite.orthogonal_vector();
-	normOpposite = normOpposite / normOpposite.squared_length();
-	double product = norm * normOpposite;
-	double angle = acos(product);
+	auto halfedge = facet.facet_begin();
+	auto halfedgeNext = halfedge;
+	++halfedgeNext;
+	Point_3 pointBegin = facet.facet_begin()->vertex()->point();
+	double areaFacet = 0.;
+	do
+	{
+		Point_3 point = halfedge->vertex()->point();
+		Point_3 pointNext = halfedgeNext->vertex()->point();
+		CGAL::Triangle_3<Kernel> triangle(pointBegin, point,
+				pointNext);
+		double areaTriangle = sqrt(triangle.squared_area());
+		areaFacet += areaTriangle;
+		++halfedge;
+		++halfedgeNext;
+	}
+	while (halfedgeNext != facet.facet_begin());
+	areaFacet = fabs(areaFacet);
 	DEBUG_END;
-	return angle;
+	return areaFacet;
 }
 
-std::vector<std::set<int>> buildClusters(Polyhedron_3 polyhedron)
+std::set<int> findBigFacets(Polyhedron_3 polyhedron, double thresholdBigFacet)
 {
 	DEBUG_START;
-	int iHalfedge = 0;
-	std::vector<std::set<int>> clusters;
-	for (auto halfedge = polyhedron.halfedges_begin();
-			halfedge != polyhedron.halfedges_end();
-			++halfedge)
-	{
-		auto facet = halfedge->facet();
-		auto facetOpposite = halfedge->opposite()->facet();
-		double angle = calculateEdgeAngle(facet, facetOpposite);
-
-		if (angle < threshold)
-		{
-			bool ifOneRegistered = false;
-			for (auto &cluster: clusters)
-			{
-				if (cluster.find(facet->id) != cluster.end())
-				{
-					cluster.insert((int) facetOpposite->id);
-					ifOneRegistered = true;
-					break;
-				}
-				if (cluster.find(facetOpposite->id)
-						!= cluster.end())
-				{
-					cluster.insert((int) facet->id);
-					ifOneRegistered = true;
-				}
-			}
-			if (!ifOneRegistered)
-			{
-				std::set<int> clusterNew;
-				clusterNew.insert(facet->id);
-				clusterNew.insert(facetOpposite->id);
-				clusters.push_back(clusterNew);
-			}
-		}
-		++iHalfedge;
-	}
-	DEBUG_END;
-	return clusters;
-}
-
-std::list<Plane_3> collectClusterPlanes(Polyhedron_3 polyhedron,
-		std::set<int> cluster)
-{
-	DEBUG_START;
-	std::list<Plane_3> planes;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		if (cluster.find(facet->id) != cluster.end())
-		{
-			planes.push_back(facet->plane());
-		}
-	}
-	DEBUG_END;
-	return planes;
-}
-
-std::list<Point_3> collectClusterPoints(Polyhedron_3 polyhedron,
-		std::set<int> cluster)
-{
-	DEBUG_START;
-	std::set<int> indices;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		if (cluster.find(facet->id) != cluster.end())
-		{
-			auto halfedge = facet->facet_begin();
-			do
-			{
-				indices.insert(halfedge->vertex()->id);
-				++halfedge;
-			}
-			while (halfedge != facet->facet_begin());
-
-		}
-	}
-	std::list<Point_3> points;
-	for (auto vertex = polyhedron.vertices_begin();
-			vertex != polyhedron.vertices_end(); ++vertex)
-	{
-		if (indices.find(vertex->id) != indices.end())
-		{
-			points.push_back(vertex->point());
-		}
-	}
-	DEBUG_END;
-	return points;
-}
-
-const double DEFAULT_QUALITY_BOUND = 0.99;
-std::list<Plane_3> joinClusterLeastSquaresCGAL(Polyhedron_3 polyhedron,
-		std::set<int> cluster)
-{
-	DEBUG_START;
-	std::list<Plane_3> planes;
-	auto planesOld = collectClusterPlanes(polyhedron, cluster);
-	auto points = collectClusterPoints(polyhedron, cluster);
-	Plane_3 planeBest;
-	double quality = CGAL::linear_least_squares_fitting_3(
-			points.begin(), points.end(), planeBest,
-			CGAL::Dimension_tag<0>());
-	for (auto plane: planesOld)
-	{
-		if (plane.orthogonal_vector()
-				* planeBest.orthogonal_vector() < 0.)
-		{
-			planeBest = Plane_3(-planeBest.a(),
-					-planeBest.b(), -planeBest.c(),
-					-planeBest.d());
-		}
-	}
-	if (getenv("PCL_DEEP_DEBUG"))
-		std::cerr << "... quality " << quality << " ";
-	double qualityBound = DEFAULT_QUALITY_BOUND;
-	char *qualityBoundString = getenv("PCL_QUALITY_BOUND");
-	if (qualityBoundString)
-	{
-		char *error = NULL;
-		qualityBound = strtod(qualityBoundString, &error);
-		if (error && *error)
-		{
-			ERROR_PRINT("Failed to read PCL_QUALITY_BOUND: %s",
-					error);
-			exit(EXIT_FAILURE);
-		}
-	}
-	if (quality > qualityBound && std::isfinite(quality))
-	{
-		if (getenv("PCL_DEEP_DEBUG"))
-			std::cerr << "ADDED!!!" << std::endl;
-		planes.push_back(planeBest);
-	}
-	else
-	{
-		if (getenv("PCL_DEEP_DEBUG"))
-			std::cerr << std::endl;
-		for (auto plane: planesOld)
-			planes.push_back(plane);
-	}
-	DEBUG_END;
-	return planes;
-}
-
-std::list<Plane_3> collectNonJoinedPlanes(Polyhedron_3 polyhedron,
-		std::vector<std::set<int>> clusters)
-{
-	DEBUG_START;
-	std::list<Plane_3> planes;
-	std::set<int> clustersUnion;
-	for (auto cluster: clusters)
-	{
-		clustersUnion.insert(cluster.begin(), cluster.end());
-	}
+	std::set<int> indicesBigFacets;
 	int iFacet = 0;
-	std::cerr << "Total size of clusters: " << clustersUnion.size()
-		<< std::endl;
 	for (auto facet = polyhedron.facets_begin();
 			facet != polyhedron.facets_end(); ++facet)
 	{
-		if (clustersUnion.find(facet->id) == clustersUnion.end())
+		double area = calculateFacetArea(*facet);
+		if (area > thresholdBigFacet)
 		{
-			planes.push_back(facet->plane());
+			indicesBigFacets.insert(iFacet);
 		}
 		++iFacet;
 	}
+	std::cerr << indicesBigFacets.size() << " of "
+		<< polyhedron.size_of_facets() << " facets are big"
+		<< std::endl;
+	std::vector<std::set<int>> cluster;
+	cluster.push_back(indicesBigFacets);
+	printColouredPolyhedron(polyhedron, cluster, "big-facets-cluster.ply");
 	DEBUG_END;
-	return planes;
+	return indicesBigFacets;
 }
 
-Polyhedron_3 NaiveFacetJoiner::run(Polyhedron_3 polyhedron)
+
+std::pair<Plane_3, double> NaiveFacetJoiner::analyzeCluster(
+		std::set<int> indicesCluster)
 {
 	DEBUG_START;
-	if (threshold <= 0.)
-		return polyhedron;
-	auto clusters = buildClusters(polyhedron);
-	printColouredPolyhedron(polyhedron, clusters,
-			"recovered-coloured-by-plane-clusters.ply");
-	std::cerr << "Found " << clusters.size()
-		<< " clusters for threshold: "
-		<< threshold << std::endl;
-	int iCluster = 0;
-	std::list<Plane_3> planes;
-	int numSuccessfullJoins = 0;
-	for (auto cluster: clusters)
+	std::set<int> indicesVerticesAll;
+	for (int iFacet: indicesCluster)
 	{
-		if (getenv("PCL_DEEP_DEBUG"))
-		{
-			std::cerr << "Cluster #" << iCluster << ": ";
-			for (int iFacet: cluster)
-			{
-				std::cerr << iFacet << " ";
-			}
-		}
-		auto planesNew = joinClusterLeastSquaresCGAL(polyhedron,
-				cluster);
-		if (planesNew.size() == 1)
-			++numSuccessfullJoins;
-		planes.insert(planes.end(), planesNew.begin(),
-				planesNew.end());
-		++iCluster;
+		auto indicesVertices = getIncidentVerticesIndices(iFacet);
+		indicesVerticesAll.insert(indicesVertices.begin(),
+				indicesVertices.end());
 	}
-	std::cerr << "Successfully joined " << numSuccessfullJoins << " of "
-		<< clusters.size() << " clusters" << std::endl;
-	auto planesOld = collectNonJoinedPlanes(polyhedron, clusters);
-	planes.insert(planes.end(), planesOld.begin(), planesOld.end());
+	std::set<Point_3> points;
+	for (int iVertex: indicesVerticesAll)
+	{
+		points.insert(vertices_[iVertex]->point());
+	}
 
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel()); 
-	intersection.initialize_indices();
-	int numFacetsBefore = polyhedron.size_of_facets();
-	int numFacetsAfter = intersection.size_of_facets();
-	int numFacetsReduced = numFacetsBefore - numFacetsAfter;
-	std::cerr << "Number of facets reduced from " << numFacetsBefore
-		<< " to " << numFacetsAfter << " ( difference is "
-		<< numFacetsReduced << ")" << std::endl;
+	Plane_3 planeBest;
+	double quality = CGAL::linear_least_squares_fitting_3(
+	                points.begin(), points.end(), planeBest,
+	                CGAL::Dimension_tag<0>());
+	if (quality < thresholdLeastSquaresQuality_ || !std::isfinite(quality))
+	{
+		DEBUG_END;
+		return std::make_pair(Plane_3(), ALPHA_CLUSTER_INFINITY);
+	}
+	double distanceMaximal = 0.;
+	for (auto point: points)
+	{
+		double distance = sqrt(CGAL::squared_distance(point,
+					planeBest));
+		if (distance > distanceMaximal)
+		{
+			distanceMaximal = distance;
+		}
+	}
 
 	DEBUG_END;
-	return intersection;
+	return std::make_pair(planeBest, distanceMaximal);
+}
+
+std::set<int> NaiveFacetJoiner::getNeighborsIndices(int iFacet)
+{
+	DEBUG_START;
+	auto facet = facets_[iFacet];
+	auto halfedge = facet->facet_begin();
+	std::set<int> indicesNeighbors;
+	do
+	{
+		indicesNeighbors.insert(halfedge->opposite()->facet()->id);
+		++halfedge;
+	}
+	while (halfedge != facet->facet_begin());
+	DEBUG_END;
+	return indicesNeighbors;
+}
+
+std::set<int> NaiveFacetJoiner::getIncidentVerticesIndices(int iFacet)
+{
+	DEBUG_START;
+	auto facet = facets_[iFacet];
+	auto halfedge = facet->facet_begin();
+	std::set<int> indicesVertices;
+	do
+	{
+		indicesVertices.insert(halfedge->vertex()->id);
+		++halfedge;
+	}
+	while (halfedge != facet->facet_begin());
+	DEBUG_END;
+	return indicesVertices;
+}
+
+Polyhedron_3 NaiveFacetJoiner::run()
+{
+	DEBUG_START;
+	auto indicesBigFacets = findBigFacets(polyhedron_, thresholdBigFacet_);
+	auto comparer = [](std::pair<std::set<int>, double> a,
+			std::pair<std::set<int>, double> b)
+	{
+		auto iA = a.first.begin();
+		auto iB = b.first.begin();
+		do
+		{
+			if (*iA < *iB)
+			{
+				return true;
+			}
+			if (*iA > *iB)
+			{
+				return false;
+			}
+			++iA;
+			++iB;
+		}
+		while (iA != a.first.end() && iB != b.first.end());
+		return false;
+	};
+	std::set<std::pair<std::set<int>, double>,
+		decltype(comparer)> clustersInformations(comparer);
+	for (int iFacetBig: indicesBigFacets)
+	{
+		auto indicesNeighbors = getNeighborsIndices(iFacetBig);
+		for (int iFacetNeighbor: indicesNeighbors)
+		{
+			if (indicesBigFacets.find(iFacetNeighbor)
+					!= indicesBigFacets.end())
+			{
+				std::set<int> cluster;
+				cluster.insert(iFacetBig);
+				cluster.insert(iFacetNeighbor);
+				auto pair = analyzeCluster(cluster);
+				clustersInformations.insert(
+						std::make_pair(cluster,
+							pair.second));
+			}
+		}
+	}
+	std::vector<std::pair<std::set<int>, double>> informations;
+	for (auto information: clustersInformations)
+	{
+		informations.push_back(information);
+	}
+	std::sort(informations.begin(), informations.end(),
+			[](std::pair<std::set<int>, double> a,
+				std::pair<std::set<int>, double> b)
+	{
+		return a.second < b.second;
+	});
+	for (auto clusterInformation: informations)
+	{
+		std::cerr << "Error " << clusterInformation.second
+			<< " for cluster ";
+		for (int iFacet: clusterInformation.first)
+		{
+			std::cerr << iFacet << " ";
+		}
+		std::cerr << std::endl;
+	}
+	DEBUG_END;
+	return polyhedron_; /* FIXME */
 }
