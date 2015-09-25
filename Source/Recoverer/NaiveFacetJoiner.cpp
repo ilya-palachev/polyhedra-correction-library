@@ -31,12 +31,29 @@
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
 
+void tryGetenvDouble(const char *envName, double &value)
+{
+	DEBUG_START;
+	char *mistake = NULL;
+	char *string = getenv(envName);
+	if (string)
+	{
+		double valueNew = strtod(string, &mistake);
+		if (mistake && *mistake)
+			return;
+		else
+			value = valueNew;
+	}
+	DEBUG_END;
+}
+
 NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 	polyhedron_(polyhedron),
 	facets_(polyhedron.size_of_facets()),
 	vertices_(polyhedron.size_of_vertices()),
-	thresholdBigFacet_(),
-	thresholdLeastSquaresQuality_()
+	thresholdBigFacet_(THRESHOLD_BIG_FACET_DEFAULT),
+	thresholdLeastSquaresQuality_(THRESHOLD_LEAST_SQUARES_QUALITY_DEFAULT),
+	thresholdClusterError_(THRESHOLD_CLUSTER_ERROR_DEFAULT)
 {
 	DEBUG_START;
 	int iFacet = 0;
@@ -56,31 +73,10 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 		vertex->id = iVertex;
 		++iVertex;
 	}
-
-	char *thresholdBigFacetString = getenv("THRESHOLD_BIG_FACET");
-	std::set<int> indicesBigFacets;
-	if (thresholdBigFacetString)
-	{
-		thresholdBigFacet_ = strtod(thresholdBigFacetString, NULL);
-	}
-	else
-	{
-		thresholdBigFacet_ = THRESHOLD_BIG_FACET_DEFAULT;
-	}
-
-	char *thresholdLeastSquaresQualityString = getenv(
-			"THRESHOLD_LEAST_SQUARES_QUALITY");
-	std::set<int> indicesLeastSquaresQualitys;
-	if (thresholdLeastSquaresQualityString)
-	{
-		thresholdLeastSquaresQuality_ = strtod(
-				thresholdLeastSquaresQualityString, NULL);
-	}
-	else
-	{
-		thresholdLeastSquaresQuality_
-			= THRESHOLD_LEAST_SQUARES_QUALITY_DEFAULT;
-	}
+	tryGetenvDouble("THRESHOLD_BIG_FACET", thresholdBigFacet_);
+	tryGetenvDouble("THRESHOLD_LEAST_SQUARES_QUALITY",
+			thresholdLeastSquaresQuality_);
+	tryGetenvDouble("THRESHOLD_CLUSTER_ERROR", thresholdClusterError_);
 	DEBUG_END;
 }
 
@@ -213,10 +209,33 @@ std::set<int> NaiveFacetJoiner::getIncidentVerticesIndices(int iFacet)
 	return indicesVertices;
 }
 
+void doParaviewVisualization(Polyhedron_3 polyhedron,
+		std::vector<std::pair<std::set<int>, double>> clusterCandidates)
+{
+	DEBUG_START;
+	for (auto clusterCandidate: clusterCandidates)
+	{
+		std::cerr << "Error " << clusterCandidate.second
+			<< " for cluster ";
+		for (int iFacet: clusterCandidate.first)
+		{
+			std::cerr << iFacet << " ";
+		}
+		std::cerr << std::endl;
+			printColouredPolyhedronAndLoadParaview(polyhedron,
+				clusterCandidate.first);
+	}
+	DEBUG_END;
+}
+
 Polyhedron_3 NaiveFacetJoiner::run()
 {
 	DEBUG_START;
+
+	/* 1. Find big facets: */
 	auto indicesBigFacets = findBigFacets(polyhedron_, thresholdBigFacet_);
+
+	/* 2. Find first cluster candidates among them: */
 	auto comparer = [](std::pair<std::set<int>, double> a,
 			std::pair<std::set<int>, double> b)
 	{
@@ -239,7 +258,7 @@ Polyhedron_3 NaiveFacetJoiner::run()
 		return false;
 	};
 	std::set<std::pair<std::set<int>, double>,
-		decltype(comparer)> clustersInformations(comparer);
+		decltype(comparer)> clusterCandidates(comparer);
 	for (int iFacetBig: indicesBigFacets)
 	{
 		auto indicesNeighbors = getNeighborsIndices(iFacetBig);
@@ -252,36 +271,121 @@ Polyhedron_3 NaiveFacetJoiner::run()
 				cluster.insert(iFacetBig);
 				cluster.insert(iFacetNeighbor);
 				auto pair = analyzeCluster(cluster);
-				clustersInformations.insert(
+				clusterCandidates.insert(
 						std::make_pair(cluster,
 							pair.second));
 			}
 		}
 	}
-	std::vector<std::pair<std::set<int>, double>> informations;
-	for (auto information: clustersInformations)
+
+	/* 3. Sort found first cluster candidates by error values: */
+	std::vector<std::pair<std::set<int>, double>> clusterCandidatesSorted;
+	std::set<int> clusterCandidatesUnion;
+	for (auto clusterCandidate: clusterCandidates)
 	{
-		informations.push_back(information);
+		clusterCandidatesSorted.push_back(clusterCandidate);
+		auto cluster = clusterCandidate.first;
+		clusterCandidatesUnion.insert(cluster.begin(), cluster.end());
 	}
-	std::sort(informations.begin(), informations.end(),
+	printColouredPolyhedron(polyhedron_, clusterCandidatesUnion,
+			"first-clusters-union.ply");
+	std::sort(clusterCandidatesSorted.begin(),
+			clusterCandidatesSorted.end(),
 			[](std::pair<std::set<int>, double> a,
 				std::pair<std::set<int>, double> b)
 	{
 		return a.second < b.second;
 	});
-	for (auto clusterInformation: informations)
+	if (getenv("DO_PARAVIEW_VISUALIZATION"))
+		doParaviewVisualization(polyhedron_, clusterCandidatesSorted);
+
+	/* 4. Start build clusters from first clusters candidates: */
+	const int INDEX_NOT_PROCESSED = -1;
+	const int INDEX_NEW_CLUSTER = -1;
+	std::vector<std::set<int>> clusters;
+	std::vector<int> index(polyhedron_.size_of_facets());
+	for (int i = 0; i < (int) index.size(); ++i)
+		index[i] = INDEX_NOT_PROCESSED;
+	for (auto clusterCandidate: clusterCandidatesSorted)
 	{
-		std::cerr << "Error " << clusterInformation.second
-			<< " for cluster ";
-		for (int iFacet: clusterInformation.first)
+		std::set<int> cluster = clusterCandidate.first;
+		double error = clusterCandidate.second;
+		if (error > thresholdClusterError_)
+			break;
+		std::vector<int> indices;
+		indices.insert(indices.end(), cluster.begin(), cluster.end());
+		DEBUG_ASSERT(cluster.size() == 2);
+		int iFacetFirst = indices[0];
+		int iFacetSecond = indices[1];
+		if (index[iFacetFirst] != INDEX_NOT_PROCESSED
+				&& index[iFacetFirst] != INDEX_NOT_PROCESSED)
 		{
-			std::cerr << iFacet << " ";
+			std::set<int> clusterCompetitor;
+			int iMin = std::min(index[iFacetFirst],
+					index[iFacetSecond]);
+			int iMax = std::max(index[iFacetFirst],
+					index[iFacetSecond]);
+			clusterCompetitor.insert(clusters[iMin].begin(),
+					clusters[iMin].end());
+			clusterCompetitor.insert(clusters[iMax].begin(),
+					clusters[iMax].end());
+			auto pair = analyzeCluster(clusterCompetitor);
+			double errorCompetitor = pair.second;
+			if (errorCompetitor <= thresholdClusterError_)
+			{
+				clusters[iMin] = clusterCompetitor;
+				clusters.erase(cluster.begin() + iMax);
+				for (int iFacet: clusterCompetitor)
+				{
+					index[iFacet] = iMin;
+				}
+				continue;
+			}
+
 		}
-		std::cerr << std::endl;
-		if (getenv("DO_PARAVIEW_VISUALIZATION"))
-			printColouredPolyhedronAndLoadParaview(polyhedron_,
-				clusterInformation.first);
+
+		/* FIXME: code below is not correct. */
+		double errorMinimal = error;
+		int indexBest = INDEX_NEW_CLUSTER;
+		std::set<int> clusterBest = cluster;
+		for (int iFacet: cluster)
+		{
+			if (index[iFacet] == INDEX_NOT_PROCESSED)
+				continue;
+			std::set<int> clusterCompetitor;
+			clusterCompetitor.insert(
+					clusters[index[iFacet]].begin(),
+					clusters[index[iFacet]].end());
+			clusterCompetitor.insert(
+					cluster.begin(),
+					cluster.end());
+			auto pair = analyzeCluster(clusterCompetitor);
+			double errorCompetitor = pair.second;
+			if (errorCompetitor < errorMinimal)
+			{
+				errorMinimal = errorCompetitor;
+				indexBest = index[iFacet];
+				clusterBest = clusterCompetitor;
+			}
+		}
+		if (indexBest != INDEX_NEW_CLUSTER)
+		{
+			if (errorMinimal > thresholdClusterError_)
+				continue;
+			clusters[indexBest] = clusterBest;
+		}
+		else
+		{
+			indexBest = clusters.size();
+			clusters.push_back(clusterBest);
+		}
+		for (int iFacet: clusterBest)
+		{
+			index[iFacet] = indexBest;
+		}
 	}
+	
+	printColouredPolyhedron(polyhedron_, clusters, "")
 	DEBUG_END;
 	return polyhedron_; /* FIXME */
 }
