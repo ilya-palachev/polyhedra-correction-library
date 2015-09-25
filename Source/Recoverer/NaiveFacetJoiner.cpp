@@ -133,9 +133,8 @@ std::set<int> findBigFacets(Polyhedron_3 polyhedron, double thresholdBigFacet)
 	std::cerr << indicesBigFacets.size() << " of "
 		<< polyhedron.size_of_facets() << " facets are big"
 		<< std::endl;
-	std::vector<std::set<int>> cluster;
-	cluster.push_back(indicesBigFacets);
-	printColouredPolyhedron(polyhedron, cluster, "big-facets-cluster.ply");
+	printColouredPolyhedron(polyhedron, indicesBigFacets,
+			"big-facets-cluster.ply");
 	DEBUG_END;
 	return indicesBigFacets;
 }
@@ -279,6 +278,9 @@ Polyhedron_3 NaiveFacetJoiner::run()
 			std::cerr << iFacet << " ";
 		}
 		std::cerr << std::endl;
+		if (getenv("DO_PARAVIEW_VISUALIZATION"))
+			printColouredPolyhedronAndLoadParaview(polyhedron_,
+				clusterInformation.first);
 	}
 	DEBUG_END;
 	return polyhedron_; /* FIXME */

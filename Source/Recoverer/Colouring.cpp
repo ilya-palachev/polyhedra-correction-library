@@ -166,3 +166,60 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, suffix) << *polyhedronCopy;
 	DEBUG_END;
 }
+
+void printColouredPolyhedron(Polyhedron_3 polyhedron,
+		std::set<int> clusterIndices,
+		const char *suffix)
+{
+	DEBUG_START;
+	std::vector<std::set<int>> cluster;
+	cluster.push_back(clusterIndices);
+	printColouredPolyhedron(polyhedron, cluster, suffix);
+	DEBUG_END;
+}
+
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
+		std::vector<std::set<int>> clustersIndices)
+{
+	DEBUG_START;
+	PolyhedronPtr polyhedronPCL(new Polyhedron(polyhedron));
+	srand(time(NULL));
+	for (auto clusterIndices: clustersIndices)
+	{
+		unsigned char red = rand() % 256;
+		unsigned char green = rand() % 256;
+		unsigned char blue = rand() % 256;
+
+		for (int iFacet: clusterIndices)
+		{
+			polyhedronPCL->facets[iFacet].set_rgb(red, green, blue);
+		}
+	}
+	Polyhedron *polyhedronCopy = new Polyhedron(polyhedronPCL);
+	char *polyhedronTmpFileName = strdup(tmpnam(NULL));
+	std::string polyhedronFileName(polyhedronTmpFileName);
+	polyhedronFileName += ".ply";
+	std::ofstream polyhedronFile;
+	polyhedronFile.open(polyhedronFileName);
+	polyhedronFile << *polyhedronCopy;
+	polyhedronFile.close();
+	std::string paraviewCommand("paraview --data=");
+	paraviewCommand += polyhedronFileName;
+	int exitValueParaview = system(paraviewCommand.c_str());
+	std::cerr << "Paraview exit with value " << exitValueParaview
+		<< std::endl;
+	remove(polyhedronFileName.c_str());
+	if (exitValueParaview != 0)
+		exit(EXIT_FAILURE);
+	DEBUG_END;
+}
+
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
+		std::set<int> clusterIndices)
+{
+	DEBUG_START;
+	std::vector<std::set<int>> cluster;
+	cluster.push_back(clusterIndices);
+	printColouredPolyhedronAndLoadParaview(polyhedron, cluster);
+	DEBUG_END;
+}
