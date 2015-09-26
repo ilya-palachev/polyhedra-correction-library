@@ -87,6 +87,8 @@ private:
 	 */
 	std::set<int> getNeighborsIndices(int iFacet);
 
+	std::set<int> getNeighborsIndicesCluster(int iCluster);
+
 	/**
 	 * Gets the set of indices that correspond to the vertices that are
 	 * incident to the given facet.
@@ -115,6 +117,10 @@ private:
 	void tryMergeClusterPairs();
 
 	void buildSecondClusters(std::set<int> indicesBigFacets);
+
+	bool finalizeClusters();
+
+
 public:
 	/**
 	 * The default constructor.
