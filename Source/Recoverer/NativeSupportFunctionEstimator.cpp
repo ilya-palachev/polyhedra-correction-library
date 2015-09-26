@@ -32,6 +32,7 @@
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include "Recoverer/NaiveFacetJoiner.h"
+#include "Recoverer/Colouring.h"
 
 
 static double threshold = 0.;
@@ -623,8 +624,8 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	Polyhedron *pCopy = new Polyhedron(intersection);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-union.ply") << *pCopy;
 
-	NaiveFacetJoiner joiner(threshold);
-	Polyhedron_3 polyhedron = joiner.run(intersection);
+	NaiveFacetJoiner joiner(intersection);
+	Polyhedron_3 polyhedron = joiner.run();
 	polyhedron.initialize_indices();
 	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
 		polyhedron.planes_begin(), Plane_from_facet());
