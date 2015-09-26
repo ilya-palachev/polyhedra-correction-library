@@ -87,6 +87,19 @@ private:
 	 * @return			The set of incident vertices IDs.
 	 */
 	std::set<int> getIncidentVerticesIndices(int iFacet);
+
+	/**
+	 * Finds first cluster candidates.
+	 *
+	 * @param indicesBigFacets	Big facets' IDs.
+	 * @return			Cluster candidates.
+	 */
+	std::vector<std::pair<std::set<int>, double>>
+		findFirstClusterCandidates(std::set<int> indicesBigFacets);
+
+	std::vector<std::set<int>> buildFirstClusters(
+			std::vector<std::pair<std::set<int>, double>>
+			clusterCandidates);
 public:
 	/**
 	 * The default constructor.
