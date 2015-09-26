@@ -35,11 +35,19 @@ const double THRESHOLD_LEAST_SQUARES_QUALITY_DEFAULT = 0.9;
 const double THRESHOLD_CLUSTER_ERROR_DEFAULT = 0.002;
 const double ALPHA_CLUSTER_INFINITY = 1e16;
 
+const int INDEX_NOT_PROCESSED = -1;
+
 class NaiveFacetJoiner
 {
 private:
 	/** The initial polyhedron. */
 	Polyhedron_3 polyhedron_;
+
+	/** The current cluters. */
+	std::vector<std::set<int>> clusters_;
+
+	/** Markers that show which cluster facets belong to. */
+	std::vector<int> index_;
 
 	/** The vector that implements random access to to facets. */
 	std::vector<Polyhedron_3::Facet_iterator> facets_;
@@ -100,6 +108,10 @@ private:
 	std::vector<std::set<int>> buildFirstClusters(
 			std::vector<std::pair<std::set<int>, double>>
 			clusterCandidates);
+
+	bool mergeClusters(int iClusterFirst, int iClusterSecond);
+
+	bool extendCluster(int iCluster, std::set<int> cluster);
 public:
 	/**
 	 * The default constructor.

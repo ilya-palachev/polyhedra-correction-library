@@ -65,6 +65,8 @@ void tryGetenvDouble(const char *envName, double &value)
 
 NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 	polyhedron_(polyhedron),
+	clusters_(),
+	index_(polyhedron.size_of_facets()),
 	facets_(polyhedron.size_of_facets()),
 	vertices_(polyhedron.size_of_vertices()),
 	thresholdBigFacet_(THRESHOLD_BIG_FACET_DEFAULT),
@@ -73,6 +75,9 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 {
 	DEBUG_START;
 	int iFacet = 0;
+	for (int i = 0; i < (int) index_.size(); ++i)
+		index_[i] = INDEX_NOT_PROCESSED;
+
 	for (auto facet = polyhedron_.facets_begin();
 			facet != polyhedron_.facets_end(); ++facet)
 	{
@@ -320,14 +325,70 @@ NaiveFacetJoiner::findFirstClusterCandidates(std::set<int> indicesBigFacets)
 	return clusterCandidatesSorted;
 }
 
+bool NaiveFacetJoiner::mergeClusters(int iClusterFirst, int iClusterSecond)
+{
+	DEBUG_START;
+	std::cerr << "Trying to merge clusters:" << std::endl;
+	std::cerr << "  first: " << clusters_[iClusterFirst] << std::endl;
+	std::cerr << "  second: " << clusters_[iClusterSecond] << std::endl;
+	std::set<int> clusterCompetitor;
+	int iMin = std::min(iClusterFirst, iClusterSecond);
+	int iMax = std::max(iClusterFirst, iClusterSecond);
+	clusterCompetitor.insert(clusters_[iMin].begin(),
+			clusters_[iMin].end());
+	clusterCompetitor.insert(clusters_[iMax].begin(),
+			clusters_[iMax].end());
+	auto pair = analyzeCluster(clusterCompetitor);
+	double errorCompetitor = pair.second;
+	if (errorCompetitor <= thresholdClusterError_)
+	{
+		std::cerr << "Mering clusters!" << std::endl;
+		clusters_[iMin] = clusterCompetitor;
+		clusters_.erase(clusters_.begin() + iMax);
+		for (int iFacet: clusterCompetitor)
+		{
+			index_[iFacet] = iMin;
+		}
+		DEBUG_END;
+		return true;
+	}
+	DEBUG_END;
+	return false;
+}
+
+bool NaiveFacetJoiner::extendCluster(int indexCompetitor,
+		std::set<int> cluster)
+{
+	DEBUG_START;
+	std::set<int> clusterCompetitor;
+	clusterCompetitor.insert(
+			clusters_[indexCompetitor].begin(),
+			clusters_[indexCompetitor].end());
+	clusterCompetitor.insert(cluster.begin(),
+			cluster.end());
+	auto pair = analyzeCluster(clusterCompetitor);
+	double errorCompetitor = pair.second;
+	if (errorCompetitor <= thresholdClusterError_)
+	{
+		std::cerr << "Merging pair to the cluster!"
+			<< std::endl;
+		clusters_[indexCompetitor] = clusterCompetitor;
+		for (int iFacet: clusterCompetitor)
+		{
+			index_[iFacet] = indexCompetitor;
+		}
+		return true;
+	}
+	DEBUG_END;
+	return false;
+}
+
 std::vector<std::set<int>> NaiveFacetJoiner::buildFirstClusters(
 		std::vector<std::pair<std::set<int>, double>>
 		clusterCandidates)
 {
 	DEBUG_START;
-	const int INDEX_NOT_PROCESSED = -1;
 	const int INDEX_NEW_CLUSTER = -1;
-	std::vector<std::set<int>> clusters;
 	std::vector<int> index(polyhedron_.size_of_facets());
 	for (int i = 0; i < (int) index.size(); ++i)
 		index[i] = INDEX_NOT_PROCESSED;
@@ -354,54 +415,30 @@ std::vector<std::set<int>> NaiveFacetJoiner::buildFirstClusters(
 		int iFacetSecond = indices[1];
 		std::cerr << "first = " << iFacetFirst << ", second = "
 			<< iFacetSecond << std::endl;
-		if (index[iFacetFirst] != INDEX_NOT_PROCESSED
-				&& index[iFacetSecond] != INDEX_NOT_PROCESSED)
+		if (index_[iFacetFirst] != INDEX_NOT_PROCESSED
+				&& index_[iFacetSecond] != INDEX_NOT_PROCESSED)
 		{
 			std::cerr << "Number of found competitors: 2 "
 				<< std::endl;
-			std::cerr << "Competitor for facet #" << iFacetFirst
-				<< ": cluster #" << index[iFacetFirst] << ": "
-				<< clusters[index[iFacetFirst]] << std::endl;
-			std::cerr << "Competitor for facet #" << iFacetSecond
-				<< ": cluster #" << index[iFacetSecond] << ": "
-				<< clusters[index[iFacetSecond]] << std::endl;
-			std::set<int> clusterCompetitor;
-			int iMin = std::min(index[iFacetFirst],
-					index[iFacetSecond]);
-			int iMax = std::max(index[iFacetFirst],
-					index[iFacetSecond]);
-			clusterCompetitor.insert(clusters[iMin].begin(),
-					clusters[iMin].end());
-			clusterCompetitor.insert(clusters[iMax].begin(),
-					clusters[iMax].end());
-			auto pair = analyzeCluster(clusterCompetitor);
-			double errorCompetitor = pair.second;
-			if (errorCompetitor <= thresholdClusterError_)
-			{
-				std::cerr << "Mering clusters!" << std::endl;
-				clusters[iMin] = clusterCompetitor;
-				clusters.erase(clusters.begin() + iMax);
-				for (int iFacet: clusterCompetitor)
-				{
-					index[iFacet] = iMin;
-				}
+			bool ifMerged = mergeClusters(index_[iFacetFirst],
+					index_[iFacetSecond]);
+			if (ifMerged)
 				continue;
-			}
 			/* FIXME: Maybe here will be cluster breaking. */
 		}
 
 		int indexCompetitor = INDEX_NEW_CLUSTER;
 		int iFacetNew = INDEX_NEW_CLUSTER;
 		int iFacetCommon = INDEX_NEW_CLUSTER;
-		if (index[iFacetFirst] != INDEX_NOT_PROCESSED)
+		if (index_[iFacetFirst] != INDEX_NOT_PROCESSED)
 		{
-			indexCompetitor = index[iFacetFirst];
+			indexCompetitor = index_[iFacetFirst];
 			iFacetNew = iFacetSecond;
 			iFacetCommon = iFacetFirst;
 		}
-		if (index[iFacetSecond] != INDEX_NOT_PROCESSED)
+		if (index_[iFacetSecond] != INDEX_NOT_PROCESSED)
 		{
-			indexCompetitor = index[iFacetSecond];
+			indexCompetitor = index_[iFacetSecond];
 			iFacetNew = iFacetFirst;
 			iFacetCommon = iFacetSecond;
 		}
@@ -410,37 +447,22 @@ std::vector<std::set<int>> NaiveFacetJoiner::buildFirstClusters(
 			std::cerr << "Number of found competitors: 1 "
 				<< std::endl;
 			std::cerr << "Competitor for facet #" << iFacetCommon
-				<< ": cluster #" << index[indexCompetitor] << ": "
-				<< clusters[indexCompetitor] << std::endl;
-			std::set<int> clusterCompetitor;
-			clusterCompetitor.insert(
-					clusters[indexCompetitor].begin(),
-					clusters[indexCompetitor].end());
-			clusterCompetitor.insert(cluster.begin(),
-					cluster.end());
-			auto pair = analyzeCluster(clusterCompetitor);
-			double errorCompetitor = pair.second;
-			if (errorCompetitor <= thresholdClusterError_)
-			{
-				std::cerr << "Merging pair to the cluster!"
-					<< std::endl;
-				clusters[indexCompetitor] = clusterCompetitor;
-				for (int iFacet: clusterCompetitor)
-				{
-					index[iFacet] = indexCompetitor;
-				}
-				continue;
-			}
+				<< ": cluster #" << index_[indexCompetitor]
+				<< ": "
+				<< clusters_[indexCompetitor] << std::endl;
+			bool ifExtended = extendCluster(indexCompetitor,
+					cluster);
+
 			/* FIXME: Maybe here will be cluster breaking. */
-			else
+			if (!ifExtended)
 			{
 				std::cerr << "Adding new cluster with one "
 					<< "facet " << iFacetNew << " !"
 					<< std::endl;
 				std::set<int> clusterNew;
 				clusterNew.insert(iFacetNew);
-				index[iFacetNew] = clusters.size();
-				clusters.push_back(clusterNew);
+				index_[iFacetNew] = clusters_.size();
+				clusters_.push_back(clusterNew);
 			}
 		}
 		else
@@ -448,15 +470,15 @@ std::vector<std::set<int>> NaiveFacetJoiner::buildFirstClusters(
 			std::cerr << "Adding new cluster!" << std::endl;
 			for (int iFacet: cluster)
 			{
-				index[iFacet] = clusters.size();
+				index_[iFacet] = clusters_.size();
 			}
-			clusters.push_back(cluster);
+			clusters_.push_back(cluster);
 		}
 	}
 	
-	printColouredPolyhedron(polyhedron_, clusters, "first-clusters.ply")
+	printColouredPolyhedron(polyhedron_, clusters_, "first-clusters.ply")
 	DEBUG_END;
-	return clusters;
+	return clusters_;
 }
 
 Polyhedron_3 NaiveFacetJoiner::run()
