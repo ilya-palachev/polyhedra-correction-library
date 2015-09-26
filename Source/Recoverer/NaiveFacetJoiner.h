@@ -113,6 +113,8 @@ private:
 	bool extendCluster(int iCluster, std::set<int> cluster);
 
 	void tryMergeClusterPairs();
+
+	void buildSecondClusters(std::set<int> indicesBigFacets);
 public:
 	/**
 	 * The default constructor.
