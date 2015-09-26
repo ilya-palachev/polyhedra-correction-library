@@ -105,13 +105,14 @@ private:
 	std::vector<std::pair<std::set<int>, double>>
 		findFirstClusterCandidates(std::set<int> indicesBigFacets);
 
-	std::vector<std::set<int>> buildFirstClusters(
-			std::vector<std::pair<std::set<int>, double>>
+	void buildFirstClusters(std::vector<std::pair<std::set<int>, double>>
 			clusterCandidates);
 
 	bool mergeClusters(int iClusterFirst, int iClusterSecond);
 
 	bool extendCluster(int iCluster, std::set<int> cluster);
+
+	void tryMergeClusterPairs();
 public:
 	/**
 	 * The default constructor.

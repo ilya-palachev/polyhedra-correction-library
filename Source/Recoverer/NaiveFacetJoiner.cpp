@@ -383,7 +383,7 @@ bool NaiveFacetJoiner::extendCluster(int indexCompetitor,
 	return false;
 }
 
-std::vector<std::set<int>> NaiveFacetJoiner::buildFirstClusters(
+void NaiveFacetJoiner::buildFirstClusters(
 		std::vector<std::pair<std::set<int>, double>>
 		clusterCandidates)
 {
@@ -476,9 +476,25 @@ std::vector<std::set<int>> NaiveFacetJoiner::buildFirstClusters(
 		}
 	}
 	
-	printColouredPolyhedron(polyhedron_, clusters_, "first-clusters.ply")
+	printColouredPolyhedron(polyhedron_, clusters_, "first-clusters.ply");
 	DEBUG_END;
-	return clusters_;
+}
+
+void NaiveFacetJoiner::tryMergeClusterPairs()
+{
+	DEBUG_START;
+	for (int i = 0; i < (int) clusters_.size(); ++i)
+	{
+		for (int j = 0; j < (int) clusters_.size(); ++j)
+		{
+			if (j == i)
+				continue;
+			mergeClusters(i, j);
+		}
+	}
+	printColouredPolyhedron(polyhedron_, clusters_,
+			"first-clusters-merged.ply");
+	DEBUG_END;
 }
 
 Polyhedron_3 NaiveFacetJoiner::run()
@@ -492,7 +508,15 @@ Polyhedron_3 NaiveFacetJoiner::run()
 	auto clusterCandidates = findFirstClusterCandidates(indicesBigFacets);
 
 	/* 3. Build first clusters: */
-	auto clusters = buildFirstClusters(clusterCandidates);
+	buildFirstClusters(clusterCandidates);
+	std::cerr << "Number of first clusters: " << clusters_.size()
+		<< std::endl;
+
+	/* 4. Try to merge first clusters if possible: */
+	tryMergeClusterPairs();
+	std::cerr << "Number of first clusters: " << clusters_.size()
+		<< std::endl;
+
 	DEBUG_END;
 	return polyhedron_; /* FIXME */
 }
