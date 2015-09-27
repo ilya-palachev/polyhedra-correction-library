@@ -592,14 +592,14 @@ void NaiveFacetJoiner::buildAdditionalClusters(std::set<int> indicesFreeFacets)
 std::set<int> NaiveFacetJoiner::getNeighborsIndicesCluster(int iCluster)
 {
 	DEBUG_START;
+	std::set<int> cluster = clusters_[iCluster];
 	std::set<int> indicesNeighbors;
-	for (int iFacet: clusters_[iCluster])
+	for (int iFacet: cluster)
 	{
 		auto indices = getNeighborsIndices(iFacet);
 		for (int i: indices)
 		{
-			if (clusters_[iCluster].find(i)
-					== clusters_[iCluster].end())
+			if (cluster.find(i) == cluster.end())
 			{
 				indicesNeighbors.insert(i);
 			}
