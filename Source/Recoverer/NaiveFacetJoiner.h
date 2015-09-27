@@ -36,6 +36,7 @@ const double THRESHOLD_CLUSTER_ERROR_DEFAULT = 0.002;
 const double ALPHA_CLUSTER_INFINITY = 1e16;
 
 const int INDEX_NOT_PROCESSED = -1;
+const int INDEX_NEW_CLUSTER = -1;
 
 class NaiveFacetJoiner
 {
@@ -116,7 +117,7 @@ private:
 
 	void tryMergeClusterPairs();
 
-	void buildSecondClusters(std::set<int> indicesBigFacets);
+	void buildAdditionalClusters(std::set<int> indicesBigFacets);
 
 	bool finalizeClusters();
 
