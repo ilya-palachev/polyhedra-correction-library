@@ -730,7 +730,7 @@ Polyhedron_3 NaiveFacetJoiner::run()
 	{
 		std::cerr << "======================================"
 			<< std::endl;
-		std::cerr << "Running final iteration " << iIteration
+		std::cerr << "Running final iteration " << iIteration++
 			<< std::endl;
 		ifExtended = finalizeClusters();
 	}
@@ -738,6 +738,11 @@ Polyhedron_3 NaiveFacetJoiner::run()
 	printColouredPolyhedron(polyhedron_, clusters_,
 			"clusters-finalized.ply");
 	std::cerr << "Number of final clusters: " << clusters_.size()
+		<< std::endl;
+
+	/* 7. Try to merge first clusters if possible: */
+	tryMergeClusterPairs();
+	std::cerr << "Number of final clusters merged: " << clusters_.size()
 		<< std::endl;
 	DEBUG_END;
 	return polyhedron_; /* FIXME */
