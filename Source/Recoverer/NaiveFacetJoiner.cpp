@@ -534,7 +534,15 @@ void NaiveFacetJoiner::tryMergeClusterPairs()
 	{
 		if (clusters_[i].empty())
 			continue;
-		for (int j = 0; j < (int) clusters_.size(); ++j)
+		auto indicesFacets = getNeighborsIndicesCluster(i);
+		std::set<int> indicesClusters;
+		for (int iFacet: indicesFacets)
+		{
+			int iCluster = index_[iFacet];
+			if (iCluster != INDEX_NOT_PROCESSED)
+				indicesClusters.insert(iCluster);
+		}
+		for (int j: indicesClusters)
 		{
 			if (j == i)
 				continue;
@@ -756,6 +764,7 @@ Polyhedron_3 NaiveFacetJoiner::run()
 		<< std::endl;
 
 	/* 7. Try to merge first clusters if possible: */
+	tryMergeClusterPairs();
 	tryMergeClusterPairs();
 	printColouredPolyhedron(polyhedron_, clusters_,
 			"clusters-finalized-merged.ply");
