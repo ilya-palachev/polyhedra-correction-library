@@ -780,6 +780,19 @@ Polyhedron_3 NaiveFacetJoiner::run()
 			"clusters-finalized-merged.ply");
 	std::cerr << "Number of final clusters merged: " << clusters_.size()
 		<< std::endl;
+
+	std::vector<Plane_3> planes;
+	for (auto cluster: clusters_)
+	{
+		if (cluster.empty())
+			continue;
+		auto pair = analyzeCluster(cluster);
+		Plane_3 plane = pair.first;
+		planes.push_back(plane);
+	}
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel());
 	DEBUG_END;
-	return polyhedron_; /* FIXME */
+	return intersection;
 }
