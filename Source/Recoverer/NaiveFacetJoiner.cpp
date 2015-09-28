@@ -585,7 +585,6 @@ void NaiveFacetJoiner::buildAdditionalClusters(std::set<int> indicesFreeFacets)
 					clusters_.size();
 				clusters_.push_back(cluster);
 			}
-			clusters_.push_back(cluster);
 		}
 		else
 		{
@@ -620,6 +619,8 @@ std::set<int> NaiveFacetJoiner::getNeighborsIndicesCluster(int iCluster)
 bool NaiveFacetJoiner::finalizeClusters()
 {
 	DEBUG_START;
+	if (!checkClusters(clusters_, index_))
+		exit(EXIT_FAILURE);
 	std::vector<int> indexBest(index_.size());
 	for (int &i: indexBest)
 		i = INDEX_NEW_CLUSTER;
@@ -695,7 +696,8 @@ bool NaiveFacetJoiner::finalizeClusters()
 		}
 	}
 	buildAdditionalClusters(indicesFreeFacets);
-	checkClusters(clusters_, index_);
+	if (!checkClusters(clusters_, index_))
+		exit(EXIT_FAILURE);
 	
 	DEBUG_END;
 	return (numExtensionsHappened + indicesFreeFacets.size() > 0);
@@ -743,6 +745,12 @@ Polyhedron_3 NaiveFacetJoiner::run()
 			"second-clusters.ply");
 	std::cerr << "Number of second clusters: " << clusters_.size()
 		<< std::endl;
+	int iCluster = 0;
+	for (auto cluster: clusters_)
+	{
+		std::cerr << "Cluster #" << iCluster++ << ": " << cluster
+			<< std::endl;
+	}
 
 	/*
 	 * 6. Finalize clusters by extending them with neighboring facets:
