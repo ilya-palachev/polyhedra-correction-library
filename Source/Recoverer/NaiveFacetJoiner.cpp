@@ -26,6 +26,7 @@
 
 #include <list>
 #include <set>
+#include "LeastSquaresMethod.h"
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Recoverer/NaiveFacetJoiner.h"
@@ -70,7 +71,6 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 	facets_(polyhedron.size_of_facets()),
 	vertices_(polyhedron.size_of_vertices()),
 	thresholdBigFacet_(THRESHOLD_BIG_FACET_DEFAULT),
-	thresholdLeastSquaresQuality_(THRESHOLD_LEAST_SQUARES_QUALITY_DEFAULT),
 	thresholdClusterError_(THRESHOLD_CLUSTER_ERROR_DEFAULT)
 {
 	DEBUG_START;
@@ -95,8 +95,6 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 		++iVertex;
 	}
 	tryGetenvDouble("THRESHOLD_BIG_FACET", thresholdBigFacet_);
-	tryGetenvDouble("THRESHOLD_LEAST_SQUARES_QUALITY",
-			thresholdLeastSquaresQuality_);
 	tryGetenvDouble("THRESHOLD_CLUSTER_ERROR", thresholdClusterError_);
 	DEBUG_END;
 }
@@ -166,23 +164,27 @@ std::pair<Plane_3, double> NaiveFacetJoiner::analyzeCluster(
 		indicesVerticesAll.insert(indicesVertices.begin(),
 				indicesVertices.end());
 	}
-	std::set<Point_3> points;
+	std::vector<Point_3> points;
 	for (int iVertex: indicesVerticesAll)
 	{
-		points.insert(vertices_[iVertex]->point());
+		points.push_back(vertices_[iVertex]->point());
 	}
-
-	Plane_3 planeBest;
-	double quality = CGAL::linear_least_squares_fitting_3(
-	                points.begin(), points.end(), planeBest,
-	                CGAL::Dimension_tag<0>());
-	std::cerr << "   quality = " << quality << std::endl;
-	if (quality < thresholdLeastSquaresQuality_ || !std::isfinite(quality))
+	double *x = new double[points.size()];
+	double *y = new double[points.size()];
+	double *z = new double[points.size()];
+	for (int i = 0; i < (int) points.size(); ++i)
 	{
-		std::cerr << "   failed to make a plane!" << std::endl;
-		DEBUG_END;
-		return std::make_pair(Plane_3(), ALPHA_CLUSTER_INFINITY);
+		x[i] = points[i].x();
+		y[i] = points[i].y();
+		z[i] = points[i].z();
 	}
+	double a, b, c, d;
+	runListSquaresMethod(points.size(), x, y, z, a, b, c, d);
+	delete[] x;
+	delete[] y;
+	delete[] z;
+	Plane_3 planeBest(a, b, c, d);
+
 	double distanceMaximal = 0.;
 	for (auto point: points)
 	{

@@ -31,7 +31,6 @@
 #include <CGAL/linear_least_squares_fitting_3.h>
 
 const double THRESHOLD_BIG_FACET_DEFAULT = 0.05;
-const double THRESHOLD_LEAST_SQUARES_QUALITY_DEFAULT = 0.9;
 const double THRESHOLD_CLUSTER_ERROR_DEFAULT = 0.002;
 const double ALPHA_CLUSTER_INFINITY = 1e16;
 
@@ -61,11 +60,6 @@ private:
 	 * facet.
 	 */
 	double thresholdBigFacet_;
-
-	/**
-	 * Threshold of linear least squares qulity (lower bound).
-	 */
-	double thresholdLeastSquaresQuality_;
 
 	/** The worst possible cluster error. */
 	double thresholdClusterError_;
