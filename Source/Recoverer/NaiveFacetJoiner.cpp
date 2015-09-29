@@ -331,7 +331,7 @@ bool NaiveFacetJoiner::mergeClusters(int iClusterFirst, int iClusterSecond)
 	if (iClusterFirst == iClusterSecond)
 	{
 		std::cerr << "The same clusters!" << std::endl;
-		return true;
+		return false;
 	}
 	std::set<int> clusterCompetitor;
 	int iMin = std::min(iClusterFirst, iClusterSecond);
@@ -529,9 +529,10 @@ void NaiveFacetJoiner::buildFirstClusters(
 	DEBUG_END;
 }
 
-void NaiveFacetJoiner::tryMergeClusterPairs()
+bool NaiveFacetJoiner::tryMergeClusterPairs()
 {
 	DEBUG_START;
+	bool ifMergedAtLeastOnce = false;
 	for (int i = 0; i < (int) clusters_.size(); ++i)
 	{
 		if (clusters_[i].empty())
@@ -550,10 +551,13 @@ void NaiveFacetJoiner::tryMergeClusterPairs()
 				continue;
 			if (clusters_[j].empty())
 				continue;
-			mergeClusters(i, j);
+			bool ifMerged = mergeClusters(i, j);
+			if (ifMerged)
+				ifMergedAtLeastOnce = true;
 		}
 	}
 	DEBUG_END;
+	return ifMergedAtLeastOnce;
 }
 
 void NaiveFacetJoiner::buildAdditionalClusters(std::set<int> indicesFreeFacets)
@@ -708,7 +712,7 @@ bool NaiveFacetJoiner::finalizeClusters()
 Polyhedron_3 NaiveFacetJoiner::run()
 {
 	DEBUG_START;
-
+	thresholdClusterError_ *= 0.5;
 	/* 1. Find big facets: */
 	auto indicesBigFacets = findBigFacets(polyhedron_, thresholdBigFacet_);
 	printColouredPolyhedron(polyhedron_, indicesBigFacets,
@@ -767,15 +771,20 @@ Polyhedron_3 NaiveFacetJoiner::run()
 			<< std::endl;
 		ifExtended = finalizeClusters();
 	}
-	while(ifExtended);
+	while (ifExtended);
 	printColouredPolyhedron(polyhedron_, clusters_,
 			"clusters-finalized.ply");
 	std::cerr << "Number of final clusters: " << clusters_.size()
 		<< std::endl;
 
 	/* 7. Try to merge first clusters if possible: */
-	tryMergeClusterPairs();
-	tryMergeClusterPairs();
+	thresholdClusterError_ *= 2.;
+	bool ifMerged = false;
+	do
+	{
+		ifMerged = tryMergeClusterPairs();
+	}
+	while (ifMerged);
 	printColouredPolyhedron(polyhedron_, clusters_,
 			"clusters-finalized-merged.ply");
 	std::cerr << "Number of final clusters merged: " << clusters_.size()

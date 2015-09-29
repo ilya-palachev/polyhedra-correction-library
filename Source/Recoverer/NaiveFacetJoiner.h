@@ -109,7 +109,7 @@ private:
 
 	bool extendCluster(int iCluster, std::set<int> cluster);
 
-	void tryMergeClusterPairs();
+	bool tryMergeClusterPairs();
 
 	void buildAdditionalClusters(std::set<int> indicesBigFacets);
 
