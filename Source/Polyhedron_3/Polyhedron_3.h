@@ -43,12 +43,24 @@ typedef Point_3 PCLPoint_3;
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Polyhedron/Polyhedron.h"
 
+
+typedef struct
+{
+	unsigned char red;
+	unsigned char green;
+	unsigned char blue;
+} Colour;
+
 /** Define point creator */
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
 class Polyhedron_3 : public BasePolyhedron_3
 {
 public:
+	std::vector<Colour> vertexColours;
+	std::vector<Colour> facetColours;
+	std::vector<Colour> halfedgeColours;
+
 	/**
 	 * Constructs empty CGAL polyhedron from nothing.
 	 */
