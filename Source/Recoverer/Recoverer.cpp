@@ -40,6 +40,7 @@
 #include "halfspaces_intersection.h"
 
 TimeMeasurer timer;
+std::set<int> indicesDirectionsIgnored;
 
 Recoverer::Recoverer() :
 	estimatorType(CGAL_ESTIMATOR),
@@ -148,21 +149,28 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 	double DEBUG_VARIABLE L2 = 0.;
 	double DEBUG_VARIABLE Linf = 0.;
 	ASSERT(h0.size() == h.size());
+	int numDirectionsAccounted = 0;
 	for (int i = 0; i < h.size(); ++i)
 	{
+		if (indicesDirectionsIgnored.find(i)
+				!= indicesDirectionsIgnored.end())
+			continue;
+		++numDirectionsAccounted;
 		double delta = h0(i) - h(i);
 		L1 += fabs(delta);
 		L2 += delta * delta;
 		Linf = delta > Linf ? delta : Linf;
 	}
 	MAIN_PRINT("L1 = %lf = %le", L1, L1);
-	double L1average = L1 / h.size();
-	MAIN_PRINT("L1 / %ld = %lf = %le", h.size(), L1average, L1average);
+	double L1average = L1 / numDirectionsAccounted;
+	MAIN_PRINT("L1 / %d = %lf = %le", numDirectionsAccounted, L1average,
+			L1average);
 	MAIN_PRINT("Sum of squares = %lf = %le", L2, L2);
 	L2 = sqrt(L2);
 	MAIN_PRINT("L2 = %lf = %le", L2, L2);
-	double L2average = L2 / sqrt(h.size());
-	MAIN_PRINT("L2 / sqrt(%ld) = %lf = %le", h.size(), L2average, L2average);
+	double L2average = L2 / sqrt(numDirectionsAccounted);
+	MAIN_PRINT("L2 / sqrt(%d) = %lf = %le", numDirectionsAccounted, L2average,
+			L2average);
 	MAIN_PRINT("Linf = %lf = %le", Linf, Linf);
 	if (getenv("PCL_PRINT_VARIABLE_CHANGE"))
 	{
@@ -364,6 +372,31 @@ static PolyhedronPtr produceFinalPolyhedron(
 {
 	DEBUG_START;
 	timer.pushTimer();
+	auto directions = data->supportDirections();
+	char *normMinimalString = getenv("NORM_MINIMAL");
+	double normMinimal = 0.;
+	if (normMinimalString)
+	{
+		char *mistake = NULL;
+		normMinimal = strtod(normMinimalString, &mistake);
+		if (mistake && *mistake)
+		{
+			std::cerr << "mistake: " << mistake << std::endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+	for (int i = 0; i < (int) directions.size(); ++i)
+	{
+		Point_3 direction = directions[i];
+		double normOXYsquared = direction.x() * direction.x()
+				+ direction.y() * direction.y();
+		if (normOXYsquared < normMinimal && direction.z() < 0.)
+		{
+			indicesDirectionsIgnored.insert(i);
+		}
+	}
+	std::cerr << "Number of ignored directions: "
+		<< indicesDirectionsIgnored.size() << std::endl;
 
 	auto h = supportValuesFromPoints(data->supportDirections(), estimate);
 	/* Now produce final polyhedron from the estimate. */
