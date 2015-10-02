@@ -214,7 +214,7 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	stream << "property uchar red" << std::endl;
 	stream << "property uchar green" << std::endl;
 	stream << "property uchar blue" << std::endl;
-	stream << "element facet " << p.size_of_facets() << std::endl;
+	stream << "element face " << p.size_of_facets() << std::endl;
 	stream << "property list uchar uint vertex_indices" << std::endl;
 	stream << "property uchar red" << std::endl;
 	stream << "property uchar green" << std::endl;
@@ -227,15 +227,18 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	stream << "property uchar blue" << std::endl;
 	stream << "end_header" << std::endl;
 	int iVertex = 0;
+	double scale = 1.;
 	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end();
 			++vertex)
 	{
 		auto point = vertex->point();
 		auto colour = p.vertexColours[iVertex];
-		stream << point.x() << " " << point.y() << " " << point.z();
-		stream << " " << colour.red
-			<< " " << colour.green
-			<< " " << colour.blue << std::endl;
+		stream << (int) std::floor(scale * point.x()) << " "
+			<< (int) std::floor(scale * point.y()) << " "
+			<< (int) std::floor(scale * point.z());
+		stream << " " << static_cast<int>(colour.red)
+			<< " " << static_cast<int>(colour.green)
+			<< " " << static_cast<int>(colour.blue) << std::endl;
 		++iVertex;
 	}
 	int iFacet = 0;
@@ -247,10 +250,11 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 		do
 		{
 			stream << " " << halfedge->vertex()->id;
+			++halfedge;
 		} while (halfedge != facet->facet_begin());
-		stream << " " << colour.red
-			<< " " << colour.green
-			<< " " << colour.blue << std::endl;
+		stream << " " << static_cast<int>(colour.red)
+			<< " " << static_cast<int>(colour.green)
+			<< " " << static_cast<int>(colour.blue) << std::endl;
 		++iFacet;
 	}
 	int iHalfedge = 0;
@@ -262,13 +266,12 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 		if (iVertex2 > iVertex1)
 			continue;
 		auto colour = p.halfedgeColours[iHalfedge];
-		stream << " " << colour.red
-			<< " " << colour.green
-			<< " " << colour.blue << std::endl;
+		stream << iVertex1 << " " << iVertex2;
+		stream << " " << static_cast<int>(colour.red)
+			<< " " << static_cast<int>(colour.green)
+			<< " " << static_cast<int>(colour.blue) << std::endl;
 		++iFacet;
 	}
-
-
 	DEBUG_END;
 	return stream;
 }
@@ -283,6 +286,11 @@ void Polyhedron_3::initialize_indices()
 	grey.red = 100;
 	grey.green = 100;
 	grey.blue = 100;
+
+	Colour red;
+	red.red = 255;
+	red.green = 0;
+	red.blue = 0;
 
 	auto vertex = vertices_begin();
 	for (int i = 0; i < (int) size_of_vertices(); ++i)
@@ -304,7 +312,7 @@ void Polyhedron_3::initialize_indices()
 	for (int i = 0; i < (int) size_of_halfedges(); ++i)
 	{
 		halfedge->id = i;
-		halfedgeColours[i] = grey;
+		halfedgeColours[i] = red;
 		++halfedge;
 	}
 	DEBUG_END;
