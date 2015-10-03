@@ -37,6 +37,7 @@
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Recoverer/IpoptFinitePlanesFitter.h"
+#include "Recoverer/NaiveFacetJoiner.h"
 #include "halfspaces_intersection.h"
 
 TimeMeasurer timer;
@@ -301,7 +302,7 @@ static Polyhedron_3 producePolyhedron(
 	return intersection;
 }
 
-static VectorXd supportValuesFromPoints(std::vector<Vector3d> directions,
+static VectorXd supportValuesFromPoints(std::vector<Point_3> directions,
 	VectorXd v)
 {
 	DEBUG_START;
@@ -316,9 +317,10 @@ static VectorXd supportValuesFromPoints(std::vector<Vector3d> directions,
 #endif /* NDEBUG */
 	for (int i = 0; i < num; ++i)
 	{
-		values(i) = directions[i].x * v(3 * i)
-			+ directions[i].y * v(3 * i + 1)
-			+ directions[i].z * v(3 * i + 2);
+		Point_3 direction = directions[i];
+		values(i) = direction.x() * v(3 * i)
+			+ direction.y() * v(3 * i + 1)
+			+ direction.z() * v(3 * i + 2);
 	}
 	DEBUG_END;
 	return values;
@@ -364,11 +366,12 @@ static Polyhedron_3 produceFinalPolyhedron(
 	SupportFunctionEstimationDataPtr data,
 	VectorXd estimate,
 	VectorXd h3rdParty,
-	RecovererEstimatorType estimatorType)
+	RecovererEstimatorType estimatorType,
+	double threshold)
 {
 	DEBUG_START;
 	timer.pushTimer();
-	auto directions = data->supportDirections();
+	auto directions = data->supportData()->supportDirectionsCGAL();
 	char *normMinimalString = getenv("NORM_MINIMAL");
 	double normMinimal = 0.;
 	if (normMinimalString)
@@ -394,10 +397,10 @@ static Polyhedron_3 produceFinalPolyhedron(
 	std::cerr << "Number of ignored directions: "
 		<< indicesDirectionsIgnored.size() << std::endl;
 
-	auto h = supportValuesFromPoints(data->supportDirections(), estimate);
-	/* Now produce final polyhedron from the estimate. */
+	auto h = supportValuesFromPoints(directions, estimate);
+	/* Now produce polyhedron from the estimate. */
 	Polyhedron_3 polyhedron = producePolyhedron(data, h);
-
+	
 	/* Additional debug prints to check the quality of the result: */
 
 	/* Also produce naive polyhedron (to compare recovered one with it). */
@@ -407,23 +410,40 @@ static Polyhedron_3 produceFinalPolyhedron(
 		<< polyhedronNaive;
 
 	/* Also produce polyhedron from starting point of the algorithm. */
-	auto hStarting = supportValuesFromPoints(data->supportDirections(),
-			data->startingVector());	
+	auto hStarting = supportValuesFromPoints(directions,
+			data->startingVector());
 	Polyhedron_3 polyhedronStart = producePolyhedron(data,	hStarting);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
 		<< polyhedronStart;
 
-	MAIN_PRINT("===== Starting point: =====");
-	printEstimationReport(data->supportMatrix(), h0, hStarting,
-			estimatorType);
-	MAIN_PRINT("======== Solution: ========");
-	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
-
 	MAIN_PRINT("===== 3rd-party polyhedron =====");
 	printEstimationReport(data->supportMatrix(), h0, h3rdParty,
 			estimatorType);
+	MAIN_PRINT("===== Starting point: =====");
+	printEstimationReport(data->supportMatrix(), h0, hStarting,
+			estimatorType);
+	MAIN_PRINT("======== First estimate: ========");
+	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
+
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
+
+	if (threshold > 0.)
+	{
+		/* Produce joined polyhedron: */
+		NaiveFacetJoiner joiner(polyhedron, threshold);
+		Polyhedron_3 polyhedronJoined = joiner.run();
+		VectorXd estimateJoined =
+			polyhedronJoined.findTangientPointsConcatenated(
+					directions);
+		auto hJoined = supportValuesFromPoints(directions,
+				estimateJoined);
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "estimated-joined.ply");
+		MAIN_PRINT("======== Joined estimate: ========");
+		printEstimationReport(data->supportMatrix(), h0, hJoined,
+				estimatorType);
+		polyhedron = polyhedronJoined;
+	}
 
 	DEBUG_END;
 	return polyhedron;
@@ -518,7 +538,7 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 				directions, balancingVector_);
 	}
 	Polyhedron_3 polyhedron = produceFinalPolyhedron(dataEstimation,
-			estimate, h3rdParty, estimatorType);
+			estimate, h3rdParty, estimatorType, threshold_);
 
 	DEBUG_END;
 	return polyhedron;
