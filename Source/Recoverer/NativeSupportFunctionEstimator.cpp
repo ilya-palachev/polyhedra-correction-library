@@ -31,7 +31,6 @@
 #include "halfspaces_intersection.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
-#include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
@@ -360,35 +359,6 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 	DEBUG_END;
 }
 
-std::pair<Polyhedron_3::Vertex_iterator, double> findTangientVertex(
-		Polyhedron_3 *polyhedron,
-		Vector_3 direction)
-{
-	DEBUG_START;
-	double maximum  = -1e100;
-	auto tangient = polyhedron->vertices_end();
-	for (auto vertex = polyhedron->vertices_begin();
-			vertex != polyhedron->vertices_end(); ++vertex)
-	{
-		if (vertex->degree() < 3)
-		{
-			std::cerr << "warning degree of " << vertex->id
-				<< " is " << vertex->degree() << std::endl;
-			continue;
-		}
-		auto point = vertex->point();
-		double product = direction * (point - CGAL::ORIGIN);
-		if (product > maximum)
-		{
-			maximum = product;
-			tangient = vertex;
-		}
-	}
-	DEBUG_END;
-	return std::pair<Polyhedron_3::Vertex_iterator, double>(tangient,
-			maximum);
-}
-
 std::set<int> findTangientPointPlanesIDs(
 		Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
 		std::vector<int> index)
@@ -502,7 +472,7 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	for (int &iOuter: outerIndex)
 	{
 		rightSide(iOuter) = 0.;
-		auto pair = findTangientVertex(intersection,
+		auto pair = intersection->findTangientVertex(
 				directions[iOuter]);
 		auto tangient = pair.first;
 
@@ -559,7 +529,7 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 	Polyhedron_3::Vertex_iterator tangient;
 	for (int &iOuter: outerIndex)
 	{
-		auto pair = findTangientVertex(intersection,
+		auto pair = intersection->findTangientVertex(
 				directions[iOuter]);
 		auto vertex = pair.first;
 		if (!vertex->is_trivalent())
@@ -603,44 +573,22 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	std::cerr << innerIndex.size() << " points are inner" << std::endl;
 
 	std::vector<Plane_3> planes;
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirectionsCGAL();
 	for (int i = 0; i < (int) directions.size(); ++i)
 	{
 		auto direction = directions[i];
-		Plane_3 plane(direction.x, direction.y, direction.z,
+		Plane_3 plane(direction.x(), direction.y(), direction.z(),
 				-values(i));
 		planes.push_back(plane);
 	}
-	Polyhedron_3 intersection;
+	Polyhedron_3 polyhedron;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
-	intersection.initialize_indices();
-	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_facet());
-	Polyhedron *pCopy = new Polyhedron(intersection);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-union.ply") << *pCopy;
+			polyhedron, Kernel());
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"recovered-by-native-estimator.ply") << polyhedron;
 
-	NaiveFacetJoiner joiner(intersection);
-	Polyhedron_3 polyhedron = joiner.run();
-	polyhedron.initialize_indices();
-	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
-		polyhedron.planes_begin(), Plane_from_facet());
-
-	Polyhedron *pCopy2 = new Polyhedron(polyhedron);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-union.ply") << *pCopy2;
-
-	VectorXd solution(3 * directions.size());
-	for (int i = 0; i < (int) directions.size(); ++i)
-	{
-		 auto direction = directions[i];
-		 auto pair = findTangientVertex(&polyhedron, direction);
-		 auto vertex = pair.first;
-		 auto point = vertex->point();
-		 solution(3 * i) = point.x();
-		 solution(3 * i + 1) = point.y();
-		 solution(3 * i + 2) = point.z();
-	}
-
+	VectorXd solution =
+		polyhedron.findTangientPointsConcatenated(directions);
 	DEBUG_END;
 	return solution;
 }
