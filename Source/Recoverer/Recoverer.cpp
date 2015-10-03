@@ -279,7 +279,7 @@ static SupportFunctionEstimator *constructEstimator(
 	return estimator;
 }
 
-static PolyhedronPtr producePolyhedron(
+static Polyhedron_3 producePolyhedron(
 		SupportFunctionEstimationDataPtr dataEstimation,
 		VectorXd estimate)
 {
@@ -298,11 +298,8 @@ static PolyhedronPtr producePolyhedron(
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
-
-	/* Construct final polyhedron. */
-	PolyhedronPtr polyhedron(new Polyhedron(intersection));
 	DEBUG_END;
-	return polyhedron;
+	return intersection;
 }
 
 static VectorXd supportValuesFromPoints(std::vector<Vector3d> directions,
@@ -336,7 +333,7 @@ void Recoverer::setNumMaxContours(int number)
 	DEBUG_END;
 }
 
-PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
+Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
 	timer.pushTimer();
@@ -358,13 +355,13 @@ PolyhedronPtr Recoverer::run(ShadowContourDataPtr dataShadow)
 	std::cout << "Support data extraction: " << timer.popTimer()
 		<< std::endl;
 
-	PolyhedronPtr p = run(data);
+	Polyhedron_3 polyhedron = run(data);
 
 	DEBUG_END;
-	return p;
+	return polyhedron;
 }
 
-static PolyhedronPtr produceFinalPolyhedron(
+static Polyhedron_3 produceFinalPolyhedron(
 	SupportFunctionEstimationDataPtr data,
 	VectorXd estimate,
 	VectorXd h3rdParty,
@@ -400,24 +397,22 @@ static PolyhedronPtr produceFinalPolyhedron(
 
 	auto h = supportValuesFromPoints(data->supportDirections(), estimate);
 	/* Now produce final polyhedron from the estimate. */
-	PolyhedronPtr polyhedron = producePolyhedron(data, h);
+	Polyhedron_3 polyhedron = producePolyhedron(data, h);
 
 	/* Additional debug prints to check the quality of the result: */
 
 	/* Also produce naive polyhedron (to compare recovered one with it). */
 	auto h0 = data->supportVector();
-	PolyhedronPtr polyhedronNaive = producePolyhedron(data,	h0);
-	Polyhedron *pCopy = new Polyhedron(polyhedronNaive);
+	Polyhedron_3 polyhedronNaive = producePolyhedron(data,	h0);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naively-recovered.ply")
-		<< *pCopy;
+		<< polyhedronNaive;
 
 	/* Also produce polyhedron from starting point of the algorithm. */
 	auto hStarting = supportValuesFromPoints(data->supportDirections(),
 			data->startingVector());	
-	PolyhedronPtr polyhedronStart = producePolyhedron(data,	hStarting);
-	Polyhedron *pCopy2 = new Polyhedron(polyhedronStart);
+	Polyhedron_3 polyhedronStart = producePolyhedron(data,	hStarting);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
-		<< *pCopy2;
+		<< polyhedronStart;
 
 	MAIN_PRINT("===== Starting point: =====");
 	printEstimationReport(data->supportMatrix(), h0, hStarting,
@@ -458,7 +453,7 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 	return h3rdParty;
 }
 
-PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
+Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	std::cout << "Number of support function items: " << data->size()
@@ -469,7 +464,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		IpoptFinitePlanesFitter fitter(data, numFinitePlanes_);
 		fitter.run();
 		DEBUG_END;
-		return NULL;
+		return Polyhedron_3();
 	}
 
 	char *trustedEdgesThesholdString = getenv("TRUSTED_EDGES_THRESHOLD");
@@ -523,7 +518,7 @@ PolyhedronPtr Recoverer::run(SupportFunctionDataPtr data)
 		h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
 				directions, balancingVector_);
 	}
-	PolyhedronPtr polyhedron = produceFinalPolyhedron(dataEstimation,
+	Polyhedron_3 polyhedron = produceFinalPolyhedron(dataEstimation,
 			estimate, h3rdParty, estimatorType);
 
 	DEBUG_END;

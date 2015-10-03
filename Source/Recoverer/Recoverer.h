@@ -228,14 +228,14 @@ public:
 	 *
 	 * @param SCData	Shadow contour data
 	 */
-	PolyhedronPtr run(ShadowContourDataPtr SCData);
+	Polyhedron_3 run(ShadowContourDataPtr SCData);
 
 	/**
 	 * Runs the recovering procedure for support function data.
 	 *
 	 * @param data		Support function data
 	 */
-	PolyhedronPtr run(SupportFunctionDataPtr data);
+	Polyhedron_3 run(SupportFunctionDataPtr data);
 };
 
 typedef std::shared_ptr<Recoverer> RecovererPtr;
