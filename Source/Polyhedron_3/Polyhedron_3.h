@@ -57,7 +57,6 @@ typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 class Polyhedron_3 : public BasePolyhedron_3
 {
 public:
-	std::vector<Colour> vertexColours;
 	std::vector<Colour> facetColours;
 	std::vector<Colour> halfedgeColours;
 
