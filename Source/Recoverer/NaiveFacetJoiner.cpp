@@ -712,6 +712,11 @@ bool NaiveFacetJoiner::finalizeClusters()
 Polyhedron_3 NaiveFacetJoiner::run()
 {
 	DEBUG_START;
+	std::streambuf *cerrBuffer = std::cerr.rdbuf();
+	std::stringstream stringBuffer;
+	std::cerr.rdbuf(stringBuffer.rdbuf());
+
+
 	thresholdClusterError_ *= 0.5;
 	/* 1. Find big facets: */
 	auto indicesBigFacets = findBigFacets(polyhedron_, thresholdBigFacet_);
@@ -803,7 +808,13 @@ Polyhedron_3 NaiveFacetJoiner::run()
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
 	intersection.initialize_indices();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "polyhedron_3.ply") << intersection;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"just-facet-joined-polyhedron.ply") << intersection;
+
+	std::string naiveJoinerLog = stringBuffer.str();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naive-facet-joiner.log")
+		<< naiveJoinerLog;
+	std::cerr.rdbuf(cerrBuffer);
 	DEBUG_END;
 	return intersection;
 }
