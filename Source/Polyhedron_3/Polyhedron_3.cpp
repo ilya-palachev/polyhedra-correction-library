@@ -312,3 +312,49 @@ void Polyhedron_3::initialize_indices()
 	}
 	DEBUG_END;
 }
+
+std::pair<Polyhedron_3::Vertex_iterator, double>
+Polyhedron_3::findTangientVertex(PCLPoint_3 direction)
+{
+	DEBUG_START;
+	double maximum  = -1e100;
+	auto tangient = vertices_end();
+	for (auto vertex = vertices_begin(); vertex != vertices_end(); ++vertex)
+	{
+		if (vertex->degree() < 3)
+		{
+			std::cerr << "warning degree of " << vertex->id
+				<< " is " << vertex->degree() << std::endl;
+			continue;
+		}
+		auto point = vertex->point();
+		double product = direction * (point - CGAL::ORIGIN);
+		if (product > maximum)
+		{
+			maximum = product;
+			tangient = vertex;
+		}
+	}
+	DEBUG_END;
+	return std::make_pair(tangient, maximum);
+}
+
+VectorXd Polyhedron_3::findTangientPointsConcatenated(
+		std::vector<PCLPoint_3> directions)
+{
+	DEBUG_START;
+	VectorXd solution(3 * directions.size());
+	for (int i = 0; i < (int) directions.size(); ++i)
+	{
+		 auto direction = directions[i];
+		 auto pair = findTangientVertex(direction);
+		 auto vertex = pair.first;
+		 auto point = vertex->point();
+		 solution(3 * i) = point.x();
+		 solution(3 * i + 1) = point.y();
+		 solution(3 * i + 2) = point.z();
+	}
+
+	DEBUG_END;
+	return solution;
+}

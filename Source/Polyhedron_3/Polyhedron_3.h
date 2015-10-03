@@ -137,6 +137,26 @@ public:
 	 * Initializes the indices of the polyhedron.
 	 */
 	void initialize_indices();
+
+	/**
+	 * Calculates the tangient points and support value for the given
+	 * direction.
+	 *
+	 * @param direction	The 3D direction.
+	 * @return		The pair tangient point and direction.
+	 */
+	std::pair<Polyhedron_3::Vertex_iterator, double>
+	findTangientVertex(PCLPoint_3 direction);
+
+	/**
+	 * Calculates the concatenation of tangient points coordinates for
+	 * the given directions.
+	 *
+	 * @param directions	The 3D directions.
+	 * @return		The support values.
+	 */
+	VectorXd findTangientPointsConcatenated(
+			std::vector<PCLPoint_3> directions);
 };
 
 #endif /* POLYHEDRONCGAL_H_ */
