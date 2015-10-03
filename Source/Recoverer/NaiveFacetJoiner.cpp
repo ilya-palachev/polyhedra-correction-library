@@ -65,14 +65,14 @@ void tryGetenvDouble(const char *envName, double &value)
 	DEBUG_END;
 }
 
-NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
+NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
 	polyhedron_(polyhedron),
 	clusters_(),
 	index_(polyhedron.size_of_facets()),
 	facets_(polyhedron.size_of_facets()),
 	vertices_(polyhedron.size_of_vertices()),
 	thresholdBigFacet_(THRESHOLD_BIG_FACET_DEFAULT),
-	thresholdClusterError_(THRESHOLD_CLUSTER_ERROR_DEFAULT)
+	thresholdClusterError_(threshold)
 {
 	DEBUG_START;
 	int iFacet = 0;
@@ -96,7 +96,6 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron) :
 		++iVertex;
 	}
 	tryGetenvDouble("THRESHOLD_BIG_FACET", thresholdBigFacet_);
-	tryGetenvDouble("THRESHOLD_CLUSTER_ERROR", thresholdClusterError_);
 	DEBUG_END;
 }
 

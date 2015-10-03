@@ -31,7 +31,6 @@
 #include <CGAL/linear_least_squares_fitting_3.h>
 
 const double THRESHOLD_BIG_FACET_DEFAULT = 0.05;
-const double THRESHOLD_CLUSTER_ERROR_DEFAULT = 0.002;
 const double ALPHA_CLUSTER_INFINITY = 1e16;
 
 const int INDEX_NOT_PROCESSED = -1;
@@ -122,7 +121,7 @@ public:
 	 *
 	 * @param polyhedron	The input polyhedron.
 	 */
-	NaiveFacetJoiner(Polyhedron_3 polyhedron);
+	NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold);
 
 	/**
 	 * The empty destructor.
