@@ -29,6 +29,7 @@
 #include "LeastSquaresMethod.h"
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
 
@@ -802,6 +803,8 @@ Polyhedron_3 NaiveFacetJoiner::run()
 	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			intersection, Kernel());
+	intersection.initialize_indices();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "polyhedron_3.ply") << intersection;
 	DEBUG_END;
 	return intersection;
 }
