@@ -217,7 +217,6 @@ static SupportFunctionEstimator *constructEstimator(
 	case NATIVE_ESTIMATOR:
 		nativeEstimator = new NativeSupportFunctionEstimator(data);
 		nativeEstimator->setProblemType(problemType);
-		nativeEstimator->setThreshold(threshold);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(
 					nativeEstimator);

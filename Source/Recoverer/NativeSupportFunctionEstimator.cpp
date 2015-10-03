@@ -34,14 +34,10 @@
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
 
-
-static double threshold = 0.;
-
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
-	threshold_(0.)
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -740,7 +736,6 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	VectorXd solution;
-	threshold = threshold_;
 	
 	switch(problemType_)
 	{
