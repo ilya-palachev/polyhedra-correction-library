@@ -81,6 +81,13 @@ private:
 	 */
 	std::set<int> getNeighborsIndices(int iFacet);
 
+	/**
+	 * Gets the set of indices that correspond to the facets that are
+	 * neighbors of the given cluster of facets.
+	 *
+	 * @param iCluster		The ID of cluster.
+	 * @return			The set of neighbor facets IDs.
+	 */
 	std::set<int> getNeighborsIndicesCluster(int iCluster);
 
 	/**
