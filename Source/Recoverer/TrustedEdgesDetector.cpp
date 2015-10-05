@@ -27,6 +27,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "halfspaces_intersection.h"
 #include "Recoverer/TrustedEdgesDetector.h"
 
@@ -147,14 +148,47 @@ TrustedEdgesDetector::getSortedSegments(Polyhedron_3 polyhedron)
 		auto segment = std::make_pair(points[edge.first.first],
 				points[edge.first.second]);
 		segments[iSegment] = segment;
-		double length = sqrt((segment.second
-					- segment.first).squared_length());
-		std::cerr << "Segment #" << iSegment << ": length is " << length
-			<<std::endl;
 		++iSegment;
 	}
+
 	DEBUG_END;
 	return segments;
+}
+
+static void printPolyhedronWithColouredBigEdges(Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	polyhedron.initialize_indices();
+	char *thresholdEdgeLengthString = getenv("THRESHOLD_EDGE_LENGTH");
+	Colour red;
+	red.red = 255; red.green = 0; red.blue = 0;
+	if (thresholdEdgeLengthString)
+	{
+		char *mistake = NULL;
+		double thresholdEdgeLength = strtod(thresholdEdgeLengthString,
+				&mistake);
+		if (mistake && *mistake)
+		{
+			std::cerr << "mistake: " << mistake << std::endl;
+		}
+		int iHalfedge = 0;
+		for (auto halfedge = polyhedron.halfedges_begin();
+				halfedge != polyhedron.halfedges_end();
+				++halfedge)
+		{
+			Vector_3 edge = halfedge->vertex()->point()
+				- halfedge->opposite()->vertex()->point();
+			double length = sqrt(edge.squared_length());
+			if (length >= thresholdEdgeLength)
+			{
+				polyhedron.halfedgeColours[iHalfedge] = red;
+			}
+			++iHalfedge;
+		}
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+				"coloured-big-edges.ply") << polyhedron;
+	}
+	DEBUG_END;
 }
 
 std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
@@ -163,6 +197,7 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	DEBUG_START;
 	initialize();
 	auto segments = getSortedSegments(polyhedron);
+	printPolyhedronWithColouredBigEdges(polyhedron);
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
 	return nothing;
