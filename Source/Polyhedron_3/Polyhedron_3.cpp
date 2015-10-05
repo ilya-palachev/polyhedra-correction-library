@@ -264,15 +264,19 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	{
 		int iVertex1 = halfedge->vertex()->id;
 		int iVertex2 = halfedge->opposite()->vertex()->id;
-		if (iVertex2 > iVertex1)
-			continue;
-		auto colour = p.halfedgeColours[iHalfedge];
-		stream << 4 << " " << 2 * iVertex1 << " " << 2 * iVertex1 + 1
-			<< " " << 2 * iVertex2 + 1 << " " << 2 * iVertex2;
-		stream << " " << static_cast<int>(colour.red)
-			<< " " << static_cast<int>(colour.green)
-			<< " " << static_cast<int>(colour.blue) << std::endl;
-		++iFacet;
+		if (iVertex1 < iVertex2)
+		{
+			auto colour = p.halfedgeColours[iHalfedge];
+			stream << 4 << " " << 2 * iVertex1 << " "
+				<< 2 * iVertex1 + 1
+				<< " " << 2 * iVertex2 + 1 << " "
+				<< 2 * iVertex2;
+			stream << " " << static_cast<int>(colour.red)
+				<< " " << static_cast<int>(colour.green)
+				<< " " << static_cast<int>(colour.blue)
+				<< std::endl;
+		}
+		++iHalfedge;
 	}
 	DEBUG_END;
 	return stream;
@@ -281,6 +285,7 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 void Polyhedron_3::initialize_indices()
 {
 	DEBUG_START;
+	std::cerr << "Inidices are initialized!" << std::endl;
 	facetColours = std::vector<Colour>(size_of_facets());
 	halfedgeColours = std::vector<Colour>(size_of_halfedges());
 	Colour grey;
