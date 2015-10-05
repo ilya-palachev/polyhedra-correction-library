@@ -38,6 +38,7 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "Recoverer/NaiveFacetJoiner.h"
+#include "Recoverer/TrustedEdgesDetector.h"
 #include "halfspaces_intersection.h"
 
 TimeMeasurer timer;
@@ -443,6 +444,10 @@ static Polyhedron_3 produceFinalPolyhedron(
 		printEstimationReport(data->supportMatrix(), h0, hJoined,
 				estimatorType);
 		polyhedron = polyhedronJoined;
+		TrustedEdgesDetector detector(
+				data->supportData()->supportPlanes(),
+				threshold);
+		detector.run(polyhedron);
 	}
 
 	DEBUG_END;
