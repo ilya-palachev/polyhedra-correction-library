@@ -1871,15 +1871,13 @@ static void runRecovery(CommandLineOptions* options,
 		recoverer->setEstimatorType(ZERO_ESTIMATOR);	
 
 	/* Run the recoverer. */
-	PolyhedronPtr p = recoverer->run(data);
-	Polyhedron *pCopy = new Polyhedron(p);
-	Polyhedron_3 intersection(p);
-	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_facet());
+	Polyhedron_3 polyhedron = recoverer->run(data);
+	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
+		polyhedron.planes_begin(), Plane_from_facet());
 #ifndef NDEBUG
 	int iFacet = 0;
-	for (auto facet = intersection.facets_begin();
-			facet != intersection.facets_end(); ++facet)
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
 	{
 		std::cerr << "facet " << iFacet << ": " << facet->plane()
 			<< std::endl;
@@ -1887,7 +1885,7 @@ static void runRecovery(CommandLineOptions* options,
 	}
 #endif
 
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << *pCopy;
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 	DEBUG_END;
 }
 

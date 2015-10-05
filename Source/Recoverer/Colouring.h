@@ -32,7 +32,7 @@
 /**
  * Prints the intersection of subspaces that correspond to the given planes
  * in such manner that facets that are contained in the same cluster are
- * coloured with the same (random colour).
+ * coloured with the same (random) colour.
  *
  * @param planes		The vector of planes.
  * @param clustersIndices	The clusters of planes represented as a vector
@@ -46,7 +46,7 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 /**
  * Prints the intersection of subspaces that correspond to the given planes
  * in such manner that facets that are contained in the same cluster are
- * coloured with the same (random colour).
+ * coloured with the same (random) colour.
  *
  * @param planes		The vector of planes.
  * @param clustersIndices	The clusters of planes represented as a vector
@@ -58,9 +58,8 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 		const char *suffix);
 
 /**
- * Prints the polyhedron (FIXME: and rebuilding it) in such manner that facets
- * that are contained in the same cluster are coloured with the same (random
- * colour).
+ * Prints the polyhedron in such manner that facets that are contained in the
+ * same cluster are coloured with the same (random) colour.
  *
  * @param polyhedron		The polyhedron. 
  * @param clustersIndices	The clusters of planes represented as a vector
@@ -70,5 +69,23 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 void printColouredPolyhedron(Polyhedron_3 polyhedron,
 		std::vector<std::set<int>> clustersIndices,
 		const char *suffix);
+
+/**
+ * Prints the polyhedron in such manner that facets that are contained in the
+ * cluster are coloured with the same (random) colour.
+ *
+ * @param polyhedron		The polyhedron. 
+ * @param clusterIndices	The cluster indices set.
+ * @param suffix		The suffix of output file.
+ */
+void printColouredPolyhedron(Polyhedron_3 polyhedron,
+		std::set<int> clusterIndices,
+		const char *suffix);
+
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
+		std::set<int> clusterIndices);
+
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
+		std::set<int> clusterIndices);
 
 #endif /* COLOURING_H_ */

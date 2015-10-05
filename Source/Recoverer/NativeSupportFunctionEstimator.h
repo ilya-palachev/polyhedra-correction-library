@@ -37,9 +37,6 @@ private:
 	/** Type of problem. */
 	EstimationProblemNorm problemType_;
 
-	/** The thteshold for adjacent facets. */
-	double threshold_;
-
 public:
 	/**
 	 * Default constructor
@@ -61,26 +58,6 @@ public:
 
 	/** Runs the estiamtion process. */
 	virtual VectorXd run(void);
-
-	/**
-	 * Sets the threshold.
-	 *
-	 * @param threshold	The value of threshold.
-	 */
-	void setThreshold(double threshold)
-	{
-		threshold_ = threshold;
-	}
-
-	/**
-	 * Gets the threshold.
-	 *
-	 * @return		The value of threshold.
-	 */
-	double getThreshold()
-	{
-		return threshold_;
-	}
 };
 
 #endif /* NATIVESUPPORTFUNCTIONESTIMATOR_H_ */

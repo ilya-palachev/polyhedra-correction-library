@@ -31,17 +31,12 @@
 #include "halfspaces_intersection.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
-#include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
-
-
-static double threshold = 0.;
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
-	threshold_(0.)
+	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -364,35 +359,6 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 	DEBUG_END;
 }
 
-std::pair<Polyhedron_3::Vertex_iterator, double> findTangientVertex(
-		Polyhedron_3 *polyhedron,
-		Vector_3 direction)
-{
-	DEBUG_START;
-	double maximum  = -1e100;
-	auto tangient = polyhedron->vertices_end();
-	for (auto vertex = polyhedron->vertices_begin();
-			vertex != polyhedron->vertices_end(); ++vertex)
-	{
-		if (vertex->degree() < 3)
-		{
-			std::cerr << "warning degree of " << vertex->id
-				<< " is " << vertex->degree() << std::endl;
-			continue;
-		}
-		auto point = vertex->point();
-		double product = direction * (point - CGAL::ORIGIN);
-		if (product > maximum)
-		{
-			maximum = product;
-			tangient = vertex;
-		}
-	}
-	DEBUG_END;
-	return std::pair<Polyhedron_3::Vertex_iterator, double>(tangient,
-			maximum);
-}
-
 std::set<int> findTangientPointPlanesIDs(
 		Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
 		std::vector<int> index)
@@ -506,7 +472,7 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	for (int &iOuter: outerIndex)
 	{
 		rightSide(iOuter) = 0.;
-		auto pair = findTangientVertex(intersection,
+		auto pair = intersection->findTangientVertex(
 				directions[iOuter]);
 		auto tangient = pair.first;
 
@@ -563,7 +529,7 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 	Polyhedron_3::Vertex_iterator tangient;
 	for (int &iOuter: outerIndex)
 	{
-		auto pair = findTangientVertex(intersection,
+		auto pair = intersection->findTangientVertex(
 				directions[iOuter]);
 		auto vertex = pair.first;
 		if (!vertex->is_trivalent())
@@ -607,117 +573,24 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	std::cerr << innerIndex.size() << " points are inner" << std::endl;
 
 	std::vector<Plane_3> planes;
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirectionsCGAL();
 	for (int i = 0; i < (int) directions.size(); ++i)
 	{
 		auto direction = directions[i];
-		Plane_3 plane(direction.x, direction.y, direction.z,
+		Plane_3 plane(direction.x(), direction.y(), direction.z(),
 				-values(i));
 		planes.push_back(plane);
 	}
-	Polyhedron_3 intersection;
+	Polyhedron_3 polyhedron;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
-	intersection.initialize_indices();
-	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_facet());
-	Polyhedron *pCopy = new Polyhedron(intersection);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-union.ply") << *pCopy;
+			polyhedron, Kernel());
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"recovered-by-native-estimator.ply") << polyhedron;
 
-	NaiveFacetJoiner joiner(threshold);
-	Polyhedron_3 polyhedron = joiner.run(intersection);
-	polyhedron.initialize_indices();
-	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
-		polyhedron.planes_begin(), Plane_from_facet());
-
-	Polyhedron *pCopy2 = new Polyhedron(polyhedron);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-union.ply") << *pCopy2;
-
-	VectorXd solution(3 * directions.size());
-	for (int i = 0; i < (int) directions.size(); ++i)
-	{
-		 auto direction = directions[i];
-		 auto pair = findTangientVertex(&polyhedron, direction);
-		 auto vertex = pair.first;
-		 auto point = vertex->point();
-		 solution(3 * i) = point.x();
-		 solution(3 * i + 1) = point.y();
-		 solution(3 * i + 2) = point.z();
-	}
-
+	VectorXd solution =
+		polyhedron.findTangientPointsConcatenated(directions);
 	DEBUG_END;
 	return solution;
-}
-
-double calculateFacetArea(Polyhedron_3::Facet facet)
-{
-	DEBUG_START;
-	auto halfedge = facet.facet_begin();
-	auto halfedgeNext = halfedge;
-	++halfedgeNext;
-	Point_3 pointBegin = facet.facet_begin()->vertex()->point();
-	double areaFacet = 0.;
-	do
-	{
-		Point_3 point = halfedge->vertex()->point();
-		Point_3 pointNext = halfedgeNext->vertex()->point();
-		CGAL::Triangle_3<Kernel> triangle(pointBegin, point,
-				pointNext);
-		double areaTriangle = sqrt(triangle.squared_area());
-		areaFacet += areaTriangle;
-		++halfedge;
-		++halfedgeNext;
-	}
-	while (halfedgeNext != facet.facet_begin());
-	areaFacet = fabs(areaFacet);
-	DEBUG_END;
-	return areaFacet;
-}
-
-void printFacetsArea(Polyhedron_3 polyhedron)
-{
-	DEBUG_START;
-	int iFacet = 0;
-	std::vector<std::pair<int, double>> areas;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		double area = calculateFacetArea(*facet);
-		areas.push_back(std::make_pair(iFacet, area));
-		++iFacet;
-	}
-	std::sort(areas.begin(), areas.end(),
-			[](std::pair<int, double> a,
-				std::pair<int, double> b) -> bool
-	{
-		return a.second > b.second;
-	});
-	for (auto info: areas)
-	{
-		std::cerr << "facet " << info.first << " has area "
-			<< info.second << std::endl;
-	}
-	char *thresholdBigFacetString = getenv("BIG_FACET_THRESHOLD");
-	std::set<int> indicesBigFacets;
-	if (thresholdBigFacetString)
-	{
-		double thresholdBigFacet = strtod(thresholdBigFacetString,
-				NULL);
-		for (auto info: areas)
-		{
-			if (info.second >= thresholdBigFacet)
-			{
-				indicesBigFacets.insert(info.first);
-			}
-		}
-	}
-	std::cerr << indicesBigFacets.size() << " of "
-		<< polyhedron.size_of_facets() << " facets are big"
-		<< std::endl;
-	std::vector<std::set<int>> cluster;
-	cluster.push_back(indicesBigFacets);
-	printColouredPolyhedron(polyhedron, cluster, "big-facets-cluster.ply");
-	DEBUG_END;
 }
 
 VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
@@ -737,7 +610,6 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	auto index = constructPlanesIndex(intersection);
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;
-	printFacetsArea(intersection);
 
 	if (getenv("PCL_CONTOURS_COUNTER_DIAGNOSTICS"))
 		runContoursCounterDiagnostics(data, index);
@@ -812,7 +684,6 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	VectorXd solution;
-	threshold = threshold_;
 	
 	switch(problemType_)
 	{

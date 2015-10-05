@@ -50,6 +50,7 @@ poly-data-*
 *.toc
 *.dvi
 *.out
+*.brf
 
 # BibTEX automatically generated files:
 *.bbl

@@ -43,12 +43,23 @@ typedef Point_3 PCLPoint_3;
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Polyhedron/Polyhedron.h"
 
+
+typedef struct
+{
+	unsigned char red;
+	unsigned char green;
+	unsigned char blue;
+} Colour;
+
 /** Define point creator */
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
 class Polyhedron_3 : public BasePolyhedron_3
 {
 public:
+	std::vector<Colour> facetColours;
+	std::vector<Colour> halfedgeColours;
+
 	/**
 	 * Constructs empty CGAL polyhedron from nothing.
 	 */
@@ -126,6 +137,26 @@ public:
 	 * Initializes the indices of the polyhedron.
 	 */
 	void initialize_indices();
+
+	/**
+	 * Calculates the tangient points and support value for the given
+	 * direction.
+	 *
+	 * @param direction	The 3D direction.
+	 * @return		The pair tangient point and direction.
+	 */
+	std::pair<Polyhedron_3::Vertex_iterator, double>
+	findTangientVertex(PCLPoint_3 direction);
+
+	/**
+	 * Calculates the concatenation of tangient points coordinates for
+	 * the given directions.
+	 *
+	 * @param directions	The 3D directions.
+	 * @return		The support values.
+	 */
+	VectorXd findTangientPointsConcatenated(
+			std::vector<PCLPoint_3> directions);
 };
 
 #endif /* POLYHEDRONCGAL_H_ */
