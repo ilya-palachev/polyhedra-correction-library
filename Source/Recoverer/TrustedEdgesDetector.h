@@ -28,6 +28,23 @@
 #ifndef TRUSTEDEDGESDETECTOR_H_
 #define TRUSTEDEDGESDETECTOR_H_
 
+#include "Polyhedron_3/Polyhedron_3.h"
+
+/**
+ * The information about trusted edge.
+ */
+typedef struct
+{
+	/** The line representing the cluster center. */
+	Line_3 line;
+
+	/**
+	 * The set of indices of planes that form the cluster of planes
+	 * corresponding to the edge.
+	 */
+	std::set<int> cluster;
+} TrustedEdgeInformation;
+
 /**
  * The detector of trusted edges.
  */
@@ -38,13 +55,13 @@ private:
 	std::vector<Plane_3> planes_;
 
 	/** The initial support directions. */
-	std::vector<Point_3> points_;
+	std::vector<Point_3> directions_;
 
 	/** The initial support values. */
 	VectorXd values_;
 
 	/** The current clusters. */
-	std::vector<std::set<int>> clusters_;
+	std::vector<TrustedEdgeInformation> clusters_;
 
 	/** Markers that show which cluster the plane belongs to. */
 	std::vector<int> index_;
@@ -53,7 +70,7 @@ private:
 	 * The Delaunay triangulation of sphere which vertices are the initial
 	 * support directions.
 	 */
-	Polyhedron_3 shere_;
+	Polyhedron_3 sphere_;
 
 	/** The vector that implements random access to to vertices. */
 	std::vector<Polyhedron_3::Vertex_iterator> vertices_;
@@ -61,17 +78,26 @@ private:
 	/** The worst possible cluster error. */
 	double thresholdClusterError_;
 
+	/** Initializes the trusted edges detector. */
+	void initialize();
+
+	/**
+	 * Gets edges of the polyhedron sorted by their length.
+	 *
+	 * @param polyhedron	The polyhedron obtained after naive facet
+	 * 			clusterization.
+	 * @return		Pairs of points corresponding to segments.
+	 */
+	std::vector<std::pair<Point_3, Point_3>> getSortedSegments(
+			Polyhedron_3 polyhedron);
 public:
 	/**
 	 * Teh defaulr constructor.
 	 *
 	 * @param planes	The list of initial support planes.
-	 * @param polyhedron	The polyhedron obtained after naive facet
-	 * 			clusterization.
 	 * @param threshold	The threshold for cluster error.
 	 */
-	TrustedEdgesDetector(std::vector<Plane_3> planes,
-			Polyhedron_3 polyhedron, double threshold);
+	TrustedEdgesDetector(std::vector<Plane_3> planes, double threshold);
 
 	/**
 	 * The empty destructor.
@@ -81,10 +107,11 @@ public:
 	/**
 	 * Runs the trusted edges detection.
 	 *
+	 * @param polyhedron	The polyhedron obtained after naive facet
+	 * 			clusterization.
 	 * @return		The information about detected planes clusters.
 	 */
-	std::vector<std::pair<std::set<int>, std::pair<Point_3, Vector_3>>>
-	run();
+	std::vector<TrustedEdgeInformation> run(Polyhedron_3 polyhedron);
 };
 
 #endif /* TRUSTEDEDGESDETECTOR_H_ */
