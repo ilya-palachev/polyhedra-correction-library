@@ -444,9 +444,24 @@ static Polyhedron_3 produceFinalPolyhedron(
 		printEstimationReport(data->supportMatrix(), h0, hJoined,
 				estimatorType);
 		polyhedron = polyhedronJoined;
+	}
+
+	/* FIXME: here should the same way as for naive facet joiner. */
+	char *thresholdEdgeClusterErrorString
+		= getenv("THRESHOLD_EDGE_CLUSTER_ERROR");
+	if (thresholdEdgeClusterErrorString)
+	{
+		char *mistake = NULL;
+		double thresholdEdgeClusterError = strtod(
+				thresholdEdgeClusterErrorString, &mistake);
+		if (mistake && *mistake)
+		{
+			std::cerr << "mistake: " << mistake << std::endl;
+			exit(EXIT_FAILURE);
+		}
 		TrustedEdgesDetector detector(
 				data->supportData()->supportPlanes(),
-				threshold);
+				thresholdEdgeClusterError);
 		detector.run(polyhedron);
 	}
 
