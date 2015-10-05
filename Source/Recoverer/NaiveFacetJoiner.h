@@ -101,17 +101,71 @@ private:
 	std::vector<std::pair<std::set<int>, double>>
 		findFirstClusterCandidates(std::set<int> indicesBigFacets);
 
+	/**
+	 * Builds first clusters from cluster candidates depending on whether
+	 * the cluster candidate has lower error than the threshold.
+	 *
+	 * @param clusterCandidates	The information about caluster
+	 * 				candidates.
+	 */
 	void buildFirstClusters(std::vector<std::pair<std::set<int>, double>>
 			clusterCandidates);
 
+	/**
+	 * Merges two clusters if it is possible (i. e. when the error of sum
+	 * is not bigger than the threshold).
+	 *
+	 * @param iClusterFirst		The ID of the 1st cluster.
+	 * @param iClusterSecond	The ID of the 2nd cluster.
+	 * @return			True, if the merge has been performed
+	 * 				successfully, false otherwise.
+	 */
 	bool mergeClusters(int iClusterFirst, int iClusterSecond);
 
+	/**
+	 * Extends given cluster with new facets that are represented as a set 
+	 * of facet indices. It is done if it is possible (i. e. when the error
+	 * of the sum is not bigger than the threshold).
+	 *
+	 * @param iCluster		The ID of cluster that shoudl be
+	 * 				extended.
+	 * @param cluster		The set of indices (that are currently
+	 * 				not forming any registered cluster)
+	 * 				that should be added to the existing
+	 * 				cluster.
+	 * @return			True, if the extension has been
+	 * 				performed successfully, false otherwise.
+	 */
 	bool extendCluster(int iCluster, std::set<int> cluster);
 
+	/**
+	 * Tries to merge all possible pairs of clusters that are the
+	 * neighbours of each other if it is possible (i. e. when the error of
+	 * the sum is not bigger than the threshold).
+	 *
+	 * @return			True, if at least one pair of clusters
+	 * 				has been merged successfully.
+	 */
 	bool tryMergeClusterPairs();
 
+	/**
+	 * Builds new additional clusters from the given set of facets indices.
+	 *
+	 * @param indicesBigFacets 	The set of indices from which new
+	 * 				clusters should be formed.
+	 */
 	void buildAdditionalClusters(std::set<int> indicesBigFacets);
 
+	/**
+	 * Tries to extend all clusters with their neighbor facets if it is
+	 * possible (i. e. when the error of the extended cluster is not bigger
+	 * than the threshold) and in a best manner (i. e. if some facet can be
+	 * appended to multiple clusters then the best of them in the sense of
+	 * best error is chosen)
+	 *
+	 * @return			True, if at least one cluster has been
+	 * 				extended.
+	 */
 	bool finalizeClusters();
 
 
@@ -120,6 +174,7 @@ public:
 	 * The default constructor.
 	 *
 	 * @param polyhedron	The input polyhedron.
+	 * @param threshold	The threshold of cluster error.
 	 */
 	NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold);
 
