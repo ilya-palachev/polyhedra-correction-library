@@ -101,8 +101,8 @@ void TrustedEdgesDetector::initialize()
 	DEBUG_END;
 }
 
-std::vector<std::pair<Point_3, Point_3>>
-TrustedEdgesDetector::getSortedSegments(Polyhedron_3 polyhedron)
+std::vector<Segment_3> TrustedEdgesDetector::getSortedSegments(
+		Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 	std::vector<Point_3> points(polyhedron.size_of_vertices());
@@ -114,9 +114,8 @@ TrustedEdgesDetector::getSortedSegments(Polyhedron_3 polyhedron)
 		++iVertex;
 	}
 
-	std::vector<std::pair<std::pair<int, int>, double>>
-		edges(polyhedron.size_of_halfedges() / 2);
-	int iEdge = 0;
+	std::vector<Segment_3> segments(polyhedron.size_of_halfedges() / 2);
+	int iSegment = 0;
 	for (auto halfedge = polyhedron.halfedges_begin();
 			halfedge != polyhedron.halfedges_end(); ++halfedge)
 	{
@@ -124,33 +123,18 @@ TrustedEdgesDetector::getSortedSegments(Polyhedron_3 polyhedron)
 		int iVertexOpposite = halfedge->opposite()->vertex()->id;
 		if (iVertex < iVertexOpposite)
 		{
-			Vector_3 vector = points[iVertexOpposite]
-				- points[iVertex];
-			double length = sqrt(vector.squared_length());
-			edges[iEdge] = std::make_pair(
-					std::make_pair(iVertex,
-						iVertexOpposite), length);
-			++iEdge;
+			Segment_3 segment(points[iVertexOpposite],
+					points[iVertex]);
+			segments[iSegment] = segment;
+			++iSegment;
 		}
 	}
 
-	std::sort(edges.begin(), edges.end(),
-			[](std::pair<std::pair<int, int>, double> a,
-				std::pair<std::pair<int, int>, double> b)
+	std::sort(segments.begin(), segments.end(),
+			[](Segment_3 a, Segment_3 b)
 	{
-		return a.second < b.second;
+		return a.squared_length() < b.squared_length();
 	});
-
-	std::vector<std::pair<Point_3, Point_3>> segments(edges.size());
-	int iSegment = 0;
-	for (auto edge: edges)
-	{
-		auto segment = std::make_pair(points[edge.first.first],
-				points[edge.first.second]);
-		segments[iSegment] = segment;
-		++iSegment;
-	}
-
 	DEBUG_END;
 	return segments;
 }
@@ -170,6 +154,7 @@ static void printPolyhedronWithColouredBigEdges(Polyhedron_3 polyhedron)
 		if (mistake && *mistake)
 		{
 			std::cerr << "mistake: " << mistake << std::endl;
+			exit(EXIT_FAILURE);
 		}
 		int iHalfedge = 0;
 		for (auto halfedge = polyhedron.halfedges_begin();
@@ -191,6 +176,62 @@ static void printPolyhedronWithColouredBigEdges(Polyhedron_3 polyhedron)
 	DEBUG_END;
 }
 
+/**
+ * Calculates the distance between the plane and the segment as a quadratic mean
+ * of distance between segment points and plane.
+ *
+ * @param segment		The segment.
+ * @param plane			The plane.
+ * @return			The distance between them.
+ */
+double distance(Segment_3 segment, Plane_3 plane)
+{
+	DEBUG_START;
+	Point_3 direction(plane.a(), plane.b(), plane.c());
+	double value = -plane.d();
+	double a = direction * segment.source();
+	double b = direction * segment.target();
+	double mean = (a * a + a * b + b * b) / 3. - value * (a * b)
+		+ value * value;
+	DEBUG_END;
+	return sqrt(mean);
+}
+
+void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
+{
+	DEBUG_START;
+	std::vector<std::vector<int>> clustersFirst(segments.size());
+	for (int iPlane = 0; iPlane < (int) planes_.size(); ++iPlane)
+	{
+		int iSegmentNearest = INDEX_PLANE_NOT_PROCESSED;
+		double errorMinimal = ALPHA_PLANE_CLUSTER_INFINITY;
+		Plane_3 plane = planes_[iPlane];
+		for (int iSegment = 0; iSegment < (int) segments.size();
+				++iSegment)
+		{
+			Segment_3 segment = segments[iSegment];
+			double error = distance(segment, plane);
+			if (error < errorMinimal)
+			{
+				errorMinimal = error;
+				iSegmentNearest = iSegment;
+			}
+		}
+		if (errorMinimal <= thresholdClusterError_)
+		{
+			clustersFirst[iSegmentNearest].push_back(iPlane);
+		}
+	}
+	for (int iSegment = 0; iSegment < (int) segments.size(); ++iSegment)
+	{
+		std::cerr << "Found " << clustersFirst[iSegment].size()
+			<< " planes for segment #" << iSegment << " of length "
+			<< sqrt(segments[iSegment].squared_length())
+			<< std::endl;
+	}
+	DEBUG_END;
+}
+
 std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		Polyhedron_3 polyhedron)
 {
@@ -198,6 +239,7 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	initialize();
 	auto segments = getSortedSegments(polyhedron);
 	printPolyhedronWithColouredBigEdges(polyhedron);
+	buildFirstClusters(segments);
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
 	return nothing;

@@ -45,6 +45,9 @@ typedef struct
 	std::set<int> cluster;
 } TrustedEdgeInformation;
 
+const int INDEX_PLANE_NOT_PROCESSED = -1;
+const double ALPHA_PLANE_CLUSTER_INFINITY = 1e16;
+
 /**
  * The detector of trusted edges.
  */
@@ -86,10 +89,16 @@ private:
 	 *
 	 * @param polyhedron	The polyhedron obtained after naive facet
 	 * 			clusterization.
-	 * @return		Pairs of points corresponding to segments.
+	 * @return		Segments.
 	 */
-	std::vector<std::pair<Point_3, Point_3>> getSortedSegments(
-			Polyhedron_3 polyhedron);
+	std::vector<Segment_3> getSortedSegments(Polyhedron_3 polyhedron);
+
+	/**
+	 * Builds first clusters of planes.
+	 *
+	 * @param segments	The segments tostart from.
+	 */
+	void buildFirstClusters(std::vector<Segment_3> segments);
 public:
 	/**
 	 * Teh defaulr constructor.
