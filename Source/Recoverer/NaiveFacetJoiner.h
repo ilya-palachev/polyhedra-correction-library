@@ -42,16 +42,16 @@ private:
 	/** The initial polyhedron. */
 	Polyhedron_3 polyhedron_;
 
-	/** The current cluters. */
+	/** The current clusters. */
 	std::vector<std::set<int>> clusters_;
 
 	/** Markers that show which cluster facets belong to. */
 	std::vector<int> index_;
 
-	/** The vector that implements random access to to facets. */
+	/** The vector that implements random access to facets. */
 	std::vector<Polyhedron_3::Facet_iterator> facets_;
 
-	/** The vector that implements random access to to vertices. */
+	/** The vector that implements random access to vertices. */
 	std::vector<Polyhedron_3::Vertex_iterator> vertices_;
 
 	/**
