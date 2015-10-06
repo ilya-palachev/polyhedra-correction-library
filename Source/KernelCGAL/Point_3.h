@@ -69,6 +69,15 @@ public:
 				double, CGAL::Epick>, 
 				CGAL::Epick>::Point_3 p):
 		Kernel::Point_3(p.x(), p.y(), p.z()) {}
+
+	/**
+	 * Calculates the squared length of the vector with source at the origin
+	 * and with target at the point.
+	 */
+	double squared_length()
+	{
+		return (*this - CGAL::Origin()).squared_length();
+	}
 };
 
 #endif /* KERNELCGAL_POINT_3_H_ */
