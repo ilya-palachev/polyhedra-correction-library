@@ -459,8 +459,7 @@ static Polyhedron_3 produceFinalPolyhedron(
 			std::cerr << "mistake: " << mistake << std::endl;
 			exit(EXIT_FAILURE);
 		}
-		TrustedEdgesDetector detector(
-				data->supportData()->supportPlanes(),
+		TrustedEdgesDetector detector(data->supportData(),
 				thresholdEdgeClusterError);
 		detector.run(polyhedron);
 	}
