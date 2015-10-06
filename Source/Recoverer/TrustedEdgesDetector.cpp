@@ -257,21 +257,9 @@ double distance(Segment_3 segment, SupportFunctionDataItemInfo info)
 	return result;
 }
 
-void TrustedEdgesDetector::buildFirstClusters(
-		std::vector<Segment_3> segmentsAll)
+void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 {
 	DEBUG_START;
-	char *thresholdSegmentNumberString = getenv("THRESHOLD_SEGMENT_NUMBER");
-	std::vector<Segment_3> segments;
-	if (thresholdSegmentNumberString)
-	{
-		int thresholdSegmentNumber = atoi(thresholdSegmentNumberString);
-		for (int i = 0; i < thresholdSegmentNumber; ++i)
-			segments.push_back(segmentsAll[segmentsAll.size() - 1
-					- i]);
-	}
-	else
-		segments = segmentsAll;
 	std::vector<std::vector<int>> clustersFirst(segments.size());
 	for (int iItem = 0; iItem < (int) data_->size(); ++iItem)
 	{
