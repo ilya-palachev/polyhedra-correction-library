@@ -31,7 +31,9 @@
 SupportFunctionDataItemInfo::SupportFunctionDataItemInfo() :
 	point(Vector3d(0., 0., 0.)),
 	iContour(-1),
-	numSidesContour(-1)
+	numSidesContour(-1),
+	segment(),
+	normalShadow()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -44,6 +46,8 @@ SupportFunctionDataItemInfo &SupportFunctionDataItemInfo::operator=(
 	point = info.point;
 	iContour = info.iContour;
 	numSidesContour = info.numSidesContour;
+	segment = info.segment;
+	normalShadow = info.normalShadow;
 	DEBUG_END;
 	return *this;
 }

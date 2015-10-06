@@ -28,6 +28,7 @@
 #define SUPPORT_FUNCTION_DATA_ITEM_INFO_H
 
 #include <memory>
+#include "KernelCGAL/KernelCGAL.h"
 
 class SupportFunctionDataItemInfo
 {
@@ -40,6 +41,12 @@ public:
 
 	/** The number of sides in the mother contour. */
 	int numSidesContour;
+
+	/** The original segment in the shadow contour. */
+	Segment_3 segment;
+
+	/** The normal vector to the original shadow contour. */
+	Vector_3 normalShadow;
 
 	/** Empty constructor. */
 	SupportFunctionDataItemInfo();
