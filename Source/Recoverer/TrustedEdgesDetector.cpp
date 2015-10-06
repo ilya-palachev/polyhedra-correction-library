@@ -267,16 +267,24 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 		auto item = (*data_)[iItem];
 		int iSegmentNearest = 0;
 		double distanceMinimal = ALPHA_PLANE_CLUSTER_INFINITY;
-		for (int iSegment = segments.size() - 1; iSegment >= 0;
-				--iSegment)
+		for (int iSegment = 0; iSegment < (int) segments.size();
+				++iSegment)
 		{
+			double length = sqrt(
+					segments[iSegment].squared_length());
 			double distanceCurrent = distance(segments[iSegment],
 					*(item.info));
-			if (distanceCurrent <= thresholdClusterError_)
+			if (distanceCurrent < distanceMinimal)
 			{
 				distanceMinimal = distanceCurrent;
 				iSegmentNearest = iSegment;
-				break;
+			}
+			if (distanceCurrent <= thresholdClusterError_)
+			{
+				std::cerr << "   For segment #" << iSegment <<
+					" of length " << length <<
+					" distance is " << distanceCurrent
+					<< std::endl;
 			}
 		}
 		if (distanceMinimal <= thresholdClusterError_)
@@ -291,11 +299,6 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 			<< " items for segment #" << iSegment << " of length "
 			<< sqrt(segments[iSegment].squared_length())
 			<< std::endl;
-		for (auto i: clustersFirst[iSegment])
-		{
-			Segment_3 segment = (*data_)[i].info->segment;
-			std::cerr << segment << std::endl;
-		}
 	}
 	DEBUG_END;
 }
