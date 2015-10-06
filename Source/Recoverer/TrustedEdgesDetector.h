@@ -54,6 +54,9 @@ const double ALPHA_PLANE_CLUSTER_INFINITY = 1e16;
 class TrustedEdgesDetector
 {
 private:
+	/** The initial support function data items. */
+	SupportFunctionDataPtr data_;
+
 	/** The initial support planes. */
 	std::vector<Plane_3> planes_;
 
@@ -106,7 +109,7 @@ public:
 	 * @param planes	The list of initial support planes.
 	 * @param threshold	The threshold for cluster error.
 	 */
-	TrustedEdgesDetector(std::vector<Plane_3> planes, double threshold);
+	TrustedEdgesDetector(SupportFunctionDataPtr data, double threshold);
 
 	/**
 	 * The empty destructor.

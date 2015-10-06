@@ -25,30 +25,36 @@
  * precision) by some spatial line (implementation).
  */
 
+#include "Constants.h"
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
 #include "halfspaces_intersection.h"
 #include "Recoverer/TrustedEdgesDetector.h"
 
-TrustedEdgesDetector::TrustedEdgesDetector(std::vector<Plane_3> planes,
+TrustedEdgesDetector::TrustedEdgesDetector(SupportFunctionDataPtr data,
 		double threshold) :
-	planes_(planes),
-	directions_(std::vector<Point_3>(planes.size())),
-	values_(VectorXd(planes.size())),
+	data_(data),
+	planes_(std::vector<Plane_3>(data->size())),
+	directions_(std::vector<Point_3>(data->size())),
+	values_(VectorXd(data->size())),
 	clusters_(),
-	index_(std::vector<int>(planes.size())),
+	index_(std::vector<int>(data->size())),
 	sphere_(),
 	vertices_(),
 	thresholdClusterError_(threshold)
 {
 	DEBUG_START;
-	for (int i = 0; i < (int) planes.size(); ++i)
+	for (int i = 0; i < (int) data->size(); ++i)
 	{
-		Plane_3 plane = planes[i];
-		Point_3 direction(plane.a(), plane.b(), plane.c());
+		auto item = (*data)[i];
+		Point_3 direction(item.direction);
+		double value = item.value;
+		Plane_3 plane(direction.x(), direction.y(), direction.z(),
+				-value);
+		planes_[i] = plane;
 		directions_[i] = direction;
-		values_[i] = -plane.d();
+		values_[i] = value;
 	}
 	DEBUG_END;
 }
@@ -176,55 +182,121 @@ static void printPolyhedronWithColouredBigEdges(Polyhedron_3 polyhedron)
 	DEBUG_END;
 }
 
-/**
- * Calculates the distance between the plane and the segment as a quadratic mean
- * of distance between segment points and plane.
- *
- * @param segment		The segment.
- * @param plane			The plane.
- * @return			The distance between them.
- */
-double distance(Segment_3 segment, Plane_3 plane)
+double distance(Point_3 a, Point_3 b)
 {
 	DEBUG_START;
-	Point_3 direction(plane.a(), plane.b(), plane.c());
-	double length = sqrt(direction.squared_length());
-	double value = -plane.d();
-	double a = (direction * segment.source() - value) / length;
-	double b = (direction * segment.target() - value) / length;
+	double distanceSquared = (a - b).squared_length();
+	double result = sqrt(distanceSquared);
 	DEBUG_END;
-	return std::max(fabs(a), fabs(b));
+	return result;
+}
+
+double distance(Point_3 point, Segment_3 segment)
+{
+	DEBUG_START;
+	Point_3 begin = segment.source();
+	Point_3 end = segment.target();
+	Vector_3 vector = end - begin;
+	double result = 0.;
+	if (vector * (point - begin) <= 0.)
+	{
+		result = distance(point, begin);
+	}
+	else if (vector * (point - end) >= 0.)
+	{
+		result = distance(point, end);
+	}
+	else
+	{
+		double left = distance(point, begin);
+		double right = distance(point, end);
+		double difference = fabs(left - right);
+		while (difference > EPS_MIN_DOUBLE * 100.)
+		{
+			Point_3 middle = 0.5 * (begin + end);
+			if (left > right)
+			{
+				begin = middle;
+			}
+			else
+			{
+				end = middle;
+			}
+			left = distance(point, begin);
+			right = distance(point, end);
+			difference = fabs(left - right);
+		}
+		result = left;
+	}
+	DEBUG_END;
+	return result;
+}
+
+double distance(Segment_3 a, Segment_3 b)
+{
+	DEBUG_START;
+	double aMaximal = std::max(distance(a.source(), b),
+			distance(a.target(), b));
+	double bMaximal = std::max(distance(b.source(), a),
+			distance(b.target(), a));
+	double result = std::min(aMaximal, bMaximal);
+	DEBUG_END;
+	return result;
+}
+
+double distance(Segment_3 segment, SupportFunctionDataItemInfo info)
+{
+	DEBUG_START;
+	Point_3 source = segment.source() - (segment.source()
+			* info.normalShadow) * info.normalShadow;
+	Point_3 target = segment.target() - (segment.target()
+			* info.normalShadow) * info.normalShadow;
+	Segment_3 segmentProjected(source, target);
+	double result = distance(segmentProjected, info.segment);
+	DEBUG_END;
+	return result;
 }
 
 void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 {
 	DEBUG_START;
 	std::vector<std::vector<int>> clustersFirst(segments.size());
-	for (int iPlane = 0; iPlane < (int) planes_.size(); ++iPlane)
+	for (int iItem = 0; iItem < (int) data_->size(); ++iItem)
 	{
-		int iSegmentNearest = INDEX_PLANE_NOT_PROCESSED;
-		double errorMinimal = ALPHA_PLANE_CLUSTER_INFINITY;
-		Plane_3 plane = planes_[iPlane];
+		std::cerr << "Processing item " << iItem << std::endl;
+		auto item = (*data_)[iItem];
+		int iSegmentNearest = 0;
+		double distanceMinimal = ALPHA_PLANE_CLUSTER_INFINITY;
 		for (int iSegment = 0; iSegment < (int) segments.size();
 				++iSegment)
 		{
-			Segment_3 segment = segments[iSegment];
-			double error = distance(segment, plane);
-			if (error < errorMinimal)
+			double length = sqrt(
+					segments[iSegment].squared_length());
+			double distanceCurrent = distance(segments[iSegment],
+					*(item.info));
+			if (distanceCurrent < distanceMinimal)
 			{
-				errorMinimal = error;
+				distanceMinimal = distanceCurrent;
 				iSegmentNearest = iSegment;
 			}
+			if (distanceCurrent <= thresholdClusterError_)
+			{
+				std::cerr << "   For segment #" << iSegment <<
+					" of length " << length <<
+					" distance is " << distanceCurrent
+					<< std::endl;
+			}
 		}
-		if (errorMinimal <= thresholdClusterError_)
+		if (distanceMinimal <= thresholdClusterError_)
 		{
-			clustersFirst[iSegmentNearest].push_back(iPlane);
+			clustersFirst[iSegmentNearest].push_back(iItem);
 		}
 	}
+
 	for (int iSegment = 0; iSegment < (int) segments.size(); ++iSegment)
 	{
 		std::cerr << "Found " << clustersFirst[iSegment].size()
-			<< " planes for segment #" << iSegment << " of length "
+			<< " items for segment #" << iSegment << " of length "
 			<< sqrt(segments[iSegment].squared_length())
 			<< std::endl;
 	}
