@@ -188,13 +188,12 @@ double distance(Segment_3 segment, Plane_3 plane)
 {
 	DEBUG_START;
 	Point_3 direction(plane.a(), plane.b(), plane.c());
+	double length = sqrt(direction.squared_length());
 	double value = -plane.d();
-	double a = direction * segment.source();
-	double b = direction * segment.target();
-	double mean = (a * a + a * b + b * b) / 3. - value * (a * b)
-		+ value * value;
+	double a = (direction * segment.source() - value) / length;
+	double b = (direction * segment.target() - value) / length;
 	DEBUG_END;
-	return sqrt(mean);
+	return std::max(fabs(a), fabs(b));
 }
 
 void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
