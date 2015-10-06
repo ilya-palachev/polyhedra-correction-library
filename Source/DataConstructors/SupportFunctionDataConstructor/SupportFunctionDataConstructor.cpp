@@ -345,6 +345,9 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 				SupportFunctionDataItemInfo());
 		item.info->iContour = contour->id;
 		item.info->numSidesContour = contour->ns;
+		item.info->segment = Segment_3(Point_3(side->A1),
+				Point_3(side->A2));
+		item.info->normalShadow = contour->plane.norm;
 		items.push_back(item);
 	}
 	DEBUG_END;
