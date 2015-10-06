@@ -273,7 +273,7 @@ double distance(Segment_3 a, Segment_3 b)
 			distance(a.target(), b));
 	double bMaximal = std::max(distance(b.source(), a),
 			distance(b.target(), a));
-	double result = std::min(aMaximal, bMaximal);
+	double result = std::max(aMaximal, bMaximal);
 	DEBUG_END;
 	return result;
 }
@@ -354,6 +354,21 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 		}
 	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "associated-edges.ply")
+		<< polyhedronInitial;
+	polyhedronInitial.initialize_indices();
+	for (int iSegment = 0; iSegment < (int) segments.size();
+			++iSegment)
+	{
+		int size = clustersFirst[iSegment].size();
+		if (size > 0)
+			continue;
+		auto halfedge = halfedges[iSegment];
+		if (halfedge->id < 0 || halfedge->id
+			>= (int) polyhedronInitial.halfedgeColours.size())
+			continue;
+		polyhedronInitial.halfedgeColours[halfedge->id] = red;
+	}
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "non-associated-edges.ply")
 		<< polyhedronInitial;
 	DEBUG_END;
 }
