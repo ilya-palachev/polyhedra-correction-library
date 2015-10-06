@@ -226,7 +226,7 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	stream << "end_header" << std::endl;
 	int iVertex = 0;
 	double scale = 1e+6;
-	double factor = 1.01;
+	double factor = 1.05;
 	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end();
 			++vertex)
 	{
