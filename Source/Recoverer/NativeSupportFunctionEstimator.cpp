@@ -593,6 +593,39 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	return solution;
 }
 
+void validateEstimate(std::vector<Plane_3> planesOld, VectorXd valuesNew)
+{
+	DEBUG_START;
+	std::vector<Plane_3> planesNew(planesOld.size());
+	for (int i = 0; i < (int) valuesNew.size(); ++i)
+	{
+		Plane_3 plane = planesOld[i];
+		planesNew[i] = Plane_3(plane.a(), plane.b(), plane.c(),
+				-valuesNew[i]);
+	}
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planesNew.begin(),
+			planesNew.end(), intersection, Kernel());
+	intersection.initialize_indices();
+	int numOuterPlanes = 0;
+	for (int i = 0; i < (int) valuesNew.size(); ++i)
+	{
+		Plane_3 plane = planesNew[i];
+		Point_3 direction(plane.a(), plane.b(), plane.c());
+		auto pair = intersection.findTangientVertex(direction);
+		double value = pair.second;
+		if (value < valuesNew[i])
+		{
+			std::cerr << "Value #" << i << ": " << value << " < "
+				<< valuesNew[i] << std::endl;
+			++numOuterPlanes;
+		}
+	}
+	std::cerr << "Number of outer planes: " << numOuterPlanes <<
+		" from total " << planesOld.size() << std::endl;
+	DEBUG_END;
+}
+
 VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
@@ -639,6 +672,9 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 		ERROR_PRINT("Solving failed!");
 		exit(EXIT_FAILURE);
 	}
+	if (getenv("PCL_NATIVE_ESTIMATOR_VALIDATOIN"))
+		validateEstimate(planes, values);
+
 	auto solution = calculateSolution(supportData, values);
 	DEBUG_END;
 	return solution;
