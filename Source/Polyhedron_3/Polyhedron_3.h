@@ -57,7 +57,13 @@ typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 class Polyhedron_3 : public BasePolyhedron_3
 {
 public:
+	/** Whether to print "edge-colouring facets" in the PLY output. */
+	bool whetherPrintEdgeColouringFacets;
+
+	/** Facet colours. */
 	std::vector<Colour> facetColours;
+
+	/** Halfedge colours.  */
 	std::vector<Colour> halfedgeColours;
 
 	/**
