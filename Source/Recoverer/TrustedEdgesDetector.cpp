@@ -236,18 +236,11 @@ double distance(Point_3 point, Segment_3 segment)
 double distance(Segment_3 a, Segment_3 b)
 {
 	DEBUG_START;
-#if 0
 	double aMaximal = std::max(distance(a.source(), b),
 			distance(a.target(), b));
 	double bMaximal = std::max(distance(b.source(), a),
 			distance(b.target(), a));
 	double result = std::min(aMaximal, bMaximal);
-#endif
-	double forward = distance(a.source(), b.source())
-		+ distance(a.target(), b.target());
-	double backward = distance(a.source(), b.target())
-		+ distance(a.target(), b.source());
-	double result = std::min(forward, backward);
 	DEBUG_END;
 	return result;
 }
