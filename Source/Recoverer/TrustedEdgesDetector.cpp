@@ -32,8 +32,6 @@
 #include "halfspaces_intersection.h"
 #include "Recoverer/TrustedEdgesDetector.h"
 
-static std::vector<Polyhedron_3::Halfedge_iterator> halfedges;
-static Polyhedron_3 polyhedronInitial;
 double distance(Segment_3 a, Segment_3 b);
 
 TrustedEdgesDetector::TrustedEdgesDetector(SupportFunctionDataPtr data,
@@ -303,8 +301,6 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 			<< sqrt(segments[iSegment].squared_length())
 			<< std::endl;
 	}
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "associated-edges.ply")
-		<< polyhedronInitial;
 	DEBUG_END;
 }
 
@@ -313,8 +309,6 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 {
 	DEBUG_START;
 	initialize();
-	polyhedronInitial = polyhedron;
-	polyhedronInitial.initialize_indices();
 	auto segments = getSortedSegments(polyhedron);
 	printPolyhedronWithColouredBigEdges(polyhedron);
 	buildFirstClusters(segments);
