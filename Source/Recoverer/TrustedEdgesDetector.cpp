@@ -139,42 +139,11 @@ std::vector<Segment_3> TrustedEdgesDetector::getSortedSegments(
 			++iSegment;
 		}
 	}
-	std::vector<Segment_3> segmentsUnsorted = segments;
 	std::sort(segments.begin(), segments.end(),
 			[](Segment_3 a, Segment_3 b)
 	{
 		return a.squared_length() < b.squared_length();
 	});
-	std::vector<int> backMap(segments.size());
-	for (int iSegment = 0; iSegment < (int) segments.size(); ++iSegment)
-	{
-		int iBest = 0;
-		double distanceMinimal = ALPHA_PLANE_CLUSTER_INFINITY;
-		for (int i = 0; i < (int) segmentsUnsorted.size(); ++i)
-		{
-			double distanceCurrent = distance(segments[iSegment],
-					segmentsUnsorted[i]);
-			if (distanceCurrent < distanceMinimal)
-			{
-				iBest = i;
-				distanceMinimal = distanceCurrent;
-			}
-		}
-		backMap[iSegment] = iBest;
-	}
-	iSegment = 0;
-	halfedges = std::vector<Polyhedron_3::Halfedge_iterator>(
-			segments.size());
-	for (auto halfedge = polyhedron.halfedges_begin();
-			halfedge != polyhedron.halfedges_end(); ++halfedge)
-	{
-		int iVertex = halfedge->vertex()->id;
-		int iVertexOpposite = halfedge->opposite()->vertex()->id;
-		if (iVertex < iVertexOpposite)
-		{
-			halfedges[backMap[iSegment++]] = halfedge;
-		}
-	}
 	DEBUG_END;
 	return segments;
 }
@@ -273,7 +242,7 @@ double distance(Segment_3 a, Segment_3 b)
 			distance(a.target(), b));
 	double bMaximal = std::max(distance(b.source(), a),
 			distance(b.target(), a));
-	double result = std::max(aMaximal, bMaximal);
+	double result = std::min(aMaximal, bMaximal);
 	DEBUG_END;
 	return result;
 }
@@ -327,48 +296,14 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 		}
 	}
 
-	char *segmentThresholdString = getenv("SEGMENT_THRESHOLD");
-	Colour red; red.red = 255; red.green = 0; red.blue = 0;
-	if (segmentThresholdString)
+	for (int iSegment = 0; iSegment < (int) segments.size(); ++iSegment)
 	{
-		int segmentThreshold = atoi(segmentThresholdString);
-		for (int iSegment = 0; iSegment < (int) segments.size();
-				++iSegment)
-		{
-			int size = clustersFirst[iSegment].size();
-			std::cerr << "Found " << size
-				<< " items for segment #" << iSegment
-				<< " of length "
-				<< sqrt(segments[iSegment].squared_length())
-				<< std::endl;
-			if (size < segmentThreshold)
-				continue;
-			auto halfedge = halfedges[iSegment];
-			std::cerr << "Halfedge id = " << halfedge->id
-				<< ", while size is "
-				<< polyhedronInitial.halfedgeColours.size()
-				<< std::endl;
-			polyhedronInitial.halfedgeColours[halfedge->id] = red;
-			halfedge = halfedge->opposite();
-			polyhedronInitial.halfedgeColours[halfedge->id] = red;
-		}
+		std::cerr << "Found " << clustersFirst[iSegment].size()
+			<< " items for segment #" << iSegment << " of length "
+			<< sqrt(segments[iSegment].squared_length())
+			<< std::endl;
 	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "associated-edges.ply")
-		<< polyhedronInitial;
-	polyhedronInitial.initialize_indices();
-	for (int iSegment = 0; iSegment < (int) segments.size();
-			++iSegment)
-	{
-		int size = clustersFirst[iSegment].size();
-		if (size > 0)
-			continue;
-		auto halfedge = halfedges[iSegment];
-		if (halfedge->id < 0 || halfedge->id
-			>= (int) polyhedronInitial.halfedgeColours.size())
-			continue;
-		polyhedronInitial.halfedgeColours[halfedge->id] = red;
-	}
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "non-associated-edges.ply")
 		<< polyhedronInitial;
 	DEBUG_END;
 }
