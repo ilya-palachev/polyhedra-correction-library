@@ -31,6 +31,7 @@
 #include "PCLDumper.h"
 #include "halfspaces_intersection.h"
 #include "Recoverer/TrustedEdgesDetector.h"
+#include "Recoverer/Colouring.h"
 
 double distance(Segment_3 a, Segment_3 b);
 
@@ -261,7 +262,7 @@ double distance(Segment_3 segment, SupportFunctionDataItemInfo info)
 void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 {
 	DEBUG_START;
-	std::vector<std::vector<int>> clustersFirst(segments.size());
+	std::vector<std::set<int>> clustersFirst(segments.size());
 	for (int iItem = 0; iItem < (int) data_->size(); ++iItem)
 	{
 		std::cerr << "Processing item " << iItem << std::endl;
@@ -290,9 +291,11 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 		}
 		if (distanceMinimal <= thresholdClusterError_)
 		{
-			clustersFirst[iSegmentNearest].push_back(iItem);
+			clustersFirst[iSegmentNearest].insert(iItem);
 		}
 	}
+	printColouredIntersection(planes_, clustersFirst,
+			"first-trusted-clusters.ply");
 
 	for (int iSegment = 0; iSegment < (int) segments.size(); ++iSegment)
 	{
