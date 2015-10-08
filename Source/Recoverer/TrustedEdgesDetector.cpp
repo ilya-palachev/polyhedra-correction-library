@@ -312,6 +312,14 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	auto segments = getSortedSegments(polyhedron);
 	printPolyhedronWithColouredBigEdges(polyhedron);
 	buildFirstClusters(segments);
+
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes_.begin(), planes_.end(),
+			intersection, Kernel());
+	intersection.initialize_indices();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"intersection-inside-detector.ply") << intersection;
+
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
 	return nothing;
