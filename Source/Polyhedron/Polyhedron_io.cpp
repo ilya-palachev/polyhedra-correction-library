@@ -1138,8 +1138,7 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron &p)
 {
 	DEBUG_START;
 	char *name = tmpnam(NULL);
-	p.fprint_ply_autoscale(DEFAULT_MAX_COORDINATE, name,
-		"generated-from-polyhedron");
+	p.fprint_ply_scale(1e6, name, "generated-from-polyhedron");
 	std::ifstream tmpstream;
 	tmpstream.open(name, std::ifstream::in);
 	stream << tmpstream.rdbuf();
