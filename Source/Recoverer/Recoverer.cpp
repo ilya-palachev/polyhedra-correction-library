@@ -463,6 +463,8 @@ static Polyhedron_3 produceFinalPolyhedron(
 				thresholdEdgeClusterError);
 		detector.run(polyhedron);
 	}
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
+		<< data->supportData();
 
 	DEBUG_END;
 	return polyhedron;
