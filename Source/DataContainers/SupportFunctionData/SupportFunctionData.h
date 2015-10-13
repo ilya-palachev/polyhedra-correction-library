@@ -224,4 +224,12 @@ public:
 	void searchTrustedEdges(double threshold);
 };
 
+/**
+ * Prints support function data in PLY format.
+ *
+ * @param stream	The output stream.
+ * @param data		The data.
+ */
+std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data);
+
 #endif /* SUPPORT_FUNCTION_DATA_H */
