@@ -25,6 +25,13 @@
  * precision) by some spatial line (implementation).
  */
 
+#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include <CGAL/Origin.h>
+
 #include "Constants.h"
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -356,6 +363,64 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Point_3> points)
 	return stream;
 }
 
+inline std::string generateRandomString(const int length)
+{
+	static const char alphanum[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+	std::string string;
+	for (int i = 0; i < length; ++i)
+	{
+		string += alphanum[rand() % (sizeof(alphanum) - 1)];
+	}
+
+	return string;
+}
+
+inline bool checkFileExists(std::string path)
+{
+	struct stat buffer;
+	return (stat(path.c_str(), &buffer) == 0);
+}
+
+inline std::string generateRandomFileName(const char *prefix, int length)
+{
+	std::string name;
+	do
+	{
+		name = prefix + generateRandomString(length);
+	}
+	while (checkFileExists(name));
+	return name;
+}
+
+std::ostream &operator<<(std::ostream &stream,
+		std::vector<std::pair<Vector_3, std::vector<Point_3>>> contours)
+{
+	DEBUG_START;
+	CGAL::Origin origin;
+	for (auto contour: contours)
+	{
+		std::ofstream temporary;
+		auto path = generateRandomFileName("contour_", 16);
+		temporary.open(path);
+		Vector_3 normal = contour.first;
+		Vector_3 ez(0., 0., 1.);
+		Vector_3 tau = CGAL::cross_product(ez, normal);
+		for (auto point: contour.second)
+		{
+			Vector_3 vector = point - origin;
+			double x = vector * tau;
+			double y = vector * ez;
+			temporary << x << " " << y << std::endl;
+		}
+		temporary.close();
+	}
+	DEBUG_END;
+	return stream;
+}
+
 std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		Polyhedron_3 polyhedron)
 {
@@ -402,7 +467,22 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		name += ".ply";
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
 			<< pointContours[iContour];
+		
 	}
+	for (int iContour = 0; iContour < (int) indexContours.size();
+			++iContour)
+	{
+		std::string name;
+		name += "contours-comparative-view-";
+		name += std::to_string(iContour);
+		name += ".png";
+		std::vector<std::pair<Vector_3, std::vector<Point_3>>> contours;
+		contours.push_back(std::make_pair(directionContours[iContour],
+					pointContours[iContour]));
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
+			<< contours;
+	}
+
 #if 0
 	auto segments = getSortedSegments(polyhedron);
 	printPolyhedronWithColouredBigEdges(polyhedron);
