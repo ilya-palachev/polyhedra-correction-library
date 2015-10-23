@@ -29,6 +29,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstdio>
 
 #include <CGAL/Origin.h>
 
@@ -395,20 +396,29 @@ inline std::string generateRandomFileName(const char *prefix, int length)
 	return name;
 }
 
+typedef struct
+{
+	std::string comment;
+	Vector_3 normal;
+	std::vector<Point_3> points;
+} ContourInfo;
+
 std::ostream &operator<<(std::ostream &stream,
-		std::vector<std::pair<Vector_3, std::vector<Point_3>>> contours)
+		std::vector<ContourInfo> contours)
 {
 	DEBUG_START;
 	CGAL::Origin origin;
+	std::vector<std::string> paths;
 	for (auto contour: contours)
 	{
 		std::ofstream temporary;
 		auto path = generateRandomFileName("contour_", 16);
+		paths.push_back(path);
 		temporary.open(path);
-		Vector_3 normal = contour.first;
+		Vector_3 normal = contour.normal;
 		Vector_3 ez(0., 0., 1.);
 		Vector_3 tau = CGAL::cross_product(ez, normal);
-		for (auto point: contour.second)
+		for (auto point: contour.points)
 		{
 			Vector_3 vector = point - origin;
 			double x = vector * tau;
@@ -417,6 +427,35 @@ std::ostream &operator<<(std::ostream &stream,
 		}
 		temporary.close();
 	}
+	auto imagePath = generateRandomFileName("image_", 16);
+	std::string gnuplotCommand;
+	gnuplotCommand += "gnuplot -e \"";
+	gnuplotCommand += "set term pngcairo ; set output \'";
+	gnuplotCommand += imagePath;
+	gnuplotCommand += "\' ; plot";
+	for (int i = 0; i < (int) contours.size(); ++i)
+	{
+		if (i != 0)
+			gnuplotCommand += " , ";
+		gnuplotCommand += " \'";
+		gnuplotCommand += paths[i];
+		gnuplotCommand += "\' with lines title \'";
+		gnuplotCommand += contours[i].comment;
+		gnuplotCommand += " \'";
+	}
+	gnuplotCommand += "\"";
+	int code = system(gnuplotCommand.c_str());
+	if (code != 0)
+	{
+		ERROR_PRINT("gnuplot failed!");
+	}
+	for (auto path: paths)
+		std::remove(path.c_str());
+	std::ifstream tmpstream;
+	tmpstream.open(imagePath, std::ifstream::in);
+	stream << tmpstream.rdbuf();
+	tmpstream.close();
+	std::remove(imagePath.c_str());
 	DEBUG_END;
 	return stream;
 }
@@ -476,9 +515,12 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		name += "contours-comparative-view-";
 		name += std::to_string(iContour);
 		name += ".png";
-		std::vector<std::pair<Vector_3, std::vector<Point_3>>> contours;
-		contours.push_back(std::make_pair(directionContours[iContour],
-					pointContours[iContour]));
+		std::vector<ContourInfo> contours;
+		ContourInfo contourInitial;
+		contourInitial.comment = "initial";
+		contourInitial.normal = directionContours[iContour];
+		contourInitial.points = pointContours[iContour];
+		contours.push_back(contourInitial);
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
 			<< contours;
 	}
