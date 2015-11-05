@@ -36,6 +36,7 @@ set (SOURCE_pcl
 	Source/Analyzers/ShadowContourClusterizer/ShadowContourClusterizer.cpp
 	Source/Analyzers/SizeCalculator/SizeCalculator.cpp
 	Source/Analyzers/SizeCalculator/SortedDouble/SortedDouble.cpp
+	Source/Common.cpp
 	Source/Correctors/Coalescer/Coalescer.cpp
 	Source/Correctors/EdgeReducer/EdgeReducer.cpp
 	Source/Correctors/GlobalShadowCorrector/GlobalShadowCorrector.cpp

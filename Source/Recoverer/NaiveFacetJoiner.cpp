@@ -30,6 +30,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
+#include "Common.h"
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/Colouring.h"
 
@@ -47,22 +48,6 @@ std::ostream &operator<<(std::ostream &stream, std::set<int> cluster)
 		}
 	}
 	return stream;
-}
-
-void tryGetenvDouble(const char *envName, double &value)
-{
-	DEBUG_START;
-	char *mistake = NULL;
-	char *string = getenv(envName);
-	if (string)
-	{
-		double valueNew = strtod(string, &mistake);
-		if (mistake && *mistake)
-			return;
-		else
-			value = valueNew;
-	}
-	DEBUG_END;
 }
 
 NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
