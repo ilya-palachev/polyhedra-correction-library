@@ -38,8 +38,6 @@ private:
 
 	EdgeDataPtr edgeData;
 
-	void createContour(int idOfContour, Plane planeOfProjection,
-			SContour* outputContour);
 	bool edgeIsVisibleOnPlane(Edge edge, Plane planeOfProjection);
 	bool collinearVisibility(int v0processed, int v1processed,
 			Plane planeOfProjection, int ifacet);
@@ -48,6 +46,8 @@ public:
 	ShadowContourConstructor(PolyhedronPtr p,
 			std::shared_ptr<ShadowContourData> d);
 	~ShadowContourConstructor();
+	void createContour(int idOfContour, Plane planeOfProjection,
+			SContour* outputContour);
 	void run(int numContoursNeeded, double firstAngle);
 };
 
