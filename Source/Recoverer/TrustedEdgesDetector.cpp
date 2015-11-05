@@ -32,6 +32,13 @@
 #include <cstdio>
 
 #include <CGAL/Origin.h>
+#include <CGAL/convex_hull_2.h>
+#include <CGAL/basic.h>
+#include <CGAL/Filtered_kernel.h>
+#include "PCLKernel/PCLKernel.h"
+typedef PCLKernel<double> PCL_K;
+typedef CGAL::Filtered_kernel_adaptor<PCL_K> LocalSContourK;
+typedef LocalSContourK::Point_2 Point_2;
 
 #include "Constants.h"
 #include "DebugPrint.h"
@@ -403,11 +410,29 @@ typedef struct
 	std::vector<Point_3> points;
 } ContourInfo;
 
+Point_2 project(Point_3 point, Vector_3 normal)
+{
+	CGAL::Origin origin;
+	Vector_3 ez(0., 0., 1.);
+	Vector_3 tau = CGAL::cross_product(ez, normal);
+	Vector_3 vector = point - origin;
+	double x = vector * tau;
+	double y = vector * ez;
+	return Point_2(x, y);
+}
+
+Point_3 unproject(Point_2 projection, Vector_3 normal)
+{
+	CGAL::Origin origin;
+	Vector_3 ez(0., 0., 1.);
+	Vector_3 tau = CGAL::cross_product(ez, normal);
+	return origin + projection.x() * tau + projection.y() * ez;
+}
+
 std::ostream &operator<<(std::ostream &stream,
 		std::vector<ContourInfo> contours)
 {
 	DEBUG_START;
-	CGAL::Origin origin;
 	std::vector<std::string> paths;
 	for (auto contour: contours)
 	{
@@ -416,14 +441,9 @@ std::ostream &operator<<(std::ostream &stream,
 		paths.push_back(path);
 		temporary.open(path);
 		Vector_3 normal = contour.normal;
-		Vector_3 ez(0., 0., 1.);
-		Vector_3 tau = CGAL::cross_product(ez, normal);
 		for (auto point: contour.points)
 		{
-			Vector_3 vector = point - origin;
-			double x = vector * tau;
-			double y = vector * ez;
-			temporary << x << " " << y << std::endl;
+			temporary << project(point, normal) << std::endl;
 		}
 		temporary.close();
 	}
@@ -441,9 +461,10 @@ std::ostream &operator<<(std::ostream &stream,
 		gnuplotCommand += paths[i];
 		gnuplotCommand += "\' with lines title \'";
 		gnuplotCommand += contours[i].comment;
-		gnuplotCommand += " \'";
+		gnuplotCommand += "\'";
 	}
 	gnuplotCommand += "\"";
+	std::cerr << gnuplotCommand << std::endl;
 	int code = system(gnuplotCommand.c_str());
 	if (code != 0)
 	{
@@ -460,33 +481,32 @@ std::ostream &operator<<(std::ostream &stream,
 	return stream;
 }
 
-std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
-		Polyhedron_3 polyhedron)
+std::vector<Point_3> generateProjection(Polyhedron_3 polyhedron, Vector_3 normal)
 {
 	DEBUG_START;
-	initialize();
-	int iContourMax = 0;
-	for (int i = 0; i < (int) data_->size(); ++i)
+	std::vector<Point_2> points;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
 	{
-		auto item = (*data_)[i];
-		int iContour = item.info->iContour;
-		if (iContour > iContourMax)
-		{
-			iContourMax = iContour;
-		}
+		points.push_back(project(vertex->point(), normal));
 	}
-	std::vector<std::vector<int>> indexContours(iContourMax + 1);
-	std::vector<Vector_3> directionContours(iContourMax + 1);
-	std::vector<std::vector<Point_3>> pointContours(iContourMax + 1);
-	for (int i = 0; i < (int) data_->size(); ++i)
+	std::vector<Point_2> hull;
+	convex_hull_2(points.begin(), points.end(), std::back_inserter(hull));
+	std::vector<Point_3> projection;
+	for (auto point: hull)
 	{
-		auto item = (*data_)[i];
-		int iContour = item.info->iContour;
-		indexContours[iContour].push_back(i);
-		directionContours[iContour] = item.info->normalShadow;
-		pointContours[iContour].push_back(item.info->segment.source());
-		pointContours[iContour].push_back(item.info->segment.target());
+		projection.push_back(unproject(point, normal));
 	}
+	DEBUG_END;
+	return projection;
+}
+
+void dumpContours(Polyhedron_3 polyhedron,
+		std::vector<std::vector<int>> indexContours,
+		std::vector<Vector_3> directionContours,
+		std::vector<std::vector<Point_3>> pointContours)
+{
+	DEBUG_START;
 	for (int iContour = 0; iContour < (int) indexContours.size();
 			++iContour)
 	{
@@ -521,9 +541,48 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		contourInitial.normal = directionContours[iContour];
 		contourInitial.points = pointContours[iContour];
 		contours.push_back(contourInitial);
+		ContourInfo contourRude;
+		contourRude.comment = "rude";
+		contourRude.normal = directionContours[iContour];
+		contourRude.points = generateProjection(polyhedron,
+				directionContours[iContour]);
+		contours.push_back(contourRude);
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
 			<< contours;
 	}
+	DEBUG_END;
+}
+
+std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
+		Polyhedron_3 polyhedron)
+{
+	DEBUG_START;
+	initialize();
+	int iContourMax = 0;
+	for (int i = 0; i < (int) data_->size(); ++i)
+	{
+		auto item = (*data_)[i];
+		int iContour = item.info->iContour;
+		if (iContour > iContourMax)
+		{
+			iContourMax = iContour;
+		}
+	}
+	std::vector<std::vector<int>> indexContours(iContourMax + 1);
+	std::vector<Vector_3> directionContours(iContourMax + 1);
+	std::vector<std::vector<Point_3>> pointContours(iContourMax + 1);
+	for (int i = 0; i < (int) data_->size(); ++i)
+	{
+		auto item = (*data_)[i];
+		int iContour = item.info->iContour;
+		indexContours[iContour].push_back(i);
+		directionContours[iContour] = item.info->normalShadow;
+		pointContours[iContour].push_back(item.info->segment.source());
+		pointContours[iContour].push_back(item.info->segment.target());
+	}
+	if (getenv("DUMP_CONTOURS"))
+		dumpContours(polyhedron, indexContours, directionContours,
+				pointContours);
 
 #if 0
 	auto segments = getSortedSegments(polyhedron);
