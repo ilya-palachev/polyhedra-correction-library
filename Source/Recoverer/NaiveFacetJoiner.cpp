@@ -68,6 +68,8 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
 			facet != polyhedron_.facets_end(); ++facet)
 	{
 		facets_[iFacet] = facet;
+		std::cerr << "facet id : " << facet->id << " -> " << iFacet
+			<< std::endl;
 		facet->id = iFacet;
 		++iFacet;
 	}

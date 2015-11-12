@@ -215,59 +215,11 @@ int countInnerPoints(std::vector<Point_3> points)
 
 static std::vector<Plane_3> planesOriginal;
 
-static int findBestPlaneOriginal(Polyhedron_3::Facet& facet)
-{
-	DEBUG_START;
-	double minimum = 1e100;
-	int iPlaneBest = -1;
-	for (int i = 0; i < (int) planesOriginal.size(); ++i)
-	{
-		Plane_3 plane = planesOriginal[i];
-		auto halfedgeBegin = facet.facet_begin();
-		auto halfedge = halfedgeBegin;
-		double errorSumSquares = 0.;
-		bool ifAllOnPlane = true;
-		do
-		{
-			auto point = halfedge->vertex()->point();
-			ifAllOnPlane &= plane.has_on(point);
-			double error = point.x() * plane.a()
-				+ point.y() * plane.b()
-				+ point.z() * plane.c() + plane.d();
-			error = error * error;
-			errorSumSquares += error;
-			++halfedge;
-		}
-		while (halfedge != halfedgeBegin);
-
-		if (ifAllOnPlane)
-		{
-			std::cerr << "Found exact plane: " << plane
-				<< std::endl;
-			iPlaneBest = i;
-			break;
-		}
-
-		if (errorSumSquares < minimum)
-		{
-			iPlaneBest = i;
-			minimum = errorSumSquares;
-		}
-	}
-	if (iPlaneBest < 0)
-	{
-		ERROR_PRINT("Failed to find best plane");
-		exit(EXIT_FAILURE);
-	}
-	DEBUG_END;
-	return iPlaneBest;
-}
-
 struct Plane_from_facet
 {
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
 	{
-		int iPlane = findBestPlaneOriginal(facet);
+		int iPlane = findBestPlaneOriginal(facet, planesOriginal);
 		Plane_3 planeBest = planesOriginal[iPlane];
 		double a = planeBest.a();
 		double b = planeBest.b();
@@ -289,30 +241,6 @@ struct Plane_from_facet
 		return planeBest;
 	}
 };
-
-std::vector<int> constructPlanesIndex(Polyhedron_3 polyhedron)
-{
-	DEBUG_START;
-	int iFacet = 0;
- 	std::vector<int> index(polyhedron.size_of_facets());
-	std::set<int> usedIndices;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		int iBestPlane = findBestPlaneOriginal(*facet);
-		index[iFacet] = iBestPlane;
-		usedIndices.insert(iBestPlane);
-		++iFacet;
-	}
-	if (usedIndices.size() < index.size())
-	{
-		std::cerr << "Equal indices: " << usedIndices.size() << " < "
-			<< index.size() << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	DEBUG_END;
-	return index;
-}
 
 void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 		std::vector<int> index)
@@ -640,7 +568,8 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 
 	std::transform(intersection.facets_begin(), intersection.facets_end(),
 		intersection.planes_begin(), Plane_from_facet());
-	auto index = constructPlanesIndex(intersection);
+	intersection.initialize_indices(planesOriginal);
+	auto index = intersection.indexPlanes_;
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;
 

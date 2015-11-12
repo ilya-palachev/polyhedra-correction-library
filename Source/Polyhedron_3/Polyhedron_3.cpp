@@ -380,3 +380,75 @@ VectorXd Polyhedron_3::findTangientPointsConcatenated(
 	DEBUG_END;
 	return solution;
 }
+
+int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
+		std::vector<PCLPlane_3> planesOriginal)
+{
+	DEBUG_START;
+	double minimum = 1e100;
+	int iPlaneBest = -1;
+	for (int i = 0; i < (int) planesOriginal.size(); ++i)
+	{
+		PCLPlane_3 plane = planesOriginal[i];
+		auto halfedgeBegin = facet.facet_begin();
+		auto halfedge = halfedgeBegin;
+		double errorSumSquares = 0.;
+		bool ifAllOnPlane = true;
+		do
+		{
+			auto point = halfedge->vertex()->point();
+			ifAllOnPlane &= plane.has_on(point);
+			double error = point.x() * plane.a()
+				+ point.y() * plane.b()
+				+ point.z() * plane.c() + plane.d();
+			error = error * error;
+			errorSumSquares += error;
+			++halfedge;
+		}
+		while (halfedge != halfedgeBegin);
+
+		if (ifAllOnPlane)
+		{
+			std::cerr << "Found exact plane: " << plane
+				<< std::endl;
+			iPlaneBest = i;
+			break;
+		}
+
+		if (errorSumSquares < minimum)
+		{
+			iPlaneBest = i;
+			minimum = errorSumSquares;
+		}
+	}
+	if (iPlaneBest < 0)
+	{
+		ERROR_PRINT("Failed to find best plane");
+		exit(EXIT_FAILURE);
+	}
+	DEBUG_END;
+	return iPlaneBest;
+}
+
+void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
+{
+	DEBUG_START;
+	int iFacet = 0;
+ 	std::vector<int> index(size_of_facets());
+	std::set<int> usedIndices;
+	for (auto facet = facets_begin(); facet != facets_end(); ++facet)
+	{
+		int iBestPlane = findBestPlaneOriginal(*facet, planes);
+		index[iFacet] = iBestPlane;
+		usedIndices.insert(iBestPlane);
+		++iFacet;
+	}
+	if (usedIndices.size() < index.size())
+	{
+		std::cerr << "Equal indices: " << usedIndices.size() << " < "
+			<< index.size() << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	indexPlanes_ = index;
+	DEBUG_END;
+}

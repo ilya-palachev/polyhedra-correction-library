@@ -34,6 +34,7 @@
 
 #include "KernelCGAL/KernelCGAL.h"
 typedef Point_3 PCLPoint_3;
+typedef Plane_3 PCLPlane_3;
 
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
@@ -163,6 +164,26 @@ public:
 	 */
 	VectorXd findTangientPointsConcatenated(
 			std::vector<PCLPoint_3> directions);
+
+	/**
+	 * The indices of planes in the given polyhedron.
+	 */
+	std::vector<int> indexPlanes_;
+
+	/**
+	 * Initializes the indices of the polyhedron by the indices of given
+	 * vector of planes.
+	 */
+	void initialize_indices(std::vector<PCLPlane_3> planes);
 };
+
+/**
+ * Finds the ID of best plane corresponding to the given facet.
+ *
+ * @param facet			The facet.
+ * @param planesOriginal	The vector of original planes.
+ */
+int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
+		std::vector<PCLPlane_3> planesOriginal);
 
 #endif /* POLYHEDRONCGAL_H_ */
