@@ -448,7 +448,6 @@ void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 	{
 		std::cerr << "Equal indices: " << usedIndices.size() << " < "
 			<< index.size() << std::endl;
-		exit(EXIT_FAILURE);
 	}
 	indexPlanes_ = index;
 	DEBUG_END;
@@ -487,14 +486,12 @@ struct Plane_from_planes
 Polyhedron_3::Polyhedron_3(std::vector<PCLPlane_3> planes)
 {
 	DEBUG_START;
-	Polyhedron_3 intersection;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
-	intersection.initialize_indices();
+			*this, Kernel());
+	initialize_indices();
 
 	planesOriginal = planes;
-	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_planes());
-	intersection.initialize_indices(planes);
+	std::transform(facets_begin(), facets_end(), planes_begin(), Plane_from_planes());
+	initialize_indices(planes);
 	DEBUG_END;
 }
