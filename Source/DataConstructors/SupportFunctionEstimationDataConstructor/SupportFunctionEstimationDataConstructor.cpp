@@ -29,7 +29,6 @@
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
 #include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
 #include "SparseMatrixEigen.h"
-#include "halfspaces_intersection.h"
 #include "PCLDumper.h"
 #include "Polyhedron/Polyhedron.h"
 
@@ -277,7 +276,6 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 	VectorXd startingVector(3 * data->size());
 	/* Construct intersection of support halfspaces represented by planes */
 	std::vector<Plane_3> planes = data->supportPlanes();
-	Polyhedron_3 intersection;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"support-planes-for-halfspaces_intersection.txt") << planes;
 
@@ -289,8 +287,7 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 
 	DEBUG_PRINT("Computing intersection of %ld halfspaces.", planes.size());
 	ASSERT(planes.size() > 3);
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-		intersection, Kernel());
+	Polyhedron_3 intersection(planes);
 
 	startingVector = calculateSupportValues(
 		data->supportDirectionsCGAL(), intersection.getVertices());

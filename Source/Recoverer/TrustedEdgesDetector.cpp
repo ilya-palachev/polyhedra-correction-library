@@ -44,7 +44,6 @@ typedef LocalSContourK::Point_2 Point_2;
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
-#include "halfspaces_intersection.h"
 #include "Recoverer/TrustedEdgesDetector.h"
 #include "Recoverer/Colouring.h"
 
@@ -584,18 +583,6 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		dumpContours(polyhedron, indexContours, directionContours,
 				pointContours);
 
-#if 0
-	auto segments = getSortedSegments(polyhedron);
-	printPolyhedronWithColouredBigEdges(polyhedron);
-	buildFirstClusters(segments);
-
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes_.begin(), planes_.end(),
-			intersection, Kernel());
-	intersection.initialize_indices();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			"intersection-inside-detector.ply") << intersection;
-#endif
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
 	return nothing;

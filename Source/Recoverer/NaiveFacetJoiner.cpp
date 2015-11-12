@@ -793,10 +793,7 @@ Polyhedron_3 NaiveFacetJoiner::run()
 		Plane_3 plane = pair.first;
 		planes.push_back(plane);
 	}
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
-	intersection.initialize_indices();
+	Polyhedron_3 intersection(planes);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"just-facet-joined-polyhedron.ply") << intersection;
 

@@ -39,7 +39,6 @@
 #include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/TrustedEdgesDetector.h"
-#include "halfspaces_intersection.h"
 
 TimeMeasurer timer;
 std::set<int> indicesDirectionsIgnored;
@@ -296,9 +295,7 @@ static Polyhedron_3 producePolyhedron(
 	}
 
 	/* Intersect halfspaces corresponding to corrected planes. */
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
+	Polyhedron_3 intersection(planes);
 	DEBUG_END;
 	return intersection;
 }

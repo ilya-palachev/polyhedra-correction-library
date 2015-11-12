@@ -26,7 +26,6 @@
 
 #ifndef NAIVEFACETJOINER_H_
 #define NAIVEFACETJOINER_H_
-#include "halfspaces_intersection.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
 

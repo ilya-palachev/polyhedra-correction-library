@@ -21,14 +21,12 @@
 /**
  * @file GardnerKiderlenSupportMatrix.cpp
  * @brief Support matrix based on the approach described by Gardner and
- * Kiderlen 
- * - implementation.
+ * Kiderlen (implementation).
  */
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
-#include "halfspaces_intersection.h"
 
 GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(long int numRows,
 		long int numColumns) :
@@ -102,7 +100,6 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	return matrix;
 }
 
-# if 1
 double GardnerKiderlenSupportMatrix::epsilonFactor = 1.;
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
@@ -166,60 +163,3 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	DEBUG_END;
 	return matrix;
 }
-#endif
-
-#if 0
-GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-		SupportFunctionDataPtr data, double epsilon)
-{
-	DEBUG_START;
-	auto directions = data->supportDirectionsCGAL();
-	Polyhedron_3 hull;
-	CGAL::convex_hull_3(directions.begin(), directions.end(), hull);
-
-	long int numDirections = data->size();
-	for (auto vertex = hull.vertices_begin();
-			vertex != hull.vertices_end(); ++vertex)
-	{
-		Point_3 point = vertex->point();
-		double minDist = 0.;
-		int iMin = -1;
-		for (int i = 0; i < numDirections; ++i)
-		{
-			double dist = (point - directions[i]).squared_length();
-			if (dist < minDist || iMin == -1)
-			{
-				iMin = i;
-				minDist = dist;
-			}
-		}
-		DEBUG_PRINT("Found closest vertex #%d, dist = %lf", iMin,
-				minDist);
-		vertex->id = iMin;
-	}
-
-	std::vector<Eigen::Triplet<double>> triplets;
-	int iCondition = 0;
-	int numConditions = 0;
-	for (auto halfedge = hull.halfedges_begin();
-			halfedge != hull.halfedges_end(); ++halfedge)
-	{
-		int i = halfedge->prev()->vertex()->id;
-		ASSERT(i >= 0);
-		int j = halfedge->vertex()->id;
-		ASSERT(j >= 0);
-		addCondition(triplets, iCondition, i, j, directions[i]);
-		++numConditions;
-	}
-
-	ALWAYS_PRINT(stdout, "Number of conditions: %d\n", numConditions);
-	ALWAYS_PRINT(stdout, "Number of directions: %ld\n", numDirections);
-
-	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
-			numConditions, numDirections * 3);
-	matrix->setFromTriplets(triplets.begin(), triplets.end());
-	DEBUG_END;
-	return matrix;
-}
-
-#endif

@@ -33,7 +33,6 @@
 #include "Recoverer/Colouring.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
-#include "halfspaces_intersection.h"
 
 static int findBestPlaneID(Plane_3 plane, std::vector<Plane_3> planes)
 {
@@ -98,9 +97,7 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 		const char *suffix)
 {
 	DEBUG_START;
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
+	Polyhedron_3 intersection(planes);
 	PolyhedronPtr polyhedron(new Polyhedron(intersection));
 	auto clustersFacetsIDs = getClustersFacetsIndices(polyhedron, planes,
 			clustersIndices);

@@ -37,7 +37,6 @@
 #include "DebugAssert.h"
 #include <coin/IpIpoptApplication.hpp>
 #include "Recoverer/IpoptFinitePlanesFitter.h"
-#include "halfspaces_intersection.h"
 
 #include <CGAL/point_generators_3.h>
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
@@ -491,28 +490,8 @@ void IpoptFinitePlanesFitter::recalculateParameters(void)
 		values_[i] = value;
 		planes_[i] = plane;
 	}
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes_.begin(), planes_.end(),
-			intersection, Kernel());
-	std::transform(intersection.facets_begin(), intersection.facets_end(),
-			intersection.planes_begin(), Plane_from_facet());
+	Polyhedron_3 intersection(planes_);
 	recalculateFunctional(&intersection);
-
-#if 0
-	/* FIXME: maybe we can parallelize this with openmp. */
-	for (int i = 0; i < numDirections; ++i)
-	{
-		std::vector<Plane_3> planesWithoutOne = planes_;
-		planesWithoutOne.erase(i);
-		Polyhedron_3 intersectionWithoutOne;
-		CGAL::internal::halfspaces_intersection(
-				planesWithoutOne.begin(),
-				planesWithoutOne.end(), intersectionWithoutOne,
-				Kernel());
-		recalculateConstraint(intersectionWithoutOne, i);
-	}
-	DEBUG_END;
-#endif
 }
 
 static inline double distancePlanes(Plane_3 first, Plane_3 second)

@@ -33,7 +33,6 @@
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Polyhedron_3/Polyhedron_3.h"
-#include "halfspaces_intersection.h"
 #include "Recoverer/Colouring.h"
 
 
