@@ -28,7 +28,6 @@
 #include "DebugAssert.h"
 #include "PCLDumper.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
-#include "halfspaces_intersection.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include "Recoverer/Colouring.h"
@@ -212,35 +211,6 @@ int countInnerPoints(std::vector<Point_3> points)
 	DEBUG_END;
 	return numInnerPoints;
 }
-
-static std::vector<Plane_3> planesOriginal;
-
-struct Plane_from_facet
-{
-	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
-	{
-		int iPlane = findBestPlaneOriginal(facet, planesOriginal);
-		Plane_3 planeBest = planesOriginal[iPlane];
-		double a = planeBest.a();
-		double b = planeBest.b();
-		double c = planeBest.c();
-		double d = planeBest.d();
-		double norm = sqrt(a * a + b * b + c * c);
-		a /= norm;
-		b /= norm;
-		c /= norm;
-		d /= norm;
-		if (d > 0.)
-		{
-			a = -a;
-			b = -b;
-			c = -c;
-			d = -d;
-		}
-		planeBest = Plane_3(a, b, c, d);
-		return planeBest;
-	}
-};
 
 void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 		std::vector<int> index)
@@ -509,9 +479,7 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 				-values(i));
 		planes.push_back(plane);
 	}
-	Polyhedron_3 polyhedron;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			polyhedron, Kernel());
+	Polyhedron_3 polyhedron(planes);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"recovered-by-native-estimator.ply") << polyhedron;
 
@@ -531,10 +499,7 @@ void validateEstimate(std::vector<Plane_3> planesOld, VectorXd valuesNew)
 		planesNew[i] = Plane_3(plane.a(), plane.b(), plane.c(),
 				-valuesNew[i]);
 	}
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planesNew.begin(),
-			planesNew.end(), intersection, Kernel());
-	intersection.initialize_indices();
+	Polyhedron_3 intersection(planesNew);
 	int numOuterPlanes = 0;
 	for (int i = 0; i < (int) valuesNew.size(); ++i)
 	{
@@ -559,16 +524,8 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	DEBUG_START;
 	SupportFunctionDataPtr supportData = data->supportData();
 	auto planes = supportData->supportPlanes();
-	planesOriginal = planes;
 
-	Polyhedron_3 intersection;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
-			intersection, Kernel());
-	intersection.initialize_indices();
-
-	std::transform(intersection.facets_begin(), intersection.facets_end(),
-		intersection.planes_begin(), Plane_from_facet());
-	intersection.initialize_indices(planesOriginal);
+	Polyhedron_3 intersection(planes);
 	auto index = intersection.indexPlanes_;
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;

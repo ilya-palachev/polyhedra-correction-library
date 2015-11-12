@@ -26,6 +26,7 @@
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "halfspaces_intersection.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
@@ -382,14 +383,14 @@ VectorXd Polyhedron_3::findTangientPointsConcatenated(
 }
 
 int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
-		std::vector<PCLPlane_3> planesOriginal)
+		std::vector<PCLPlane_3> planes)
 {
 	DEBUG_START;
 	double minimum = 1e100;
 	int iPlaneBest = -1;
-	for (int i = 0; i < (int) planesOriginal.size(); ++i)
+	for (int i = 0; i < (int) planes.size(); ++i)
 	{
-		PCLPlane_3 plane = planesOriginal[i];
+		PCLPlane_3 plane = planes[i];
 		auto halfedgeBegin = facet.facet_begin();
 		auto halfedge = halfedgeBegin;
 		double errorSumSquares = 0.;
@@ -450,5 +451,50 @@ void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 		exit(EXIT_FAILURE);
 	}
 	indexPlanes_ = index;
+	DEBUG_END;
+}
+
+
+static std::vector<Plane_3> planesOriginal;
+
+struct Plane_from_planes
+{
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
+	{
+		int iPlane = findBestPlaneOriginal(facet, planesOriginal);
+		Plane_3 planeBest = planesOriginal[iPlane];
+		double a = planeBest.a();
+		double b = planeBest.b();
+		double c = planeBest.c();
+		double d = planeBest.d();
+		double norm = sqrt(a * a + b * b + c * c);
+		a /= norm;
+		b /= norm;
+		c /= norm;
+		d /= norm;
+		if (d > 0.)
+		{
+			a = -a;
+			b = -b;
+			c = -c;
+			d = -d;
+		}
+		planeBest = Plane_3(a, b, c, d);
+		return planeBest;
+	}
+};
+
+Polyhedron_3::Polyhedron_3(std::vector<PCLPlane_3> planes)
+{
+	DEBUG_START;
+	Polyhedron_3 intersection;
+	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+			intersection, Kernel());
+	intersection.initialize_indices();
+
+	planesOriginal = planes;
+	std::transform(intersection.facets_begin(), intersection.facets_end(),
+		intersection.planes_begin(), Plane_from_planes());
+	intersection.initialize_indices(planes);
 	DEBUG_END;
 }

@@ -80,6 +80,14 @@ public:
 	Polyhedron_3(Polyhedron p);
 
 	/**
+	 * Constructs CGAL polyhedron as an intersection of halfspaces.
+	 *
+	 * @param planes	The vector of planes that correspond to
+	 * 			halfspaces.
+	 */
+	Polyhedron_3(std::vector<PCLPlane_3> planes);
+
+	/**
 	 * Shifts all vertices of the polyhedron on the given vector
 	 * and recalculates the equation of its plane.
 	 */
