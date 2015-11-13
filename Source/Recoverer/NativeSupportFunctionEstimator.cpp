@@ -268,6 +268,12 @@ std::set<int> findTangientPointPlanesIDs(
 	do
 	{
 		int iFacet = circulator->facet()->id;
+		if (iFacet > (int) polyhedron->size_of_facets())
+		{
+			ERROR_PRINT("%d > %ld", iFacet,
+					polyhedron->size_of_facets());
+			exit(EXIT_FAILURE);
+		}
 		planesIDs.insert(index[iFacet]);
 		++circulator;
 	} while (circulator != circulatorFirst);
@@ -526,6 +532,7 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	auto planes = supportData->supportPlanes();
 
 	Polyhedron_3 intersection(planes);
+	intersection.initialize_indices(planes);
 	auto index = intersection.indexPlanes_;
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
 		<< " of " << planes.size() << " planes." << std::endl;
