@@ -50,6 +50,8 @@ std::ostream &operator<<(std::ostream &stream, std::set<int> cluster)
 	return stream;
 }
 
+static std::vector<int> facetOriginalIndices;
+
 NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
 	polyhedron_(polyhedron),
 	clusters_(),
@@ -68,10 +70,7 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
 			facet != polyhedron_.facets_end(); ++facet)
 	{
 		facets_[iFacet] = facet;
-#if 0
-		std::cerr << "facet id : " << facet->id << " -> " << iFacet
-			<< std::endl;
-#endif
+		facetOriginalIndices.push_back(facet->id);
 		facet->id = iFacet;
 		++iFacet;
 	}
@@ -698,7 +697,7 @@ bool NaiveFacetJoiner::finalizeClusters()
 	return (numExtensionsHappened + indicesFreeFacets.size() > 0);
 }
 
-Polyhedron_3 NaiveFacetJoiner::run()
+std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 {
 	DEBUG_START;
 	std::streambuf *cerrBuffer = std::cerr.rdbuf();
@@ -796,11 +795,27 @@ Polyhedron_3 NaiveFacetJoiner::run()
 	Polyhedron_3 intersection(planes);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"just-facet-joined-polyhedron.ply") << intersection;
+	std::vector<std::vector<int>> clustersOriginal;
+	for (auto facet = intersection.facets_begin();
+			facet != intersection.facets_end(); ++facet)
+	{
+		int iCluster = facet->id;
+		std::vector<int> clusterOriginal;
+		auto cluster = clusters_[iCluster];
+		if (cluster.empty())
+			continue;
+		for (int iFacet: cluster)
+		{
+			int iFacetOriginal = facetOriginalIndices[iFacet];
+			clusterOriginal.push_back(iFacetOriginal);
+		}
+		clustersOriginal.push_back(clusterOriginal);
+	}
 
 	std::string naiveJoinerLog = stringBuffer.str();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naive-facet-joiner.log")
 		<< naiveJoinerLog;
 	std::cerr.rdbuf(cerrBuffer);
 	DEBUG_END;
-	return intersection;
+	return std::make_pair(intersection, clustersOriginal);
 }

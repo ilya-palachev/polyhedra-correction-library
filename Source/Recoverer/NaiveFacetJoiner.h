@@ -192,9 +192,10 @@ public:
 	/**
 	 * Runs the join procedure.
 	 *
-	 * @return		The processed polyhedron.
+	 * @return		The processed polyhedron and the IDs of facets
+	 * 			that were added to clusters.
 	 */
-	Polyhedron_3 run();
+	std::pair<Polyhedron_3, std::vector<std::vector<int>>>run();
 };
 
 #endif /* NAIVEFACETJOINER_H_ */

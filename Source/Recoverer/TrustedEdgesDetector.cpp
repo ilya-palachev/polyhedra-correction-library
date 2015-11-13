@@ -553,7 +553,8 @@ void dumpContours(Polyhedron_3 polyhedron,
 }
 
 std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
-		Polyhedron_3 polyhedron)
+		Polyhedron_3 polyhedron,
+		std::vector<std::vector<int>> clusters)
 {
 	DEBUG_START;
 	initialize();

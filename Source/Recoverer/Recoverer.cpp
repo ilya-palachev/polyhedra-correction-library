@@ -398,6 +398,13 @@ static Polyhedron_3 produceFinalPolyhedron(
 	auto h = supportValuesFromPoints(directions, estimate);
 	/* Now produce polyhedron from the estimate. */
 	Polyhedron_3 polyhedron = producePolyhedron(data, h);
+	int iFacet = 0;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		std::cerr << "Facet #" << iFacet++ << ": " << facet->id
+			<< std::endl;
+	}
 	
 	/* Additional debug prints to check the quality of the result: */
 
@@ -426,11 +433,13 @@ static Polyhedron_3 produceFinalPolyhedron(
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
 
+	std::vector<std::vector<int>> clusters;
 	if (threshold > 0.)
 	{
 		/* Produce joined polyhedron: */
 		NaiveFacetJoiner joiner(polyhedron, threshold);
-		Polyhedron_3 polyhedronJoined = joiner.run();
+		auto pairJoined = joiner.run();
+		Polyhedron_3 polyhedronJoined = pairJoined.first;
 		VectorXd estimateJoined =
 			polyhedronJoined.findTangientPointsConcatenated(
 					directions);
@@ -441,6 +450,7 @@ static Polyhedron_3 produceFinalPolyhedron(
 		printEstimationReport(data->supportMatrix(), h0, hJoined,
 				estimatorType);
 		polyhedron = polyhedronJoined;
+		clusters = pairJoined.second;
 	}
 
 	/* FIXME: here should the same way as for naive facet joiner. */
@@ -458,7 +468,7 @@ static Polyhedron_3 produceFinalPolyhedron(
 		}
 		TrustedEdgesDetector detector(data->supportData(),
 				thresholdEdgeClusterError);
-		detector.run(polyhedron);
+		detector.run(polyhedron, clusters);
 	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
 		<< data->supportData();
