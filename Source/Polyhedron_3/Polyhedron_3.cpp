@@ -441,6 +441,7 @@ void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 	{
 		int iBestPlane = findBestPlaneOriginal(*facet, planes);
 		index[iFacet] = iBestPlane;
+		facet->id = iFacet;
 		usedIndices.insert(iBestPlane);
 		++iFacet;
 	}
@@ -488,10 +489,9 @@ Polyhedron_3::Polyhedron_3(std::vector<PCLPlane_3> planes)
 	DEBUG_START;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			*this, Kernel());
-	initialize_indices();
-
 	planesOriginal = planes;
-	std::transform(facets_begin(), facets_end(), planes_begin(), Plane_from_planes());
-	initialize_indices(planes);
+	std::transform(facets_begin(), facets_end(), planes_begin(),
+			Plane_from_planes());
+	initialize_indices();
 	DEBUG_END;
 }
