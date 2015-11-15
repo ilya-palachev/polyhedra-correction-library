@@ -279,7 +279,7 @@ static SupportFunctionEstimator *constructEstimator(
 	return estimator;
 }
 
-static Polyhedron_3 producePolyhedron(
+static std::vector<Plane_3> produceCorrectedPlanes(
 		SupportFunctionEstimationDataPtr dataEstimation,
 		VectorXd estimate)
 {
@@ -293,8 +293,17 @@ static Polyhedron_3 producePolyhedron(
 		planes.push_back(Plane_3(directions[i].x, directions[i].y,
 					directions[i].z, -estimate(i)));
 	}
+	DEBUG_END;
+	return planes;
+}
 
+static Polyhedron_3 producePolyhedron(
+		SupportFunctionEstimationDataPtr dataEstimation,
+		VectorXd estimate)
+{
+	DEBUG_START;
 	/* Intersect halfspaces corresponding to corrected planes. */
+	auto planes = produceCorrectedPlanes(dataEstimation, estimate);
 	Polyhedron_3 intersection(planes);
 	DEBUG_END;
 	return intersection;
@@ -360,6 +369,49 @@ Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 	return polyhedron;
 }
 
+std::vector<std::vector<int>> reindexClusters(
+		SupportFunctionEstimationDataPtr data,
+		VectorXd estimate,
+		Polyhedron_3 polyhedronConsistent,
+		std::vector<std::vector<int>> clusters)
+{
+	DEBUG_START;
+	/* Reset polyhedron facets' IDs according to initial items order. */
+	auto planes = produceCorrectedPlanes(data, estimate);
+	polyhedronConsistent.initialize_indices(planes);
+
+	/* Build map from polyhedron facets' IDs to support items' IDs. */
+	std::vector<int> map(polyhedronConsistent.size_of_facets());
+	for (auto facet = polyhedronConsistent.facets_begin();
+			facet != polyhedronConsistent.facets_end();
+			++facet)
+	{
+		int id = polyhedronConsistent.indexPlanes_[facet->id];
+		map[facet->id] = id;
+	}
+
+	/* Map clusters' IDs to support items IDs. */
+	std::vector<std::vector<int>> clustersNew;
+	for (auto cluster: clusters)
+	{
+		std::vector<int> clusterNew;
+		for (int iFacet: cluster)
+		{
+			int id = map[iFacet];
+			clusterNew.push_back(id);
+		}
+		std::cerr << "new cluster:";
+		for (int iFacet: clusterNew)
+		{
+			std::cerr << " " << iFacet;
+		}
+		std::cerr << std::endl;
+		clustersNew.push_back(clusterNew);
+	}
+	DEBUG_END;
+	return clustersNew;
+}
+
 static Polyhedron_3 produceFinalPolyhedron(
 	SupportFunctionEstimationDataPtr data,
 	VectorXd estimate,
@@ -398,15 +450,6 @@ static Polyhedron_3 produceFinalPolyhedron(
 	auto h = supportValuesFromPoints(directions, estimate);
 	/* Now produce polyhedron from the estimate. */
 	Polyhedron_3 polyhedron = producePolyhedron(data, h);
-	int iFacet = 0;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		std::cerr << "Facet #" << iFacet++ << ": " << facet->id
-			<< std::endl;
-	}
-	
-	/* Additional debug prints to check the quality of the result: */
 
 	/* Also produce naive polyhedron (to compare recovered one with it). */
 	auto h0 = data->supportVector();
@@ -432,6 +475,8 @@ static Polyhedron_3 produceFinalPolyhedron(
 
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
+
+	Polyhedron_3 polyhedronConsistent = polyhedron;
 
 	std::vector<std::vector<int>> clusters;
 	if (threshold > 0.)
@@ -468,7 +513,9 @@ static Polyhedron_3 produceFinalPolyhedron(
 		}
 		TrustedEdgesDetector detector(data->supportData(),
 				thresholdEdgeClusterError);
-		detector.run(polyhedron, clusters);
+		auto clustersMapped = reindexClusters(data, estimate,
+				polyhedronConsistent, clusters);
+		detector.run(polyhedron, clustersMapped);
 	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
 		<< data->supportData();

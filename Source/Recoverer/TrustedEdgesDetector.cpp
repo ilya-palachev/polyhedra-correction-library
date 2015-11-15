@@ -591,6 +591,23 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	if (getenv("DUMP_CONTOURS"))
 		analyzeContours(polyhedron, data_);
 
+	if (getenv("DUMP_CLUSTERS"))
+	{
+		int numClusters = clusters.size();
+		for (int iCluster = 0; iCluster < numClusters; ++iCluster)
+		{
+			std::cerr << "Cluster #" << iCluster << ":"
+				<< std::endl;
+			for (int iFacet: clusters[iCluster])
+			{
+				std::cerr << " " << iFacet << " -> ";
+				std::cerr << planes_[iFacet] << std::endl;
+
+			}
+			std::cerr << std::endl;
+		}
+	}
+
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
 	return nothing;
