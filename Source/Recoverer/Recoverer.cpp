@@ -398,15 +398,6 @@ static Polyhedron_3 produceFinalPolyhedron(
 	auto h = supportValuesFromPoints(directions, estimate);
 	/* Now produce polyhedron from the estimate. */
 	Polyhedron_3 polyhedron = producePolyhedron(data, h);
-	int iFacet = 0;
-	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
-	{
-		std::cerr << "Facet #" << iFacet++ << ": " << facet->id
-			<< std::endl;
-	}
-	
-	/* Additional debug prints to check the quality of the result: */
 
 	/* Also produce naive polyhedron (to compare recovered one with it). */
 	auto h0 = data->supportVector();
