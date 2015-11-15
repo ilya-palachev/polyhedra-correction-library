@@ -552,16 +552,13 @@ void dumpContours(Polyhedron_3 polyhedron,
 	DEBUG_END;
 }
 
-std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
-		Polyhedron_3 polyhedron,
-		std::vector<std::vector<int>> clusters)
+void analyzeContours(Polyhedron_3 polyhedron, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
-	initialize();
 	int iContourMax = 0;
-	for (int i = 0; i < (int) data_->size(); ++i)
+	for (int i = 0; i < (int) data->size(); ++i)
 	{
-		auto item = (*data_)[i];
+		auto item = (*data)[i];
 		int iContour = item.info->iContour;
 		if (iContour > iContourMax)
 		{
@@ -571,18 +568,28 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	std::vector<std::vector<int>> indexContours(iContourMax + 1);
 	std::vector<Vector_3> directionContours(iContourMax + 1);
 	std::vector<std::vector<Point_3>> pointContours(iContourMax + 1);
-	for (int i = 0; i < (int) data_->size(); ++i)
+	for (int i = 0; i < (int) data->size(); ++i)
 	{
-		auto item = (*data_)[i];
+		auto item = (*data)[i];
 		int iContour = item.info->iContour;
 		indexContours[iContour].push_back(i);
 		directionContours[iContour] = item.info->normalShadow;
 		pointContours[iContour].push_back(item.info->segment.source());
 		pointContours[iContour].push_back(item.info->segment.target());
 	}
+	dumpContours(polyhedron, indexContours, directionContours,
+			pointContours);
+	DEBUG_END;
+}
+
+std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
+		Polyhedron_3 polyhedron,
+		std::vector<std::vector<int>> clusters)
+{
+	DEBUG_START;
+	initialize();
 	if (getenv("DUMP_CONTOURS"))
-		dumpContours(polyhedron, indexContours, directionContours,
-				pointContours);
+		analyzeContours(polyhedron, data_);
 
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
