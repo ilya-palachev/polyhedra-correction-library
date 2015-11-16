@@ -376,10 +376,6 @@ std::vector<std::vector<int>> reindexClusters(
 		std::vector<std::vector<int>> clusters)
 {
 	DEBUG_START;
-	/* Reset polyhedron facets' IDs according to initial items order. */
-	auto planes = produceCorrectedPlanes(data, estimate);
-	polyhedronConsistent.initialize_indices(planes);
-
 	/* Build map from polyhedron facets' IDs to support items' IDs. */
 	std::vector<int> map(polyhedronConsistent.size_of_facets());
 	for (auto facet = polyhedronConsistent.facets_begin();
@@ -476,6 +472,10 @@ static Polyhedron_3 produceFinalPolyhedron(
 	std::cout << "Final polyhedron construction: " << timer.popTimer()
 		<< std::endl;
 
+	/* Reset polyhedron facets' IDs according to initial items order. */
+	auto planes = produceCorrectedPlanes(data, h);
+	polyhedron.initialize_indices(planes);
+
 	Polyhedron_3 polyhedronConsistent = polyhedron;
 
 	std::vector<std::vector<int>> clusters;
@@ -513,9 +513,9 @@ static Polyhedron_3 produceFinalPolyhedron(
 		}
 		TrustedEdgesDetector detector(data->supportData(),
 				thresholdEdgeClusterError);
-		auto clustersMapped = reindexClusters(data, estimate,
-				polyhedronConsistent, clusters);
-		detector.run(polyhedron, clustersMapped);
+		//auto clustersMapped = reindexClusters(data, estimate,
+	//			polyhedronConsistent, clusters);
+		detector.run(polyhedron, clusters);
 	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
 		<< data->supportData();

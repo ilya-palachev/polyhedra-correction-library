@@ -382,6 +382,49 @@ VectorXd Polyhedron_3::findTangientPointsConcatenated(
 	return solution;
 }
 
+PCLPlane_3 normalize(PCLPlane_3 plane)
+{
+	double a = plane.a();
+	double b = plane.b();
+	double c = plane.c();
+	double d = plane.d();
+	double norm = sqrt(a * a + b * b + c * c);
+	a /= norm;
+	b /= norm;
+	c /= norm;
+	d /= norm;
+	return PCLPlane_3(a, b, c, d);
+}
+
+double distance(PCLPoint_3 point, PCLPlane_3 planeGiven)
+{
+	DEBUG_START;
+	PCLPlane_3 plane = normalize(planeGiven);
+	double value = plane.a() * point.x() + plane.b() * point.y()
+		+ plane.c() * point.z() + plane.d();
+	DEBUG_END;
+	return sqrt(value * value);
+}
+
+double distanceSum(Polyhedron_3::Facet& facet, PCLPlane_3 plane)
+{
+	DEBUG_START;
+	auto halfedgeBegin = facet.facet_begin();
+	auto halfedge = halfedgeBegin;
+	double errorSum = 0.;
+	do
+	{
+		auto point = halfedge->vertex()->point();
+		double error = distance(point, plane);
+		errorSum += error;
+		++halfedge;
+	}
+	while (halfedge != halfedgeBegin);
+
+	DEBUG_END;
+	return errorSum;
+}
+
 int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
 		std::vector<PCLPlane_3> planes)
 {
@@ -391,35 +434,11 @@ int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
 	for (int i = 0; i < (int) planes.size(); ++i)
 	{
 		PCLPlane_3 plane = planes[i];
-		auto halfedgeBegin = facet.facet_begin();
-		auto halfedge = halfedgeBegin;
-		double errorSumSquares = 0.;
-		bool ifAllOnPlane = true;
-		do
-		{
-			auto point = halfedge->vertex()->point();
-			ifAllOnPlane &= plane.has_on(point);
-			double error = point.x() * plane.a()
-				+ point.y() * plane.b()
-				+ point.z() * plane.c() + plane.d();
-			error = error * error;
-			errorSumSquares += error;
-			++halfedge;
-		}
-		while (halfedge != halfedgeBegin);
-
-		if (ifAllOnPlane)
-		{
-			std::cerr << "Found exact plane: " << plane
-				<< std::endl;
-			iPlaneBest = i;
-			break;
-		}
-
-		if (errorSumSquares < minimum)
+		double errorSum = distanceSum(facet, plane);
+		if (errorSum < minimum)
 		{
 			iPlaneBest = i;
-			minimum = errorSumSquares;
+			minimum = errorSum;
 		}
 	}
 	if (iPlaneBest < 0)
@@ -427,38 +446,20 @@ int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
 		ERROR_PRINT("Failed to find best plane");
 		exit(EXIT_FAILURE);
 	}
+	std::cerr << "Error is " << minimum << std::endl;
 	DEBUG_END;
 	return iPlaneBest;
 }
 
-void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
-{
-	DEBUG_START;
-	int iFacet = 0;
- 	std::vector<int> index(size_of_facets());
-	std::set<int> usedIndices;
-	for (auto facet = facets_begin(); facet != facets_end(); ++facet)
-	{
-		int iBestPlane = findBestPlaneOriginal(*facet, planes);
-		index[iFacet] = iBestPlane;
-		facet->id = iFacet;
-		usedIndices.insert(iBestPlane);
-		++iFacet;
-	}
-	if (usedIndices.size() < index.size())
-	{
-		std::cerr << "Equal indices: " << usedIndices.size() << " < "
-			<< index.size() << std::endl;
-	}
-	indexPlanes_ = index;
-	DEBUG_END;
-}
-
-
-static std::vector<Plane_3> planesOriginal;
-
 struct Plane_from_planes
 {
+	std::vector<Plane_3> planesOriginal;
+
+	Plane_from_planes(std::vector<Plane_3> planes):
+		planesOriginal(planes)
+	{
+	}
+
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
 	{
 		int iPlane = findBestPlaneOriginal(facet, planesOriginal);
@@ -484,14 +485,86 @@ struct Plane_from_planes
 	}
 };
 
+double distance(PCLPlane_3 alphaGiven, PCLPlane_3 betaGiven)
+{
+	DEBUG_START;
+	PCLPlane_3 alpha = normalize(alphaGiven);
+	PCLPlane_3 beta = normalize(betaGiven);
+	double a = alpha.a() - beta.a();
+	double b = alpha.b() - beta.b();
+	double c = alpha.c() - beta.c();
+	double d = alpha.d() - beta.d();
+	double error = sqrt(a * a + b * b + c * c + d * d);
+	DEBUG_END;
+	return error;
+}
+
+PCLPlane_3 nearestPlane(PCLPlane_3 alpha, std::vector<PCLPlane_3> planes)
+{
+	DEBUG_START;
+	double minimum = 1e100;
+	PCLPlane_3 planeBest;
+	for (PCLPlane_3 plane: planes)
+	{
+		double error = distance(alpha, plane);
+		if (error < minimum)
+		{
+			minimum = error;
+			planeBest = plane;
+		}
+	}
+	DEBUG_END;
+	return planeBest;
+}
+
+void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
+{
+	DEBUG_START;
+	//std::transform(facets_begin(), facets_end(), planes_begin(),
+	//		Plane_from_planes(planes));
+	int iFacet = 0;
+ 	std::vector<int> index(size_of_facets());
+	std::set<int> usedIndices;
+	for (auto facet = facets_begin(); facet != facets_end(); ++facet)
+	{
+		std::cerr << "------------------------------" << std::endl;
+		std::cerr << "Analyzing facet #" << iFacet << std::endl;
+		double error = distanceSum(*facet, facet->plane());
+		std::cerr << "Before analysis error of facet was " << error
+			<< std::endl;
+
+		int iBestPlane = findBestPlaneOriginal(*facet, planes);
+		std::cerr << "Best plane search: " << facet->plane() << " -> "
+			<< std::endl << "                   "
+			<< planes[iBestPlane] << std::endl;
+		PCLPlane_3 planeNearest = nearestPlane(facet->plane(), planes);
+		std::cerr << "Nearest plane: " << planeNearest << std::endl;
+		index[iFacet] = iBestPlane;
+		facet->id = iFacet;
+		usedIndices.insert(iBestPlane);
+		++iFacet;
+	}
+	if (usedIndices.size() < index.size())
+	{
+		std::cerr << "Equal indices: " << usedIndices.size() << " < "
+			<< index.size() << std::endl;
+	}
+	indexPlanes_ = index;
+
+	std::cerr << "indexPlanes_:";
+	for (int i: indexPlanes_)
+		std::cerr << " " << i;
+	std::cerr << std::endl;
+	DEBUG_END;
+}
+
 Polyhedron_3::Polyhedron_3(std::vector<PCLPlane_3> planes)
 {
 	DEBUG_START;
 	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
 			*this, Kernel());
-	planesOriginal = planes;
 	std::transform(facets_begin(), facets_end(), planes_begin(),
-			Plane_from_planes());
+			Plane_from_planes(planes));
 	initialize_indices();
 	DEBUG_END;
 }

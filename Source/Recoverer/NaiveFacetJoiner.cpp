@@ -62,15 +62,21 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
 	thresholdClusterError_(threshold)
 {
 	DEBUG_START;
-	int iFacet = 0;
 	for (int i = 0; i < (int) index_.size(); ++i)
 		index_[i] = INDEX_NOT_PROCESSED;
 
+	std::cerr << "indexPlanes_:";
+	for (int i: polyhedron_.indexPlanes_)
+		std::cerr << " " << i;
+	std::cerr << std::endl;
+
+	int iFacet = 0;
 	for (auto facet = polyhedron_.facets_begin();
 			facet != polyhedron_.facets_end(); ++facet)
 	{
 		facets_[iFacet] = facet;
-		facetOriginalIndices.push_back(facet->id);
+		int iFacetOriginal = polyhedron_.indexPlanes_[iFacet];
+		facetOriginalIndices.push_back(iFacetOriginal);
 		facet->id = iFacet;
 		++iFacet;
 	}
@@ -704,7 +710,6 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 	std::stringstream stringBuffer;
 	std::cerr.rdbuf(stringBuffer.rdbuf());
 
-
 	thresholdClusterError_ *= 0.5;
 	/* 1. Find big facets: */
 	auto indicesBigFacets = findBigFacets(polyhedron_, thresholdBigFacet_);
@@ -793,6 +798,41 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 		planes.push_back(plane);
 	}
 	Polyhedron_3 intersection(planes);
+
+	std::string naiveJoinerLog = stringBuffer.str();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naive-facet-joiner.log")
+		<< naiveJoinerLog;
+	std::cerr.rdbuf(cerrBuffer);
+	
+	if (getenv("DUMP_CLUSTERS"))
+	{
+		std::cerr << "Start printing in " << __FILE__ << std::endl;
+		int iCluster = 0;
+		for (auto cluster: clusters_)
+		{
+			if (cluster.empty())
+				continue;
+			std::cerr << "Cluster #" << iCluster << ":"
+				<< std::endl;
+			for (int iFacet: cluster)
+			{
+				std::cerr << " " << iFacet << " ("
+					<< polyhedron_.indexPlanes_[iFacet]
+					<< ") -> ";
+				Plane_3 plane = facets_[iFacet]->plane();
+				std::cerr << plane << std::endl;
+
+			}
+			std::cerr << std::endl;
+			++iCluster;
+		}
+	}
+
+	std::cerr << "facetOriginalIndices:";
+	for (int i: facetOriginalIndices)
+		std::cerr << " " << i;
+	std::cerr << std::endl;
+
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"just-facet-joined-polyhedron.ply") << intersection;
 	std::vector<std::vector<int>> clustersOriginal;
@@ -812,10 +852,17 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 		clustersOriginal.push_back(clusterOriginal);
 	}
 
-	std::string naiveJoinerLog = stringBuffer.str();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naive-facet-joiner.log")
-		<< naiveJoinerLog;
-	std::cerr.rdbuf(cerrBuffer);
+	for (auto cluster: clustersOriginal)
+	{
+		std::cerr << "Prepared cluster:";
+		for (int i: cluster)
+		{
+			std::cerr << " " << i;
+		}
+		std::cerr << std::endl;
+	}
+
+
 	DEBUG_END;
 	return std::make_pair(intersection, clustersOriginal);
 }
