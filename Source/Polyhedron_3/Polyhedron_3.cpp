@@ -446,7 +446,6 @@ int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
 		ERROR_PRINT("Failed to find best plane");
 		exit(EXIT_FAILURE);
 	}
-	std::cerr << "Error is " << minimum << std::endl;
 	DEBUG_END;
 	return iPlaneBest;
 }
@@ -520,25 +519,12 @@ PCLPlane_3 nearestPlane(PCLPlane_3 alpha, std::vector<PCLPlane_3> planes)
 void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 {
 	DEBUG_START;
-	//std::transform(facets_begin(), facets_end(), planes_begin(),
-	//		Plane_from_planes(planes));
 	int iFacet = 0;
  	std::vector<int> index(size_of_facets());
 	std::set<int> usedIndices;
 	for (auto facet = facets_begin(); facet != facets_end(); ++facet)
 	{
-		std::cerr << "------------------------------" << std::endl;
-		std::cerr << "Analyzing facet #" << iFacet << std::endl;
-		double error = distanceSum(*facet, facet->plane());
-		std::cerr << "Before analysis error of facet was " << error
-			<< std::endl;
-
 		int iBestPlane = findBestPlaneOriginal(*facet, planes);
-		std::cerr << "Best plane search: " << facet->plane() << " -> "
-			<< std::endl << "                   "
-			<< planes[iBestPlane] << std::endl;
-		PCLPlane_3 planeNearest = nearestPlane(facet->plane(), planes);
-		std::cerr << "Nearest plane: " << planeNearest << std::endl;
 		index[iFacet] = iBestPlane;
 		facet->id = iFacet;
 		usedIndices.insert(iBestPlane);
@@ -550,11 +536,6 @@ void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 			<< index.size() << std::endl;
 	}
 	indexPlanes_ = index;
-
-	std::cerr << "indexPlanes_:";
-	for (int i: indexPlanes_)
-		std::cerr << " " << i;
-	std::cerr << std::endl;
 	DEBUG_END;
 }
 

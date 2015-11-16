@@ -513,8 +513,6 @@ static Polyhedron_3 produceFinalPolyhedron(
 		}
 		TrustedEdgesDetector detector(data->supportData(),
 				thresholdEdgeClusterError);
-		//auto clustersMapped = reindexClusters(data, estimate,
-	//			polyhedronConsistent, clusters);
 		detector.run(polyhedron, clusters);
 	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")

@@ -65,11 +65,6 @@ NaiveFacetJoiner::NaiveFacetJoiner(Polyhedron_3 polyhedron, double threshold) :
 	for (int i = 0; i < (int) index_.size(); ++i)
 		index_[i] = INDEX_NOT_PROCESSED;
 
-	std::cerr << "indexPlanes_:";
-	for (int i: polyhedron_.indexPlanes_)
-		std::cerr << " " << i;
-	std::cerr << std::endl;
-
 	int iFacet = 0;
 	for (auto facet = polyhedron_.facets_begin();
 			facet != polyhedron_.facets_end(); ++facet)
@@ -828,11 +823,6 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 		}
 	}
 
-	std::cerr << "facetOriginalIndices:";
-	for (int i: facetOriginalIndices)
-		std::cerr << " " << i;
-	std::cerr << std::endl;
-
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"just-facet-joined-polyhedron.ply") << intersection;
 	std::vector<std::vector<int>> clustersOriginal;
@@ -851,18 +841,6 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 		}
 		clustersOriginal.push_back(clusterOriginal);
 	}
-
-	for (auto cluster: clustersOriginal)
-	{
-		std::cerr << "Prepared cluster:";
-		for (int i: cluster)
-		{
-			std::cerr << " " << i;
-		}
-		std::cerr << std::endl;
-	}
-
-
 	DEBUG_END;
 	return std::make_pair(intersection, clustersOriginal);
 }
