@@ -793,13 +793,57 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 		planes.push_back(plane);
 	}
 	Polyhedron_3 intersection(planes);
+	intersection.initialize_indices(planes);
 
 	std::string naiveJoinerLog = stringBuffer.str();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naive-facet-joiner.log")
 		<< naiveJoinerLog;
 	std::cerr.rdbuf(cerrBuffer);
 	
-	if (getenv("DUMP_CLUSTERS"))
+	std::vector<std::vector<int>> clusters;
+	for (auto cluster_: clusters_)
+	{
+		if (cluster_.empty())
+			continue;
+		std::vector<int> cluster;
+		for (int iFacet: cluster_)
+			cluster.push_back(iFacet);
+		clusters.push_back(cluster);
+
+	}
+	if (getenv("DUMP_CLUSTERS_RAW"))
+	{
+		for (auto facet = intersection.facets_begin();
+				facet != intersection.facets_end(); ++facet)
+		{
+			std::cerr << "Check:" << std::endl;
+			std::cerr << "   " << facet->id << " " << facet->plane()
+				<< std::endl;
+			int iFacet = intersection.indexPlanes_[facet->id];
+			std::cerr << "   " << iFacet << " " << planes[iFacet]
+				<< std::endl;
+			auto cluster = clusters[iFacet];
+			for (int i: cluster)
+			{
+				std::cerr << " " << i << " ("
+					<< polyhedron_.indexPlanes_[i]
+					<< ") -> ";
+				Plane_3 plane = facets_[i]->plane();
+				std::cerr << plane << std::endl;
+			}
+		}
+	}
+
+	for (auto &cluster: clusters)
+	{
+		int length = cluster.size();
+		for (int i = 0; i < length; ++i)
+		{
+			cluster[i] = facetOriginalIndices[cluster[i]];
+		}
+	}
+
+	if (getenv("DUMP_CLUSTERS_RAW"))
 	{
 		std::cerr << "Start printing in " << __FILE__ << std::endl;
 		int iCluster = 0;
@@ -825,22 +869,6 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"just-facet-joined-polyhedron.ply") << intersection;
-	std::vector<std::vector<int>> clustersOriginal;
-	for (auto facet = intersection.facets_begin();
-			facet != intersection.facets_end(); ++facet)
-	{
-		int iCluster = facet->id;
-		std::vector<int> clusterOriginal;
-		auto cluster = clusters_[iCluster];
-		if (cluster.empty())
-			continue;
-		for (int iFacet: cluster)
-		{
-			int iFacetOriginal = facetOriginalIndices[iFacet];
-			clusterOriginal.push_back(iFacetOriginal);
-		}
-		clustersOriginal.push_back(clusterOriginal);
-	}
 	DEBUG_END;
-	return std::make_pair(intersection, clustersOriginal);
+	return std::make_pair(intersection, clusters);
 }
