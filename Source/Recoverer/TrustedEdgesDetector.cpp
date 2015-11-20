@@ -582,6 +582,63 @@ void analyzeContours(Polyhedron_3 polyhedron, SupportFunctionDataPtr data)
 	DEBUG_END;
 }
 
+void dumpClustersRaw(std::vector<std::vector<int>> clusters,
+		std::vector<Plane_3> planes)
+{
+	DEBUG_START;
+	int numClusters = clusters.size();
+	for (int iCluster = 0; iCluster < numClusters; ++iCluster)
+	{
+		std::cerr << "Cluster #" << iCluster << ":"
+			<< std::endl;
+		for (int iFacet: clusters[iCluster])
+		{
+			std::cerr << " " << iFacet << " -> ";
+			std::cerr << planes[iFacet] << std::endl;
+
+		}
+		std::cerr << std::endl;
+	}
+	DEBUG_END;
+}
+
+void dumpClusters(Polyhedron_3 polyhedron,
+		std::vector<std::vector<int>> clusters,
+		std::vector<Plane_3> planes)
+{
+	DEBUG_START;
+	int iFacetCluster = 0;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		std::cerr << "facet-cluster " << iFacetCluster
+			<< std::endl;
+		std::cerr << "facet->id = " << facet->id << std::endl;
+		std::cerr << "polyhedron.indexPlanes_[" << facet->id
+			<< "] = " << polyhedron.indexPlanes_[facet->id]
+			<< std::endl;
+		int iCluster = polyhedron.indexPlanes_[facet->id];
+		if (iCluster > (int) clusters.size())
+		{
+			ERROR_PRINT("%d > %ld", iCluster,
+					clusters.size());
+		}
+		std::cerr << "Cluster #" << iCluster << ":"
+			<< std::endl;
+		for (int iFacet: clusters[iCluster])
+		{
+			std::cerr << " " << iFacet << " -> ";
+			std::cerr << planes[iFacet] << std::endl;
+
+		}
+		std::cerr << "   cluster plane: " << facet->plane()
+			<< std::endl;
+		std::cerr << std::endl;
+		++iFacetCluster;
+	}
+	DEBUG_END;
+}
+
 std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		Polyhedron_3 polyhedron,
 		std::vector<std::vector<int>> clusters)
@@ -590,55 +647,10 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	initialize();
 	if (getenv("DUMP_CONTOURS"))
 		analyzeContours(polyhedron, data_);
-
 	if (getenv("DUMP_CLUSTERS_RAW"))
-	{
-		int numClusters = clusters.size();
-		for (int iCluster = 0; iCluster < numClusters; ++iCluster)
-		{
-			std::cerr << "Cluster #" << iCluster << ":"
-				<< std::endl;
-			for (int iFacet: clusters[iCluster])
-			{
-				std::cerr << " " << iFacet << " -> ";
-				std::cerr << planes_[iFacet] << std::endl;
-
-			}
-			std::cerr << std::endl;
-		}
-	}
+		dumpClustersRaw(clusters, planes_);
 	if (getenv("DUMP_CLUSTERS"))
-	{
-		int iFacetCluster = 0;
-		for (auto facet = polyhedron.facets_begin();
-				facet != polyhedron.facets_end(); ++facet)
-		{
-			std::cerr << "facet-cluster " << iFacetCluster
-				<< std::endl;
-			std::cerr << "facet->id = " << facet->id << std::endl;
-			std::cerr << "polyhedron.indexPlanes_[" << facet->id
-				<< "] = " << polyhedron.indexPlanes_[facet->id]
-				<< std::endl;
-			int iCluster = polyhedron.indexPlanes_[facet->id];
-			if (iCluster > (int) clusters.size())
-			{
-				ERROR_PRINT("%d > %ld", iCluster,
-						clusters.size());
-			}
-			std::cerr << "Cluster #" << iCluster << ":"
-				<< std::endl;
-			for (int iFacet: clusters[iCluster])
-			{
-				std::cerr << " " << iFacet << " -> ";
-				std::cerr << planes_[iFacet] << std::endl;
-
-			}
-			std::cerr << "   cluster plane: " << facet->plane()
-				<< std::endl;
-			std::cerr << std::endl;
-			++iFacetCluster;
-		}
-	}
+		dumpClusters(polyhedron, clusters, planes_);
 
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
