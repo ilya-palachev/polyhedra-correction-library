@@ -425,61 +425,49 @@ double distanceSum(Polyhedron_3::Facet& facet, PCLPlane_3 plane)
 	return errorSum;
 }
 
-int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
-		std::vector<PCLPlane_3> planes)
+template <class PlaneIterator>
+std::pair<int, PCLPlane_3> findBestPlaneOriginal(
+		Polyhedron_3::Facet& facet,
+		PlaneIterator planesBegin,
+		PlaneIterator planesEnd)
 {
 	DEBUG_START;
 	double minimum = 1e100;
-	int iPlaneBest = -1;
-	for (int i = 0; i < (int) planes.size(); ++i)
+	PCLPlane_3 planeBest;
+	int iPlaneBest = 0;
+	int iPlane = 0;
+	for (auto plane = planesBegin; plane != planesEnd; ++plane)
 	{
-		PCLPlane_3 plane = planes[i];
-		double errorSum = distanceSum(facet, plane);
+		double errorSum = distanceSum(facet, *plane);
 		if (errorSum < minimum)
 		{
-			iPlaneBest = i;
+			planeBest = *plane;
+			iPlaneBest = iPlane;
 			minimum = errorSum;
 		}
-	}
-	if (iPlaneBest < 0)
-	{
-		ERROR_PRINT("Failed to find best plane");
-		exit(EXIT_FAILURE);
+		++iPlane;
 	}
 	DEBUG_END;
-	return iPlaneBest;
+	return std::make_pair(iPlaneBest, planeBest);
 }
 
+template <class PlaneIterator>
 struct Plane_from_planes
 {
-	std::vector<Plane_3> planesOriginal;
+	PlaneIterator planesBegin_;
+	PlaneIterator planesEnd_;
 
-	Plane_from_planes(std::vector<Plane_3> planes):
-		planesOriginal(planes)
+	Plane_from_planes(PlaneIterator planesBegin,
+			PlaneIterator planesEnd):
+		planesBegin_(planesBegin),
+		planesEnd_(planesEnd)
 	{
 	}
 
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
 	{
-		int iPlane = findBestPlaneOriginal(facet, planesOriginal);
-		Plane_3 planeBest = planesOriginal[iPlane];
-		double a = planeBest.a();
-		double b = planeBest.b();
-		double c = planeBest.c();
-		double d = planeBest.d();
-		double norm = sqrt(a * a + b * b + c * c);
-		a /= norm;
-		b /= norm;
-		c /= norm;
-		d /= norm;
-		if (d > 0.)
-		{
-			a = -a;
-			b = -b;
-			c = -c;
-			d = -d;
-		}
-		planeBest = Plane_3(a, b, c, d);
+		Plane_3 planeBest = findBestPlaneOriginal(facet, planesBegin_,
+				planesEnd_).second;
 		return planeBest;
 	}
 };
@@ -516,7 +504,10 @@ PCLPlane_3 nearestPlane(PCLPlane_3 alpha, std::vector<PCLPlane_3> planes)
 	return planeBest;
 }
 
-void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
+template <class PlaneIterator>
+void Polyhedron_3::initialize_indices(
+		PlaneIterator planesBegin,
+		PlaneIterator planesEnd)
 {
 	DEBUG_START;
 	int iFacet = 0;
@@ -524,7 +515,8 @@ void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 	std::set<int> usedIndices;
 	for (auto facet = facets_begin(); facet != facets_end(); ++facet)
 	{
-		int iBestPlane = findBestPlaneOriginal(*facet, planes);
+		int iBestPlane = findBestPlaneOriginal(*facet,
+				planesBegin, planesEnd).first;
 		index[iFacet] = iBestPlane;
 		facet->id = iFacet;
 		usedIndices.insert(iBestPlane);
@@ -539,13 +531,41 @@ void Polyhedron_3::initialize_indices(std::vector<PCLPlane_3> planes)
 	DEBUG_END;
 }
 
-Polyhedron_3::Polyhedron_3(std::vector<PCLPlane_3> planes)
+template <class PlaneIterator>
+Polyhedron_3::Polyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd)
 {
 	DEBUG_START;
-	CGAL::internal::halfspaces_intersection(planes.begin(), planes.end(),
+	CGAL::internal::halfspaces_intersection(planesBegin, planesEnd,
 			*this, Kernel());
 	std::transform(facets_begin(), facets_end(), planes_begin(),
-			Plane_from_planes(planes));
+			Plane_from_planes<PlaneIterator>(planesBegin,
+				planesEnd));
 	initialize_indices();
 	DEBUG_END;
 }
+
+typedef std::vector<PCLPlane_3>::iterator PlaneVectorIterator;
+template Polyhedron_3::Polyhedron_3<PlaneVectorIterator>(
+		PlaneVectorIterator,
+		PlaneVectorIterator);
+template std::pair<int, PCLPlane_3>
+findBestPlaneOriginal<PlaneVectorIterator>(
+		Polyhedron_3::Facet& facet,
+		PlaneVectorIterator planesBegin,
+		PlaneVectorIterator planesEnd);
+template void Polyhedron_3::initialize_indices<PlaneVectorIterator>(
+		PlaneVectorIterator planesBegin,
+		PlaneVectorIterator planesEnd);
+
+typedef std::list<PCLPlane_3>::iterator PlaneListIterator;
+template Polyhedron_3::Polyhedron_3<PlaneListIterator>(
+		PlaneListIterator,
+		PlaneListIterator);
+template std::pair<int, PCLPlane_3>
+findBestPlaneOriginal<PlaneListIterator>(
+		Polyhedron_3::Facet& facet,
+		PlaneListIterator planesBegin,
+		PlaneListIterator planesEnd);
+template void Polyhedron_3::initialize_indices<PlaneListIterator>(
+		PlaneListIterator planesBegin,
+		PlaneListIterator planesEnd);

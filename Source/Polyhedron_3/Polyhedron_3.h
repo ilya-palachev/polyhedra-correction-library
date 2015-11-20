@@ -82,10 +82,23 @@ public:
 	/**
 	 * Constructs CGAL polyhedron as an intersection of halfspaces.
 	 *
+	 * @param planesBegin	The iterator pointing to the beginning of
+	 * 			planes container.
+	 * @param planesEnd	The iterator pointing to the end of
+	 * 			planes container.
+	 */
+	template <class PlaneIterator>
+	Polyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd);
+
+	/**
+	 * Constructs CGAL polyhedron as an intersection of halfspaces.
+	 *
 	 * @param planes	The vector of planes that correspond to
 	 * 			halfspaces.
 	 */
-	Polyhedron_3(std::vector<PCLPlane_3> planes);
+	Polyhedron_3(std::vector<PCLPlane_3> planes) :
+		Polyhedron_3(planes.begin(), planes.end())
+	{}
 
 	/**
 	 * Shifts all vertices of the polyhedron on the given vector
@@ -180,9 +193,29 @@ public:
 
 	/**
 	 * Initializes the indices of the polyhedron by the indices of given
-	 * vector of planes.
+	 * planes.
+	 *
+	 * @param planesBegin	The iterator pointing to the beginning of
+	 * 			planes container.
+	 * @param planesEnd	The iterator pointing to the end of
+	 * 			planes container.
 	 */
-	void initialize_indices(std::vector<PCLPlane_3> planes);
+	template <class PlaneIterator>
+	void initialize_indices(
+			PlaneIterator planesBegin,
+			PlaneIterator planesEnd);
+
+	/**
+	 * Initializes the indices of the polyhedron by the indices of given
+	 * vector of planes.
+	 *
+	 * @param planes	The vector of planes from which indices should
+	 * 			be initialized from.
+	 */
+	void initialize_indices(std::vector<PCLPlane_3> planes)
+	{
+		initialize_indices(planes.begin(), planes.end());
+	}
 };
 
 /**
