@@ -639,6 +639,78 @@ void dumpClusters(Polyhedron_3 polyhedron,
 	DEBUG_END;
 }
 
+template <class PlaneIterator>
+double calculateFunctional(
+		PlaneIterator planesBegin,
+		PlaneIterator planesEnd,
+		std::vector<Point_3> directions,
+		VectorXd values)
+{
+	DEBUG_START;
+	Polyhedron_3 intersection(planesBegin, planesEnd);
+	auto data = intersection.calculateSupportData(directions);
+	VectorXd valuesNew = data->supportValues();
+	double functional = 0.;
+	int numItems = directions.size();
+	for (int i = 0; i < numItems; ++i)
+	{
+		double error = valuesNew(i) - values(i);
+		functional += error * error;
+	}
+	DEBUG_END;
+	return functional;
+}
+
+void analyzeClustersQuality(Polyhedron_3 polyhedron,
+		std::vector<std::vector<int>> clusters,
+		std::vector<Plane_3> planes,
+		std::vector<Point_3> directions,
+		VectorXd values)
+{
+	DEBUG_START;
+	std::list<Plane_3> planesBig;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+		planesBig.push_back(facet->plane());
+
+	int iIntersection = 0;
+	double functionalInitial = calculateFunctional(planes.begin(),
+			planes.end(), directions, values);
+	double functionalJoined = calculateFunctional(planesBig.begin(),
+			planesBig.end(), directions, values);
+	double diff = functionalJoined - functionalInitial;
+	for (auto facet = polyhedron.facets_begin();
+			facet != polyhedron.facets_end(); ++facet)
+	{
+		int iCluster = polyhedron.indexPlanes_[facet->id];
+		auto first = planesBig.begin();
+		Plane_3 planeCurrent = *first;
+		planesBig.erase(first);
+		int numPlanes = 0;
+		for (int iFacet: clusters[iCluster])
+		{
+			planesBig.push_back(planes[iFacet]);
+			++numPlanes;
+		}
+		double functional = calculateFunctional(planesBig.begin(),
+				planesBig.end(), directions, values);
+		double diffInitial = functional - functionalInitial;
+		double diffJoined = functional - functionalJoined;
+		double percent = diffJoined / diff * 100.;
+
+		std::cerr << "Intersection #" << iIntersection << std::endl;
+		std::cerr << "     functional  : " << functional << std::endl;
+		std::cerr << "     diff initial: " << diffInitial << std::endl;
+		std::cerr << "     diff joined : " << diffJoined << std::endl;
+		std::cerr << "     percent     : " << percent << std::endl;
+		while(numPlanes--)
+			planesBig.pop_back();
+		planesBig.push_back(planeCurrent);
+		++iIntersection;
+	}
+	DEBUG_END;
+}
+
 std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		Polyhedron_3 polyhedron,
 		std::vector<std::vector<int>> clusters)
@@ -651,6 +723,9 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 		dumpClustersRaw(clusters, planes_);
 	if (getenv("DUMP_CLUSTERS"))
 		dumpClusters(polyhedron, clusters, planes_);
+	if (getenv("ANALYZE_CLUSTERS_QUALITY"))
+		analyzeClustersQuality(polyhedron, clusters, planes_,
+				directions_, values_);
 
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;
