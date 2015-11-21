@@ -265,6 +265,7 @@ std::set<int> findTangientPointPlanesIDs(
 	auto circulatorFirst = vertex->vertex_begin();
 	auto circulator = circulatorFirst;
 	std::set<int> planesIDs;
+	std::vector<int> planesIDsVector;
 	do
 	{
 		int iFacet = circulator->facet()->id;
@@ -275,12 +276,17 @@ std::set<int> findTangientPointPlanesIDs(
 			exit(EXIT_FAILURE);
 		}
 		planesIDs.insert(index[iFacet]);
+		planesIDsVector.push_back(index[iFacet]);
 		++circulator;
 	} while (circulator != circulatorFirst);
 
 	if (planesIDs.size() != 3)
 	{
 		ERROR_PRINT("%d != %d", (int) planesIDs.size(), 3);
+		std::cerr << "Indices:";
+		for (int i: planesIDsVector)
+			std::cerr << " " << i;
+		std::cerr << std::endl;
 		std::cerr << "degree of vertex " << vertex->id << " is "
 			<< vertex->degree() << std::endl;
 		exit(EXIT_FAILURE);
