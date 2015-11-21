@@ -674,6 +674,12 @@ void analyzeClustersQuality(Polyhedron_3 polyhedron,
 		planesBig.push_back(facet->plane());
 
 	int iIntersection = 0;
+	typedef std::pair<int, double> BadnessInfo;
+	auto comparator = [](BadnessInfo a, BadnessInfo b)
+	{
+		return a.second < b.second;
+	};
+	std::set<BadnessInfo, decltype(comparator)> badnesses(comparator);
 	double functionalInitial = calculateFunctional(planes.begin(),
 			planes.end(), directions, values);
 	double functionalJoined = calculateFunctional(planesBig.begin(),
@@ -694,20 +700,48 @@ void analyzeClustersQuality(Polyhedron_3 polyhedron,
 		}
 		double functional = calculateFunctional(planesBig.begin(),
 				planesBig.end(), directions, values);
-		double diffInitial = functional - functionalInitial;
-		double diffJoined = functional - functionalJoined;
-		double percent = diffJoined / diff * 100.;
-
-		std::cerr << "Intersection #" << iIntersection << std::endl;
-		std::cerr << "     functional  : " << functional << std::endl;
-		std::cerr << "     diff initial: " << diffInitial << std::endl;
-		std::cerr << "     diff joined : " << diffJoined << std::endl;
-		std::cerr << "     percent     : " << percent << std::endl;
+		badnesses.insert(BadnessInfo(iIntersection, functional));
 		while(numPlanes--)
 			planesBig.pop_back();
 		planesBig.push_back(planeCurrent);
 		++iIntersection;
 	}
+	double diffMinimal = badnesses.begin()->second - functionalJoined;
+	for (auto badness: badnesses)
+	{
+		int iIntersection = badness.first;
+		double functional = badness.second;
+		double diffInitial = functional - functionalInitial;
+		double diffJoined = functional - functionalJoined;
+		double percent = diffJoined / diff * 100.;
+		std::cerr << "Intersection #" << iIntersection << std::endl;
+		std::cerr << "     functional  : " << functional << std::endl;
+		std::cerr << "     diff initial: " << diffInitial << std::endl;
+		std::cerr << "     diff joined : " << diffJoined << std::endl;
+		std::cerr << "     percent     : " << percent << std::endl;
+		double ratio = 1. - diffJoined / diffMinimal;
+		std::cerr << "     ratio       : " << ratio << std::endl;
+		Colour colour;
+		if (ratio > 0)
+		{
+			unsigned char component = (unsigned char)
+				(255. * ratio);
+			colour.red = component;
+			colour.green = component;
+			colour.blue = component;
+			std::cerr << "     component   : " << (int) component
+				<< std::endl;
+		}
+		else
+		{
+			colour.red = 255;
+			colour.green = 0;
+			colour.blue = 0;
+		}
+		polyhedron.facetColours[iIntersection] = colour;
+	}
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"coloured-badness.ply") << polyhedron;
 	DEBUG_END;
 }
 
