@@ -480,7 +480,10 @@ std::ostream &operator<<(std::ostream &stream,
 	return stream;
 }
 
-std::vector<Point_3> generateProjection(Polyhedron_3 polyhedron, Vector_3 normal)
+std::pair<std::vector<Point_3>, std::vector<int>>
+generateProjection(
+		Polyhedron_3 polyhedron,
+		Vector_3 normal)
 {
 	DEBUG_START;
 	std::vector<Point_2> points;
@@ -491,13 +494,41 @@ std::vector<Point_3> generateProjection(Polyhedron_3 polyhedron, Vector_3 normal
 	}
 	std::vector<Point_2> hull;
 	convex_hull_2(points.begin(), points.end(), std::back_inserter(hull));
+	int numFound = 0;
+	std::vector<int> indices;
+	for (int i = 0; i < (int) points.size(); ++i)
+	{
+		int iCurrent = 0;
+		bool ifFound = false;
+		Point_2 point = points[i];
+		for (auto it = hull.begin(); it != hull.end(); ++it)
+		{
+			Point_2 pointExtreme = *it;
+			if (equal(point.x(), pointExtreme.x()) &&
+					equal(point.y(), pointExtreme.y()))
+			{
+				ifFound = true;
+				break;
+			}
+			++iCurrent;
+		}
+		numFound += ifFound;
+		indices.push_back(iCurrent);
+	}
+	if (numFound != (int) hull.size())
+	{
+		ERROR_PRINT("Only %d of %ld points found!", numFound,
+				hull.size());
+		exit(EXIT_FAILURE);
+	}
+
 	std::vector<Point_3> projection;
 	for (auto point: hull)
 	{
 		projection.push_back(unproject(point, normal));
 	}
 	DEBUG_END;
-	return projection;
+	return std::make_pair(projection, indices);
 }
 
 void dumpContours(Polyhedron_3 polyhedron,
@@ -544,7 +575,7 @@ void dumpContours(Polyhedron_3 polyhedron,
 		contourRude.comment = "rude";
 		contourRude.normal = directionContours[iContour];
 		contourRude.points = generateProjection(polyhedron,
-				directionContours[iContour]);
+				directionContours[iContour]).first;
 		contours.push_back(contourRude);
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
 			<< contours;
