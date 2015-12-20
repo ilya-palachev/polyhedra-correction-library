@@ -13,6 +13,7 @@
 *.bak
 # * Vim backup files:
 *.swp
+*.swo
 # * LibreOffice Draw backup files:
 *.odg#
 # * LibreOffice Impress backup files:
