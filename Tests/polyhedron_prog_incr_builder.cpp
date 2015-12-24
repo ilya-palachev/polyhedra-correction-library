@@ -79,7 +79,7 @@ static double genRandomDouble(double maxDelta)
 const double MEAN_VALUE = 0.5;
 const double RAND_MAX_VALUE = 0.1;
 const double MAX_COORDINATE = 1.;
-Polyhedron_3 cutPyramid(Polyhedron_3 pyramid)
+std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 {
 	pyramid = Polyhedron_3(Polyhedron(pyramid));
 	double a = genRandomDouble(MAX_COORDINATE);
@@ -100,33 +100,57 @@ Polyhedron_3 cutPyramid(Polyhedron_3 pyramid)
 		planes[iPlane++] = facet->plane();
 	}
 	planes[pyramid.size_of_facets()] = planeCutting;
-	for (auto plane: planes)
-		std::cout << plane << std::endl;
 	Polyhedron_3 intersection(planes.begin(), planes.end());
-	return intersection;
+
+	int iPlaneCutting = intersection.size_of_facets();
+	iPlane = 0;
+	for (auto facet = intersection.facets_begin();
+			facet != intersection.facets_end(); ++facet)
+	{
+		if (facet->plane() == planeCutting)
+		{
+			iPlaneCutting = iPlane;
+			break;
+		}
+		++iPlane;
+	}
+	if (iPlaneCutting == (int) intersection.size_of_facets())
+		std::cerr << "Failed to find cutting plane in intersection"
+			<< std::endl;
+	else
+		std::cout << "Found cutting plane as the " << iPlaneCutting
+			<< "-th plane in the intersection." << std::endl;
+
+	return std::make_pair(intersection, iPlaneCutting);
 }
 
 typedef Polyhedron_3::HalfedgeDS HalfedgeDS;
 
 int main(int argc, char **argv) {
-	if (argc != 2)
+	if (argc != 3)
 	{
-		std::cerr << "Usage: " << argv[0] << " <pyramid sides number>"
+		std::cerr << "Usage: " << argv[0]
+			<< " <pyramid sides number> <shadow contours number>"
 			<< std::endl;
 		exit(EXIT_FAILURE);
 	}
 	int numSidesPyramid = atoi(argv[1]);
+	int numShadowContours = atoi(argv[2]);
+	std::cout << "We will build " << numShadowContours
+		<< " shadow contours." << std::endl;
 	
-	Polyhedron_3 P;
-	BuildPyramid<HalfedgeDS> pyramid(numSidesPyramid);
-	P.delegate(pyramid);
-	Polyhedron_3 intersection = cutPyramid(P);
+	Polyhedron_3 pyramid;
+	BuildPyramid<HalfedgeDS> pyramidBuilder(numSidesPyramid);
+	pyramid.delegate(pyramidBuilder);
+ 	auto pyramidCuterResult = cutPyramid(pyramid);
+	Polyhedron_3 pyramidCut = pyramidCuterResult.first;
 
-	std::string output_name = "polyhedron." + std::to_string(getpid()) + ".ply";
+	std::string output_name = "polyhedron." + std::to_string(getpid())
+		+ ".ply";
 	std::cout << "Dumping to file " << output_name << "... ";
 	std::ofstream output;
 	output.open(output_name, std::ostream::out);
-	output << intersection;
+	output << pyramidCut;
 	output.close();
 	std::cout << "done" << std::endl;
 	return 0;
