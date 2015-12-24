@@ -352,3 +352,73 @@ bool ShadowContourConstructor::collinearVisibility(int v0processed,
 	return false;
 }
 
+Point_2 project(Point_3 point, Vector_3 normal)
+{
+	CGAL::Origin origin;
+	Vector_3 ez(0., 0., 1.);
+	Vector_3 tau = CGAL::cross_product(ez, normal);
+	Vector_3 vector = point - origin;
+	double x = vector * tau;
+	double y = vector * ez;
+	return Point_2(x, y);
+}
+
+Point_3 unproject(Point_2 projection, Vector_3 normal)
+{
+	CGAL::Origin origin;
+	Vector_3 ez(0., 0., 1.);
+	Vector_3 tau = CGAL::cross_product(ez, normal);
+	return origin + projection.x() * tau + projection.y() * ez;
+}
+
+std::pair<std::vector<Point_3>, std::vector<int>>
+generateProjection(
+		Polyhedron_3 polyhedron,
+		Vector_3 normal)
+{
+	DEBUG_START;
+	std::vector<Point_2> points;
+	for (auto vertex = polyhedron.vertices_begin();
+			vertex != polyhedron.vertices_end(); ++vertex)
+	{
+		points.push_back(project(vertex->point(), normal));
+	}
+	std::vector<Point_2> hull;
+	convex_hull_2(points.begin(), points.end(), std::back_inserter(hull));
+	int numFound = 0;
+	std::vector<int> indices;
+	for (int i = 0; i < (int) points.size(); ++i)
+	{
+		int iCurrent = 0;
+		bool ifFound = false;
+		Point_2 point = points[i];
+		for (auto it = hull.begin(); it != hull.end(); ++it)
+		{
+			Point_2 pointExtreme = *it;
+			if (equal(point.x(), pointExtreme.x()) &&
+					equal(point.y(), pointExtreme.y()))
+			{
+				ifFound = true;
+				break;
+			}
+			++iCurrent;
+		}
+		numFound += ifFound;
+		indices.push_back(iCurrent);
+	}
+	if (numFound != (int) hull.size())
+	{
+		ERROR_PRINT("Only %d of %ld points found!", numFound,
+				hull.size());
+		exit(EXIT_FAILURE);
+	}
+
+	std::vector<Point_3> projection;
+	for (auto point: hull)
+	{
+		projection.push_back(unproject(point, normal));
+	}
+	DEBUG_END;
+	return std::make_pair(projection, indices);
+}
+
