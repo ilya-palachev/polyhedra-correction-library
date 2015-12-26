@@ -129,36 +129,50 @@ typedef Polyhedron_3::HalfedgeDS HalfedgeDS;
 
 void buildContours(Polyhedron_3 polyhedron, int iFacetCutting, int numContours)
 {
-	double angleFirst = genRandomDouble(0.1);
 	polyhedron.initialize_indices();
 	auto facet = polyhedron.facets_begin() + iFacetCutting;
-	std::vector<int> indices;
+	std::set<int> indicesCutting;
 	auto circulator = facet->facet_begin();
 	do
 	{
-		indices.push_back(circulator->vertex()->id);
+		indicesCutting.insert(circulator->vertex()->id);
 		++circulator;
 	}
 	while (circulator != facet->facet_begin());
 	std::cout << "Cutting facet contains " << facet->facet_degree()
 		<< " vertices:";
-	for (int i: indices)
+	for (int i: indicesCutting)
 		std::cout << " " << i;
 	std::cout << std::endl;
 
+	double angleFirst = genRandomDouble(0.1);
 	for (int iContour = 0 ; iContour < numContours; ++iContour)
 	{
 		double angle = angleFirst + 2 * M_PI * iContour / numContours;
 		Vector_3 normal(cos(angle), sin(angle), 0.);
 		auto result = generateProjection(polyhedron, normal);
+		auto contour = result.first;
+		auto indices = result.second;
 		std::cout << "Generated contour #" << iContour << ":";
-		for (int iVertex: result.second)
+		for (int iVertex: indices)
 			std::cout << " " << iVertex;
+		std::cout << std::endl;
+		for (int i = 0; i < (int) indices.size(); ++i)
+		{
+			int iVertex = indices[i];
+			if (indicesCutting.find(iVertex)
+					!= indicesCutting.end())
+				std::cout << "Vertex #" << iVertex
+					<< " must lie on line " << contour[i]
+					<< " + " << "t * " << normal
+					<< std::endl;
+		}
 		std::cout << std::endl;
 	}
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 	if (argc != 3)
 	{
 		std::cerr << "Usage: " << argv[0]
