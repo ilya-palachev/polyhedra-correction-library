@@ -127,15 +127,31 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 typedef Polyhedron_3::HalfedgeDS HalfedgeDS;
 
-void buildContours(Polyhedron_3 polyhedron, int numContours)
+void buildContours(Polyhedron_3 polyhedron, int iFacetCutting, int numContours)
 {
 	double angleFirst = genRandomDouble(0.1);
+	polyhedron.initialize_indices();
+	auto facet = polyhedron.facets_begin() + iFacetCutting;
+	std::vector<int> indices;
+	auto circulator = facet->facet_begin();
+	do
+	{
+		indices.push_back(circulator->vertex()->id);
+		++circulator;
+	}
+	while (circulator != facet->facet_begin());
+	std::cout << "Cutting facet contains " << facet->facet_degree()
+		<< " vertices:";
+	for (int i: indices)
+		std::cout << " " << i;
+	std::cout << std::endl;
+
 	for (int iContour = 0 ; iContour < numContours; ++iContour)
 	{
 		double angle = angleFirst + 2 * M_PI * iContour / numContours;
 		Vector_3 normal(cos(angle), sin(angle), 0.);
 		auto result = generateProjection(polyhedron, normal);
-		std::cout << "Generated contour #" << iContour;
+		std::cout << "Generated contour #" << iContour << ":";
 		for (int iVertex: result.second)
 			std::cout << " " << iVertex;
 		std::cout << std::endl;
@@ -158,8 +174,9 @@ int main(int argc, char **argv) {
 	Polyhedron_3 pyramid;
 	BuildPyramid<HalfedgeDS> pyramidBuilder(numSidesPyramid);
 	pyramid.delegate(pyramidBuilder);
- 	auto pyramidCuterResult = cutPyramid(pyramid);
-	Polyhedron_3 pyramidCut = pyramidCuterResult.first;
+	auto result = cutPyramid(pyramid);
+	Polyhedron_3 pyramidCut = result.first;
+	int iFacetCutting = result.second;
 
 	std::string output_name = "polyhedron." + std::to_string(getpid())
 		+ ".ply";
@@ -170,6 +187,6 @@ int main(int argc, char **argv) {
 	output.close();
 	std::cout << "done" << std::endl;
 	
-	buildContours(pyramidCut, numShadowContours);
+	buildContours(pyramidCut, iFacetCutting, numShadowContours);
 	return 0;
 }
