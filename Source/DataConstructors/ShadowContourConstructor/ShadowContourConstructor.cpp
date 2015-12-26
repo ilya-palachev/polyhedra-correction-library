@@ -385,12 +385,15 @@ generateProjection(
 	}
 	std::vector<Point_2> hull;
 	convex_hull_2(points.begin(), points.end(), std::back_inserter(hull));
-	int numFound = 0;
-	std::vector<int> indices;
+	std::cout << "   Hull contains " << hull.size() << " vetrices."
+		<< std::endl;
+	std::vector<int> indices(hull.size());
+	for (int &i: indices)
+		i = INT_NOT_INITIALIZED;
+	bool ifConflicts = false;
 	for (int i = 0; i < (int) points.size(); ++i)
 	{
 		int iCurrent = 0;
-		bool ifFound = false;
 		Point_2 point = points[i];
 		for (auto it = hull.begin(); it != hull.end(); ++it)
 		{
@@ -398,18 +401,23 @@ generateProjection(
 			if (equal(point.x(), pointExtreme.x()) &&
 					equal(point.y(), pointExtreme.y()))
 			{
-				ifFound = true;
+				if (indices[iCurrent] != INT_NOT_INITIALIZED)
+				{
+					std::cerr << "Conflicting "
+						<< indices[iCurrent] << " and "
+						<< i << " for hull vertex #"
+						<< iCurrent << std::endl;
+					ifConflicts = true;
+				}
+				indices[iCurrent] = i;
 				break;
 			}
 			++iCurrent;
 		}
-		numFound += ifFound;
-		indices.push_back(iCurrent);
 	}
-	if (numFound != (int) hull.size())
+	if (ifConflicts)
 	{
-		ERROR_PRINT("Only %d of %ld points found!", numFound,
-				hull.size());
+		ERROR_PRINT("Conflicts for hull points found!");
 		exit(EXIT_FAILURE);
 	}
 
