@@ -127,7 +127,10 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 typedef Polyhedron_3::HalfedgeDS HalfedgeDS;
 
-void buildContours(Polyhedron_3 polyhedron, int iFacetCutting, int numContours)
+std::vector<std::vector<Line_3>> buildTargetLines(
+		Polyhedron_3 polyhedron,
+		int iFacetCutting,
+		int numContours)
 {
 	polyhedron.initialize_indices();
 	auto facet = polyhedron.facets_begin() + iFacetCutting;
@@ -146,6 +149,7 @@ void buildContours(Polyhedron_3 polyhedron, int iFacetCutting, int numContours)
 	std::cout << std::endl;
 
 	double angleFirst = genRandomDouble(0.1);
+	std::vector<std::vector<Line_3>> targets(polyhedron.size_of_vertices());
 	for (int iContour = 0 ; iContour < numContours; ++iContour)
 	{
 		double angle = angleFirst + 2 * M_PI * iContour / numContours;
@@ -162,13 +166,15 @@ void buildContours(Polyhedron_3 polyhedron, int iFacetCutting, int numContours)
 			int iVertex = indices[i];
 			if (indicesCutting.find(iVertex)
 					!= indicesCutting.end())
-				std::cout << "Vertex #" << iVertex
-					<< " must lie on line " << contour[i]
-					<< " + " << "t * " << normal
-					<< std::endl;
+			{
+				Point_3 point = contour[i];
+				Line_3 line(point, point + normal);
+				targets[iVertex].push_back(line);
+			}
 		}
 		std::cout << std::endl;
 	}
+	return targets;
 }
 
 int main(int argc, char **argv)
@@ -201,6 +207,17 @@ int main(int argc, char **argv)
 	output.close();
 	std::cout << "done" << std::endl;
 	
-	buildContours(pyramidCut, iFacetCutting, numShadowContours);
+	auto targets = buildTargetLines(pyramidCut, iFacetCutting,
+			numShadowContours);
+	for (int i = 0; i < (int) targets.size(); ++i)
+	{
+		auto target = targets[i];
+		if (target.empty())
+			continue;
+		std::cout << "Target lines for vertex #" << i << ":"
+			<< std::endl;
+		for (Line_3 line: target)
+			std::cout << "    " << line << std::endl;
+	}
 	return 0;
 }
