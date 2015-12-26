@@ -3,6 +3,7 @@
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 #include "Polyhedron_3/Polyhedron_3.h"
+#include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
 
 // A modifier creating a pyramid with the incremental builder.
 template <class HDS>
@@ -126,6 +127,21 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 typedef Polyhedron_3::HalfedgeDS HalfedgeDS;
 
+void buildContours(Polyhedron_3 polyhedron, int numContours)
+{
+	double angleFirst = genRandomDouble(0.1);
+	for (int iContour = 0 ; iContour < numContours; ++iContour)
+	{
+		double angle = angleFirst + 2 * M_PI * iContour / numContours;
+		Vector_3 normal(cos(angle), sin(angle), 0.);
+		auto result = generateProjection(polyhedron, normal);
+		std::cout << "Generated contour #" << iContour;
+		for (int iVertex: result.second)
+			std::cout << " " << iVertex;
+		std::cout << std::endl;
+	}
+}
+
 int main(int argc, char **argv) {
 	if (argc != 3)
 	{
@@ -138,7 +154,7 @@ int main(int argc, char **argv) {
 	int numShadowContours = atoi(argv[2]);
 	std::cout << "We will build " << numShadowContours
 		<< " shadow contours." << std::endl;
-	
+
 	Polyhedron_3 pyramid;
 	BuildPyramid<HalfedgeDS> pyramidBuilder(numSidesPyramid);
 	pyramid.delegate(pyramidBuilder);
@@ -153,5 +169,7 @@ int main(int argc, char **argv) {
 	output << pyramidCut;
 	output.close();
 	std::cout << "done" << std::endl;
+	
+	buildContours(pyramidCut, numShadowContours);
 	return 0;
 }
