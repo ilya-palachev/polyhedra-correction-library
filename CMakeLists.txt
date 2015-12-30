@@ -137,7 +137,6 @@ set (SOURCE_tests
 	Tests/buildCluster.cpp
 	Tests/experimentCGAL_convexHullDynamic.cpp
 	Tests/experimentCGAL_convexHullStatic.cpp
-	Tests/facetCorrectorPrototype.cpp
 	Tests/gaussStringTest.cpp
 	Tests/globalCorrection.cpp
 	Tests/GlobalCorrectionReal.cpp
@@ -225,6 +224,7 @@ if (ENABLE_IPOPT)
 	add_definitions(-DUSE_IPOPT)
 	add_definitions(-DHAVE_CSTDDEF)
 	add_definitions(-DFORTRAN_INTEGER_TYPE=int)
+	list(APPEND SOURCE_tests Tests/facetCorrectorPrototype.cpp)
 	message("!!! Ipopt solver is enabled !!!")
 endif()
 
