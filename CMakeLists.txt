@@ -137,6 +137,7 @@ set (SOURCE_tests
 	Tests/buildCluster.cpp
 	Tests/experimentCGAL_convexHullDynamic.cpp
 	Tests/experimentCGAL_convexHullStatic.cpp
+	Tests/facetCorrectorPrototype.cpp
 	Tests/gaussStringTest.cpp
 	Tests/globalCorrection.cpp
 	Tests/GlobalCorrectionReal.cpp
@@ -147,7 +148,6 @@ set (SOURCE_tests
 	Tests/moveVertexGetStatistics.cpp
 	Tests/moveVertexLinear2.cpp
 	Tests/moveVertexW.cpp
-	Tests/polyhedron_prog_incr_builder.cpp
 	Tests/printTemplatePolyhedrons.cpp
 	Tests/Recoverer_test.cpp
 	Tests/ShadowContourCluterizer_test.cpp
