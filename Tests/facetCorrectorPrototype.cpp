@@ -1,7 +1,10 @@
 
 #include <fstream>
+
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_incremental_builder_3.h>
+#include <coin/IpTNLP.hpp>
+
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
 
@@ -127,10 +130,36 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 typedef Polyhedron_3::HalfedgeDS HalfedgeDS;
 
-std::vector<std::vector<Line_3>> buildTargetLines(
+/**
+ * The structure defining the description of QP problem for facet correction
+ * for one particular vertex.
+ */
+struct ProblemPointDescription
+{
+	/** The vertex ID in the initial polyhedron. */
+	int iVertex;
+
+	/**
+	 * The list of target lines that should the corrected vertex should
+	 * belong to (with some precision).
+	 */
+	std::vector<Line_3> lines;
+
+	/**
+	 * The list target planes that should the corrected vertex should
+	 * belong to (precisely).
+	 */
+	std::vector<Plane_3> planes;
+
+	/** The initial position of corrected vertex. */
+	Point_3 initialPosition;
+};
+
+static
+std::set<int>
+buildFacetIndices(
 		Polyhedron_3 polyhedron,
-		int iFacetCutting,
-		int numContours)
+		int iFacetCutting)
 {
 	polyhedron.initialize_indices();
 	auto facet = polyhedron.facets_begin() + iFacetCutting;
@@ -147,9 +176,62 @@ std::vector<std::vector<Line_3>> buildTargetLines(
 	for (int i: indicesCutting)
 		std::cout << " " << i;
 	std::cout << std::endl;
+	return indicesCutting;
+}
+
+static
+std::vector<ProblemPointDescription>
+buildPlanesDescriptions(
+		Polyhedron_3 polyhedron,
+		int iFacetCutting,
+		std::set<int> indicesCutting)
+{
+	std::vector<ProblemPointDescription> descriptions;
+
+	/* Build planes descriptions. */
+	for (int iVertex: indicesCutting)
+	{
+		ProblemPointDescription description;
+		description.iVertex = iVertex;
+		descriptions.push_back(description);
+		auto vertex = polyhedron.vertices_begin() + iVertex;
+		auto circulator = vertex->vertex_begin();
+		bool ifVertexCorrect = false;
+		do
+		{
+			auto facet = circulator->facet();
+			int iFacet = facet->id;
+			if (iFacet != iFacetCutting)
+				description.planes.push_back(facet->plane());
+			else
+				ifVertexCorrect = true;
+			++circulator;
+		}
+		while (circulator != vertex->vertex_begin());
+		if (!ifVertexCorrect)
+		{
+			std::cerr << "Vertex #" << iVertex
+				<< " is incorrect, doesn't belong to cutting "
+				<< "facet!" << std::endl;
+		       exit(EXIT_FAILURE);
+		}
+	}
+	return descriptions;
+}
+
+static
+std::vector<ProblemPointDescription>
+buildProblemPointDescriptions(
+		Polyhedron_3 polyhedron,
+		int iFacetCutting,
+		int numContours)
+{
+	auto indicesCutting = buildFacetIndices(polyhedron, iFacetCutting);
+	auto descriptions = buildPlanesDescriptions(polyhedron, iFacetCutting,
+			indicesCutting);
 
 	double angleFirst = genRandomDouble(0.1);
-	std::vector<std::vector<Line_3>> targets(polyhedron.size_of_vertices());
+	/* Generate contours and build lines description by them. */
 	for (int iContour = 0 ; iContour < numContours; ++iContour)
 	{
 		double angle = angleFirst + 2 * M_PI * iContour / numContours;
@@ -164,17 +246,24 @@ std::vector<std::vector<Line_3>> buildTargetLines(
 		for (int i = 0; i < (int) indices.size(); ++i)
 		{
 			int iVertex = indices[i];
-			if (indicesCutting.find(iVertex)
-					!= indicesCutting.end())
+			int iDescription = descriptions.size();
+			for (int j = 0; j < (int) descriptions.size(); ++j)
 			{
-				Point_3 point = contour[i];
-				Line_3 line(point, point + normal);
-				targets[iVertex].push_back(line);
+				if (descriptions[j].iVertex == iVertex)
+				{
+					iDescription = j;
+					break;
+				}
 			}
+			if (iDescription == (int) descriptions.size())
+				continue;
+			Point_3 point = contour[i];
+			Line_3 line(point, point + normal);
+			descriptions[iDescription].lines.push_back(line);
 		}
 		std::cout << std::endl;
 	}
-	return targets;
+	return descriptions;
 }
 
 int main(int argc, char **argv)
@@ -207,17 +296,23 @@ int main(int argc, char **argv)
 	output.close();
 	std::cout << "done" << std::endl;
 	
-	auto targets = buildTargetLines(pyramidCut, iFacetCutting,
-			numShadowContours);
-	for (int i = 0; i < (int) targets.size(); ++i)
+	auto descriptions = buildProblemPointDescriptions(
+			pyramidCut, iFacetCutting, numShadowContours);
+	for (auto description: descriptions)
 	{
-		auto target = targets[i];
-		if (target.empty())
-			continue;
-		std::cout << "Target lines for vertex #" << i << ":"
+		int iVertex = description.iVertex;
+		std::cout << "Target lines for vertex #" << iVertex << ":"
 			<< std::endl;
-		for (Line_3 line: target)
+		for (Line_3 line: description.lines)
 			std::cout << "    " << line << std::endl;
+		std::cout << "    " << description.lines.size() << " in total"
+			<< std::endl;
+		std::cout << "Target planes for vertex #" << iVertex << ":"
+			<< std::endl;
+		for (Plane_3 plane: description.planes)
+			std::cout << "        " << plane << std::endl;
+		std::cout << "         " << description.planes.size()
+			<< " in total" << std::endl;
 	}
 	return 0;
 }
