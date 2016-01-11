@@ -3,6 +3,7 @@
 
 #include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_incremental_builder_3.h>
+#include <CGAL/squared_distance_3.h>
 #include <coin/IpTNLP.hpp>
 
 #include "Polyhedron_3/Polyhedron_3.h"
@@ -193,7 +194,6 @@ buildPlanesDescriptions(
 	{
 		ProblemPointDescription description;
 		description.iVertex = iVertex;
-		descriptions.push_back(description);
 		auto vertex = polyhedron.vertices_begin() + iVertex;
 		auto circulator = vertex->vertex_begin();
 		bool ifVertexCorrect = false;
@@ -201,8 +201,23 @@ buildPlanesDescriptions(
 		{
 			auto facet = circulator->facet();
 			int iFacet = facet->id;
+			std::cout << "Vertex " << iVertex
+				<< " is incident to facet " << iFacet
+				<< std::endl;
+			Plane_3 plane = facet->plane();
+			double distance = CGAL::squared_distance<Kernel>(plane,
+					vertex->point());
 			if (iFacet != iFacetCutting)
-				description.planes.push_back(facet->plane());
+			{
+				description.planes.push_back(plane);
+				std::cout << "Plane: " << plane	<< std::endl;
+				std::cout << "Distance: " << distance
+					<< std::endl;
+				std::cout << "Adding it to vector, so now it "
+					<< "contains "
+					<< description.planes.size()
+					<< " planes." << std::endl;
+			}
 			else
 				ifVertexCorrect = true;
 			++circulator;
@@ -215,6 +230,7 @@ buildPlanesDescriptions(
 				<< "facet!" << std::endl;
 		       exit(EXIT_FAILURE);
 		}
+		descriptions.push_back(description);
 	}
 	return descriptions;
 }
