@@ -5,6 +5,7 @@
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 #include <CGAL/squared_distance_3.h>
 #include <coin/IpTNLP.hpp>
+#include <coin/IpIpoptApplication.hpp>
 
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
@@ -282,6 +283,38 @@ buildProblemPointDescriptions(
 	return descriptions;
 }
 
+void dumpBody(Polyhedron_3 body)
+{
+	std::string output_name = "polyhedron." + std::to_string(getpid())
+		+ ".ply";
+	std::cout << "Dumping to file " << output_name << "... ";
+	std::ofstream output;
+	output.open(output_name, std::ostream::out);
+	output << body;
+	output.close();
+	std::cout << "done" << std::endl;
+}
+
+void dumpDescriptions(std::vector<ProblemPointDescription> descriptions)
+{
+	for (auto description: descriptions)
+	{
+		int iVertex = description.iVertex;
+		std::cout << "Target lines for vertex #" << iVertex << ":"
+			<< std::endl;
+		for (Line_3 line: description.lines)
+			std::cout << "    " << line << std::endl;
+		std::cout << "    " << description.lines.size() << " in total"
+			<< std::endl;
+		std::cout << "Target planes for vertex #" << iVertex << ":"
+			<< std::endl;
+		for (Plane_3 plane: description.planes)
+			std::cout << "        " << plane << std::endl;
+		std::cout << "         " << description.planes.size()
+			<< " in total" << std::endl;
+	}
+}
+
 int main(int argc, char **argv)
 {
 	if (argc != 3)
@@ -302,33 +335,10 @@ int main(int argc, char **argv)
 	auto result = cutPyramid(pyramid);
 	Polyhedron_3 pyramidCut = result.first;
 	int iFacetCutting = result.second;
-
-	std::string output_name = "polyhedron." + std::to_string(getpid())
-		+ ".ply";
-	std::cout << "Dumping to file " << output_name << "... ";
-	std::ofstream output;
-	output.open(output_name, std::ostream::out);
-	output << pyramidCut;
-	output.close();
-	std::cout << "done" << std::endl;
+	dumpBody(pyramidCut);
 	
 	auto descriptions = buildProblemPointDescriptions(
 			pyramidCut, iFacetCutting, numShadowContours);
-	for (auto description: descriptions)
-	{
-		int iVertex = description.iVertex;
-		std::cout << "Target lines for vertex #" << iVertex << ":"
-			<< std::endl;
-		for (Line_3 line: description.lines)
-			std::cout << "    " << line << std::endl;
-		std::cout << "    " << description.lines.size() << " in total"
-			<< std::endl;
-		std::cout << "Target planes for vertex #" << iVertex << ":"
-			<< std::endl;
-		for (Plane_3 plane: description.planes)
-			std::cout << "        " << plane << std::endl;
-		std::cout << "         " << description.planes.size()
-			<< " in total" << std::endl;
-	}
+	dumpDescriptions(descriptions);
 	return 0;
 }
