@@ -285,10 +285,10 @@ buildProblemPointDescriptions(
 	return descriptions;
 }
 
-void dumpBody(Polyhedron_3 body)
+void dumpBody(Polyhedron_3 body, const char *comment)
 {
 	std::string output_name = "polyhedron." + std::to_string(getpid())
-		+ ".ply";
+		+ "." + comment + ".ply";
 	std::cout << "Dumping to file " << output_name << "... ";
 	std::ofstream output;
 	output.open(output_name, std::ostream::out);
@@ -317,6 +317,9 @@ void dumpDescriptions(std::vector<ProblemPointDescription> descriptions)
 	}
 }
 
+/** The final position of plane. */
+static Plane_3 planeFinal_;
+
 class FacetCorrectionNLP: public TNLP
 {
 private:
@@ -325,6 +328,7 @@ private:
 
 	/** The initial position of plane. */
 	Plane_3 planeInitial_;
+
 public:
 	/** default constructor */
 	FacetCorrectionNLP(std::vector<ProblemPointDescription> descriptions,
@@ -728,7 +732,7 @@ public:
 		const IpoptData* ip_data,
 		IpoptCalculatedQuantities* ip_cq)
 	{
-		/* TODO */
+		planeFinal_ = Plane_3(x[0], x[1], x[2], x[3]);
 	}
 	//@}
 
@@ -770,7 +774,7 @@ int main(int argc, char **argv)
 	auto result = cutPyramid(pyramid);
 	Polyhedron_3 pyramidCut = result.first;
 	int iFacetCutting = result.second;
-	dumpBody(pyramidCut);
+	dumpBody(pyramidCut, "initial");
 	
 	auto descriptions = buildProblemPointDescriptions(
 			pyramidCut, iFacetCutting, numShadowContours);
@@ -793,8 +797,23 @@ int main(int argc, char **argv)
 	}
 	status = app->OptimizeTNLP(mynlp);
 	if (status == Solve_Succeeded)
+	{
 		std::cout << std::endl << std::endl << "*** The problem solved!"
 			<< std::endl;
+		std::vector<Plane_3> planes;
+		int iFacet = 0;
+		for (auto facet = pyramidCut.facets_begin();
+				facet != pyramidCut.facets_end(); ++facet)
+		{
+			if (iFacet == iFacetCutting)
+				planes.push_back(planeFinal_);
+			else
+				planes.push_back(facet->plane());
+			++iFacet;
+		}
+		Polyhedron_3 pyramidFinal(planes);
+		dumpBody(pyramidFinal, "final");
+	}
 	else
 		std::cout << std::endl << std::endl << "*** The problem FAILED!"
 			<< std::endl;
