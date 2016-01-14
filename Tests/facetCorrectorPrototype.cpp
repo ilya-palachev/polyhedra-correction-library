@@ -781,6 +781,32 @@ int main(int argc, char **argv)
 	dumpDescriptions(descriptions);
 
 	Plane_3 plane = (pyramidCut.facets_begin() + iFacetCutting)->plane();
+	Plane_3 planeTrue = plane;
+	char *maxDeltaStr = getenv("PLANE_SHIFT");
+	if (maxDeltaStr)
+	{
+		double maxDelta = strtod(maxDeltaStr, NULL);
+		double a = plane.a() + genRandomDouble(maxDelta);
+		double b = plane.b() + genRandomDouble(maxDelta);
+		double c = plane.c() + genRandomDouble(maxDelta);
+		double d = plane.d() + genRandomDouble(maxDelta);
+		plane = Plane_3(a, b, c, d);
+		if (!getenv("NO_POINT_SHIFT"))
+		{
+			for (auto &description: descriptions)
+			{
+				Point_3 point = description.initialPosition;
+				double x = point.x() +
+					genRandomDouble(maxDelta);
+				double y = point.y() +
+					genRandomDouble(maxDelta);
+				double z = point.z() +
+					genRandomDouble(maxDelta);
+				description.initialPosition = Point_3(x, y, z);
+			}
+		}
+	}
+
 	SmartPtr<TNLP> mynlp = new FacetCorrectionNLP(descriptions, plane);
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 	app->RethrowNonIpoptException(true);
@@ -795,11 +821,20 @@ int main(int argc, char **argv)
 			<< "*** Error during initialization!" << std::endl;
 		return (int) status;
 	}
+	clock_t begin, end;
+	begin = clock();
 	status = app->OptimizeTNLP(mynlp);
+	end = clock();
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	std::cout << "Time spent: " << time_spent << std::endl;
 	if (status == Solve_Succeeded)
 	{
 		std::cout << std::endl << std::endl << "*** The problem solved!"
 			<< std::endl;
+		std::cout << "True    plane: " << planeTrue << std::endl;
+		std::cout << "Initial plane: " << plane << "(maybe shifted)"
+			<< std::endl;
+		std::cout << "Final   plane: " << planeFinal_ << std::endl;
 		std::vector<Plane_3> planes;
 		int iFacet = 0;
 		for (auto facet = pyramidCut.facets_begin();
