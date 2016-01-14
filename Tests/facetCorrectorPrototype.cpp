@@ -6,6 +6,7 @@
 #include <CGAL/squared_distance_3.h>
 #include <coin/IpTNLP.hpp>
 #include <coin/IpIpoptApplication.hpp>
+using namespace Ipopt;
 
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
@@ -196,6 +197,7 @@ buildPlanesDescriptions(
 		ProblemPointDescription description;
 		description.iVertex = iVertex;
 		auto vertex = polyhedron.vertices_begin() + iVertex;
+		description.initialPosition = vertex->point();
 		auto circulator = vertex->vertex_begin();
 		bool ifVertexCorrect = false;
 		do
@@ -315,6 +317,439 @@ void dumpDescriptions(std::vector<ProblemPointDescription> descriptions)
 	}
 }
 
+class FacetCorrectionNLP: public TNLP
+{
+private:
+	/** The descriptions of the problem objects. */
+	std::vector<ProblemPointDescription> descriptions_;
+
+	/** The initial position of plane. */
+	Plane_3 planeInitial_;
+public:
+	/** default constructor */
+	FacetCorrectionNLP(std::vector<ProblemPointDescription> descriptions,
+			Plane_3 planeInitial):
+		descriptions_(descriptions),
+		planeInitial_(planeInitial)
+	{}
+
+	/** default destructor */
+	virtual ~FacetCorrectionNLP() {}
+
+
+	/**@name Overloaded from TNLP */
+	//@{
+	/** Method to return some info about the nlp */
+	virtual bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
+		Index& nnz_h_lag, IndexStyleEnum& index_style)
+	{
+		n = 4 +                            /* u, h */
+			3 * descriptions_.size();  /* A_i */
+
+		int numPlanesConstraints = 0;
+		for (auto description: descriptions_)
+			numPlanesConstraints += description.planes.size();
+		m = 1 +                             /* (u, u) = 1 */
+			descriptions_.size() +      /* (u,   A_i) = h   */
+			numPlanesConstraints;       /* (u_k, A_i) = h_k */
+
+		nnz_jac_g = 3 +                     /* (u, u) = 1 */
+			7 * descriptions_.size() +  /* (u,   A_i) = h   */
+			3 * numPlanesConstraints;   /* (u_k, A_i) = h_k */
+
+		nnz_h_lag = 3 + 15 * descriptions_.size();
+
+		index_style = TNLP::C_STYLE;
+		return true;
+	}
+
+#define IPOPT_INFINITY 2e19
+	/** Method to return the bounds for my problem */
+	virtual bool get_bounds_info(Index n, Number* x_l, Number* x_u,
+		Index m, Number* g_l, Number* g_u)
+	{
+		for (Index i = 0; i < n; ++i)
+		{
+			x_l[i] = -IPOPT_INFINITY;
+			x_u[i] = +IPOPT_INFINITY;
+		}
+		g_l[0] = g_u[0] = 1.;
+		for (Index i = 1; i < m; ++i)
+		{
+			g_l[i] = 0.;
+			g_u[i] = 0.;
+		}
+		return true;
+	}
+
+	/** Method to return the starting point for the algorithm */
+	virtual bool get_starting_point(Index n, bool init_x, Number* x,
+		bool init_z, Number* z_L, Number* z_U,
+		Index m, bool init_lambda,
+		Number* lambda)
+	{
+		assert(init_x == true);
+		assert(init_z == false);
+		assert(init_lambda == false);
+		x[0] = planeInitial_.a();
+		x[1] = planeInitial_.b();
+		x[2] = planeInitial_.c();
+		x[3] = planeInitial_.d();
+		Index i = 4;
+		for (auto description: descriptions_)
+		{
+			x[i + 0] = description.initialPosition.x();
+			x[i + 1] = description.initialPosition.y();
+			x[i + 2] = description.initialPosition.z();
+			i += 3;
+		}
+		return true;
+	}
+
+	/** Method to return the objective value */
+	virtual bool eval_f(Index n, const Number* x, bool new_x,
+			Number& obj_value)
+	{
+		Index i = 4;
+		obj_value = 0.;
+		for (auto description: descriptions_)
+		{
+			Point_3 point(x[i], x[i + 1], x[i + 2]);
+			for (Line_3 line: description.lines)
+				obj_value += CGAL::squared_distance(point,
+						line);
+			i += 3;
+		}
+		return true;
+	}
+
+	/** Method to return the gradient of the objective */
+	virtual bool eval_grad_f(Index n, const Number* x, bool new_x,
+			Number* grad_f)
+	{
+		for (Index i = 0; i < n; ++i)
+			grad_f[i] = 0.;
+		Index i = 4;
+		for (auto description: descriptions_)
+		{
+			Point_3 point(x[i], x[i + 1], x[i + 2]);
+			for (Line_3 line: description.lines)
+			{
+				Vector_3 direction = line.to_vector();
+				Point_3 projection = line.projection(point);
+				grad_f[i + 0] += (projection.x() - point.x()) *
+					(direction.x() * direction.x() - 1.);
+				grad_f[i + 0] += (projection.y() - point.y()) * 
+					(direction.y() * direction.x());
+				grad_f[i + 0] += (projection.z() - point.z()) * 
+					(direction.z() * direction.x());
+				grad_f[i + 1] += (projection.x() - point.x()) *
+					(direction.x() * direction.y());
+				grad_f[i + 1] += (projection.y() - point.y()) *
+					(direction.y() * direction.y() - 1.);
+				grad_f[i + 1] += (projection.z() - point.z()) *
+					(direction.z() * direction.y());
+				grad_f[i + 2] += (projection.x() - point.x()) *
+					(direction.x() * direction.z());
+				grad_f[i + 2] += (projection.y() - point.y()) *
+					(direction.y() * direction.z());
+				grad_f[i + 2] += (projection.z() - point.z()) *
+					(direction.z() * direction.z() - 1.);
+			}
+			grad_f[i + 0] *= 2.;
+			grad_f[i + 1] *= 2.;
+			grad_f[i + 2] *= 2.;
+			i += 3;
+		}
+		return true;
+	}
+
+	/** Method to return the constraint residuals */
+	virtual bool eval_g(Index n, const Number* x, bool new_x, Index m,
+			Number* g)
+	{
+		Vector_3 normalMoved(x[0], x[1], x[2]);
+		Plane_3 planeMoved(x[0], x[1], x[2], x[3]);
+		Index iConstraint = 0;
+		g[iConstraint++] = normalMoved.squared_length();
+		for (int iPoint = 0; iPoint < (int) descriptions_.size();
+				++iPoint)
+		{
+			Index i = 4 + 3 * iPoint;
+			Vector_3 point(x[i], x[i + 1], x[i + 2]);
+			g[iConstraint++] = normalMoved * point + planeMoved.d();
+		}
+		for (int iPoint = 0; iPoint < (int) descriptions_.size();
+				++iPoint)
+		{
+			Index i = 4 + 3 * iPoint;
+			Vector_3 point(x[i], x[i + 1], x[i + 2]);
+			for (Plane_3 plane: descriptions_[iPoint].planes)
+			{
+				Vector_3 normal(plane.a(), plane.b(),
+						plane.c());
+				g[iConstraint++] = normal * point + plane.d();
+			}
+		}
+		return true;
+	}
+
+	/** Method to return:
+	*   1) The structure of the jacobian (if "values" is NULL)
+	*   2) The values of the jacobian (if "values" is not NULL)
+	*/
+	virtual bool eval_jac_g(Index n, const Number* x, bool new_x,
+		Index m, Index nele_jac, Index* iRow, Index *jCol,
+		Number* values)
+	{
+		Index *iRow_ = new Index[nele_jac];
+		Index *jCol_ = new Index[nele_jac];
+		Number *x_ = new Number[n];
+		if (x)
+			for (int i = 0; i < n; ++i)
+				x_[i] = x[i];
+		else
+			for (int i = 0; i < n; ++i)
+				x_[i] = 0.;
+		Number *values_ = new Number[nele_jac];
+
+		Index iConstraint = 0;
+		Index iNonzero = 0;
+		Number planeMoved[4];
+		for (Index iVariable = 0; iVariable < 3; ++iVariable)
+		{
+			iRow_[iNonzero] = iConstraint;
+			jCol_[iNonzero] = iVariable;
+			values_[iNonzero] = 2. * x_[iVariable];
+			++iNonzero;
+		}
+		for (Index iVariable = 0; iVariable < 4; ++iVariable)
+		{
+			planeMoved[iVariable] = x_[iVariable];
+		}
+		++iConstraint;
+
+		Index numPoints = descriptions_.size();
+		for (Index iPoint = 0; iPoint < numPoints; ++iPoint)
+		{
+			Index iVariableFirst = 4 + 3 * iPoint;
+			Number point[4];
+			for (Index iVariable = 0; iVariable < 3; ++iVariable)
+				point[iVariable] =
+					x_[iVariableFirst + iVariable];
+			point[3] = 1.;
+
+			for (Index iVariable = 0; iVariable < 4;
+					++iVariable)
+			{
+				iRow_[iNonzero] = iConstraint;
+				jCol_[iNonzero] = iVariable;
+				values_[iNonzero] = point[iVariable];
+				++iNonzero;
+			}
+			for (Index iVariable = iVariableFirst;
+					iVariable < iVariableFirst + 3;
+					++iVariable)
+			{
+				iRow_[iNonzero] = iConstraint;
+				jCol_[iNonzero] = iVariable;
+				values_[iNonzero] = planeMoved[iVariable
+					- iVariableFirst];
+				++iNonzero;
+			}
+			++iConstraint;
+		}
+
+		for (Index iPoint = 0; iPoint < numPoints; ++iPoint)
+		{
+			for (Plane_3 plane:
+					descriptions_[iPoint].planes)
+			{
+				Number planeFixed[4];
+				planeFixed[0] = plane.a();
+				planeFixed[1] = plane.b();
+				planeFixed[2] = plane.c();
+				planeFixed[3] = plane.d();
+				Index iVariableFirst = 4 + 3 * iPoint;
+				for (Index iVariable = iVariableFirst;
+						iVariable < iVariableFirst + 3;
+						++iVariable)
+				{
+					iRow_[iNonzero] = iConstraint;
+					jCol_[iNonzero] = iVariable;
+					values_[iNonzero] = planeFixed[iVariable
+						- iVariableFirst];
+					++iNonzero;
+				}
+				++iConstraint;
+			}
+		}
+		assert(iNonzero == nele_jac);
+
+		if (values)
+		{
+			for (Index i = 0; i < nele_jac; ++i)
+				values[i] = values_[i];
+		}
+		else
+		{
+			for (Index i = 0; i < nele_jac; ++i)
+			{
+				iRow[i] = iRow_[i];
+				jCol[i] = jCol_[i];
+			}
+		}
+		delete[] iRow_;
+		delete[] jCol_;
+		delete[] x_;
+		delete[] values_;
+		return true;
+	}
+
+	/** Method to return:
+	*   1) The structure of the hessian of the lagrangian (if "values" is NULL)
+	*   2) The values of the hessian of the lagrangian (if "values" is not NULL)
+	*/
+	virtual bool eval_h(Index n, const Number* x, bool new_x,
+		Number obj_factor, Index m, const Number* lambda,
+		bool new_lambda, Index nele_hess, Index* iRow,
+		Index* jCol, Number* values)
+	{
+		Index *iRow_ = new Index[nele_hess];
+		Index *jCol_ = new Index[nele_hess];
+		Number *lambda_ = new Number[m];
+		if (lambda)
+			for (int i = 0; i < m; ++i)
+				lambda_[i] = lambda[i];
+		else
+			for (int i = 0; i < m; ++i)
+				lambda_[i] = 0.;
+		Number *values_ = new Number[nele_hess];
+		int iNonzero = 0;
+
+		int numPoints = descriptions_.size();
+		for (Index i = 0; i < 3; ++i)
+		{
+			iRow_[iNonzero] = i;
+			jCol_[iNonzero] = i;
+			values_[iNonzero] = lambda_[0];
+			++iNonzero;
+			for (int iPoint = 0; iPoint < numPoints; ++iPoint)
+			{
+				iRow_[iNonzero] = i;
+				jCol_[iNonzero] = 4 + 3 * iPoint + i;
+				values_[iNonzero] = lambda_[1 + iPoint];
+				++iNonzero;
+			}
+
+		}
+
+		for (int iPoint = 0; iPoint < numPoints; ++iPoint)
+		{
+			std::vector<Number> d[3][3];
+			auto lines = descriptions_[iPoint].lines;
+			int numLines = lines.size();
+			for (auto line: lines)
+			{
+				auto vector = line.to_vector();
+				double x = vector.x();
+				double y = vector.y();
+				double z = vector.z();
+				d[0][0].push_back(x * x - 1.);
+				d[0][1].push_back(x * y);
+				d[0][2].push_back(x * z);
+				d[1][0].push_back(y * x);
+				d[1][1].push_back(y * y - 1.);
+				d[1][2].push_back(y * z);
+				d[2][0].push_back(z * x);
+				d[2][1].push_back(z * y);
+				d[2][2].push_back(z * z - 1.);
+			}
+
+			for (int i = 0; i < 3; ++i)
+			{
+				int row = 4 + 3 * iPoint + i;
+				iRow_[iNonzero] = row;
+				jCol_[iNonzero] = i;
+				values_[iNonzero] = lambda_[1 + iPoint];
+				++iNonzero;
+				
+				for (int j = 0; j < 3; ++j)
+				{
+					int col = 4 + 3 * iPoint + j;
+					iRow_[iNonzero] = row;
+					jCol_[iNonzero] = col;
+					values_[iNonzero] = 0.;
+					for (int k = 0; k < 3; ++k)
+					{
+						for (int l = 0; l < numLines;
+								++l)
+						{
+							values_[iNonzero] +=
+								d[k][i][l] *
+								d[k][j][l] * 2.;
+						}
+					}
+					++iNonzero;
+				}
+			}
+		}
+		assert(iNonzero == nele_hess);
+
+		if (values)
+		{
+			for (Index i = 0; i < nele_hess; ++i)
+				values[i] = values_[i];
+		}
+		else
+		{
+			for (Index i = 0; i < nele_hess; ++i)
+			{
+				iRow[i] = iRow_[i];
+				jCol[i] = jCol_[i];
+			}
+		}
+		delete[] iRow_;
+		delete[] jCol_;
+		delete[] lambda_;
+		delete[] values_;
+		return true;
+	}
+
+	//@}
+
+	/** @name Solution Methods */
+	//@{
+	/** This method is called when the algorithm is complete so the TNLP can store/write the solution */
+	virtual void finalize_solution(SolverReturn status,
+		Index n, const Number* x, const Number* z_L, const Number* z_U,
+		Index m, const Number* g, const Number* lambda,
+		Number obj_value,
+		const IpoptData* ip_data,
+		IpoptCalculatedQuantities* ip_cq)
+	{
+		/* TODO */
+	}
+	//@}
+
+	private:
+	/**@name Methods to block default compiler methods.
+	* The compiler automatically generates the following three methods.
+	*  Since the default compiler implementation is generally not what
+	*  you want (for all but the most simple classes), we usually 
+	*  put the declarations of these methods in the private section
+	*  and never implement them. This prevents the compiler from
+	*  implementing an incorrect "default" behavior without us
+	*  knowing. (See Scott Meyers book, "Effective C++")
+	*  
+	*/
+	//@{
+	//  HS071_NLP();
+	FacetCorrectionNLP(const FacetCorrectionNLP&);
+	FacetCorrectionNLP& operator=(const FacetCorrectionNLP&);
+	//@}
+};
+
 int main(int argc, char **argv)
 {
 	if (argc != 3)
@@ -340,5 +775,29 @@ int main(int argc, char **argv)
 	auto descriptions = buildProblemPointDescriptions(
 			pyramidCut, iFacetCutting, numShadowContours);
 	dumpDescriptions(descriptions);
-	return 0;
+
+	Plane_3 plane = (pyramidCut.facets_begin() + iFacetCutting)->plane();
+	SmartPtr<TNLP> mynlp = new FacetCorrectionNLP(descriptions, plane);
+	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
+	app->RethrowNonIpoptException(true);
+	app->Options()->SetNumericValue("tol", 1e-7);
+	app->Options()->SetStringValue("mu_strategy", "adaptive");
+	app->Options()->SetStringValue("output_file", "ipopt.out");
+	ApplicationReturnStatus status;
+	status = app->Initialize();
+	if (status != Solve_Succeeded)
+	{
+		std::cout << std::endl << std::endl
+			<< "*** Error during initialization!" << std::endl;
+		return (int) status;
+	}
+	status = app->OptimizeTNLP(mynlp);
+	if (status == Solve_Succeeded)
+		std::cout << std::endl << std::endl << "*** The problem solved!"
+			<< std::endl;
+	else
+		std::cout << std::endl << std::endl << "*** The problem FAILED!"
+			<< std::endl;
+
+	return (int) status;
 }
