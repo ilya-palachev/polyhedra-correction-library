@@ -151,6 +151,7 @@ set (SOURCE_tests
 	Tests/Recoverer_test.cpp
 	Tests/ShadowContourCluterizer_test.cpp
 	Tests/shadowContoursConstruction.cpp
+	Tests/supportPlanes2DJoiner.cpp
 )
 
 set (INCLUDE_DIRS_all
