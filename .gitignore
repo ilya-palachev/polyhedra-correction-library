@@ -63,3 +63,6 @@ config/debug_exceptions.conf
 
 # VIM files:
 .*.swp
+
+# CTags generated file:
+tags
