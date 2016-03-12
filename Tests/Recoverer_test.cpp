@@ -28,6 +28,7 @@
 #include <sys/time.h>
 
 #include "Constants.h"
+#include "Common.h"
 #include "PolyhedraCorrectionLibrary.h"
 
 /**
@@ -1566,31 +1567,6 @@ static ShadowContourDataPtr getRealSCData(CommandLineOptions* options)
 
 	DEBUG_END;
 	return SCData;
-}
-
-/**
- * Generates random number d such that |d| <= maxDelta
- *
- * @param maxDelta	maximum absolute limit of generated number
- */
-static double genRandomDouble(double maxDelta)
-{
-	DEBUG_START;
-	//srand((unsigned) time(0));
-	struct timeval t1;
-	gettimeofday(&t1, NULL);
-	srand(t1.tv_usec * t1.tv_sec);
-	
-	int randomInteger = rand();
-	double randomDouble = randomInteger;
-	const double halfRandMax = RAND_MAX * 0.5;
-	randomDouble -= halfRandMax;
-	randomDouble /= halfRandMax;
-
-	randomDouble *= maxDelta;
-
-	DEBUG_END;
-	return randomDouble;
 }
 
 /**

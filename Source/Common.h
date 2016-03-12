@@ -23,3 +23,10 @@
  * @brief Common functions used in PCL (declaration)
  */
 bool tryGetenvDouble(const char *envName, double &value);
+
+/**
+ * Generates random number d such that |d| <= maxDelta
+ *
+ * @param maxDelta	maximum absolute limit of generated number
+ */
+double genRandomDouble(double maxDelta);

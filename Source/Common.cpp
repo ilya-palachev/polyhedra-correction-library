@@ -24,6 +24,7 @@
  */
 
 #include <cstdlib>
+#include <sys/time.h>
 #include "DebugPrint.h"
 
 bool tryGetenvDouble(const char *envName, double &value)
@@ -49,3 +50,24 @@ bool tryGetenvDouble(const char *envName, double &value)
 	DEBUG_END;
 	return false;
 }
+
+double genRandomDouble(double maxDelta)
+{
+	DEBUG_START;
+	//srand((unsigned) time(0));
+	struct timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
+	
+	int randomInteger = rand();
+	double randomDouble = randomInteger;
+	const double halfRandMax = RAND_MAX * 0.5;
+	randomDouble -= halfRandMax;
+	randomDouble /= halfRandMax;
+
+	randomDouble *= maxDelta;
+
+	DEBUG_END;
+	return randomDouble;
+}
+

@@ -8,6 +8,7 @@
 #include <coin/IpIpoptApplication.hpp>
 using namespace Ipopt;
 
+#include "Common.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
 
@@ -57,31 +58,6 @@ public:
 		B.end_surface();
 	}
 };
-
-/**
- * Generates random number d such that |d| <= maxDelta
- *
- * @param maxDelta	maximum absolute limit of generated number
- */
-static double genRandomDouble(double maxDelta)
-{
-	DEBUG_START;
-	//srand((unsigned) time(0));
-	struct timeval t1;
-	gettimeofday(&t1, NULL);
-	srand(t1.tv_usec * t1.tv_sec);
-	
-	int randomInteger = rand();
-	double randomDouble = randomInteger;
-	const double halfRandMax = RAND_MAX * 0.5;
-	randomDouble -= halfRandMax;
-	randomDouble /= halfRandMax;
-
-	randomDouble *= maxDelta;
-
-	DEBUG_END;
-	return randomDouble;
-}
 
 const double MEAN_VALUE = 0.5;
 const double RAND_MAX_VALUE = 0.1;

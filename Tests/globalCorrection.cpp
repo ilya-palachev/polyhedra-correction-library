@@ -18,6 +18,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "Common.h"
 #include "PolyhedraCorrectionLibrary.h"
 
 enum NameFigure
@@ -260,22 +261,6 @@ PolyhedronPtr makePolyhedron(NameFigure figureParsed)
 	}
 	DEBUG_END;
 	return NULL;
-}
-
-static double genRandomDouble(double maxDelta)
-{
-	DEBUG_START;
-	srand((unsigned) time(0));
-	int randomInteger = rand();
-	double randomDouble = randomInteger;
-	const double halfRandMax = RAND_MAX * 0.5;
-	randomDouble -= halfRandMax;
-	randomDouble /= halfRandMax;
-
-	randomDouble *= maxDelta;
-
-	DEBUG_END;
-	return randomDouble;
 }
 
 inline void moveFacetRandom(PolyhedronPtr polyhedron, double maxMoveDelta,
