@@ -144,6 +144,7 @@ set (SOURCE_tests
 	Tests/intersectPolyhedron.cpp
 	Tests/joinFacets.cpp
 	Tests/joinFacetsMultiple.cpp
+	Tests/join2DFacets.cpp
 	Tests/moveVertexGetStatistics.cpp
 	Tests/moveVertexLinear2.cpp
 	Tests/moveVertexW.cpp
