@@ -48,6 +48,7 @@ static double genRandomDouble(double maxDelta)
 std::vector<Point_2> generateExtremePoints(int numPoints)
 {
 	std::vector<Point_2> points;
+#if 0
 	for (int i = 0; i < numPoints; ++i)
 	{
 		do
@@ -64,6 +65,20 @@ std::vector<Point_2> generateExtremePoints(int numPoints)
 		}
 		while (1);
 	}
+#endif
+	double maxDelta = 2. / ((double) numPoints);
+	for (int i = 0; i < numPoints; ++i)
+	{
+		double angle = 2. * M_PI * ((double) i) / ((double) numPoints);
+		double xShift = genRandomDouble(maxDelta);
+		double yShift = genRandomDouble(maxDelta);
+		Point_2 point(cos(angle) + xShift, sin(angle) + yShift);
+		points.push_back(point);
+	}
+	std::vector<Point_2> hull;
+	convex_hull_2(points.begin(), points.end(), std::back_inserter(hull));
+	assert(hull.size() == numPoints);
+	std::cout << "Number of points in the hull: " << hull.size() << std::endl;
 	return points;
 }
 
@@ -130,13 +145,8 @@ int calculateJoinedNumber(std::vector<Point_2> points)
 	return numJoined;
 }
 
-Point_2 calculateTop(std::vector<Point_2> points, int numJoined)
+Point_2 calculateTop(Point_2 left, Point_2 first, Point_2 last, Point_2 right)
 {
-	Point_2 left = points[0];
-	Point_2 first = points[1];
-	Point_2 last = points[numJoined];
-	Point_2 right = points[numJoined + 1];
-
 	Line_2 lineLeft(left, first);
 	Line_2 lineRight(right, last);
 
@@ -147,11 +157,29 @@ Point_2 calculateTop(std::vector<Point_2> points, int numJoined)
 		exit(EXIT_FAILURE);
 }
 
+double calculateFunctional(int numJoined, std::vector<Vector_2> directions,
+		std::vector<double> values, Point_2 gridLeft, Point_2 gridRight)
+{
+	Vector_2 left = gridLeft - CGAL::Origin();
+	Vector_2 right = gridRight - CGAL::Origin();
+	double functional = 0.;
+	for (int i = 1; i <= numJoined; ++i)
+	{
+		Vector_2 direction = directions[i];
+		double value = values[i];
+		double difference = std::max(direction * left,
+				direction * right) - value;
+		functional += difference * difference;
+	}
+	return functional > 100. ? 100. : functional;
+}
+
 int main(int argc, char **argv)
 {
-	if (argc != 2)
+	if (argc != 3)
 		return EXIT_FAILURE;
 	int numPoints = atoi(argv[1]);
+	int numGridPoints = atoi(argv[2]);
 	std::cout << "Convex hull of " << numPoints << " will be generated"
 		<< std::endl;
 	if (numPoints <= 0)
@@ -172,10 +200,46 @@ int main(int argc, char **argv)
 	int numJoined = calculateJoinedNumber(points);
 	std::cout << "Joined facets number: " << numJoined << std::endl;
 
-	Point_2 top = calculateTop(points, numJoined);
+	Point_2 left = points[0];
+	Point_2 first = points[1];
+	Point_2 last = points[numJoined];
+	Point_2 right = points[numJoined + 1];
+	
+	Point_2 top = calculateTop(left, first, last, right);
+	Vector_2 sideLeft = top - first;
+	double stepLeft = sqrt(sideLeft.squared_length()) / numGridPoints;
+	Vector_2 sideRight = top - last;
+	double stepRight = sqrt(sideRight.squared_length()) / numGridPoints;
+
+	std::ofstream result;
+	result.open("result.csv");
+	result << "x coord,y coord,z coord,scalar" << std::endl;
+	Point_2 gridLeft = first;
+	double x = 0.;
+	for (int i = 0; i < numGridPoints; ++i)
+	{
+		Point_2 gridRight = last;
+		double y = 0.;
+		for (int j = 0; j < numGridPoints; ++j)
+		{
+			double functional = calculateFunctional(numJoined,
+					directions, values,
+					gridLeft, gridRight);
+			if (functional <= 100.)			
+				result << x << "," << y << ","
+					<< functional << ","
+					<< 0 << std::endl;
+			gridRight = gridRight + sideRight * stepRight;
+			y += stepRight;
+		}
+		gridLeft = gridLeft + sideLeft * stepLeft;
+		x += stepLeft;
+	}
+	result.close();
+
 	std::ofstream outputFile;
 	outputFile.open("join2Dfacets-initial.txt");
-	for (int i = 0; i < numJoined; ++i)
+	for (int i = 0; i < numJoined + 1; ++i)
 		outputFile << points[i] << std::endl;
 	outputFile << top << std::endl;
 	outputFile.close();
