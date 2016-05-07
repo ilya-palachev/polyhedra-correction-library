@@ -60,6 +60,18 @@ private:
 
 	/** The solution returned by Ipopt. */
 	VectorXd solution;
+
+	/** Warm solution vector of the problem. */
+	VectorXd warmSolution;
+	/** Remembered (warm) lower bound multipliers from previous solution run. */
+	VectorXd warmMultipliersBoundLower;
+	/** Remembered (warm) upper bound multipliers from previous solution run. */
+	VectorXd warmMultipliersBoundUpper;
+	/** Remembered (warm) constraints multipliers from previous solution run. */
+	VectorXd warmMultipliersConstraints;
+
+	/** Specifies whether the given run is a repeated (warm) run. */
+	bool ifRepeated;
 public:
 	/**
 	 * Default constructor
@@ -302,6 +314,13 @@ public:
 	 * @return		The solution vector.
 	 */
 	virtual VectorXd run(void);
+
+	/**
+	 * Re-runs the Ipopt algorithm.
+	 *
+	 * @return		The solution vector.
+	 */
+	void rerun(void);
 };
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */

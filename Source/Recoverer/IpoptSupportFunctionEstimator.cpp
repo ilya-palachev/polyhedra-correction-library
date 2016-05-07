@@ -39,7 +39,12 @@ IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 	numVariablesEpsilon(),
 	numConsistencyConditions(),
 	numLocalityConditions(),
-	solution()
+	solution(),
+	warmSolution(),
+	warmMultipliersBoundLower(),
+	warmMultipliersBoundUpper(),
+	warmMultipliersConstraints(),
+	ifRepeated(false)
 {
 	DEBUG_START;
 	numVariablesX = data->numValues();
@@ -146,9 +151,43 @@ bool IpoptSupportFunctionEstimator::get_starting_point(Index n, bool init_x,
 		bool init_lambda, Number* lambda)
 {
 	DEBUG_START;
-	ASSERT(x);
 	ASSERT(n == numVariablesX + numVariablesEpsilon);
 	ASSERT(m = numConsistencyConditions + numLocalityConditions);
+
+	if (ifRepeated)
+	{
+		if (init_x)
+		{
+			std::cerr << "Getting warm primal variables..."
+				<< std::endl;
+			ASSERT(x);
+			for (int i = 0; i < n; ++i)
+				x[i] = warmSolution(i);
+		}
+		if (init_z)
+		{
+			std::cerr << "Getting warm bound multipliers..."
+				<< std::endl;
+			ASSERT(z_L);
+			ASSERT(z_U);
+			for (int i = 0; i < n; ++i)
+			{
+				z_L[i] = warmMultipliersBoundLower(i);
+				z_U[i] = warmMultipliersBoundUpper(i);
+			}
+
+		}
+		if (init_lambda)
+		{
+			std::cerr << "Getting warm constraints multipliers..."
+				<< std::endl;
+			ASSERT(lambda);
+			for (int i = 0; i < m; ++i)
+				lambda[i] = warmMultipliersConstraints(i);
+		}
+		DEBUG_END;
+		return true;
+	}
 	if (init_x)
 	{
 		VectorXd x0 = data->startingVector();
@@ -478,6 +517,10 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 	DEBUG_START;
 	ASSERT(n == numVariablesX + numVariablesEpsilon);
 	VectorXd result(numVariablesX);
+	VectorXd warm_x(n);
+	VectorXd warm_z_L(n);
+	VectorXd warm_z_U(n);
+	VectorXd warm_lambda(m);
 
 	switch (status)
 	{
@@ -487,7 +530,19 @@ void IpoptSupportFunctionEstimator::finalize_solution(SolverReturn status,
 		{
 			result(i) = x[i];
 		}
+		for (int i = 0; i < n; ++i)
+		{
+			warm_x(i) = x[i];
+			warm_z_L(i) = z_L[i];
+			warm_z_U(i) = z_U[i];
+		}
+		for (int i = 0; i < m; ++i)
+			warm_lambda(i) = lambda[i];
 		solution = result;
+		warmSolution = warm_x;
+		warmMultipliersBoundLower = warm_z_L;
+		warmMultipliersBoundUpper = warm_z_U;
+		warmMultipliersConstraints = warm_lambda;
 		break;
 	case MAXITER_EXCEEDED:
 		MAIN_PRINT("MAXITER_EXCEEDED");
@@ -561,6 +616,43 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	//app->Options()->SetNumericValue("acceptable_tol", 1e-3);
 	//app->Options()->SetIntegerValue("max_iter", 3000000);
 	app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetStringValue("mehrotra_algorithm", "yes");
+
+	/* Ask Ipopt to solve the problem */
+	status = app->OptimizeTNLP(this);
+	if (status == Solve_Succeeded)
+	{
+		MAIN_PRINT("*** The problem solved!");
+	}
+	else
+	{
+		MAIN_PRINT("** The problem FAILED!");
+	}
+
+	rerun();
+
+	DEBUG_END;
+	return solution;
+}
+
+
+void IpoptSupportFunctionEstimator::rerun(void)
+{
+	DEBUG_START;
+	ifRepeated = true;
+	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
+
+	/* Intialize the IpoptApplication and process the options */
+	ApplicationReturnStatus status;
+	status = app->Initialize();
+	if (status != Solve_Succeeded)
+	{
+		MAIN_PRINT("*** Error during initialization!");
+		return;
+	}
+
+	app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetStringValue("warm_start_init_point", "yes");
 
 	/* Ask Ipopt to solve the problem */
 	status = app->OptimizeTNLP(this);
@@ -574,7 +666,7 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	}
 
 	DEBUG_END;
-	return solution;
+	return;
 }
 
 #endif /* USE_IPOPT */
