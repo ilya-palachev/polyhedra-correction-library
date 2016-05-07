@@ -83,7 +83,10 @@ typedef enum
 	CGAL_ESTIMATOR,
 
 	/** Linear CGAL estimator. */
-	CGAL_ESTIMATOR_LINEAR
+	CGAL_ESTIMATOR_LINEAR,
+
+	/** Native method based on iterative solution of quadratic approximations. */
+	QUAD_APPROX_ESTIMATOR
 } RecovererEstimatorType;
 
 /**

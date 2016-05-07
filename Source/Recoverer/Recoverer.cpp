@@ -35,6 +35,7 @@
 #include "Recoverer/ClpSupportFunctionEstimator.h"
 #include "Recoverer/CPLEXSupportFunctionEstimator.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
+#include "Recoverer/QuadApproxSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "Recoverer/NaiveFacetJoiner.h"
@@ -273,6 +274,13 @@ static SupportFunctionEstimator *constructEstimator(
 	case CGAL_ESTIMATOR_LINEAR:
 		estimator = new CGALSupportFunctionEstimator(data,
 				CGAL_ESTIMATION_LINEAR);
+		break;
+	case QUAD_APPROX_ESTIMATOR:
+		estimator = new QuadApproxSupportFunctionEstimator(data);
+		break;
+	default:
+		ERROR_PRINT("Not implemented yet!");
+		exit(EXIT_FAILURE);
 		break;
 	}
 	DEBUG_END;
@@ -575,7 +583,7 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
-	if (estimatorType == NATIVE_ESTIMATOR)
+	if (estimatorType == NATIVE_ESTIMATOR || estimatorType == QUAD_APPROX_ESTIMATOR)
 		supportMatrixType_ = SUPPORT_MATRIX_TYPE_EMPTY;
 	SupportFunctionEstimationDataPtr dataEstimation
 		= constructorEstimation.run(data, supportMatrixType_,

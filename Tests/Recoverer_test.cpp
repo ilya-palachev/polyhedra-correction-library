@@ -651,6 +651,11 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 		CGAL_ESTIMATOR_LINEAR,
 		"cgal-lp",
 		"CGAL solver of linear programming problems"
+	},
+	{
+		QUAD_APPROX_ESTIMATOR,
+		"quad-approx",
+		"Native method based on iterative solution of quadratic approximations"
 	}
 };
 
