@@ -147,15 +147,19 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 {
 	DEBUG_START;
 	/* Remove equal items from data (and normalize all items). */
+	std::cerr << "Removing equal items..." << std::endl;
 	data = data->removeEqual();
 
 	/* Build starting vector. */
+	std::cerr << "Building starting vector..." << std::endl;
 	VectorXd startingVector = buildStartingVector(data, startingBodyType);
 
 	/** Build starting epsilon. */
+	std::cerr << "Building starting epsilon..." << std::endl;
 	double startingEpsilon = calculateEpsilon(data, startingVector);
 
 	/** Build support matrix. */
+	std::cerr << "Building support matrix..." << std::endl;
 	SupportMatrix *supportMatrix = buildSupportMatrix(data,
 		supportMatrixType, startingVector, startingEpsilon);
 
@@ -163,16 +167,27 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	VectorXd supportVector = data->supportValues();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 		"support-vector-original.mat") << supportVector;
-	if (supportVectorAlreadyConsistent(supportVector, supportMatrix, data))
-	{
-		std::cerr << "Original support vector satisfies consistency "
-			<< "conditions!" << std::endl;
+	if (supportMatrix) {
+		std::cerr << "Checking whether the support vector already "
+			"satisfies consistency conditions..." << std::endl;
+		if (supportVectorAlreadyConsistent(
+			supportVector, supportMatrix, data))
+		{
+			std::cerr << "Original support vector satisfies "
+				"consistency conditions!" << std::endl;
+		}
 	}
 
 	/* Check starting vector. */
-	ASSERT(checkStartingVector(startingVector, supportMatrix, data) == 0);
+#ifndef NDEBUG
+	std::cerr << "Checking whether the starting vector already satisfies "
+		"consistency conditions..." << std::endl;
+	int numViolations = checkStartingVector(startingVector, supportMatrix, data);
+	ASSERT(numViolations == 0 && "Starting point is infeasible");
+#endif
 
 	/* Get support directions from data. */
+	std::cerr << "Finally constructing the data structures..." << std::endl;
 	std::vector<Vector3d> supportDirections = data->supportDirections();
 
 	/* Construct data. */
