@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2009-2015 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2016 Ilya Palachev <iliyapalachev@gmail.com>
  *
  * This file is part of Polyhedra Correction Library.
  *
