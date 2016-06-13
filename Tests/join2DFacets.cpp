@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2009-2015 Ilya Palachev <iliyapalachev@gmail.com>
+ *
+ * This file is part of Polyhedra Correction Library.
+ *
+ * Polyhedra Correction Library is free software: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * Polyhedra Correction Library is distributed in the hope that it will
+ * be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Polyhedra Correction Library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file join2DFacets.cpp
+ * @brief Prototype for best fitting polygon in support funciton metrics.
+ */
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
@@ -128,58 +152,11 @@ prepareSupportData(std::vector<Point_2> points)
 	return std::make_pair(directions, values);
 }
 
-int calculateJoinedNumber(std::vector<Point_2> points)
-{
-	int numJoined = 0;
-	do
-	{
-		Point_2 a = points[0];
-		Point_2 b = points[numJoined + 1];
-		double area = a.x() * b.y() - a.y() * b.x();
-		if (area > 0.)
-			break;
-		++numJoined;
-	} while (true);
-	--numJoined;
-	numJoined = numJoined * 50 / 100;
-	return numJoined;
-}
-
-Point_2 calculateTop(Point_2 left, Point_2 first, Point_2 last, Point_2 right)
-{
-	Line_2 lineLeft(left, first);
-	Line_2 lineRight(right, last);
-
-	auto top = CGAL::intersection(lineLeft, lineRight);
-	if (top)
-		return boost::get<Point_2>(*top);
-	else
-		exit(EXIT_FAILURE);
-}
-
-double calculateFunctional(int numJoined, std::vector<Vector_2> directions,
-		std::vector<double> values, Point_2 gridLeft, Point_2 gridRight)
-{
-	Vector_2 left = gridLeft - CGAL::Origin();
-	Vector_2 right = gridRight - CGAL::Origin();
-	double functional = 0.;
-	for (int i = 1; i <= numJoined; ++i)
-	{
-		Vector_2 direction = directions[i];
-		double value = values[i];
-		double difference = std::max(direction * left,
-				direction * right) - value;
-		functional += difference * difference;
-	}
-	return functional > 100. ? 100. : functional;
-}
-
 int main(int argc, char **argv)
 {
-	if (argc != 3)
+	if (argc != 2)
 		return EXIT_FAILURE;
 	int numPoints = atoi(argv[1]);
-	int numGridPoints = atoi(argv[2]);
 	std::cout << "Convex hull of " << numPoints << " will be generated"
 		<< std::endl;
 	if (numPoints <= 0)
@@ -196,54 +173,5 @@ int main(int argc, char **argv)
 	std::vector<Vector_2> directions;
 	std::vector<double> values;
 	std::tie(directions, values) = prepareSupportData(points);
-
-	int numJoined = calculateJoinedNumber(points);
-	std::cout << "Joined facets number: " << numJoined << std::endl;
-
-	Point_2 left = points[0];
-	Point_2 first = points[1];
-	Point_2 last = points[numJoined];
-	Point_2 right = points[numJoined + 1];
-	
-	Point_2 top = calculateTop(left, first, last, right);
-	Vector_2 sideLeft = top - first;
-	double stepLeft = sqrt(sideLeft.squared_length()) / numGridPoints;
-	Vector_2 sideRight = top - last;
-	double stepRight = sqrt(sideRight.squared_length()) / numGridPoints;
-
-	std::ofstream result;
-	result.open("result.csv");
-	result << "x coord,y coord,z coord,scalar" << std::endl;
-	Point_2 gridLeft = first;
-	double x = 0.;
-	for (int i = 0; i < numGridPoints; ++i)
-	{
-		Point_2 gridRight = last;
-		double y = 0.;
-		for (int j = 0; j < numGridPoints; ++j)
-		{
-			double functional = calculateFunctional(numJoined,
-					directions, values,
-					gridLeft, gridRight);
-			if (functional <= 100.)			
-				result << x << "," << y << ","
-					<< functional << ","
-					<< 0 << std::endl;
-			gridRight = gridRight + sideRight * stepRight;
-			y += stepRight;
-		}
-		gridLeft = gridLeft + sideLeft * stepLeft;
-		x += stepLeft;
-	}
-	result.close();
-
-	std::ofstream outputFile;
-	outputFile.open("join2Dfacets-initial.txt");
-	for (int i = 0; i < numJoined + 1; ++i)
-		outputFile << points[i] << std::endl;
-	outputFile << top << std::endl;
-	outputFile.close();
-
-
-	return 0;
+	return EXIT_SUCCESS;
 }
