@@ -155,6 +155,22 @@ prepareSupportData(std::vector<Point_2> points)
 	return std::make_pair(directions, values);
 }
 
+void printClusters(std::vector<std::set<int>> clusters)
+{
+	for (const auto &cluster : clusters)
+	{
+		std::cout << "cluster: ";
+		for (const int i : cluster)
+			std::cout << i << " ";
+		std::cout << std::endl;
+		if (cluster.empty())
+		{
+			std::cerr << "Cluster is empty!" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
 std::vector<std::set<int>> prepareInitialClusters(int numPoints,
 		int numClusters)
 {
@@ -171,18 +187,7 @@ std::vector<std::set<int>> prepareInitialClusters(int numPoints,
 		++iCluster;
 	}
 	std::cout << "Initial clusters:" << std::endl;
-	for (const auto &cluster : clusters)
-	{
-		std::cout << "cluster: ";
-		for (const int i : cluster)
-			std::cout << i << " ";
-		std::cout << std::endl;
-		if (cluster.empty())
-		{
-			std::cerr << "Cluster is empty!" << std::endl;
-			exit(EXIT_FAILURE);
-		}
-	}
+	printClusters(clusters);
 	return clusters;
 }
 
@@ -414,5 +419,7 @@ int main(int argc, char **argv)
 
 	auto clusters = prepareInitialClusters(numPoints, numClusters);
 	constructBestClusters(clusters, directions, values);
+	std::cout << "Best clusters:" << std::endl;
+	printClusters(clusters);
 	return EXIT_SUCCESS;
 }
