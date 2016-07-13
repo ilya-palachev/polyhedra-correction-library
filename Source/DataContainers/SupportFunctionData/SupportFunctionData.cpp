@@ -75,6 +75,18 @@ SupportFunctionData::SupportFunctionData(
 	DEBUG_END;
 }
 
+SupportFunctionData::SupportFunctionData(std::istream &stream)
+{
+	DEBUG_START;
+	double x, y, z, h;
+	while (stream >> x >> y >> z >> h)
+	{
+		SupportFunctionDataItem item(Vector3d(x, y, z), h);
+		items.push_back(item);
+	}
+	DEBUG_END;
+}
+
 SupportFunctionData::~SupportFunctionData()
 {
 	DEBUG_START;

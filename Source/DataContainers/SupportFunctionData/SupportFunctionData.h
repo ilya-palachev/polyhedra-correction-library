@@ -106,6 +106,13 @@ public:
 			const std::vector<SupportFunctionDataItem> itemsGiven);
 
 	/**
+	 * Reads support support function data from input stream.
+	 *
+	 * @param stream 	The stream for data to be read from.
+	 */
+	SupportFunctionData(std::istream &stream);
+
+	/**
 	 * Assignment operator.
 	 *
 	 * @param data	The original data.
