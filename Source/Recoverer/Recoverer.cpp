@@ -241,18 +241,6 @@ static std::vector<Plane_3> produceCorrectedPlanes(
 	return planes;
 }
 
-static Polyhedron_3 producePolyhedron(
-		SupportFunctionEstimationDataPtr dataEstimation,
-		VectorXd estimate)
-{
-	DEBUG_START;
-	/* Intersect halfspaces corresponding to corrected planes. */
-	auto planes = produceCorrectedPlanes(dataEstimation, estimate);
-	Polyhedron_3 intersection(planes);
-	DEBUG_END;
-	return intersection;
-}
-
 static VectorXd supportValuesFromPoints(std::vector<Point_3> directions,
 	VectorXd v)
 {
@@ -285,116 +273,31 @@ void Recoverer::setNumMaxContours(int number)
 	DEBUG_END;
 }
 
-std::vector<std::vector<int>> reindexClusters(
+static Polyhedron_3 producePolyhedron(
 		SupportFunctionEstimationDataPtr data,
-		VectorXd estimate,
-		Polyhedron_3 polyhedronConsistent,
-		std::vector<std::vector<int>> clusters)
+		VectorXd values, RecovererEstimatorType estimatorType,
+		const char *title, bool ifPrintReport = true)
 {
 	DEBUG_START;
-	/* Build map from polyhedron facets' IDs to support items' IDs. */
-	std::vector<int> map(polyhedronConsistent.size_of_facets());
-	for (auto facet = polyhedronConsistent.facets_begin();
-			facet != polyhedronConsistent.facets_end();
-			++facet)
+	/* Intersect halfspaces corresponding to corrected planes. */
+	auto planes = produceCorrectedPlanes(data, values);
+	Polyhedron_3 intersection(planes);
+	
+	/* Dump the resulting polyhedron to the debug file. */
+	std::string name = title;
+       	name += ".ply";
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str()) << intersection;
+
+	if (ifPrintReport)
 	{
-		int id = polyhedronConsistent.indexPlanes_[facet->id];
-		map[facet->id] = id;
+		/* Write the estimation report about this polyhedron. */
+		std::cout << "Report about \"" << title << "\":" << std::endl;
+		printEstimationReport(data->supportMatrix(),
+			data->supportVector(), values, estimatorType);
 	}
-
-	/* Map clusters' IDs to support items IDs. */
-	std::vector<std::vector<int>> clustersNew;
-	for (auto cluster: clusters)
-	{
-		std::vector<int> clusterNew;
-		for (int iFacet: cluster)
-		{
-			int id = map[iFacet];
-			clusterNew.push_back(id);
-		}
-		std::cerr << "new cluster:";
-		for (int iFacet: clusterNew)
-		{
-			std::cerr << " " << iFacet;
-		}
-		std::cerr << std::endl;
-		clustersNew.push_back(clusterNew);
-	}
-	DEBUG_END;
-	return clustersNew;
-}
-
-static Polyhedron_3 produceFinalPolyhedron(
-	SupportFunctionEstimationDataPtr data,
-	VectorXd estimate,
-	VectorXd h3rdParty,
-	RecovererEstimatorType estimatorType,
-	double threshold)
-{
-	DEBUG_START;
-	timer.pushTimer();
-	auto directions = data->supportData()->supportDirectionsCGAL();
-
-	auto h = supportValuesFromPoints(directions, estimate);
-	/* Now produce polyhedron from the estimate. */
-	Polyhedron_3 polyhedron = producePolyhedron(data, h);
-
-	/* Also produce naive polyhedron (to compare recovered one with it). */
-	auto h0 = data->supportVector();
-	Polyhedron_3 polyhedronNaive = producePolyhedron(data,	h0);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "naively-recovered.ply")
-		<< polyhedronNaive;
-
-	/* Also produce polyhedron from starting point of the algorithm. */
-	auto hStarting = supportValuesFromPoints(directions,
-			data->startingVector());
-	Polyhedron_3 polyhedronStart = producePolyhedron(data,	hStarting);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-polyhedron.ply")
-		<< polyhedronStart;
-
-	MAIN_PRINT("===== 3rd-party polyhedron =====");
-	printEstimationReport(data->supportMatrix(), h0, h3rdParty,
-			estimatorType);
-	MAIN_PRINT("===== Starting point: =====");
-	printEstimationReport(data->supportMatrix(), h0, hStarting,
-			estimatorType);
-	MAIN_PRINT("======== First estimate: ========");
-	printEstimationReport(data->supportMatrix(), h0, h, estimatorType);
-
-	std::cout << "Final polyhedron construction: " << timer.popTimer()
-		<< std::endl;
-
-	/* Reset polyhedron facets' IDs according to initial items order. */
-	auto planes = produceCorrectedPlanes(data, h);
-	polyhedron.initialize_indices(planes);
-
-	Polyhedron_3 polyhedronConsistent = polyhedron;
-
-	std::vector<std::vector<int>> clusters;
-	if (threshold > 0.)
-	{
-		/* Produce joined polyhedron: */
-		NaiveFacetJoiner joiner(polyhedron, threshold);
-		auto pairJoined = joiner.run();
-		Polyhedron_3 polyhedronJoined = pairJoined.first;
-		VectorXd estimateJoined =
-			polyhedronJoined.findTangientPointsConcatenated(
-					directions);
-		auto hJoined = supportValuesFromPoints(directions,
-				estimateJoined);
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "estimated-joined.ply");
-		MAIN_PRINT("======== Joined estimate: ========");
-		printEstimationReport(data->supportMatrix(), h0, hJoined,
-				estimatorType);
-		polyhedron = polyhedronJoined;
-		clusters = pairJoined.second;
-	}
-
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
-		<< data->supportData();
 
 	DEBUG_END;
-	return polyhedron;
+	return intersection;
 }
 
 /**
@@ -413,7 +316,7 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 {
 	DEBUG_START;
 	PolyhedronPtr p(new Polyhedron());
-	/*
+	/* 
 	 * FIXME: Current implementation assumes one fixed type of 3rd-party
 	 * data.
 	 */
@@ -446,7 +349,7 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
  *
  * @param directions		The initial directions.
  * @param normMinimal		The minimal norm of Oxy projection that
- * 				is required for the direction for not to be
+ * 				is required for the direction for not to be 
  * 				ignored.
  *
  * FIXME: Ignore only down-side directions, upper-side should be stayed "as is".
@@ -472,66 +375,109 @@ std::set<int> prepareIgnoredIndices(std::vector<Point_3> directions,
 	return ignored;
 }
 
-Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
+Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
-	std::cout << "Number of support function items: " << data->size()
+	std::cout << "Number of support function items: " << SData->size()
 		<< std::endl;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
+		<< SData;
 
-	/* 1. Build support function estimation data. */
+	/* 1. Build support function estimation SData. */
 	timer.pushTimer();
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
 	if (estimatorType == NATIVE_ESTIMATOR)
 		supportMatrixType_ = SUPPORT_MATRIX_TYPE_EMPTY;
-	SupportFunctionEstimationDataPtr dataEstimation
-		= constructorEstimation.run(data, supportMatrixType_,
+	SupportFunctionEstimationDataPtr SEData
+		= constructorEstimation.run(SData, supportMatrixType_,
 				startingBodyType_);
-	std::cout << "Time for estimation data preparation: "
+	std::cout << "Time for estimation SData preparation: "
 		<< timer.popTimer() << std::endl;
 
 	/* 2. Build support function estimator. */
 	timer.pushTimer();
-	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
+	SupportFunctionEstimator *estimator = constructEstimator(SEData,
 			estimatorType, problemType_, threshold_);
 
 	/* 3. Run support function estimation. */
-	VectorXd estimate(dataEstimation->numValues());
+	VectorXd estimate(SEData->numValues());
 	if (estimator)
 		estimate = estimator->run();
 	else
-		estimate = dataEstimation->supportVector();
+		estimate = SEData->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
 	std::cout << "Tine for estimation: " << timer.popTimer() << std::endl;
 
 	/* 4. Validate the result of estimation. */
-	if(!constructorEstimation.checkResult(dataEstimation,
+	if(!constructorEstimation.checkResult(SEData,
 				supportMatrixType_, estimate))
 	{
 		exit(EXIT_FAILURE);
 	}
 
-	/* 5. Prepare 3rd-party data to be compared with. */
+	timer.pushTimer();
+	/* 4.1. Prepared directions' IDs that should be ignored. */
+	indicesDirectionsIgnored = prepareIgnoredIndices(
+			SData->supportDirectionsCGAL(), zMinimalNorm_);
+
+	auto directions = SData->supportDirectionsCGAL();
+
+	/* 4.2. Prepare 3rd-party SData to be compared with. */
 	VectorXd h3rdParty(1);
 	if (fileNamePolyhedron_)
 	{
-		auto directions = data->supportDirectionsCGAL();
 		h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
 				directions, balancingVector_);
+		producePolyhedron(SEData, h3rdParty, estimatorType,
+				"3rd-party-body");
 	}
 
-	/* 5.1. Prepared directions' IDs that should be ignored. */
-	indicesDirectionsIgnored = prepareIgnoredIndices(
-			data->supportDirectionsCGAL(), zMinimalNorm_);
+	/* 4.3. Prepare starting body to be reported. */
+	auto hStarting = supportValuesFromPoints(directions,
+			SEData->startingVector());
+	producePolyhedron(SEData, hStarting, estimatorType, "starting-body");
 
-	/* 6. Produce final polyhedron and reports about it. */
-	Polyhedron_3 polyhedron = produceFinalPolyhedron(dataEstimation,
-			estimate, h3rdParty, estimatorType, threshold_);
+	/* 4.4. Prepare naive body to be reported. */
+	producePolyhedron(SEData, SEData->supportVector(), estimatorType,
+			"naive-body", false);
+
+	/* 4.5. Prepare consistent body to be reported. */
+	auto h = supportValuesFromPoints(directions, estimate);
+	Polyhedron_3 P = producePolyhedron(SEData, h, estimatorType,
+			"consistent-body");
+
+	/*
+	 * 5. Join the polyhedron facets naively and prepare the body based on
+	 * them.
+	 */
+	if (threshold_ > 0.)
+	{
+		auto planes = produceCorrectedPlanes(SEData, h);
+		/*
+		 * Reset polyhedron facets' IDs according to initial items
+		 * order.
+		 */
+		P.initialize_indices(planes);
+
+		/* Produce joined polyhedron: */
+		NaiveFacetJoiner joiner(P, threshold_);
+		P = joiner.run().first;
+		VectorXd estimateJoined =
+			P.findTangientPointsConcatenated(directions);
+
+		producePolyhedron(SEData,
+			supportValuesFromPoints(directions, estimateJoined),
+			estimatorType, "naively-joined-body");
+	}
+
+	std::cout << "Final polyhedron construction: " << timer.popTimer()
+		<< std::endl;
 
 	DEBUG_END;
-	return polyhedron;
+	return P;
 }
 
 Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
