@@ -516,7 +516,7 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	{
 		DEBUG_PRINT("estimate(%d) = %lf", i, estimate(i));
 	}
-#endif 
+#endif
 
 	std::vector<Vector3d> points;
 	for (int i = 0; i < numDirections; ++i)

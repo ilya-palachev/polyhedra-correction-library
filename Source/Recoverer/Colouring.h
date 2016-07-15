@@ -61,7 +61,7 @@ void printColouredIntersection(std::vector<Plane_3> planes,
  * Prints the polyhedron in such manner that facets that are contained in the
  * same cluster are coloured with the same (random) colour.
  *
- * @param polyhedron		The polyhedron. 
+ * @param polyhedron		The polyhedron.
  * @param clustersIndices	The clusters of planes represented as a vector
  * 				of indices' sets.
  * @param suffix		The suffix of output file.
@@ -74,7 +74,7 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
  * Prints the polyhedron in such manner that facets that are contained in the
  * cluster are coloured with the same (random) colour.
  *
- * @param polyhedron		The polyhedron. 
+ * @param polyhedron		The polyhedron.
  * @param clusterIndices	The cluster indices set.
  * @param suffix		The suffix of output file.
  */

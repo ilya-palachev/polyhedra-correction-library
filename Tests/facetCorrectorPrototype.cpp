@@ -443,9 +443,9 @@ public:
 				Point_3 projection = line.projection(point);
 				grad_f[i + 0] += (projection.x() - point.x()) *
 					(direction.x() * direction.x() - 1.);
-				grad_f[i + 0] += (projection.y() - point.y()) * 
+				grad_f[i + 0] += (projection.y() - point.y()) *
 					(direction.y() * direction.x());
-				grad_f[i + 0] += (projection.z() - point.z()) * 
+				grad_f[i + 0] += (projection.z() - point.z()) *
 					(direction.z() * direction.x());
 				grad_f[i + 1] += (projection.x() - point.x()) *
 					(direction.x() * direction.y());
@@ -740,12 +740,12 @@ public:
 	/**@name Methods to block default compiler methods.
 	* The compiler automatically generates the following three methods.
 	*  Since the default compiler implementation is generally not what
-	*  you want (for all but the most simple classes), we usually 
+	*  you want (for all but the most simple classes), we usually
 	*  put the declarations of these methods in the private section
 	*  and never implement them. This prevents the compiler from
 	*  implementing an incorrect "default" behavior without us
 	*  knowing. (See Scott Meyers book, "Effective C++")
-	*  
+	*
 	*/
 	//@{
 	//  HS071_NLP();

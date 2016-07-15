@@ -66,7 +66,7 @@ public:
 	 */
 	Point_3(CGAL::Type_equality_wrapper<
 			CGAL::Cartesian_base_no_ref_count<
-				double, CGAL::Epick>, 
+				double, CGAL::Epick>,
 				CGAL::Epick>::Point_3 p):
 		Kernel::Point_3(p.x(), p.y(), p.z()) {}
 

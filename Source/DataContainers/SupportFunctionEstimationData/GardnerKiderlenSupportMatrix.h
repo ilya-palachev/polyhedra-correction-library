@@ -21,12 +21,12 @@
 /**
  * @file GardnerKiderlenSupportMatrix.h
  * @brief Support matrix based on the approach described by Gardner and
- * Kiderlen 
+ * Kiderlen
  * - declaration.
  *
  * Literature:
  *   Gardner, Kiderlen - A new algorithm for 3D reconstruction from support
- *   functions 
+ *   functions
  *   - see: http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.86.9984
  */
 

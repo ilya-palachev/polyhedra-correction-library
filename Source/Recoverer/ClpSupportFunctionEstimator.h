@@ -68,7 +68,7 @@ class ClpCommandLineSupportFunctionEstimator: public ClpSupportFunctionEstimator
 public:
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param data			Support function estimation data (input)
 	 */
 	ClpCommandLineSupportFunctionEstimator(

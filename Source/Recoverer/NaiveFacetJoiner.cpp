@@ -735,7 +735,7 @@ std::pair<Polyhedron_3, std::vector<std::vector<int>>> NaiveFacetJoiner::run()
 	std::cerr << "Number of first clusters merged: " << clusters_.size()
 		<< std::endl;
 
-	/* 
+	/*
 	 * 5. Try to form new clusters with other (non-clustered) big
 	 * facets.
 	 */

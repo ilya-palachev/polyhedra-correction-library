@@ -42,7 +42,7 @@ IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 {
 	DEBUG_START;
 	numVariablesX = data->numValues();
-	numVariablesEpsilon = 
+	numVariablesEpsilon =
 		(problemType_ == ESTIMATION_PROBLEM_NORM_L_INF)
 		? 1 : (numVariablesX / 3);
 	numConsistencyConditions = data->numConditions();
@@ -60,7 +60,7 @@ bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 		Index& nnz_jac_g, Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	DEBUG_START;
-	numVariablesEpsilon = 
+	numVariablesEpsilon =
 		(problemType_ == ESTIMATION_PROBLEM_NORM_L_INF)
 		? 1 : (numVariablesX / 3);
 
@@ -333,7 +333,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 			else
 			{
 				/*
-				 * Inform about the sparsity structure of the 
+				 * Inform about the sparsity structure of the
 				 * Lagrangian of g
 				 */
 				iRow[i] = it.row();
