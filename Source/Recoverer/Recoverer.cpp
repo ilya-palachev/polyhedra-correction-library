@@ -36,7 +36,6 @@
 #include "Recoverer/CPLEXSupportFunctionEstimator.h"
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
-#include "Recoverer/IpoptFinitePlanesFitter.h"
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/TrustedEdgesDetector.h"
 
@@ -51,7 +50,6 @@ Recoverer::Recoverer() :
 	ifScaleMatrix(false),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
-	numFinitePlanes_(0),
 	fileNamePolyhedron_(NULL),
 	threshold_(0.)
 {
@@ -118,13 +116,6 @@ void Recoverer::setProblemType(EstimationProblemNorm type)
 {
 	DEBUG_START;
 	problemType_ = type;
-	DEBUG_END;
-}
-
-void Recoverer::setNumFinitePlanes(int numFinitePlanes)
-{
-	DEBUG_START;
-	numFinitePlanes_ = numFinitePlanes;
 	DEBUG_END;
 }
 
@@ -422,23 +413,6 @@ static Polyhedron_3 produceFinalPolyhedron(
 		clusters = pairJoined.second;
 	}
 
-	/* FIXME: here should the same way as for naive facet joiner. */
-	char *thresholdEdgeClusterErrorString
-		= getenv("THRESHOLD_EDGE_CLUSTER_ERROR");
-	if (thresholdEdgeClusterErrorString)
-	{
-		char *mistake = NULL;
-		double thresholdEdgeClusterError = strtod(
-				thresholdEdgeClusterErrorString, &mistake);
-		if (mistake && *mistake)
-		{
-			std::cerr << "mistake: " << mistake << std::endl;
-			exit(EXIT_FAILURE);
-		}
-		TrustedEdgesDetector detector(data->supportData(),
-				thresholdEdgeClusterError);
-		detector.run(polyhedron, clusters);
-	}
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
 		<< data->supportData();
 
@@ -495,27 +469,6 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 	DEBUG_START;
 	std::cout << "Number of support function items: " << data->size()
 		<< std::endl;
-
-	/* 0.1. Run finite planes fitter (to be removed) */
-	if (numFinitePlanes_ > 0)
-	{
-		/* Actually, it's not working for now... */
-		IpoptFinitePlanesFitter fitter(data, numFinitePlanes_);
-		fitter.run();
-		DEBUG_END;
-		return Polyhedron_3();
-	}
-
-	/* 0.2. Run trusted edges search (to be removed) */
-	char *trustedEdgesThesholdString = getenv("TRUSTED_EDGES_THRESHOLD");
-	if (trustedEdgesThesholdString)
-	{
-
-		double trustedEdgesThreshold = strtod(
-				trustedEdgesThesholdString, NULL);
-		data->searchTrustedEdges(trustedEdgesThreshold);
-	}
-
 
 	/* 1. Build support function estimation data. */
 	timer.pushTimer();

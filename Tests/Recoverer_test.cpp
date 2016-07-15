@@ -62,9 +62,6 @@
 /** Option "-f" takes the argument with file name. */
 #define OPTION_FILE_NAME 'f'
 
-/** Option "-F" controls the finite number of planes to be fitted. */
-#define OPTION_FINITE_PLANES 'F'
-
 /**
  * Options "-i" sets the body used as starting point of the estimation process.
  */
@@ -149,7 +146,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abc:d:e:f:F:i:l:m:M:n:N:o:p:r:sS:t:T:vx"
+	"a:Abc:d:e:f:i:l:m:M:n:N:o:p:r:sS:t:T:vx"
 
 struct PCLOption: public option
 {
@@ -363,16 +360,6 @@ static PCLOption optionsLong[] =
 	{
 		option
 		{
-			"finite-planes",
-			required_argument,
-			0,
-			OPTION_FINITE_PLANES
-		},
-		"The finite number of planes to be fitted."
-	},
-	{
-		option
-		{
 			"compare",
 			required_argument,
 			0,
@@ -519,9 +506,6 @@ typedef struct
 
 	/** The problem type. */
 	EstimationProblemNorm problemType;
-
-	/** The finite number of planes to be fitted. */
-	int numFinitePlanes;
 
 	/** The name of file with 3rd-party constructed polyhedron. */
 	char *fileNamePolyhedron;
@@ -918,7 +902,6 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
 	options->epsilonFactor = -1;
-	options->numFinitePlanes = 0;
 	options->fileNamePolyhedron = NULL;
 	options->threshold = 0.;
 	options->input.file.ifSupportFunctionData = false;
@@ -1303,28 +1286,6 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			ifOptionEpsilonFactor = true;
-			break;
-		case OPTION_FINITE_PLANES:
-			options->numFinitePlanes = strtol(optarg,
-					&charMistaken, 10);
-			/*
-			 * If user gives invalid character, the charMistaken is
-			 * set to it
-			 */
-			if (charMistaken && *charMistaken)
-			{
-				errorCannotParseNumber(argc, argv,
-						charMistaken);
-			}
-
-			/*
-			 * In case of underflow or overflow errno is set to
-			 * ERANGE.
-			 */
-			if (errno == ERANGE)
-			{
-				errorOutOfRange(argc, argv);
-			}
 			break;
 		case OPTION_COMPARE_WITH_FILE:
 			if (options->fileNamePolyhedron)
@@ -1854,9 +1815,6 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 		GardnerKiderlenSupportMatrix::epsilonFactor =
 			options->epsilonFactor;
 	}
-
-	/* Set the finite number of planes to be fitted. */
-	recoverer->setNumFinitePlanes(options->numFinitePlanes);
 
 	recoverer->setFileNamePolyhedron(options->fileNamePolyhedron);
 	recoverer->setThreshold(options->threshold);

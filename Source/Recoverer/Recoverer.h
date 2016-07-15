@@ -118,9 +118,6 @@ private:
 	/** Number of analyzed contours. */
 	int numMaxContours;
 
-	/** The finite number of planes to be fitted. */
-	int numFinitePlanes_;
-
 	/** File name of 3rd-party constructed polyhedron. */
 	char *fileNamePolyhedron_;
 
@@ -193,14 +190,6 @@ public:
 	 * @param number	The maximum number of analyzed contours.
 	 */
 	void setNumMaxContours(int number);
-
-	/**
-	 * Sets the finite number of planes to be fitted.
-	 *
-	 * @param numFinitePlanes	The finite number of planes to be
-	 * 				fitted.
-	 */
-	void setNumFinitePlanes(int numFinitePlanes);
 
 	/**
 	 * Sets the file name of 3rd-party constructed polyhedron.
