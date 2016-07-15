@@ -123,6 +123,12 @@ private:
 
 	/** The threshold of angle betweeb adjacent facets. */
 	double threshold_;
+
+	/**
+	 * The minimal Z norm for which down-side support directions are not
+	 * ignored during the production of the estimation report.
+	 */
+	double zMinimalNorm_;
 public:
 
 	/**
@@ -207,6 +213,16 @@ public:
 	void setThreshold(double threshold)
 	{
 		threshold_ = threshold;
+	}
+
+	/**
+	 * Sets the Z minimal norm.
+	 *
+	 * @param zMinimalNorm	The Z minimal norm to be set.
+	 */
+	void setZMinimalNorm(double zMinimalNorm)
+	{
+		zMinimalNorm_ = zMinimalNorm;
 	}
 
 	/**

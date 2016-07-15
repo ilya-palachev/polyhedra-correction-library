@@ -139,6 +139,11 @@
  */
 #define OPTION_CONVEXIFY_CONTOURS 'x'
 
+/**
+ * Option "-z" is controlling the Z minimal norm.
+ */
+#define OPTION_Z_MINIMAL_NORM 'z'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
@@ -146,7 +151,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abc:d:e:f:i:l:m:M:n:N:o:p:r:sS:t:T:vx"
+	"a:Abc:d:e:f:i:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
 
 struct PCLOption: public option
 {
@@ -388,6 +393,16 @@ static PCLOption optionsLong[] =
 		},
 		"Support function data file."
 	},
+	{
+		option
+		{
+			"z-minimal-norm",
+			required_argument,
+			0,
+			OPTION_Z_MINIMAL_NORM
+		},
+		"The Z minimal norm."
+	},
 	{option{0, 0, 0, 0}, 0}
 };
 
@@ -512,6 +527,9 @@ typedef struct
 
 	/** The threshold of angle between adjacent facets. */
 	double threshold;
+
+	/** The Z minimal norm. */
+	double zMinimalNorm;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -904,6 +922,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->epsilonFactor = -1;
 	options->fileNamePolyhedron = NULL;
 	options->threshold = 0.;
+	options->zMinimalNorm = 0.;
 	options->input.file.ifSupportFunctionData = false;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
@@ -1320,6 +1339,14 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			ifOptionEpsilonFactor = true;
+			break;
+		case OPTION_Z_MINIMAL_NORM:
+			options->zMinimalNorm = strtod(optarg, &charMistaken);
+			if (charMistaken && *charMistaken)
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			if (errno == ERANGE)
+				errorOutOfRange(argc, argv);
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1818,6 +1845,7 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 
 	recoverer->setFileNamePolyhedron(options->fileNamePolyhedron);
 	recoverer->setThreshold(options->threshold);
+	recoverer->setZMinimalNorm(options->zMinimalNorm);
 
 	DEBUG_END;
 	return recoverer;

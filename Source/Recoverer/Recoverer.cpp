@@ -51,7 +51,8 @@ Recoverer::Recoverer() :
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
 	fileNamePolyhedron_(NULL),
-	threshold_(0.)
+	threshold_(0.),
+	zMinimalNorm_(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
