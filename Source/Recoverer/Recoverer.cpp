@@ -196,74 +196,35 @@ static SupportFunctionEstimator *constructEstimator(
 	DEBUG_START;
 
 	SupportFunctionEstimator *estimator = NULL;
-	NativeSupportFunctionEstimator *nativeEstimator = NULL;
-#ifdef USE_IPOPT
-	IpoptSupportFunctionEstimator *ipoptEstimator = NULL;
-#endif /* USE_IPOPT */
-#ifdef USE_GLPK
-	GlpkSupportFunctionEstimator *glpkEstimator = NULL;
-#endif /* USE_GLPK */
-#ifdef USE_CLP
-	ClpSupportFunctionEstimator *clpEstimator = NULL;
-	ClpCommandLineSupportFunctionEstimator *clpCmdEstimator = NULL;
-#endif /* USE_CLP */
-#ifdef USE_CPLEX
-	CPLEXSupportFunctionEstimator *CPLEXEstimator = NULL;
-#endif /* USE_CPLEX */
-
 	switch (estimatorType)
 	{
 	case ZERO_ESTIMATOR:
 		DEBUG_PRINT("Zero estimatorType is on!");
 		break;
-	case NATIVE_ESTIMATOR:
-		nativeEstimator = new NativeSupportFunctionEstimator(data);
-		estimator =
-			static_cast<SupportFunctionEstimator*>(
-					nativeEstimator);
-		break;
+#define ESTIMATOR_CASE(ID, TYPE) \
+	case ID: \
+		estimator = new TYPE(data); \
+		break
+	ESTIMATOR_CASE(NATIVE_ESTIMATOR, NativeSupportFunctionEstimator);
 #ifdef USE_TSNNLS
-	case TSNNLS_ESTIMATOR:
-		estimator = new TsnnlsSupportFunctionEstimator(data);
-		break;
+	ESTIMATOR_CASE(TSNNLS_ESTIMATOR, TsnnlsSupportFunctionEstimator);
 #endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
-	case IPOPT_ESTIMATOR:
-		ipoptEstimator = new IpoptSupportFunctionEstimator(data);
-		estimator =
-			static_cast<SupportFunctionEstimator*>(ipoptEstimator);
-		break;
+	ESTIMATOR_CASE(IPOPT_ESTIMATOR, IpoptSupportFunctionEstimator);
 #endif /* USE_IPOPT */
 #ifdef USE_GLPK
-	case GLPK_ESTIMATOR:
-		glpkEstimator = new GlpkSupportFunctionEstimator(data);
-		estimator =
-			static_cast<SupportFunctionEstimator*>(glpkEstimator);
-		break;
+	ESTIMATOR_CASE(GLPK_ESTIMATOR, GlpkSupportFunctionEstimator);
 #endif /* USE_GLPK */
 #ifdef USE_CLP
-	case CLP_ESTIMATOR:
-		clpEstimator = new ClpSupportFunctionEstimator(data);
-		estimator =
-			static_cast<SupportFunctionEstimator*>(clpEstimator);
-		break;
-	case CLP_COMMAND_ESTIMATOR:
-		clpCmdEstimator = new ClpCommandLineSupportFunctionEstimator(
-				data);
-		estimator =
-			static_cast<SupportFunctionEstimator*>(clpCmdEstimator);
-		break;
+	ESTIMATOR_CASE(CLP_ESTIMATOR, ClpSupportFunctionEstimator);
+	ESTIMATOR_CASE(CLP_COMMAND_ESTIMATOR,
+			ClpCommandLineSupportFunctionEstimator);
 #endif /* USE_CLP */
 #ifdef USE_CPLEX
-	case CPLEX_ESTIMATOR:
-		CPLEXEstimator = new CPLEXSupportFunctionEstimator(data);
-		estimator =
-			static_cast<SupportFunctionEstimator*>(CPLEXEstimator);
-		break;
+	ESTIMATOR_CASE(CPLEX_ESTIMATOR, CPLEXSupportFunctionEstimator);
 #endif /* USE_CPLEX */
-	case CGAL_ESTIMATOR:
-		estimator = new CGALSupportFunctionEstimator(data);
-		break;
+	ESTIMATOR_CASE(CGAL_ESTIMATOR, CGALSupportFunctionEstimator);
+#undef ESTIMATOR_CASE
 	}
 	estimator->setProblemType(problemType);
 	DEBUG_END;
