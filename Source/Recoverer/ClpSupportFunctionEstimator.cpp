@@ -32,9 +32,10 @@
 #include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data) :
+		SupportFunctionEstimationDataPtr data,
+		bool ifCommandlineMode) :
 	SupportFunctionEstimator(data),
-	ifCommandlineMode(false)
+	ifCommandlineMode(ifCommandlineMode)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -46,10 +47,11 @@ ClpSupportFunctionEstimator::~ClpSupportFunctionEstimator()
 	DEBUG_END;
 }
 
-void ClpSupportFunctionEstimator::enableCommandlineMode()
+ClpCommandLineSupportFunctionEstimator::ClpCommandLineSupportFunctionEstimator(
+		SupportFunctionEstimationDataPtr data) :
+	ClpSupportFunctionEstimator(data, true)
 {
 	DEBUG_START;
-	ifCommandlineMode = true;
 	DEBUG_END;
 }
 
