@@ -293,34 +293,6 @@ void Recoverer::setNumMaxContours(int number)
 	DEBUG_END;
 }
 
-Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
-{
-	DEBUG_START;
-	timer.pushTimer();
-
-	/* Build support function data. */
-	SupportFunctionDataConstructor constructor;
-	if (ifBalancing)
-	{
-		constructor.enableBalanceShadowContours();
-	}
-	if (ifConvexifyContours)
-		constructor.enableConvexifyShadowContour();
-	SupportFunctionDataPtr data = constructor.run(dataShadow,
-			numMaxContours);
-	if (ifBalancing)
-	{
-		balancingVector_ = constructor.balancingVector();
-	}
-	std::cout << "Support data extraction: " << timer.popTimer()
-		<< std::endl;
-
-	Polyhedron_3 polyhedron = run(data);
-
-	DEBUG_END;
-	return polyhedron;
-}
-
 std::vector<std::vector<int>> reindexClusters(
 		SupportFunctionEstimationDataPtr data,
 		VectorXd estimate,
@@ -474,11 +446,26 @@ static Polyhedron_3 produceFinalPolyhedron(
 	return polyhedron;
 }
 
+/**
+ * Prepares the data about the 3rd-party polyhedron costructed not in our
+ * library. It will be used to compare out result with it in different support
+ * metrics.
+ *
+ * @param fileNamePolyhedron	The path to 3rd-party polyhedron.
+ * @param directions		The support directions for measurements.
+ * @param shift			The shift vector on which we alreadt shifted our
+ * 				data to fit the constraint that (0, 0, 0) is
+ * 				inside the negative side of all support values.
+ */
 VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 		std::vector<Point_3> directions, Vector_3 shift)
 {
 	DEBUG_START;
 	PolyhedronPtr p(new Polyhedron());
+	/* 
+	 * FIXME: Current implementation assumes one fixed type of 3rd-party
+	 * data.
+	 */
 	p->fscan_default_1_2(fileNamePolyhedron);
 
 	Polyhedron_3 polyhedron(p);
@@ -488,6 +475,12 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 	auto h3rdParty = data3rdParty->supportValues();
 
 	Polyhedron *pCopy = new Polyhedron(polyhedron);
+
+	/*
+	 * We dump 3-rd party polyhedron here, since it's shifted and can be
+	 * comfortably compared with our polyhedron using some vizualization
+	 * program.
+	 */
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "3rd-party-recovered.ply")
 		<< *pCopy;
 	std::cerr << "3rd party polyhedron has " << p->numFacets << " facets"
@@ -503,14 +496,17 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 	std::cout << "Number of support function items: " << data->size()
 		<< std::endl;
 
+	/* 0.1. Run finite planes fitter (to be removed) */
 	if (numFinitePlanes_ > 0)
 	{
+		/* Actually, it's not working for now... */
 		IpoptFinitePlanesFitter fitter(data, numFinitePlanes_);
 		fitter.run();
 		DEBUG_END;
 		return Polyhedron_3();
 	}
 
+	/* 0.2. Run trusted edges search (to be removed) */
 	char *trustedEdgesThesholdString = getenv("TRUSTED_EDGES_THRESHOLD");
 	if (trustedEdgesThesholdString)
 	{
@@ -521,9 +517,8 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 	}
 
 
+	/* 1. Build support function estimation data. */
 	timer.pushTimer();
-
-	/* Build support function estimation data. */
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
@@ -532,15 +527,15 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 	SupportFunctionEstimationDataPtr dataEstimation
 		= constructorEstimation.run(data, supportMatrixType_,
 				startingBodyType_);
-	std::cout << "Estimation data preparation: " << timer.popTimer()
-		<< std::endl;
+	std::cout << "Time for estimation data preparation: "
+		<< timer.popTimer() << std::endl;
 
+	/* 2. Build support function estimator. */
 	timer.pushTimer();
-	/* Build support function estimator. */
 	SupportFunctionEstimator *estimator = constructEstimator(dataEstimation,
 			estimatorType, problemType_, threshold_);
 
-	/* Run support function estimation. */
+	/* 3. Run support function estimation. */
 	VectorXd estimate(dataEstimation->numValues());
 	if (estimator)
 		estimate = estimator->run();
@@ -548,13 +543,16 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 		estimate = dataEstimation->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
-	std::cout << "Estimation: " << timer.popTimer() << std::endl;
+	std::cout << "Tine for estimation: " << timer.popTimer() << std::endl;
+
+	/* 4. Validate the result of estimation. */
 	if(!constructorEstimation.checkResult(dataEstimation,
 				supportMatrixType_, estimate))
 	{
 		exit(EXIT_FAILURE);
 	}
 
+	/* 5. Prepare 3rd-party data to be compared with. */
 	VectorXd h3rdParty(1);
 	if (fileNamePolyhedron_)
 	{
@@ -562,9 +560,40 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 		h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
 				directions, balancingVector_);
 	}
+
+	/* 6. Produce final polyhedron and reports about it. */
 	Polyhedron_3 polyhedron = produceFinalPolyhedron(dataEstimation,
 			estimate, h3rdParty, estimatorType, threshold_);
 
 	DEBUG_END;
 	return polyhedron;
 }
+
+Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
+{
+	DEBUG_START;
+	/* 0. Build support function data. */
+	timer.pushTimer();
+	SupportFunctionDataConstructor constructor;
+	if (ifBalancing)
+	{
+		constructor.enableBalanceShadowContours();
+	}
+	if (ifConvexifyContours)
+		constructor.enableConvexifyShadowContour();
+	SupportFunctionDataPtr data = constructor.run(dataShadow,
+			numMaxContours);
+	if (ifBalancing)
+	{
+		balancingVector_ = constructor.balancingVector();
+	}
+	std::cout << "Support data extraction: " << timer.popTimer()
+		<< std::endl;
+
+	/* 1. Run the recoverer for the constructed data. */
+	Polyhedron_3 polyhedron = run(data);
+
+	DEBUG_END;
+	return polyhedron;
+}
+
