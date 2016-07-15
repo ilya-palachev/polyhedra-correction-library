@@ -151,7 +151,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	}
 	long int numValues = 3 * numDirections;
 	long int numConditions = triplets.size() / 6;
-	ALWAYS_PRINT(stdout, "Number of skipped constrained: %d (%lf from "
+	ALWAYS_PRINT(stdout, "Number of skipped constraints: %d (%lf from "
 			"total %ld)\n", numSkipped,
 			((double) numSkipped) / (numSkipped + numConditions),
 			numSkipped + numConditions);
