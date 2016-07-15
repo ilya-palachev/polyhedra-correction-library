@@ -334,30 +334,6 @@ static Polyhedron_3 produceFinalPolyhedron(
 	DEBUG_START;
 	timer.pushTimer();
 	auto directions = data->supportData()->supportDirectionsCGAL();
-	char *normMinimalString = getenv("NORM_MINIMAL");
-	double normMinimal = 0.;
-	if (normMinimalString)
-	{
-		char *mistake = NULL;
-		normMinimal = strtod(normMinimalString, &mistake);
-		if (mistake && *mistake)
-		{
-			std::cerr << "mistake: " << mistake << std::endl;
-			exit(EXIT_FAILURE);
-		}
-	}
-	for (int i = 0; i < (int) directions.size(); ++i)
-	{
-		Point_3 direction = directions[i];
-		double normOXYsquared = direction.x() * direction.x()
-				+ direction.y() * direction.y();
-		if (normOXYsquared < normMinimal && direction.z() < 0.)
-		{
-			indicesDirectionsIgnored.insert(i);
-		}
-	}
-	std::cerr << "Number of ignored directions: "
-		<< indicesDirectionsIgnored.size() << std::endl;
 
 	auto h = supportValuesFromPoints(directions, estimate);
 	/* Now produce polyhedron from the estimate. */
@@ -437,7 +413,7 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 {
 	DEBUG_START;
 	PolyhedronPtr p(new Polyhedron());
-	/* 
+	/*
 	 * FIXME: Current implementation assumes one fixed type of 3rd-party
 	 * data.
 	 */
@@ -463,6 +439,37 @@ VectorXd prepare3rdPartyValues(char *fileNamePolyhedron,
 
 	DEBUG_END;
 	return h3rdParty;
+}
+
+/**
+ * Produces directions IDs that should be ignored.
+ *
+ * @param directions		The initial directions.
+ * @param normMinimal		The minimal norm of Oxy projection that
+ * 				is required for the direction for not to be
+ * 				ignored.
+ *
+ * FIXME: Ignore only down-side directions, upper-side should be stayed "as is".
+ */
+std::set<int> prepareIgnoredIndices(std::vector<Point_3> directions,
+		double normMinimal)
+{
+	DEBUG_START;
+	std::set<int> ignored;
+	for (int i = 0; i < (int) directions.size(); ++i)
+	{
+		Point_3 direction = directions[i];
+		double normOXYsquared = direction.x() * direction.x()
+				+ direction.y() * direction.y();
+		if (normOXYsquared < normMinimal && direction.z() < 0.)
+		{
+			ignored.insert(i);
+		}
+	}
+	std::cerr << "Number of ignored directions: " << ignored.size()
+		<< std::endl;
+	DEBUG_END;
+	return ignored;
 }
 
 Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
@@ -514,6 +521,10 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr data)
 		h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
 				directions, balancingVector_);
 	}
+
+	/* 5.1. Prepared directions' IDs that should be ignored. */
+	indicesDirectionsIgnored = prepareIgnoredIndices(
+			data->supportDirectionsCGAL(), zMinimalNorm_);
 
 	/* 6. Produce final polyhedron and reports about it. */
 	Polyhedron_3 polyhedron = produceFinalPolyhedron(dataEstimation,
