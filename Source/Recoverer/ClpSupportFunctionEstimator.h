@@ -42,9 +42,6 @@ class ClpSupportFunctionEstimator:
 private:
 	/** Whether to run the CLP as a sommand-line program. */
 	bool ifCommandlineMode;
-
-	/** The type of problem. */
-	EstimationProblemNorm problemType_;
 public:
 	/**
 	 * Default constructor
@@ -55,13 +52,6 @@ public:
 
 	/** Default destructor. */
 	~ClpSupportFunctionEstimator();
-
-	/**
-	 * Sets the type of problem.
-	 *
-	 * @param type	The problem type.
-	 */
-	void setProblemType(EstimationProblemNorm type);
 
 	/**
 	 * Enables the command-line mode.

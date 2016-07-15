@@ -40,3 +40,9 @@ SupportFunctionEstimator::~SupportFunctionEstimator()
 	DEBUG_END;
 }
 
+void SupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
+{
+	DEBUG_START;
+	problemType_ = type;
+	DEBUG_END;
+}

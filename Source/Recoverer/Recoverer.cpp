@@ -217,7 +217,6 @@ static SupportFunctionEstimator *constructEstimator(
 		break;
 	case NATIVE_ESTIMATOR:
 		nativeEstimator = new NativeSupportFunctionEstimator(data);
-		nativeEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(
 					nativeEstimator);
@@ -230,7 +229,6 @@ static SupportFunctionEstimator *constructEstimator(
 #ifdef USE_IPOPT
 	case IPOPT_ESTIMATOR:
 		ipoptEstimator = new IpoptSupportFunctionEstimator(data);
-		ipoptEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(ipoptEstimator);
 		break;
@@ -238,7 +236,6 @@ static SupportFunctionEstimator *constructEstimator(
 #ifdef USE_GLPK
 	case GLPK_ESTIMATOR:
 		glpkEstimator = new GlpkSupportFunctionEstimator(data);
-		glpkEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(glpkEstimator);
 		break;
@@ -246,14 +243,12 @@ static SupportFunctionEstimator *constructEstimator(
 #ifdef USE_CLP
 	case CLP_ESTIMATOR:
 		clpEstimator = new ClpSupportFunctionEstimator(data);
-		clpEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(clpEstimator);
 		break;
 	case CLP_COMMAND_ESTIMATOR:
 		clpEstimator = new ClpSupportFunctionEstimator(data);
 		clpEstimator->enableCommandlineMode();
-		clpEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(clpEstimator);
 		break;
@@ -261,20 +256,15 @@ static SupportFunctionEstimator *constructEstimator(
 #ifdef USE_CPLEX
 	case CPLEX_ESTIMATOR:
 		CPLEXEstimator = new CPLEXSupportFunctionEstimator(data);
-		CPLEXEstimator->setProblemType(problemType);
 		estimator =
 			static_cast<SupportFunctionEstimator*>(CPLEXEstimator);
 		break;
 #endif /* USE_CPLEX */
 	case CGAL_ESTIMATOR:
-		estimator = new CGALSupportFunctionEstimator(data,
-				CGAL_ESTIMATION_QUADRATIC);
-		break;
-	case CGAL_ESTIMATOR_LINEAR:
-		estimator = new CGALSupportFunctionEstimator(data,
-				CGAL_ESTIMATION_LINEAR);
+		estimator = new CGALSupportFunctionEstimator(data);
 		break;
 	}
+	estimator->setProblemType(problemType);
 	DEBUG_END;
 	return estimator;
 }

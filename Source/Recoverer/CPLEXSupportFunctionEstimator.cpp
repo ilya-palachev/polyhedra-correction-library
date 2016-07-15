@@ -33,8 +33,7 @@
 
 CPLEXSupportFunctionEstimator::CPLEXSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
-	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
+	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -43,13 +42,6 @@ CPLEXSupportFunctionEstimator::CPLEXSupportFunctionEstimator(
 CPLEXSupportFunctionEstimator::~CPLEXSupportFunctionEstimator()
 {
 	DEBUG_START;
-	DEBUG_END;
-}
-
-void CPLEXSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
-{
-	DEBUG_START;
-	problemType_ = type;
 	DEBUG_END;
 }
 

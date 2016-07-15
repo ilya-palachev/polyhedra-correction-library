@@ -34,6 +34,9 @@ class SupportFunctionEstimator
 protected:
 	/* Data used for estimation. */
 	SupportFunctionEstimationDataPtr data;
+	
+	/** Type of problem. */
+	EstimationProblemNorm problemType_;
 public:
 	/**
 	 * Constructs the estimator and sets its data.
@@ -47,6 +50,13 @@ public:
 
 	/** Runs the estimator (should be defined in child classes). */
 	virtual VectorXd run(void) = 0;
+
+	/**
+	 * Sets the type of problem.
+	 *
+	 * @param type	The problem type.
+	 */
+	void setProblemType(EstimationProblemNorm type);
 };
 
 #endif /* SUPPORTFUNCTIONESTIMATOR_H_ */

@@ -79,11 +79,8 @@ typedef enum
 	CPLEX_ESTIMATOR,
 #endif /* USE_CPLEX */
 
-	/** Quadratic primal CGAL estimator.  */
-	CGAL_ESTIMATOR,
-
-	/** Linear CGAL estimator. */
-	CGAL_ESTIMATOR_LINEAR
+	/** Built-in CGAL estimator.  */
+	CGAL_ESTIMATOR
 } RecovererEstimatorType;
 
 /**

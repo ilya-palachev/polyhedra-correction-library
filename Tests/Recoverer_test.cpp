@@ -670,12 +670,7 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
-		"CGAL solver of quadratic programming problems"
-	},
-	{
-		CGAL_ESTIMATOR_LINEAR,
-		"cgal-lp",
-		"CGAL solver of linear programming problems"
+		"Built-in CGAL solver"
 	}
 };
 

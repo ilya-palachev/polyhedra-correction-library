@@ -34,7 +34,6 @@
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numVariablesX(),
 	numVariablesEpsilon(),
 	numConsistencyConditions(),
@@ -57,20 +56,14 @@ IpoptSupportFunctionEstimator::~IpoptSupportFunctionEstimator()
 	DEBUG_END;
 }
 
-void IpoptSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
-{
-	DEBUG_START;
-	problemType_ = type;
-	numVariablesEpsilon = 
-		(problemType_ == ESTIMATION_PROBLEM_NORM_L_INF)
-		? 1 : (numVariablesX / 3);
-	DEBUG_END;
-}
-
 bool IpoptSupportFunctionEstimator::get_nlp_info(Index& n, Index& m,
 		Index& nnz_jac_g, Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	DEBUG_START;
+	numVariablesEpsilon = 
+		(problemType_ == ESTIMATION_PROBLEM_NORM_L_INF)
+		? 1 : (numVariablesX / 3);
+
 	n = numVariablesX + numVariablesEpsilon;
 	DEBUG_PRINT("Number of variables is set to n = %d", n);
 	

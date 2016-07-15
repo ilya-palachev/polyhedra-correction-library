@@ -45,10 +45,8 @@ typedef CGAL::Quadratic_program_solution<ET> Solution;
 #include "CGALSupportFunctionEstimator.h"
 
 CGALSupportFunctionEstimator::CGALSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data,
-		CGALEstimationMode modeOrig) :
-		SupportFunctionEstimator(data),
-		mode(modeOrig)
+		SupportFunctionEstimationDataPtr data) :
+		SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -181,20 +179,24 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 VectorXd CGALSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
-	switch(mode)
+	switch(problemType_)
 	{
-	case CGAL_ESTIMATION_LINEAR:
+	case ESTIMATION_PROBLEM_NORM_L_INF:
 		return runLP();
 		break;
-	case CGAL_ESTIMATION_QUADRATIC:
+	case ESTIMATION_PROBLEM_NORM_L_1:
+		ASSERT(0 && "Not implemented yet!");
+		ERROR_PRINT("L1 problem is not implemented yet for this type of"
+			" recoverer");
+		exit(EXIT_FAILURE);
+		break;
+	case ESTIMATION_PROBLEM_NORM_L_2:
 		return runQP();
 		break;
 	default:
 		__builtin_unreachable();
 		break;
 	}
-
-	__builtin_unreachable();
 	DEBUG_END;
 	return VectorXd(1);
 }

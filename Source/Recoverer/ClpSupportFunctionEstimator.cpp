@@ -34,8 +34,7 @@
 ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data),
-	ifCommandlineMode(false),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
+	ifCommandlineMode(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -51,13 +50,6 @@ void ClpSupportFunctionEstimator::enableCommandlineMode()
 {
 	DEBUG_START;
 	ifCommandlineMode = true;
-	DEBUG_END;
-}
-
-void ClpSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
-{
-	DEBUG_START;
-	problemType_ = type;
 	DEBUG_END;
 }
 

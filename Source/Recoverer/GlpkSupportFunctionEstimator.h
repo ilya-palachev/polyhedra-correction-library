@@ -38,9 +38,6 @@
 class GlpkSupportFunctionEstimator:
 	public SupportFunctionEstimator
 {
-private:
-	/** Type of problem. */
-	EstimationProblemNorm problemType_;
 public:
 	/**
 	 * Default constructor
@@ -51,13 +48,6 @@ public:
 
 	/** Default destructor. */
 	~GlpkSupportFunctionEstimator();
-
-	/**
-	 * Sets the type of problem.
-	 *
-	 * @param type	The problem type.
-	 */
-	void setProblemType(EstimationProblemNorm type);
 
 	/**
 	 * Runs the Glpk algorithm.

@@ -43,9 +43,6 @@ class IpoptSupportFunctionEstimator:
 	public SupportFunctionEstimator
 {
 private:
-	/** Type of problem. */
-	EstimationProblemNorm problemType_;
-
 	/** Number of regular variables: */
 	int numVariablesX;
 
@@ -67,13 +64,6 @@ public:
 	 * @param data	Support function estimation data (input)
 	 */
 	IpoptSupportFunctionEstimator(SupportFunctionEstimationDataPtr data);
-
-	/**
-	 * Sets the type of problem.
-	 *
-	 * @param type	The problem type.
-	 */
-	void setProblemType(EstimationProblemNorm type);
 
 	/** Default destructor. */
 	~IpoptSupportFunctionEstimator();
