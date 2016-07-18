@@ -226,6 +226,16 @@ public:
 	}
 
 	/**
+	 * Runs the classical support function estimation procedure.
+	 *
+	 * @param data		Support function data.
+	 *
+	 * @return		Consistent estimate vector.
+	 */
+	std::pair<VectorXd, SupportFunctionEstimationDataPtr>
+	runEstimation(SupportFunctionDataPtr SData);
+
+	/**
 	 * Runs the recovering procedure for support function data.
 	 *
 	 * @param data		Support function data

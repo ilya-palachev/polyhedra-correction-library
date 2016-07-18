@@ -182,8 +182,7 @@ static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
 static SupportFunctionEstimator *constructEstimator(
 		SupportFunctionEstimationDataPtr data,
 		RecovererEstimatorType estimatorType,
-		EstimationProblemNorm problemType,
-		double threshold)
+		EstimationProblemNorm problemType)
 {
 	DEBUG_START;
 
@@ -375,7 +374,8 @@ std::set<int> prepareIgnoredIndices(std::vector<Point_3> directions,
 	return ignored;
 }
 
-Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
+std::pair<VectorXd, SupportFunctionEstimationDataPtr>
+Recoverer::runEstimation(SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
 	std::cout << "Number of support function items: " << SData->size()
@@ -399,7 +399,7 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 	/* 2. Build support function estimator. */
 	timer.pushTimer();
 	SupportFunctionEstimator *estimator = constructEstimator(SEData,
-			estimatorType, problemType_, threshold_);
+			estimatorType, problemType_);
 
 	/* 3. Run support function estimation. */
 	VectorXd estimate(SEData->numValues());
@@ -417,6 +417,16 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 	{
 		exit(EXIT_FAILURE);
 	}
+	DEBUG_END;
+	return std::make_pair(estimate, SEData);
+}
+
+Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
+{
+	DEBUG_START;
+	VectorXd estimate;
+	SupportFunctionEstimationDataPtr SEData;
+	std::tie(estimate, SEData) = runEstimation(SData);
 
 	timer.pushTimer();
 	/* 4.1. Prepared directions' IDs that should be ignored. */
@@ -426,10 +436,9 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 	auto directions = SData->supportDirectionsCGAL();
 
 	/* 4.2. Prepare 3rd-party SData to be compared with. */
-	VectorXd h3rdParty(1);
 	if (fileNamePolyhedron_)
 	{
-		h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
+		VectorXd h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
 				directions, balancingVector_);
 		producePolyhedron(SEData, h3rdParty, estimatorType,
 				"3rd-party-body");
