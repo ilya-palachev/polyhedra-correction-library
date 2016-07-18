@@ -29,6 +29,8 @@
 #define PCL_DUMPER
 
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <string>
 
 #include "DebugPrint.h"
@@ -84,9 +86,11 @@ public:
 	{
 		DEBUG_START;
 		std::ofstream stream;
+		std::stringstream count;
+		count << std::setfill('0') << std::setw(3)
+			<< dumper.iCurrentDumpCount_;
 		std::string filename = dumper.nameBase_ + "."
-			+ std::to_string(dumper.iCurrentDumpCount_) + "."
-			+ dumper.nameSuffix_;
+			+ count.str() + "." + dumper.nameSuffix_;
 		DEBUG_PRINT("file name = %s", filename.c_str());
 		stream.open(filename, std::ofstream::out);
 
