@@ -409,7 +409,7 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 		estimate = SEData->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
-	std::cout << "Tine for estimation: " << timer.popTimer() << std::endl;
+	std::cout << "Time for estimation: " << timer.popTimer() << std::endl;
 
 	/* 4. Validate the result of estimation. */
 	if(!constructorEstimation.checkResult(SEData,
@@ -449,12 +449,16 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 	Polyhedron_3 P = producePolyhedron(SEData, h, estimatorType,
 			"consistent-body");
 
+	std::cout << "Time for reporting and final post-processing: "
+		<< timer.popTimer() << std::endl;
+
 	/*
 	 * 5. Join the polyhedron facets naively and prepare the body based on
 	 * them.
 	 */
 	if (threshold_ > 0.)
 	{
+		timer.pushTimer();
 		auto planes = produceCorrectedPlanes(SEData, h);
 		/*
 		 * Reset polyhedron facets' IDs according to initial items
@@ -471,10 +475,10 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 		producePolyhedron(SEData,
 			supportValuesFromPoints(directions, estimateJoined),
 			estimatorType, "naively-joined-body");
+		std::cout << "Time for naive facet joining: "
+			<< timer.popTimer() << std::endl;
 	}
 
-	std::cout << "Final polyhedron construction: " << timer.popTimer()
-		<< std::endl;
 
 	DEBUG_END;
 	return P;
