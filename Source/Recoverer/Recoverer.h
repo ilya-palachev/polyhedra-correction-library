@@ -230,10 +230,23 @@ public:
 	 *
 	 * @param data		Support function data.
 	 *
-	 * @return		Consistent estimate vector.
+	 * @return		Consistent values + estimation data.
 	 */
 	std::pair<VectorXd, SupportFunctionEstimationDataPtr>
 	runEstimation(SupportFunctionDataPtr SData);
+
+	/**
+	 * Builds consistent body from the estimated values of support function
+	 * and prints comparison report about it and about other possible
+	 * bodies.
+	 *
+	 * @param consistentValues	The result of support function
+	 * 				estimation.
+	 * @param SEData		The support function estimation initial
+	 * 				data.
+	 */
+	Polyhedron_3 buildConsistentBody(VectorXd consistentValues,
+		SupportFunctionEstimationDataPtr SEData);
 
 	/**
 	 * Runs the recovering procedure for support function data.

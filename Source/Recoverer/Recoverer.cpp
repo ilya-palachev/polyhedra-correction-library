@@ -129,8 +129,7 @@ void Recoverer::setFileNamePolyhedron(char *fileNamePolyhedron)
 
 #define ACCEPTED_TOL 1e-6
 
-static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h,
-	RecovererEstimatorType estimatorType)
+static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
 {
 	DEBUG_START;
 	if (h.size() != h0.size())
@@ -274,8 +273,7 @@ void Recoverer::setNumMaxContours(int number)
 
 static Polyhedron_3 producePolyhedron(
 		SupportFunctionEstimationDataPtr data,
-		VectorXd values, RecovererEstimatorType estimatorType,
-		const char *title, bool ifPrintReport = true)
+		VectorXd values, const char *title, bool ifPrintReport = true)
 {
 	DEBUG_START;
 	/* Intersect halfspaces corresponding to corrected planes. */
@@ -292,7 +290,7 @@ static Polyhedron_3 producePolyhedron(
 		/* Write the estimation report about this polyhedron. */
 		std::cout << "Report about \"" << title << "\":" << std::endl;
 		printEstimationReport(data->supportMatrix(),
-			data->supportVector(), values, estimatorType);
+				data->supportVector(), values);
 	}
 
 	DEBUG_END;
@@ -417,77 +415,102 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	{
 		exit(EXIT_FAILURE);
 	}
+	VectorXd consistentValues = supportValuesFromPoints(
+			SData->supportDirectionsCGAL(), estimate);
 	DEBUG_END;
-	return std::make_pair(estimate, SEData);
+	return std::make_pair(consistentValues, SEData);
+}
+
+Polyhedron_3 Recoverer::buildConsistentBody(VectorXd consistentValues,
+		SupportFunctionEstimationDataPtr SEData)
+{
+	DEBUG_START;
+	timer.pushTimer();
+	/* 1. Prepare directions' IDs that should be ignored. */
+	auto directions = SEData->supportData()->supportDirectionsCGAL();
+	indicesDirectionsIgnored = prepareIgnoredIndices(directions,
+			zMinimalNorm_);
+
+	/* 2. Prepare 3rd-party SData to be compared with. */
+	if (fileNamePolyhedron_)
+	{
+		VectorXd h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
+				directions, balancingVector_);
+		producePolyhedron(SEData, h3rdParty, "3rd-party-body");
+	}
+
+	/* 3. Prepare starting body to be reported. */
+	auto hStarting = supportValuesFromPoints(directions,
+			SEData->startingVector());
+	producePolyhedron(SEData, hStarting, "starting-body");
+
+	/* 4. Prepare naive body to be reported. */
+	producePolyhedron(SEData, SEData->supportVector(), "naive-body", false);
+
+	/* 5. Prepare consistent body to be reported. */
+	Polyhedron_3 P = producePolyhedron(SEData, consistentValues,
+			"consistent-body");
+
+	std::cout << "Time for reporting and final post-processing: "
+		<< timer.popTimer() << std::endl;
+	DEBUG_END;
+	return P;
+}
+
+/**
+ * Simplifies the given body according to some heuristics.
+ *
+ * @param P			The body to be simplified.
+ * @param consistentValues	The result of support function
+ * 				estimation.
+ * @param SEData		The support function estimation initial
+ * 				data.
+ * @paran threshold		The threshold for simplification.
+ */
+static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
+		SupportFunctionEstimationDataPtr SEData, double threshold)
+{
+	DEBUG_START;
+	timer.pushTimer();
+	/*
+	 * 2. Reset polyhedron facets' IDs according to initial items
+	 * order.
+	 */
+	auto planes = produceCorrectedPlanes(SEData, consistentValues);
+	P.initialize_indices(planes);
+
+	/* 2. Produce joined polyhedron: */
+	NaiveFacetJoiner joiner(P, threshold);
+	P = joiner.run().first;
+
+	/* 3. Produce vector of tangient points: */
+	auto directions = SEData->supportData()->supportDirectionsCGAL();
+	VectorXd estimateJoined =
+		P.findTangientPointsConcatenated(directions);
+
+	/* 4. Now produce the joined polyheron and report about it: */
+	producePolyhedron(SEData, supportValuesFromPoints(directions,
+		estimateJoined), "naively-joined-body");
+	std::cout << "Time for naive facet joining: " << timer.popTimer()
+		<< std::endl;
+	DEBUG_END;
+	return P;
 }
 
 Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
-	VectorXd estimate;
+	/* 1. Run classical support function estimation process. */
+	VectorXd consistentValues;
 	SupportFunctionEstimationDataPtr SEData;
-	std::tie(estimate, SEData) = runEstimation(SData);
+	std::tie(consistentValues, SEData) = runEstimation(SData);
 
-	timer.pushTimer();
-	/* 4.1. Prepared directions' IDs that should be ignored. */
-	indicesDirectionsIgnored = prepareIgnoredIndices(
-			SData->supportDirectionsCGAL(), zMinimalNorm_);
+	/* 2. Build the consistent body from the obtained estimate. */
+	Polyhedron_3 P = buildConsistentBody(consistentValues, SEData);
 
-	auto directions = SData->supportDirectionsCGAL();
-
-	/* 4.2. Prepare 3rd-party SData to be compared with. */
-	if (fileNamePolyhedron_)
-	{
-		VectorXd h3rdParty = prepare3rdPartyValues(fileNamePolyhedron_,
-				directions, balancingVector_);
-		producePolyhedron(SEData, h3rdParty, estimatorType,
-				"3rd-party-body");
-	}
-
-	/* 4.3. Prepare starting body to be reported. */
-	auto hStarting = supportValuesFromPoints(directions,
-			SEData->startingVector());
-	producePolyhedron(SEData, hStarting, estimatorType, "starting-body");
-
-	/* 4.4. Prepare naive body to be reported. */
-	producePolyhedron(SEData, SEData->supportVector(), estimatorType,
-			"naive-body", false);
-
-	/* 4.5. Prepare consistent body to be reported. */
-	auto h = supportValuesFromPoints(directions, estimate);
-	Polyhedron_3 P = producePolyhedron(SEData, h, estimatorType,
-			"consistent-body");
-
-	std::cout << "Time for reporting and final post-processing: "
-		<< timer.popTimer() << std::endl;
-
-	/*
-	 * 5. Join the polyhedron facets naively and prepare the body based on
-	 * them.
-	 */
+	/* 3. Simplify this (very complicated!) consistent body. */
 	if (threshold_ > 0.)
-	{
-		timer.pushTimer();
-		auto planes = produceCorrectedPlanes(SEData, h);
-		/*
-		 * Reset polyhedron facets' IDs according to initial items
-		 * order.
-		 */
-		P.initialize_indices(planes);
-
-		/* Produce joined polyhedron: */
-		NaiveFacetJoiner joiner(P, threshold_);
-		P = joiner.run().first;
-		VectorXd estimateJoined =
-			P.findTangientPointsConcatenated(directions);
-
-		producePolyhedron(SEData,
-			supportValuesFromPoints(directions, estimateJoined),
-			estimatorType, "naively-joined-body");
-		std::cout << "Time for naive facet joining: "
-			<< timer.popTimer() << std::endl;
-	}
-
+		P = simplifyBody(P, consistentValues, SEData, threshold_);
 
 	DEBUG_END;
 	return P;
@@ -520,4 +543,3 @@ Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 	DEBUG_END;
 	return polyhedron;
 }
-
