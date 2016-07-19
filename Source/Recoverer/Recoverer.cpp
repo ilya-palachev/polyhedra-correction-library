@@ -40,6 +40,25 @@
 #include "Recoverer/TrustedEdgesDetector.h"
 
 TimeMeasurer timer;
+std::stack<const char *> taskNames;
+
+void pushTimer(const char *taskName)
+{
+	taskNames.push(taskName);
+	std::cout << COLOUR_GREEN << "========== Starting task: \"" << taskName
+		<< "\" ==========" << COLOUR_NORM << std::endl;
+	timer.pushTimer();
+}
+
+void popTimer()
+{
+	const char *taskName = taskNames.top();
+	std::cout << COLOUR_GREEN << "========== Completed task \"" << taskName
+		<< "\" in time: " << timer.popTimer() << " =========="
+		<< COLOUR_NORM << std::endl;
+	taskNames.pop();
+}
+
 std::set<int> indicesDirectionsIgnored;
 
 Recoverer::Recoverer() :
@@ -382,7 +401,7 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 		<< SData;
 
 	/* 1. Build support function estimation SData. */
-	timer.pushTimer();
+	pushTimer("SEData preparation");
 	SupportFunctionEstimationDataConstructor constructorEstimation;
 	if (ifScaleMatrix)
 		constructorEstimation.enableMatrixScaling();
@@ -391,11 +410,10 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	SupportFunctionEstimationDataPtr SEData
 		= constructorEstimation.run(SData, supportMatrixType_,
 				startingBodyType_);
-	std::cout << "Time for estimation SData preparation: "
-		<< timer.popTimer() << std::endl;
+	popTimer();
 
 	/* 2. Build support function estimator. */
-	timer.pushTimer();
+	pushTimer("Estimation");
 	SupportFunctionEstimator *estimator = constructEstimator(SEData,
 			estimatorType, problemType_);
 
@@ -407,7 +425,7 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 		estimate = SEData->supportVector();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
-	std::cout << "Time for estimation: " << timer.popTimer() << std::endl;
+	popTimer();
 
 	/* 4. Validate the result of estimation. */
 	if(!constructorEstimation.checkResult(SEData,
@@ -425,7 +443,7 @@ Polyhedron_3 Recoverer::buildConsistentBody(VectorXd consistentValues,
 		SupportFunctionEstimationDataPtr SEData)
 {
 	DEBUG_START;
-	timer.pushTimer();
+	pushTimer("reporting and final post-processing");
 	/* 1. Prepare directions' IDs that should be ignored. */
 	auto directions = SEData->supportData()->supportDirectionsCGAL();
 	indicesDirectionsIgnored = prepareIgnoredIndices(directions,
@@ -451,8 +469,7 @@ Polyhedron_3 Recoverer::buildConsistentBody(VectorXd consistentValues,
 	Polyhedron_3 P = producePolyhedron(SEData, consistentValues,
 			"consistent-body");
 
-	std::cout << "Time for reporting and final post-processing: "
-		<< timer.popTimer() << std::endl;
+	popTimer();
 	DEBUG_END;
 	return P;
 }
@@ -471,7 +488,7 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 		SupportFunctionEstimationDataPtr SEData, double threshold)
 {
 	DEBUG_START;
-	timer.pushTimer();
+	pushTimer("naive facet joining");
 	/*
 	 * 2. Reset polyhedron facets' IDs according to initial items
 	 * order.
@@ -491,8 +508,7 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 	/* 4. Now produce the joined polyheron and report about it: */
 	producePolyhedron(SEData, supportValuesFromPoints(directions,
 		estimateJoined), "naively-joined-body");
-	std::cout << "Time for naive facet joining: " << timer.popTimer()
-		<< std::endl;
+	popTimer();
 	DEBUG_END;
 	return P;
 }
@@ -520,7 +536,7 @@ Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
 	/* 0. Build support function data. */
-	timer.pushTimer();
+	pushTimer("support data extraction");
 	SupportFunctionDataConstructor constructor;
 	if (ifBalancing)
 	{
@@ -534,8 +550,7 @@ Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 	{
 		balancingVector_ = constructor.balancingVector();
 	}
-	std::cout << "Support data extraction: " << timer.popTimer()
-		<< std::endl;
+	popTimer();
 
 	/* 1. Run the recoverer for the constructed data. */
 	Polyhedron_3 polyhedron = run(data);
