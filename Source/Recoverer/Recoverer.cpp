@@ -37,7 +37,7 @@
 #include "Recoverer/NativeSupportFunctionEstimator.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Recoverer/NaiveFacetJoiner.h"
-#include "Recoverer/TrustedEdgesDetector.h"
+#include "Recoverer/SupportPolyhedronCorrector.h"
 
 TimeMeasurer timer;
 std::stack<const char *> taskNames;
@@ -488,7 +488,7 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 		SupportFunctionEstimationDataPtr SEData, double threshold)
 {
 	DEBUG_START;
-	pushTimer("naive facet joining");
+	pushTimer("facet joining");
 	/*
 	 * 2. Reset polyhedron facets' IDs according to initial items
 	 * order.
@@ -498,7 +498,9 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 
 	/* 2. Produce joined polyhedron: */
 	NaiveFacetJoiner joiner(P, threshold);
+	pushTimer("naive facet joining itself");
 	P = joiner.run().first;
+	popTimer();
 
 	/* 3. Produce vector of tangient points: */
 	auto directions = SEData->supportData()->supportDirectionsCGAL();
@@ -509,6 +511,16 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 	producePolyhedron(SEData, supportValuesFromPoints(directions,
 		estimateJoined), "naively-joined-body");
 	popTimer();
+
+	/* 5. Correct the simplified body. */
+	if (getenv("CORRECT_SIMPLIFIED_BODY"))
+	{
+		pushTimer("polyhedron correction");
+		SupportPolyhedronCorrector corrector(P, SEData->supportData());
+		P = corrector.run();
+		popTimer();
+	}
+
 	DEBUG_END;
 	return P;
 }
