@@ -81,7 +81,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
 
-	std::vector<Vector3d> directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
@@ -121,7 +121,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 	/* Find needed conditions. */
 	long int numDirections = data->size();
-	std::vector<Vector3d> directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
 	int numSkipped = 0;

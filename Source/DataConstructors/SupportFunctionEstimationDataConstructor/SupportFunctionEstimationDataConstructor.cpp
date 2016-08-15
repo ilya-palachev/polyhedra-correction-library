@@ -100,7 +100,7 @@ static bool supportVectorAlreadyConsistent(VectorXd supportVector,
 		DEBUG_END;
 		return true;
 	}
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	VectorXd startingFromSupportVector(3 * directions.size());
 	for (unsigned int i = 0; i < directions.size(); ++i)
 	{
@@ -121,7 +121,7 @@ static double calculateEpsilon(SupportFunctionDataPtr data,
 		VectorXd startingVector)
 {
 	DEBUG_START;
-	std::vector<Vector3d> directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	VectorXd supportVector = data->supportValues();
 	int numDirections = directions.size();
 	double max = 0.;
@@ -188,7 +188,7 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 
 	/* Get support directions from data. */
 	std::cerr << "Finally constructing the data structures..." << std::endl;
-	std::vector<Vector3d> supportDirections = data->supportDirections();
+	auto supportDirections = data->supportDirections<Vector3d>();
 
 	/* Construct data. */
 	if (!supportMatrix)
@@ -305,7 +305,7 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 	Polyhedron_3 intersection(planes);
 
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), intersection.getVertices());
+		data->supportDirections<Point_3>(), intersection.getVertices());
 	DEBUG_END;
 	return startingVector;
 }
@@ -315,7 +315,7 @@ static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 	DEBUG_START;
 	VectorXd startingVector(3 * data->size());
 	VectorXd supportVector = data->supportValues();
-	std::vector<Vector3d> supportDirections = data->supportDirections();
+	auto supportDirections = data->supportDirections<Vector3d>();
 
 	if (supportDirections.empty())
 	{
@@ -334,7 +334,7 @@ static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 	CGAL::convex_hull_3(points.begin(), points.end(), hull);
 	ASSERT(is_strongly_convex_3(hull));
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), hull.getVertices());
+		data->supportDirections<Point_3>(), hull.getVertices());
 	DEBUG_END;
 	return startingVector;
 }
@@ -343,7 +343,7 @@ static VectorXd buildVectorOfUnits(SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	VectorXd startingVector(3 * data->size());
-	std::vector<Vector3d> supportDirections = data->supportDirections();
+	auto supportDirections = data->supportDirections<Vector3d>();
 	for (int i = 0; i < data->size(); ++i)
 	{
 		startingVector(3 * i) = supportDirections[i].x;
@@ -373,7 +373,7 @@ static VectorXd buildVectorFromCube(SupportFunctionDataPtr data)
 	ASSERT(is_strongly_convex_3(cube));
 
 	startingVector = calculateSupportValues(
-		data->supportDirectionsCGAL(), cube.getVertices());
+		data->supportDirections<Point_3>(), cube.getVertices());
 
 	DEBUG_END;
 	return startingVector;
@@ -446,7 +446,7 @@ static long int checkStartingVector(VectorXd startingVector,
 	VectorXd product(matrix->rows());
 	long int numNegative = 0;
 
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	ASSERT(directions.size() * 3 == (unsigned) matrix->cols());
 	ASSERT(directions.size() * 3 == (unsigned) startingVector.rows());
 	product = (*matrix) * startingVector;
@@ -507,7 +507,7 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 		DEBUG_END;
 		return true;
 	}
-	std::vector<Vector3d> directions = data->supportDirections();
+	auto directions = data->supportDirections();
 	int numDirections = directions.size();
 	ASSERT(3 * numDirections == estimate.size());
 

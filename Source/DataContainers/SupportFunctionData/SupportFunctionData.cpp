@@ -157,31 +157,6 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 	return dataUnequal;
 }
 
-std::vector<Vector3d> SupportFunctionData::supportDirections()
-{
-	DEBUG_START;
-	std::vector<Vector3d> directions;
-	for (auto item = items.begin(); item != items.end(); ++item)
-	{
-		directions.push_back(item->direction);
-	}
-	DEBUG_END;
-	return directions;
-}
-
-std::vector<Point_3> SupportFunctionData::supportDirectionsCGAL()
-{
-	DEBUG_START;
-	std::vector<Point_3> directions;
-	for (auto item = items.begin(); item != items.end(); ++item)
-	{
-		Vector3d v = item->direction;
-		directions.push_back(Point_3(v.x, v.y, v.z));
-	}
-	DEBUG_END;
-	return directions;
-}
-
 VectorXd SupportFunctionData::supportValues()
 {
 	DEBUG_START;
@@ -484,7 +459,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	double height = 1e-1;
 	if (heightString)
 		height = strtod(heightString, NULL);
-	auto directions = supportDirectionsCGAL();
+	auto directions = supportDirections<Point_3>();
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		for (int i = 0; i < depth; ++i)

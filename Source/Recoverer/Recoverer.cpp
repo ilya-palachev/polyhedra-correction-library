@@ -434,7 +434,7 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 		exit(EXIT_FAILURE);
 	}
 	VectorXd consistentValues = supportValuesFromPoints(
-			SData->supportDirectionsCGAL(), estimate);
+			SData->supportDirections<Point_3>(), estimate);
 	DEBUG_END;
 	return std::make_pair(consistentValues, SEData);
 }
@@ -445,7 +445,7 @@ Polyhedron_3 Recoverer::buildConsistentBody(VectorXd consistentValues,
 	DEBUG_START;
 	pushTimer("reporting and final post-processing");
 	/* 1. Prepare directions' IDs that should be ignored. */
-	auto directions = SEData->supportData()->supportDirectionsCGAL();
+	auto directions = SEData->supportData()->supportDirections<Point_3>();
 	indicesDirectionsIgnored = prepareIgnoredIndices(directions,
 			zMinimalNorm_);
 
@@ -503,7 +503,7 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 	popTimer();
 
 	/* 3. Produce vector of tangient points: */
-	auto directions = SEData->supportData()->supportDirectionsCGAL();
+	auto directions = SEData->supportData()->supportDirections<Point_3>();
 	VectorXd estimateJoined =
 		P.findTangientPointsConcatenated(directions);
 
