@@ -27,6 +27,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "SupportPolyhedronCorrector.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include <coin/IpTNLP.hpp>
 #include <coin/IpIpoptApplication.hpp>
 
@@ -452,6 +453,8 @@ public:
 	{
 		DEBUG_START;
 		int iElem = 0;
+		if (x)
+			getVariables(x);
 		for (unsigned i = 0; i < points.size(); ++i)
 		{
 			counter = iElem;
@@ -539,18 +542,160 @@ public:
 		DEBUG_END;
 		return true;
 	}
+
+	
+	void finalize_solution(SolverReturn status, Index n, const Number *x,
+			const Number *z_L, const Number *z_U, Index m,
+			const Number *g, const Number *lambda, Number obj_value,
+			const IpoptData *ip_data,
+			IpoptCalculatedQuantities *ip_cq)
+	{
+		DEBUG_START;
+		switch (status)
+		{
+		case SUCCESS:
+			MAIN_PRINT("SUCCESS");
+			getVariables(x);
+			break;
+		case MAXITER_EXCEEDED:
+			MAIN_PRINT("MAXITER_EXCEEDED");
+			break;
+		case CPUTIME_EXCEEDED:
+			MAIN_PRINT("CPUTIME_EXCEEDED");
+			break;
+		case STOP_AT_TINY_STEP:
+			MAIN_PRINT("STOP_AT_TINY_STEP");
+			break;
+		case STOP_AT_ACCEPTABLE_POINT:
+			MAIN_PRINT("STOP_AT_ACCEPTABLE_POINT");
+			break;
+		case LOCAL_INFEASIBILITY:
+			MAIN_PRINT("LOCAL_INFEASIBILITY");
+			break;
+		case USER_REQUESTED_STOP:
+			MAIN_PRINT("USER_REQUESTED_STOP");
+			break;
+		case FEASIBLE_POINT_FOUND:
+			MAIN_PRINT("FEASIBLE_POINT_FOUND");
+			break;
+		case DIVERGING_ITERATES:
+			MAIN_PRINT("DIVERGING_ITERATES");
+			break;
+		case RESTORATION_FAILURE:
+			MAIN_PRINT("RESTORATION_FAILURE");
+			break;
+		case ERROR_IN_STEP_COMPUTATION:
+			MAIN_PRINT("ERROR_IN_STEP_COMPUTATION");
+			break;
+		case INVALID_NUMBER_DETECTED:
+			MAIN_PRINT("INVALID_NUMBER_DETECTED");
+			break;
+		case TOO_FEW_DEGREES_OF_FREEDOM:
+			MAIN_PRINT("TOO_FEW_DEGREES_OF_FREEDOM");
+			break;
+		case INVALID_OPTION:
+			MAIN_PRINT("INVALID_OPTION");
+			break;
+		case OUT_OF_MEMORY:
+			MAIN_PRINT("OUT_OF_MEMORY");
+			break;
+		case INTERNAL_ERROR:
+			MAIN_PRINT("INTERNAL_ERROR");
+			break;
+		case UNASSIGNED:
+			MAIN_PRINT("UNASSIGNED");
+			break;
+		}
+		DEBUG_END;
+	}
 };
 
 SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
-		SupportFunctionData SData) : initialP(initialP), SData(SData)
+		SupportFunctionDataPtr SData) : initialP(initialP), SData(SData)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
+static FixedTopologyNLP *buildNLP(Polyhedron_3 initialP,
+		SupportFunctionDataPtr SData)
+{
+	DEBUG_START;
+	/* Prepare the NLP for solving. */
+	auto u = SData->supportDirections<Vector_3>();
+	VectorXd values = SData->supportValues();
+	ASSERT(u.size() == values.size());
+	std::vector<double> h(values.size());
+	for (unsigned i = 0; i < values.size(); ++i)
+		h[i] = values(i);
+	std::vector<Vector_3> U;
+	std::vector<double> H;
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E;
+			++I)
+	{
+		Plane_3 plane = I->plane();
+		Vector_3 norm = plane.orthogonal_vector();
+		double length = sqrt(norm.squared_length());
+		norm = norm * (1. / length);
+		double value = -plane.d() / length;
+		// FIXME: Handle cases with small lengths.
+		U.push_back(norm);
+		H.push_back(value);
+	}
+	std::vector<Vector_3> points;
+	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end();
+			I != E; ++I)
+	{
+		Point_3 point = I->point();
+		points.push_back(Vector_3(point.x(), point.y(), point.z()));
+	}
+
+	FixedTopology FT;
+	SupportFunctionDataConstructor constructor;
+	constructor.run(SData->supportDirections<Point_3>(), initialP);
+	auto IDs = constructor.getTangientIDs();
+	for (unsigned i = 0; i < IDs.size(); ++i)
+		FT.tangient[IDs[i]].insert(i);
+
+	initialP.initialize_indices();
+
+	// FIXME: complete also FT.incident
+
+	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
+	DEBUG_END;
+	return FTNLP;
+}
+
 Polyhedron_3 SupportPolyhedronCorrector::run()
 {
 	DEBUG_START;
+	FixedTopologyNLP *FTNLP = buildNLP(initialP, SData);
+
+	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
+
+	/* Intialize the IpoptApplication and process the options */
+	ApplicationReturnStatus status;
+	status = app->Initialize();
+	if (status != Solve_Succeeded)
+	{
+		MAIN_PRINT("*** Error during initialization!");
+		return initialP;
+	}
+
+	app->Options()->SetStringValue("linear_solver", "ma57");
+
+	/* Ask Ipopt to solve the problem */
+	status = app->OptimizeTNLP(FTNLP);
+	if (status == Solve_Succeeded)
+	{
+		MAIN_PRINT("*** The problem solved!");
+	}
+	else
+	{
+		MAIN_PRINT("** The problem FAILED!");
+	}
+
+	delete FTNLP;
 	DEBUG_END;
-	return initialP;
+	return initialP; // FIXME: Construct the proper polyhedron.
 }

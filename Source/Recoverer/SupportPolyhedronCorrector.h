@@ -36,11 +36,11 @@ class SupportPolyhedronCorrector
 	Polyhedron_3 initialP;
 
 	/** The support function data that should be considered. */
-	SupportFunctionData SData;
+	SupportFunctionDataPtr SData;
 public:
 	/** Creates the corector for given polyhedron and data. */
 	SupportPolyhedronCorrector(Polyhedron_3 initialP,
-			SupportFunctionData SData);
+			SupportFunctionDataPtr SData);
 
 	/** Runs the correction process and builds the polyhedron. */
 	Polyhedron_3 run();
