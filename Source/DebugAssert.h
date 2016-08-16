@@ -36,7 +36,7 @@
  * If file is compiler with macro NDEBUG enabled, then all assertions in it will
  * become dummy and will be cut by compiler at compile time.
  */
-#ifndef NDEBUG
+#ifndef NO_ASSERTS
 
 /* Implementation for debug build. */
 
