@@ -62,13 +62,22 @@ struct FixedTopology
 		auto IDs = constructor.getTangientIDs();
 		for (unsigned i = 0; i < IDs.size(); ++i)
 		{
-			std::cout << "Inserting " << i << " into " << IDs[i]
-				<< std::endl;
 			tangient[IDs[i]].insert(i);
 		}
 
 		initialP.initialize_indices();
-		// FIXME: complete also FT->incident
+		
+		unsigned iFacet = 0;
+		for (auto I = initialP.facets_begin(),
+				E = initialP.facets_end(); I != E; ++I)
+		{
+			auto C = I->facet_begin();
+			do
+			{
+				incident[iFacet].insert(C->vertex()->id);
+			} while (C++ != I->facet_begin());
+			++iFacet;
+		}
 		DEBUG_END;
 	}
 };
@@ -174,12 +183,18 @@ public:
 
 		/* ==== Number of non-zeros in the Hessian of the Lagrangian: */
 		/*
+		 * 0. The minimized functional gives 9 non-zeros to the hessian
+		 * for each point.
 		 * 1. Consitency constraints are linear.
 		 * 2. Convexity + planarity constraints contain 3 quadratic
-		 * summands each:
-		 * 3. Normality constraints contain 3 quadratic summands each:
+		 * summands each, and they are of type "a * b" => each of them
+		 * gives two non-zeros to the hessian:
+		 * 3. Normality constraints contain 3 quadratic summands each
+		 * (which are squares of U_i, so they each of them give only one
+		 * non-zero to the hessian):
 		 */
-		nnz_h_lag = 3 * numConvexityConstraints
+		nnz_h_lag = 9 * pointsInitial.size()
+			+ 6 * numConvexityConstraints
 			+ 3 * numNormalityConstraints;
 		DEBUG_END;
 		return true;
@@ -320,7 +335,7 @@ public:
 		ASSERT(x && g);
 		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
-			for (int j : FT->incident[i])
+			for (unsigned j = 0; j < points.size(); ++j)
 				g[iCond++] = directions[i] * points[j]
 					- values[i];
 		ASSERT(iCond == numConvexityConstraints);
@@ -359,7 +374,7 @@ public:
 		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
 		{
-			for (int j : FT->incident[i])
+			for (unsigned j = 0; j < points.size(); ++j)
 			{
 				counter = iElem;
 				if (!values)
@@ -475,6 +490,7 @@ public:
 			counter = iElem;
 			for (unsigned p = 0; p < 3; ++p)
 			{
+				counter = iElem;
 				for (unsigned q = 0; q < 3; ++q)
 				{
 					if (!values)
@@ -632,7 +648,8 @@ SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
 	DEBUG_END;
 }
 
-static FixedTopologyNLP *buildNLP(Polyhedron_3 initialP,
+ApplicationReturnStatus solveNLP(SmartPtr<IpoptApplication> app,
+		Polyhedron_3 initialP,
 		SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
@@ -645,8 +662,8 @@ static FixedTopologyNLP *buildNLP(Polyhedron_3 initialP,
 		h[i] = values(i);
 	std::vector<Vector_3> U;
 	std::vector<double> H;
-	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E;
-			++I)
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
+			I != E; ++I)
 	{
 		Plane_3 plane = I->plane();
 		Vector_3 norm = plane.orthogonal_vector();
@@ -668,15 +685,14 @@ static FixedTopologyNLP *buildNLP(Polyhedron_3 initialP,
 	FixedTopology *FT = new FixedTopology(initialP, SData);
 
 	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
+	ApplicationReturnStatus status = app->OptimizeTNLP(FTNLP);
 	DEBUG_END;
-	return FTNLP;
+	return status;
 }
 
 Polyhedron_3 SupportPolyhedronCorrector::run()
 {
 	DEBUG_START;
-	FixedTopologyNLP *FTNLP = buildNLP(initialP, SData);
-
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 
 	/* Intialize the IpoptApplication and process the options */
@@ -691,7 +707,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	app->Options()->SetStringValue("linear_solver", "ma57");
 
 	/* Ask Ipopt to solve the problem */
-	status = app->OptimizeTNLP(FTNLP);
+	status = solveNLP(app, initialP, SData);
 	if (status == Solve_Succeeded)
 	{
 		MAIN_PRINT("*** The problem solved!");
@@ -701,7 +717,6 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		MAIN_PRINT("** The problem FAILED!");
 	}
 
-	delete FTNLP;
 	DEBUG_END;
 	return initialP; // FIXME: Construct the proper polyhedron.
 }
