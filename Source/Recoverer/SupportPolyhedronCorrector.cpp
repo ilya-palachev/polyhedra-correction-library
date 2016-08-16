@@ -33,7 +33,7 @@
 
 using namespace Ipopt;
 
-static int counter;
+static unsigned counter;
 
 /**
  * Describes the topology of the given (polyhedron, s-data) pair.
@@ -105,13 +105,13 @@ class FixedTopologyNLP : public TNLP
 	const FixedTopology *FT;
 
 	/** The number of consistensy constraints. */
-	int numConsistencyConstraints;
+	unsigned numConsistencyConstraints;
 
 	/** The number of convexity + planarity constraints. */
-	int numConvexityConstraints;
+	unsigned numConvexityConstraints;
 
 	/** The number of normality constraints. */
-	int numNormalityConstraints;
+	unsigned numNormalityConstraints;
 public:
 	/** Simple by-value constructor. */
 	FixedTopologyNLP(const std::vector<Vector_3> &u,
@@ -214,13 +214,13 @@ public:
 				iVertexPrev = iVertex;
 			}
 		}
-		for (int i = 0; i < numConsistencyConstraints; ++i)
+		for (unsigned i = 0; i < numConsistencyConstraints; ++i)
 		{
 			g_l[iCond] = 0.;
 			g_u[iCond] = +TNLP_INFINITY;
 			++iCond;
 		}
-		for (int i = 0; i < numNormalityConstraints; ++i)
+		for (unsigned i = 0; i < numNormalityConstraints; ++i)
 		{
 			g_l[iCond] = 1.;
 			g_u[iCond] = 1.;
@@ -318,7 +318,7 @@ public:
 	{
 		DEBUG_START;
 		ASSERT(x && g);
-		int iCond = 0;
+		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
 			for (int j : FT->incident[i])
 				g[iCond++] = directions[i] * points[j]
@@ -342,21 +342,21 @@ public:
 		{
 			g[iCond++] = direction * direction;
 		}
-		ASSERT(iCond == m);
+		ASSERT(iCond == unsigned(m));
 		DEBUG_END;
 		return true;
 	}
 
 	bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
-			Index n_ele_jac, Index *iRow, Index *jCol,
+			Index nnz_jac_g, Index *iRow, Index *jCol,
 			Number *values)
 	{
 		DEBUG_START;
 		ASSERT((iRow && jCol) || values);
 		if (x)
 			getVariables(x);
-		int iElem = 0;
-		int iCond = 0;
+		unsigned iElem = 0;
+		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
 		{
 			for (int j : FT->incident[i])
@@ -454,8 +454,8 @@ public:
 			ASSERT(iElem == counter + 3);
 			++iCond;
 		}
-		ASSERT(iCond == m);
-		ASSERT(iElem == nnz_jac_g);
+		ASSERT(iCond == unsigned(m));
+		ASSERT(iElem == unsigned(nnz_jac_g));
 		DEBUG_END;
 		return true;
 	}
@@ -463,11 +463,11 @@ public:
 
 	bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
 			Index m, const Number *lambda, bool new_lambda,
-			Index n_ele_hess, Index *iRow, Index *jCol,
+			Index nnz_h_lag, Index *iRow, Index *jCol,
 			Number *values)
 	{
 		DEBUG_START;
-		int iElem = 0;
+		unsigned iElem = 0;
 		if (x)
 			getVariables(x);
 		for (unsigned i = 0; i < points.size(); ++i)
@@ -553,7 +553,7 @@ public:
 				ASSERT(iElem == counter + points.size() + 1);
 			}
 		}
-		ASSERT(iElem == nnz_h_lag);
+		ASSERT(iElem == unsigned(nnz_h_lag));
 		DEBUG_END;
 		return true;
 	}
@@ -639,7 +639,7 @@ static FixedTopologyNLP *buildNLP(Polyhedron_3 initialP,
 	/* Prepare the NLP for solving. */
 	auto u = SData->supportDirections<Vector_3>();
 	VectorXd values = SData->supportValues();
-	ASSERT(u.size() == values.size());
+	ASSERT(u.size() == unsigned(values.size()));
 	std::vector<double> h(values.size());
 	for (unsigned i = 0; i < values.size(); ++i)
 		h[i] = values(i);
