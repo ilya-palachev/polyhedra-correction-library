@@ -51,6 +51,26 @@ struct FixedTopology
 	 * incident to the i-th facet.
 	 */
 	std::vector<std::set<int>> incident;
+
+	FixedTopology(Polyhedron_3 initialP, SupportFunctionDataPtr SData) :
+		tangient(initialP.size_of_vertices()),
+		incident(initialP.size_of_facets())
+	{
+		DEBUG_START;
+		SupportFunctionDataConstructor constructor;
+		constructor.run(SData->supportDirections<Point_3>(), initialP);
+		auto IDs = constructor.getTangientIDs();
+		for (unsigned i = 0; i < IDs.size(); ++i)
+		{
+			std::cout << "Inserting " << i << " into " << IDs[i]
+				<< std::endl;
+			tangient[IDs[i]].insert(i);
+		}
+
+		initialP.initialize_indices();
+		// FIXME: complete also FT->incident
+		DEBUG_END;
+	}
 };
 
 #define TNLP_INFINITY 2e19
@@ -82,7 +102,7 @@ class FixedTopologyNLP : public TNLP
 	std::vector<Vector_3> points;
 
 	/** Topology of the problem. */
-	const FixedTopology &FT;
+	const FixedTopology *FT;
 
 	/** The number of consistensy constraints. */
 	int numConsistencyConstraints;
@@ -99,7 +119,7 @@ public:
 			const std::vector<Vector_3> &U,
 			const std::vector<double> &H,
 			const std::vector<Vector_3> &pointsInitial,
-			const FixedTopology &FT) :
+			const FixedTopology *FT) :
 		u(u),
 		h(h),
 		U(U),
@@ -176,12 +196,7 @@ public:
 		}
 
 		int iCond = 0;
-		for (; iCond < numConsistencyConstraints; ++iCond)
-		{
-			g_l[iCond] = 0.;
-			g_u[iCond] = +TNLP_INFINITY;
-		}
-		for (const auto &facet : FT.incident)
+		for (const auto &facet : FT->incident)
 		{
 			int iVertexPrev = 0;
 			for (const auto &iVertex : facet)
@@ -266,7 +281,7 @@ public:
 		obj_value = 0.;
 		for (unsigned i = 0; i < pointsInitial.size(); ++i)
 		{
-			for (int j : FT.tangient[i])
+			for (int j : FT->tangient[i])
 			{
 				double diff = u[j] * points[i] - h[j];
 				obj_value += diff * diff;
@@ -286,7 +301,7 @@ public:
 			grad_f[i] = 0.;
 		for (unsigned i = 0; i < pointsInitial.size(); ++i)
 		{
-			for (int j : FT.tangient[i])
+			for (int j : FT->tangient[i])
 			{
 				Vector_3 direction = u[j];
 				double diff = direction * points[i] - h[j];
@@ -305,13 +320,13 @@ public:
 		ASSERT(x && g);
 		int iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
-			for (int j : FT.incident[i])
+			for (int j : FT->incident[i])
 				g[iCond++] = directions[i] * points[j]
 					- values[i];
 		ASSERT(iCond == numConvexityConstraints);
 
 		for (unsigned i = 0; i < pointsInitial.size(); ++i)
-			for (int j : FT.tangient[i])
+			for (int j : FT->tangient[i])
 				for (unsigned k = 0; k < pointsInitial.size();
 						++k)
 				{
@@ -344,7 +359,7 @@ public:
 		int iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
 		{
-			for (int j : FT.incident[i])
+			for (int j : FT->incident[i])
 			{
 				counter = iElem;
 				if (!values)
@@ -380,7 +395,7 @@ public:
 		ASSERT(iElem == 7 * numConvexityConstraints);
 
 		for (unsigned i = 0; i < points.size(); ++i)
-			for (int j : FT.tangient[i])
+			for (int j : FT->tangient[i])
 				for (unsigned k = 0; k < points.size(); ++k)
 				{
 					if (k == i)
@@ -470,7 +485,7 @@ public:
 					else
 					{
 						double sum = 0.;
-						for (int k : FT.tangient[i])
+						for (int k : FT->tangient[i])
 							sum += u[k].cartesian(p)
 							* u[k].cartesian(q);
 						values[iElem] = obj_factor
@@ -650,16 +665,7 @@ static FixedTopologyNLP *buildNLP(Polyhedron_3 initialP,
 		points.push_back(Vector_3(point.x(), point.y(), point.z()));
 	}
 
-	FixedTopology FT;
-	SupportFunctionDataConstructor constructor;
-	constructor.run(SData->supportDirections<Point_3>(), initialP);
-	auto IDs = constructor.getTangientIDs();
-	for (unsigned i = 0; i < IDs.size(); ++i)
-		FT.tangient[IDs[i]].insert(i);
-
-	initialP.initialize_indices();
-
-	// FIXME: complete also FT.incident
+	FixedTopology *FT = new FixedTopology(initialP, SData);
 
 	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
 	DEBUG_END;
