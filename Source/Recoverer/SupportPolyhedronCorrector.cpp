@@ -210,37 +210,42 @@ public:
 			x_u[i] = +TNLP_INFINITY;
 		}
 
-		int iCond = 0;
-		for (const auto &facet : FT->incident)
+		unsigned iCond = 0;
+		for (; iCond < numConvexityConstraints; ++iCond)
 		{
-			int iVertexPrev = 0;
-			for (const auto &iVertex : facet)
+
+			g_l[iCond] = -TNLP_INFINITY;
+			g_u[iCond] = 0.;
+		}
+
+		for (unsigned iFacet = 0; iFacet < U.size(); ++iFacet)
+		{
+			const auto &facet = FT->incident[iFacet];
+			for (auto iVertex : facet)
 			{
-				ASSERT(iVertexPrev <= iVertex);
-				for (; iVertexPrev < iVertex; ++iVertexPrev)
-				{
-					g_l[iCond] = -TNLP_INFINITY;
-					g_u[iCond] = 0.;
-					++iCond;
-				}
-				g_l[iCond] = 0.;
-				g_u[iCond] = 0.;
-				++iCond;
-				iVertexPrev = iVertex;
+				unsigned iCondInc =
+					pointsInitial.size() * iFacet + iVertex;
+				g_l[iCondInc] = 0.;
 			}
 		}
+		ASSERT(iCond == numConvexityConstraints);
+
 		for (unsigned i = 0; i < numConsistencyConstraints; ++i)
 		{
 			g_l[iCond] = 0.;
 			g_u[iCond] = +TNLP_INFINITY;
 			++iCond;
 		}
+		ASSERT(iCond == numConvexityConstraints
+				+ numConsistencyConstraints);
+
 		for (unsigned i = 0; i < numNormalityConstraints; ++i)
 		{
 			g_l[iCond] = 1.;
 			g_u[iCond] = 1.;
 			++iCond;
 		}
+		ASSERT(iCond == unsigned(m));
 		DEBUG_END;
 		return true;
 	}
