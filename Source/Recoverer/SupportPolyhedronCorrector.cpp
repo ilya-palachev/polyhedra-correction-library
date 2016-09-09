@@ -266,12 +266,50 @@ public:
 		}
 		for (unsigned i = 0; i < U.size(); ++i)
 		{
-			x[iVariable++] = U[i].x();
-			x[iVariable++] = U[i].y();
-			x[iVariable++] = U[i].z();
-			x[iVariable++] = H[i];
+			double a = U[i].x();
+			double b = U[i].y();
+			double c = U[i].z();
+			double d = H[i];
+			double norm = sqrt(a * a + b * b + c * c);
+			ASSERT(norm > 1e-10);
+			a /= norm;
+			b /= norm;
+			c /= norm;
+			d /= norm;
+			if (H[i] >= 0.)
+			{
+				x[iVariable++] = a;
+				x[iVariable++] = b;
+				x[iVariable++] = c;
+				x[iVariable++] = d;
+			}
+			else
+			{
+				x[iVariable++] = -a;
+				x[iVariable++] = -b;
+				x[iVariable++] = -c;
+				x[iVariable++] = -d;
+			}
 		}
 		ASSERT(iVariable == n);
+		double *g = new double[m];
+		double *g_l = new double[m];
+		double *g_u = new double[m];
+		double *x_l = new double[n];
+		double *x_u = new double[n];
+		eval_g(n, x, false, m, g);
+		get_bounds_info(n, x_l, x_u, m, g_l, g_u);
+		const double tol = 1e-10;
+		for (int i = 0; i < m; ++i)
+			if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
+				std::cout << "g[" << i << "] = " << g[i]
+					<< " not in [" << g_l[i] << ", "
+					<< g_u[i] << "]" << std::endl;
+		delete[] g;
+		delete[] g_l;
+		delete[] g_u;
+		delete[] x_l;
+		delete[] x_u;
 		DEBUG_END;
 		return true;
 	}
