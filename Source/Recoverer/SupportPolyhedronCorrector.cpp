@@ -369,10 +369,10 @@ public:
 
 	bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 			Index nnz_jac_g, Index *iRow, Index *jCol,
-			Number *values)
+			Number *jacValues)
 	{
 		DEBUG_START;
-		ASSERT((iRow && jCol) || values);
+		ASSERT((iRow && jCol) || jacValues);
 		if (x)
 			getVariables(x);
 		unsigned iElem = 0;
@@ -382,7 +382,7 @@ public:
 			for (unsigned j = 0; j < points.size(); ++j)
 			{
 				counter = iElem;
-				if (!values)
+				if (!jacValues)
 				{
 					for (int k = 0; k < 3; ++k)
 					{
@@ -399,13 +399,13 @@ public:
 				}
 				else
 				{
-					values[iElem++] = directions[i].x();
-					values[iElem++] = directions[i].y();
-					values[iElem++] = directions[i].z();
-					values[iElem++] = points[j].x();
-					values[iElem++] = points[j].y();
-					values[iElem++] = points[j].z();
-					values[iElem++] = -1.;
+					jacValues[iElem++] = directions[i].x();
+					jacValues[iElem++] = directions[i].y();
+					jacValues[iElem++] = directions[i].z();
+					jacValues[iElem++] = points[j].x();
+					jacValues[iElem++] = points[j].y();
+					jacValues[iElem++] = points[j].z();
+					jacValues[iElem++] = -1.;
 				}
 				ASSERT(iElem == counter + 7);
 				++iCond;
@@ -421,7 +421,7 @@ public:
 					if (k == i)
 						continue;
 					counter = iElem;
-					if (!values)
+					if (!jacValues)
 					{
 						for (int l = 0; l < 3; ++l)
 						{
@@ -438,12 +438,12 @@ public:
 					}
 					else
 					{
-						values[iElem++] = u[j].x();
-						values[iElem++] = u[j].y();
-						values[iElem++] = u[j].z();
-						values[iElem++] = -u[j].x();
-						values[iElem++] = -u[j].y();
-						values[iElem++] = -u[j].z();
+						jacValues[iElem++] = u[j].x();
+						jacValues[iElem++] = u[j].y();
+						jacValues[iElem++] = u[j].z();
+						jacValues[iElem++] = -u[j].x();
+						jacValues[iElem++] = -u[j].y();
+						jacValues[iElem++] = -u[j].z();
 					}
 					ASSERT(iElem == counter + 6);
 					++iCond;
@@ -456,7 +456,7 @@ public:
 		for (unsigned i = 0; i < directions.size(); ++i)
 		{
 			counter = iElem;
-			if (!values)
+			if (!jacValues)
 			{
 				for (int k = 0; k < 3; ++k)
 				{
@@ -467,9 +467,9 @@ public:
 			}
 			else
 			{
-				values[iElem++] = 2. * directions[i].x();
-				values[iElem++] = 2. * directions[i].y();
-				values[iElem++] = 2. * directions[i].z();
+				jacValues[iElem++] = 2. * directions[i].x();
+				jacValues[iElem++] = 2. * directions[i].y();
+				jacValues[iElem++] = 2. * directions[i].z();
 			}
 			ASSERT(iElem == counter + 3);
 			++iCond;
@@ -484,7 +484,7 @@ public:
 	bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
 			Index m, const Number *lambda, bool new_lambda,
 			Index nnz_h_lag, Index *iRow, Index *jCol,
-			Number *values)
+			Number *hValues)
 	{
 		DEBUG_START;
 		unsigned iElem = 0;
@@ -498,7 +498,7 @@ public:
 				counter = iElem;
 				for (unsigned q = 0; q < 3; ++q)
 				{
-					if (!values)
+					if (!hValues)
 					{
 						iRow[iElem] = 3 * i + p;
 						jCol[iElem] = 3 * i + q;
@@ -509,7 +509,7 @@ public:
 						for (int k : FT->tangient[i])
 							sum += u[k].cartesian(p)
 							* u[k].cartesian(q);
-						values[iElem] = obj_factor
+						hValues[iElem] = obj_factor
 							* sum;
 					}
 					++iElem;
@@ -517,7 +517,7 @@ public:
 				ASSERT(iElem == counter + 3);
 				for (unsigned j = 0; j < directions.size(); ++j)
 				{
-					if (!values)
+					if (!hValues)
 					{
 						iRow[iElem] = 3 * i + p;
 						jCol[iElem] = 3 * points.size()
@@ -528,7 +528,8 @@ public:
 					{
 						int iCond = points.size() * j
 							+ i;
-						values[iElem++] = lambda[iCond];
+						hValues[iElem++] =
+							lambda[iCond];
 					}
 				}
 				ASSERT(iElem == counter + 3
@@ -544,7 +545,7 @@ public:
 				counter = iElem;
 				for (unsigned i = 0; i < points.size(); ++i)
 				{
-					if (!values)
+					if (!hValues)
 					{
 						iRow[iElem] = iRowCommon;
 						jCol[iElem] = 3 * i + p;
@@ -554,12 +555,13 @@ public:
 					{
 						int iCond = points.size() * j
 							+ i;
-						values[iElem++] = lambda[iCond];
+						hValues[iElem++] =
+							lambda[iCond];
 					}
 				}
 				ASSERT(iElem == counter + points.size());
 
-				if (!values)
+				if (!hValues)
 				{
 					iRow[iElem] = iRowCommon;
 					jCol[iElem] = iRowCommon;
@@ -569,7 +571,7 @@ public:
 				{
 					int iCond = numConvexityConstraints
 						+ numConsistencyConstraints + j;
-					values[iElem++] = 2. * lambda[iCond];
+					hValues[iElem++] = 2. * lambda[iCond];
 				}
 				ASSERT(iElem == counter + points.size() + 1);
 			}
