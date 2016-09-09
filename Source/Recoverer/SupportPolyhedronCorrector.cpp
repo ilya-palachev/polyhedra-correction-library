@@ -550,6 +550,8 @@ public:
 						for (int k : FT->tangient[i])
 							sum += u[k].cartesian(p)
 							* u[k].cartesian(q);
+						if (p == q)
+							sum *= 2.;
 						hValues[iElem] = obj_factor
 							* sum;
 					}
@@ -570,7 +572,7 @@ public:
 						int iCond = points.size() * j
 							+ i;
 						hValues[iElem++] =
-							lambda[iCond];
+							0.5 * lambda[iCond];
 					}
 				}
 				ASSERT(iElem == counter + 3
@@ -597,7 +599,7 @@ public:
 						int iCond = points.size() * j
 							+ i;
 						hValues[iElem++] =
-							lambda[iCond];
+							0.5 * lambda[iCond];
 					}
 				}
 				ASSERT(iElem == counter + points.size());
@@ -753,6 +755,8 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	}
 
 	app->Options()->SetStringValue("linear_solver", "ma57");
+	//app->Options()->SetStringValue("derivative_test", "only-second-order");
+	//app->Options()->SetStringValue("derivative_test_print_all", "yes");
 
 	/* Ask Ipopt to solve the problem */
 	status = solveNLP(app, initialP, SData);
