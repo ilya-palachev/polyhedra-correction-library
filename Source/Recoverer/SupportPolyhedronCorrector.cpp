@@ -393,7 +393,9 @@ public:
 					for (int k = 0; k < 4; ++k)
 					{
 						iRow[iElem] = iCond;
-						jCol[iElem] = 4 * i + k;
+						jCol[iElem] =
+							3 * pointsInitial.size()
+							+ 4 * i + k;
 						++iElem;
 					}
 				}
@@ -461,7 +463,8 @@ public:
 				for (int k = 0; k < 3; ++k)
 				{
 					iRow[iElem] = iCond;
-					jCol[iElem] = 3 * i;
+					jCol[iElem] = 3 * pointsInitial.size()
+						+ 4 * i + k;
 					++iElem;
 				}
 			}
