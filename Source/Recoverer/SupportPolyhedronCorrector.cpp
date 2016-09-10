@@ -71,12 +71,16 @@ struct FixedTopology
 		for (auto I = initialP.facets_begin(),
 				E = initialP.facets_end(); I != E; ++I)
 		{
+			std::cout << "Constructing facet #" << iFacet << ": ";
 			auto C = I->facet_begin();
 			do
 			{
-				incident[iFacet].insert(C->vertex()->id);
-			} while (C++ != I->facet_begin());
+				int iVertex = C->vertex()->id;
+				std::cout << iVertex << " ";
+				incident[iFacet].insert(iVertex);
+			} while (++C != I->facet_begin());
 			++iFacet;
+			std::cout << std::endl;
 		}
 		DEBUG_END;
 	}
@@ -157,11 +161,15 @@ public:
 
 		/* ===================================== Number of variables: */
 		n = 3 * U.size() + H.size() + 3 * pointsInitial.size();
+		std::cout << "Number of vertices: " << pointsInitial.size() << std::endl;
+		std::cout << "Number of facets: " << U.size() << std::endl;
+		std::cout << "Number of variables: " << n << std::endl;
 		ASSERT(m == 0 && nnz_jac_g == 0 && nnz_h_lag == 0);
 
 		/* =================================== Number of constraints: */
 		m = numConsistencyConstraints + numConvexityConstraints
 			+ numNormalityConstraints;
+		std::cout << "Number of constraints: " << m << std::endl;
 		ASSERT(nnz_jac_g == 0 && nnz_h_lag == 0);
 
 		/* ========= Number of non-zeros in the constraints Jacobian: */
@@ -179,6 +187,8 @@ public:
 		nnz_jac_g = 6 * numConsistencyConstraints
 			+ 7 * numConvexityConstraints
 			+ 3 * numNormalityConstraints;
+		std::cout << "Number of nonzeros in constraints Jacobian: "
+			<< nnz_jac_g << std::endl;
 		ASSERT(nnz_h_lag == 0);
 
 		/* ==== Number of non-zeros in the Hessian of the Lagrangian: */
@@ -196,6 +206,8 @@ public:
 		nnz_h_lag = 9 * pointsInitial.size()
 			+ 6 * numConvexityConstraints
 			+ 3 * numNormalityConstraints;
+		std::cout << "Number of nonzeros in the Lagrangian Hessian: "
+			<< nnz_h_lag << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -211,11 +223,16 @@ public:
 		}
 
 		int iCond = 0;
+		int numIncidenceConstraints = 0;
+		int iFacet = 0;
 		for (const auto &facet : FT->incident)
 		{
+			std::cout << "Facet #" << iFacet << ": ";
+
 			int iVertexPrev = 0;
 			for (const auto &iVertex : facet)
 			{
+				std::cout << iVertex << " ";
 				ASSERT(iVertexPrev <= iVertex);
 				for (; iVertexPrev < iVertex; ++iVertexPrev)
 				{
@@ -226,9 +243,14 @@ public:
 				g_l[iCond] = 0.;
 				g_u[iCond] = 0.;
 				++iCond;
+				++numIncidenceConstraints;
 				iVertexPrev = iVertex;
 			}
+			std::cout << std::endl;
+			++iFacet;
 		}
+		std::cout << "Number of incidence constraints: "
+			<< numIncidenceConstraints << std::endl;
 		for (unsigned i = 0; i < numConsistencyConstraints; ++i)
 		{
 			g_l[iCond] = 0.;
@@ -241,6 +263,9 @@ public:
 			g_u[iCond] = 1.;
 			++iCond;
 		}
+		std::cout << "Number of equality constraints: "
+			<< numIncidenceConstraints + numNormalityConstraints << std::endl;
+		std::cout << "Bounds info done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -268,6 +293,7 @@ public:
 		}
 		ASSERT(iVariable == n);
 		DEBUG_END;
+		std::cout << "Get starting point done." << std::endl;
 		return true;
 	}
 
@@ -302,6 +328,7 @@ public:
 				obj_value += diff * diff;
 			}
 		}
+		std::cout << "eval_f done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -325,6 +352,7 @@ public:
 				grad_f[3 * i + 2] += 2. * diff * direction.z();
 			}
 		}
+		std::cout << "eval_grad_f done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -358,6 +386,7 @@ public:
 			g[iCond++] = direction * direction;
 		}
 		ASSERT(iCond == unsigned(m));
+		std::cout << "eval_g done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -471,6 +500,7 @@ public:
 		}
 		ASSERT(iCond == unsigned(m));
 		ASSERT(iElem == unsigned(nnz_jac_g));
+		std::cout << "eval_jac_g done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -570,6 +600,7 @@ public:
 			}
 		}
 		ASSERT(iElem == unsigned(nnz_h_lag));
+		std::cout << "eval_h done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -704,7 +735,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		return initialP;
 	}
 
-	app->Options()->SetStringValue("linear_solver", "ma57");
+	//app->Options()->SetStringValue("linear_solver", "ma57");
 
 	/* Ask Ipopt to solve the problem */
 	status = solveNLP(app, initialP, SData);
