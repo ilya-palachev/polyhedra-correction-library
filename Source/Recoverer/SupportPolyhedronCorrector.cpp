@@ -222,50 +222,42 @@ public:
 			x_u[i] = +TNLP_INFINITY;
 		}
 
-		int iCond = 0;
-		int numIncidenceConstraints = 0;
-		int iFacet = 0;
-		for (const auto &facet : FT->incident)
+		unsigned iCond = 0;
+		for (; iCond < numConvexityConstraints; ++iCond)
 		{
-			std::cout << "Facet #" << iFacet << ": ";
 
-			int iVertexPrev = 0;
-			for (const auto &iVertex : facet)
-			{
-				std::cout << iVertex << " ";
-				ASSERT(iVertexPrev <= iVertex);
-				for (; iVertexPrev < iVertex; ++iVertexPrev)
-				{
-					g_l[iCond] = -TNLP_INFINITY;
-					g_u[iCond] = 0.;
-					++iCond;
-				}
-				g_l[iCond] = 0.;
-				g_u[iCond] = 0.;
-				++iCond;
-				++numIncidenceConstraints;
-				iVertexPrev = iVertex;
-			}
-			std::cout << std::endl;
-			++iFacet;
+			g_l[iCond] = -TNLP_INFINITY;
+			g_u[iCond] = 0.;
 		}
-		std::cout << "Number of incidence constraints: "
-			<< numIncidenceConstraints << std::endl;
+
+		for (unsigned iFacet = 0; iFacet < U.size(); ++iFacet)
+		{
+			const auto &facet = FT->incident[iFacet];
+			for (auto iVertex : facet)
+			{
+				unsigned iCondInc =
+					pointsInitial.size() * iFacet + iVertex;
+				g_l[iCondInc] = 0.;
+			}
+		}
+		ASSERT(iCond == numConvexityConstraints);
+
 		for (unsigned i = 0; i < numConsistencyConstraints; ++i)
 		{
 			g_l[iCond] = 0.;
 			g_u[iCond] = +TNLP_INFINITY;
 			++iCond;
 		}
+		ASSERT(iCond == numConvexityConstraints
+				+ numConsistencyConstraints);
+
 		for (unsigned i = 0; i < numNormalityConstraints; ++i)
 		{
 			g_l[iCond] = 1.;
 			g_u[iCond] = 1.;
 			++iCond;
 		}
-		std::cout << "Number of equality constraints: "
-			<< numIncidenceConstraints + numNormalityConstraints << std::endl;
-		std::cout << "Bounds info done." << std::endl;
+		ASSERT(iCond == unsigned(m));
 		DEBUG_END;
 		return true;
 	}
@@ -286,14 +278,51 @@ public:
 		}
 		for (unsigned i = 0; i < U.size(); ++i)
 		{
-			x[iVariable++] = U[i].x();
-			x[iVariable++] = U[i].y();
-			x[iVariable++] = U[i].z();
-			x[iVariable++] = H[i];
+			double a = U[i].x();
+			double b = U[i].y();
+			double c = U[i].z();
+			double d = H[i];
+			double norm = sqrt(a * a + b * b + c * c);
+			ASSERT(norm > 1e-10);
+			a /= norm;
+			b /= norm;
+			c /= norm;
+			d /= norm;
+			if (H[i] >= 0.)
+			{
+				x[iVariable++] = a;
+				x[iVariable++] = b;
+				x[iVariable++] = c;
+				x[iVariable++] = d;
+			}
+			else
+			{
+				x[iVariable++] = -a;
+				x[iVariable++] = -b;
+				x[iVariable++] = -c;
+				x[iVariable++] = -d;
+			}
 		}
 		ASSERT(iVariable == n);
+		double *g = new double[m];
+		double *g_l = new double[m];
+		double *g_u = new double[m];
+		double *x_l = new double[n];
+		double *x_u = new double[n];
+		eval_g(n, x, false, m, g);
+		get_bounds_info(n, x_l, x_u, m, g_l, g_u);
+		const double tol = 1e-10;
+		for (int i = 0; i < m; ++i)
+			if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
+				std::cout << "g[" << i << "] = " << g[i]
+					<< " not in [" << g_l[i] << ", "
+					<< g_u[i] << "]" << std::endl;
+		delete[] g;
+		delete[] g_l;
+		delete[] g_u;
+		delete[] x_l;
+		delete[] x_u;
 		DEBUG_END;
-		std::cout << "Get starting point done." << std::endl;
 		return true;
 	}
 
@@ -328,7 +357,6 @@ public:
 				obj_value += diff * diff;
 			}
 		}
-		std::cout << "eval_f done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -352,7 +380,6 @@ public:
 				grad_f[3 * i + 2] += 2. * diff * direction.z();
 			}
 		}
-		std::cout << "eval_grad_f done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -386,17 +413,16 @@ public:
 			g[iCond++] = direction * direction;
 		}
 		ASSERT(iCond == unsigned(m));
-		std::cout << "eval_g done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
 
 	bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 			Index nnz_jac_g, Index *iRow, Index *jCol,
-			Number *values)
+			Number *jacValues)
 	{
 		DEBUG_START;
-		ASSERT((iRow && jCol) || values);
+		ASSERT((iRow && jCol) || jacValues);
 		if (x)
 			getVariables(x);
 		unsigned iElem = 0;
@@ -406,7 +432,7 @@ public:
 			for (unsigned j = 0; j < points.size(); ++j)
 			{
 				counter = iElem;
-				if (!values)
+				if (!jacValues)
 				{
 					for (int k = 0; k < 3; ++k)
 					{
@@ -417,19 +443,21 @@ public:
 					for (int k = 0; k < 4; ++k)
 					{
 						iRow[iElem] = iCond;
-						jCol[iElem] = 4 * i + k;
+						jCol[iElem] =
+							3 * pointsInitial.size()
+							+ 4 * i + k;
 						++iElem;
 					}
 				}
 				else
 				{
-					values[iElem++] = directions[i].x();
-					values[iElem++] = directions[i].y();
-					values[iElem++] = directions[i].z();
-					values[iElem++] = points[j].x();
-					values[iElem++] = points[j].y();
-					values[iElem++] = points[j].z();
-					values[iElem++] = -1.;
+					jacValues[iElem++] = directions[i].x();
+					jacValues[iElem++] = directions[i].y();
+					jacValues[iElem++] = directions[i].z();
+					jacValues[iElem++] = points[j].x();
+					jacValues[iElem++] = points[j].y();
+					jacValues[iElem++] = points[j].z();
+					jacValues[iElem++] = -1.;
 				}
 				ASSERT(iElem == counter + 7);
 				++iCond;
@@ -445,7 +473,7 @@ public:
 					if (k == i)
 						continue;
 					counter = iElem;
-					if (!values)
+					if (!jacValues)
 					{
 						for (int l = 0; l < 3; ++l)
 						{
@@ -462,12 +490,12 @@ public:
 					}
 					else
 					{
-						values[iElem++] = u[j].x();
-						values[iElem++] = u[j].y();
-						values[iElem++] = u[j].z();
-						values[iElem++] = -u[j].x();
-						values[iElem++] = -u[j].y();
-						values[iElem++] = -u[j].z();
+						jacValues[iElem++] = u[j].x();
+						jacValues[iElem++] = u[j].y();
+						jacValues[iElem++] = u[j].z();
+						jacValues[iElem++] = -u[j].x();
+						jacValues[iElem++] = -u[j].y();
+						jacValues[iElem++] = -u[j].z();
 					}
 					ASSERT(iElem == counter + 6);
 					++iCond;
@@ -480,20 +508,21 @@ public:
 		for (unsigned i = 0; i < directions.size(); ++i)
 		{
 			counter = iElem;
-			if (!values)
+			if (!jacValues)
 			{
 				for (int k = 0; k < 3; ++k)
 				{
 					iRow[iElem] = iCond;
-					jCol[iElem] = 3 * i;
+					jCol[iElem] = 3 * pointsInitial.size()
+						+ 4 * i + k;
 					++iElem;
 				}
 			}
 			else
 			{
-				values[iElem++] = 2. * directions[i].x();
-				values[iElem++] = 2. * directions[i].y();
-				values[iElem++] = 2. * directions[i].z();
+				jacValues[iElem++] = 2. * directions[i].x();
+				jacValues[iElem++] = 2. * directions[i].y();
+				jacValues[iElem++] = 2. * directions[i].z();
 			}
 			ASSERT(iElem == counter + 3);
 			++iCond;
@@ -509,7 +538,7 @@ public:
 	bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
 			Index m, const Number *lambda, bool new_lambda,
 			Index nnz_h_lag, Index *iRow, Index *jCol,
-			Number *values)
+			Number *hValues)
 	{
 		DEBUG_START;
 		unsigned iElem = 0;
@@ -523,7 +552,7 @@ public:
 				counter = iElem;
 				for (unsigned q = 0; q < 3; ++q)
 				{
-					if (!values)
+					if (!hValues)
 					{
 						iRow[iElem] = 3 * i + p;
 						jCol[iElem] = 3 * i + q;
@@ -534,7 +563,9 @@ public:
 						for (int k : FT->tangient[i])
 							sum += u[k].cartesian(p)
 							* u[k].cartesian(q);
-						values[iElem] = obj_factor
+						if (p == q)
+							sum *= 2.;
+						hValues[iElem] = obj_factor
 							* sum;
 					}
 					++iElem;
@@ -542,7 +573,7 @@ public:
 				ASSERT(iElem == counter + 3);
 				for (unsigned j = 0; j < directions.size(); ++j)
 				{
-					if (!values)
+					if (!hValues)
 					{
 						iRow[iElem] = 3 * i + p;
 						jCol[iElem] = 3 * points.size()
@@ -553,7 +584,8 @@ public:
 					{
 						int iCond = points.size() * j
 							+ i;
-						values[iElem++] = lambda[iCond];
+						hValues[iElem++] =
+							0.5 * lambda[iCond];
 					}
 				}
 				ASSERT(iElem == counter + 3
@@ -569,7 +601,7 @@ public:
 				counter = iElem;
 				for (unsigned i = 0; i < points.size(); ++i)
 				{
-					if (!values)
+					if (!hValues)
 					{
 						iRow[iElem] = iRowCommon;
 						jCol[iElem] = 3 * i + p;
@@ -579,12 +611,13 @@ public:
 					{
 						int iCond = points.size() * j
 							+ i;
-						values[iElem++] = lambda[iCond];
+						hValues[iElem++] =
+							0.5 * lambda[iCond];
 					}
 				}
 				ASSERT(iElem == counter + points.size());
 
-				if (!values)
+				if (!hValues)
 				{
 					iRow[iElem] = iRowCommon;
 					jCol[iElem] = iRowCommon;
@@ -594,13 +627,12 @@ public:
 				{
 					int iCond = numConvexityConstraints
 						+ numConsistencyConstraints + j;
-					values[iElem++] = 2. * lambda[iCond];
+					hValues[iElem++] = 2. * lambda[iCond];
 				}
 				ASSERT(iElem == counter + points.size() + 1);
 			}
 		}
 		ASSERT(iElem == unsigned(nnz_h_lag));
-		std::cout << "eval_h done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -735,7 +767,9 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		return initialP;
 	}
 
-	//app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetStringValue("linear_solver", "ma57");
+	//app->Options()->SetStringValue("derivative_test", "only-second-order");
+	//app->Options()->SetStringValue("derivative_test_print_all", "yes");
 
 	/* Ask Ipopt to solve the problem */
 	status = solveNLP(app, initialP, SData);
