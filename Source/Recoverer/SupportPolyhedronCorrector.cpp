@@ -312,11 +312,40 @@ public:
 		eval_g(n, x, false, m, g);
 		get_bounds_info(n, x_l, x_u, m, g_l, g_u);
 		const double tol = 1e-10;
-		for (int i = 0; i < m; ++i)
+		unsigned numViolations = 0;
+		for (unsigned i = 0; i < unsigned(m); ++i)
 			if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
+			{
+				++numViolations;
 				std::cout << "g[" << i << "] = " << g[i]
 					<< " not in [" << g_l[i] << ", "
 					<< g_u[i] << "]" << std::endl;
+				if (i < numConvexityConstraints)
+				{
+					int iFacet = i / pointsInitial.size();
+					int iVertex = i % pointsInitial.size();
+					std::cout
+						<< "  It's condition for facet "
+						<< iFacet << " and vertex "
+						<< iVertex << std::endl;
+				} else if (i < numConvexityConstraints
+						+ numConvexityConstraints)
+				{
+					std::cout
+						<< "  It's consistency constr."
+						<< std::endl;;
+				} else
+				{
+					int iFacet = i - numConvexityConstraints
+						- numConsistencyConstraints;
+					std::cout <<
+						"  It's normality for facet "
+						<< iFacet << std::endl;
+				}
+			}
+		std::cout << "Violation in " << numViolations
+			<< " constraints from total " << m << std::endl;
+		ASSERT(numViolations == 0);
 		delete[] g;
 		delete[] g_l;
 		delete[] g_u;
