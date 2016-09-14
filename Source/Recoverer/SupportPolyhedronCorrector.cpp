@@ -71,12 +71,16 @@ struct FixedTopology
 		for (auto I = initialP.facets_begin(),
 				E = initialP.facets_end(); I != E; ++I)
 		{
+			std::cout << "Constructing facet #" << iFacet << ": ";
 			auto C = I->facet_begin();
 			do
 			{
-				incident[iFacet].insert(C->vertex()->id);
-			} while (C++ != I->facet_begin());
+				int iVertex = C->vertex()->id;
+				std::cout << iVertex << " ";
+				incident[iFacet].insert(iVertex);
+			} while (++C != I->facet_begin());
 			++iFacet;
+			std::cout << std::endl;
 		}
 		DEBUG_END;
 	}
@@ -157,11 +161,15 @@ public:
 
 		/* ===================================== Number of variables: */
 		n = 3 * U.size() + H.size() + 3 * pointsInitial.size();
+		std::cout << "Number of vertices: " << pointsInitial.size() << std::endl;
+		std::cout << "Number of facets: " << U.size() << std::endl;
+		std::cout << "Number of variables: " << n << std::endl;
 		ASSERT(m == 0 && nnz_jac_g == 0 && nnz_h_lag == 0);
 
 		/* =================================== Number of constraints: */
 		m = numConsistencyConstraints + numConvexityConstraints
 			+ numNormalityConstraints;
+		std::cout << "Number of constraints: " << m << std::endl;
 		ASSERT(nnz_jac_g == 0 && nnz_h_lag == 0);
 
 		/* ========= Number of non-zeros in the constraints Jacobian: */
@@ -179,6 +187,8 @@ public:
 		nnz_jac_g = 6 * numConsistencyConstraints
 			+ 7 * numConvexityConstraints
 			+ 3 * numNormalityConstraints;
+		std::cout << "Number of nonzeros in constraints Jacobian: "
+			<< nnz_jac_g << std::endl;
 		ASSERT(nnz_h_lag == 0);
 
 		/* ==== Number of non-zeros in the Hessian of the Lagrangian: */
@@ -196,6 +206,8 @@ public:
 		nnz_h_lag = 9 * pointsInitial.size()
 			+ 6 * numConvexityConstraints
 			+ 3 * numNormalityConstraints;
+		std::cout << "Number of nonzeros in the Lagrangian Hessian: "
+			<< nnz_h_lag << std::endl;
 		DEBUG_END;
 		return true;
 	}
@@ -300,11 +312,40 @@ public:
 		eval_g(n, x, false, m, g);
 		get_bounds_info(n, x_l, x_u, m, g_l, g_u);
 		const double tol = 1e-10;
-		for (int i = 0; i < m; ++i)
+		unsigned numViolations = 0;
+		for (unsigned i = 0; i < unsigned(m); ++i)
 			if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
+			{
+				++numViolations;
 				std::cout << "g[" << i << "] = " << g[i]
 					<< " not in [" << g_l[i] << ", "
 					<< g_u[i] << "]" << std::endl;
+				if (i < numConvexityConstraints)
+				{
+					int iFacet = i / pointsInitial.size();
+					int iVertex = i % pointsInitial.size();
+					std::cout
+						<< "  It's condition for facet "
+						<< iFacet << " and vertex "
+						<< iVertex << std::endl;
+				} else if (i < numConvexityConstraints
+						+ numConvexityConstraints)
+				{
+					std::cout
+						<< "  It's consistency constr."
+						<< std::endl;;
+				} else
+				{
+					int iFacet = i - numConvexityConstraints
+						- numConsistencyConstraints;
+					std::cout <<
+						"  It's normality for facet "
+						<< iFacet << std::endl;
+				}
+			}
+		std::cout << "Violation in " << numViolations
+			<< " constraints from total " << m << std::endl;
+		ASSERT(numViolations == 0);
 		delete[] g;
 		delete[] g_l;
 		delete[] g_u;
@@ -517,6 +558,7 @@ public:
 		}
 		ASSERT(iCond == unsigned(m));
 		ASSERT(iElem == unsigned(nnz_jac_g));
+		std::cout << "eval_jac_g done." << std::endl;
 		DEBUG_END;
 		return true;
 	}
