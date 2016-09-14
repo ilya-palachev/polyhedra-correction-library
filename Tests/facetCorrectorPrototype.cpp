@@ -551,14 +551,12 @@ public:
 				values_[iNonzero] = point[iVariable];
 				++iNonzero;
 			}
-			for (Index iVariable = iVariableFirst;
-					iVariable < iVariableFirst + 3;
+			for (Index iVariable = 0; iVariable < 3;
 					++iVariable)
 			{
 				iRow_[iNonzero] = iConstraint;
-				jCol_[iNonzero] = iVariable;
-				values_[iNonzero] = planeMoved[iVariable
-					- iVariableFirst];
+				jCol_[iNonzero] = iVariableFirst + iVariable;
+				values_[iNonzero] = planeMoved[iVariable];
 				++iNonzero;
 			}
 			++iConstraint;
