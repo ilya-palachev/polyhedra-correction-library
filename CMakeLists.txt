@@ -125,6 +125,7 @@ set (SOURCE_pcl
 	Source/Recoverer/NativeSupportFunctionEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
+	Source/Recoverer/SupportPolyhedronCorrector.cpp
 	Source/Recoverer/TangientPointInformation.cpp
 	Source/Recoverer/TrustedEdgesDetector.cpp
 	Source/Recoverer/TsnnlsSupportFunctionEstimator.cpp

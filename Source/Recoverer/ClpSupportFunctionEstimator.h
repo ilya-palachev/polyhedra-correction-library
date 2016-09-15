@@ -36,37 +36,23 @@
 /**
  * Clp-based linear programming solver used for support function estimation.
  */
-class ClpSupportFunctionEstimator:
-	public SupportFunctionEstimator
+class ClpSupportFunctionEstimator: public SupportFunctionEstimator
 {
-private:
+protected:
 	/** Whether to run the CLP as a sommand-line program. */
 	bool ifCommandlineMode;
-
-	/** The type of problem. */
-	EstimationProblemNorm problemType_;
 public:
 	/**
 	 * Default constructor
 	 *
-	 * @param data	Support function estimation data (input)
+	 * @param data			Support function estimation data (input)
+	 * @param ifCommandlineMode	Whether to run through the command line
 	 */
-	ClpSupportFunctionEstimator(SupportFunctionEstimationDataPtr data);
+	ClpSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
+			bool ifCommandlineMode = false);
 
 	/** Default destructor. */
 	~ClpSupportFunctionEstimator();
-
-	/**
-	 * Sets the type of problem.
-	 *
-	 * @param type	The problem type.
-	 */
-	void setProblemType(EstimationProblemNorm type);
-
-	/**
-	 * Enables the command-line mode.
-	 */
-	void enableCommandlineMode();
 
 	/**
 	 * Runs the Clp algorithm.
@@ -76,6 +62,18 @@ public:
 	virtual VectorXd run(void);
 };
 
+/** The same as above, but CLP is run through the command line. */
+class ClpCommandLineSupportFunctionEstimator: public ClpSupportFunctionEstimator
+{
+public:
+	/**
+	 * Default constructor.
+	 *
+	 * @param data			Support function estimation data (input)
+	 */
+	ClpCommandLineSupportFunctionEstimator(
+			SupportFunctionEstimationDataPtr data);
+};
+
 #endif /* CLPSUPPORTFUNCTIONESTIMATOR_H_ */
 #endif /* USE_CLP */
-

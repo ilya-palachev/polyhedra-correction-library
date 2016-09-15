@@ -102,7 +102,8 @@ SupportFunctionDataConstructor::SupportFunctionDataConstructor() :
 	ifBalanceShadowContours_(false),
 	ifConvexifyShadowContours_(false),
 	ifExtractItemsByPoints_(false),
-	balancingVector_(0., 0., 0.)
+	balancingVector_(0., 0., 0.),
+	tangientIDs_()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -392,6 +393,8 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 		Vector_3 vDirection = direction - CGAL::ORIGIN;
 		double scalarProductMax = 0.;
 		Vector_3 supportPoint(0., 0., 0.);
+		int iVertexTangient = 0;
+		int iVertex = 0;
 		for (auto &vertex: vertices)
 		{
 			double scalarProduct = vDirection * vertex;
@@ -399,8 +402,11 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 			{
 				scalarProductMax = scalarProduct;
 				supportPoint = vertex;
+				iVertexTangient = iVertex;
 			}
+			++iVertex;
 		}
+		tangientIDs_.push_back(iVertexTangient);
 		ASSERT(scalarProductMax > 0);
 		SupportFunctionDataItem item(direction, scalarProductMax);
 		item.info = SupportFunctionDataItemInfoPtr(
@@ -410,4 +416,11 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	}
 	DEBUG_END;
 	return SupportFunctionDataPtr(new SupportFunctionData(items));
+}
+
+std::vector<int> SupportFunctionDataConstructor::getTangientIDs()
+{
+	DEBUG_START;
+	DEBUG_END;
+	return tangientIDs_;
 }

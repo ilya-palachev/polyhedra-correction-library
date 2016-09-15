@@ -81,7 +81,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
 
-	std::vector<Vector3d> directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
@@ -121,7 +121,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 	/* Find needed conditions. */
 	long int numDirections = data->size();
-	std::vector<Vector3d> directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
 	int numSkipped = 0;
@@ -151,7 +151,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	}
 	long int numValues = 3 * numDirections;
 	long int numConditions = triplets.size() / 6;
-	ALWAYS_PRINT(stdout, "Number of skipped constrained: %d (%lf from "
+	ALWAYS_PRINT(stdout, "Number of skipped constraints: %d (%lf from "
 			"total %ld)\n", numSkipped,
 			((double) numSkipped) / (numSkipped + numConditions),
 			numSkipped + numConditions);

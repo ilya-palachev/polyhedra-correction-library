@@ -32,8 +32,7 @@
 
 GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
-	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
+	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -42,13 +41,6 @@ GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
 GlpkSupportFunctionEstimator::~GlpkSupportFunctionEstimator()
 {
 	DEBUG_START;
-	DEBUG_END;
-}
-
-void GlpkSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
-{
-	DEBUG_START;
-	problemType_ = type;
 	DEBUG_END;
 }
 

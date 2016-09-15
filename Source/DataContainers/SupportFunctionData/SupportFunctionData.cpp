@@ -75,6 +75,18 @@ SupportFunctionData::SupportFunctionData(
 	DEBUG_END;
 }
 
+SupportFunctionData::SupportFunctionData(std::istream &stream)
+{
+	DEBUG_START;
+	double x, y, z, h;
+	while (stream >> x >> y >> z >> h)
+	{
+		SupportFunctionDataItem item(Vector3d(x, y, z), h);
+		items.push_back(item);
+	}
+	DEBUG_END;
+}
+
 SupportFunctionData::~SupportFunctionData()
 {
 	DEBUG_START;
@@ -143,31 +155,6 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 		SupportFunctionData(itemsUnequal));
 	DEBUG_END;
 	return dataUnequal;
-}
-
-std::vector<Vector3d> SupportFunctionData::supportDirections()
-{
-	DEBUG_START;
-	std::vector<Vector3d> directions;
-	for (auto item = items.begin(); item != items.end(); ++item)
-	{
-		directions.push_back(item->direction);
-	}
-	DEBUG_END;
-	return directions;
-}
-
-std::vector<Point_3> SupportFunctionData::supportDirectionsCGAL()
-{
-	DEBUG_START;
-	std::vector<Point_3> directions;
-	for (auto item = items.begin(); item != items.end(); ++item)
-	{
-		Vector3d v = item->direction;
-		directions.push_back(Point_3(v.x, v.y, v.z));
-	}
-	DEBUG_END;
-	return directions;
 }
 
 VectorXd SupportFunctionData::supportValues()
@@ -472,7 +459,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 	double height = 1e-1;
 	if (heightString)
 		height = strtod(heightString, NULL);
-	auto directions = supportDirectionsCGAL();
+	auto directions = supportDirections<Point_3>();
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		for (int i = 0; i < depth; ++i)

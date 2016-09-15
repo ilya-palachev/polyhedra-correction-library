@@ -129,7 +129,7 @@ private:
 	bool mergeClusters(int iClusterFirst, int iClusterSecond);
 
 	/**
-	 * Extends given cluster with new facets that are represented as a set 
+	 * Extends given cluster with new facets that are represented as a set
 	 * of facet indices. It is done if it is possible (i. e. when the error
 	 * of the sum is not bigger than the threshold).
 	 *

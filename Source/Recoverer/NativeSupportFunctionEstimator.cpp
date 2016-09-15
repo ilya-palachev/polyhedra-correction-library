@@ -34,8 +34,7 @@
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
-	SupportFunctionEstimator(data),
-	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM)
+	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -44,13 +43,6 @@ NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 NativeSupportFunctionEstimator::~NativeSupportFunctionEstimator()
 {
 	DEBUG_START;
-	DEBUG_END;
-}
-
-void NativeSupportFunctionEstimator::setProblemType(EstimationProblemNorm type)
-{
-	DEBUG_START;
-	problemType_ = type;
 	DEBUG_END;
 }
 
@@ -299,7 +291,7 @@ Eigen::Vector3d decomposeDirection(SupportFunctionDataPtr data, int planeID,
 		std::set<int> planesIDs)
 {
 	DEBUG_START;
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 
 	Eigen::Matrix3d matrix;
 	int i = 0;
@@ -360,7 +352,7 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	DEBUG_START;
 	auto outerIndex = collectInnerPointsIDs(
 			data->getShiftedDualPoints_3(0.));
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	auto values = data->supportValues();
 
 	typedef Eigen::Triplet<double> Triplet;
@@ -431,7 +423,7 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 
 	auto outerIndex = collectInnerPointsIDs(
 			data->getShiftedDualPoints_3(0.));
-	auto directions = data->supportDirections();
+	auto directions = data->supportDirections<Vector3d>();
 	auto values = data->supportValues();
 
 	double minimal = 0.;
@@ -483,7 +475,7 @@ static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 	std::cerr << innerIndex.size() << " points are inner" << std::endl;
 
 	std::vector<Plane_3> planes;
-	auto directions = data->supportDirectionsCGAL();
+	auto directions = data->supportDirections<Point_3>();
 	for (int i = 0; i < (int) directions.size(); ++i)
 	{
 		auto direction = directions[i];

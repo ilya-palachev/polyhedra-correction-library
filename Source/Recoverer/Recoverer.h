@@ -79,11 +79,8 @@ typedef enum
 	CPLEX_ESTIMATOR,
 #endif /* USE_CPLEX */
 
-	/** Quadratic primal CGAL estimator.  */
-	CGAL_ESTIMATOR,
-
-	/** Linear CGAL estimator. */
-	CGAL_ESTIMATOR_LINEAR
+	/** Built-in CGAL estimator.  */
+	CGAL_ESTIMATOR
 } RecovererEstimatorType;
 
 /**
@@ -121,14 +118,17 @@ private:
 	/** Number of analyzed contours. */
 	int numMaxContours;
 
-	/** The finite number of planes to be fitted. */
-	int numFinitePlanes_;
-
 	/** File name of 3rd-party constructed polyhedron. */
 	char *fileNamePolyhedron_;
 
 	/** The threshold of angle betweeb adjacent facets. */
 	double threshold_;
+
+	/**
+	 * The minimal Z norm for which down-side support directions are not
+	 * ignored during the production of the estimation report.
+	 */
+	double zMinimalNorm_;
 public:
 
 	/**
@@ -198,14 +198,6 @@ public:
 	void setNumMaxContours(int number);
 
 	/**
-	 * Sets the finite number of planes to be fitted.
-	 *
-	 * @param numFinitePlanes	The finite number of planes to be
-	 * 				fitted.
-	 */
-	void setNumFinitePlanes(int numFinitePlanes);
-
-	/**
 	 * Sets the file name of 3rd-party constructed polyhedron.
 	 *
 	 * @param fileNamePolyheedron	The file name of 3rd-party constructed
@@ -224,11 +216,37 @@ public:
 	}
 
 	/**
-	 * Runs the recovering procedure for shadow contours.
+	 * Sets the Z minimal norm.
 	 *
-	 * @param SCData	Shadow contour data
+	 * @param zMinimalNorm	The Z minimal norm to be set.
 	 */
-	Polyhedron_3 run(ShadowContourDataPtr SCData);
+	void setZMinimalNorm(double zMinimalNorm)
+	{
+		zMinimalNorm_ = zMinimalNorm;
+	}
+
+	/**
+	 * Runs the classical support function estimation procedure.
+	 *
+	 * @param data		Support function data.
+	 *
+	 * @return		Consistent values + estimation data.
+	 */
+	std::pair<VectorXd, SupportFunctionEstimationDataPtr>
+	runEstimation(SupportFunctionDataPtr SData);
+
+	/**
+	 * Builds consistent body from the estimated values of support function
+	 * and prints comparison report about it and about other possible
+	 * bodies.
+	 *
+	 * @param consistentValues	The result of support function
+	 * 				estimation.
+	 * @param SEData		The support function estimation initial
+	 * 				data.
+	 */
+	Polyhedron_3 buildConsistentBody(VectorXd consistentValues,
+		SupportFunctionEstimationDataPtr SEData);
 
 	/**
 	 * Runs the recovering procedure for support function data.
@@ -236,6 +254,13 @@ public:
 	 * @param data		Support function data
 	 */
 	Polyhedron_3 run(SupportFunctionDataPtr data);
+
+	/**
+	 * Runs the recovering procedure for shadow contours.
+	 *
+	 * @param SCData	Shadow contour data
+	 */
+	Polyhedron_3 run(ShadowContourDataPtr SCData);
 };
 
 typedef std::shared_ptr<Recoverer> RecovererPtr;

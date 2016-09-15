@@ -566,7 +566,7 @@ static std::vector<TangientPointInformation> searchTangientVertices(
 {
 	DEBUG_START;
 	int numDirections = data->size();
-	std::vector<Point_3> directions = data->supportDirectionsCGAL();
+	auto directions = data->supportDirections<Point_3>();
 	std::vector<TangientPointInformation> informations;
 	for (int i = 0; i < numDirections; ++i)
 	{

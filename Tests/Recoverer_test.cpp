@@ -62,9 +62,6 @@
 /** Option "-f" takes the argument with file name. */
 #define OPTION_FILE_NAME 'f'
 
-/** Option "-F" controls the finite number of planes to be fitted. */
-#define OPTION_FINITE_PLANES 'F'
-
 /**
  * Options "-i" sets the body used as starting point of the estimation process.
  */
@@ -117,6 +114,12 @@
 #define OPTION_SCALE_MATRIX 's'
 
 /**
+ * Option "-S" is used to specify the file name with ready support function
+ * data.
+ */
+#define OPTION_SUPPORT_FUNCTION_DATA_FILE 'S'
+
+/**
  * Option "-t" sets the type of support matrix.
  */
 #define OPTION_SUPPORT_MATRIX_TYPE 't'
@@ -136,6 +139,11 @@
  */
 #define OPTION_CONVEXIFY_CONTOURS 'x'
 
+/**
+ * Option "-z" is controlling the Z minimal norm.
+ */
+#define OPTION_Z_MINIMAL_NORM 'z'
+
 /** Getopt returns '?' in case of parsing error (missing argument). */
 #define GETOPT_QUESTION '?'
 
@@ -143,7 +151,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abc:d:e:f:F:i:l:m:M:n:N:o:p:r:st:T:vx"
+	"a:Abc:d:e:f:i:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
 
 struct PCLOption: public option
 {
@@ -357,16 +365,6 @@ static PCLOption optionsLong[] =
 	{
 		option
 		{
-			"finite-planes",
-			required_argument,
-			0,
-			OPTION_FINITE_PLANES
-		},
-		"The finite number of planes to be fitted."
-	},
-	{
-		option
-		{
 			"compare",
 			required_argument,
 			0,
@@ -384,6 +382,26 @@ static PCLOption optionsLong[] =
 			OPTION_THRESHOLD_ADJACENT_FACETS
 		},
 		"The value of threshold of angle between adjacent facets."
+	},
+	{
+		option
+		{
+			"support-function-data",
+			required_argument,
+			0,
+			OPTION_SUPPORT_FUNCTION_DATA_FILE
+		},
+		"Support function data file."
+	},
+	{
+		option
+		{
+			"z-minimal-norm",
+			required_argument,
+			0,
+			OPTION_Z_MINIMAL_NORM
+		},
+		"The Z minimal norm."
 	},
 	{option{0, 0, 0, 0}, 0}
 };
@@ -452,8 +470,17 @@ typedef struct
 	/** The string with intput data location. */
 	union
 	{
-		/** File name with existent shadow contour data. */
-		char *fileName;
+		struct
+		{
+			/**
+			 * File name with existent shadow contour data or
+			 * support function data.
+			 */
+			char *name;
+
+			/** Whether it is support function data or not. */
+			bool ifSupportFunctionData;
+		} file;
 
 		/** Parameters of synthetically generated data. */
 		SyntheticModelDescription model;
@@ -495,14 +522,14 @@ typedef struct
 	/** The problem type. */
 	EstimationProblemNorm problemType;
 
-	/** The finite number of planes to be fitted. */
-	int numFinitePlanes;
-
 	/** The name of file with 3rd-party constructed polyhedron. */
 	char *fileNamePolyhedron;
 
 	/** The threshold of angle between adjacent facets. */
 	double threshold;
+
+	/** The Z minimal norm. */
+	double zMinimalNorm;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -645,12 +672,7 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] =
 	{
 		CGAL_ESTIMATOR,
 		"cgal",
-		"CGAL solver of quadratic programming problems"
-	},
-	{
-		CGAL_ESTIMATOR_LINEAR,
-		"cgal-lp",
-		"CGAL solver of linear programming problems"
+		"Built-in CGAL solver"
 	}
 };
 
@@ -898,9 +920,10 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->ifScaleMatrix = false;
 	options->outputName = NULL;
 	options->epsilonFactor = -1;
-	options->numFinitePlanes = 0;
 	options->fileNamePolyhedron = NULL;
 	options->threshold = 0.;
+	options->zMinimalNorm = 0.;
+	options->input.file.ifSupportFunctionData = false;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -916,6 +939,8 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			DEBUG_END;
 			exit(EXIT_FAILURE);
 			break;
+		case OPTION_SUPPORT_FUNCTION_DATA_FILE:
+			options->input.file.ifSupportFunctionData = true;
 		case OPTION_FILE_NAME:
 			if (ifOptionFileName)
 			{
@@ -923,7 +948,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			options->mode = RECOVERER_REAL_TESTING;
-			options->input.fileName = optarg;
+			options->input.file.name = optarg;
 			ifOptionFileName = true;
 			break;
 		case OPTION_MODEL_NAME:
@@ -1281,28 +1306,6 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 
 			ifOptionEpsilonFactor = true;
 			break;
-		case OPTION_FINITE_PLANES:
-			options->numFinitePlanes = strtol(optarg,
-					&charMistaken, 10);
-			/*
-			 * If user gives invalid character, the charMistaken is
-			 * set to it
-			 */
-			if (charMistaken && *charMistaken)
-			{
-				errorCannotParseNumber(argc, argv,
-						charMistaken);
-			}
-
-			/*
-			 * In case of underflow or overflow errno is set to
-			 * ERANGE.
-			 */
-			if (errno == ERANGE)
-			{
-				errorOutOfRange(argc, argv);
-			}
-			break;
 		case OPTION_COMPARE_WITH_FILE:
 			if (options->fileNamePolyhedron)
 			{
@@ -1336,6 +1339,14 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			}
 
 			ifOptionEpsilonFactor = true;
+			break;
+		case OPTION_Z_MINIMAL_NORM:
+			options->zMinimalNorm = strtod(optarg, &charMistaken);
+			if (charMistaken && *charMistaken)
+				errorCannotParseNumber(argc, argv,
+						charMistaken);
+			if (errno == ERANGE)
+				errorOutOfRange(argc, argv);
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1428,7 +1439,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	{
 		if (ifOptionFileName)
 		{
-			options->outputName = strdup(options->input.fileName);
+			options->outputName = strdup(options->input.file.name);
 		}
 		else
 		{
@@ -1562,7 +1573,8 @@ static ShadowContourDataPtr getRealSCData(CommandLineOptions* options)
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
 
 	/* Read shadow contours data from file. */
-	SCData->fscanDefault(options->input.fileName);
+	ASSERT(!options->input.file.ifSupportFunctionData);
+	SCData->fscanDefault(options->input.file.name);
 
 	DEBUG_END;
 	return SCData;
@@ -1733,9 +1745,31 @@ static std::vector<Point_3> readDirections(char *fileName)
 	return points;
 }
 
-static SupportFunctionDataPtr makeSupportData(CommandLineOptions* options)
+static SupportFunctionDataPtr makeSupportData(CommandLineOptions *options)
 {
 	DEBUG_START;
+	if (options->mode == RECOVERER_REAL_TESTING
+			&& options->input.file.ifSupportFunctionData)
+	{
+		std::filebuf fb;
+		if (fb.open(options->input.file.name, std::ios::in))
+		{
+			std::istream is(&fb);
+			SupportFunctionDataPtr data(new SupportFunctionData(
+				is));
+			fb.close();
+			DEBUG_END;
+			return data;
+		}
+		else
+		{
+			ERROR_PRINT("Cannot open file %s",
+				options->input.file.name);
+			DEBUG_END;
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	/* Create polyhedron based on one of possible models. */
 	Polyhedron_3 p = makeModel(options);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
@@ -1809,11 +1843,9 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 			options->epsilonFactor;
 	}
 
-	/* Set the finite number of planes to be fitted. */
-	recoverer->setNumFinitePlanes(options->numFinitePlanes);
-
 	recoverer->setFileNamePolyhedron(options->fileNamePolyhedron);
 	recoverer->setThreshold(options->threshold);
+	recoverer->setZMinimalNorm(options->zMinimalNorm);
 
 	DEBUG_END;
 	return recoverer;
@@ -1905,9 +1937,10 @@ int main(int argc, char** argv)
 	/* Create the recoverer with requested properties. */
 	RecovererPtr recoverer = makeRecoverer(options);
 	
-	if (options->mode == RECOVERER_REAL_TESTING
-			|| (options->mode == RECOVERER_SYNTHETIC_TESTING
-				&& options->input.model.numContours))
+	if ((options->mode == RECOVERER_REAL_TESTING
+		&& !options->input.file.ifSupportFunctionData)
+		|| (options->mode == RECOVERER_SYNTHETIC_TESTING
+		&& options->input.model.numContours))
 	{
 		/*
 		 * Read or generate shadow contour data depending on requested

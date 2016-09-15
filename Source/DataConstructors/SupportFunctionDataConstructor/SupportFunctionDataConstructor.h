@@ -48,6 +48,12 @@ private:
 	/** The vector used for shifting during balancing. */
 	Vector3d balancingVector_;
 
+	/**
+	 * IDs points of tangient vertices (for case when data is constructed
+	 * for the given polyhedron).
+	 */
+	std::vector<int> tangientIDs_;
+
 public:
 	/** Empty constructor. */
 	SupportFunctionDataConstructor();
@@ -92,6 +98,14 @@ public:
 	 */
 	SupportFunctionDataPtr run(std::vector<Point_3> directions,
 		Polyhedron_3 polyhedron);
+
+	/**
+	 * Gets IDs of tangient vertices that have been obtained during the
+	 * construction of support function data.
+	 *
+	 * @return IDs of tangient vertices.
+	 */
+	std::vector<int> getTangientIDs();
 };
 
 #endif /* SUPPORT_FUNCTION_DATA_CONSTRUCTOR_H */

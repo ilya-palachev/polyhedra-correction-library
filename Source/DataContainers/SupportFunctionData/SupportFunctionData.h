@@ -106,6 +106,13 @@ public:
 			const std::vector<SupportFunctionDataItem> itemsGiven);
 
 	/**
+	 * Reads support support function data from input stream.
+	 *
+	 * @param stream 	The stream for data to be read from.
+	 */
+	SupportFunctionData(std::istream &stream);
+
+	/**
 	 * Assignment operator.
 	 *
 	 * @param data	The original data.
@@ -144,14 +151,19 @@ public:
 	 *
 	 * @return Vector of support directions.
 	 */
-	std::vector<Vector3d> supportDirections();
-
-	/**
-	 * Gets the vector of support directions represented as CGAL points.
-	 *
-	 * @return Vector of support directions as CGAL points.
-	 */
-	std::vector<Point_3> supportDirectionsCGAL();
+	template <class TemplPoint>
+	std::vector<TemplPoint> supportDirections() const
+	{
+		DEBUG_START;
+		std::vector<TemplPoint> directions;
+		for (auto item = items.begin(); item != items.end(); ++item)
+		{
+			Vector3d v = item->direction;
+			directions.push_back(TemplPoint(v.x, v.y, v.z));
+		}
+		DEBUG_END;
+		return directions;
+	}
 
 	/**
 	 * Gets the vector of support values.

@@ -37,9 +37,6 @@
 class CPLEXSupportFunctionEstimator:
 	public SupportFunctionEstimator
 {
-private:
-	/** Type of problem. */
-	EstimationProblemNorm problemType_;
 public:
 	/**
 	 * Default constructor
@@ -50,13 +47,6 @@ public:
 
 	/** Default destructor. */
 	~CPLEXSupportFunctionEstimator();
-
-	/**
-	 * Sets the type of problem.
-	 *
-	 * @param type	The problem type.
-	 */
-	void setProblemType(EstimationProblemNorm type);
 
 	/**
 	 * Runs the CPLEX algorithm.
