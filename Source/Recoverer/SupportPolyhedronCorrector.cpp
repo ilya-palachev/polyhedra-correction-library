@@ -151,6 +151,27 @@ public:
 		DEBUG_END;
 	}
 
+	std::vector<Vector_3> getDirections()
+	{
+		DEBUG_START;
+		DEBUG_END;
+		return directions;
+	}
+
+	std::vector<double> getValues()
+	{
+		DEBUG_START;
+		DEBUG_END;
+		return values;
+	}
+
+	std::vector<Vector_3> getPoints()
+	{
+		DEBUG_START;
+		DEBUG_END;
+		return points;
+	}
+
 	bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			Index& nnz_h_lag, IndexStyleEnum& index_style)
 	{
@@ -741,8 +762,7 @@ SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
 	DEBUG_END;
 }
 
-ApplicationReturnStatus solveNLP(SmartPtr<IpoptApplication> app,
-		Polyhedron_3 initialP,
+FixedTopologyNLP *prepareNLP(Polyhedron_3 initialP,
 		SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
@@ -778,9 +798,34 @@ ApplicationReturnStatus solveNLP(SmartPtr<IpoptApplication> app,
 	FixedTopology *FT = new FixedTopology(initialP, SData);
 
 	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
-	ApplicationReturnStatus status = app->OptimizeTNLP(FTNLP);
 	DEBUG_END;
-	return status;
+	return FTNLP;
+}
+
+Polyhedron_3 obtainPolyhedron(FixedTopologyNLP *FTNLP)
+{
+	DEBUG_START;
+	std::vector<Vector_3> directions = FTNLP->getDirections();
+	std::vector<double> values = FTNLP->getValues();
+	std::vector<Plane_3> planes(values.size());
+	for (unsigned i = 0; i < values.size(); ++i)
+		planes[i] = Plane_3(directions[i].x(), directions[i].y(),
+				directions[i].z(), values[i]);
+	Polyhedron_3 intersection(planes);
+	std::cout << "Intersection has " << intersection.size_of_vertices()
+		<< " vertices, " << intersection.size_of_facets() << " facets."
+		<< std::endl;
+
+	std::vector<Vector_3> pointsAsVectors = FTNLP->getPoints();
+	std::vector<Point_3> points(pointsAsVectors.size());
+	for (const Vector_3 &v : pointsAsVectors)
+		points.push_back(Point_3(v.x(), v.y(), v.z()));
+	Polyhedron_3 hull;
+	CGAL::convex_hull_3(points.begin(), points.end(), hull);
+	std::cout << "Hull has " << hull.size_of_vertices() << " vertices, "
+		<< hull.size_of_facets() << " facets." << std::endl;
+	DEBUG_END;
+	return hull;
 }
 
 Polyhedron_3 SupportPolyhedronCorrector::run()
@@ -789,9 +834,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	SmartPtr<IpoptApplication> app = IpoptApplicationFactory();
 
 	/* Intialize the IpoptApplication and process the options */
-	ApplicationReturnStatus status;
-	status = app->Initialize();
-	if (status != Solve_Succeeded)
+	if (app->Initialize() != Solve_Succeeded)
 	{
 		MAIN_PRINT("*** Error during initialization!");
 		return initialP;
@@ -802,16 +845,17 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	//app->Options()->SetStringValue("derivative_test_print_all", "yes");
 
 	/* Ask Ipopt to solve the problem */
-	status = solveNLP(app, initialP, SData);
-	if (status == Solve_Succeeded)
-	{
-		MAIN_PRINT("*** The problem solved!");
-	}
-	else
+	FixedTopologyNLP *FTNLP = prepareNLP(initialP, SData);
+	if (app->OptimizeTNLP(FTNLP) != Solve_Succeeded)
 	{
 		MAIN_PRINT("** The problem FAILED!");
+		DEBUG_END;
+		return initialP;
 	}
+	MAIN_PRINT("*** The problem solved!");
+	Polyhedron_3 correctedP = obtainPolyhedron(FTNLP);
 
+	delete FTNLP;
 	DEBUG_END;
-	return initialP; // FIXME: Construct the proper polyhedron.
+	return correctedP;
 }
