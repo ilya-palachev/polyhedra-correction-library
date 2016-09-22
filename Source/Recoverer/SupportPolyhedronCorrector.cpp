@@ -417,6 +417,7 @@ public:
 	{
 		DEBUG_START;
 		ASSERT(x && g);
+		getVariables(x);
 		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
 			for (unsigned j = 0; j < points.size(); ++j)
