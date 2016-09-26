@@ -762,46 +762,6 @@ SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
 	DEBUG_END;
 }
 
-FixedTopologyNLP *prepareNLP(Polyhedron_3 initialP,
-		SupportFunctionDataPtr SData)
-{
-	DEBUG_START;
-	/* Prepare the NLP for solving. */
-	auto u = SData->supportDirections<Vector_3>();
-	VectorXd values = SData->supportValues();
-	ASSERT(u.size() == unsigned(values.size()));
-	std::vector<double> h(values.size());
-	for (unsigned i = 0; i < values.size(); ++i)
-		h[i] = values(i);
-	std::vector<Vector_3> U;
-	std::vector<double> H;
-	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
-			I != E; ++I)
-	{
-		Plane_3 plane = I->plane();
-		Vector_3 norm = plane.orthogonal_vector();
-		double length = sqrt(norm.squared_length());
-		norm = norm * (1. / length);
-		double value = -plane.d() / length;
-		// FIXME: Handle cases with small lengths.
-		U.push_back(norm);
-		H.push_back(value);
-	}
-	std::vector<Vector_3> points;
-	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end();
-			I != E; ++I)
-	{
-		Point_3 point = I->point();
-		points.push_back(Vector_3(point.x(), point.y(), point.z()));
-	}
-
-	FixedTopology *FT = new FixedTopology(initialP, SData);
-
-	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
-	DEBUG_END;
-	return FTNLP;
-}
-
 Polyhedron_3 obtainPolyhedron(FixedTopologyNLP *FTNLP)
 {
 	DEBUG_START;
@@ -844,8 +804,40 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	//app->Options()->SetStringValue("derivative_test", "only-second-order");
 	//app->Options()->SetStringValue("derivative_test_print_all", "yes");
 
+	/* Prepare the NLP for solving. */
+	auto u = SData->supportDirections<Vector_3>();
+	VectorXd values = SData->supportValues();
+	ASSERT(u.size() == unsigned(values.size()));
+	std::vector<double> h(values.size());
+	for (unsigned i = 0; i < values.size(); ++i)
+		h[i] = values(i);
+	std::vector<Vector_3> U;
+	std::vector<double> H;
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
+			I != E; ++I)
+	{
+		Plane_3 plane = I->plane();
+		Vector_3 norm = plane.orthogonal_vector();
+		double length = sqrt(norm.squared_length());
+		norm = norm * (1. / length);
+		double value = -plane.d() / length;
+		// FIXME: Handle cases with small lengths.
+		U.push_back(norm);
+		H.push_back(value);
+	}
+	std::vector<Vector_3> points;
+	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end();
+			I != E; ++I)
+	{
+		Point_3 point = I->point();
+		points.push_back(Vector_3(point.x(), point.y(), point.z()));
+	}
+
+	FixedTopology *FT = new FixedTopology(initialP, SData);
+
+	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
+
 	/* Ask Ipopt to solve the problem */
-	FixedTopologyNLP *FTNLP = prepareNLP(initialP, SData);
 	if (app->OptimizeTNLP(FTNLP) != Solve_Succeeded)
 	{
 		MAIN_PRINT("** The problem FAILED!");
