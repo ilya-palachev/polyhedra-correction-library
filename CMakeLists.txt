@@ -196,8 +196,8 @@ add_library(vector3d SHARED ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
 
 option(ENABLE_TSNNLS "Enable tsnnls solver (does not work)" OFF)
-option(ENABLE_IPOPT "Enable Ipopt solver" OFF)
-option(ENABLE_GLPK "Enable Glpk solver" OFF)
+option(ENABLE_IPOPT "Enable Ipopt solver" ON)
+option(ENABLE_GLPK "Enable Glpk solver" ON)
 option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 option(DISABLE_CGAL_DEBUG "Disable all CGAL internal checks" OFF)
 
