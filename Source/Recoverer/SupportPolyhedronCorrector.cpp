@@ -41,20 +41,35 @@ static unsigned counter;
 struct FixedTopology
 {
 	/**
-	 * Vector of vectors, i-th element of which contains IDs of support
+	 * Vector of sets, i-th element of which contains IDs of support
 	 * directions for which i-th vertex of the polyhedron is tangient.
 	 */
 	std::vector<std::set<int>> tangient;
 
 	/**
-	 * Vector of vectors, i-th element of which contains IDs of vertices
+	 * Vector of sets, i-th element of which contains IDs of vertices
 	 * incident to the i-th facet.
 	 */
 	std::vector<std::set<int>> incident;
 
+	/**
+	 * Vector of sets, i-th element of which contains IDs of vertices
+	 * incident to the neighbor facets of the i-th facet, but not incident
+	 * to the i-th facet.
+	 */
+	std::vector<std::set<int>> semiIncident;
+
+	/**
+	 * Vector of sets, i-th element of which contains IDs of vertices
+	 * incident to some edge that is incident to the i-th vertex.
+	 */
+	std::vector<std::set<int>> neighbors;
+
 	FixedTopology(Polyhedron_3 initialP, SupportFunctionDataPtr SData) :
 		tangient(initialP.size_of_vertices()),
-		incident(initialP.size_of_facets())
+		incident(initialP.size_of_facets()),
+		semiIncident(initialP.size_of_facets()),
+		neighbors(initialP.size_of_vertices())
 	{
 		DEBUG_START;
 		SupportFunctionDataConstructor constructor;
@@ -66,6 +81,23 @@ struct FixedTopology
 		}
 
 		initialP.initialize_indices();
+
+		unsigned iVertex = 0;
+		for (auto I = initialP.vertices_begin(),
+				E = initialP.vertices_end(); I != E; ++I)
+		{
+			std::cout << "Constructing vertrex #" << iVertex
+				<< ": ";
+			auto C = I->vertex_begin();
+			do
+			{
+				int iNeighbor = C->opposite()->vertex()->id;
+				std::cout << iNeighbor << " ";
+				neighbors[iVertex].insert(iNeighbor);
+			} while (++C != I->vertex_begin());
+			++iVertex;
+			std::cout << std::endl;
+		}
 		
 		unsigned iFacet = 0;
 		for (auto I = initialP.facets_begin(),
@@ -79,6 +111,20 @@ struct FixedTopology
 				std::cout << iVertex << " ";
 				incident[iFacet].insert(iVertex);
 			} while (++C != I->facet_begin());
+			std::cout << " semi ";
+
+			ASSERT(C == I->facet_begin());
+			do
+			{
+				int iVertex = C->vertex()->id;
+				for (int i : neighbors[iVertex])
+					if (!incident[iFacet].count(i))
+					{
+						std::cout << i << " ";
+						semiIncident[iFacet].insert(i);
+					}
+			} while (++C != I->facet_begin());
+
 			++iFacet;
 			std::cout << std::endl;
 		}
@@ -120,7 +166,10 @@ class FixedTopologyNLP : public TNLP
 	/** The number of consistensy constraints. */
 	unsigned numConsistencyConstraints;
 
-	/** The number of convexity + planarity constraints. */
+	/** The number of planarity constraints. */
+	unsigned numPlanarityConstraints;
+
+	/** The number of convexity constraints. */
 	unsigned numConvexityConstraints;
 
 	/** The number of normality constraints. */
@@ -141,13 +190,31 @@ public:
 		values(H.size()),
 		pointsInitial(pointsInitial),
 		points(pointsInitial.size()),
-		FT(FT),
-		numConsistencyConstraints(u.size()
-				* (pointsInitial.size() - 1)),
-		numConvexityConstraints(pointsInitial.size() * U.size()),
-		numNormalityConstraints(U.size())
+		FT(FT)
 	{
 		DEBUG_START;
+		numConsistencyConstraints = 0;
+		for (unsigned i = 0; i < pointsInitial.size(); ++i)
+			numConsistencyConstraints += FT->tangient[i].size()
+				* FT->neighbors[i].size();
+		std::cout << "Number of consistency constraints: "
+			<< numConsistencyConstraints << std::endl;
+
+		numPlanarityConstraints = 0;
+		for (unsigned i = 0; i < U.size(); ++i)
+			numPlanarityConstraints += FT->incident[i].size();
+		std::cout << "Number of planarity constraints: "
+			<< numPlanarityConstraints << std::endl;
+
+		numConvexityConstraints = 0;
+		for (unsigned i = 0; i < U.size(); ++i)
+			numConvexityConstraints += FT->semiIncident[i].size();
+		std::cout << "Number of convexity constraints: "
+			<< numConvexityConstraints << std::endl;
+
+		numNormalityConstraints = U.size();
+		std::cout << "Number of normality constraints: "
+			<< numNormalityConstraints << std::endl;
 		DEBUG_END;
 	}
 
@@ -182,14 +249,15 @@ public:
 
 		/* ===================================== Number of variables: */
 		n = 3 * U.size() + H.size() + 3 * pointsInitial.size();
-		std::cout << "Number of vertices: " << pointsInitial.size() << std::endl;
+		std::cout << "Number of vertices: " << pointsInitial.size()
+			<< std::endl;
 		std::cout << "Number of facets: " << U.size() << std::endl;
 		std::cout << "Number of variables: " << n << std::endl;
 		ASSERT(m == 0 && nnz_jac_g == 0 && nnz_h_lag == 0);
 
 		/* =================================== Number of constraints: */
-		m = numConsistencyConstraints + numConvexityConstraints
-			+ numNormalityConstraints;
+		m = numConsistencyConstraints + numPlanarityConstraints
+			+ numConvexityConstraints + numNormalityConstraints;
 		std::cout << "Number of constraints: " << m << std::endl;
 		ASSERT(nnz_jac_g == 0 && nnz_h_lag == 0);
 
@@ -206,7 +274,8 @@ public:
 		 *    (U_j, U_j) = 1
 		 */
 		nnz_jac_g = 6 * numConsistencyConstraints
-			+ 7 * numConvexityConstraints
+			+ 7 * (numPlanarityConstraints
+					+ numConvexityConstraints)
 			+ 3 * numNormalityConstraints;
 		std::cout << "Number of nonzeros in constraints Jacobian: "
 			<< nnz_jac_g << std::endl;
@@ -225,7 +294,8 @@ public:
 		 * non-zero to the hessian):
 		 */
 		nnz_h_lag = 9 * pointsInitial.size()
-			+ 6 * numConvexityConstraints
+			+ 6 * (numPlanarityConstraints
+					+ numConvexityConstraints)
 			+ 3 * numNormalityConstraints;
 		std::cout << "Number of nonzeros in the Lagrangian Hessian: "
 			<< nnz_h_lag << std::endl;
@@ -244,24 +314,24 @@ public:
 		}
 
 		unsigned iCond = 0;
-		for (; iCond < numConvexityConstraints; ++iCond)
+		for (; iCond < numPlanarityConstraints; ++iCond)
+		{
+			g_l[iCond] = 0.;
+			g_u[iCond] = 0.;
+		}
+		ASSERT(iCond == numPlanarityConstraints);
+
+		for (; iCond < numPlanarityConstraints
+				+ numConvexityConstraints; ++iCond)
 		{
 
 			g_l[iCond] = -TNLP_INFINITY;
 			g_u[iCond] = 0.;
 		}
-
-		for (unsigned iFacet = 0; iFacet < U.size(); ++iFacet)
-		{
-			const auto &facet = FT->incident[iFacet];
-			for (auto iVertex : facet)
-			{
-				unsigned iCondInc =
-					pointsInitial.size() * iFacet + iVertex;
-				g_l[iCondInc] = 0.;
-			}
-		}
-		ASSERT(iCond == numConvexityConstraints);
+		std::cout << "iCond: " << iCond << std::endl;
+		std::cout << "sum: " << numPlanarityConstraints + numConvexityConstraints << std::endl;
+		ASSERT(iCond == numPlanarityConstraints
+				+ numConvexityConstraints);
 
 		for (unsigned i = 0; i < numConsistencyConstraints; ++i)
 		{
@@ -269,7 +339,8 @@ public:
 			g_u[iCond] = +TNLP_INFINITY;
 			++iCond;
 		}
-		ASSERT(iCond == numConvexityConstraints
+		ASSERT(iCond == numPlanarityConstraints
+				+ numConvexityConstraints
 				+ numConsistencyConstraints);
 
 		for (unsigned i = 0; i < numNormalityConstraints; ++i)
@@ -441,22 +512,27 @@ public:
 		getVariables(x);
 		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
-			for (unsigned j = 0; j < points.size(); ++j)
+			for (int j : FT->incident[i])
 				g[iCond++] = directions[i] * points[j]
 					- values[i];
-		ASSERT(iCond == numConvexityConstraints);
+		ASSERT(iCond == numPlanarityConstraints);
+
+		for (unsigned i = 0; i < U.size(); ++i)
+			for (int j : FT->semiIncident[i])
+				g[iCond++] = directions[i] * points[j]
+					- values[i];
+		ASSERT(iCond == numPlanarityConstraints
+				+ numConvexityConstraints);
 
 		for (unsigned i = 0; i < pointsInitial.size(); ++i)
 			for (int j : FT->tangient[i])
-				for (unsigned k = 0; k < pointsInitial.size();
-						++k)
+				for (int k : FT->neighbors[i])
 				{
-					if (k == i)
-						continue;
 					g[iCond++] = u[j] * (points[i]
 							- points[k]);
 				}
-		ASSERT(iCond == numConvexityConstraints
+		ASSERT(iCond == numPlanarityConstraints
+				+ numConvexityConstraints
 				+ numConsistencyConstraints);
 
 		for (const Vector_3 &direction : directions)
@@ -480,7 +556,7 @@ public:
 		unsigned iCond = 0;
 		for (unsigned i = 0; i < U.size(); ++i)
 		{
-			for (unsigned j = 0; j < points.size(); ++j)
+			for (int j : FT->incident[i])
 			{
 				counter = iElem;
 				if (!jacValues)
@@ -514,15 +590,54 @@ public:
 				++iCond;
 			}
 		}
-		ASSERT(iCond == numConvexityConstraints);
-		ASSERT(iElem == 7 * numConvexityConstraints);
+		ASSERT(iCond == numPlanarityConstraints);
+		ASSERT(iElem == 7 * numPlanarityConstraints);
+
+		for (unsigned i = 0; i < U.size(); ++i)
+		{
+			for (int j : FT->semiIncident[i])
+			{
+				counter = iElem;
+				if (!jacValues)
+				{
+					for (int k = 0; k < 3; ++k)
+					{
+						iRow[iElem] = iCond;
+						jCol[iElem] = 3 * j + k;
+						++iElem;
+					}
+					for (int k = 0; k < 4; ++k)
+					{
+						iRow[iElem] = iCond;
+						jCol[iElem] =
+							3 * pointsInitial.size()
+							+ 4 * i + k;
+						++iElem;
+					}
+				}
+				else
+				{
+					jacValues[iElem++] = directions[i].x();
+					jacValues[iElem++] = directions[i].y();
+					jacValues[iElem++] = directions[i].z();
+					jacValues[iElem++] = points[j].x();
+					jacValues[iElem++] = points[j].y();
+					jacValues[iElem++] = points[j].z();
+					jacValues[iElem++] = -1.;
+				}
+				ASSERT(iElem == counter + 7);
+				++iCond;
+			}
+		}
+		ASSERT(iCond == numPlanarityConstraints
+				+ numConvexityConstraints);
+		ASSERT(iElem == 7 * (numPlanarityConstraints
+					+ numConvexityConstraints));
 
 		for (unsigned i = 0; i < points.size(); ++i)
 			for (int j : FT->tangient[i])
-				for (unsigned k = 0; k < points.size(); ++k)
+				for (int k : FT->neighbors[i])
 				{
-					if (k == i)
-						continue;
 					counter = iElem;
 					if (!jacValues)
 					{
@@ -551,9 +666,11 @@ public:
 					ASSERT(iElem == counter + 6);
 					++iCond;
 				}
-		ASSERT(iCond == numConvexityConstraints
+		ASSERT(iCond == numPlanarityConstraints
+				+ numConvexityConstraints
 				+ numConsistencyConstraints);
-		ASSERT(iElem == 7 * numConvexityConstraints
+		ASSERT(iElem == 7 * (numPlanarityConstraints
+					+ numConvexityConstraints)
 				+ 6 * numConsistencyConstraints);
 
 		for (unsigned i = 0; i < directions.size(); ++i)
@@ -622,8 +739,20 @@ public:
 					++iElem;
 				}
 				ASSERT(iElem == counter + 3);
+				// FIXME: Rework on this.
+				unsigned numPlanarityVisited = 0;
+				unsigned numConvexityVisited = 0;
 				for (unsigned j = 0; j < directions.size(); ++j)
 				{
+					auto &inc = FT->incident[j];
+					auto &sinc = FT->semiIncident[j];
+					if (!inc.count(i) && !sinc.count(i))
+					{
+						numPlanarityVisited += inc.size();
+						numConvexityVisited += sinc.size();
+						continue;
+					}
+
 					if (!hValues)
 					{
 						iRow[iElem] = 3 * i + p;
@@ -633,25 +762,38 @@ public:
 					}
 					else
 					{
-						int iCond = points.size() * j
-							+ i;
+						int iCond = 0;
+						auto P = inc.find(i);
+						if (P != inc.end())
+							iCond = numPlanarityVisited + std::distance(inc.begin(), P);
+						P = sinc.find(i);
+						if (P != sinc.end())
+							iCond = numPlanarityConstraints + numConvexityVisited + std::distance(sinc.begin(), P);
 						hValues[iElem++] =
 							0.5 * lambda[iCond];
 					}
+					numPlanarityVisited += inc.size();
+					numConvexityVisited += sinc.size();
 				}
-				ASSERT(iElem == counter + 3
-						+ directions.size());
 			}
 		}
 
 		for (unsigned j = 0; j < directions.size(); ++j)
 		{
+			auto &inc = FT->incident[j];
+			auto &sinc = FT->semiIncident[j];
+			// FIXME: Rework on this.
+			unsigned numPlanarityVisited = 0;
+			unsigned numConvexityVisited = 0;
 			for (unsigned p = 0; p < 3; ++p)
 			{
 				int iRowCommon = 3 * points.size() + 4 * j + p;
 				counter = iElem;
 				for (unsigned i = 0; i < points.size(); ++i)
 				{
+					if (!inc.count(i) && !sinc.count(i))
+						continue;
+
 					if (!hValues)
 					{
 						iRow[iElem] = iRowCommon;
@@ -660,13 +802,19 @@ public:
 					}
 					else
 					{
-						int iCond = points.size() * j
-							+ i;
+						int iCond = 0;
+						if (inc.count(i))
+							iCond = numPlanarityVisited;
+						if (sinc.count(i))
+							iCond = numPlanarityConstraints + numConvexityVisited;
 						hValues[iElem++] =
 							0.5 * lambda[iCond];
 					}
+					if (inc.count(i))
+						++numPlanarityVisited;
+					if (sinc.count(i))
+						++numConvexityVisited;
 				}
-				ASSERT(iElem == counter + points.size());
 
 				if (!hValues)
 				{
@@ -676,11 +824,11 @@ public:
 				}
 				else
 				{
-					int iCond = numConvexityConstraints
+					int iCond = numPlanarityConstraints
+						+ numConvexityConstraints
 						+ numConsistencyConstraints + j;
 					hValues[iElem++] = 2. * lambda[iCond];
 				}
-				ASSERT(iElem == counter + points.size() + 1);
 			}
 		}
 		ASSERT(iElem == unsigned(nnz_h_lag));
