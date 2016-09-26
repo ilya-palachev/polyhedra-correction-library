@@ -26,6 +26,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "SupportPolyhedronCorrector.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include <coin/IpTNLP.hpp>
@@ -827,8 +828,8 @@ Polyhedron_3 obtainPolyhedron(FixedTopologyNLP *FTNLP)
 	std::vector<double> values = FTNLP->getValues();
 	std::vector<Plane_3> planes(values.size());
 	for (unsigned i = 0; i < values.size(); ++i)
-		planes[i] = Plane_3(directions[i].x(), directions[i].y(),
-				directions[i].z(), values[i]);
+		planes[i] = Plane_3(-directions[i].x(), -directions[i].y(),
+				-directions[i].z(), values[i]);
 	Polyhedron_3 intersection(planes);
 	std::cout << "Intersection has " << intersection.size_of_vertices()
 		<< " vertices, " << intersection.size_of_facets() << " facets."
@@ -913,7 +914,9 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		return initialP;
 	}
 	MAIN_PRINT("*** The problem solved!");
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply") << initialP;
 	Polyhedron_3 correctedP = obtainPolyhedron(FTNLP);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-from-planes.ply") << correctedP;
 
 	delete FTNLP;
 	DEBUG_END;
