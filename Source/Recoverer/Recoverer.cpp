@@ -301,7 +301,7 @@ static Polyhedron_3 producePolyhedron(
 	
 	/* Dump the resulting polyhedron to the debug file. */
 	std::string name = title;
-       	name += ".ply";
+       	name += ".DONT_USE_THIS_FILE.ply";
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str()) << intersection;
 
 	if (ifPrintReport)
@@ -516,9 +516,19 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 	if (getenv("CORRECT_SIMPLIFIED_BODY"))
 	{
 		pushTimer("polyhedron correction");
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-FT-correction.ply") << P;
 		SupportPolyhedronCorrector corrector(P, SEData->supportData());
-		P = corrector.run();
+		Polyhedron_3 PC = corrector.run();
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-FT-correction.ply") << PC;
 		popTimer();
+		producePolyhedron(SEData, supportValuesFromPoints(directions,
+			estimateJoined), "naively-joined-body");
+		VectorXd estimateCorrected =
+			PC.findTangientPointsConcatenated(directions);
+		producePolyhedron(SEData, supportValuesFromPoints(
+					directions, estimateCorrected),
+				"corrected-joined-body");
+		P = PC;
 	}
 
 	DEBUG_END;
