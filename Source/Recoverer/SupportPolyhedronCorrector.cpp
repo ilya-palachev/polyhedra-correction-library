@@ -840,11 +840,6 @@ Polyhedron_3 obtainPolyhedron(FixedTopologyNLP *FTNLP)
 	for (const Vector_3 &v : pointsAsVectors)
 		points.push_back(Point_3(v.x(), v.y(), v.z()));
 
-	// FIXME: Fix the hull method.
-	Polyhedron_3 hull;
-	CGAL::convex_hull_3(points.begin(), points.end(), hull);
-	std::cout << "Hull has " << hull.size_of_vertices() << " vertices, "
-		<< hull.size_of_facets() << " facets." << std::endl;
 	DEBUG_END;
 	return intersection;
 }
