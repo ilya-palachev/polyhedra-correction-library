@@ -48,7 +48,8 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	startingVector_(data->startingVector()),
 	supportDirections_(data->supportDirections()),
 	startingEpsilon_(0.),
-	supportData_(NULL)
+	supportData_(NULL),
+	ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	ASSERT(numValues_ >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
@@ -62,7 +63,8 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 SupportFunctionEstimationData::SupportFunctionEstimationData(
 	SupportMatrix supportMatrix, VectorXd supportVector,
 	VectorXd startingVector, std::vector<Vector3d> supportDirections,
-	double epsilon, SupportFunctionDataPtr supportData) :
+	double epsilon, SupportFunctionDataPtr supportData,
+	bool ifShadowHeuristics) :
 	numValues_(supportMatrix.cols()),
 	numConditions_(supportMatrix.rows()),
 	supportMatrix_(supportMatrix),
@@ -70,7 +72,8 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	startingVector_(startingVector),
 	supportDirections_(supportDirections),
 	startingEpsilon_(epsilon),
-	supportData_(supportData)
+	supportData_(supportData),
+	ifShadowHeuristics_(ifShadowHeuristics)
 {
 	DEBUG_START;
 	if (supportMatrix.nonZeros() > 0)

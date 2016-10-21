@@ -142,6 +142,7 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 			if (equal(itemOrig.direction, itemPrev->direction,
 				EPS_SUPPORT_DIRECTION_EQUALITY))
 			{
+				std::cout << "Found equal items!" << std::endl;
 				ifEqual = true;
 				break;
 			}

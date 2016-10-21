@@ -71,7 +71,8 @@ Recoverer::Recoverer() :
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
 	fileNamePolyhedron_(NULL),
 	threshold_(0.),
-	zMinimalNorm_(0.)
+	zMinimalNorm_(0.),
+	ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -402,13 +403,15 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 
 	/* 1. Build support function estimation SData. */
 	pushTimer("SEData preparation");
-	SupportFunctionEstimationDataConstructor constructorEstimation;
+	SupportFunctionEstimationDataConstructor constructor;
 	if (ifScaleMatrix)
-		constructorEstimation.enableMatrixScaling();
+		constructor.enableMatrixScaling();
 	if (estimatorType == NATIVE_ESTIMATOR)
 		supportMatrixType_ = SUPPORT_MATRIX_TYPE_EMPTY;
+	if (ifShadowHeuristics_)
+		constructor.enableShadowHeuristics();
 	SupportFunctionEstimationDataPtr SEData
-		= constructorEstimation.run(SData, supportMatrixType_,
+		= constructor.run(SData, supportMatrixType_,
 				startingBodyType_);
 	popTimer();
 
@@ -428,8 +431,7 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	popTimer();
 
 	/* 4. Validate the result of estimation. */
-	if(!constructorEstimation.checkResult(SEData,
-				supportMatrixType_, estimate))
+	if(!constructor.checkResult(SEData, supportMatrixType_, estimate))
 	{
 		exit(EXIT_FAILURE);
 	}

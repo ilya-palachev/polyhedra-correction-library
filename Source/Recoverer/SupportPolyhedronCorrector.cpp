@@ -908,6 +908,9 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		DEBUG_END;
 		return initialP;
 	}
+
+	app->ReOptimizeTNLP(FTNLP);
+
 	MAIN_PRINT("*** The problem solved!");
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply") << initialP;
 	Polyhedron_3 correctedP = obtainPolyhedron(FTNLP);

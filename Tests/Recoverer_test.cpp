@@ -63,6 +63,11 @@
 #define OPTION_FILE_NAME 'f'
 
 /**
+ * Option "-h" specifies whether to do shadow heuristics.
+ */
+#define OPTION_SHADOW_HEURISTICS 'h'
+
+/**
  * Options "-i" sets the body used as starting point of the estimation process.
  */
 #define OPTION_STARTING_BODY 'i'
@@ -151,7 +156,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abc:d:e:f:i:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
+	"a:Abc:d:e:f:hi:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
 
 struct PCLOption: public option
 {
@@ -311,6 +316,16 @@ static PCLOption optionsLong[] =
 			OPTION_CONVEXIFY_CONTOURS
 		},
 		"Enable contours convexification"
+	},
+	{
+		option
+		{
+			"shadow-heuristics",
+			no_argument,
+			0,
+			OPTION_SHADOW_HEURISTICS
+		},
+		"Enable shadow heuristics"
 	},
 	{
 		option
@@ -530,6 +545,9 @@ typedef struct
 
 	/** The Z minimal norm. */
 	double zMinimalNorm;
+
+	/** Shadow heuristics. */
+	bool shadowHeuristics;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -924,6 +942,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->threshold = 0.;
 	options->zMinimalNorm = 0.;
 	options->input.file.ifSupportFunctionData = false;
+	options->shadowHeuristics = false;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -1347,6 +1366,9 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 						charMistaken);
 			if (errno == ERANGE)
 				errorOutOfRange(argc, argv);
+			break;
+		case OPTION_SHADOW_HEURISTICS:
+			options->shadowHeuristics = true;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1846,6 +1868,9 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 	recoverer->setFileNamePolyhedron(options->fileNamePolyhedron);
 	recoverer->setThreshold(options->threshold);
 	recoverer->setZMinimalNorm(options->zMinimalNorm);
+
+	if (options->shadowHeuristics)
+		recoverer->enableShadowHeuristics();
 
 	DEBUG_END;
 	return recoverer;

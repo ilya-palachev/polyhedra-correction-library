@@ -129,6 +129,8 @@ private:
 	 * ignored during the production of the estimation report.
 	 */
 	double zMinimalNorm_;
+
+	bool ifShadowHeuristics_;
 public:
 
 	/**
@@ -223,6 +225,11 @@ public:
 	void setZMinimalNorm(double zMinimalNorm)
 	{
 		zMinimalNorm_ = zMinimalNorm;
+	}
+
+	void enableShadowHeuristics()
+	{
+		ifShadowHeuristics_ = true;
 	}
 
 	/**

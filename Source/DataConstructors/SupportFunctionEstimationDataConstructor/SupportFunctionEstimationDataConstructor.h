@@ -65,6 +65,8 @@ class SupportFunctionEstimationDataConstructor
 private:
 	/** Whether to scale matrix. */
 	bool ifScaleMatrix;
+
+	bool ifShadowHeuristics_;
 public:
 	/** Empty constructor. */
 	SupportFunctionEstimationDataConstructor();
@@ -74,6 +76,9 @@ public:
 
 	/** Enables matrix scaling */
 	void enableMatrixScaling();
+
+	/** Enables shadow heuristics. */
+	void enableShadowHeuristics();
 
 	/**
 	 * Constructs data used for support function estimation from general

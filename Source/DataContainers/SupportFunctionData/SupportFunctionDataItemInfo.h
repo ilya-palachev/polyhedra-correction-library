@@ -48,6 +48,15 @@ public:
 	/** The normal vector to the original shadow contour. */
 	Vector_3 normalShadow;
 
+	/** The number of side in the shadow contour. */
+	int iSide;
+
+	/**
+	 * The ID if the next item, that is its counter-clockwise neighbor on
+	 * the current side on the shadow contour that it belongs to.
+	 */
+	int iNext;
+
 	/** Empty constructor. */
 	SupportFunctionDataItemInfo();
 

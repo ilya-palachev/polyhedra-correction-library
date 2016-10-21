@@ -317,6 +317,22 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 	ALWAYS_PRINT(stdout, "We are analyzing only %d contours.\n",
 			numContoursAnalyzed - 1);
 
+	int iPrevZero = INT_NOT_INITIALIZED;
+	int iCurr = 0;
+	for (auto &item : items)
+	{
+		ASSERT(item.info->iContour != INT_NOT_INITIALIZED);
+		ASSERT(item.info->numSidesContour != INT_NOT_INITIALIZED);
+		ASSERT(item.info->iSide != INT_NOT_INITIALIZED);
+		ASSERT(item.info->iNext == INT_NOT_INITIALIZED);
+		if (item.info->iSide == 0)
+			iPrevZero = iCurr;
+		item.info->iNext =
+			item.info->iSide < item.info->numSidesContour - 1
+			? iCurr + 1 : iPrevZero;
+		++iCurr;
+	}
+
 	/* Check the result. */
 	ASSERT(checkSupportFunctionDataItemsInequality(items));
 
@@ -346,6 +362,7 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 				SupportFunctionDataItemInfo());
 		item.info->iContour = contour->id;
 		item.info->numSidesContour = contour->ns;
+		item.info->iSide = iSide;
 		item.info->segment = Segment_3(Point_3(side->A1),
 				Point_3(side->A2));
 		item.info->normalShadow = contour->plane.norm;

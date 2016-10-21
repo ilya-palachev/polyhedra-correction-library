@@ -24,16 +24,19 @@
  * - implementation.
  */
 
+#include "Constants.h"
 #include "DebugPrint.h"
 #include "Vector3d.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 
 SupportFunctionDataItemInfo::SupportFunctionDataItemInfo() :
 	point(Vector3d(0., 0., 0.)),
-	iContour(-1),
-	numSidesContour(-1),
+	iContour(INT_NOT_INITIALIZED),
+	numSidesContour(INT_NOT_INITIALIZED),
 	segment(),
-	normalShadow()
+	normalShadow(),
+	iSide(INT_NOT_INITIALIZED),
+	iNext(INT_NOT_INITIALIZED)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -48,6 +51,8 @@ SupportFunctionDataItemInfo &SupportFunctionDataItemInfo::operator=(
 	numSidesContour = info.numSidesContour;
 	segment = info.segment;
 	normalShadow = info.normalShadow;
+	iSide = info.iSide;
+	iNext = info.iNext;
 	DEBUG_END;
 	return *this;
 }

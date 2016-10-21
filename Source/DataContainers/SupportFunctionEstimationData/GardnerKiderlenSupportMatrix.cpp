@@ -103,7 +103,8 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
 double GardnerKiderlenSupportMatrix::epsilonFactor = 1.;
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-		SupportFunctionDataPtr data, double epsilon)
+		SupportFunctionDataPtr data, double epsilon,
+		bool ifShadowHeuristics)
 {
 	DEBUG_START;
 	std::cout << "epsilon = " << epsilon << std::endl;
@@ -128,12 +129,34 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	for (int i = 0; i < numDirections; ++i)
 	{
 		int numConditionsForOne = 0;
+		int iNext = (*data)[i].info->iNext;
 
 		for (int j = i + 1; j < numDirections; ++j)
 		{
+			int jNext = (*data)[j].info->iNext;
 			Segment query(pointsLower[i], pointsLower[j]);
 
-			if (!tree.do_intersect(query))
+			bool success = false;
+			if (ifShadowHeuristics) {
+				Segment query0(pointsLower[i], pointsLower[j]);
+				Segment query1(pointsLower[i],
+						pointsLower[jNext]);
+				Segment query2(pointsLower[iNext],
+						pointsLower[j]);
+				Segment query3(pointsLower[iNext],
+						pointsLower[jNext]);
+				success = !tree.do_intersect(query0)
+					&& !tree.do_intersect(query1)
+					&& !tree.do_intersect(query2)
+					&& !tree.do_intersect(query3);
+			}
+			else
+			{
+				Segment query(pointsLower[i], pointsLower[j]);
+				success = !tree.do_intersect(query);
+			}
+
+			if (success)
 			{
 				addCondition(triplets, iCondition, i, j,
 						directions[i]);

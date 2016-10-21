@@ -80,6 +80,7 @@ GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
  * @return	Reduced Gardner-Kiderlen support matrix.
  */
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-		SupportFunctionDataPtr data, double epsilon);
+		SupportFunctionDataPtr data, double epsilon,
+		bool ifShadowHeuristics);
 
 #endif /* GARDNER_KIDERLEN_SUPPORT_MATRIX_H */

@@ -120,6 +120,9 @@ private:
 
 	/** The original support function data. */
 	SupportFunctionDataPtr supportData_;
+
+	/** Whether the data is constructed with shadow heuristics. */
+	double ifShadowHeuristics_;
 public:
 	/** Default empty constructor. */
 	SupportFunctionEstimationData();
@@ -141,7 +144,7 @@ public:
 	SupportFunctionEstimationData(SupportMatrix supportMatrix,
 		VectorXd supportVector, VectorXd startingVector,
 		std::vector<Vector3d> supportDirections, double epsilon,
-		SupportFunctionDataPtr supportData);
+		SupportFunctionDataPtr supportData, bool ifShadowHeuristics);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();

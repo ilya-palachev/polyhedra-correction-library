@@ -47,7 +47,7 @@
  */
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 	SupportMatrixType type, VectorXd startingVector,
-	double startingEpsilon);
+	double startingEpsilon, bool ifShadowHeuristics);
 
 /**
  * Builds starting vector for the estimation process.
@@ -88,6 +88,13 @@ void SupportFunctionEstimationDataConstructor::enableMatrixScaling()
 {
 	DEBUG_START;
 	ifScaleMatrix = true;
+	DEBUG_END;
+}
+
+void SupportFunctionEstimationDataConstructor::enableShadowHeuristics()
+{
+	DEBUG_START;
+	ifShadowHeuristics_ = true;
 	DEBUG_END;
 }
 
@@ -147,8 +154,11 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 {
 	DEBUG_START;
 	/* Remove equal items from data (and normalize all items). */
-	std::cerr << "Removing equal items..." << std::endl;
-	data = data->removeEqual();
+	if (!ifShadowHeuristics_)
+	{
+		std::cerr << "Removing equal items..." << std::endl;
+		data = data->removeEqual();
+	}
 
 	/* Build starting vector. */
 	std::cerr << "Building starting vector..." << std::endl;
@@ -161,7 +171,8 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	/** Build support matrix. */
 	std::cerr << "Building support matrix..." << std::endl;
 	SupportMatrix *supportMatrix = buildSupportMatrix(data,
-		supportMatrixType, startingVector, startingEpsilon);
+		supportMatrixType, startingVector, startingEpsilon,
+		ifShadowHeuristics_);
 
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
@@ -198,14 +209,15 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	SupportFunctionEstimationDataPtr estimationData(new
 		SupportFunctionEstimationData(*supportMatrix, supportVector,
 				startingVector, supportDirections,
-				startingEpsilon, data));
+				startingEpsilon, data, ifShadowHeuristics_));
 	delete supportMatrix;
 	DEBUG_END;
 	return estimationData;
 }
 
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-	SupportMatrixType type, VectorXd startingVector, double startingEpsilon)
+	SupportMatrixType type, VectorXd startingVector, double startingEpsilon,
+	bool ifShadowHeuristics)
 {
 	DEBUG_START;
 	SupportMatrix *matrix = NULL;
@@ -218,7 +230,7 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 		break;
 	case SUPPORT_MATRIX_TYPE_GK_OPT:
 		matrix = constructReducedGardnerKiderlenSupportMatrix(data,
-				startingEpsilon);
+				startingEpsilon, ifShadowHeuristics);
 		break;
 	case SUPPORT_MATRIX_TYPE_GK:
 		matrix = constructGardnerKiderlenSupportMatrix(data);
@@ -509,7 +521,11 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	}
 	auto directions = data->supportDirections();
 	int numDirections = directions.size();
-	ASSERT(3 * numDirections == estimate.size());
+	std::cout << "Number of directions: " << numDirections << std::endl;
+	std::cout << "Size of the estimate vector: " << estimate.size()
+		<< std::endl;
+	ASSERT(3 * numDirections == estimate.size()
+			|| numDirections == estimate.size());
 
 #ifndef NDEBUG
 	for (int i = 0; i < estimate.rows(); ++i)
