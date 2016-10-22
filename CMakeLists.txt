@@ -162,13 +162,16 @@ set (INCLUDE_DIRS_all
 	${CMAKE_SOURCE_DIR}/External/LSM
 	${CMAKE_SOURCE_DIR}/External/Vector3d
 	${CMAKE_SOURCE_DIR}/External/CGAL
-	/usr/local/include/eigen3
-	/usr/local/include/coin/
-	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Algorithm
-	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Common
-	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/LinAlg
-	/home/ilya/git/opensource/Ipopt-3.12.1/Ipopt/src/Interfaces
 )
+
+foreach (module "eigen3" "coin")
+	foreach (prefix "/usr/local/include/" "/usr/include/")
+		set (dir "${prefix}/${module}")
+		if (EXISTS ${dir})
+			list (APPEND INCLUDE_DIRS_all ${dir})
+		endif ()
+	endforeach ()
+endforeach ()
 
 # Common compiler flags used for build:
 set(COMMON_FLAGS "-g")
@@ -186,8 +189,8 @@ if (${CMAKE_C_COMPILER} MATCHES ".*clang")
 	set(COMMON_FLAGS "-Wno-error=gnu-zero-variadic-macro-arguments")
 endif()
 
-set(CMAKE_SHARED_LINKER_FLAGS "-L/usr/local/lib")
-set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/lib")
+set(CMAKE_SHARED_LINKER_FLAGS "-L${IPOPT_INSTALL_PREFIX}/lib")
+set(CMAKE_EXE_LINKER_FLAGS "-L${IPOPT_INSTALL_PREFIX}/lib")
 
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
