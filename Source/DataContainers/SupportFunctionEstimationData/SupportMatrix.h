@@ -34,6 +34,14 @@
 class SupportMatrix : public SparseMatrix
 {
 public:
+	/** Flags for shadow contour heuristics. */
+	std::vector<bool> flags;
+
+	void setFlags(std::vector<bool> flagsI)
+	{
+		flags = flagsI;
+	}
+
 	/** Empty constructor. */
 	SupportMatrix();
 

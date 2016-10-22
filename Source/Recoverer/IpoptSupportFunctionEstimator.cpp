@@ -98,6 +98,7 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 	ASSERT(g_u);
 	ASSERT(n == numVariablesX + numVariablesEpsilon);
 	ASSERT(m = numConsistencyConditions + numLocalityConditions);
+	std::vector<bool> flags = data->supportMatrix().flags;
 
 	/* There are no restrictions on regular variables: */
 	for (int i = 0; i < numVariablesX; ++i)
@@ -117,7 +118,7 @@ bool IpoptSupportFunctionEstimator::get_bounds_info(Index n, Number* x_l,
 	for (int i = 0; i < numConsistencyConditions; ++i)
 	{
 		g_l[i] = 0.;
-		g_u[i] = +TNLP_INFINITY;
+		g_u[i] = ifShadowHeuristics_ && flags[i] ? 0. : +TNLP_INFINITY;
 	}
 	/* All locality conditions have bounds depending on h0: */
 	auto h0 = data->supportVector();

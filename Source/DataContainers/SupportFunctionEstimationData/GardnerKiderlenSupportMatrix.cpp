@@ -36,7 +36,6 @@ GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(long int numRows,
 	DEBUG_END;
 }
 
-
 GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
 {
 	DEBUG_START;
@@ -126,6 +125,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	std::vector<Eigen::Triplet<double>> triplets;
 	int iCondition = 0;
 	int numSkipped = 0;
+	std::vector<bool> flags;
 	for (int i = 0; i < numDirections; ++i)
 	{
 		int numConditionsForOne = 0;
@@ -158,8 +158,10 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 			if (success)
 			{
+				flags.push_back(iNext == j);
 				addCondition(triplets, iCondition, i, j,
 						directions[i]);
+				flags.push_back(jNext == i);
 				addCondition(triplets, iCondition, j, i,
 						directions[j]);
 				++numConditionsForOne;
@@ -182,6 +184,7 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
+	matrix->setFlags(flags);
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
 	return matrix;
