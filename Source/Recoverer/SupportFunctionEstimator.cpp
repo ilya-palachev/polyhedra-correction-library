@@ -28,7 +28,7 @@
 
 SupportFunctionEstimator::SupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr dataOrig) :
-		data(dataOrig)
+		data(dataOrig), ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	DEBUG_END;

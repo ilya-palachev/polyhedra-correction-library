@@ -68,6 +68,14 @@ public:
 	/** Default destructor. */
 	~IpoptSupportFunctionEstimator();
 
+	/** Enables shadow heuristics mode. */
+	virtual void enableShadowHeuristics()
+	{
+		DEBUG_START;
+		ifShadowHeuristics_ = true;
+		DEBUG_END;
+	}
+
 	/**
 	 * Gives Ipopt the information about the size of the problem (and hence,
 	 * the size of arrays it needs to allocate).

@@ -27,6 +27,7 @@
 #define SUPPORTFUNCTIONESTIMATOR_H_
 
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
+#include "DebugAssert.h"
 
 /** The generic support function estimator. */
 class SupportFunctionEstimator
@@ -37,6 +38,9 @@ protected:
 	
 	/** Type of problem. */
 	EstimationProblemNorm problemType_;
+
+	/** Whether the estimator is run in shadow heuristics mode. */
+	bool ifShadowHeuristics_;
 public:
 	/**
 	 * Constructs the estimator and sets its data.
@@ -57,6 +61,16 @@ public:
 	 * @param type	The problem type.
 	 */
 	void setProblemType(EstimationProblemNorm type);
+
+	/**
+	 * Craches the estimator if it doesn't support shadow heuristics.
+	 */
+	virtual void enableShadowHeuristics()
+	{
+		DEBUG_START;
+		ASSERT(0 && "This estimator doesn't support shadow heuristics");
+		DEBUG_END;
+	}
 };
 
 #endif /* SUPPORTFUNCTIONESTIMATOR_H_ */

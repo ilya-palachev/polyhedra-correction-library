@@ -419,6 +419,8 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	pushTimer("Estimation");
 	SupportFunctionEstimator *estimator = constructEstimator(SEData,
 			estimatorType, problemType_);
+	if (ifShadowHeuristics_)
+		estimator->enableShadowHeuristics();
 
 	/* 3. Run support function estimation. */
 	VectorXd estimate(SEData->numValues());
