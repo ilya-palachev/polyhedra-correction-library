@@ -141,6 +141,15 @@ struct FixedTopology
 
 #define TNLP_INFINITY 2e19
 
+static struct
+{
+	Number *x;
+	Number *z_L;
+	Number *z_U;
+	Number *g;
+	Number *lambda;
+} FinalResult = {nullptr};
+
 class FixedTopologyNLP : public TNLP
 {
 	/** Support directions. */
@@ -363,7 +372,24 @@ public:
 		bool init_lambda, Number *lambda)
 	{
 		DEBUG_START;
-		ASSERT(x && init_x && !init_z && !init_lambda);
+		//ASSERT(x && init_x && !init_z && !init_lambda);
+		if (init_x && init_z && init_lambda)
+		{
+			std::cout << "Using cached values!" << std::endl;
+			ASSERT(FinalResult.x);
+			for (Index i = 0; i < n; ++i)
+			{
+				x[i] = FinalResult.x[i];
+				z_L[i] = FinalResult.z_L[i];
+				z_U[i] = FinalResult.z_U[i];
+			}
+			for (Index i = 0; i < m; ++i)
+			{
+				lambda[i] = FinalResult.lambda[i];
+			}
+			return true;
+		}
+		ASSERT(x && init_x);
 		ASSERT(U.size() == H.size());
 		int iVariable = 0;
 		for (const auto &v : pointsInitial)
@@ -746,7 +772,6 @@ public:
 		DEBUG_END;
 		return true;
 	}
-
 	
 	void finalize_solution(SolverReturn status, Index n, const Number *x,
 			const Number *z_L, const Number *z_U, Index m,
@@ -760,6 +785,22 @@ public:
 		case SUCCESS:
 			MAIN_PRINT("SUCCESS");
 			getVariables(x);
+			FinalResult.x = new Number[n];
+			FinalResult.z_L = new Number[n];
+			FinalResult.z_U = new Number[n];
+			for (Index i = 0; i < n; ++i)
+			{
+				FinalResult.x[i] = x[i];
+				FinalResult.z_L[i] = z_L[i];
+				FinalResult.z_U[i] = z_U[i];
+			}
+			FinalResult.g = new Number[m];
+			FinalResult.lambda = new Number[m];
+			for (Index i = 0; i < m; ++i)
+			{
+				FinalResult.g[i] = g[i];
+				FinalResult.lambda[i] = lambda[i];
+			}
 			break;
 		case MAXITER_EXCEEDED:
 			MAIN_PRINT("MAXITER_EXCEEDED");
@@ -857,6 +898,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	}
 
 	app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetStringValue("nlp_scaling_method", "none");
 	if (getenv("DERIVATIVE_TEST_FIRST"))
 		app->Options()->SetStringValue("derivative_test", "first-order");
 	else if (getenv("DERIVATIVE_TEST_SECOND"))
@@ -909,6 +951,12 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		return initialP;
 	}
 
+	app->Options()->SetStringValue("warm_start_init_point", "yes");
+	app->Options()->SetNumericValue("warm_start_bound_frac", 1e-16);
+	app->Options()->SetNumericValue("warm_start_bound_push", 1e-16);
+	app->Options()->SetNumericValue("warm_start_mult_bound_push", 1e-16);
+	app->Options()->SetNumericValue("warm_start_slack_bound_frac", 1e-16);
+	app->Options()->SetNumericValue("warm_start_slack_bound_push", 1e-16);
 	app->ReOptimizeTNLP(FTNLP);
 
 	MAIN_PRINT("*** The problem solved!");
