@@ -143,12 +143,13 @@ struct FixedTopology
 
 static struct
 {
+	int i_min_lower;
 	Number *x;
 	Number *z_L;
 	Number *z_U;
 	Number *g;
 	Number *lambda;
-} FinalResult = {nullptr};
+} FinalResult = {-1, nullptr};
 
 class FixedTopologyNLP : public TNLP
 {
@@ -350,6 +351,13 @@ public:
 		{
 			g_l[iCond] = 0.;
 			g_u[iCond] = +TNLP_INFINITY;
+			if (iCond == unsigned(FinalResult.i_min_lower))
+			{
+				std::cout << "Reversing consistency #" << i
+					<< std::endl;
+				g_l[iCond] = 0.;
+				g_u[iCond] = 0.;
+			}
 			++iCond;
 		}
 		ASSERT(iCond == numPlanarityConstraints
@@ -365,6 +373,112 @@ public:
 		ASSERT(iCond == unsigned(m));
 		DEBUG_END;
 		return true;
+	}
+
+	bool check_constraints(Index n, const Number *x, Index m)
+	{
+		DEBUG_START;
+		double *g = new double[m];
+		double *g_l = new double[m];
+		double *g_u = new double[m];
+		double *x_l = new double[n];
+		double *x_u = new double[n];
+		eval_g(n, x, false, m, g);
+		get_bounds_info(n, x_l, x_u, m, g_l, g_u);
+		const double tol = 1e-3;
+		const double tol2 = 1e-8;
+		unsigned numViolations = 0;
+
+		double min_l = +TNLP_INFINITY;
+		unsigned i_min_l = -1;
+		double min_u = +TNLP_INFINITY;
+		unsigned i_min_u = -1;
+
+		unsigned num_lower = 0;
+		unsigned num_lower_100 = 0;
+		unsigned num_lower_10000 = 0;
+		unsigned num_upper = 0;
+		unsigned num_upper_100 = 0;
+		unsigned num_upper_10000 = 0;
+
+		for (unsigned i = 0; i < unsigned(m); ++i)
+		{
+			if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
+			{
+				++numViolations;
+				std::cout << "g[" << i << "] = " << g[i]
+					<< " not in [" << g_l[i] << ", "
+					<< g_u[i] << "]" << std::endl;
+			}
+			ASSERT(g_u[i] >= g_l[i]);
+			if (g_u[i] > g_l[i] + tol2)
+			{
+				double diff_l = fabs(g[i] - g_l[i]);
+				if (diff_l < min_l)
+				{
+					min_l = diff_l;
+					i_min_l = i;
+				}
+
+				double diff_u = fabs(g[i] - g_u[i]);
+				if (diff_u < min_u)
+				{
+					min_u = diff_u;
+					i_min_u = i;
+				}
+
+				if (diff_l < tol2)
+				{
+					++num_lower;
+				}
+				else if (diff_l < 100. * tol2)
+				{
+					++num_lower_100;
+				}
+				else if (diff_l < 10000. * tol2)
+				{
+					++num_lower_10000;
+				}
+
+				if (diff_u < tol2)
+				{
+					++num_upper;
+				}
+				else if (diff_u < 100. * tol2)
+				{
+					++num_upper_100;
+				}
+				else if (diff_u < 10000. * tol2)
+				{
+					++num_upper_10000;
+				}
+			}
+		}
+
+		std::cout << "Lower: x1: " << num_lower << ", x100: "
+			<< num_lower_100 << ", x10000: " << num_lower_10000
+			<< std::endl;
+		std::cout << "Upper: x1: " << num_upper << ", x100: "
+			<< num_upper_100 << ", x10000: " << num_upper_10000
+			<< std::endl;
+		std::cout << "Minimal lower " << i_min_l << ": " << min_l
+			<< std::endl;
+		std::cout << "Minimal upper " << i_min_u << ": " << min_u
+			<< std::endl;
+		std::cout << "Violation in " << numViolations
+			<< " constraints from total " << m << std::endl;
+		delete[] g;
+		delete[] g_l;
+		delete[] g_u;
+		delete[] x_l;
+		delete[] x_u;
+		if (FinalResult.i_min_lower == -1)
+		{
+			FinalResult.i_min_lower = i_min_l;
+			return true;
+		}
+		DEBUG_END;
+		return numViolations == 0;
 	}
 
 	bool get_starting_point(Index n, bool init_x,
@@ -387,6 +501,7 @@ public:
 			{
 				lambda[i] = FinalResult.lambda[i];
 			}
+			ASSERT(check_constraints(n, x, m));
 			return true;
 		}
 		ASSERT(x && init_x);
@@ -426,31 +541,7 @@ public:
 			}
 		}
 		ASSERT(iVariable == n);
-		double *g = new double[m];
-		double *g_l = new double[m];
-		double *g_u = new double[m];
-		double *x_l = new double[n];
-		double *x_u = new double[n];
-		eval_g(n, x, false, m, g);
-		get_bounds_info(n, x_l, x_u, m, g_l, g_u);
-		const double tol = 1e-10;
-		unsigned numViolations = 0;
-		for (unsigned i = 0; i < unsigned(m); ++i)
-			if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
-			{
-				++numViolations;
-				std::cout << "g[" << i << "] = " << g[i]
-					<< " not in [" << g_l[i] << ", "
-					<< g_u[i] << "]" << std::endl;
-			}
-		std::cout << "Violation in " << numViolations
-			<< " constraints from total " << m << std::endl;
-		ASSERT(numViolations == 0);
-		delete[] g;
-		delete[] g_l;
-		delete[] g_u;
-		delete[] x_l;
-		delete[] x_u;
+		ASSERT(check_constraints(n, x, m));
 		DEBUG_END;
 		return true;
 	}
@@ -788,6 +879,7 @@ public:
 			FinalResult.x = new Number[n];
 			FinalResult.z_L = new Number[n];
 			FinalResult.z_U = new Number[n];
+			check_constraints(n, x, m);
 			for (Index i = 0; i < n; ++i)
 			{
 				FinalResult.x[i] = x[i];
