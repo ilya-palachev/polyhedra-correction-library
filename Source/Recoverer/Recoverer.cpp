@@ -38,6 +38,7 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/SupportPolyhedronCorrector.h"
+#include "Recoverer/EdgeCorrector.h"
 
 TimeMeasurer timer;
 std::stack<const char *> taskNames;
@@ -520,10 +521,12 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 	if (getenv("CORRECT_SIMPLIFIED_BODY"))
 	{
 		pushTimer("polyhedron correction");
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "before-FT-correction.ply") << P;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+				"before-FT-correction.ply") << P;
 		SupportPolyhedronCorrector corrector(P, SEData->supportData());
 		Polyhedron_3 PC = corrector.run();
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "after-FT-correction.ply") << PC;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+				"after-FT-correction.ply") << PC;
 		popTimer();
 		producePolyhedron(SEData, supportValuesFromPoints(directions,
 			estimateJoined), "naively-joined-body");
@@ -532,6 +535,22 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 		producePolyhedron(SEData, supportValuesFromPoints(
 					directions, estimateCorrected),
 				"corrected-joined-body");
+		P = PC;
+	}
+
+	if (getenv("EDGE_CORRECTION"))
+	{
+		pushTimer("edge correction");
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+				"before-edge-correction.ply") << P;
+		EdgeCorrector corrector(P, SEData->supportData());
+		Polyhedron_3 PC = corrector.run();
+		popTimer();
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+				"after-edge-correction.ply") << PC;
+		VectorXd E = PC.findTangientPointsConcatenated(directions);
+		producePolyhedron(SEData, supportValuesFromPoints(directions,
+					E), "edge-corrected-joined-body");
 		P = PC;
 	}
 

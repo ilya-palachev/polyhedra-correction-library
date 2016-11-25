@@ -117,6 +117,7 @@ set (SOURCE_pcl
 	Source/Recoverer/Colouring.cpp
 	Source/Recoverer/CPLEXSupportFunctionEstimator.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
+	Source/Recoverer/EdgeCorrector.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptFinitePlanesFitter.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
