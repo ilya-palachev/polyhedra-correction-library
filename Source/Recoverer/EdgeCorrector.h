@@ -53,8 +53,8 @@ public:
 
 struct SimpleEdge_3
 {
-	Point_3 A;
-	Point_3 B;
+	Vector_3 A;
+	Vector_3 B;
 	Plane_3 piA;
 	Plane_3 piB;
 	std::vector<Plane_3> tangients;

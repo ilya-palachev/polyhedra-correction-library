@@ -24,10 +24,6 @@
  * edge heuristics (implementation).
  */
 
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/Polyhedron_3.h>
-typedef CGAL::Simple_cartesian<double> SCKernel;
-
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "EdgeCorrector.h"
@@ -52,15 +48,18 @@ static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P)
 
 	std::vector<SimpleEdge_3> edges;
 	P.initialize_indices();
+	CGAL::Origin origin;
 	for (auto I = P.halfedges_begin(), E = P.halfedges_end(); I != E; ++I)
 	{
 		if (visited[I->id])
 			continue;
 		SimpleEdge_3 edge;
-		edge.A = I->vertex()->point();
-		edge.B = I->opposite()->vertex()->point();
+		edge.A = I->vertex()->point() - origin;
+		edge.B = I->opposite()->vertex()->point() - origin;
 		edge.iForward = I->facet()->id;
 		edge.iBackward = I->opposite()->facet()->id;
+		// FIXME: Remember indices of planes, not planes themselves,
+		// and fix structure for this.
 		edges.push_back(edge);
 		visited[I->id] = visited[I->opposite()->id] = true;
 	}
@@ -71,10 +70,96 @@ static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P)
 	return edges;
 }
 
+Vector_3 projectOnBasis(Vector_3 e1, Vector_3 e2, Vector_3 a)
+{
+	DEBUG_START;
+	double x1 = a * e1;
+	Vector_3 a1 = e1 * x1;
+	double x2 = a * e2;
+	Vector_3 a2 = e2 * x2;
+	Vector_3 projection = a1 + a2;
+	DEBUG_END;
+	return projection;
+}
+
+#define SOME_BIG_DOUBLE 1e10
+#define SOME_SMALL_DOUBLE 1e-10
+
+double calculateDiff(SimpleEdge_3 edge, Vector_3 e1, Vector_3 e2, Vector_3 u)
+{
+	DEBUG_START;
+	Vector_3 origin(0., 0., 0.);
+	Vector_3 a = projectOnBasis(e1, e2, edge.A - origin);
+	Vector_3 b = projectOnBasis(e1, e2, edge.B - origin);
+	Vector_3 segment = a - b;
+	double square = segment * segment;
+	if (square < SOME_SMALL_DOUBLE)
+	{
+		DEBUG_END;
+		return SOME_BIG_DOUBLE;
+	}
+	double alpha = -(a * segment) / square;
+	Vector_3 v = alpha * a + (1. - alpha) * b;
+	double length = sqrt(v * v);
+	if (length < SOME_SMALL_DOUBLE)
+	{
+		DEBUG_END;
+		return SOME_BIG_DOUBLE;
+	}
+	v = (1. / length) * v;
+	Vector_3 d = v - u;
+	DEBUG_END;
+	return d * d;
+}
+
+void associateEdges(std::vector<SimpleEdge_3> edges,
+		SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	std::vector<Vector_3> directions = data->supportDirections<Vector_3>();
+	std::vector<Plane_3> planes = data->supportPlanes();
+	unsigned numItems = directions.size();
+	double L1 = 0.;
+	double L2 = 0.;
+	double Linf = 0.;
+	for (unsigned i = 0; i < numItems; ++i)
+	{
+		Vector_3 u = directions[i];
+		// FIXME: This should be rewritten on information about
+		// contours.
+		Vector_3 u_z(0., 0., u.z());
+		Vector_3 u_xy(u.x(), u.y(), 0.);
+
+		unsigned jBest = edges.size();
+		double diffBest = SOME_BIG_DOUBLE;
+		
+		for (unsigned j = 0; j < edges.size(); ++j)
+		{
+			double diff = calculateDiff(edges[j], u_z, u_xy, u);
+			if (diff < diffBest)
+			{
+				diffBest = diff;
+				jBest = j;
+			}	
+		}
+		ASSERT(jBest != edges.size() && "Failed to find best edge");
+		edges[jBest].tangients.push_back(planes[i]);
+		L1 += diffBest;
+		L2 += diffBest * diffBest;
+		Linf = diffBest > Linf ? diffBest : Linf;
+	}
+	std::cout << "L1: " << L1 << ", mean: " << L1 / numItems << std::endl;
+	std::cout << "L2: " << sqrt(L2) << ", mean: " << L2 / sqrt(numItems)
+		<< std::endl;
+	std::cout << "Linf: " << Linf << std::endl;
+	DEBUG_END;
+}
+
 Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
 	std::vector<SimpleEdge_3> edges = getEdges(initialP);
+	associateEdges(edges, SData);
 	Polyhedron_3 correctedP = initialP;
 	DEBUG_END;
 	return correctedP;
