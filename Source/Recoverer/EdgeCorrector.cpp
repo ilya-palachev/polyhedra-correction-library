@@ -26,7 +26,9 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "Common.h"
 #include "EdgeCorrector.h"
+#include "Colouring.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 
 EdgeCorrector::EdgeCorrector(Polyhedron_3 initialP,
@@ -152,7 +154,63 @@ void associateEdges(std::vector<SimpleEdge_3> edges,
 	std::cout << "L2: " << sqrt(L2) << ", mean: " << L2 / sqrt(numItems)
 		<< std::endl;
 	std::cout << "Linf: " << Linf << std::endl;
+
+	unsigned numTangientsMin = numItems;
+	unsigned numTangientsMax = 0;
+	unsigned numNonAssociatedEdges = 0;
+	for (unsigned i = 0; i < edges.size(); ++i)
+	{
+		unsigned size = edges[i].tangients.size();
+		if (size < numTangientsMin)
+			numTangientsMin = size;
+		if (size > numTangientsMax)
+			numTangientsMax = size;
+		if (size == 0)
+			++numNonAssociatedEdges;
+	}
+	std::cout << "Minimal number of tangients: " << numTangientsMin
+		<< std::endl;
+	std::cout << "Maximal number of tangients: " << numTangientsMax
+		<< std::endl;
+	std::cout << "Number of non-associated edges: " << numNonAssociatedEdges
+		<< std::endl;
 	DEBUG_END;
+}
+
+std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
+{
+	DEBUG_START;
+	std::vector<SimpleEdge_3> extractedEdges;
+	double zLower = 0., zUpper = 0.;
+	if (!tryGetenvDouble("Z_LOWER", zLower)
+			|| !tryGetenvDouble("Z_UPPER", zUpper))
+	{
+		DEBUG_END;
+		return extractedEdges;
+	}
+	std::cout << "Z lower: " << zLower << std::endl;
+	std::cout << "Z upper: " << zUpper << std::endl;
+	double zMin = 1e10, zMax = 0.;
+	for (const SimpleEdge_3 &edge: edges)
+	{
+		double zA = edge.A.z();
+		zMin = zA < zMin ? zA : zMin;
+		zMax = zA > zMax ? zA : zMax;
+		double zB = edge.B.z();
+		zMin = zB < zMin ? zB : zMin;
+		zMax = zB > zMax ? zB : zMax;
+		if ((zA >= zLower && zA <= zUpper)
+				|| (zB >= zLower && zB <= zUpper))
+		{
+			extractedEdges.push_back(edge);
+		}
+	}
+	std::cout << "Z minimal: " << zMin << std::endl;
+	std::cout << "Z maximal: " << zMax << std::endl;
+
+
+	DEBUG_END;
+	return extractedEdges;
 }
 
 Polyhedron_3 EdgeCorrector::run()
@@ -160,6 +218,25 @@ Polyhedron_3 EdgeCorrector::run()
 	DEBUG_START;
 	std::vector<SimpleEdge_3> edges = getEdges(initialP);
 	associateEdges(edges, SData);
+	std::vector<SimpleEdge_3> mainEdges = extractEdges(edges);
+	std::cout << "Number of extracted edges: " << mainEdges.size()
+		<< std::endl;
+	if (mainEdges.size() == 0)
+	{
+		DEBUG_END;
+		return initialP;
+	}
+	std::set<int> cluster;
+	for (const SimpleEdge_3 &edge: mainEdges)
+	{
+		cluster.insert(edge.iForward);
+		cluster.insert(edge.iBackward);
+	}
+	std::vector<std::set<int>> clusters;
+	clusters.push_back(cluster);
+	printColouredPolyhedron(initialP, clusters,
+			"edge-corrector-extracted-edges.ply");
+
 	Polyhedron_3 correctedP = initialP;
 	DEBUG_END;
 	return correctedP;
