@@ -31,113 +31,11 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include <coin/IpTNLP.hpp>
 #include <coin/IpIpoptApplication.hpp>
+#include "FixedTopology.h"
 
 using namespace Ipopt;
 
 static unsigned counter;
-
-/**
- * Describes the topology of the given (polyhedron, s-data) pair.
- */
-struct FixedTopology
-{
-	/**
-	 * Vector of sets, i-th element of which contains IDs of support
-	 * directions for which i-th vertex of the polyhedron is tangient.
-	 */
-	std::vector<std::set<int>> tangient;
-
-	/**
-	 * Vector of sets, i-th element of which contains IDs of vertices
-	 * incident to the i-th facet.
-	 */
-	std::vector<std::set<int>> incident;
-
-	/**
-	 * Vector of sets, i-th element of which contains IDs of vertices
-	 * incident to the neighbor facets of the i-th facet.
-	 */
-	std::vector<std::set<int>> influent;
-
-	/**
-	 * Vector of sets, i-th element of which contains IDs of vertices
-	 * incident to some edge that is incident to the i-th vertex.
-	 */
-	std::vector<std::set<int>> neighbors;
-
-	FixedTopology(Polyhedron_3 initialP, SupportFunctionDataPtr SData) :
-		tangient(initialP.size_of_vertices()),
-		incident(initialP.size_of_facets()),
-		influent(initialP.size_of_facets()),
-		neighbors(initialP.size_of_vertices())
-	{
-		DEBUG_START;
-		SupportFunctionDataConstructor constructor;
-		constructor.run(SData->supportDirections<Point_3>(), initialP);
-		auto IDs = constructor.getTangientIDs();
-		for (unsigned i = 0; i < IDs.size(); ++i)
-		{
-			tangient[IDs[i]].insert(i);
-		}
-
-		initialP.initialize_indices();
-
-		unsigned iVertex = 0;
-		for (auto I = initialP.vertices_begin(),
-				E = initialP.vertices_end(); I != E; ++I)
-		{
-			std::cout << "Constructing vertrex #" << iVertex
-				<< ": ";
-			auto C = I->vertex_begin();
-			do
-			{
-				int iNeighbor = C->opposite()->vertex()->id;
-				std::cout << iNeighbor << " ";
-				neighbors[iVertex].insert(iNeighbor);
-			} while (++C != I->vertex_begin());
-			++iVertex;
-			std::cout << std::endl;
-		}
-		
-		unsigned iFacet = 0;
-		for (auto I = initialP.facets_begin(),
-				E = initialP.facets_end(); I != E; ++I)
-		{
-			auto C = I->facet_begin();
-			do
-			{
-				int iVertex = C->vertex()->id;
-				incident[iFacet].insert(iVertex);
-			} while (++C != I->facet_begin());
-
-			ASSERT(C == I->facet_begin());
-			do
-			{
-				int iVertex = C->vertex()->id;
-				for (int i : neighbors[iVertex])
-				{
-					influent[iFacet].insert(i);
-				}
-			} while (++C != I->facet_begin());
-
-			std::cout << "Facet #" << iFacet << ":" << std::endl;
-			std::cout << "  incident: ";
-			for (int i : incident[iFacet])
-			{
-				ASSERT(influent[iFacet].count(i));
-				std::cout << i << " ";
-			}
-			std::cout << std::endl;
-			std::cout << "  influent: ";
-			for (int i : influent[iFacet])
-				std::cout << i << " ";
-			std::cout << std::endl;
-
-			++iFacet;
-		}
-		DEBUG_END;
-	}
-};
 
 #define TNLP_INFINITY 2e19
 
