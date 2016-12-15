@@ -28,6 +28,7 @@
 #include "DebugAssert.h"
 #include "PCLDumper.h"
 #include "SupportPolyhedronCorrector.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "IpoptTopologicalCorrector.h"
 
 SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
@@ -58,6 +59,83 @@ Polyhedron_3 obtainPolyhedron(IpoptTopologicalCorrector *FTNLP)
 
 	DEBUG_END;
 	return intersection;
+}
+
+FixedTopology *buildTopology(Polyhedron_3 initialP,
+		SupportFunctionDataPtr SData)
+{
+	DEBUG_START;
+	FixedTopology *FT = new FixedTopology();
+	FT->tangient.reserve(initialP.size_of_vertices());
+	FT->incident.reserve(initialP.size_of_facets());
+	FT->influent.reserve(initialP.size_of_facets());
+	FT->neighbors.reserve(initialP.size_of_vertices());
+
+	SupportFunctionDataConstructor constructor;
+	constructor.run(SData->supportDirections<Point_3>(), initialP);
+	auto IDs = constructor.getTangientIDs();
+	for (unsigned i = 0; i < IDs.size(); ++i)
+	{
+		FT->tangient[IDs[i]].insert(i);
+	}
+
+	initialP.initialize_indices();
+
+	unsigned iVertex = 0;
+	for (auto I = initialP.vertices_begin(),
+			E = initialP.vertices_end(); I != E; ++I)
+	{
+		std::cout << "Constructing vertrex #" << iVertex
+			<< ": ";
+		auto C = I->vertex_begin();
+		do
+		{
+			int iNeighbor = C->opposite()->vertex()->id;
+			std::cout << iNeighbor << " ";
+			FT->neighbors[iVertex].insert(iNeighbor);
+		} while (++C != I->vertex_begin());
+		++iVertex;
+		std::cout << std::endl;
+	}
+	
+	unsigned iFacet = 0;
+	for (auto I = initialP.facets_begin(),
+			E = initialP.facets_end(); I != E; ++I)
+	{
+		auto C = I->facet_begin();
+		do
+		{
+			int iVertex = C->vertex()->id;
+			FT->incident[iFacet].insert(iVertex);
+		} while (++C != I->facet_begin());
+
+		ASSERT(C == I->facet_begin());
+		do
+		{
+			int iVertex = C->vertex()->id;
+			for (int i : FT->neighbors[iVertex])
+			{
+				FT->influent[iFacet].insert(i);
+			}
+		} while (++C != I->facet_begin());
+
+		std::cout << "Facet #" << iFacet << ":" << std::endl;
+		std::cout << "  incident: ";
+		for (int i : FT->incident[iFacet])
+		{
+			ASSERT(FT->influent[iFacet].count(i));
+			std::cout << i << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "  influent: ";
+		for (int i : FT->influent[iFacet])
+			std::cout << i << " ";
+		std::cout << std::endl;
+
+		++iFacet;
+	}
+	DEBUG_END;
+	return FT;
 }
 
 Polyhedron_3 SupportPolyhedronCorrector::run()
@@ -113,7 +191,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		points.push_back(Vector_3(point.x(), point.y(), point.z()));
 	}
 
-	FixedTopology *FT = new FixedTopology(initialP, SData);
+	FixedTopology *FT = buildTopology(initialP, SData);
 
 	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
 			u, h, U, H, points, FT);

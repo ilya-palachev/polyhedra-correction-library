@@ -28,9 +28,40 @@
 #define IPOPTTOPOLOGICALCORRECTOR_H
 #include <coin/IpTNLP.hpp>
 #include <coin/IpIpoptApplication.hpp>
-#include "FixedTopology.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 
 using namespace Ipopt;
+
+/**
+ * Describes the topology of the given (polyhedron, s-data) pair.
+ */
+struct FixedTopology
+{
+	/**
+	 * Vector of sets, i-th element of which contains IDs of support
+	 * directions for which i-th vertex of the polyhedron is tangient.
+	 */
+	std::vector<std::set<int>> tangient;
+
+	/**
+	 * Vector of sets, i-th element of which contains IDs of vertices
+	 * incident to the i-th facet.
+	 */
+	std::vector<std::set<int>> incident;
+
+	/**
+	 * Vector of sets, i-th element of which contains IDs of vertices
+	 * incident to the neighbor facets of the i-th facet.
+	 */
+	std::vector<std::set<int>> influent;
+
+	/**
+	 * Vector of sets, i-th element of which contains IDs of vertices
+	 * incident to some edge that is incident to the i-th vertex.
+	 */
+	std::vector<std::set<int>> neighbors;
+};
+
 
 class IpoptTopologicalCorrector : public TNLP
 {
