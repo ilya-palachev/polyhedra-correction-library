@@ -19,20 +19,20 @@
  */
 
 /**
- * @file FixedTopology.h
+ * @file IpoptTopologicalCorrector.h
  * @brief NLP for Ipopt engine. It's used for the correction of polyhedrons
  * in the fixed topology.
  */
 
-#ifndef FIXEDTOPOLOGYNLP_H
-#define FIXEDTOPOLOGYNLP_H
+#ifndef IPOPTTOPOLOGICALCORRECTOR_H
+#define IPOPTTOPOLOGICALCORRECTOR_H
 #include <coin/IpTNLP.hpp>
 #include <coin/IpIpoptApplication.hpp>
 #include "FixedTopology.h"
 
 using namespace Ipopt;
 
-class FixedTopologyNLP : public TNLP
+class IpoptTopologicalCorrector : public TNLP
 {
 	/** Support directions. */
 	const std::vector<Vector_3> &u;
@@ -74,7 +74,7 @@ class FixedTopologyNLP : public TNLP
 	unsigned numNormalityConstraints;
 public:
 	/** Simple by-value constructor. */
-	FixedTopologyNLP(const std::vector<Vector_3> &u,
+	IpoptTopologicalCorrector(const std::vector<Vector_3> &u,
 			const std::vector<double> &h,
 			const std::vector<Vector_3> &U,
 			const std::vector<double> &H,
@@ -123,4 +123,4 @@ public:
 			IpoptCalculatedQuantities *ip_cq);
 };
 
-#endif /* FIXEDTOPOLOGYNLP_H */
+#endif /* IPOPTTOPOLOGICALCORRECTOR_H */

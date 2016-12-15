@@ -119,9 +119,9 @@ set (SOURCE_pcl
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/EdgeCorrector.cpp
 	Source/Recoverer/FixedTopology.cpp
-	Source/Recoverer/FixedTopologyNLP.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptFinitePlanesFitter.cpp
+	Source/Recoverer/IpoptTopologicalCorrector.cpp
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSFELinearProgramBuilder.cpp
 	Source/Recoverer/NaiveFacetJoiner.cpp

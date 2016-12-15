@@ -26,14 +26,15 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "Recoverer/FixedTopologyNLP.h"
+#include "Recoverer/IpoptTopologicalCorrector.h"
 
 static unsigned counter;
 
 #define TNLP_INFINITY 2e19
 
-	/** Simple by-value constructor. */
-FixedTopologyNLP::FixedTopologyNLP(const std::vector<Vector_3> &u,
+/** Simple by-value constructor. */
+IpoptTopologicalCorrector::IpoptTopologicalCorrector(
+		const std::vector<Vector_3> &u,
 		const std::vector<double> &h,
 		const std::vector<Vector_3> &U,
 		const std::vector<double> &H,
@@ -76,28 +77,29 @@ FixedTopologyNLP::FixedTopologyNLP(const std::vector<Vector_3> &u,
 	DEBUG_END;
 }
 
-std::vector<Vector_3> FixedTopologyNLP::getDirections()
+std::vector<Vector_3> IpoptTopologicalCorrector::getDirections()
 {
 	DEBUG_START;
 	DEBUG_END;
 	return directions;
 }
 
-std::vector<double> FixedTopologyNLP::getValues()
+std::vector<double> IpoptTopologicalCorrector::getValues()
 {
 	DEBUG_START;
 	DEBUG_END;
 	return values;
 }
 
-std::vector<Vector_3> FixedTopologyNLP::getPoints()
+std::vector<Vector_3> IpoptTopologicalCorrector::getPoints()
 {
 	DEBUG_START;
 	DEBUG_END;
 	return points;
 }
 
-bool FixedTopologyNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
+bool IpoptTopologicalCorrector::get_nlp_info(Index& n, Index& m,
+		Index& nnz_jac_g,
 		Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	DEBUG_START;
@@ -161,7 +163,8 @@ bool FixedTopologyNLP::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	return true;
 }
 
-bool FixedTopologyNLP::get_bounds_info(Index n, Number *x_l, Number *x_u,
+bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
+		Number *x_u,
 		Index m, Number *g_l, Number *g_u)
 {
 	DEBUG_START;
@@ -208,7 +211,7 @@ bool FixedTopologyNLP::get_bounds_info(Index n, Number *x_l, Number *x_u,
 	return true;
 }
 
-bool FixedTopologyNLP::get_starting_point(Index n, bool init_x,
+bool IpoptTopologicalCorrector::get_starting_point(Index n, bool init_x,
 	Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
 	bool init_lambda, Number *lambda)
 {
@@ -279,7 +282,7 @@ bool FixedTopologyNLP::get_starting_point(Index n, bool init_x,
 	return true;
 }
 
-void FixedTopologyNLP::getVariables(const Number *x)
+void IpoptTopologicalCorrector::getVariables(const Number *x)
 {
 	DEBUG_START;
 	ASSERT(x);
@@ -296,7 +299,7 @@ void FixedTopologyNLP::getVariables(const Number *x)
 	DEBUG_END;
 }
 
-bool FixedTopologyNLP::eval_f(Index n, const Number *x, bool new_x,
+bool IpoptTopologicalCorrector::eval_f(Index n, const Number *x, bool new_x,
 		Number& obj_value)
 {
 	DEBUG_START;
@@ -316,7 +319,8 @@ bool FixedTopologyNLP::eval_f(Index n, const Number *x, bool new_x,
 }
 
 
-bool FixedTopologyNLP::eval_grad_f(Index n, const Number *x, bool new_x,
+bool IpoptTopologicalCorrector::eval_grad_f(Index n, const Number *x,
+		bool new_x,
 		Number *grad_f)
 {
 	DEBUG_START;
@@ -339,7 +343,8 @@ bool FixedTopologyNLP::eval_grad_f(Index n, const Number *x, bool new_x,
 	return true;
 }
 
-bool FixedTopologyNLP::eval_g(Index n, const Number *x, bool new_x, Index m,
+bool IpoptTopologicalCorrector::eval_g(Index n, const Number *x, bool new_x,
+		Index m,
 		Number *g)
 {
 	DEBUG_START;
@@ -373,7 +378,8 @@ bool FixedTopologyNLP::eval_g(Index n, const Number *x, bool new_x, Index m,
 	return true;
 }
 
-bool FixedTopologyNLP::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
+bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
+		Index m,
 		Index nnz_jac_g, Index *iRow, Index *jCol,
 		Number *jacValues)
 {
@@ -492,7 +498,7 @@ bool FixedTopologyNLP::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 }
 
 
-bool FixedTopologyNLP::eval_h(Index n, const Number *x, bool new_x,
+bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
 		Number obj_factor,
 		Index m, const Number *lambda, bool new_lambda,
 		Index nnz_h_lag, Index *iRow, Index *jCol,
@@ -602,7 +608,8 @@ bool FixedTopologyNLP::eval_h(Index n, const Number *x, bool new_x,
 }
 
 	
-void FixedTopologyNLP::finalize_solution(SolverReturn status, Index n, const Number *x,
+void IpoptTopologicalCorrector::finalize_solution(SolverReturn status, Index n,
+		const Number *x,
 		const Number *z_L, const Number *z_U, Index m,
 		const Number *g, const Number *lambda, Number obj_value,
 		const IpoptData *ip_data,

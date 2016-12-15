@@ -28,7 +28,7 @@
 #include "DebugAssert.h"
 #include "PCLDumper.h"
 #include "SupportPolyhedronCorrector.h"
-#include "FixedTopologyNLP.h"
+#include "IpoptTopologicalCorrector.h"
 
 SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
 		SupportFunctionDataPtr SData) : initialP(initialP), SData(SData)
@@ -37,7 +37,7 @@ SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP,
 	DEBUG_END;
 }
 
-Polyhedron_3 obtainPolyhedron(FixedTopologyNLP *FTNLP)
+Polyhedron_3 obtainPolyhedron(IpoptTopologicalCorrector *FTNLP)
 {
 	DEBUG_START;
 	std::vector<Vector_3> directions = FTNLP->getDirections();
@@ -115,7 +115,8 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 
 	FixedTopology *FT = new FixedTopology(initialP, SData);
 
-	FixedTopologyNLP *FTNLP = new FixedTopologyNLP(u, h, U, H, points, FT);
+	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
+			u, h, U, H, points, FT);
 
 	/* Ask Ipopt to solve the problem */
 	if (app->OptimizeTNLP(FTNLP) != Solve_Succeeded)
