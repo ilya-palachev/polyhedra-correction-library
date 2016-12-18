@@ -213,6 +213,23 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 	return extractedEdges;
 }
 
+void printColouredExtractedPolyhedron(Polyhedron_3 polyhedron,
+		const std::vector<SimpleEdge_3> &edges)
+{
+	DEBUG_START;
+	std::set<int> cluster;
+	for (const SimpleEdge_3 &edge: edges)
+	{
+		cluster.insert(edge.iForward);
+		cluster.insert(edge.iBackward);
+	}
+	std::vector<std::set<int>> clusters;
+	clusters.push_back(cluster);
+	printColouredPolyhedron(polyhedron, clusters,
+			"edge-corrector-extracted-edges.ply");
+	DEBUG_END;
+}
+
 Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
@@ -226,16 +243,7 @@ Polyhedron_3 EdgeCorrector::run()
 		DEBUG_END;
 		return initialP;
 	}
-	std::set<int> cluster;
-	for (const SimpleEdge_3 &edge: mainEdges)
-	{
-		cluster.insert(edge.iForward);
-		cluster.insert(edge.iBackward);
-	}
-	std::vector<std::set<int>> clusters;
-	clusters.push_back(cluster);
-	printColouredPolyhedron(initialP, clusters,
-			"edge-corrector-extracted-edges.ply");
+	printColouredExtractedPolyhedron(initialP, mainEdges);
 
 	Polyhedron_3 correctedP = initialP;
 	DEBUG_END;
