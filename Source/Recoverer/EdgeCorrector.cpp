@@ -30,6 +30,7 @@
 #include "EdgeCorrector.h"
 #include "Colouring.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
+#include "IpoptTopologicalCorrector.h"
 
 EdgeCorrector::EdgeCorrector(Polyhedron_3 initialP,
 		SupportFunctionDataPtr SData) :
@@ -218,7 +219,7 @@ void printColouredExtractedPolyhedron(Polyhedron_3 polyhedron,
 {
 	DEBUG_START;
 	std::set<int> cluster;
-	for (const SimpleEdge_3 &edge: edges)
+	for (const SimpleEdge_3 &edge : edges)
 	{
 		cluster.insert(edge.iForward);
 		cluster.insert(edge.iBackward);
@@ -227,6 +228,65 @@ void printColouredExtractedPolyhedron(Polyhedron_3 polyhedron,
 	clusters.push_back(cluster);
 	printColouredPolyhedron(polyhedron, clusters,
 			"edge-corrector-extracted-edges.ply");
+	DEBUG_END;
+}
+
+std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges)
+{
+	DEBUG_START;
+	std::map<int, int> indices;
+	std::vector<Plane_3> planes;
+#define UNINITIALIZED_MAP_VALUE -1
+	for (const SimpleEdge_3 &edge : edges)
+	{
+		indices.insert(std::pair<int, int>(edge.iForward,
+					UNINITIALIZED_MAP_VALUE));
+		indices.insert(std::pair<int, int>(edge.iBackward,
+					UNINITIALIZED_MAP_VALUE));
+	}
+#undef UNINITIALIZED_MAP_VALUE
+
+	int i = 0;
+	for (auto &pair : indices)
+	{
+		pair.second = i++;
+	}
+
+	i = 0;
+	for (auto facet = polyhedron.facets_begin();
+			facet < polyhedron.facets_end(); ++facet)
+	{
+		ASSERT(facet->id == i);
+		if (indices.find(i) != indices.end())
+		{
+			planes.push_back(facet->plane());
+		}
+		++i;
+	}
+	for (auto &pair : indices)
+	{
+		std::cout << "map[" << pair.first << "] = " << pair.second
+			<< ", plane: " << planes[pair.second]
+			<< std::endl;
+	}
+
+	for (SimpleEdge_3 &edge : edges)
+	{
+		edge.iForward = indices[edge.iForward];
+		edge.iBackward = indices[edge.iBackward];
+	}
+	DEBUG_END;
+	return planes;
+}
+
+void buildTopology(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges)
+{
+	DEBUG_START;
+	std::vector<Plane_3> planes = renumerateFacets(polyhedron, edges);
+
+
 	DEBUG_END;
 }
 
@@ -244,6 +304,7 @@ Polyhedron_3 EdgeCorrector::run()
 		return initialP;
 	}
 	printColouredExtractedPolyhedron(initialP, mainEdges);
+	buildTopology(initialP, mainEdges);
 
 	Polyhedron_3 correctedP = initialP;
 	DEBUG_END;
