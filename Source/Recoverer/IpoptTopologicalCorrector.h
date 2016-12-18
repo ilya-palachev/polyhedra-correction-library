@@ -103,6 +103,9 @@ class IpoptTopologicalCorrector : public TNLP
 
 	/** The number of normality constraints. */
 	unsigned numNormalityConstraints;
+
+	/** Whether the Z coordinates are fixed during the optimization. */
+	bool modeZfixed;
 public:
 	/** Simple by-value constructor. */
 	IpoptTopologicalCorrector(const std::vector<Vector_3> &u,
@@ -111,6 +114,11 @@ public:
 			const std::vector<double> &H,
 			const std::vector<Vector_3> &pointsInitial,
 			const FixedTopology *FT);
+
+	void enableModeZfixed()
+	{
+		modeZfixed = true;
+	}
 
 	std::vector<Vector_3> getDirections();
 

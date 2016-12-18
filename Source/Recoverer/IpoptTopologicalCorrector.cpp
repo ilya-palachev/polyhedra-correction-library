@@ -48,7 +48,8 @@ IpoptTopologicalCorrector::IpoptTopologicalCorrector(
 	values(H.size()),
 	pointsInitial(pointsInitial),
 	points(pointsInitial.size()),
-	FT(FT)
+	FT(FT),
+	modeZfixed(false)
 {
 	DEBUG_START;
 	numConsistencyConstraints = 0;
