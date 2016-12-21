@@ -26,6 +26,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "Common.h"
 #include "EdgeCorrector.h"
 #include "Colouring.h"
@@ -115,7 +116,7 @@ double calculateDiff(SimpleEdge_3 edge, Vector_3 e1, Vector_3 e2, Vector_3 u)
 	return d * d;
 }
 
-void associateEdges(std::vector<SimpleEdge_3> edges,
+void associateEdges(std::vector<SimpleEdge_3> &edges,
 		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
@@ -232,10 +233,9 @@ void printColouredExtractedPolyhedron(Polyhedron_3 polyhedron,
 }
 
 std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges)
+		std::vector<SimpleEdge_3> &edges, std::map<int, int> &indices)
 {
 	DEBUG_START;
-	std::map<int, int> indices;
 	std::vector<Plane_3> planes;
 #define UNINITIALIZED_MAP_VALUE -1
 	for (const SimpleEdge_3 &edge : edges)
@@ -280,14 +280,150 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 	return planes;
 }
 
-void buildTopology(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges)
+void printSetVector(std::vector<std::set<int>> &v)
 {
 	DEBUG_START;
-	std::vector<Plane_3> planes = renumerateFacets(polyhedron, edges);
+	for (unsigned i = 0; i < v.size(); ++i)
+	{
+		std::cout << "  " << i << ": ";
+		for (int j : v[i])
+		{
+			std::cout << j << " ";
+		}
+		std::cout << std::endl;
+	}
+	DEBUG_END;
+}
 
+FixedTopology *buildTopology(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges, std::vector<Vector_3> &u,
+		std::vector<Vector_3> &U, std::vector<Vector_3> &points,
+		std::vector<double> &h, std::vector<double> &H,
+		std::map<int, int> &indices)
+{
+	DEBUG_START;
+	std::vector<Plane_3> planes = renumerateFacets(polyhedron, edges,
+			indices);
+	for (const Plane_3 &plane : planes)
+	{
+		Vector_3 norm = plane.orthogonal_vector();
+		double length = sqrt(norm.squared_length());
+		norm = norm * (1. / length);
+		double value = -plane.d() / length;
+		ASSERT(value > 0.);
+		U.push_back(norm);
+		H.push_back(value);
+	}
+
+	FixedTopology *FT = new FixedTopology();
+	FT->tangient.resize(2 * edges.size());
+	FT->incident.resize(planes.size());
+	FT->influent.resize(planes.size());
+	FT->neighbors.resize(2 * edges.size());
+
+	unsigned iTangient = 0;
+	for (unsigned i = 0; i < edges.size(); ++i)
+	{
+		for (const Plane_3 plane : edges[i].tangients)
+		{
+			FT->tangient[2 * i].insert(iTangient);
+			FT->tangient[2 * i + 1].insert(iTangient);
+			++iTangient;
+			Vector_3 norm = plane.orthogonal_vector();
+			double length = sqrt(norm.squared_length());
+			norm = norm * (1. / length);
+			double value = -plane.d() / length;
+			ASSERT(value > 0.);
+			u.push_back(norm);
+			h.push_back(value);
+		}
+
+		FT->incident[edges[i].iForward].insert(2 * i);
+		FT->incident[edges[i].iForward].insert(2 * i + 1);
+		FT->incident[edges[i].iBackward].insert(2 * i);
+		FT->incident[edges[i].iBackward].insert(2 * i + 1);
+		points.push_back(edges[i].A);
+		points.push_back(edges[i].B);
+	}
+	ASSERT(iTangient > 0);
+
+	for (unsigned i = 0; i < edges.size(); ++i)
+	{
+		ASSERT(edges[i].iForward != edges[i].iBackward);
+		int iForward = edges[i].iForward;
+		int iBackward = edges[i].iBackward;
+
+		for (int j : FT->incident[iForward])
+		{
+			if (FT->incident[iBackward].find(j)
+					== FT->incident[iBackward].end())
+				FT->influent[iBackward].insert(j);
+#if 0
+			if (unsigned(j / 2) != i)
+			{
+				FT->neighbors[2 * i].insert(j);
+				FT->neighbors[2 * i + 1].insert(j);
+			}
+#endif
+		}
+
+		for (int j : FT->incident[iBackward])
+		{
+			if (FT->incident[iForward].find(j)
+					== FT->incident[iForward].end())
+				FT->influent[iForward].insert(j);
+#if 0
+			if (unsigned(j / 2) != i)
+			{
+				FT->neighbors[2 * i].insert(j);
+				FT->neighbors[2 * i + 1].insert(j);
+			}
+#endif
+		}
+	}
+
+	std::cout << "FT->tangient:" << std::endl;
+	printSetVector(FT->tangient);
+	std::cout << "FT->incident:" << std::endl;
+	printSetVector(FT->incident);
+	std::cout << "FT->influent:" << std::endl;
+	printSetVector(FT->influent);
+	std::cout << "FT->neighbors:" << std::endl;
+	printSetVector(FT->neighbors);
 
 	DEBUG_END;
+	return FT;
+}
+
+Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
+		IpoptTopologicalCorrector *FTNLP)
+{
+	DEBUG_START;
+	std::vector<Vector_3> directions = FTNLP->getDirections();
+	std::vector<double> values = FTNLP->getValues();
+	std::vector<Plane_3> planes(initialP.size_of_facets());
+	unsigned iFacet = 0;
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
+			I != E; ++I)
+	{
+		auto it = map.find(iFacet);
+		if (it != map.end())
+		{
+			int i = it->second;
+			planes[iFacet] = Plane_3(-directions[i].x(),
+					-directions[i].y(), -directions[i].z(),
+					values[i]);
+		}
+		else
+		{
+			planes[iFacet] = I->plane();
+		}
+		++iFacet;
+	}
+
+	Polyhedron_3 intersection(planes);
+	DEBUG_END;
+	return intersection;
 }
 
 Polyhedron_3 EdgeCorrector::run()
@@ -304,9 +440,48 @@ Polyhedron_3 EdgeCorrector::run()
 		return initialP;
 	}
 	printColouredExtractedPolyhedron(initialP, mainEdges);
-	buildTopology(initialP, mainEdges);
 
-	Polyhedron_3 correctedP = initialP;
+	std::vector<Vector_3> u, U, points;
+	std::vector<double> h, H;
+	std::map<int, int> map;
+	FixedTopology *FT = buildTopology(initialP, mainEdges, u, U, points, h,
+			H, map);
+	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
+			u, h, U, H, points, FT);
+
+	IpoptApplication *app = IpoptApplicationFactory();
+
+	/* Intialize the IpoptApplication and process the options */
+	if (app->Initialize() != Solve_Succeeded)
+	{
+		MAIN_PRINT("*** Error during initialization!");
+		return initialP;
+	}
+
+	app->Options()->SetStringValue("linear_solver", "ma57");
+	if (getenv("DERIVATIVE_TEST_FIRST"))
+		app->Options()->SetStringValue("derivative_test", "first-order");
+	else if (getenv("DERIVATIVE_TEST_SECOND"))
+		app->Options()->SetStringValue("derivative_test", "second-order");
+	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
+		app->Options()->SetStringValue("derivative_test", "only-second-order");
+	if (getenv("HESSIAN_APPROX"))
+		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+
+	/* Ask Ipopt to solve the problem */
+	if (app->OptimizeTNLP(FTNLP) != Solve_Succeeded)
+	{
+		MAIN_PRINT("** The problem FAILED!");
+		DEBUG_END;
+		return initialP;
+	}
+
+	MAIN_PRINT("*** The problem solved!");
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply") << initialP;
+	Polyhedron_3 correctedP = obtainPolyhedron(initialP, map, FTNLP);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-from-planes.ply") << correctedP;
+
+	delete FTNLP;
 	DEBUG_END;
 	return correctedP;
 }
