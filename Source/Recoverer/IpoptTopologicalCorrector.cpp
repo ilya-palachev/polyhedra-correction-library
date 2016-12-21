@@ -269,7 +269,22 @@ bool IpoptTopologicalCorrector::get_starting_point(Index n, bool init_x,
 			++numViolations;
 			std::cout << "g[" << i << "] = " << g[i]
 				<< " not in [" << g_l[i] << ", "
-				<< g_u[i] << "]" << std::endl;
+				<< g_u[i] << "] -- it is ";
+			if (i < numPlanarityConstraints
+					+ numConvexityConstraints)
+				std::cout << "planarity/convexity constraint";
+			else if (i < numPlanarityConstraints
+					+ numConvexityConstraints
+					+ numConsistencyConstraints)
+				std::cout << "consistency constraint";
+			else if (i < numPlanarityConstraints
+					+ numConvexityConstraints
+					+ numConsistencyConstraints
+					+ numNormalityConstraints)
+				std::cout << "planarity constraint";
+			else
+				ASSERT(0 && "Go and fix checking function");
+			std::cout << std::endl;
 		}
 	std::cout << "Violation in " << numViolations
 		<< " constraints from total " << m << std::endl;
