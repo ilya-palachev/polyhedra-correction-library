@@ -52,11 +52,6 @@ Polyhedron_3 obtainPolyhedron(IpoptTopologicalCorrector *FTNLP)
 		<< " vertices, " << intersection.size_of_facets() << " facets."
 		<< std::endl;
 
-	std::vector<Vector_3> pointsAsVectors = FTNLP->getPoints();
-	std::vector<Point_3> points(pointsAsVectors.size());
-	for (const Vector_3 &v : pointsAsVectors)
-		points.push_back(Point_3(v.x(), v.y(), v.z()));
-
 	DEBUG_END;
 	return intersection;
 }
@@ -66,10 +61,10 @@ FixedTopology *buildTopology(Polyhedron_3 initialP,
 {
 	DEBUG_START;
 	FixedTopology *FT = new FixedTopology();
-	FT->tangient.reserve(initialP.size_of_vertices());
-	FT->incident.reserve(initialP.size_of_facets());
-	FT->influent.reserve(initialP.size_of_facets());
-	FT->neighbors.reserve(initialP.size_of_vertices());
+	FT->tangient.resize(initialP.size_of_vertices());
+	FT->incident.resize(initialP.size_of_facets());
+	FT->influent.resize(initialP.size_of_facets());
+	FT->neighbors.resize(initialP.size_of_vertices());
 
 	SupportFunctionDataConstructor constructor;
 	constructor.run(SData->supportDirections<Point_3>(), initialP);
@@ -203,8 +198,6 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		DEBUG_END;
 		return initialP;
 	}
-
-	app->ReOptimizeTNLP(FTNLP);
 
 	MAIN_PRINT("*** The problem solved!");
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply") << initialP;
