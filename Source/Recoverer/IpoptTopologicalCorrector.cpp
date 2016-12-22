@@ -175,6 +175,16 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 		x_u[i] = +TNLP_INFINITY;
 	}
 
+	if (modeZfixed)
+	{
+		int iPoint = 0;
+		for (const auto &v : pointsInitial)
+		{
+			x_l[3 * iPoint] = x_u[3 * iPoint] = v.z();
+			++iPoint;
+		}
+	}
+
 	unsigned iCond = 0;
 	for (unsigned j = 0; j < U.size(); ++j)
 	{
