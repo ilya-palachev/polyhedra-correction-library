@@ -89,7 +89,8 @@ Vector_3 projectOnBasis(Vector_3 e1, Vector_3 e2, Vector_3 a)
 #define SOME_BIG_DOUBLE 1e10
 #define SOME_SMALL_DOUBLE 1e-10
 
-double calculateDiff(SimpleEdge_3 edge, Vector_3 e1, Vector_3 e2, Vector_3 u)
+double calculateDiff(SimpleEdge_3 edge, Vector_3 e1, Vector_3 e2, Vector_3 u,
+		double value)
 {
 	DEBUG_START;
 	Vector_3 origin(0., 0., 0.);
@@ -112,8 +113,10 @@ double calculateDiff(SimpleEdge_3 edge, Vector_3 e1, Vector_3 e2, Vector_3 u)
 	}
 	v = (1. / length) * v;
 	Vector_3 d = v - u;
+	double hA = u * edge.A - value;
+	double hB = u * edge.B - value;
 	DEBUG_END;
-	return d * d;
+	return d * d + 3. * (hA * hA + hB * hB);
 }
 
 void associateEdges(std::vector<SimpleEdge_3> &edges,
@@ -122,6 +125,7 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 	DEBUG_START;
 	std::vector<Vector_3> directions = data->supportDirections<Vector_3>();
 	std::vector<Plane_3> planes = data->supportPlanes();
+	VectorXd values = data->supportValues();
 	unsigned numItems = directions.size();
 	double L1 = 0.;
 	double L2 = 0.;
@@ -139,7 +143,8 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 		
 		for (unsigned j = 0; j < edges.size(); ++j)
 		{
-			double diff = calculateDiff(edges[j], u_z, u_xy, u);
+			double diff = calculateDiff(edges[j], u_z, u_xy, u,
+					values(i));
 			if (diff < diffBest)
 			{
 				diffBest = diff;
@@ -280,6 +285,21 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 	return planes;
 }
 
+void shortenEdges(std::vector<SimpleEdge_3> &edges)
+{
+	DEBUG_START;
+	// FIXME: Make this variable parametrizable
+	const double relativeShift = 0.9;
+	for (SimpleEdge_3 &edge : edges)
+	{
+		Vector_3 A = edge.A;
+		Vector_3 B = edge.B;
+		edge.A = A + (B - A) * relativeShift;
+		edge.B = B + (A - B) * relativeShift;
+	}
+	DEBUG_END;
+}
+
 void printSetVector(std::vector<std::set<int>> &v)
 {
 	DEBUG_START;
@@ -358,13 +378,11 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 			if (FT->incident[iBackward].find(j)
 					== FT->incident[iBackward].end())
 				FT->influent[iBackward].insert(j);
-#if 0
 			if (unsigned(j / 2) != i)
 			{
 				FT->neighbors[2 * i].insert(j);
 				FT->neighbors[2 * i + 1].insert(j);
 			}
-#endif
 		}
 
 		for (int j : FT->incident[iBackward])
@@ -372,13 +390,11 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 			if (FT->incident[iForward].find(j)
 					== FT->incident[iForward].end())
 				FT->influent[iForward].insert(j);
-#if 0
 			if (unsigned(j / 2) != i)
 			{
 				FT->neighbors[2 * i].insert(j);
 				FT->neighbors[2 * i + 1].insert(j);
 			}
-#endif
 		}
 	}
 
@@ -439,6 +455,8 @@ Polyhedron_3 EdgeCorrector::run()
 		DEBUG_END;
 		return initialP;
 	}
+	shortenEdges(mainEdges);
+
 	printColouredExtractedPolyhedron(initialP, mainEdges);
 
 	std::vector<Vector_3> u, U, points;
@@ -448,6 +466,7 @@ Polyhedron_3 EdgeCorrector::run()
 			H, map);
 	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
 			u, h, U, H, points, FT);
+	FTNLP->enableModeZfixed();
 
 	IpoptApplication *app = IpoptApplicationFactory();
 
