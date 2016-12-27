@@ -111,8 +111,20 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 				jBest = j;
 			}
 		}
+
+		bool safe = true;
+#if 0
+		for (const SimpleEdge_3 &edge : edges)
+		{
+			Vector_3 A = edges[jBestPair].A;
+			Vector_3 B = edges[jBestPair].B;
+			if (edge.A * u > A * u || edge.A * u > B * u
+				|| edge.B * u > A * u || edge.B * u > B * u)
+				safe = false;
+		}
+#endif
 		ASSERT(jBestPair != edges.size() && "Failed to find best edge");
-		if (jBest == jBestPair &&
+		if (safe && jBest == jBestPair &&
 				sqrt(productMaxPair - 2. * values(i)) < 1e-1)
 			edges[jBestPair].tangients.push_back(planes[i]);
 	}
@@ -401,6 +413,7 @@ Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
 	std::vector<SimpleEdge_3> edges = getEdges(initialP);
+	shortenEdges(edges);
 	associateEdges(edges, SData);
 	std::vector<SimpleEdge_3> mainEdges = extractEdges(edges);
 	std::cout << "Number of extracted edges: " << mainEdges.size()
@@ -410,7 +423,6 @@ Polyhedron_3 EdgeCorrector::run()
 		DEBUG_END;
 		return initialP;
 	}
-	shortenEdges(mainEdges);
 
 	printColouredExtractedPolyhedron(initialP, mainEdges);
 
