@@ -74,51 +74,6 @@ static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P)
 	return edges;
 }
 
-Vector_3 projectOnBasis(Vector_3 e1, Vector_3 e2, Vector_3 a)
-{
-	DEBUG_START;
-	double x1 = a * e1;
-	Vector_3 a1 = e1 * x1;
-	double x2 = a * e2;
-	Vector_3 a2 = e2 * x2;
-	Vector_3 projection = a1 + a2;
-	DEBUG_END;
-	return projection;
-}
-
-#define SOME_BIG_DOUBLE 1e10
-#define SOME_SMALL_DOUBLE 1e-10
-
-double calculateDiff(SimpleEdge_3 edge, Vector_3 e1, Vector_3 e2, Vector_3 u,
-		double value)
-{
-	DEBUG_START;
-	Vector_3 origin(0., 0., 0.);
-	Vector_3 a = projectOnBasis(e1, e2, edge.A - origin);
-	Vector_3 b = projectOnBasis(e1, e2, edge.B - origin);
-	Vector_3 segment = a - b;
-	double square = segment * segment;
-	if (square < SOME_SMALL_DOUBLE)
-	{
-		DEBUG_END;
-		return SOME_BIG_DOUBLE;
-	}
-	double alpha = -(a * segment) / square;
-	Vector_3 v = alpha * a + (1. - alpha) * b;
-	double length = sqrt(v * v);
-	if (length < SOME_SMALL_DOUBLE)
-	{
-		DEBUG_END;
-		return SOME_BIG_DOUBLE;
-	}
-	v = (1. / length) * v;
-	Vector_3 d = v - u;
-	double hA = u * edge.A - value;
-	double hB = u * edge.B - value;
-	DEBUG_END;
-	return d * d + 3. * (hA * hA + hB * hB);
-}
-
 void associateEdges(std::vector<SimpleEdge_3> &edges,
 		SupportFunctionDataPtr data)
 {
@@ -127,40 +82,40 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 	std::vector<Plane_3> planes = data->supportPlanes();
 	VectorXd values = data->supportValues();
 	unsigned numItems = directions.size();
-	double L1 = 0.;
-	double L2 = 0.;
-	double Linf = 0.;
+
 	for (unsigned i = 0; i < numItems; ++i)
 	{
 		Vector_3 u = directions[i];
-		// FIXME: This should be rewritten on information about
-		// contours.
-		Vector_3 u_z(0., 0., u.z());
-		Vector_3 u_xy(u.x(), u.y(), 0.);
 
+		double productMax = 0.;
+		unsigned jBestPair = edges.size();
 		unsigned jBest = edges.size();
-		double diffBest = SOME_BIG_DOUBLE;
+		double productMaxPair = 0.;
 		
 		for (unsigned j = 0; j < edges.size(); ++j)
 		{
-			double diff = calculateDiff(edges[j], u_z, u_xy, u,
-					values(i));
-			if (diff < diffBest)
+			double productPair = edges[j].A * u + edges[j].B * u;
+			if (productPair > productMaxPair)
 			{
-				diffBest = diff;
-				jBest = j;
+				productMaxPair = productPair;
+				jBestPair = j;
 			}	
+			if (edges[j].A * u > productMax)
+			{
+				productMax = edges[j].A * u;
+				jBest = j;
+			}
+			if (edges[j].B * u > productMax)
+			{
+				productMax = edges[j].B * u;
+				jBest = j;
+			}
 		}
-		ASSERT(jBest != edges.size() && "Failed to find best edge");
-		edges[jBest].tangients.push_back(planes[i]);
-		L1 += diffBest;
-		L2 += diffBest * diffBest;
-		Linf = diffBest > Linf ? diffBest : Linf;
+		ASSERT(jBestPair != edges.size() && "Failed to find best edge");
+		if (jBest == jBestPair &&
+				sqrt(productMaxPair - 2. * values(i)) < 1e-1)
+			edges[jBestPair].tangients.push_back(planes[i]);
 	}
-	std::cout << "L1: " << L1 << ", mean: " << L1 / numItems << std::endl;
-	std::cout << "L2: " << sqrt(L2) << ", mean: " << L2 / sqrt(numItems)
-		<< std::endl;
-	std::cout << "Linf: " << Linf << std::endl;
 
 	unsigned numTangientsMin = numItems;
 	unsigned numTangientsMax = 0;
