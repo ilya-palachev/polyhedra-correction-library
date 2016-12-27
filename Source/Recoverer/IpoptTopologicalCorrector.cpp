@@ -222,6 +222,53 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 	return true;
 }
 
+void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
+		double *x)
+{
+	DEBUG_START;
+	double *g = new double[m];
+	double *g_l = new double[m];
+	double *g_u = new double[m];
+	double *x_l = new double[n];
+	double *x_u = new double[n];
+	eval_g(n, x, false, m, g);
+	get_bounds_info(n, x_l, x_u, m, g_l, g_u);
+	const double tol = 1e-10;
+	unsigned numViolations = 0;
+	for (unsigned i = 0; i < unsigned(m); ++i)
+		if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
+		{
+			++numViolations;
+			std::cout << "g[" << i << "] = " << g[i]
+				<< " not in [" << g_l[i] << ", "
+				<< g_u[i] << "] -- it is ";
+			if (i < numPlanarityConstraints
+					+ numConvexityConstraints)
+				std::cout << "planarity/convexity constraint";
+			else if (i < numPlanarityConstraints
+					+ numConvexityConstraints
+					+ numConsistencyConstraints)
+				std::cout << "consistency constraint";
+			else if (i < numPlanarityConstraints
+					+ numConvexityConstraints
+					+ numConsistencyConstraints
+					+ numNormalityConstraints)
+				std::cout << "planarity constraint";
+			else
+				ASSERT(0 && "Go and fix checking function");
+			std::cout << std::endl;
+		}
+	std::cout << "Violation in " << numViolations
+		<< " constraints from total " << m << std::endl;
+	ASSERT(numViolations == 0);
+	delete[] g;
+	delete[] g_l;
+	delete[] g_u;
+	delete[] x_l;
+	delete[] x_u;
+	DEBUG_END;
+}
+
 bool IpoptTopologicalCorrector::get_starting_point(Index n, bool init_x,
 	Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
 	bool init_lambda, Number *lambda)
@@ -264,46 +311,8 @@ bool IpoptTopologicalCorrector::get_starting_point(Index n, bool init_x,
 		}
 	}
 	ASSERT(iVariable == n);
-	double *g = new double[m];
-	double *g_l = new double[m];
-	double *g_u = new double[m];
-	double *x_l = new double[n];
-	double *x_u = new double[n];
-	eval_g(n, x, false, m, g);
-	get_bounds_info(n, x_l, x_u, m, g_l, g_u);
-	const double tol = 1e-10;
-	unsigned numViolations = 0;
-	for (unsigned i = 0; i < unsigned(m); ++i)
-		if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
-		{
-			++numViolations;
-			std::cout << "g[" << i << "] = " << g[i]
-				<< " not in [" << g_l[i] << ", "
-				<< g_u[i] << "] -- it is ";
-			if (i < numPlanarityConstraints
-					+ numConvexityConstraints)
-				std::cout << "planarity/convexity constraint";
-			else if (i < numPlanarityConstraints
-					+ numConvexityConstraints
-					+ numConsistencyConstraints)
-				std::cout << "consistency constraint";
-			else if (i < numPlanarityConstraints
-					+ numConvexityConstraints
-					+ numConsistencyConstraints
-					+ numNormalityConstraints)
-				std::cout << "planarity constraint";
-			else
-				ASSERT(0 && "Go and fix checking function");
-			std::cout << std::endl;
-		}
-	std::cout << "Violation in " << numViolations
-		<< " constraints from total " << m << std::endl;
-	ASSERT(numViolations == 0);
-	delete[] g;
-	delete[] g_l;
-	delete[] g_u;
-	delete[] x_l;
-	delete[] x_u;
+	if (getenv("CHECK_STARTING_POINT"))
+		checkStartingPoint(n, m, x);
 	DEBUG_END;
 	return true;
 }
