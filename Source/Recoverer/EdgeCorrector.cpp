@@ -409,6 +409,32 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 	return intersection;
 }
 
+void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
+		std::vector<Vector_3> U, std::vector<double> H,
+		std::vector<Vector_3> points, FixedTopology *FT)
+{
+	DEBUG_START;
+	std::cout << "Checking consistency constraints..." << std::endl;
+	unsigned numViolations = 0;
+	for (unsigned i = 0; i < points.size(); ++i)
+		for (int j : FT->tangient[i])
+			for (int k : FT->neighbors[i])
+			{
+				double value = u[j] * (points[i] - points[k]);
+
+				if (value < 0.)				
+				{
+					std::cout << "  consistency " <<
+						i << " " << j << " " <<
+						k << " " << value << std::endl;
+					++numViolations;
+				}
+			}
+	std::cout << "Number of violations: " << numViolations << std::endl;
+	ASSERT(numViolations == 0 && "Bad starting point");
+	DEBUG_END;
+}
+
 Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
@@ -431,6 +457,8 @@ Polyhedron_3 EdgeCorrector::run()
 	std::map<int, int> map;
 	FixedTopology *FT = buildTopology(initialP, mainEdges, u, U, points, h,
 			H, map);
+	if (getenv("CHECK_STARTING_POINT"))
+		checkConsistencyConstraints(u, h, U, H, points, FT);
 	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
 			u, h, U, H, points, FT);
 	FTNLP->enableModeZfixed();
