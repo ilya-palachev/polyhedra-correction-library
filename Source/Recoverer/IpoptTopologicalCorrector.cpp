@@ -178,9 +178,12 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 	if (modeZfixed)
 	{
 		int iPoint = 0;
+		int numUH = 3 * U.size() + H.size();
 		for (const auto &v : pointsInitial)
 		{
-			x_l[3 * iPoint] = x_u[3 * iPoint] = v.z();
+			int iCurr = numUH + 3 * iPoint;
+			x_l[iCurr] = x_u[iCurr] = v.z();
+			std::cout << "Fixing " << v.z() << std::endl;
 			++iPoint;
 		}
 	}
