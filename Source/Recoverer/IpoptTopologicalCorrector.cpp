@@ -178,12 +178,10 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 	if (modeZfixed)
 	{
 		int iPoint = 0;
-		int numUH = 3 * U.size() + H.size();
 		for (const auto &v : pointsInitial)
 		{
-			int iCurr = numUH + 3 * iPoint + 2;
+			int iCurr = 3 * iPoint + 2;
 			x_l[iCurr] = x_u[iCurr] = v.z();
-			std::cout << "Fixing " << v.z() << std::endl;
 			++iPoint;
 		}
 	}
@@ -269,13 +267,12 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 			std::cout << "x[" << i << "] = " << x[i]
 				<< " not in [" << x_l[i] << ", "
 				<< x_u[i] << "] -- it is ";
-			unsigned numUH = 3 * U.size() + H.size();
-			if (i < numUH)
+			if (i >= pointsInitial.size())
 				ASSERT(0 && "Impossible happened");
 			else
 			{
-				unsigned iPoint = (i - numUH) / 3;
-				unsigned iCoord = (i - numUH) % 3;
+				unsigned iPoint = i / 3;
+				unsigned iCoord = i % 3;
 				ASSERT(iCoord == 2 && "Impossible happened");
 				switch (iCoord)
 				{
