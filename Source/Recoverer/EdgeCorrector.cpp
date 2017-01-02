@@ -252,21 +252,6 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 	return planes;
 }
 
-void shortenEdges(std::vector<SimpleEdge_3> &edges)
-{
-	DEBUG_START;
-	// FIXME: Make this variable parametrizable
-	const double relativeShift = 0.9;
-	for (SimpleEdge_3 &edge : edges)
-	{
-		Vector_3 A = edge.A;
-		Vector_3 B = edge.B;
-		edge.A = A + (B - A) * relativeShift;
-		edge.B = B + (A - B) * relativeShift;
-	}
-	DEBUG_END;
-}
-
 void printSetVector(std::vector<std::set<int>> &v)
 {
 	DEBUG_START;
@@ -339,28 +324,39 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 		ASSERT(edges[i].iForward != edges[i].iBackward);
 		int iForward = edges[i].iForward;
 		int iBackward = edges[i].iBackward;
+		const std::set<int> &incForward = FT->incident[iForward];
+		const std::set<int> &incBackward = FT->incident[iBackward];
 
-		for (int j : FT->incident[iForward])
+		for (int j : incForward)
 		{
-			if (FT->incident[iBackward].find(j)
-					== FT->incident[iBackward].end())
+			if (incBackward.find(j) == incBackward.end())
 				FT->influent[iBackward].insert(j);
-			if (unsigned(j / 2) != i)
-			{
-				FT->neighbors[2 * i].insert(j);
-				FT->neighbors[2 * i + 1].insert(j);
-			}
 		}
 
-		for (int j : FT->incident[iBackward])
+		for (int j : incBackward)
 		{
-			if (FT->incident[iForward].find(j)
-					== FT->incident[iForward].end())
+			if (incForward.find(j) == incForward.end())
 				FT->influent[iForward].insert(j);
-			if (unsigned(j / 2) != i)
+		}
+	}
+
+	for (unsigned i = 0; i < points.size(); ++i)
+	{
+		unsigned iOpposite = i % 2 ? i - 1 : i + 1;
+		Vector_3 A = points[i];
+		for (unsigned j = 0; j < points.size(); ++j)
+		{
+			if (i == j)
+				continue;
+			unsigned jOpposite = j % 2 ? j - 1 : j + 1;
+			Vector_3 B = points[j];
+			double distance = (A - B).squared_length();
+			if (distance < 1e-16)
 			{
-				FT->neighbors[2 * i].insert(j);
-				FT->neighbors[2 * i + 1].insert(j);
+				FT->neighbors[i].insert(iOpposite);
+				FT->neighbors[i].insert(jOpposite);
+				FT->neighbors[j].insert(iOpposite);
+				FT->neighbors[j].insert(jOpposite);
 			}
 		}
 	}
@@ -422,11 +418,20 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 			{
 				double value = u[j] * (points[i] - points[k]);
 
-				if (value < 0.)				
+				if (value < 0.)
 				{
-					std::cout << "  consistency " <<
-						i << " " << j << " " <<
-						k << " " << value << std::endl;
+					std::cout << "  consistency violation: "
+						<< std::endl;
+					std::cout << "    major point: " << i
+						<< " "
+						<< points[i] << std::endl;
+					std::cout << "    minor point: " << j
+						<< " "
+						<< points[j] << std::endl;
+					std::cout << "    on direction: " <<
+						k << " " << u[j] << std::endl;
+					std::cout << "    value: "
+						<< value << std::endl;
 					++numViolations;
 				}
 			}
@@ -435,11 +440,26 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 	DEBUG_END;
 }
 
+void shortenEdges(std::vector<Vector_3> &points)
+{
+	DEBUG_START;
+	// FIXME: Make this variable parametrizable
+	const double relativeShift = 0.9;
+	ASSERT(points.size() % 2 == 0);
+	for (unsigned i = 0; i < points.size() / 2; ++i)
+	{
+		Vector_3 A = points[2 * i];
+		Vector_3 B = points[2 * i + 1];
+		points[2 * i] = A + (B - A) * relativeShift;
+		points[2 * i + 1] = B + (A - B) * relativeShift;
+	}
+	DEBUG_END;
+}
+
 Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
 	std::vector<SimpleEdge_3> edges = getEdges(initialP);
-	shortenEdges(edges);
 	associateEdges(edges, SData);
 	std::vector<SimpleEdge_3> mainEdges = extractEdges(edges);
 	std::cout << "Number of extracted edges: " << mainEdges.size()
@@ -459,6 +479,7 @@ Polyhedron_3 EdgeCorrector::run()
 			H, map);
 	if (getenv("CHECK_STARTING_POINT"))
 		checkConsistencyConstraints(u, h, U, H, points, FT);
+	shortenEdges(points);
 	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
 			u, h, U, H, points, FT);
 	FTNLP->enableModeZfixed();
