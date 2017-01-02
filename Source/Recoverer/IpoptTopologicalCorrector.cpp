@@ -181,7 +181,7 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 		int numUH = 3 * U.size() + H.size();
 		for (const auto &v : pointsInitial)
 		{
-			int iCurr = numUH + 3 * iPoint;
+			int iCurr = numUH + 3 * iPoint + 2;
 			x_l[iCurr] = x_u[iCurr] = v.z();
 			std::cout << "Fixing " << v.z() << std::endl;
 			++iPoint;
@@ -260,6 +260,41 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 			else
 				ASSERT(0 && "Go and fix checking function");
 			std::cout << std::endl;
+		}
+
+	for (unsigned i = 0; i < unsigned(n); ++i)
+		if (x[i] < x_l[i] - tol || x[i] > x_u[i] + tol)
+		{
+			++numViolations;
+			std::cout << "x[" << i << "] = " << x[i]
+				<< " not in [" << x_l[i] << ", "
+				<< x_u[i] << "] -- it is ";
+			unsigned numUH = 3 * U.size() + H.size();
+			if (i < numUH)
+				ASSERT(0 && "Impossible happened");
+			else
+			{
+				unsigned iPoint = (i - numUH) / 3;
+				unsigned iCoord = (i - numUH) % 3;
+				ASSERT(iCoord == 2 && "Impossible happened");
+				switch (iCoord)
+				{
+				case 0:
+					std::cout << "x";
+					break;
+				case 1:
+					std::cout << "y";
+					break;
+				case 2:
+					std::cout << "z";
+					break;
+				default:
+					ASSERT(0 && "Impossible happened");
+					break;
+				}
+				std::cout << "-violation in " << iPoint
+					<< "-th point" << std::endl;
+			}
 		}
 	std::cout << "Violation in " << numViolations
 		<< " constraints from total " << m << std::endl;
