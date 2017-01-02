@@ -375,15 +375,6 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 	buildInfluents(edges, FT);
 	buildNeighbors(edges, points, FT);
 
-	std::cout << "FT->tangient:" << std::endl;
-	printSetVector(FT->tangient);
-	std::cout << "FT->incident:" << std::endl;
-	printSetVector(FT->incident);
-	std::cout << "FT->influent:" << std::endl;
-	printSetVector(FT->influent);
-	std::cout << "FT->neighbors:" << std::endl;
-	printSetVector(FT->neighbors);
-
 	DEBUG_END;
 	return FT;
 }
@@ -421,19 +412,29 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 
 void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 		std::vector<Vector_3> U, std::vector<double> H,
-		std::vector<Vector_3> points, FixedTopology *FT)
+		std::vector<Vector_3> points, FixedTopology *FT,
+		bool Strict)
 {
 	DEBUG_START;
 	std::cout << "Checking consistency constraints..." << std::endl;
 	unsigned numViolations = 0;
 	for (unsigned i = 0; i < points.size(); ++i)
-		for (int j : FT->tangient[i])
-			for (int k : FT->neighbors[i])
+	{
+		std::set<int> &tangients = FT->tangient[i];
+		std::set<int> &neighbors = FT->neighbors[i];
+		std::set<int> falseTangients;
+		std::set<int> falseNeighbors;
+		for (int j : tangients)
+		{
+			bool violationFound = false;
+			for (int k : neighbors)
 			{
 				double value = u[j] * (points[i] - points[k]);
 
 				if (value < 0.)
 				{
+					violationFound = true;
+					falseNeighbors.insert(k);
 					std::cout << "  consistency violation: "
 						<< std::endl;
 					std::cout << "    major point: " << i
@@ -449,8 +450,26 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 					++numViolations;
 				}
 			}
+			if (violationFound)
+				falseTangients.insert(j);
+		}
+
+		for (int j : falseTangients)
+		{
+			ASSERT(tangients.find(j) != tangients.end());
+			tangients.erase(j);
+			ASSERT(tangients.find(j) == tangients.end());
+		}
+
+		for (int l : falseNeighbors)
+		{
+			ASSERT(neighbors.find(l) != neighbors.end());
+			neighbors.erase(l);
+			ASSERT(neighbors.find(l) == neighbors.end());
+		}
+	}
 	std::cout << "Number of violations: " << numViolations << std::endl;
-	ASSERT(numViolations == 0 && "Bad starting point");
+	ASSERT((!Strict || numViolations == 0) && "Bad starting point");
 	DEBUG_END;
 }
 
@@ -467,6 +486,20 @@ void shortenEdges(std::vector<Vector_3> &points)
 		points[2 * i] = A + (B - A) * relativeShift;
 		points[2 * i + 1] = B + (A - B) * relativeShift;
 	}
+	DEBUG_END;
+}
+
+void printFixedTopology(FixedTopology *FT)
+{
+	DEBUG_START;
+	std::cout << "FT->tangient:" << std::endl;
+	printSetVector(FT->tangient);
+	std::cout << "FT->incident:" << std::endl;
+	printSetVector(FT->incident);
+	std::cout << "FT->influent:" << std::endl;
+	printSetVector(FT->influent);
+	std::cout << "FT->neighbors:" << std::endl;
+	printSetVector(FT->neighbors);
 	DEBUG_END;
 }
 
@@ -491,9 +524,13 @@ Polyhedron_3 EdgeCorrector::run()
 	std::map<int, int> map;
 	FixedTopology *FT = buildTopology(initialP, mainEdges, u, U, points, h,
 			H, map);
-	if (getenv("CHECK_STARTING_POINT"))
-		checkConsistencyConstraints(u, h, U, H, points, FT);
 	shortenEdges(points);
+	if (getenv("CHECK_STARTING_POINT"))
+	{
+		checkConsistencyConstraints(u, h, U, H, points, FT, false);
+		checkConsistencyConstraints(u, h, U, H, points, FT, true);
+	}
+	printFixedTopology(FT);
 	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
 			u, h, U, H, points, FT);
 	FTNLP->enableModeZfixed();
