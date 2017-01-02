@@ -474,7 +474,7 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 	buildInfluents(edges, FT);
 	buildNeighbors(edges, points, FT);
 
-	//shortenEdges(points);
+	shortenEdges(points);
 	if (getenv("CHECK_STARTING_POINT"))
 	{
 		checkConsistencyConstraints(u, h, U, H, points, FT, false);
