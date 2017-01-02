@@ -282,10 +282,9 @@ void printSetVector(std::vector<std::set<int>> &v)
 	DEBUG_END;
 }
 
-FixedTopology *buildTopology(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges, std::vector<Vector_3> &u,
-		std::vector<Vector_3> &U, std::vector<Vector_3> &points,
-		std::vector<double> &h, std::vector<double> &H,
+void buildFacets(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges,
+		std::vector<Vector_3> &U, std::vector<double> &H,
 		std::map<int, int> &indices)
 {
 	DEBUG_START;
@@ -301,13 +300,15 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 		U.push_back(norm);
 		H.push_back(value);
 	}
+	DEBUG_END;
+}
 
-	FixedTopology *FT = new FixedTopology();
-	FT->tangient.resize(2 * edges.size());
-	FT->incident.resize(planes.size());
-	FT->influent.resize(planes.size());
-	FT->neighbors.resize(2 * edges.size());
-
+void buildMainTopology(std::vector<SimpleEdge_3> &edges,
+		std::vector<Vector_3> &u,
+		std::vector<double> &h, std::vector<Vector_3> &points,
+		FixedTopology *FT)
+{
+	DEBUG_START;
 	unsigned iTangient = 0;
 	for (unsigned i = 0; i < edges.size(); ++i)
 	{
@@ -333,7 +334,12 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 		points.push_back(edges[i].B);
 	}
 	ASSERT(iTangient > 0);
+	DEBUG_END;
+}
 
+void buildInfluents(std::vector<SimpleEdge_3> &edges, FixedTopology *FT)
+{
+	DEBUG_START;
 	for (unsigned i = 0; i < edges.size(); ++i)
 	{
 		ASSERT(edges[i].iForward != edges[i].iBackward);
@@ -354,7 +360,13 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 				FT->influent[iForward].insert(j);
 		}
 	}
+	DEBUG_END;
+}
 
+void buildNeighbors(std::vector<SimpleEdge_3> &edges,
+		std::vector<Vector_3> points, FixedTopology *FT)
+{
+	DEBUG_START;
 	for (unsigned i = 0; i < points.size(); ++i)
 	{
 		unsigned iOpposite = i % 2 ? i - 1 : i + 1;
@@ -375,6 +387,27 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 			}
 		}
 	}
+	DEBUG_END;
+}
+
+FixedTopology *buildTopology(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges, std::vector<Vector_3> &u,
+		std::vector<Vector_3> &U, std::vector<Vector_3> &points,
+		std::vector<double> &h, std::vector<double> &H,
+		std::map<int, int> &indices)
+{
+	DEBUG_START;
+	buildFacets(polyhedron, edges, U, H, indices);
+
+	FixedTopology *FT = new FixedTopology();
+	FT->tangient.resize(2 * edges.size());
+	FT->incident.resize(U.size());
+	FT->influent.resize(U.size());
+	FT->neighbors.resize(2 * edges.size());
+
+	buildMainTopology(edges, u, h, points, FT);
+	buildInfluents(edges, FT);
+	buildNeighbors(edges, points, FT);
 
 	std::cout << "FT->tangient:" << std::endl;
 	printSetVector(FT->tangient);
