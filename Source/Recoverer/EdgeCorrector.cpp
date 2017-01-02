@@ -356,60 +356,6 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 	DEBUG_END;
 }
 
-FixedTopology *buildTopology(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges, std::vector<Vector_3> &u,
-		std::vector<Vector_3> &U, std::vector<Vector_3> &points,
-		std::vector<double> &h, std::vector<double> &H,
-		std::map<int, int> &indices)
-{
-	DEBUG_START;
-	buildFacets(polyhedron, edges, U, H, indices);
-
-	FixedTopology *FT = new FixedTopology();
-	FT->tangient.resize(2 * edges.size());
-	FT->incident.resize(U.size());
-	FT->influent.resize(U.size());
-	FT->neighbors.resize(2 * edges.size());
-
-	buildMainTopology(edges, u, h, points, FT);
-	buildInfluents(edges, FT);
-	buildNeighbors(edges, points, FT);
-
-	DEBUG_END;
-	return FT;
-}
-
-Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
-		IpoptTopologicalCorrector *FTNLP)
-{
-	DEBUG_START;
-	std::vector<Vector_3> directions = FTNLP->getDirections();
-	std::vector<double> values = FTNLP->getValues();
-	std::vector<Plane_3> planes(initialP.size_of_facets());
-	unsigned iFacet = 0;
-	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
-			I != E; ++I)
-	{
-		auto it = map.find(iFacet);
-		if (it != map.end())
-		{
-			int i = it->second;
-			planes[iFacet] = Plane_3(-directions[i].x(),
-					-directions[i].y(), -directions[i].z(),
-					values[i]);
-		}
-		else
-		{
-			planes[iFacet] = I->plane();
-		}
-		++iFacet;
-	}
-
-	Polyhedron_3 intersection(planes);
-	DEBUG_END;
-	return intersection;
-}
-
 void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 		std::vector<Vector_3> U, std::vector<double> H,
 		std::vector<Vector_3> points, FixedTopology *FT,
@@ -461,12 +407,14 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 			ASSERT(tangients.find(j) == tangients.end());
 		}
 
+#if 0
 		for (int l : falseNeighbors)
 		{
 			ASSERT(neighbors.find(l) != neighbors.end());
 			neighbors.erase(l);
 			ASSERT(neighbors.find(l) == neighbors.end());
 		}
+#endif
 	}
 	std::cout << "Number of violations: " << numViolations << std::endl;
 	ASSERT((!Strict || numViolations == 0) && "Bad starting point");
@@ -503,6 +451,67 @@ void printFixedTopology(FixedTopology *FT)
 	DEBUG_END;
 }
 
+FixedTopology *buildTopology(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges, std::vector<Vector_3> &u,
+		std::vector<Vector_3> &U, std::vector<Vector_3> &points,
+		std::vector<double> &h, std::vector<double> &H,
+		std::map<int, int> &indices)
+{
+	DEBUG_START;
+	buildFacets(polyhedron, edges, U, H, indices);
+
+	FixedTopology *FT = new FixedTopology();
+	FT->tangient.resize(2 * edges.size());
+	FT->incident.resize(U.size());
+	FT->influent.resize(U.size());
+	FT->neighbors.resize(2 * edges.size());
+
+	buildMainTopology(edges, u, h, points, FT);
+	buildInfluents(edges, FT);
+	buildNeighbors(edges, points, FT);
+
+	shortenEdges(points);
+	if (getenv("CHECK_STARTING_POINT"))
+	{
+		checkConsistencyConstraints(u, h, U, H, points, FT, false);
+		checkConsistencyConstraints(u, h, U, H, points, FT, true);
+	}
+	printFixedTopology(FT);
+	DEBUG_END;
+	return FT;
+}
+
+Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
+		IpoptTopologicalCorrector *FTNLP)
+{
+	DEBUG_START;
+	std::vector<Vector_3> directions = FTNLP->getDirections();
+	std::vector<double> values = FTNLP->getValues();
+	std::vector<Plane_3> planes(initialP.size_of_facets());
+	unsigned iFacet = 0;
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
+			I != E; ++I)
+	{
+		auto it = map.find(iFacet);
+		if (it != map.end())
+		{
+			int i = it->second;
+			planes[iFacet] = Plane_3(-directions[i].x(),
+					-directions[i].y(), -directions[i].z(),
+					values[i]);
+		}
+		else
+		{
+			planes[iFacet] = I->plane();
+		}
+		++iFacet;
+	}
+
+	Polyhedron_3 intersection(planes);
+	DEBUG_END;
+	return intersection;
+}
+
 Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
@@ -524,13 +533,6 @@ Polyhedron_3 EdgeCorrector::run()
 	std::map<int, int> map;
 	FixedTopology *FT = buildTopology(initialP, mainEdges, u, U, points, h,
 			H, map);
-	shortenEdges(points);
-	if (getenv("CHECK_STARTING_POINT"))
-	{
-		checkConsistencyConstraints(u, h, U, H, points, FT, false);
-		checkConsistencyConstraints(u, h, U, H, points, FT, true);
-	}
-	printFixedTopology(FT);
 	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
 			u, h, U, H, points, FT);
 	FTNLP->enableModeZfixed();
