@@ -400,18 +400,22 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 				falseTangients.insert(j);
 		}
 
+#if 0
 		for (int j : falseTangients)
 		{
 			ASSERT(tangients.find(j) != tangients.end());
 			tangients.erase(j);
+			FT->tangient[i % 2 ? i - 1 : i + 1].erase(j);
 			ASSERT(tangients.find(j) == tangients.end());
 		}
+#endif
 
-#if 0
+#if 1
 		for (int l : falseNeighbors)
 		{
 			ASSERT(neighbors.find(l) != neighbors.end());
 			neighbors.erase(l);
+			FT->neighbors[i % 2 ? i - 1 : i + 1].erase(l);
 			ASSERT(neighbors.find(l) == neighbors.end());
 		}
 #endif
@@ -470,7 +474,7 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 	buildInfluents(edges, FT);
 	buildNeighbors(edges, points, FT);
 
-	shortenEdges(points);
+	//shortenEdges(points);
 	if (getenv("CHECK_STARTING_POINT"))
 	{
 		checkConsistencyConstraints(u, h, U, H, points, FT, false);
