@@ -86,29 +86,45 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 	for (unsigned i = 0; i < numItems; ++i)
 	{
 		Vector_3 u = directions[i];
+		Vector_3 u_xy(u.x(), u.y(), 0.);
+		Vector_3 u_z(0., 0., u.z());
 
 		double productMax = 0.;
 		unsigned jBestPair = edges.size();
 		unsigned jBest = edges.size();
 		double productMaxPair = 0.;
+		unsigned jBestDir = edges.size();
+		double productMaxDir = 0.;
 		
 		for (unsigned j = 0; j < edges.size(); ++j)
 		{
-			double productPair = edges[j].A * u + edges[j].B * u;
+			Vector_3 A = edges[j].A;
+			Vector_3 B = edges[j].B;
+			Vector_3 prA = (A * u_xy) * u_xy + (A * u_z) * u_z;
+			Vector_3 prB = (B * u_xy) * u_xy + (B * u_z) * u_z;
+			Vector_3 P = (prA - prB) % u;
+			double productDir = P.squared_length();
+			double productPair = A * u + B * u;
+
 			if (productPair > productMaxPair)
 			{
 				productMaxPair = productPair;
 				jBestPair = j;
 			}	
-			if (edges[j].A * u > productMax)
+			if (A * u > productMax)
 			{
-				productMax = edges[j].A * u;
+				productMax = A * u;
 				jBest = j;
 			}
-			if (edges[j].B * u > productMax)
+			if (B * u > productMax)
 			{
-				productMax = edges[j].B * u;
+				productMax = B * u;
 				jBest = j;
+			}
+			if (productDir > productMaxDir)
+			{
+				productMaxDir = productDir;
+				jBestDir = j;
 			}
 		}
 
@@ -124,8 +140,7 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 		}
 #endif
 		ASSERT(jBestPair != edges.size() && "Failed to find best edge");
-		if (safe && jBest == jBestPair &&
-				sqrt(productMaxPair - 2. * values(i)) < 1e-1)
+		if (safe && jBest == jBestPair && jBest == jBestDir)
 			edges[jBestPair].tangients.push_back(planes[i]);
 	}
 
