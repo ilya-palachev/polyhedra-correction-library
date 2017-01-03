@@ -333,16 +333,22 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 		std::vector<Vector_3> points, FixedTopology *FT)
 {
 	DEBUG_START;
+	unsigned numOppositeEqual = 0;
 	for (unsigned i = 0; i < points.size(); ++i)
 	{
-		unsigned iOpposite = i % 2 ? i - 1 : i + 1;
 		Vector_3 A = points[i];
+		unsigned iOpposite = i % 2 ? i - 1 : i + 1;
+		Vector_3 Aop = points[iOpposite];
 		for (unsigned j = 0; j < points.size(); ++j)
 		{
-			if (i == j)
+			if (i == j || iOpposite == j)
 				continue;
-			unsigned jOpposite = j % 2 ? j - 1 : j + 1;
 			Vector_3 B = points[j];
+			unsigned jOpposite = j % 2 ? j - 1 : j + 1;
+			ASSERT(iOpposite != jOpposite);
+			ASSERT(iOpposite != j);
+			ASSERT(i != jOpposite);
+			Vector_3 Bop = points[jOpposite];
 			double distance = (A - B).squared_length();
 			if (distance < 1e-16)
 			{
@@ -350,9 +356,20 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 				FT->neighbors[i].insert(jOpposite);
 				FT->neighbors[j].insert(iOpposite);
 				FT->neighbors[j].insert(jOpposite);
+				double distanceOp =
+					(Aop - Bop).squared_length();
+				if (distanceOp < 1e-16)
+				{
+					std::cout << "Opposite are equal: "
+						<< distanceOp << std::endl;
+					++numOppositeEqual;
+				}
 			}
 		}
 	}
+	std::cout << "Number of equal opposites: " << numOppositeEqual
+		<< std::endl;
+	ASSERT(numOppositeEqual == 0 && "To small distance...");
 	DEBUG_END;
 }
 
@@ -410,7 +427,7 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 		}
 #endif
 
-#if 1
+#if 0
 		for (int l : falseNeighbors)
 		{
 			ASSERT(neighbors.find(l) != neighbors.end());
