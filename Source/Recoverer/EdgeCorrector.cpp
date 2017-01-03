@@ -352,10 +352,8 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 			double distance = (A - B).squared_length();
 			if (distance < 1e-16)
 			{
-				FT->neighbors[i].insert(iOpposite);
 				FT->neighbors[i].insert(jOpposite);
 				FT->neighbors[j].insert(iOpposite);
-				FT->neighbors[j].insert(jOpposite);
 				double distanceOp =
 					(Aop - Bop).squared_length();
 				if (distanceOp < 1e-16)
@@ -381,6 +379,7 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 	DEBUG_START;
 	std::cout << "Checking consistency constraints..." << std::endl;
 	unsigned numViolations = 0;
+	unsigned numConsistencyConstraints = 0;
 	for (unsigned i = 0; i < points.size(); ++i)
 	{
 		std::set<int> &tangients = FT->tangient[i];
@@ -392,6 +391,7 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 			bool violationFound = false;
 			for (int k : neighbors)
 			{
+				++numConsistencyConstraints;
 				double value = u[j] * (points[i] - points[k]);
 
 				if (value < 0.)
@@ -437,7 +437,9 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 		}
 #endif
 	}
-	std::cout << "Number of violations: " << numViolations << std::endl;
+	std::cout << "Number of violations: " << numViolations << " from "
+		<< numConsistencyConstraints << " consistency constraints..."
+		<< std::endl;
 	ASSERT((!Strict || numViolations == 0) && "Bad starting point");
 	DEBUG_END;
 }
@@ -491,10 +493,10 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 	buildInfluents(edges, FT);
 	buildNeighbors(edges, points, FT);
 
-	shortenEdges(points);
+	//shortenEdges(points);
 	if (getenv("CHECK_STARTING_POINT"))
 	{
-		checkConsistencyConstraints(u, h, U, H, points, FT, false);
+		//checkConsistencyConstraints(u, h, U, H, points, FT, false);
 		checkConsistencyConstraints(u, h, U, H, points, FT, true);
 	}
 	printFixedTopology(FT);
