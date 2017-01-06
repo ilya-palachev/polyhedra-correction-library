@@ -82,7 +82,6 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 	std::vector<Plane_3> planes = data->supportPlanes();
 	VectorXd values = data->supportValues();
 	unsigned numItems = directions.size();
-	unsigned numIssues = 0;
 
 	for (unsigned i = 0; i < numItems; ++i)
 	{
@@ -98,14 +97,9 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 			Vector_3 B = edges[j].B;
 			double product = std::max(A * u, B * u);
 			double productVice = std::min(A * u, B * u);
-			if (product > productMax
-					&& productVice < productMaxVice)
-			{
-				++numIssues;
-			}
-
 			if (product >= productMax
-					&& productVice >= productMaxVice)
+				|| (product == productMax
+					&& productVice >= productMaxVice))
 			{
 				productMax = product;
 				productMaxVice = productVice;
@@ -136,9 +130,6 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 		<< std::endl;
 	std::cout << "Number of non-associated edges: " << numNonAssociatedEdges
 		<< std::endl;
-	std::cout << "Number of issues with association: " << numIssues
-		<< std::endl;
-	ASSERT(numIssues == 0);
 
 	DEBUG_END;
 }
@@ -289,11 +280,10 @@ void buildMainTopology(std::vector<SimpleEdge_3> &edges,
 	unsigned iTangient = 0;
 	for (unsigned i = 0; i < edges.size(); ++i)
 	{
+		Vector_3 A = edges[i].A;
+		Vector_3 B = edges[i].B;
 		for (const Plane_3 plane : edges[i].tangients)
 		{
-			FT->tangient[2 * i].insert(iTangient);
-			FT->tangient[2 * i + 1].insert(iTangient);
-			++iTangient;
 			Vector_3 norm = plane.orthogonal_vector();
 			double length = sqrt(norm.squared_length());
 			norm = norm * (1. / length);
@@ -301,14 +291,20 @@ void buildMainTopology(std::vector<SimpleEdge_3> &edges,
 			ASSERT(value > 0.);
 			u.push_back(norm);
 			h.push_back(value);
+
+			if (norm * A > norm * B)
+				FT->tangient[2 * i].insert(iTangient);
+			else
+				FT->tangient[2 * i + 1].insert(iTangient);
+			++iTangient;
 		}
 
 		FT->incident[edges[i].iForward].insert(2 * i);
 		FT->incident[edges[i].iForward].insert(2 * i + 1);
 		FT->incident[edges[i].iBackward].insert(2 * i);
 		FT->incident[edges[i].iBackward].insert(2 * i + 1);
-		points.push_back(edges[i].A);
-		points.push_back(edges[i].B);
+		points.push_back(A);
+		points.push_back(B);
 	}
 	ASSERT(iTangient > 0);
 	DEBUG_END;
@@ -581,7 +577,8 @@ Polyhedron_3 EdgeCorrector::run()
 		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
 
 	/* Ask Ipopt to solve the problem */
-	if (app->OptimizeTNLP(FTNLP) != Solve_Succeeded)
+	auto status = app->OptimizeTNLP(FTNLP);
+	if (status != Solve_Succeeded && status != Solved_To_Acceptable_Level)
 	{
 		MAIN_PRINT("** The problem FAILED!");
 		DEBUG_END;
