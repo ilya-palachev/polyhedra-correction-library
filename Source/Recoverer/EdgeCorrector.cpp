@@ -82,6 +82,7 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 	std::vector<Plane_3> planes = data->supportPlanes();
 	VectorXd values = data->supportValues();
 	unsigned numItems = directions.size();
+	unsigned numIssues = 0;
 
 	for (unsigned i = 0; i < numItems; ++i)
 	{
@@ -97,6 +98,12 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 			Vector_3 B = edges[j].B;
 			double product = std::max(A * u, B * u);
 			double productVice = std::min(A * u, B * u);
+			if (product > productMax
+					&& productVice < productMaxVice)
+			{
+				++numIssues;
+			}
+
 			if (product >= productMax
 					&& productVice >= productMaxVice)
 			{
@@ -129,6 +136,10 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 		<< std::endl;
 	std::cout << "Number of non-associated edges: " << numNonAssociatedEdges
 		<< std::endl;
+	std::cout << "Number of issues with association: " << numIssues
+		<< std::endl;
+	ASSERT(numIssues == 0);
+
 	DEBUG_END;
 }
 
