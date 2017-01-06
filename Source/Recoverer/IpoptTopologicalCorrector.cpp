@@ -703,6 +703,7 @@ void IpoptTopologicalCorrector::finalize_solution(SolverReturn status, Index n,
 		break;
 	case STOP_AT_ACCEPTABLE_POINT:
 		MAIN_PRINT("STOP_AT_ACCEPTABLE_POINT");
+		getVariables(x);
 		break;
 	case LOCAL_INFEASIBILITY:
 		MAIN_PRINT("LOCAL_INFEASIBILITY");
