@@ -334,6 +334,7 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 {
 	DEBUG_START;
 	unsigned numOppositeEqual = 0;
+	bool allNeighbors = (getenv("ALL_NEIGHBORS") != nullptr);
 	for (unsigned i = 0; i < points.size(); ++i)
 	{
 		Vector_3 A = points[i];
@@ -350,18 +351,24 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 			ASSERT(i != jOpposite);
 			Vector_3 Bop = points[jOpposite];
 			double distance = (A - B).squared_length();
-			if (distance < 1e-16)
+			double distanceOp =
+				(Aop - Bop).squared_length();
+			if (!allNeighbors && distance < 1e-16)
 			{
 				FT->neighbors[i].insert(jOpposite);
 				FT->neighbors[j].insert(iOpposite);
-				double distanceOp =
-					(Aop - Bop).squared_length();
-				if (distanceOp < 1e-16)
-				{
-					std::cout << "Opposite are equal: "
-						<< distanceOp << std::endl;
-					++numOppositeEqual;
-				}
+			}
+
+			if (allNeighbors && distance > 1e-16)
+			{
+				FT->neighbors[i].insert(j);
+			}
+
+			if (distance < 1e-16 && distanceOp < 1e-16)
+			{
+				std::cout << "Opposite are equal: "
+					<< distanceOp << std::endl;
+				++numOppositeEqual;
 			}
 		}
 	}
@@ -416,26 +423,6 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 			if (violationFound)
 				falseTangients.insert(j);
 		}
-
-#if 0
-		for (int j : falseTangients)
-		{
-			ASSERT(tangients.find(j) != tangients.end());
-			tangients.erase(j);
-			FT->tangient[i % 2 ? i - 1 : i + 1].erase(j);
-			ASSERT(tangients.find(j) == tangients.end());
-		}
-#endif
-
-#if 0
-		for (int l : falseNeighbors)
-		{
-			ASSERT(neighbors.find(l) != neighbors.end());
-			neighbors.erase(l);
-			FT->neighbors[i % 2 ? i - 1 : i + 1].erase(l);
-			ASSERT(neighbors.find(l) == neighbors.end());
-		}
-#endif
 	}
 	std::cout << "Number of violations: " << numViolations << " from "
 		<< numConsistencyConstraints << " consistency constraints..."
@@ -519,9 +506,12 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 		if (it != map.end())
 		{
 			int i = it->second;
-			planes[iFacet] = Plane_3(-directions[i].x(),
-					-directions[i].y(), -directions[i].z(),
-					values[i]);
+			Vector_3 u = directions[i];
+			double h = values[i];
+			planes[iFacet] = Plane_3(-u.x(), -u.y(), -u.z(), h);
+			std::cout << "Changing plane #" << iFacet << ": "
+				<< I->plane() << " |--> " << planes[iFacet]
+				<< std::endl;
 		}
 		else
 		{
