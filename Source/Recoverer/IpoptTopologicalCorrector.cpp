@@ -224,7 +224,7 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 }
 
 void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
-		double *x)
+		const double *x)
 {
 	DEBUG_START;
 	double *g = new double[m];
@@ -234,7 +234,7 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 	double *x_u = new double[n];
 	eval_g(n, x, false, m, g);
 	get_bounds_info(n, x_l, x_u, m, g_l, g_u);
-	const double tol = 1e-10;
+	const double tol = 1e-6;
 	unsigned numViolations = 0;
 	for (unsigned i = 0; i < unsigned(m); ++i)
 		if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
@@ -686,11 +686,32 @@ void IpoptTopologicalCorrector::finalize_solution(SolverReturn status, Index n,
 		IpoptCalculatedQuantities *ip_cq)
 {
 	DEBUG_START;
+	getVariables(x);
+	checkStartingPoint(n, m, x);
+
+	std::cout << "========== finalize_solution ==========" << std::endl;
+	for (unsigned i = 0; i < pointsInitial.size(); ++i)
+	{
+		std::cout << "Changing point #" << i << ": "
+			<< pointsInitial[i] << " |--> " << points[i]
+			<< std::endl;
+	}
+	
+	for (unsigned i = 0; i < U.size(); ++i)
+	{
+		Plane_3 planeInitial(U[i].x(), U[i].y(), U[i].z(), -H[i]);
+		Plane_3 plane(directions[i].x(), directions[i].y(),
+				directions[i].z(), -values[i]);
+		std::cout << "Changing plane #" << i << ": "
+			<< planeInitial << " |--> " << plane << std::endl;
+	}
+
+	std::cout << "========== end ==========" << std::endl;
+
 	switch (status)
 	{
 	case SUCCESS:
 		MAIN_PRINT("SUCCESS");
-		getVariables(x);
 		break;
 	case MAXITER_EXCEEDED:
 		MAIN_PRINT("MAXITER_EXCEEDED");
@@ -703,7 +724,6 @@ void IpoptTopologicalCorrector::finalize_solution(SolverReturn status, Index n,
 		break;
 	case STOP_AT_ACCEPTABLE_POINT:
 		MAIN_PRINT("STOP_AT_ACCEPTABLE_POINT");
-		getVariables(x);
 		break;
 	case LOCAL_INFEASIBILITY:
 		MAIN_PRINT("LOCAL_INFEASIBILITY");

@@ -107,7 +107,7 @@ class IpoptTopologicalCorrector : public TNLP
 	/** Whether the Z coordinates are fixed during the optimization. */
 	bool modeZfixed;
 
-	void checkStartingPoint(int n, int m, double *x);
+	void checkStartingPoint(int n, int m, const double *x);
 
 public:
 	/** Simple by-value constructor. */
