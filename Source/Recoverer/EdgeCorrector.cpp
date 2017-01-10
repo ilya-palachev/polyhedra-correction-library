@@ -515,6 +515,7 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 			int i = it->second;
 			Vector_3 u = directions[i];
 			double h = values[i];
+			ASSERT(h > 0);
 			planes[iFacet] = Plane_3(-u.x(), -u.y(), -u.z(), h);
 			std::cout << "Changing plane #" << iFacet << ": "
 				<< I->plane() << " |--> " << planes[iFacet]
@@ -528,6 +529,11 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 	}
 
 	Polyhedron_3 intersection(planes);
+	std::cout << "Change in facets number: " << initialP.size_of_facets()
+		<< " -> " << intersection.size_of_facets() << std::endl;
+	ASSERT(initialP.size_of_facets() - intersection.size_of_facets()
+			< map.size() &&
+			"It seems that all extracted facets have gone");
 	DEBUG_END;
 	return intersection;
 }
