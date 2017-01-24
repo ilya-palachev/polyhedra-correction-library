@@ -172,6 +172,10 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 	unsigned numCriticalNonAssociatedEdges = 0;
 	const double CRITICAL_LENGTH = 1.; // FIXME: hardcoded constant...
 	double lengthMax = 0.;
+
+	std::vector<Plane_3> allTangients;
+	std::vector<std::vector<int>> clusters;
+	int iPlaneCurrent = 0;
 	for (auto &i : halfedgesMap)
 	{
 		assert(i.second != UNINITIALIZED_MAP_VALUE);
@@ -186,7 +190,19 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 			if (length > lengthMax)
 				lengthMax = length;
 		}
+		else
+		{
+			std::vector<int> cluster;
+			for (const Plane_3 &plane : edge.tangients)
+			{
+				allTangients.push_back(plane);
+				cluster.push_back(iPlaneCurrent++);
+			}
+			clusters.push_back(cluster);
+		}
 	}
+	printColouredIntersection(allTangients, clusters,
+			"tangient-clusters.ply");
 
 	std::cout << "Number of extracted non-associated edges: "
 		<< numNonAssociatedEdges << std::endl;
