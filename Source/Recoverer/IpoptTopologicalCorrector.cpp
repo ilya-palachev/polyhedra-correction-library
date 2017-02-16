@@ -184,6 +184,12 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 			x_l[iCurr] = x_u[iCurr] = v.z();
 			++iPoint;
 		}
+
+		for (unsigned i = 0; i < U.size(); ++i)
+		{
+			int iCurr = pointsInitial.size() * 3 + 4 * i + 3;
+			x_l[iCurr] = 0.;
+		}
 	}
 
 	unsigned iCond = 0;
@@ -268,7 +274,31 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 				<< " not in [" << x_l[i] << ", "
 				<< x_u[i] << "] -- it is ";
 			if (i >= pointsInitial.size())
-				ASSERT(0 && "Impossible happened");
+			{
+				unsigned ii = i - 3 * pointsInitial.size();
+				unsigned iPlane = ii / 4;
+				unsigned iCoord = ii % 4;
+				switch (iCoord)
+				{
+				case 0:
+					std::cout << "a";
+					break;
+				case 1:
+					std::cout << "b";
+					break;
+				case 2:
+					std::cout << "c";
+					break;
+				case 3:
+					std::cout << "d";
+					break;
+				default:
+					ASSERT(0 && "Impossible happened");
+					break;
+				}
+				std::cout << "-violation in " << iPlane
+					<< "-th plane" << std::endl;
+			}
 			else
 			{
 				unsigned iPoint = i / 3;

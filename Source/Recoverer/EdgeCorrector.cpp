@@ -33,6 +33,8 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "IpoptTopologicalCorrector.h"
 
+#define UNINITIALIZED_MAP_VALUE -1
+
 EdgeCorrector::EdgeCorrector(Polyhedron_3 initialP,
 		SupportFunctionDataPtr SData) :
 	initialP(initialP), SData(SData)
@@ -41,7 +43,8 @@ EdgeCorrector::EdgeCorrector(Polyhedron_3 initialP,
 	DEBUG_END;
 }
 
-static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P)
+static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P,
+		std::map<int, int> &map)
 {
 	DEBUG_START;
 	std::vector<bool> visited(P.size_of_halfedges());
@@ -53,6 +56,10 @@ static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P)
 	std::vector<SimpleEdge_3> edges;
 	P.initialize_indices();
 	CGAL::Origin origin;
+
+	for (auto &i : map)
+		i.second = UNINITIALIZED_MAP_VALUE;
+
 	for (auto I = P.halfedges_begin(), E = P.halfedges_end(); I != E; ++I)
 	{
 		if (visited[I->id])
@@ -64,6 +71,7 @@ static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P)
 		edge.iBackward = I->opposite()->facet()->id;
 		// FIXME: Remember indices of planes, not planes themselves,
 		// and fix structure for this.
+		map[I->id] = map[I->opposite()->id] = edges.size();
 		edges.push_back(edge);
 		visited[I->id] = visited[I->opposite()->id] = true;
 	}
@@ -134,6 +142,78 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 	DEBUG_END;
 }
 
+static void printAssociatedEdges(Polyhedron_3 polyhedron,
+		std::vector<SimpleEdge_3> &edges,
+		std::map<int, int> &halfedgesMap)
+{
+	Colour red;
+	red.red = 255; red.green = 0; red.blue = 0;
+
+	unsigned numColouredHalfedges = 0;
+	for (auto &i : halfedgesMap)
+	{
+		assert(i.second != uninitialized_map_value);
+		if (!edges[i.second].tangients.empty())
+		{
+			polyhedron.halfedgeColours[i.first] = red;
+			++numColouredHalfedges;
+		}
+	}
+	std::cout << "The number of coloured halfedges: "
+		<< numColouredHalfedges << std::endl;
+	
+	polyhedron.whetherPrintEdgeColouringFacets = true;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"edge-corrector-associated-edges-coloured.ply")
+		<< polyhedron;
+	polyhedron.whetherPrintEdgeColouringFacets = false;
+
+	unsigned numNonAssociatedEdges = 0;
+	unsigned numCriticalNonAssociatedEdges = 0;
+	const double CRITICAL_LENGTH = 1.; // FIXME: hardcoded constant...
+	double lengthMax = 0.;
+
+	std::vector<Plane_3> allTangients;
+	std::vector<std::vector<int>> clusters;
+	int iPlaneCurrent = 0;
+	for (auto &i : halfedgesMap)
+	{
+		assert(i.second != UNINITIALIZED_MAP_VALUE);
+		SimpleEdge_3 edge = edges[i.second];
+		if (edge.tangients.empty())
+		{
+			++numNonAssociatedEdges;
+			double length = sqrt((edge.A
+						- edge.B).squared_length());
+			if (length >= CRITICAL_LENGTH)
+				++numCriticalNonAssociatedEdges;
+			if (length > lengthMax)
+				lengthMax = length;
+		}
+		else
+		{
+			std::vector<int> cluster;
+			for (const Plane_3 &plane : edge.tangients)
+			{
+				allTangients.push_back(plane);
+				cluster.push_back(iPlaneCurrent++);
+			}
+			clusters.push_back(cluster);
+		}
+	}
+	printColouredIntersection(allTangients, clusters,
+			"tangient-clusters.ply");
+
+	std::cout << "Number of extracted non-associated edges: "
+		<< numNonAssociatedEdges << std::endl;
+	std::cout << "Number of critical extracted non-associated edges: "
+		<< numCriticalNonAssociatedEdges << std::endl;
+	std::cout << "Maximal edge length for critical non-associated edges: "
+		<< lengthMax << std::endl;
+	ASSERT(numCriticalNonAssociatedEdges == 0
+			&& "Some critical edges have no tangients!");
+}
+
 std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 {
 	DEBUG_START;
@@ -148,6 +228,7 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 	std::cout << "Z lower: " << zLower << std::endl;
 	std::cout << "Z upper: " << zUpper << std::endl;
 	double zMin = 1e10, zMax = 0.;
+	unsigned numAssociated = 0;
 	for (const SimpleEdge_3 &edge: edges)
 	{
 		double zA = edge.A.z();
@@ -160,11 +241,15 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 				|| (zB >= zLower && zB <= zUpper))
 		{
 			extractedEdges.push_back(edge);
+			if (edge.tangients.size() > 0)
+				++numAssociated;
 		}
 	}
 	std::cout << "Z minimal: " << zMin << std::endl;
 	std::cout << "Z maximal: " << zMax << std::endl;
 
+	std::cout << "From " << extractedEdges.size() << " extracted edges "
+		<< numAssociated << " have tangients" << std::endl;
 
 	DEBUG_END;
 	return extractedEdges;
@@ -192,7 +277,6 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 {
 	DEBUG_START;
 	std::vector<Plane_3> planes;
-#define UNINITIALIZED_MAP_VALUE -1
 	for (const SimpleEdge_3 &edge : edges)
 	{
 		indices.insert(std::pair<int, int>(edge.iForward,
@@ -200,7 +284,6 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 		indices.insert(std::pair<int, int>(edge.iBackward,
 					UNINITIALIZED_MAP_VALUE));
 	}
-#undef UNINITIALIZED_MAP_VALUE
 
 	int i = 0;
 	for (auto &pair : indices)
@@ -515,6 +598,7 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 			int i = it->second;
 			Vector_3 u = directions[i];
 			double h = values[i];
+			ASSERT(h > 0);
 			planes[iFacet] = Plane_3(-u.x(), -u.y(), -u.z(), h);
 			std::cout << "Changing plane #" << iFacet << ": "
 				<< I->plane() << " |--> " << planes[iFacet]
@@ -528,6 +612,11 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 	}
 
 	Polyhedron_3 intersection(planes);
+	std::cout << "Change in facets number: " << initialP.size_of_facets()
+		<< " -> " << intersection.size_of_facets() << std::endl;
+	ASSERT(initialP.size_of_facets() - intersection.size_of_facets()
+			< map.size() &&
+			"It seems that all extracted facets have gone");
 	DEBUG_END;
 	return intersection;
 }
@@ -535,8 +624,12 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 Polyhedron_3 EdgeCorrector::run()
 {
 	DEBUG_START;
-	std::vector<SimpleEdge_3> edges = getEdges(initialP);
+	std::map<int, int> halfedgesMap;
+	std::vector<SimpleEdge_3> edges = getEdges(initialP, halfedgesMap);
 	associateEdges(edges, SData);
+
+	printAssociatedEdges(initialP, edges, halfedgesMap);
+
 	std::vector<SimpleEdge_3> mainEdges = extractEdges(edges);
 	std::cout << "Number of extracted edges: " << mainEdges.size()
 		<< std::endl;
@@ -594,3 +687,5 @@ Polyhedron_3 EdgeCorrector::run()
 	DEBUG_END;
 	return correctedP;
 }
+
+#undef UNINITIALIZED_MAP_VALUE
