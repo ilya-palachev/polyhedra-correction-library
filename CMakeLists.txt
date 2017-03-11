@@ -124,7 +124,9 @@ set (SOURCE_pcl
 	Source/Recoverer/GlpkSupportFunctionEstimator.cpp
 	Source/Recoverer/GlpkSFELinearProgramBuilder.cpp
 	Source/Recoverer/NaiveFacetJoiner.cpp
+	Source/Recoverer/NativeEstimatorCommonFunctions.cpp
 	Source/Recoverer/NativeSupportFunctionEstimator.cpp
+	Source/Recoverer/NativeQuadraticEstimator.cpp
 	Source/Recoverer/Recoverer.cpp
 	Source/Recoverer/SupportFunctionEstimator.cpp
 	Source/Recoverer/SupportPolyhedronCorrector.cpp
