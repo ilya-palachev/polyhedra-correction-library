@@ -34,7 +34,7 @@
  * @param p	The plane.
  * @return	The dual point.
  */
-Point_3 dual(Plane_3 p);
+Point_3 dual(const Plane_3 &p);
 
 /**
  * Calculates dual plane for a given point.
@@ -42,6 +42,6 @@ Point_3 dual(Plane_3 p);
  * @param p	The point.
  * @return	The dual plane.
  */
-Plane_3 dual(Point_3 p);
+Plane_3 dual(const Point_3 &p);
 
 #endif /* KERNELCGAL_DUAL_H */

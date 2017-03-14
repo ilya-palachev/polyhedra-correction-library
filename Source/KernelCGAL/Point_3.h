@@ -44,7 +44,7 @@ public:
 	 *
 	 * @param v	The PCL vector.
 	 */
-	Point_3(const Vector3d v): Kernel::Point_3(v.x, v.y, v.z) {}
+	Point_3(const Vector3d &v): Kernel::Point_3(v.x, v.y, v.z) {}
 
 	/**
 	 * Constructs CGAL point from 3 coordinates.
@@ -53,28 +53,22 @@ public:
 	 * @param y	The Y coordinate
 	 * @param z	The Z coordinate
 	 */
-	Point_3(const double x, const double y, const double z):
+	Point_3(double x, double y, double z):
 		Kernel::Point_3(x, y, z) {}
 
 	/**
-	 * Constructs CGAL vector from statement like "a + b" where a is CGAL
-	 * point and b is CGAL vector
+	 * Constructs point from another point.
 	 *
-	 * TODO: It's too dirty hack. We'd avoid it.
-	 *
-	 * @param p	The result of "a + b"
+	 * @param p	The original point
 	 */
-	Point_3(CGAL::Type_equality_wrapper<
-			CGAL::Cartesian_base_no_ref_count<
-				double, CGAL::Epick>,
-				CGAL::Epick>::Point_3 p):
-		Kernel::Point_3(p.x(), p.y(), p.z()) {}
+	Point_3(const Kernel::Point_3 &p):
+		Kernel::Point_3(p) {}
 
 	/**
 	 * Calculates the squared length of the vector with source at the origin
 	 * and with target at the point.
 	 */
-	double squared_length()
+	double squared_length() const
 	{
 		return (*this - CGAL::Origin()).squared_length();
 	}
