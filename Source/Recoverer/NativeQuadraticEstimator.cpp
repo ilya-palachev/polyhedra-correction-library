@@ -22,10 +22,47 @@
  * @file NativeQuadraticEstimator.cpp
  * @brief Native quadratic estimation engine (implementation).
  */
-#include <Eigen/LU>
 #include "NativeQuadraticEstimator.h"
-#include "NativeEstimatorCommonFunctions.h"
-#include <CGAL/intersections.h>
+#include "Recoverer/NativeEstimatorCommonFunctions.h"
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
+#include <CGAL/Triangulation_cell_base_with_info_3.h>
+#include <CGAL/Triangulation_data_structure_3.h>
+
+typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned, Kernel> TVertexBase;
+typedef CGAL::Triangulation_cell_base_with_info_3<std::set<unsigned>, Kernel> TCellBase;
+typedef CGAL::Triangulation_data_structure_3<TVertexBase, TCellBase> TDataStructure;
+typedef CGAL::Delaunay_triangulation_3<Kernel, TDataStructure> TDelaunay_3;
+typedef TDelaunay_3::Vertex_handle Vertex_handle;
+typedef TDelaunay_3::Cell_handle Cell_handle;
+
+class DualPolyhedron_3 : public TDelaunay_3
+{
+private:
+	std::vector<Vector_3> directions;
+	std::vector<Plane_3> planes;
+	std::set<Vertex_handle> outerVertices;
+	std::set<Vertex_handle> innerVertices;
+
+	double calculateProduct(const Vector_3 &direction,
+			const Cell_handle &cell) const;
+
+	void associateVertex(const Vertex_handle &vertex);
+	void initializeVertices();
+public:
+	typedef std::pair<Point_3, unsigned> PointIndexed_3;
+
+	DualPolyhedron_3(const std::vector<Vector_3> &directions,
+			const std::vector<Plane_3> &planes,
+			const std::vector<PointIndexed_3>::iterator &begin,
+			const std::vector<PointIndexed_3>::iterator &end):
+		TDelaunay_3(begin, end),
+		directions(directions),
+		planes(planes)
+	{}
+
+	void initialize();
+};
 
 NativeQuadraticEstimator::NativeQuadraticEstimator(
 		SupportFunctionEstimationDataPtr data) :
@@ -40,172 +77,142 @@ NativeQuadraticEstimator::~NativeQuadraticEstimator()
 	DEBUG_START;
 	DEBUG_END;
 }
-/** Intersects three planes in order to obtain a point. */
-Point_3 intersect(Plane_3 alpha, Plane_3 beta, Plane_3 gamma)
+
+const int NUM_CELL_VERTICES = 4;
+Plane_3 getOppositeFacetPlane(const TDelaunay_3::Cell_handle &cell,
+		const TDelaunay_3::Vertex_handle &vertex)
 {
 	DEBUG_START;
-	/*
-	 * Just for debug (TODO: remove this in release build)
-	 * CGAL intersection sometimes (1%) produces very incorrect
-	 * results, that's why it was decided to calculate intersection with Eigen
-	 * instead.
-	 */
-	auto result = CGAL::intersection(alpha, beta, gamma);
-	ASSERT(result && "Intersection failed");
-	const CGAL::Point_3<CGAL::Epick> *p =
-		boost::get<CGAL::Point_3<CGAL::Epick>>(&*result);
-	ASSERT(!boost::get<CGAL::Line_3<CGAL::Epick>>(&*result)
-			&& "Intersection is a line");
-	ASSERT(!boost::get<CGAL::Plane_3<CGAL::Epick>>(&*result)
-			&& "Intersection is a plane");
-	ASSERT(p && "Intersection is not a point");
-	/* return Point_3(p->x(), p->y(), p->z()); */
-
-	/* The actual intersection starts from here */
-	Eigen::Matrix3d matrix;
-	matrix << alpha.a(), alpha.b(), alpha.c(),
-	       beta.a(), beta.b(), beta.c(),
-	       gamma.a(), gamma.b(), gamma.c();
-	Eigen::Vector3d rightSide(-alpha.d(), -beta.d(), -gamma.d());
-	Eigen::Vector3d solution = matrix.inverse() * rightSide;
+	std::vector<Point_3> points;
+	int iVertex = cell->index(vertex);
+	for (int i = 0; i < NUM_CELL_VERTICES; ++i)
+		if (i != iVertex)
+			points.push_back(cell->vertex(i)->point());
+	Plane_3 plane(points[0], points[1], points[2]);
 	DEBUG_END;
-	return Point_3(solution(0), solution(1), solution(2));
+	return plane;
 }
 
-bool validateTangientPoint(Point_3 tangient, Plane_3 alpha, Plane_3 beta,
-		Plane_3 gamma, Plane_3 outer)
+void DualPolyhedron_3::initializeVertices()
 {
 	DEBUG_START;
-	Point_3 p = intersect(alpha, beta, gamma);
-	Vector_3 normal = outer.orthogonal_vector();
-	double value = normal * (tangient - CGAL::Origin());
-	double valueSame =  normal * (p - CGAL::Origin());
-	double difference = fabs(value - valueSame);
-	if (difference >= 1e-9)
+	for (auto I = finite_vertices_begin(), E = finite_vertices_end();
+			I != E; ++I)
 	{
-		std::cerr << p << std::endl;
-		std::cerr << "difference: " << difference << std::endl;
-		std::cerr << "value: " << value << std::endl;
-		std::cerr << "value: " << valueSame << std::endl;
-		std::cerr << "   alpha * p = " <<
-			alpha.orthogonal_vector() *
-			(p - CGAL::Origin()) + alpha.d()
-			<< std::endl;
-		std::cerr << "   beta * p = " <<
-			beta.orthogonal_vector() *
-			(p - CGAL::Origin()) + beta.d()
-			<< std::endl;
-		std::cerr << "   gamma * p = " <<
-			gamma.orthogonal_vector() *
-			(p - CGAL::Origin()) + gamma.d()
-			<< std::endl;
-		DEBUG_END;
-		return false;
+		Vertex_handle vertex = I;
+		Cell_handle unusedCell;
+		int unusedIndex0, unusedIndex1;
+		if (is_edge(vertex, infinite_vertex(), unusedCell, unusedIndex0,
+					unusedIndex1))
+			outerVertices.insert(vertex);
+		else
+			innerVertices.insert(vertex);
 	}
-	DEBUG_END;
-	return true;
-}
-
-struct WorkingState
-{
-	/* Support directions (immutable) */
-	std::vector<Vector_3> directions;
-
-	/* Initial positions of planes */
-	std::vector<Plane_3> planesInitial;
-
-	/* Initial support values */
-	VectorXd valuesInitial;
-
-	/* Current positions of planes */
-	std::vector<Plane_3> planes;
-
-	/* Current support values */
-	VectorXd values;
-
-	/* Current plane, to which we are moving */
-	int iPlane;
-
-	/* IDs of moved planes */
-	std::vector<int> IDs;
-
-	/* IDs of outer planes */
-	std::vector<int> outerIDs;
-
-	/* Current state of polyhedron */
-	Polyhedron_3 polyhedron;
-
-	/* Map from facet IDs to plane IDs */
-	std::vector<int> index;
-}
-
-static void prepareProcess(WorkingState &WS)
-{
-	DEBUG_START;
+	std::cout << "Number of outer vertices: " << outerVertices.size()
+		<< std::endl;
+	std::cout << "Number of inner vertices: " << innerVertices.size()
+		<< std::endl;
+	ASSERT(outerVertices.size() + innerVertices.size() == planes.size()
+		&& "Different numbers of dual vertices and primal planes");
 	DEBUG_END;
 }
 
-static void initState(WorkingState &WS, SupportFunctionEstimationDataPtr data)
+void DualPolyhedron_3::initialize()
 {
 	DEBUG_START;
-	SupportFunctionDataPtr supportData = data->supportData();
-	WS.planes = supportData->supportPlanes();
-	WS.planesInitial = WS.planes;
-	WS.directions = supportData->supportDirections<Vector3d>();
-	WS.values = supportData->supportValues();
-	WS.valuesInitial = WS.values;
+	initializeVertices();
 
-	WS.polyhedon = Polyhedron_3(WS.planes);
-	WS.polyhedron.initialize_indices(WS.planes);
-	WS.index = WS.polyhedron.indexPlanes_;
-	std::cerr << "Intersection contains " << WS.polyhedron.size_of_facets()
-		<< " of " << WS.planes.size() << " planes." << std::endl;
-	DEBUG_END;
-}
+	std::vector<Cell_handle> outerCells;
+	incident_cells(infinite_vertex(), std::back_inserter(outerCells));
+	std::cout << "Number of outer cells: " << outerCells.size()
+		<< std::endl;
 
-static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
-{
-	DEBUG_START;
+	std::vector<Vertex_handle> vertices;
+	for (auto I = finite_vertices_begin(), E = finite_vertices_end();
+			I != E; ++I)
+		associateVertex(I);
 
-	WorkingState WS;
-
-	WS.outerIDs = collectInnerPointsIDs(
-			supportData->getShiftedDualPoints_3(0.));
-	unsigned numDifferent = 0;
-	/* Find the nearest outer plane to the intersection: */
-	/* TODO: Replace this with more safe criterion (e.g. with curvature) */
-	unsigned iNearest = 0;
-	double minDistance = 1e16;
-	for (int &iOuter: outerIndex)
+	if (getenv("INTERNAL_CHECK"))
 	{
-		/* TODO: Re-write all common functions used here */
-		auto pair = intersection.findTangientVertex(directions[iOuter]);
-		auto tangient = pair.first;
-		double value = pair.second;
+		Polyhedron_3 intersection(planes);
+		ASSERT(intersection.size_of_vertices() == outerCells.size()
+			&& "Two methods must produce the same topology");
 
-		/* TODO: It mustn't take pointer to polyhedron! */
-		auto planesIDs = findTangientPointPlanesIDs(&intersection,
-				tangient, index);
-		ASSERT(planesIDs.size() == 3 && "Too high degree of vertex");
-
-		std::vector<int> IDs(planesIDs.begin(), planesIDs.end());
-		numDifferent += !validateTangientPoint(tangient->point(),
-				planes[IDs[0]], planes[IDs[1]], planes[IDs[2]],
-				planes[iOuter]);
-		double distance = values(iOuter) - value;
-		ASSERT(distance > 0 && "Must be outer point");
-		if (distance < minDistance)
+		unsigned numEmptyCells = 0;
+		for (Cell_handle cell : outerCells)
 		{
-			minDistance = distance;
-			iNearest = iOuter;
+			std::cout << "Cell indices: ";
+			for (int iPlane : cell->info())
+				std::cout << iPlane << " ";
+			std::cout << std::endl;
+			numEmptyCells += cell->info().empty();
 		}
+		std::cout << "Number of empty outer cells: " << numEmptyCells
+			<< std::endl;
 	}
-	std::cerr << "Number of different values: " << numDifferent << std::endl;
-	ASSERT(!numDifferent && "Different values were found");
-	std::cout << "Minimal distance: " << minDistance << std::endl;
-	std::cout << "Nearest plane: " << iNearest << std::endl;
+	DEBUG_END;
+}
 
-	auto solution = calculateSolution(supportData, values);
+double DualPolyhedron_3::calculateProduct(const Vector_3 &direction,
+		const Cell_handle &cell) const
+{
+	DEBUG_START;
+	Plane_3 plane = getOppositeFacetPlane(cell,
+			infinite_vertex());
+	Point_3 point = ::dual(plane);
+	double product = direction * (point - CGAL::Origin());
+	DEBUG_END;
+	return product;
+}
+
+void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
+{
+	DEBUG_START;
+	int iPlane = vertex->info();
+	Vector_3 direction = directions[iPlane];
+	Cell_handle bestCell = infinite_cell();
+	Cell_handle nextCell = bestCell;
+	double maxProduct = calculateProduct(direction, bestCell);
+	do
+	{
+		bestCell = nextCell;
+		int infinityIndex = bestCell->index(infinite_vertex());
+		for (int i = 0; i < NUM_CELL_VERTICES; ++i)
+		{
+			if (i == infinityIndex)
+				continue;
+			Cell_handle neighbor = bestCell->neighbor(i);
+			double product = calculateProduct(direction,
+					neighbor);
+			if (product > maxProduct)
+			{
+				nextCell = neighbor;
+				maxProduct = product;
+			}
+		}
+	} while (nextCell != bestCell);
+
+	bestCell->info().insert(iPlane);
+	DEBUG_END;
+}
+
+static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
+{
+	DEBUG_START;
+	auto data = SFEData->supportData();
+	auto planes = data->supportPlanes();
+	auto directions = data->supportDirections<Vector_3>();
+
+	std::vector<DualPolyhedron_3::PointIndexed_3> points;
+	for (unsigned i = 0; i < planes.size(); ++i)
+		points.push_back(std::make_pair(dual(planes[i]), i));
+
+	DualPolyhedron_3 dualP(directions, planes, points.begin(),
+			points.end());
+	dualP.initialize();
+
+	auto values = data->supportValues();
+	auto solution = calculateSolution(data, values);
 	DEBUG_END;
 	return solution;
 }
