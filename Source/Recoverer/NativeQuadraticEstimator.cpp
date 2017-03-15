@@ -44,9 +44,7 @@ private:
 	std::set<Vertex_handle> outerVertices;
 	std::set<Vertex_handle> innerVertices;
 
-	double calculateProduct(const Vector_3 &direction,
-			const Cell_handle &cell) const;
-
+	bool isOuterVertex(const Vertex_handle &vertex) const;
 	void associateVertex(const Vertex_handle &vertex);
 	void initializeVertices();
 public:
@@ -93,6 +91,17 @@ Plane_3 getOppositeFacetPlane(const TDelaunay_3::Cell_handle &cell,
 	return plane;
 }
 
+bool DualPolyhedron_3::isOuterVertex(const Vertex_handle &vertex) const
+{
+	DEBUG_START;
+	Cell_handle unusedCell;
+	int unusedIndex0, unusedIndex1;
+	bool result = is_edge(vertex, infinite_vertex(), unusedCell,
+			unusedIndex0, unusedIndex1);
+	DEBUG_END;
+	return result;
+}
+
 void DualPolyhedron_3::initializeVertices()
 {
 	DEBUG_START;
@@ -100,10 +109,7 @@ void DualPolyhedron_3::initializeVertices()
 			I != E; ++I)
 	{
 		Vertex_handle vertex = I;
-		Cell_handle unusedCell;
-		int unusedIndex0, unusedIndex1;
-		if (is_edge(vertex, infinite_vertex(), unusedCell, unusedIndex0,
-					unusedIndex1))
+		if (isOuterVertex(vertex))
 			outerVertices.insert(vertex);
 		else
 			innerVertices.insert(vertex);
@@ -122,11 +128,6 @@ void DualPolyhedron_3::initialize()
 	DEBUG_START;
 	initializeVertices();
 
-	std::vector<Cell_handle> outerCells;
-	incident_cells(infinite_vertex(), std::back_inserter(outerCells));
-	std::cout << "Number of outer cells: " << outerCells.size()
-		<< std::endl;
-
 	std::vector<Vertex_handle> vertices;
 	for (auto I = finite_vertices_begin(), E = finite_vertices_end();
 			I != E; ++I)
@@ -134,6 +135,12 @@ void DualPolyhedron_3::initialize()
 
 	if (getenv("INTERNAL_CHECK"))
 	{
+		std::vector<Cell_handle> outerCells;
+		incident_cells(infinite_vertex(),
+				std::back_inserter(outerCells));
+		std::cout << "Number of outer cells: " << outerCells.size()
+			<< std::endl;
+
 		Polyhedron_3 intersection(planes);
 		ASSERT(intersection.size_of_vertices() == outerCells.size()
 			&& "Two methods must produce the same topology");
@@ -149,41 +156,47 @@ void DualPolyhedron_3::initialize()
 		}
 		std::cout << "Number of empty outer cells: " << numEmptyCells
 			<< std::endl;
+		ASSERT(numEmptyCells == 0
+				&& "All outer cells should be nonempty");
 	}
 	DEBUG_END;
 }
 
-double DualPolyhedron_3::calculateProduct(const Vector_3 &direction,
-		const Cell_handle &cell) const
+static double calculateProduct(const Vector_3 &direction,
+		const Cell_handle &cell, const Vertex_handle &infinity)
 {
 	DEBUG_START;
-	Plane_3 plane = getOppositeFacetPlane(cell,
-			infinite_vertex());
+	Plane_3 plane = getOppositeFacetPlane(cell, infinity);
 	Point_3 point = ::dual(plane);
 	double product = direction * (point - CGAL::Origin());
 	DEBUG_END;
 	return product;
 }
 
-void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
+static Cell_handle findBestCell(const Vector_3 &direction,
+		const Vertex_handle &infinity,
+		const Cell_handle &startingCell)
 {
 	DEBUG_START;
-	int iPlane = vertex->info();
-	Vector_3 direction = directions[iPlane];
-	Cell_handle bestCell = infinite_cell();
+	/* FIXME: Maybe some hint will be useful here */
+	ASSERT(startingCell->has_vertex(infinity) && "Wrong input");
+	Cell_handle bestCell = startingCell;
 	Cell_handle nextCell = bestCell;
-	double maxProduct = calculateProduct(direction, bestCell);
+	double maxProduct = calculateProduct(direction, bestCell, infinity);
+	unsigned numIterations = 0;
 	do
 	{
+		++numIterations;
 		bestCell = nextCell;
-		int infinityIndex = bestCell->index(infinite_vertex());
+		ASSERT(bestCell->has_vertex(infinity) && "Wrong iteration");
+		int infinityIndex = bestCell->index(infinity);
 		for (int i = 0; i < NUM_CELL_VERTICES; ++i)
 		{
 			if (i == infinityIndex)
 				continue;
 			Cell_handle neighbor = bestCell->neighbor(i);
 			double product = calculateProduct(direction,
-					neighbor);
+					neighbor, infinity);
 			if (product > maxProduct)
 			{
 				nextCell = neighbor;
@@ -191,8 +204,46 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 			}
 		}
 	} while (nextCell != bestCell);
+	ASSERT(bestCell->has_vertex(infinity) && "Wrong result");
+	std::cout << "Found value " << maxProduct << " in " << numIterations
+		<< " iterations" << std::endl;
+	DEBUG_END;
+	return bestCell;
+}
 
-	bestCell->info().insert(iPlane);
+void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
+{
+	DEBUG_START;
+	int iPlane = vertex->info();
+	if (outerVertices.find(vertex) != outerVertices.end())
+	{
+		Cell_handle cell;
+		int iVertex, iInfinity;
+		bool result = is_edge(vertex, infinite_vertex(), cell,
+				iVertex, iInfinity);
+		ASSERT(result && "Wrong set");
+		
+		TDelaunay_3::Edge edge(cell, iVertex, iInfinity);
+		auto circulator = incident_cells(edge);
+		auto end = circulator;
+		do
+		{
+			Cell_handle currentCell = circulator;
+			ASSERT(currentCell->has_vertex(vertex));
+			ASSERT(currentCell->has_vertex(infinite_vertex()));
+			currentCell->info().insert(iPlane);
+			++circulator;
+		} while (circulator != end);
+		
+	}
+	else
+	{
+		ASSERT(!isOuterVertex(vertex) && "Wrong set");
+		Vector_3 direction = directions[iPlane];
+		Cell_handle bestCell = findBestCell(direction,
+				infinite_vertex(), infinite_cell());
+		bestCell->info().insert(iPlane);
+	}
 	DEBUG_END;
 }
 
@@ -211,6 +262,10 @@ static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
 			points.end());
 	dualP.initialize();
 
+	/*
+	 * FIXME: Change this to actual values, when the algorithm will be
+	 * implemented
+	 */
 	auto values = data->supportValues();
 	auto solution = calculateSolution(data, values);
 	DEBUG_END;
