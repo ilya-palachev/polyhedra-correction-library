@@ -186,6 +186,7 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 			ASSERT(currentCell->has_vertex(vertex));
 			ASSERT(currentCell->has_vertex(infinite_vertex()));
 			currentCell->info().insert(iPlane);
+			items[iPlane].associations.insert(currentCell);
 			++circulator;
 		} while (circulator != end);
 	}
@@ -196,6 +197,7 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 		Cell_handle bestCell = findBestCell(direction,
 				infinite_vertex(), infinite_cell());
 		bestCell->info().insert(iPlane);
+		items[iPlane].associations.insert(bestCell);
 	}
 	DEBUG_END;
 }
@@ -248,6 +250,10 @@ void DualPolyhedron_3::verify() const
 	std::cout << "Number of empty outer cells: " << numEmptyCells
 		<< std::endl;
 	ASSERT(numEmptyCells == 0 && "All outer cells should be nonempty");
+
+	for (const SupportItem &item : items)
+		ASSERT(!item.associations.empty()
+				&& "Need at least one association");
 	DEBUG_END;
 }
 
