@@ -39,6 +39,7 @@ typedef TDelaunay_3::Cell_handle Cell_handle;
 struct SupportItem
 {
 	Vector_3 direction;
+	double value;
 	Plane_3 plane;
 	std::set<Cell_handle> associations;
 };
@@ -58,6 +59,7 @@ public:
 	typedef std::pair<Point_3, unsigned> PointIndexed_3;
 
 	DualPolyhedron_3(const std::vector<Vector_3> &directions,
+			const VectorXd &values,
 			const std::vector<Plane_3> &planes,
 			const std::vector<PointIndexed_3>::iterator &begin,
 			const std::vector<PointIndexed_3>::iterator &end):
@@ -65,17 +67,28 @@ public:
 	{
 		DEBUG_START;
 		ASSERT(directions.size() == planes.size() && "Wrong input");
+		ASSERT(directions.size() == unsigned(values.size())
+				&& "Wrong input");
 		for (unsigned i = 0; i < planes.size(); ++i)
 		{
 			SupportItem item;
 			item.direction = directions[i];
+			item.value = values[i];
 			item.plane = planes[i];
+			ASSERT(item.value == -item.plane.d() && "Conflict");
+			ASSERT(item.direction.x() == item.plane.a()
+					&& "Conflict");
+			ASSERT(item.direction.y() == item.plane.b()
+					&& "Conflict");
+			ASSERT(item.direction.z() == item.plane.c()
+					&& "Conflict");
 			items.push_back(item);
 		}
 		DEBUG_END;
 	}
 
 	void initialize();
+	double calculateFunctional() const;
 };
 
 NativeQuadraticEstimator::NativeQuadraticEstimator(
@@ -98,6 +111,7 @@ Plane_3 getOppositeFacetPlane(const TDelaunay_3::Cell_handle &cell,
 {
 	DEBUG_START;
 	std::vector<Point_3> points;
+	ASSERT(cell->has_vertex(vertex) && "Wrong usage");
 	int iVertex = cell->index(vertex);
 	for (int i = 0; i < NUM_CELL_VERTICES; ++i)
 		if (i != iVertex)
@@ -273,26 +287,69 @@ void DualPolyhedron_3::initialize()
 	DEBUG_END;
 }
 
+const double EPS_PRODUCT_TOLERANCE = 1e-13;
+double DualPolyhedron_3::calculateFunctional() const
+{
+	DEBUG_START;
+	double functional = 0;
+	unsigned iItem = 0;
+	for (const SupportItem &item : items)
+	{
+		std::vector<double> products;
+		for (const Cell_handle &cell : item.associations)
+		{
+			double product = calculateProduct(item.direction, cell,
+					infinite_vertex());
+			products.push_back(product);
+		}
+		double productMin = products[0];
+		double productMax = products[0];
+		for (double product : products)
+		{
+			productMin = std::min(productMin, product);
+			productMax = std::max(productMax, product);
+		}
+		double error = productMax - productMin;
+#ifndef NDEBUG
+		std::cout << "Item #" << iItem << std::endl;
+		std::cout << std::setprecision(16);
+		std::cout << "  Product minimal: " << productMin << std::endl;
+		std::cout << "  Product maximal: " << productMax << std::endl;
+		std::cout << "  Error:           " << error << std::endl;
+#endif
+		ASSERT(error < EPS_PRODUCT_TOLERANCE && "Bad structure");
+		double difference = productMax - item.value;
+		functional += difference * difference;
+		++iItem;
+	}
+	DEBUG_END;
+	return functional;
+}
 static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
 {
 	DEBUG_START;
 	auto data = SFEData->supportData();
 	auto planes = data->supportPlanes();
 	auto directions = data->supportDirections<Vector_3>();
+	auto values = data->supportValues();
 
 	std::vector<DualPolyhedron_3::PointIndexed_3> points;
 	for (unsigned i = 0; i < planes.size(); ++i)
 		points.push_back(std::make_pair(dual(planes[i]), i));
 
-	DualPolyhedron_3 dualP(directions, planes, points.begin(),
+	DualPolyhedron_3 dualP(directions, values, planes, points.begin(),
 			points.end());
 	dualP.initialize();
+	double startingFunctional = dualP.calculateFunctional();
+	std::cout << "Starting value of functional: " << startingFunctional
+		<< std::endl;
+	std::cout << "And square root of it: " << sqrt(startingFunctional)
+		<< std::endl;
 
 	/*
 	 * FIXME: Change this to actual values, when the algorithm will be
 	 * implemented
 	 */
-	auto values = data->supportValues();
 	auto solution = calculateSolution(data, values);
 	DEBUG_END;
 	return solution;
