@@ -241,10 +241,12 @@ void DualPolyhedron_3::verify() const
 	unsigned numEmptyCells = 0;
 	for (Cell_handle cell : outerCells)
 	{
+#ifndef NDEBUG
 		std::cout << "Cell indices: ";
 		for (int iPlane : cell->info())
 			std::cout << iPlane << " ";
 		std::cout << std::endl;
+#endif
 		numEmptyCells += cell->info().empty();
 	}
 	std::cout << "Number of empty outer cells: " << numEmptyCells
