@@ -28,9 +28,17 @@
 #include <CGAL/Triangulation_vertex_base_with_info_3.h>
 #include <CGAL/Triangulation_cell_base_with_info_3.h>
 #include <CGAL/Triangulation_data_structure_3.h>
+#include <Eigen/LU>
+
+struct TangientVertex
+{
+	Point_3 point;
+	double distance;
+	std::set<unsigned> associations;
+};
 
 typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned, Kernel> TVertexBase;
-typedef CGAL::Triangulation_cell_base_with_info_3<std::set<unsigned>, Kernel> TCellBase;
+typedef CGAL::Triangulation_cell_base_with_info_3<TangientVertex, Kernel> TCellBase;
 typedef CGAL::Triangulation_data_structure_3<TVertexBase, TCellBase> TDataStructure;
 typedef CGAL::Delaunay_triangulation_3<Kernel, TDataStructure> TDelaunay_3;
 typedef TDelaunay_3::Vertex_handle Vertex_handle;
@@ -42,6 +50,7 @@ struct SupportItem
 	double value;
 	Plane_3 plane;
 	std::set<Cell_handle> associations;
+	bool resolved;
 };
 
 class DualPolyhedron_3 : public TDelaunay_3
@@ -55,6 +64,12 @@ private:
 	void associateVertex(const Vertex_handle &vertex);
 	void initializeVertices();
 	void verify() const;
+	void partiallyMove(const Vector_3 &xOld,
+		const Vector_3 &xNew,
+		const std::vector<Vertex_handle> &vertices,
+		const Vertex_handle &dominator, double alpha);
+	void lift(Cell_handle cell);
+	unsigned countResolvedItems() const;
 public:
 	typedef std::pair<Point_3, unsigned> PointIndexed_3;
 
@@ -75,6 +90,7 @@ public:
 			item.direction = directions[i];
 			item.value = values[i];
 			item.plane = planes[i];
+			item.resolved = false;
 			ASSERT(item.value == -item.plane.d() && "Conflict");
 			ASSERT(item.direction.x() == item.plane.a()
 					&& "Conflict");
@@ -89,6 +105,7 @@ public:
 
 	void initialize();
 	double calculateFunctional() const;
+	void makeConsistent();
 };
 
 NativeQuadraticEstimator::NativeQuadraticEstimator(
@@ -106,6 +123,7 @@ NativeQuadraticEstimator::~NativeQuadraticEstimator()
 }
 
 const int NUM_CELL_VERTICES = 4;
+const int NUM_FACET_VERTICES = 3;
 Plane_3 getOppositeFacetPlane(const TDelaunay_3::Cell_handle &cell,
 		const TDelaunay_3::Vertex_handle &vertex)
 {
@@ -199,8 +217,9 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 			Cell_handle currentCell = circulator;
 			ASSERT(currentCell->has_vertex(vertex));
 			ASSERT(currentCell->has_vertex(infinite_vertex()));
-			currentCell->info().insert(iPlane);
+			currentCell->info().associations.insert(iPlane);
 			items[iPlane].associations.insert(currentCell);
+			items[iPlane].resolved = true;
 			++circulator;
 		} while (circulator != end);
 	}
@@ -210,8 +229,10 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 		Vector_3 direction = items[iPlane].direction;
 		Cell_handle bestCell = findBestCell(direction,
 				infinite_vertex(), infinite_cell());
-		bestCell->info().insert(iPlane);
+		bestCell->info().associations.insert(iPlane);
+		/* FIXME: Maybe the association for a plane is singular? */
 		items[iPlane].associations.insert(bestCell);
+		items[iPlane].resolved = false;
 	}
 	DEBUG_END;
 }
@@ -261,7 +282,7 @@ void DualPolyhedron_3::verify() const
 			std::cout << iPlane << " ";
 		std::cout << std::endl;
 #endif
-		numEmptyCells += cell->info().empty();
+		numEmptyCells += cell->info().associations.empty();
 	}
 	std::cout << "Number of empty outer cells: " << numEmptyCells
 		<< std::endl;
@@ -325,6 +346,247 @@ double DualPolyhedron_3::calculateFunctional() const
 	DEBUG_END;
 	return functional;
 }
+
+static Cell_handle iterate(std::vector<Cell_handle> &cells,
+		const std::vector<SupportItem> &items,
+		const Vertex_handle &infinity)
+{
+	DEBUG_START;
+	double distanceMin = 1e10;
+	Cell_handle nextCell;
+	for (Cell_handle &cell : cells)
+	{
+		const auto &associations = cell->info().associations;
+		ASSERT(associations.size() >= NUM_CELL_VERTICES - 1
+				&& "Bad structure");
+		if (associations.size() < NUM_CELL_VERTICES)
+			continue;
+		Plane_3 plane = getOppositeFacetPlane(cell, infinity);
+		Point_3 point = dual(plane);
+		cell->info().point = point;
+		
+		double distanceMax = 0.;
+		for (unsigned iPlane : associations)
+		{
+			SupportItem item = items[iPlane];
+			Vector_3 u = item.direction;
+			double value = item.value;
+			double distance = value - u * (point - CGAL::Origin());
+			ASSERT(distance >= 0 && "Wrong outer cells list");
+			distanceMax = std::max(distanceMax, distance);
+		}
+		cell->info().distance = distanceMax;
+		if (distanceMax < distanceMin)
+		{
+			distanceMin = distanceMax;
+			nextCell = cell;
+		}
+	}
+	DEBUG_END;
+	return nextCell;
+}
+
+static Vector_3 leastSquaresPoint(std::vector<SupportItem> items)
+{
+	DEBUG_START;
+	Eigen::Matrix3d matrix;
+	Eigen::Vector3d vector;
+	for (unsigned i = 0; i < 3; ++i)
+	{
+		vector(i) = 0.;
+		for (unsigned j = 0; j < 3; ++j)
+			matrix(i, j) = 0.;
+	}
+
+	for (const SupportItem &item : items)
+	{
+		Vector_3 u = item.direction;
+		double value = item.value;
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			for (unsigned j = 0; j < 3; ++j)
+				matrix(i, j) += u.cartesian(i)
+					* u.cartesian(j);
+			vector(i) += u.cartesian(i) * value;
+		}
+	}
+	Eigen::Vector3d solution = matrix.inverse() * vector;
+
+	return Vector_3(solution(0), solution(1), solution(2));
+}
+
+static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
+		const Plane_3 &planeOuter)
+{
+	DEBUG_START;
+	Plane_3 plane = planeOuter;
+	Vector_3 u(plane.a(), plane.b(), plane.c());
+	double value = -plane.d();
+	if (value < 0.)
+	{
+		u = -u;
+		value = -value;
+	}
+	double length = sqrt(u.squared_length());
+	u = u / length;
+	value = value / length;
+	double productNew = xNew * u;
+	double productOld = xOld * u;
+	double alpha = (productNew - value) / (productNew - productOld);
+	DEBUG_END;
+	return alpha;
+}
+
+bool isPositivelyDecomposable(const Point_3 &a, const Point_3 &b,
+		const Point_3 &c, const Point_3 &decomposed)
+{
+	DEBUG_START;
+	DEBUG_END;
+	Eigen::Matrix3d matrix;
+	matrix << a.x(), b.x(), c.x(),
+	       a.y(), b.y(), c.y(),
+	       a.z(), b.z(), c.z();
+	Eigen::Vector3d vector;
+	vector << decomposed.x(), decomposed.y(), decomposed.z();
+	Eigen::Vector3d coefficients = matrix.inverse() * vector;
+	return coefficients(0) >= 0.
+		&& coefficients(1) >= 0.
+		&& coefficients(2) >= 0.;
+}
+
+Point_3 calculateMove(const Vertex_handle &vertex,
+		const Vector_3 &tangient)
+{
+	DEBUG_START;
+	Plane_3 plane = dual(vertex->point());
+	Vector_3 u(plane.a(), plane.b(), plane.c());
+	if (plane.d() > 0.)
+		u = -u;
+	double value = tangient * u;
+	Plane_3 planeNew(u.x(), u.y(), u.z(), -value);
+	Point_3 point = dual(planeNew);
+	DEBUG_END;
+	return point;
+}
+
+static inline unsigned indexModulo(unsigned i)
+{
+	return (NUM_FACET_VERTICES + i) % NUM_FACET_VERTICES;
+}
+
+void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
+		const Vector_3 &xNew,
+		const std::vector<Vertex_handle> &vertices,
+		const Vertex_handle &dominator, double alpha)
+{
+	DEBUG_START;
+	unsigned numDeletable = 0;
+	unsigned iDeleted = 0;
+	for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+	{
+		unsigned iPrev = indexModulo(i - 1);
+		unsigned iNext = indexModulo(i + 1);
+		if (isPositivelyDecomposable(vertices[iPrev]->point(),
+					vertices[iNext]->point(),
+					dominator->point(),
+					vertices[i]->point()))
+		{
+			iDeleted = i;
+			++numDeletable;
+		}
+	}
+	ASSERT(numDeletable == 1 && "Wrong topological configuration");
+	Vertex_handle vertexDeleted = vertices[iDeleted];
+	Vector_3 tangient = alpha * xOld + (1. - alpha) * xNew;
+	for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+	{
+		if (i == iDeleted)
+			continue;
+
+		Vertex_handle vertex = vertices[i];
+		Point_3 point = calculateMove(vertex, tangient);
+		move(vertex, point);
+	}
+	DEBUG_END;
+}
+
+void DualPolyhedron_3::lift(Cell_handle cell)
+{
+	DEBUG_START;
+	std::vector<SupportItem> currentItems;
+	for (unsigned iPlane : cell->info().associations)
+		currentItems.push_back(items[iPlane]);
+
+	Vector_3 xNew = leastSquaresPoint(currentItems);
+	Vector_3 xOld = cell->info().point - CGAL::Origin();
+
+	ASSERT(cell->has_vertex(infinite_vertex()));
+	unsigned infinityIndex = cell->index(infinite_vertex());
+	std::vector<Vertex_handle> vertices;
+	Vertex_handle dominator;
+	double alphaMax = 0.;
+	for (unsigned i = 0; i < NUM_CELL_VERTICES; ++i)
+	{
+		if (i == infinityIndex)
+			continue;
+
+		vertices.push_back(cell->vertex(i));
+
+		Vertex_handle vertex = mirror_vertex(cell, i);
+		Plane_3 plane = ::dual(vertex->point());
+		double alpha = calculateAlpha(xOld, xNew, plane);
+		if (alpha > alphaMax)
+		{
+			alphaMax = alpha;
+			dominator = vertex;
+		}
+	}
+	
+	if (alphaMax > 0.)
+		partiallyMove(xOld, xNew, vertices, dominator, alphaMax);
+	else
+		for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+		{
+			Vertex_handle vertex = vertices[i];
+			Point_3 point = calculateMove(vertex, xNew);
+			move(vertex, point);
+		}
+	DEBUG_END;
+}
+
+unsigned DualPolyhedron_3::countResolvedItems() const
+{
+	DEBUG_START;
+	unsigned numResolved = 0;
+	for (const SupportItem &item : items)
+		if (item.resolved)
+			++numResolved;
+	DEBUG_END;
+	return numResolved;
+}
+
+void DualPolyhedron_3::makeConsistent()
+{
+	DEBUG_START;
+	unsigned iIteration = 0;
+	std::cout << "Number of resolved items: " << countResolvedItems()
+		<< std::endl;
+	while (countResolvedItems() < items.size())
+	{
+		std::cout << "Iteration #" << iIteration << std::endl;
+		std::vector<Cell_handle> outerCells;
+		incident_cells(infinite_vertex(),
+				std::back_inserter(outerCells));
+		Cell_handle cell = iterate(outerCells, items,
+				infinite_vertex());
+		lift(cell);
+
+		/* FIXME: Optimize this by local graph traversal */
+		initialize();
+	}
+	DEBUG_END;
+}
+
 static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
 {
 	DEBUG_START;
@@ -346,10 +608,7 @@ static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
 	std::cout << "And square root of it: " << sqrt(startingFunctional)
 		<< std::endl;
 
-	/*
-	 * FIXME: Change this to actual values, when the algorithm will be
-	 * implemented
-	 */
+	dualP.makeConsistent();
 	auto solution = calculateSolution(data, values);
 	DEBUG_END;
 	return solution;
