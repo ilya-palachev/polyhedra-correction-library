@@ -240,6 +240,13 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 void DualPolyhedron_3::initializeVertices()
 {
 	DEBUG_START;
+	/*
+	 * FIXME: Remove these two lines when local re-initialization will
+	 * be implemented
+	 */
+	outerVertices.clear();
+	innerVertices.clear();
+
 	for (auto I = finite_vertices_begin(), E = finite_vertices_end();
 			I != E; ++I)
 	{
@@ -249,9 +256,19 @@ void DualPolyhedron_3::initializeVertices()
 		else
 			innerVertices.insert(vertex);
 	}
+	std::set<Vertex_handle> intersection;
+	for (const Vertex_handle &vertex : outerVertices)
+		if (innerVertices.find(vertex) != innerVertices.end())
+			intersection.insert(vertex);
+	std::cout << "Number of vertices in intersection: "
+		<< intersection.size() << std::endl;
+	ASSERT(intersection.size() == 0 && "Incorrectly initialized vertices");
+
 	std::cout << "Number of outer vertices: " << outerVertices.size()
 		<< std::endl;
 	std::cout << "Number of inner vertices: " << innerVertices.size()
+		<< std::endl;
+	std::cout << "Number of vertices: " << number_of_vertices()
 		<< std::endl;
 	ASSERT(outerVertices.size() + innerVertices.size() == items.size()
 		&& "Different numbers of dual vertices and primal planes");
@@ -298,6 +315,15 @@ void DualPolyhedron_3::initialize()
 {
 	DEBUG_START;
 	initializeVertices();
+
+	/*
+	 * FIXME: Remove these two loops when local initialization will be
+	 * implemented
+	 */
+	for (SupportItem &item : items)
+		item.associations.clear();
+	for (auto I = cells_begin(), E = cells_end(); I != E; ++I)
+		I->info().associations.clear();
 
 	for (auto I = finite_vertices_begin(), E = finite_vertices_end();
 			I != E; ++I)
@@ -347,6 +373,7 @@ double DualPolyhedron_3::calculateFunctional() const
 	return functional;
 }
 
+const double EPS_LAYER_TOLERANCE = 1e-14;
 static Cell_handle iterate(std::vector<Cell_handle> &cells,
 		const std::vector<SupportItem> &items,
 		const Vertex_handle &infinity)
@@ -372,7 +399,12 @@ static Cell_handle iterate(std::vector<Cell_handle> &cells,
 			Vector_3 u = item.direction;
 			double value = item.value;
 			double distance = value - u * (point - CGAL::Origin());
-			ASSERT(distance >= 0 && "Wrong outer cells list");
+			if (distance < -EPS_LAYER_TOLERANCE)
+			{
+				std::cout << "Distance: " << distance
+					<< std::endl;
+				ASSERT(0 && "Wrong outer cells list");
+			}
 			distanceMax = std::max(distanceMax, distance);
 		}
 		cell->info().distance = distanceMax;
@@ -573,7 +605,9 @@ void DualPolyhedron_3::makeConsistent()
 		<< std::endl;
 	while (countResolvedItems() < items.size())
 	{
-		std::cout << "Iteration #" << iIteration << std::endl;
+		std::cout << "Iteration #" << iIteration << ", resolved "
+			<< countResolvedItems() << " items from "
+			<< items.size() << std::endl;
 		std::vector<Cell_handle> outerCells;
 		incident_cells(infinite_vertex(),
 				std::back_inserter(outerCells));
@@ -583,6 +617,7 @@ void DualPolyhedron_3::makeConsistent()
 
 		/* FIXME: Optimize this by local graph traversal */
 		initialize();
+		++iIteration;
 	}
 	DEBUG_END;
 }
