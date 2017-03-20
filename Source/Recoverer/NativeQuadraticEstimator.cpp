@@ -232,7 +232,6 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 		bestCell->info().associations.insert(iPlane);
 		/* FIXME: Maybe the association for a plane is singular? */
 		items[iPlane].associations.insert(bestCell);
-		items[iPlane].resolved = false;
 	}
 	DEBUG_END;
 }
@@ -575,14 +574,23 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 	}
 	
 	if (alphaMax > 0.)
+	{
+		std::cout << "Full move is impossible, performing partial move"
+			<< std::endl;
 		partiallyMove(xOld, xNew, vertices, dominator, alphaMax);
+	}
 	else
+	{
+		std::cout << "Performing full move" << std::endl;
 		for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
 		{
 			Vertex_handle vertex = vertices[i];
 			Point_3 point = calculateMove(vertex, xNew);
 			move(vertex, point);
 		}
+		for (unsigned iPlane : cell->info().associations)
+			items[iPlane].resolved = true;
+	}
 	DEBUG_END;
 }
 
