@@ -655,12 +655,12 @@ void DualPolyhedron_3::makeConsistent()
 {
 	DEBUG_START;
 	unsigned iIteration = 0;
-	std::cout << "Number of resolved items: " << countResolvedItems()
-		<< std::endl;
-	while (countResolvedItems() < items.size())
+	unsigned numResolved = countResolvedItems();
+	while (numResolved < items.size())
 	{
-		std::cout << "Iteration #" << iIteration << ", resolved "
-			<< countResolvedItems() << " items from "
+		std::cout << "===== Iteration #" << iIteration << " ====="
+			<< std::endl;
+		std::cout << "  Resolved " << numResolved << " items from "
 			<< items.size() << std::endl;
 		std::vector<Cell_handle> outerCells;
 		incident_cells(infinite_vertex(),
@@ -671,6 +671,12 @@ void DualPolyhedron_3::makeConsistent()
 
 		/* FIXME: Optimize this by local graph traversal */
 		initialize();
+		unsigned numResolvedPrev = numResolved;
+		numResolved = countResolvedItems();
+		std::cout << "  Change in the number of resolved items: "
+			<< numResolved - numResolvedPrev << std::endl;
+		ASSERT(numResolved >= numResolvedPrev
+				&& "Degradation happened");
 		++iIteration;
 	}
 	DEBUG_END;
