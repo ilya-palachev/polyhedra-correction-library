@@ -429,10 +429,13 @@ static Vector_3 leastSquaresPoint(std::vector<SupportItem> items)
 			matrix(i, j) = 0.;
 	}
 
+	std::cout << "Calculating least squares points for the following items"
+		<< std::endl;
 	for (const SupportItem &item : items)
 	{
 		Vector_3 u = item.direction;
 		double value = item.value;
+		std::cout << "  u = " << u << "; h = " << value << std::endl;
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			for (unsigned j = 0; j < 3; ++j)
@@ -443,13 +446,23 @@ static Vector_3 leastSquaresPoint(std::vector<SupportItem> items)
 	}
 	Eigen::Vector3d solution = matrix.inverse() * vector;
 
-	return Vector_3(solution(0), solution(1), solution(2));
+	Vector_3 result(solution(0), solution(1), solution(2));
+	std::cout << "Result: " << result << std::endl;
+	for (const SupportItem &item : items)
+	{
+		double delta = item.direction * result - item.value;
+		std::cout << "  delta = " << delta << std::endl;
+	}
+	DEBUG_END;
+	return result;
 }
 
+const double EPS_PRODUCT_DIFF_TOLERANCE = 1e-5;
 static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 		const Plane_3 &planeOuter)
 {
 	DEBUG_START;
+	std::cout << "Calculating alpha for plane " << planeOuter << std::endl; 
 	Plane_3 plane = planeOuter;
 	Vector_3 u(plane.a(), plane.b(), plane.c());
 	double value = -plane.d();
@@ -460,10 +473,28 @@ static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 	}
 	double length = sqrt(u.squared_length());
 	u = u / length;
+	std::cout << "  u = " << u << std::endl;
 	value = value / length;
-	double productNew = xNew * u;
+	std::cout << "  h initial = " << value << std::endl;
 	double productOld = xOld * u;
+	std::cout << "  h current = " << productOld << std::endl;
+	double productNew = xNew * u;
+	std::cout << "  h new     = " << productNew << std::endl;
+	double productDifference = productNew - productOld;
+	std::cout << "  product difference: " << productDifference
+		<< std::endl;
+	if (productDifference < 0.
+			&& productDifference >= -EPS_PRODUCT_DIFF_TOLERANCE)
+	{
+		std::cout << "Considering negative product difference as no "
+			"difference at all" << std::endl;
+		DEBUG_END;
+		return 0.;
+	}
+	ASSERT(productNew >= productOld && "Wrong move");
 	double alpha = (productNew - value) / (productNew - productOld);
+	if (alpha > 1.)
+		alpha = 1.;
 	DEBUG_END;
 	return alpha;
 }
@@ -472,7 +503,6 @@ bool isPositivelyDecomposable(const Point_3 &a, const Point_3 &b,
 		const Point_3 &c, const Point_3 &decomposed)
 {
 	DEBUG_START;
-	DEBUG_END;
 	Eigen::Matrix3d matrix;
 	matrix << a.x(), b.x(), c.x(),
 	       a.y(), b.y(), c.y(),
@@ -480,6 +510,9 @@ bool isPositivelyDecomposable(const Point_3 &a, const Point_3 &b,
 	Eigen::Vector3d vector;
 	vector << decomposed.x(), decomposed.y(), decomposed.z();
 	Eigen::Vector3d coefficients = matrix.inverse() * vector;
+	std::cout << "Tried to decompose vector, result: " << std::endl
+		<< coefficients << std::endl;
+	DEBUG_END;
 	return coefficients(0) >= 0.
 		&& coefficients(1) >= 0.
 		&& coefficients(2) >= 0.;
@@ -526,6 +559,8 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 			++numDeletable;
 		}
 	}
+	std::cout << "Number of positively decomposable vectors: "
+		<< numDeletable << std::endl;
 	ASSERT(numDeletable == 1 && "Wrong topological configuration");
 	Vertex_handle vertexDeleted = vertices[iDeleted];
 	Vector_3 tangient = alpha * xOld + (1. - alpha) * xNew;
@@ -548,8 +583,16 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 	for (unsigned iPlane : cell->info().associations)
 		currentItems.push_back(items[iPlane]);
 
-	Vector_3 xNew = leastSquaresPoint(currentItems);
 	Vector_3 xOld = cell->info().point - CGAL::Origin();
+	std::cout << "Old tangient point: " << xOld << std::endl;
+	for (const SupportItem &item : currentItems)
+	{
+		double delta = item.direction * xOld - item.value;
+		std::cout << "  delta = " << delta << std::endl;
+	}
+
+	Vector_3 xNew = leastSquaresPoint(currentItems);
+	std::cout << "New tangient point: " << xNew << std::endl;
 
 	ASSERT(cell->has_vertex(infinite_vertex()));
 	unsigned infinityIndex = cell->index(infinite_vertex());
@@ -566,6 +609,8 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 		Vertex_handle vertex = mirror_vertex(cell, i);
 		Plane_3 plane = ::dual(vertex->point());
 		double alpha = calculateAlpha(xOld, xNew, plane);
+		std::cout << "Alpha #" << i << ": " << alpha << std::endl;
+		ASSERT(alpha <= 1. && "Wrongly computed alpha");
 		if (alpha > alphaMax)
 		{
 			alphaMax = alpha;
@@ -573,6 +618,7 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 		}
 	}
 	
+	std::cout << "Maximal alpha: " << alphaMax << std::endl;
 	if (alphaMax > 0.)
 	{
 		std::cout << "Full move is impossible, performing partial move"
