@@ -580,17 +580,25 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 void DualPolyhedron_3::lift(Cell_handle cell)
 {
 	DEBUG_START;
-	std::vector<SupportItem> currentItems;
-	for (unsigned iPlane : cell->info().associations)
-		currentItems.push_back(items[iPlane]);
-
 	Vector_3 xOld = cell->info().point - CGAL::Origin();
 	std::cout << "Old tangient point: " << xOld << std::endl;
-	for (const SupportItem &item : currentItems)
+
+	auto currentItemIDs = cell->info().associations;
+	std::vector<SupportItem> currentItems;
+	unsigned numUnresolvedCurrent = 0;
+	for (unsigned iPlane : currentItemIDs)
 	{
+		const SupportItem &item = items[iPlane];
 		double delta = item.direction * xOld - item.value;
-		std::cout << "  delta = " << delta << std::endl;
+		std::cout << "  delta for plane #" << iPlane << "= " << delta
+			<< "; resolved: " << item.resolved << std::endl;
+		currentItems.push_back(items[iPlane]);
+		if (item.resolved)
+			++numUnresolvedCurrent;
 	}
+	std::cout << "  Number of current unresolved items: "
+		<< numUnresolvedCurrent << std::endl;
+	ASSERT(numUnresolvedCurrent > 0 && "Nothing to be resolved");
 
 	Vector_3 xNew = leastSquaresPoint(currentItems);
 	std::cout << "New tangient point: " << xNew << std::endl;
@@ -635,8 +643,21 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 			Point_3 point = calculateMove(vertex, xNew);
 			move(vertex, point);
 		}
-		for (unsigned iPlane : cell->info().associations)
-			items[iPlane].resolved = true;
+		unsigned numNewlyResolved = 0;
+		for (unsigned iPlane : currentItemIDs)
+		{
+			if (!items[iPlane].resolved)
+			{
+				std::cout << "  Marking item #" << iPlane
+					<< " as resolved" << std::endl;
+				items[iPlane].resolved = true;
+				++numNewlyResolved;
+			}
+			else
+				std::cout << "  Item #" << iPlane
+					<< " is already resolved" << std::endl;
+		}
+		ASSERT(numNewlyResolved > 0 && "Nothing has been resolved");
 	}
 	DEBUG_END;
 }
