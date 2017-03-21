@@ -70,6 +70,7 @@ private:
 		const Vertex_handle &dominator, double alpha);
 	void lift(Cell_handle cell);
 	unsigned countResolvedItems() const;
+	std::vector<Cell_handle> getOuterCells() const;
 public:
 	typedef std::pair<Point_3, unsigned> PointIndexed_3;
 
@@ -373,14 +374,14 @@ double DualPolyhedron_3::calculateFunctional() const
 }
 
 const double EPS_LAYER_TOLERANCE = 1e-14;
-static Cell_handle iterate(std::vector<Cell_handle> &cells,
+static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 		const std::vector<SupportItem> &items,
 		const Vertex_handle &infinity)
 {
 	DEBUG_START;
 	double distanceMin = 1e10;
 	Cell_handle nextCell;
-	for (Cell_handle &cell : cells)
+	for (const Cell_handle &cell : cells)
 	{
 		const auto &associations = cell->info().associations;
 		ASSERT(associations.size() >= NUM_CELL_VERTICES - 1
@@ -651,6 +652,29 @@ unsigned DualPolyhedron_3::countResolvedItems() const
 	return numResolved;
 }
 
+std::vector<Cell_handle> DualPolyhedron_3::getOuterCells() const
+{
+	DEBUG_START;
+	std::vector<Cell_handle> outerCells;
+	incident_cells(infinite_vertex(), std::back_inserter(outerCells));
+
+	std::vector<Cell_handle> outerCellsAnother;
+	for (auto I = cells_begin(), E = cells_end(); I != E;
+			++I)
+		if (I->has_vertex(infinite_vertex()))
+			outerCellsAnother.push_back(I);
+
+	std::cout << "  One way to calculate outer cells gives number "
+		<< outerCells.size() << std::endl;
+	std::cout << "  Another one gives number " << outerCellsAnother.size()
+		<< std::endl;
+	ASSERT(outerCells.size() == outerCells.size()
+			&& "How to calculate it?");
+	DEBUG_END;
+	return outerCells;
+}
+
+
 void DualPolyhedron_3::makeConsistent()
 {
 	DEBUG_START;
@@ -662,9 +686,8 @@ void DualPolyhedron_3::makeConsistent()
 			<< std::endl;
 		std::cout << "  Resolved " << numResolved << " items from "
 			<< items.size() << std::endl;
-		std::vector<Cell_handle> outerCells;
-		incident_cells(infinite_vertex(),
-				std::back_inserter(outerCells));
+
+		const auto &outerCells = getOuterCells();
 		Cell_handle cell = iterate(outerCells, items,
 				infinite_vertex());
 		lift(cell);
