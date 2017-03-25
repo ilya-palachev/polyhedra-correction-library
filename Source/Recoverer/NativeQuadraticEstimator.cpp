@@ -30,6 +30,8 @@
 #include <CGAL/Triangulation_data_structure_3.h>
 #include <Eigen/LU>
 
+const double MINIMIZATION_STARTING_VALUE = 1e10;
+
 struct TangientVertex
 {
 	Point_3 point;
@@ -328,14 +330,61 @@ double DualPolyhedron_3::calculateFunctional() const
 	return functional;
 }
 
-const double EPS_LAYER_TOLERANCE = 1e-14;
+static unsigned getNearestOuterItemID(const Cell_handle &cell,
+		const std::vector<SupportItem> &items,
+		const Vertex_handle &infinity)
+{
+	DEBUG_START;
+	Plane_3 plane = getOppositeFacetPlane(cell, infinity);
+	Point_3 point = dual(plane);
+	cell->info().point = point;
+	
+	double distanceMin = MINIMIZATION_STARTING_VALUE;
+	unsigned iNearest = 0;
+	const auto &associations = cell->info().associations;
+	for (unsigned iPlane : associations)
+	{
+		SupportItem item = items[iPlane];
+		Vector_3 u = item.direction;
+		double value = item.value;
+		double distance = value - u * (point - CGAL::Origin());
+		if (!item.resolved)
+		{
+			ASSERT(distance > 0. && "Incorrect resolved flag");
+			if (distance < distanceMin)
+			{
+				iNearest = iPlane;
+				distanceMin = distance;
+			}
+		}
+	}
+	ASSERT(distanceMin < MINIMIZATION_STARTING_VALUE && "Failed to find");
+	cell->info().distance = distanceMin;
+	DEBUG_END;
+	return iNearest;
+}
+
+static void printCell(const Cell_handle &cell, const Vertex_handle &infinity)
+{
+	DEBUG_START;
+	unsigned infinityIndex = cell->index(infinity);
+	for (unsigned i = 0; i < NUM_CELL_VERTICES; ++i)
+		if (i != infinityIndex)
+			std::cout << cell->vertex(i)->info()
+				<< " ";
+	std::cout << std::endl;
+	DEBUG_END;
+}
+
 static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 		const std::vector<SupportItem> &items,
 		const Vertex_handle &infinity)
 {
 	DEBUG_START;
-	double distanceMin = 1e10;
+	double distanceMin = MINIMIZATION_STARTING_VALUE;
 	Cell_handle nextCell;
+	/* FIXME: Use this ID to move to it only */
+	unsigned iNextNearest = 0;
 	for (const Cell_handle &cell : cells)
 	{
 		const auto &associations = cell->info().associations;
@@ -345,42 +394,20 @@ static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 			continue;
 		ASSERT(cell->has_vertex(infinity) && "Wrong list");
 
-		unsigned infinityIndex = cell->index(infinity);
-		std::cout << "Checking cell, sonsisting of vertices: ";
-		for (unsigned i = 0; i < NUM_CELL_VERTICES; ++i)
-			if (i != infinityIndex)
-				std::cout << cell->vertex(i)->info()
-					<< " ";
-		std::cout << std::endl;
-
-		Plane_3 plane = getOppositeFacetPlane(cell, infinity);
-		Point_3 point = dual(plane);
-		cell->info().point = point;
-		
-		double distanceMax = 0.;
-		for (unsigned iPlane : associations)
+		unsigned iNearest = getNearestOuterItemID(cell, items,
+				infinity);
+		double distance = cell->info().distance;
+		if (distance < distanceMin)
 		{
-			SupportItem item = items[iPlane];
-			Vector_3 u = item.direction;
-			double value = item.value;
-			double distance = value - u * (point - CGAL::Origin());
-			if (distance < -EPS_LAYER_TOLERANCE)
-			{
-				std::cout << "Violation on item #" << iPlane
-					<< std::endl;
-				std::cout << "Distance: " << distance
-					<< std::endl;
-				ASSERT(0 && "Wrong outer cells list");
-			}
-			distanceMax = std::max(distanceMax, distance);
-		}
-		cell->info().distance = distanceMax;
-		if (distanceMax < distanceMin)
-		{
-			distanceMin = distanceMax;
+			iNextNearest = iNearest;
+			distanceMin = distance;
 			nextCell = cell;
 		}
 	}
+	std::cout << "Next cell to be iterated on: ";
+	printCell(nextCell, infinity);
+	std::cout << "Nearest plane ID: " << iNextNearest << std::endl;
+	std::cout << "Nearest distance: " << distanceMin << std::endl;
 	DEBUG_END;
 	return nextCell;
 }
