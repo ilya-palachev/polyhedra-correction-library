@@ -344,6 +344,15 @@ static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 		if (associations.size() < NUM_CELL_VERTICES)
 			continue;
 		ASSERT(cell->has_vertex(infinity) && "Wrong list");
+
+		unsigned infinityIndex = cell->index(infinity);
+		std::cout << "Checking cell, sonsisting of vertices: ";
+		for (unsigned i = 0; i < NUM_CELL_VERTICES; ++i)
+			if (i != infinityIndex)
+				std::cout << cell->vertex(i)->info()
+					<< " ";
+		std::cout << std::endl;
+
 		Plane_3 plane = getOppositeFacetPlane(cell, infinity);
 		Point_3 point = dual(plane);
 		cell->info().point = point;
@@ -595,6 +604,8 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 	else
 	{
 		std::cout << "Performing full move" << std::endl;
+		for (const Vertex_handle vertex : vertices)
+			ASSERT(isOuterVertex(vertex));
 		for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
 		{
 			Vertex_handle vertex = vertices[i];
@@ -604,11 +615,15 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 				<< std::setprecision(16)
 				<< vertex->point() << " -> " << std::endl
 				<< point << std::endl;
-			ASSERT(isOuterVertex(vertex));
-			move(vertex, point);
+			unsigned numOld = number_of_vertices();
+			Vertex_handle vertexNew = move(vertex, point);
+			ASSERT(vertexNew == vertex);
 			std::cout << vertex->point() << std::endl;
-			ASSERT(isOuterVertex(vertex));
+			ASSERT(number_of_vertices() == numOld);
 		}
+		for (const Vertex_handle vertex : vertices)
+			ASSERT(isOuterVertex(vertex));
+
 		unsigned numNewlyResolved = 0;
 		for (unsigned iPlane : currentItemIDs)
 		{
