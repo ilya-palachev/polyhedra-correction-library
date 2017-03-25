@@ -57,12 +57,9 @@ class DualPolyhedron_3 : public TDelaunay_3
 {
 private:
 	std::vector<SupportItem> items;
-	std::set<Vertex_handle> outerVertices;
-	std::set<Vertex_handle> innerVertices;
 
 	bool isOuterVertex(const Vertex_handle &vertex) const;
 	void associateVertex(const Vertex_handle &vertex);
-	void initializeVertices();
 	void verify() const;
 	void partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
@@ -202,7 +199,7 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 {
 	DEBUG_START;
 	int iPlane = vertex->info();
-	if (outerVertices.find(vertex) != outerVertices.end())
+	if (isOuterVertex(vertex))
 	{
 		Cell_handle cell;
 		int iVertex, iInfinity;
@@ -226,7 +223,6 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 	}
 	else
 	{
-		ASSERT(!isOuterVertex(vertex) && "Wrong set");
 		Vector_3 direction = items[iPlane].direction;
 		Cell_handle bestCell = findBestCell(direction,
 				infinite_vertex(), infinite_cell());
@@ -236,45 +232,6 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 	}
 	DEBUG_END;
 }
-
-void DualPolyhedron_3::initializeVertices()
-{
-	DEBUG_START;
-	/*
-	 * FIXME: Remove these two lines when local re-initialization will
-	 * be implemented
-	 */
-	outerVertices.clear();
-	innerVertices.clear();
-
-	for (auto I = finite_vertices_begin(), E = finite_vertices_end();
-			I != E; ++I)
-	{
-		Vertex_handle vertex = I;
-		if (isOuterVertex(vertex))
-			outerVertices.insert(vertex);
-		else
-			innerVertices.insert(vertex);
-	}
-	std::set<Vertex_handle> intersection;
-	for (const Vertex_handle &vertex : outerVertices)
-		if (innerVertices.find(vertex) != innerVertices.end())
-			intersection.insert(vertex);
-	std::cout << "Number of vertices in intersection: "
-		<< intersection.size() << std::endl;
-	ASSERT(intersection.size() == 0 && "Incorrectly initialized vertices");
-
-	std::cout << "Number of outer vertices: " << outerVertices.size()
-		<< std::endl;
-	std::cout << "Number of inner vertices: " << innerVertices.size()
-		<< std::endl;
-	std::cout << "Number of vertices: " << number_of_vertices()
-		<< std::endl;
-	ASSERT(outerVertices.size() + innerVertices.size() == items.size()
-		&& "Different numbers of dual vertices and primal planes");
-	DEBUG_END;
-}
-
 void DualPolyhedron_3::verify() const
 {
 	DEBUG_START;
@@ -314,8 +271,6 @@ void DualPolyhedron_3::verify() const
 void DualPolyhedron_3::initialize()
 {
 	DEBUG_START;
-	initializeVertices();
-
 	/*
 	 * FIXME: Remove these two loops when local initialization will be
 	 * implemented
