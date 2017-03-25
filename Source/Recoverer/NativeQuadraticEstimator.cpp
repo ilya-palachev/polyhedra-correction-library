@@ -501,7 +501,6 @@ static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup,
 	return result;
 }
 
-const double EPS_PRODUCT_DIFF_TOLERANCE = 1e-5;
 static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 		const Plane_3 &planeOuter)
 {
@@ -527,15 +526,13 @@ static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 	double productDifference = productNew - productOld;
 	std::cout << "  product difference: " << productDifference
 		<< std::endl;
-	if (productDifference < 0.
-			&& productDifference >= -EPS_PRODUCT_DIFF_TOLERANCE)
+	if (productDifference < 0.)
 	{
 		std::cout << "Considering negative product difference as no "
 			"difference at all" << std::endl;
 		DEBUG_END;
 		return 0.;
 	}
-	ASSERT(productNew >= productOld && "Wrong move");
 	double alpha = (productNew - value) / (productNew - productOld);
 	if (alpha > 1.)
 		alpha = 1.;
