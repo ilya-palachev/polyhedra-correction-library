@@ -344,6 +344,7 @@ static unsigned getNearestOuterItemID(const Cell_handle &cell,
 	double distanceMin = MINIMIZATION_STARTING_VALUE;
 	unsigned iNearest = 0;
 	const auto &associations = cell->info().associations;
+	unsigned numUnresolved = 0;
 	for (unsigned iPlane : associations)
 	{
 		SupportItem item = items[iPlane];
@@ -358,9 +359,12 @@ static unsigned getNearestOuterItemID(const Cell_handle &cell,
 				iNearest = iPlane;
 				distanceMin = distance;
 			}
+			++numUnresolved;
 		}
 	}
-	ASSERT(distanceMin < MINIMIZATION_STARTING_VALUE && "Failed to find");
+	if (numUnresolved > 0)
+		ASSERT(distanceMin < MINIMIZATION_STARTING_VALUE
+				&& "Failed to find");
 	cell->info().distance = distanceMin;
 	DEBUG_END;
 	return iNearest;
@@ -655,7 +659,6 @@ void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 				<< " is already resolved" << std::endl;
 	}
 	ASSERT(numNewlyResolved > 0 && "Nothing has been resolved");
-	ASSERT(0 && "To be implemented");
 	DEBUG_END;
 }
 
