@@ -388,6 +388,7 @@ static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 				&& "Bad structure");
 		if (associations.size() < NUM_CELL_VERTICES)
 			continue;
+		ASSERT(cell->has_vertex(infinity) && "Wrong list");
 		Plane_3 plane = getOppositeFacetPlane(cell, infinity);
 		Point_3 point = dual(plane);
 		cell->info().point = point;
@@ -401,6 +402,8 @@ static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 			double distance = value - u * (point - CGAL::Origin());
 			if (distance < -EPS_LAYER_TOLERANCE)
 			{
+				std::cout << "Violation on item #" << iPlane
+					<< std::endl;
 				std::cout << "Distance: " << distance
 					<< std::endl;
 				ASSERT(0 && "Wrong outer cells list");
@@ -641,7 +644,15 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 		{
 			Vertex_handle vertex = vertices[i];
 			Point_3 point = calculateMove(vertex, xNew);
+			std::cout << "Moving dual point #" << vertex->info()
+				<< ": " << std::endl
+				<< std::setprecision(16)
+				<< vertex->point() << " -> " << std::endl
+				<< point << std::endl;
+			ASSERT(isOuterVertex(vertex));
 			move(vertex, point);
+			std::cout << vertex->point() << std::endl;
+			ASSERT(isOuterVertex(vertex));
 		}
 		unsigned numNewlyResolved = 0;
 		for (unsigned iPlane : currentItemIDs)
