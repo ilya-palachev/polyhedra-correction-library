@@ -574,11 +574,12 @@ Point_3 calculateMove(const Vertex_handle &vertex,
 	return point;
 }
 
-static inline unsigned indexModulo(unsigned i)
+static inline unsigned indexModulo(unsigned i, unsigned mod)
 {
-	return (NUM_FACET_VERTICES + i) % NUM_FACET_VERTICES;
+	return (mod + i) % mod;
 }
 
+const double INNER_RESOLVED_POINT_FACTOR = 1e-6;
 void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
@@ -586,11 +587,11 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 {
 	DEBUG_START;
 	unsigned numDeletable = 0;
-	unsigned iDeleted = 0;
-	for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+	unsigned iDeleted = vertices.size();
+	for (unsigned i = 0; i < vertices.size(); ++i)
 	{
-		unsigned iPrev = indexModulo(i - 1);
-		unsigned iNext = indexModulo(i + 1);
+		unsigned iPrev = indexModulo(i - 1, vertices.size());
+		unsigned iNext = indexModulo(i + 1, vertices.size());
 		if (isPositivelyDecomposable(vertices[iPrev]->point(),
 					vertices[iNext]->point(),
 					dominator->point(),
@@ -602,17 +603,19 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	}
 	std::cout << "Number of positively decomposable vectors: "
 		<< numDeletable << std::endl;
-	ASSERT(numDeletable == 1 && "Wrong topological configuration");
+	ASSERT(numDeletable <= 1 && "Wrong topological configuration");
 	Vertex_handle vertexDeleted = vertices[iDeleted];
 	Vector_3 tangient = alpha * xOld + (1. - alpha) * xNew;
-	for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+	for (unsigned i = 0; i < vertices.size(); ++i)
 	{
-		if (i == iDeleted)
-			continue;
-
 		Vertex_handle vertex = vertices[i];
-		Point_3 point = calculateMove(vertex, tangient);
-		move(vertex, point);
+		Point_3 point;
+		if (i == iDeleted)
+			point = INNER_RESOLVED_POINT_FACTOR * vertex->point();
+		else
+			point = calculateMove(vertex, tangient);
+		Vertex_handle vertexNew = move(vertex, point);
+		ASSERT(vertex == vertexNew && "Conflict happened");
 	}
 	DEBUG_END;
 }
