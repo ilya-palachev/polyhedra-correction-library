@@ -67,7 +67,9 @@ private:
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
 		const Vertex_handle &dominator, double alpha);
-	void lift(Cell_handle cell);
+	void fullyMove(const std::vector<Vertex_handle> &vertices,
+		const Vector_3 &xNew, const std::vector<unsigned> &activeGroup);
+	void lift(Cell_handle cell, unsigned iNearest);
 	unsigned countResolvedItems() const;
 	std::vector<Cell_handle> getOuterCells() const;
 public:
@@ -376,7 +378,8 @@ static void printCell(const Cell_handle &cell, const Vertex_handle &infinity)
 	DEBUG_END;
 }
 
-static Cell_handle iterate(const std::vector<Cell_handle> &cells,
+static std::pair<Cell_handle, unsigned> iterate(
+		const std::vector<Cell_handle> &cells,
 		const std::vector<SupportItem> &items,
 		const Vertex_handle &infinity)
 {
@@ -409,10 +412,49 @@ static Cell_handle iterate(const std::vector<Cell_handle> &cells,
 	std::cout << "Nearest plane ID: " << iNextNearest << std::endl;
 	std::cout << "Nearest distance: " << distanceMin << std::endl;
 	DEBUG_END;
-	return nextCell;
+	return std::make_pair(nextCell, iNextNearest);
 }
 
-static Vector_3 leastSquaresPoint(std::vector<SupportItem> items)
+static std::vector<unsigned> calculateActiveGroup(const Cell_handle &cell,
+		unsigned iNearest,
+		const std::vector<SupportItem> &items)
+{
+	DEBUG_START;
+	Vector_3 xOld = cell->info().point - CGAL::Origin();
+	std::vector<unsigned> activeGroup;
+	unsigned numUnresolvedCurrent = 0;
+	bool nearestFound = false;
+	for (unsigned iPlane : cell->info().associations)
+	{
+		const SupportItem &item = items[iPlane];
+		double delta = item.direction * xOld - item.value;
+		std::cout << "  delta for plane #" << iPlane << "= " << delta
+			<< "; resolved: " << item.resolved << std::endl;
+		if (!item.resolved)
+		{
+			++numUnresolvedCurrent;
+			if (iPlane == iNearest)
+			{
+				activeGroup.push_back(iPlane);
+				nearestFound = true;
+			}
+		}
+		else
+			activeGroup.push_back(iPlane);
+	}
+	std::cout << "  Number of current unresolved items: "
+		<< numUnresolvedCurrent << std::endl;
+	ASSERT(numUnresolvedCurrent > 0 && "Nothing to be resolved");
+	ASSERT(nearestFound && "Failed to find nearest point inside given "
+			"cell");
+	ASSERT(activeGroup.size() > NUM_FACET_VERTICES && "Not enough planes");
+
+	DEBUG_END;
+	return activeGroup;
+}
+
+static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup,
+		const std::vector<SupportItem> &items)
 {
 	DEBUG_START;
 	Eigen::Matrix3d matrix;
@@ -426,11 +468,13 @@ static Vector_3 leastSquaresPoint(std::vector<SupportItem> items)
 
 	std::cout << "Calculating least squares points for the following items"
 		<< std::endl;
-	for (const SupportItem &item : items)
+	for (unsigned iPlane : activeGroup)
 	{
+		SupportItem item = items[iPlane];
 		Vector_3 u = item.direction;
 		double value = item.value;
-		std::cout << "  u = " << u << "; h = " << value << std::endl;
+		std::cout << "  Item #" << iPlane << ": u = " << u << "; h = "
+			<< value << std::endl;
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			for (unsigned j = 0; j < 3; ++j)
@@ -443,8 +487,9 @@ static Vector_3 leastSquaresPoint(std::vector<SupportItem> items)
 
 	Vector_3 result(solution(0), solution(1), solution(2));
 	std::cout << "Result: " << result << std::endl;
-	for (const SupportItem &item : items)
+	for (unsigned iPlane : activeGroup)
 	{
+		SupportItem item = items[iPlane];
 		double delta = item.direction * result - item.value;
 		std::cout << "  delta = " << delta << std::endl;
 	}
@@ -571,30 +616,56 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	DEBUG_END;
 }
 
-void DualPolyhedron_3::lift(Cell_handle cell)
+void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
+		const Vector_3 &xNew, const std::vector<unsigned> &activeGroup)
+{
+	DEBUG_START;
+	for (const Vertex_handle vertex : vertices)
+		ASSERT(isOuterVertex(vertex));
+	for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+	{
+		Vertex_handle vertex = vertices[i];
+		Point_3 point = calculateMove(vertex, xNew);
+		std::cout << "Moving dual point #" << vertex->info()
+			<< ": " << std::endl
+			<< std::setprecision(16)
+			<< vertex->point() << " -> " << std::endl
+			<< point << std::endl;
+		unsigned numOld = number_of_vertices();
+		Vertex_handle vertexNew = move(vertex, point);
+		ASSERT(vertexNew == vertex);
+		std::cout << vertex->point() << std::endl;
+		ASSERT(number_of_vertices() == numOld);
+	}
+	for (const Vertex_handle vertex : vertices)
+		ASSERT(isOuterVertex(vertex));
+
+	unsigned numNewlyResolved = 0;
+	for (unsigned iPlane : activeGroup)
+	{
+		if (!items[iPlane].resolved)
+		{
+			std::cout << "  Marking item #" << iPlane
+				<< " as resolved" << std::endl;
+			items[iPlane].resolved = true;
+			++numNewlyResolved;
+		}
+		else
+			std::cout << "  Item #" << iPlane
+				<< " is already resolved" << std::endl;
+	}
+	ASSERT(numNewlyResolved > 0 && "Nothing has been resolved");
+	ASSERT(0 && "To be implemented");
+	DEBUG_END;
+}
+
+void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 {
 	DEBUG_START;
 	Vector_3 xOld = cell->info().point - CGAL::Origin();
 	std::cout << "Old tangient point: " << xOld << std::endl;
-
-	auto currentItemIDs = cell->info().associations;
-	std::vector<SupportItem> currentItems;
-	unsigned numUnresolvedCurrent = 0;
-	for (unsigned iPlane : currentItemIDs)
-	{
-		const SupportItem &item = items[iPlane];
-		double delta = item.direction * xOld - item.value;
-		std::cout << "  delta for plane #" << iPlane << "= " << delta
-			<< "; resolved: " << item.resolved << std::endl;
-		currentItems.push_back(items[iPlane]);
-		if (item.resolved)
-			++numUnresolvedCurrent;
-	}
-	std::cout << "  Number of current unresolved items: "
-		<< numUnresolvedCurrent << std::endl;
-	ASSERT(numUnresolvedCurrent > 0 && "Nothing to be resolved");
-
-	Vector_3 xNew = leastSquaresPoint(currentItems);
+	const auto activeGroup = calculateActiveGroup(cell, iNearest, items);
+	Vector_3 xNew = leastSquaresPoint(activeGroup, items);
 	std::cout << "New tangient point: " << xNew << std::endl;
 
 	ASSERT(cell->has_vertex(infinite_vertex()));
@@ -631,41 +702,7 @@ void DualPolyhedron_3::lift(Cell_handle cell)
 	else
 	{
 		std::cout << "Performing full move" << std::endl;
-		for (const Vertex_handle vertex : vertices)
-			ASSERT(isOuterVertex(vertex));
-		for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
-		{
-			Vertex_handle vertex = vertices[i];
-			Point_3 point = calculateMove(vertex, xNew);
-			std::cout << "Moving dual point #" << vertex->info()
-				<< ": " << std::endl
-				<< std::setprecision(16)
-				<< vertex->point() << " -> " << std::endl
-				<< point << std::endl;
-			unsigned numOld = number_of_vertices();
-			Vertex_handle vertexNew = move(vertex, point);
-			ASSERT(vertexNew == vertex);
-			std::cout << vertex->point() << std::endl;
-			ASSERT(number_of_vertices() == numOld);
-		}
-		for (const Vertex_handle vertex : vertices)
-			ASSERT(isOuterVertex(vertex));
-
-		unsigned numNewlyResolved = 0;
-		for (unsigned iPlane : currentItemIDs)
-		{
-			if (!items[iPlane].resolved)
-			{
-				std::cout << "  Marking item #" << iPlane
-					<< " as resolved" << std::endl;
-				items[iPlane].resolved = true;
-				++numNewlyResolved;
-			}
-			else
-				std::cout << "  Item #" << iPlane
-					<< " is already resolved" << std::endl;
-		}
-		ASSERT(numNewlyResolved > 0 && "Nothing has been resolved");
+		fullyMove(vertices, xNew, activeGroup);
 	}
 	DEBUG_END;
 }
@@ -717,9 +754,10 @@ void DualPolyhedron_3::makeConsistent()
 			<< items.size() << std::endl;
 
 		const auto &outerCells = getOuterCells();
-		Cell_handle cell = iterate(outerCells, items,
-				infinite_vertex());
-		lift(cell);
+		auto next = iterate(outerCells, items, infinite_vertex());
+		Cell_handle cell = next.first;
+		unsigned iNearest = next.second;
+		lift(cell, iNearest);
 
 		/* FIXME: Optimize this by local graph traversal */
 		initialize();
