@@ -588,28 +588,46 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	DEBUG_START;
 	unsigned numDeletable = 0;
 	unsigned iDeleted = vertices.size();
+	unsigned numSpecial = 0;
+	unsigned iSpecial = vertices.size();
 	for (unsigned i = 0; i < vertices.size(); ++i)
 	{
 		unsigned iPrev = indexModulo(i - 1, vertices.size());
 		unsigned iNext = indexModulo(i + 1, vertices.size());
-		if (isPositivelyDecomposable(vertices[iPrev]->point(),
-					vertices[iNext]->point(),
-					dominator->point(),
-					vertices[i]->point()))
+		Point_3 prev = vertices[iPrev]->point();
+		Point_3 next = vertices[iNext]->point();
+		Point_3 curr = vertices[i]->point();
+		Point_3 dom = dominator->point();
+
+		if (isPositivelyDecomposable(prev, next, dom, curr))
 		{
 			iDeleted = i;
 			++numDeletable;
 		}
+
+		Vector_3 product = CGAL::cross_product(prev - CGAL::Origin(),
+				next - CGAL::Origin());
+		if ((product * curr) * (product * dom) < 0.)
+		{
+			iSpecial = i;
+			++numSpecial;
+		}
+
 	}
 	std::cout << "Number of positively decomposable vectors: "
 		<< numDeletable << std::endl;
 	ASSERT(numDeletable <= 1 && "Wrong topological configuration");
+	if (numDeletable == 0)
+		ASSERT(numSpecial == 1 && "This case not handled yet");
+
 	Vertex_handle vertexDeleted = vertices[iDeleted];
 	Vector_3 tangient = alpha * xOld + (1. - alpha) * xNew;
 	for (unsigned i = 0; i < vertices.size(); ++i)
 	{
 		Vertex_handle vertex = vertices[i];
 		Point_3 point;
+		if (numDeleted == 0 && i == iSpecial)
+			continue;
 		if (i == iDeleted)
 			point = INNER_RESOLVED_POINT_FACTOR * vertex->point();
 		else
