@@ -1,0 +1,2481 @@
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%\def\lrskipp{5mm}
+%\def\klrskip{1.05}
+%\def\dlrskip{0.0001}
+%\makepicturei{60}{kruch1.eps}{Рис. 1}
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%\leftmargin=150mm
+\def\No{\textnumero}
+\def\dymaketab{0mm}
+\def\vvvvv{}
+\def\addvspacetop{}
+\newcount\underoddstring
+\underoddstring=2
+\def\fludk{12}
+\def\firstpagenum{3}
+\mathchardef\lesv=\leq
+\mathchardef\gesv=\geq
+\def\kparindentsave{1}
+\def\kparindent{1} 
+\def\labstractI{}
+\def\maketabaddspacei{}
+\def\addspaceunder{}
+\def\maketabsddvspace{}
+\def\iabstractx{}
+\def\iabstractxx{}
+\def\iabstractxxx{}
+\def\dtwadd{0mm}
+\def\udkspace{}
+\def\addspacepicc{}
+
+\def\skpplusk{0.2}
+\def\dlrskipdef{0.2}
+\def\dlrskip{\dlrskipdef}
+\def\blskip{4.3mm}
+%\def\blskip{4.2mm}
+%\def\blskip{4.45mm}
+\def\lrskipdef{0mm}
+\def\lrskipp{\lrskipdef}
+\def\klrskipdef{1}
+\def\klrskip{\klrskipdef}
+\def\ktextbox{1.}
+\def\ktextboxdef{1.}
+\parskip=0.42mm
+\parskip=0.1mm
+\def\addvspacepa{0ex}
+%\baselineskip=8.0mm
+%NAME: fancyhea.sty
+% fancyheadings.sty version 1.0
+% Fancy headers and footers.
+% Piet van Oostrum, Dept of Computer Science, University of Utrecht
+% Padualaan 14, P.O. Box 80.089, 3508 TB Utrecht, The Netherlands
+% Telephone: +31-30-531806. piet@cs.ruu.nl (mcvax!hp4nl!ruuinf!piet)
+% March, 1989.
+
+% Here is a documentstylestyle option that allows you to customize your
+% page headers and footers in an easy way. It combines features that were
+% separately available in other pagestyles, without introducing much
+% complexity. You can define:
+%     - three-part headers and footers
+%     - rules in header and footer
+%     - headers and footers wider than \textwidth
+%     - multiline headers and footers
+%     - separate headers and footers for even and odd pages
+%     - separate headers and footers for chapter pages
+%
+% To use this pagestyle, you must include the ``fancyheadings'' style
+% option in your \documentstyle, and issue the \pagestyle{fancy} command.
+% The \pagestyle{fancy} command should be issued after any changes made to
+% \textwidth.
+%
+% The page layout will be as follows:
+%
+%               LHEAD          CHEAD          RHEAD
+%               ----------------------------------- (rule)
+%
+%                            page body
+%
+%
+%               ----------------------------------- (rule)
+%               LFOOT          CFOOT          RFOOT
+%
+% The L-fields will be leftadjusted, the C-fields centered and the
+% R-fields rightadjusted.
+% Each of the six fields and the two rules can be defined separately.
+%
+% Simple use:
+%
+% The header and footer fields can be defined by commands \lhead{LHEAD}
+% and so on for the other fields. If the field depends on something in the
+% document (e.g. section titles) you must in general use the \markboth and
+% \markright commands, otherwise a title may end on the wrong page. You
+% can do this e.g. by redefining the commands \chaptermark, \sectionmark
+% and so on (see example below). The defaults for these marks are as in
+% the standard pagestyles. The marks can be put into a header or footer
+% field by referencing \leftmark and \rightmark.
+%
+% Rules in header and footer
+%
+% The thickness of the rules below the header and above the footer can be
+% changed by redefining the length parameters \headrulewidth (default
+% 0.4pt) and \footrulewidth (default 0). These may be redefined by the
+% \setlength command. A thickness of 0pt makes the rule invisible.
+% If you want to make more complicated changes, you have to redefine the
+% commands \headrule and/or \footrule.
+%
+% Headers and footers wider than \textwidth
+%
+% The headers and footers are set in a box of width \headwidth. The
+% default for this is the value of \textwidth. You can make it wider (or
+% smaller) by redefining \headwidth with the \setlength or \addtolength
+% command. The headers and footers will stick out the page on the same
+% side as the marginal notes. For example to include the marginal notes,
+% add both \marginparsep and \marginparwidth to \headwidth (see also the
+% example below).
+%
+% Multiline headers and footers
+%
+% Each of the six fields is set in an appropriate parbox, so you can put a
+% multiline part in it with the \\ command. It is also possible to put
+% extra space in it with the \vspace command. Note that if you do this you
+% will probably have to increase the \headheight or \footskip lengths.
+%
+% Separate headers and footers for even and odd pages
+%
+% If you want the headers and footers to be different on even- and
+% odd-numbered pages in the ``twoside'' style, the field-defining macros
+% can be given an optional argument, to be used on the even-numbered
+% pages, like \lhead[EVEN-LHEAD]{ODD-RHEAD}.
+%
+% Separate headers and footers for chapter pages
+%
+% LaTeX gives a \thispagestyle{plain} command for the first page of the
+% document, the first page of each chapter and a couple of other pages. It
+% might be incompatible with your pagestyle. In this case you can use a
+% slightly different version of the pagestyle, called \pagestyle{fancyplain}.
+% This pagestyle redefines the pagestyle ``plain'' to also use pagestyle
+% ``fancy'' with the following modifications:
+%     - the thicknesses of the rules is defined by \plainheadrulewidth and
+%       \plainfootrulewidth (both default 0).
+%     - the 6 fields may be defined separately for the plain pages by
+%       giving them the value \fancyplain{PLAIN-VALUE}{NORMAL-VALUE}. This
+%       construct may be used in both the optional argument and the normal
+%       argument. Thus \lhead[\fancyplain{F1}{F2}]{\fancyplain{F3}{F4}}
+%       specifies the LHEAD value in a two-sided document:
+%       F1 on an even-numbered ``plain'' page
+%       F2 on an even-numbered normal page
+%       F3 on an odd-numbered ``plain'' page
+%       F4 on an odd-numbered normal page.
+%
+% Defaults:
+%
+% \headrulewidth              0.4pt
+% \footrulewidth                0pt
+% \plainheadrulewidth   0pt
+% \plainfootrulewidth   0pt
+%
+% \lhead[\fancyplain{}{\sl\rightmark}]{\fancyplain{}{\sl\leftmark}}
+% %  i.e. empty on ``plain'' pages \rightmark on even, \leftmark on odd pages
+% \chead{}
+% \rhead[\fancyplain{}{\sl\leftmark}]{\fancyplain{}{\sl\rightmark}}
+% %  i.e. empty on ``plain'' pages \leftmark on even, \rightmark on odd pages
+% \lfoot{}
+% \cfoot{\rm\thepage} % page number
+% \rfoot{}
+%
+% Examples:
+%
+% To put two lines containing the section title and the subsection title
+% in the righthandside corner, use:
+%~
+% \documentstyle[fancyheadings]{article}
+% \pagestyle{fancy}
+% \renewcommand{\sectionmark}[1]{\markboth{#1}{}}
+% \renewcommand{\subsectionmark}[1]{\markright{#1}}
+% \rfoot{\leftmark\\\rightmark}
+%
+% The following definitions give an approximation of the style used in the
+% LaTeX book:
+%
+% \documentstyle[fancyheadings]{book}
+% \pagestyle{fancyplain}
+% \addtolength{\headwidth}{\marginparsep}
+% \addtolength{\headwidth}{\marginparwidth}
+% \renewcommand{\chaptermark}[1]{\markboth{#1}{#1}} % remember chapter title
+% \renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+%                                                 % section number and title
+% \lhead[\fancyplain{}{\bf\thepage}]{\fancyplain{}{\bf\rightmark}}
+% \rhead[\fancyplain{}{\bf\leftmark}]{\fancyplain{}{\bf\thepage}}
+% \cfoot{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\lhead{\@ifnextchar[{\@xlhead}{\@ylhead}}
+\def\@xlhead[#1]#2{\gdef\@elhead{#1}\gdef\@olhead{#2}}
+\def\@ylhead#1{\gdef\@elhead{#1}\gdef\@olhead{#1}}
+
+\def\chead{\@ifnextchar[{\@xchead}{\@ychead}}
+\def\@xchead[#1]#2{\gdef\@echead{#1}\gdef\@ochead{#2}}
+\def\@ychead#1{\gdef\@echead{#1}\gdef\@ochead{#1}}
+
+\def\rhead{\@ifnextchar[{\@xrhead}{\@yrhead}}
+\def\@xrhead[#1]#2{\gdef\@erhead{#1}\gdef\@orhead{#2}}
+\def\@yrhead#1{\gdef\@erhead{#1}\gdef\@orhead{#1}}
+
+\def\lfoot{\@ifnextchar[{\@xlfoot}{\@ylfoot}}
+\def\@xlfoot[#1]#2{\gdef\@elfoot{#1}\gdef\@olfoot{#2}}
+\def\@ylfoot#1{\gdef\@elfoot{#1}\gdef\@olfoot{#1}}
+
+\def\cfoot{\@ifnextchar[{\@xcfoot}{\@ycfoot}}
+\def\@xcfoot[#1]#2{\gdef\@ecfoot{#1}\gdef\@ocfoot{#2}}
+\def\@ycfoot#1{\gdef\@ecfoot{#1}\gdef\@ocfoot{#1}}
+
+\def\rfoot{\@ifnextchar[{\@xrfoot}{\@yrfoot}}
+\def\@xrfoot[#1]#2{\gdef\@erfoot{#1}\gdef\@orfoot{#2}}
+\def\@yrfoot#1{\gdef\@erfoot{#1}\gdef\@orfoot{#1}}
+
+\newdimen\headrulewidth
+\newdimen\footrulewidth
+\newdimen\plainheadrulewidth
+\newdimen\plainfootrulewidth
+\newdimen\headwidth
+\newdimen\tabsize
+\newif\if@fancyplain \@fancyplainfalse
+\def\fancyplain#1#2{\if@fancyplain#1\else#2\fi}
+
+% Initialization of the head and foot text.
+
+\headrulewidth 0.4pt
+\footrulewidth\z@
+\plainheadrulewidth\z@
+\plainfootrulewidth\z@
+
+\lhead[\fancyplain{}{\sl\rightmark}]{\fancyplain{}{\sl\leftmark}}
+%  i.e. empty on ``plain'' pages \rightmark on even, \leftmark on odd pages
+\chead{}
+\rhead[\fancyplain{}{\sl\leftmark}]{\fancyplain{}{\sl\rightmark}}
+%  i.e. empty on ``plain'' pages \leftmark on even, \rightmark on odd pages
+\lfoot[]{\raisebox{4mm}{\scriptsize \the\underoddstring\  ВМУ, математика, механика, \No\,\Nom \global\advance\underoddstring by 1}}
+\cfoot{========\rm\thepage} % page number
+\rfoot{}
+
+% Put together a header or footer given the left, center and
+% right text, fillers at left and right and a rule.
+% The \lap commands put the text into an hbox of zero size,
+% so overlapping text does not generate an errormessage.
+
+\def\@fancyhead#1#2#3#4#5{#1\hbox to\headwidth{\vbox{\hbox
+{\rlap{\parbox[b]{\headwidth}{\raggedright#2\strut}}\hfill
+\parbox[b]{\headwidth}{\centering#3\strut}\hfill
+\llap{\parbox[b]{\headwidth}{\raggedleft#4\strut}}}\headrule}}#5}
+
+
+\def\@fancyfoot#1#2#3#4#5{#1\hbox to\headwidth{\vbox{\footrule
+\hbox{\rlap{\parbox[t]{\headwidth}{\raggedright#2\strut}}\hfill
+\parbox[t]{\headwidth}{\centering#3\strut}\hfill
+\llap{\parbox[t]{\headwidth}{\raggedleft#4\strut}}}}}#5}
+
+\def\headrule{{\if@fancyplain\headrulewidth\plainheadrulewidth\fi
+\hrule\@height\headrulewidth\@width\headwidth \vskip-\headrulewidth}}
+
+\def\footrule{{\if@fancyplain\footrulewidth\plainfootrulewidth\fi
+\vskip-0.3\normalbaselineskip\vskip-\footrulewidth
+\hrule\@width\headwidth\@height\footrulewidth\vskip0.3\normalbaselineskip}}
+
+\def\ps@fancy{
+\let\@mkboth\markboth
+\@ifundefined{chapter}{\def\sectionmark##1{\markboth
+{\uppercase{\ifnum \c@secnumdepth>\z@
+ \thesection\hskip 1em\relax \fi ##1}}{}}
+\def\subsectionmark##1{\markright {\ifnum \c@secnumdepth >\@ne
+ \thesubsection\hskip 1em\relax \fi ##1}}}
+{\def\chaptermark##1{\markboth {\uppercase{\ifnum \c@secnumdepth>\m@ne
+ \@chapapp\ \thechapter. \ \fi ##1}}{}}
+\def\sectionmark##1{\markright{\uppercase{\ifnum \c@secnumdepth >\z@
+ \thesection. \ \fi ##1}}}}
+\def\@oddhead{\@fancyhead\relax\@olhead\@ochead\@orhead\hss}
+\def\@oddfoot{\@fancyfoot\relax\@olfoot\@ocfoot\@orfoot\hss}
+\def\@evenhead{\@fancyhead\hss\@elhead\@echead\@erhead\relax}
+\def\@evenfoot{\@fancyfoot\hss\@elfoot\@ecfoot\@erfoot\relax}
+\headwidth\textwidth}
+\def\ps@fancyplain{\ps@fancy \let\ps@plain\ps@plain@fancy}
+\def\ps@plain@fancy{\@fancyplaintrue\ps@fancy}
+\def\midline{\centerline{
+\hbox{\vbox spread 1.0ex {\hrule height1pt width0.15\textwidth} * \vbox spread 1.0ex {\hrule height1pt width0.08\textwidth} * \vbox spread 1.0ex {\hrule height1pt width0.08\textwidth} * \vbox spread 1.0ex {\hrule height1pt width0.15\textwidth}}}}
+\def\midline{\centerline{
+\hbox{\vbox spread 1.0ex {\hrule height0.7pt width0.5\textwidth}}}}
+%\def\midline{\centerline{
+%\hbox{\vbox spread 1.0ex {\hrule height1pt width0.15\textwidth} $\Diamond$
+%                          \vbox spread 1.0ex {\hrule height1pt width0.08\textwidth} * \vbox spread 1.0ex {\hrule height1pt width0.08\textwidth} $\Diamond$
+%                          \vbox spread 1.0ex {\hrule height1pt width0.15\textwidth}}}}
+%
+%────────────────────────────────────────────────────────────────────────────────
+\textheight = 25.0cm
+\headsep = 5mm
+%\advance\textheight by \topskip
+%\textwidth 450pt \columnsep 10pt \columnseprule 0pt
+%\textwidth 16.5cm \columnsep 10pt \columnseprule 0pt
+%\textheight = 25.0cm
+%\advance\textheight by \topskip
+\textwidth 18.0cm \columnsep 10pt \columnseprule 0pt
+
+\footnotesep 6.65pt
+%────────────────────────────────────────────────────────────────────────────────
+%\font\tmain=xcmr6  scaled \magstep1
+%\font\tmainb=xcmbx6  scaled \magstep1
+%\font\tmainhead=xcmbx12  scaled \magstep1
+%\font\tmainauthor=xcmr9  scaled \magstep1
+%────────────────────────────────────────────────────────────────────────────────
+%\def\thepage{000}
+\def\lastpagenumber{000}
+\def\tttsp{ }
+%──start \ltitle──────────────────────────────────────────────────────────────────────────────
+\def\ltitle#1#2{ %\pagebreak
+\setcounter{equation}{0}
+\defrusspec
+\def\wdebauth{\bf #2}
+%~~~------------------------------------------------------------
+\ifnum \thepage=\lastpagenumber
+%\write9{call dvips -o prn -p \thepage \tttsp -n 1 no_\No.dvi}
+\fi
+%------------------------------------------------------------
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\bigskip\vspace*{1mm}
+
+\noindent
+\thispagestyle{plain}
+
+\ifnum \setnoudk=0
+УДК \udk
+\write12{\udk}
+\fi
+
+\udkspace
+\vspace*{0mm}
+\def\udkspace{}
+%\ifeof12
+%\def\lastpagenumber{\thepage}
+%\else
+%\read12 to \lastpagenumber
+%\fi
+%\def\lastpagenumber{\pageref{str:\Name}}
+
+%\cfoot{\bf \large \thepage}
+\write14{\thepage}
+\headrulewidth 0pt
+%\language0 
+\vspace{1ex}
+
+%\hrule \vspace{3ex}
+%\mbox{}
+
+\begin{center}
+%\tmainhead
+%\large
+\bf
+#1
+\end{center}
+%\vspace{-6mm}
+\vspace{-3mm}
+\begin{center}
+%\tmainauthor
+%\large
+\bf
+#2
+\end{center} \vspace*{-2mm plus 0mm minus 0mm}
+%\hbox to \textwidth{\hfill\vbox{\hrule width5cm height1.0pt}\hfill}\vspace{3ex}
+%------------------------------------------------------------
+\def\num{\No}
+%\def\num{N}
+\pagestyle{fancyplain}
+
+% FIRST USED!!!!!
+\lhead[\fancyplain{\sc\thepage}{\sc\thepage}]
+      {\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \hbox{\No\hspace{0.5ex}\Nom}
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,\ математика.\ механика.\ \Year.\ \hbox{\No\hspace{0.5ex}\Nom}}}
+
+\rhead[\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \No\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,\ математика.\ механика.\ \Year.\ \No\hspace{0.5ex}\Nom}]
+      {\fancyplain{\sc\thepage}{\sc\thepage}}
+\ifnum \wdeb=1
+\lhead[\fancyplain{\sc\thepage}{\sc\thepage}]
+      {\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \No\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\
+                    сер.\hspace{0.1em}1,\ математика.\ механика.\
+                    \Year.\ \nnum\hspace{0.5ex}\No \wdebauth}}
+
+\rhead[\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \No\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\
+                    сер.\hspace{0.1em}1,\ математика.\ механика.\
+                    \Year.\ \No\hspace{0.5ex}\Nom \wdebauth}]
+      {\fancyplain{\sc\thepage}{\sc\thepage}}
+\fi
+%\cfoot{\bf \large \thepage}
+\cfoot{}
+\headrulewidth 0.7pt
+\plainheadrulewidth   0.7pt
+%------------------------------------------------------------
+\def\setnoudk{0}
+}
+%──stop2 \ltitle──────────────────────────────────────────────────────────────────────────────
+%------------------------------------------------------------
+\def\ltitlee#1{ %\pagebreak
+\defrusspec
+\def\wdebauth{\bf NULL}
+%~~~------------------------------------------------------------
+\ifnum \thepage=\lastpagenumber
+%\write9{call dvips -o prn -p \thepage \tttsp -n 1 no_\No.dvi}
+\fi
+%------------------------------------------------------------
+
+\bigskip
+
+\noindent
+\thispagestyle{plain}
+
+\ifnum \setnoudk=0
+%УДК \udk
+\write12{\udk}
+\fi
+
+\vspace{-2mm}
+
+%\read12 to \lastpagenumber
+%\ifeof12
+%\def\lastpagenumber{\thepage}
+%\else
+%\read12 to \lastpagenumber
+%\fi
+%\def\lastpagenumber{\pageref{str:\Name}}
+
+%\cfoot{\bf \large \thepage}
+\write14{\thepage}
+\headrulewidth 0pt
+%\language0 
+\vspace{1ex}
+
+%\hrule \vspace{3ex}
+%\mbox{}
+
+\begin{center}
+%\tmainhead
+%\large
+\bf
+#1
+\end{center}
+\vspace{3.ex}
+%\hbox to \textwidth{\hfill\vbox{\hrule width5cm height1.0pt}\hfill}\vspace{3ex}
+%------------------------------------------------------------
+\def\num{\No}
+%\def\num{N}
+\pagestyle{fancyplain}
+
+\lhead[\fancyplain{\sc\thepage}{\sc\thepage}]
+      {\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \num\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,\ математика.\ механика.\ \Year.\ \num\hspace{0.5ex}\Nom}}
+
+\rhead[\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \num\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,\ математика.\ механика.\ \Year.\ \num\hspace{0.5ex}\Nom}]
+      {\fancyplain{\sc\thepage}{\sc\thepage}}
+\ifnum \wdeb=1
+\lhead[\fancyplain{\sc\thepage}{\sc\thepage}]
+      {\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \num\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\
+                    сер.\hspace{0.1em}1,\ математика.\ механика.\
+                    \Year.\ \num\hspace{0.5ex}\No \wdebauth}}
+
+\rhead[\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \num\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\
+                    сер.\hspace{0.1em}1,\ математика.\ механика.\
+                    \Year.\ \num\hspace{0.5ex}\Nom \wdebauth}]
+      {\fancyplain{\sc\thepage}{\sc\thepage}}
+\fi
+%\cfoot{\bf \large \thepage}
+\cfoot{}
+\headrulewidth 0.7pt
+\plainheadrulewidth   0.7pt
+%------------------------------------------------------------
+}
+%------------------------------------------------------------
+\def\titlepn{ \hbox to 0mm{\hss%
+\ifeof15%
+\def\thetitlepn{???}%
+\else%
+\read15 to \thetitlepn%
+\fi%
+\thetitlepn}}
+\def\pagenum#1{\dotfill~\hbox to 0mm{\hspace{2.4em} \titlepn \hspace{2.0em} \hbox to 0mm{\hss #1} \hss}}
+\def\pagenumx#1#2{\dotfill~\hbox to 0mm{\hspace{1.4em} #1  \hspace{2.0em} \hbox to 0mm{\hss #2} \hss}}
+%\def\pagenum#1{\dotfill~\hbox to 0mm{\hspace{2.4em} \hbox to 0mm{\hss #1} \hspace{2.0em} \titlepn \hss}}
+%------------------------------------------------------------
+
+\def\lend{
+
+\medskip
+%~~~\bigskip
+
+\midline
+
+\write11{\thepage}
+
+}
+\def\lendc{
+
+\medskip
+%~~~\bigskip
+
+%\midline
+
+\write11{\thepage}
+
+}
+%------------------------------------------------------------
+%\openout\fludk=abstr.tex
+%------------------------------------------------------------
+\def\thetheorem#1#2{{\bf #1}{\em #2}}
+%\newenvironment{theorem}[1]{\mbox{}\newline{\bf #1}\em}{\mbox{}\newline }
+\newenvironment{theorem}[1]{\endgraf  {\bf #1}\em}{ \endgraf  }
+%~~~------------------------------------------------------------
+\def\createfiles{
+%\openout11=./ugotmp1.all \openout14=./ugotmp2.all
+\openout12=./tmpudk.all %\openout9=double_p.bat
+\openout11=./tmptmp1.all
+\openout14=./tmptmp2.all
+}
+%\openin12=./tmptmp1.all
+%\openin15=./tmptmp2.all
+%------------------------------------------------------------
+\def\subtitle#1{\begin{center}
+\bf
+#1
+\end{center}
+\nopagebreak
+\par
+}
+%------------------------------------------------------------
+\parindent=2.0em
+\arraycolsep 1pt
+%------------------------------------------------------------
+\topmargin -17mm
+%нечетная
+\oddsidemargin -8mm
+\evensidemargin -13mm
+%=====================================================
+%\documentstyle{epsf}
+\input{epsf.sty}
+%=====================================================
+\newdimen\mbdx
+\newdimen\mbdxi
+\newdimen\mbdy
+\newdimen\mbdyyy
+\newcount\mbdn
+\newdimen\tmpdim
+\mbdx=1.5em
+\mbdx=2.0em
+\mbdy=0.5ex
+\mbdyyy=0.5ex
+\mbdn=1
+\mbdxi=\mbdx
+\def\mbdyy{0mm}
+\def\kinitscale{0.8}
+\def\kscale{\kinitscale}
+%=====================================================
+\newbox\picbox
+\newbox\picboxa
+\newbox\picboxb
+\newbox\picboxc
+\newbox\picboxd
+\newbox\textbox
+\newbox\textboxa
+\newbox\textboxb
+\newbox\textboxc
+\newbox\textboxd
+\newbox\allpicboxa
+\newbox\allpicboxb
+\newbox\allpicboxc
+\newbox\allpicboxd
+\newbox\allpicbox
+\newbox\objb
+\newbox\tablbox
+\newbox\tabllbox
+%=====================================================
+\newdimen\tw
+\newdimen\dtw
+\newdimen\mbdx
+\newdimen\mbdxi
+\newdimen\mbdy
+%\newcount\mbdn
+\newcount\strnumber
+%=====================================================
+\def\pictextsize{\small}
+%\makepicture{0.3}{wpic1.pcx}{Fig. 2.}
+%=====================================================
+% text text text          ----------
+% text text text          | Picture|
+% text text text <------->| |\mbdy |
+% text text text  \mbdx   | text   |
+% text text text          ----------
+% text text text        \mbdn |
+% text text text text text text text text text
+% text text text
+%=====================================================
+\newbox\allpicbox
+\gdef\picpar#1{\defrusspec
+\ifodd \thepage
+\hangindent=\dtw
+\else
+\hangindent=-\dtw
+\fi
+\advance\strnumber by -\prevgraf
+\hangafter=-#1
+              }
+\mbdx=1.5em
+\mbdx=2.0em
+\mbdy=0.5ex
+\mbdn=1
+\mbdxi=\mbdx
+
+%===================================================== ~~
+\newdimen\tmpX
+\newdimen\graphX
+\newdimen\picwidth
+\newbox\boxa%
+\newbox\boxb%
+\newbox\boxc%
+\newbox\boxd%
+\newbox\boxx%
+%===================================================== ~~
+%\def\wsetl{\setlength{\unitlength}{0.00087500in}}%
+\def\setepslatex{\def\nepslatex{1}}
+\def\seteps{\def\nepslatex{0}}
+\seteps
+\def\wepsfbox#1{%
+\newbox\boxa%
+\input{#1.psu}%
+\ifdim\epsfxsize>0pt%
+\tmpX=\epsfxsize%
+\epsfxsize=0pt%
+%
+\setbox\boxa=\hbox{%
+\begin{picture}(0,0)%
+\epsfbox{#1.psl}%
+\end{picture}%
+\input{#1.psu}%
+\input{#1.pst}%
+}
+%
+\epsfxsize=\tmpX%
+\graphX=\epsfxsize%
+\tmpX=\wd\boxa \divide\tmpX by 100 \divide\graphX by \tmpX%
+\input{#1.psu}%
+\multiply\unitlength by \graphX \divide\unitlength by 100%
+%
+{%
+\begin{picture}(0,0)%
+\epsfbox{#1.psl}%
+\end{picture}%
+\input{#1.pst}%
+}%
+%
+%
+%------------------------%
+\else%
+%------------------------%
+\tmpX=\epsfysize%
+\epsfysize=0pt%
+%
+\setbox\boxa=\hbox{%
+\begin{picture}(0,0)%
+\epsfbox{#1.psl}%
+\end{picture}%
+\input{#1.psu}%
+\input{#1.pst}%
+}%
+%
+\epsfysize=\tmpX%
+\graphX=\epsfysize%
+\tmpX=\ht\boxa%
+\divide\tmpX by 100%
+\divide\graphX by \tmpX%
+\setlength{\unitlength}{0.00087500in}%
+\multiply\unitlength by \graphX%
+\divide\unitlength by 100%
+%
+{
+\begin{picture}(0,0)%
+\epsfbox{#1.psl}%
+\end{picture}%
+\input{#1.pst}%
+}%
+%
+\fi%
+}
+%------------------------
+%===================================================== ~~
+\newbox\allpicbox
+\gdef\picpar#1{\defrusspec
+\ifodd \thepage
+\hangindent=\dtw
+\else
+\hangindent=-\dtw
+\fi
+\hangafter=-#1
+              }
+\mbdx=1.5em
+\mbdx=2.0em
+\mbdy=0.5ex
+\mbdn=1
+\mbdxi=\mbdx
+
+%- BEGIN{makepicture} ---
+\def\makepicture#1#2#3{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \ifnum #1 < 0
+%    \strnumber=#1 \strnumber=-\strnumber
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+ \ifnum \nepslatex = 0
+ \global\setbox\picbox=\hbox to \klrskip\picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picbox=\hbox to \klrskip\picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textbox=\vbox{\hsize=\wd\picbox
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {{\pictextsize
+     {#3}} }
+                      }
+ \setbox\allpicbox=\vbox{\copy\picbox\vspace{\mbdy}{\copy\textbox}}
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \advance\dtw by \dtwadd 
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\kparindent\parindent
+ %
+%\leavevmode
+\def\kparindent{\kparindentsave} 
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\addspaceunder\vspace*{\baselineskip}\box\picbox\vspace{\mbdy}{\box\textbox}\vss}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+\def\klrskip{\klrskipdef}
+\def\dtwadd{0mm}
+\mbdy=0.5ex
+\mbdn=1
+\def\addspaceunder{}
+  }
+%- END{makepicture} ---
+%- BEGIN{makepicturei} ---
+\def\makepicturei#1#2#3{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+\setbox\boxa=\hbox{\epsfbox{\picdir#2}}
+\epsfxsize=\wd\boxa
+%\epsfxsize=\wd\vbox{\epsfbox{\picdir#2}}
+% \epsfxsize=\textwidth
+% \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \ifnum #1 < 0
+%    \strnumber=#1 \strnumber=-\strnumber
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+ \ifnum \nepslatex = 0
+ \global\setbox\picbox=\hbox to \klrskip\picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picbox=\hbox to \klrskip\picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textbox=\vbox{\hsize=\wd\picbox
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {{\pictextsize
+     {#3}} }
+                      }
+ \setbox\allpicbox=\vbox{\copy\picbox\vspace{\mbdy}{\copy\textbox}}
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\kparindent\parindent
+ %
+%\leavevmode
+\def\kparindent{\kparindentsave} 
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\addvspacetop\vspace*{\baselineskip}\box\picbox\vspace{\mbdy}{\box\textbox}\vss}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+\def\klrskip{\klrskipdef}
+\def\addvspacetop{}
+\mbdn=1
+  }
+%- END{makepicturei} ---
+%- BEGIN{makepicture} ---
+\def\makepicturee#1#2#3#4{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \ifnum #1 < 0
+%    \strnumber=#1 \strnumber=-\strnumber
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+ \ifnum \nepslatex = 0
+ \global\setbox\picbox=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picbox=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textbox=\vbox{\hsize=\wd\picbox
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {{\pictextsize
+     {#3}} }
+                      }
+ \setbox\allpicbox=\vbox{\copy\picbox\vspace{\mbdy}{\copy\textbox}{\hbox to 0.5\textwidth{\hspace*{0.5\parindent}\pictextsize\hfill#4\hfill}}}
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\kparindent\parindent
+ %
+%\leavevmode
+\def\kparindent{\kparindentsave} 
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\vspace*{\baselineskip}\box\picbox\vspace{\mbdy}{\box\textbox}{\hbox to 0.5\textwidth{\hspace*{0.5\parindent}\pictextsize\hfill#4\hfill}}\vss}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+\mbdn=1
+  }
+%- END{makepicture} ---
+%- BEGIN{makepicturetwo} ---
+\def\makepicturetwo#1#2#3#4#5{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+%---
+ \ifnum #1 < 0
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+%---
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\addspacepicc\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\addspacepicc\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picboxa  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxa=\vbox{\hsize=\ktextbox\wd\picboxa
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #3}
+                      }
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+%---
+ \ifnum #1 < 0
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+%---
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\addspacepicc\vbox{\epsfbox{\picdir#4}}}
+ \else
+ \global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\addspacepicc\vbox{\wepsfbox{\picdir#4}}}
+ \fi
+ %
+ \dtw=\wd\picboxb  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxb=\vbox{\hsize=\ktextbox\wd\picboxb
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #5}
+                      }
+%--------
+ \setbox\allpicbox=\vbox{\addspaceunder\copy\picboxa\vspace{\mbdy}\copy\textboxa\vspace{2\mbdy}\vspace{2ex}\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\parindent
+ %
+%\leavevmode
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\vspace*{\baselineskip}\addspaceunder\box\picboxa\vspace{\mbdy}\box\textboxa\vspace{2\mbdyyy}\vspace{2ex}\box\picboxb\vspace{\mbdy}\box\textboxb\vss}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+\def\ktextbox{\ktextboxdef}
+\def\addspacepicc{}
+\def\addspaceunder{}
+\mbdy=0.5ex
+\mbdyyy=0.5ex
+                       }
+%- END{makepicturetwo} ---
+%============================================================================================
+%- BEGIN{makepicturethree} ---
+\def\makepicturethree#1#2#3#4#5#6#7{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+%---
+ \ifnum #1 < 0
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+%---
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picboxa  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxa=\vbox{\hsize=\wd\picboxa
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #3}
+                      }
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#4}}}
+ \else
+ \global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#4}}}
+ \fi
+ %
+ \dtw=\wd\picboxb  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxb=\vbox{\hsize=\wd\picboxb
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #5}
+                      }
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxc=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#6}}}
+ \else
+ \global\setbox\picboxc=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#6}}}
+ \fi
+ %
+ \dtw=\wd\picboxc  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxc=\vbox{\hsize=\wd\picboxc
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #7}
+                      }
+%--------
+ \setbox\allpicbox=\vbox
+ {%
+\copy\picboxa\vspace{\mbdy}\copy\textboxa\vspace{2\mbdy}\vspace{2ex}
+\copy\picboxb\vspace{\mbdy}\copy\textboxb\vspace{2\mbdy}\vspace{2ex}
+\copy\picboxc\vspace{\mbdy}\copy\textboxc
+  }
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\parindent
+ %
+%\leavevmode
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\vspace*{\baselineskip}
+\box\picboxa\vspace{\mbdy}\box\textboxa\vspace{2\mbdy}\vspace{2ex}
+\box\picboxb\vspace{\mbdy}\box\textboxb\vspace{2\mbdy}\vspace{2ex}
+\box\picboxc\vspace{\mbdy}\box\textboxc\vss
+}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+                       }
+%- END{makepicturethree} ---
+%============================================================================================
+%- BEGIN{makepicturefour} ---
+\def\makepicturefour#1#2#3#4#5#6#7#8#9{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+%---
+ \ifnum #1 < 0
+  \picwidth=#1mm
+  \picwidth=-\picwidth
+  \epsfxsize=\picwidth
+ \else
+  \picwidth=\epsfxsize
+ \fi
+%---
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picboxa  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxa=\vbox{\hsize=\wd\picboxa
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #3}
+                      }
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#4}}}
+ \else
+ \global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#4}}}
+ \fi
+ %
+ \dtw=\wd\picboxb  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxb=\vbox{\hsize=\wd\picboxb
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #5}
+                      }
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxc=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#6}}}
+ \else
+ \global\setbox\picboxc=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#6}}}
+ \fi
+ %
+ \dtw=\wd\picboxc  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxc=\vbox{\hsize=\wd\picboxc
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #7}
+                      }
+%--------
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picboxd=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#8}}}
+ \else
+ \global\setbox\picboxd=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#8}}}
+ \fi
+ %
+ \dtw=\wd\picboxd  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textboxd=\vbox{\hsize=\wd\picboxc
+     \leftskip=\lrskipp plus \dlrskip\hsize  \rightskip=\lrskipp plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #9}
+                      }
+%--------
+ \setbox\allpicbox=\vbox
+ {%
+\copy\picboxa\vspace{\mbdy}\copy\textboxa\vspace{2\mbdy}\vspace{2ex}
+\copy\picboxb\vspace{\mbdy}\copy\textboxb\vspace{2\mbdy}\vspace{2ex}
+\copy\picboxc\vspace{\mbdy}\copy\textboxc\vspace{2\mbdy}\vspace{2ex}
+\copy\picboxd\vspace{\mbdy}\copy\textboxd
+  }
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\parindent
+ %
+%\leavevmode
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\vspace*{\baselineskip}
+\box\picboxa\vspace{\mbdy}\box\textboxa\vspace{2\mbdy}\vspace{2ex}
+\box\picboxb\vspace{\mbdy}\box\textboxb\vspace{2\mbdy}\vspace{2ex}
+\box\picboxc\vspace{\mbdy}\box\textboxc\vspace{2\mbdy}\vspace{2ex}
+\box\picboxd\vspace{\mbdy}\box\textboxd\vss
+}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+                       }
+%- END{makepicturefour} ---
+%============================================================================================
+%- BEGIN{makepicturel} ---
+\def\makepicturel#1#2#3{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+ \epsfxsize=#1
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picbox=\hbox to \picwidth{\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picbox=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textbox=\vbox{\hsize=\wd\picbox
+     \leftskip=0pt plus \dlrskip\hsize  \rightskip=0pt plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #3}
+                      }
+ \setbox\allpicbox=\vbox{\copy\picbox\vspace{\mbdy}\copy\textbox}
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\parindent
+ %
+%\leavevmode
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\vspace*{\baselineskip}\box\picbox\vspace{\mbdy}\box\textbox\vss}
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+                       }
+%- END{makepicture} ---
+%============================================================================================
+%- BEGIN{makepictureafter} ---
+\def\makepictureafter#1#2#3#4{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+ \epsfxsize=\textwidth
+ \divide\epsfxsize by 10 \multiply\epsfxsize by #1 \divide\epsfxsize by 10
+ \picwidth=\epsfxsize
+ \ifnum \nepslatex = 0
+ \global\setbox\picbox=\hbox to \picwidth{\vbox{\epsfbox{\picdir#2}}}
+ \else
+ \global\setbox\picbox=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#2}}}
+ \fi
+ %
+ \dtw=\wd\picbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \setbox\textbox=\vbox{\hsize=\wd\picbox
+     \leftskip=0pt plus \dlrskip\hsize  \rightskip=0pt plus \dlrskip\hsize
+     \parindent=0pt \parfillskip=0pt {\pictextsize
+     #3}
+                      }
+ \setbox\allpicbox=\vbox{\copy\picbox\vspace{\mbdy}\copy\textbox}
+ \strnumber=\ht\allpicbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{strnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+\ifnum#4>0
+ \hangafter=#4
+\fi
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\parindent
+ %
+%\leavevmode
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+% \vbox to 0pt{\vspace*{\baselineskip}\vspace*{#4\baselineskip}\box\picbox\vspace{\mbdy}\box\textbox\vss}
+ \vbox to 0pt{\vspace{\addvspacepa}\vspace*{\baselineskip}\vspace*{#4\baselineskip}\box\picbox\vspace{\mbdy}\box\textbox\vss}
+ \hss
+             }
+\def\addvspacepa{0ex}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+                       }
+%- END{makepictureafter} ---
+%============================================================
+%=====================================================
+%\def\dlrtskip{0pt}
+%\def\lrtskip{\dlrtskip}
+%- BEGIN{makepicone} ---
+%\makepicone{wpic1.pcx}{fig.1}
+\def\xxmakepicone#1#2{\null
+%
+\epsfxsize=\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\epsfxsize=\kscale\epsfxsize
+%\setbox\picbox=\hbox to \epsfxsize{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\setbox\picbox=\hbox to \epsfxsize{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#1}}}
+\else
+\setbox\picbox=\hbox to \epsfxsize{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#1}}}
+\fi
+\global\setbox\picboxa=\hbox to \textwidth{\hfill\vbox{\copy\picbox}\hfill}
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+%\def\lrtskip{\dlrtskip}
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicbox=\hbox to \textwidth{\copy\allpicboxa}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                   }
+%- END{makepicone} ---
+%============================================================
+%=====================================================
+%- BEGIN{makepicone} ---
+%\makepicone{wpic1.pcx}{fig.1}
+\def\dlrtskip{0pt}
+\def\lrskipp{\lrskipdef}
+\def\makepicone#1#2{\null
+%
+\epsfxsize=\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\epsfxsize=\kscale\epsfxsize
+%\setbox\picbox=\hbox to \epsfxsize{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\setbox\picbox=\hbox to \epsfxsize{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#1}}}
+\else
+\setbox\picbox=\hbox to \epsfxsize{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#1}}}
+\fi
+\global\setbox\picboxa=\hbox to \textwidth{\hfill\vbox{\copy\picbox}\hfill}
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=\lrskipp plus \dlrskip\hsize
+\rightskip=\lrskipp plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicbox=\hbox to \textwidth{\copy\allpicboxa}
+\def\lrskipp{\lrskipdef}
+
+\par
+\noindent\box\allpicbox
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+%\def\lrskipp{\lrskippdef}
+\def\lrskipp{\lrskipdef}
+%\def\lrtskip{\dlrtskip}
+\mbdy=0.5ex
+}
+%\skip
+%=====================================================
+%- BEGIN{makepicone} ---
+%\makepiconew{wpic1.pcx}{fig.1}{75mm}
+\def\makepiconew#1#2#3{\null
+%
+\epsfxsize=#3
+%\epsfxsize=\kscale\epsfxsize
+%\epsfxsize=\kscale\epsfxsize
+%\setbox\picbox=\hbox to \epsfxsize{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\setbox\picbox=\hbox to \epsfxsize{\vbox{\epsfbox{\picdir#1}}}
+\else
+\setbox\picbox=\hbox to \epsfxsize{\vbox{\wepsfbox{\picdir#1}}}
+\fi
+\global\setbox\picboxa=\hbox to \textwidth{\hfill\vbox{\copy\picbox}\hfill}
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicbox=\hbox to \textwidth{\copy\allpicboxa}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                   }
+%- END{makepicone} ---
+%============================================================
+%- BEGIN{makepictwo} ---
+%\makepictwo{wpic1.pcx}{Fig. 2.}{wpic2.pcx}{Fig. 3.}
+\def\makepictwo#1#2#3#4{\null
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxa=\hbox{\vspace*{\mbdyy}\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#1}\vspace*{\mbdyy}}}
+\else
+\global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#1}\vspace*{\mbdyy}}}
+\fi
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\ktextbox\wd\picboxa
+\leftskip=\lrskipp plus \dlrskip\hsize
+\rightskip=\lrskipp plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\global\setbox\picboxb=\hbox{\vbox{\epsfbox{\picdir#3}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#3}}}
+\else
+\global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#3}}}
+\fi
+%
+\setbox\textboxb=\vbox{\null
+\hsize=\ktextbox\wd\picboxb
+\leftskip=\lrskipp plus \dlrskip\hsize
+\rightskip=\lrskipp plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#4}
+                      }
+%
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicboxb=\vbox{\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+\setbox\allpicbox=\hbox to \textwidth{\hfill\copy\allpicboxa\hfill\copy\allpicboxb\hfill}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\mbdyy{0mm}
+\def\ktextbox{\ktextboxdef}
+\def\lrskipp{\lrskipdef}
+
+                      }
+%- END{makepictwo} ---
+%============================================================
+%============================================================
+%- BEGIN{makepictwo} ---
+%\makepictwox{wpic1.pcx}{Fig. 2.}{last line}{wpic2.pcx}{Fig. 3.}{lastline}
+\def\makepictwox#1#2#3#4#5#6{\null
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxa=\hbox{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxa=\hbox to \picwidth{\vbox{\epsfbox{\picdir#1}}}
+\else
+\global\setbox\picboxa=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#1}}}
+\fi
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=0pt plus 0\hsize
+\rightskip=0pt plus 0\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2\linebreak
+\centerline{#3}}
+                      }
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\global\setbox\picboxb=\hbox{\vbox{\epsfbox{\picdir#4}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxb=\hbox to \picwidth{\vbox{\epsfbox{\picdir#4}}}
+\else
+\global\setbox\picboxb=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#4}}}
+\fi
+%
+\setbox\textboxb=\vbox{\null
+\hsize=\wd\picboxb
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#5\linebreak
+\centerline{#6}}
+
+                      }
+%
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicboxb=\vbox{\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+\setbox\allpicbox=\hbox to \textwidth{\hfill\copy\allpicboxa\hfill\copy\allpicboxb\hfill}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                      }
+%- END{makepictwox} ---
+%============================================================
+%- BEGIN{makepictwo} ---
+%\makepictwoone{wpic1.pcx}{Fig. 2.}{wpic2.pcx}
+\def\makepictwoone#1#2#3{\null
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxa=\hbox{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxa=\hbox to \picwidth{\vbox{\epsfbox{\picdir#1}}}
+\else
+\global\setbox\picboxa=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#1}}}
+\fi
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\hsize=\textwidth
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\global\setbox\picboxb=\hbox{\vbox{\epsfbox{\picdir#3}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxb=\hbox to \picwidth{\vbox{\epsfbox{\picdir#3}}}
+\else
+\global\setbox\picboxb=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#3}}}
+\fi
+%
+%\setbox\textboxb=\vbox{\null
+%\hsize=\wd\picboxb
+%\leftskip=0pt plus \dlrskip\hsize
+%\rightskip=0pt plus \dlrskip\hsize
+%\parindent=0pt
+%\parfillskip=0pt
+%\pictextsize
+%#4
+                      %}
+%
+%\setbox\allpicboxa=\vbox{\copy\picboxa\vspace}
+%\setbox\allpicboxb=\vbox{\copy\picboxb\vspace}
+%\setbox\allpicbox=\hbox to \textwidth{\hfill\copy\allpicboxa\hfill\copy\allpicboxb\hfill}
+\setbox\allpicboxa=\hbox to \textwidth{\hfill\copy\picboxa\hfill\copy\picboxb\hfill}
+\setbox\allpicbox=\vbox{\copy\allpicboxa\vspace{\mbdy}\copy\textboxa}
+%\setbox\allpicboxb=\vbox{\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                      }
+%- END{makepictwo} ---
+%============================================================
+%- BEGIN{makepictworel} ---
+%\makepictworel{wpic1.pcx}{Fig. 2.}{1}{wpic2.pcx}{Fig. 3.}{2}
+\def\makepictworel#1#2#3#4#5#6{\null
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+\epsfxsize=#3\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxa=\hbox{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#1}}}
+\else
+\global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#1}}}
+\fi
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+%
+\epsfxsize=0.5\textwidth
+\epsfxsize=\kscale\epsfxsize
+\epsfxsize=#6\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxb=\hbox{\vbox{\epsfbox{\picdir#4}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#4}}}
+\else
+\global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#4}}}
+\fi
+%
+\setbox\textboxb=\vbox{\null
+\hsize=\wd\picboxb
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#5}
+                      }
+%
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicboxb=\vbox{\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+\setbox\allpicbox=\hbox to \textwidth{\hfill\copy\allpicboxa\hfill\copy\allpicboxb\hfill}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                      }
+%- END{makepictworel} ---
+%============================================================
+%- BEGIN{makepicthree} ---
+%\makepicthree{wpic1.pcx}{Fig. 2.}{wpic2.pcx}{Fig. 3.}{wpic2.pcx}{Fig. 3.}
+\def\makepicthreerel#1#2#3#4#5#6#7#8#9{\null
+%
+\epsfxsize=0.33\textwidth
+\epsfxsize=\kscale\epsfxsize
+\epsfxsize=#3\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxa=\hbox{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#1}}}
+\else
+\global\setbox\picboxa=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#1}}}
+\fi
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+%
+\epsfxsize=0.33\textwidth
+\epsfxsize=\kscale\epsfxsize
+\epsfxsize=#6\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxb=\hbox{\vbox{\epsfbox{\picdir#4}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#4}}}
+\else
+\global\setbox\picboxb=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#4}}}
+\fi
+%
+\setbox\textboxb=\vbox{\null
+\hsize=\wd\picboxb
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#5}
+                      }
+%
+\epsfxsize=0.33\textwidth
+\epsfxsize=\kscale\epsfxsize
+\epsfxsize=#9\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxc=\hbox{\vbox{\epsfbox{\picdir#7}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxc=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\epsfbox{\picdir#7}}}
+\else
+\global\setbox\picboxc=\hbox to \picwidth{\hspace*{-\parindent}\vbox{\wepsfbox{\picdir#7}}}
+\fi
+%
+\setbox\textboxc=\vbox{\null
+\hsize=\wd\picboxc
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#8}
+                      }
+%
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicboxb=\vbox{\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+\setbox\allpicboxc=\vbox{\copy\picboxc\vspace{\mbdy}\copy\textboxc}
+\setbox\allpicbox=\hbox to \textwidth{\hfill\copy\allpicboxa\hfill\copy\allpicboxb\hfill\copy\allpicboxc\hfill}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                      }
+%- END{makepictwo} ---
+%============================================================
+%- BEGIN{makepicfour} ---
+%\makepicthree{wpic1.pcx}{Fig. 2.}{wpic2.pcx}{Fig. 3.}{wpic2.pcx}{Fig. 3.}{wpic2.pcx}{Fig. 3.}
+\def\makepicfour#1#2#3#4#5#6#7#8{\null
+%
+\epsfxsize=0.25\textwidth
+\epsfxsize=\kscale\epsfxsize
+\picwidth=\epsfxsize
+%\global\setbox\picboxa=\hbox{\vbox{\epsfbox{\picdir#1}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxa=\hbox to \picwidth{\vbox{\epsfbox{\picdir#1}}}
+\else
+\global\setbox\picboxa=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#1}}}
+\fi
+%
+\setbox\textboxa=\vbox{\null
+\hsize=\wd\picboxa
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#2}
+                      }
+%
+\epsfxsize=0.25\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\global\setbox\picboxb=\hbox{\vbox{\epsfbox{\picdir#3}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxb=\hbox to \picwidth{\vbox{\epsfbox{\picdir#3}}}
+\else
+\global\setbox\picboxb=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#3}}}
+\fi
+%
+\setbox\textboxb=\vbox{\null
+\hsize=\wd\picboxb
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#4}
+                      }
+%
+\epsfxsize=0.25\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\global\setbox\picboxc=\hbox{\vbox{\epsfbox{\picdir#5}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxc=\hbox to \picwidth{\vbox{\epsfbox{\picdir#5}}}
+\else
+\global\setbox\picboxc=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#5}}}
+\fi
+%
+\setbox\textboxc=\vbox{\null
+\hsize=\wd\picboxc
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#6}
+                      }
+\epsfxsize=0.25\textwidth
+\epsfxsize=\kscale\epsfxsize
+%\global\setbox\picboxd=\hbox{\vbox{\epsfbox{\picdir#7}}}
+\ifnum \nepslatex = 0
+\global\setbox\picboxd=\hbox to \picwidth{\vbox{\epsfbox{\picdir#7}}}
+\else
+\global\setbox\picboxd=\hbox to \picwidth{\vbox{\wepsfbox{\picdir#7}}}
+\fi
+%
+\setbox\textboxd=\vbox{\null
+\hsize=\wd\picboxd
+\leftskip=0pt plus \dlrskip\hsize
+\rightskip=0pt plus \dlrskip\hsize
+\parindent=0pt
+\parfillskip=0pt
+{\pictextsize
+#8}
+                      }
+%
+\setbox\allpicboxa=\vbox{\copy\picboxa\vspace{\mbdy}\copy\textboxa}
+\setbox\allpicboxb=\vbox{\copy\picboxb\vspace{\mbdy}\copy\textboxb}
+\setbox\allpicboxc=\vbox{\copy\picboxc\vspace{\mbdy}\copy\textboxc}
+\setbox\allpicboxd=\vbox{\copy\picboxd\vspace{\mbdy}\copy\textboxd}
+\setbox\allpicbox=\hbox to \textwidth{\hfill\copy\allpicboxa\hfill\copy\allpicboxb\hfill\copy\allpicboxc\hfill\copy\allpicboxd\hfill}
+
+\par
+\noindent\box\allpicbox
+%\skip
+\vspace{1.5ex}
+\def\kscale{\kinitscale}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+
+                      }
+%- END{makepictwo} ---
+%- BEGIN{maketab} ---
+\def\maketabold#1{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+% \tabsize=\textwidth
+% \divide\tabsize by 10 \multiply\tabsize by #1 \divide\tabsize by 10
+% \tabsize=\wd\hbox{#2}
+\setbox\tabllbox=\hbox{\small #1}
+ \tabsize=\wd\tabllbox
+\setbox\tablbox=\vbox{\hbox to \tabsize{\small #1}}
+ %
+ \dtw=\wd\tablbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \strnumber=\ht\tablbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{ TABstrnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\kparindent\parindent
+ %
+%\leavevmode
+\def\kparindent{\kparindentsave} 
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \vbox to 0pt{\vspace*{\baselineskip}\raisebox{\dymaketab}{\box\tablbox}\vspace{\mbdy}\vss}
+
+ \hss
+             }
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+                       }
+%- END{maketab} ---
+%============================================================
+%- BEGIN{maketab} ---
+\def\maketab#1{
+
+\vspace*{-\baselineskip}
+\nopagebreak
+
+% \tabsize=\textwidth
+% \divide\tabsize by 10 \multiply\tabsize by #1 \divide\tabsize by 10
+% \tabsize=\wd\hbox{#2}
+%\setbox\tabllbox=\hbox{\small #1}
+\setbox\tablbox=\vbox{\vspace*{-2.6mm}\maketabsddvspace\hbox{\small #1}}
+ \tabsize=\wd\tablbox
+ %
+ \dtw=\wd\tablbox  \advance\dtw by \mbdx  \multiply\dtw by -1
+ %
+ \strnumber=\ht\tablbox
+ \divide\strnumber by\baselineskip  \advance\strnumber by 1
+ \advance\strnumber by \mbdn        \message{ TABstrnumber=\the\strnumber}
+ \ifodd \thepage  \hangindent=\dtw \else \hangindent=-\dtw \fi
+ %\hangindent=\dtw
+ \hangafter=-\strnumber
+ %
+ \tw=\dtw
+ \advance\tw by \textwidth
+ %\advance\tw by \mbdx
+\advance\tw by -\kparindent\parindent
+ %
+%\leavevmode
+\def\kparindent{\kparindentsave} 
+%\raisebox{-3mm}
+\hbox to 0pt {
+ \ifodd \thepage
+ \hspace*{\tw}
+% \hspace*{-\parindent}
+ \hspace*{\mbdx}
+ \else
+% \hspace*{\dtw}
+% \hspace*{-\parindent}
+ \fi
+ \raisebox{\dymaketab}{\vbox to 0pt{\maketabaddspacei\vspace*{\baselineskip}{\box\tablbox}\vspace{\mbdy}\vss}}
+ \hss
+             }
+\def\dymaketab{0mm}
+\def\dlrskip{\dlrskipdef}
+\def\lrskipp{\lrskipdef}
+\def\maketabaddspacei{}\def\maketabsddvspace{}
+                       }
+%- END{maketab} ---
+%============================================================
+%----- ViTex picture insertion macros; end.----------------------
+\vfuzz=40pt
+\hfuzz=10pt
+%\def\dot{\mathaccent"7007 } %ERROR!!!!!!!
+\def\tabstrut{\rule[-2.ex]{0pt}{5.ex}}
+\def\tabstrutu{\rule{0pt}{3.ex}}
+\def\tabstrutd{\rule[-2.ex]{0pt}{3.ex}}
+%============================================================
+\def\bh{\mbox{${\cal H}$}}
+\def\w210{\mbox{$\displaystyle\stackrel{\!\!\circ}{{\bf W}^{1}}_{\!\!\!\!2} $}}
+\def\gh0{
+         \mbox{
+               $\stackrel{\circ}{G}_{h}$
+              }
+        }
+
+\def\tag#1$${\eqno{(#1)}$$}
+%\def\dfrac#1#2{{\displaystyle{#1\over#2}}}
+%\textheight = 37\baselineskip
+\def\Rus{\language1}
+\def\Eng{\language0}
+%============================================================
+\newbox\boxno%
+%\def\no{N}
+\def\no{\epsfxsize=1.1em \epsfysize=1.9ex \hbox{\vbox{\epsfbox{c:/utils/emtex/pics/no.eps}}}}
+%\def\varnothing{\epsfxsize=0.8em \epsfysize=1.8ex \hbox{\vbox{\epsfbox{c:/utils/emtex/pics/varnoth.eps}}}}
+\chardef\no=194%
+\chardef\nnum=194%
+\def\nnum{}
+\def\no{}
+\def\wref#1#2{\hangindent=\wd\boxno \noindent \hbox to \wd\boxno{\hfill #1.~}{\it #2}}
+\def\wrefdef#1{\setbox\boxno=\hbox{#1.~\null}}
+%============================================================
+\def\defrusspec{
+\let\le=\leqslant
+\let\ge=\geqslant
+\let\leq=\leqslant
+\let\geq=\geqslant
+}
+%\def\defrusspecccc{
+%\font   \tenmsbm=msbm10           \textfont9=   \tenmsbm
+%\font \eightmsbm=msbm7
+%\font \sevenmsbm=msbm7          \scriptfont9= \sevenmsbm
+%\font  \fivemsbm=msbm5    \scriptscriptfont9=  \fivemsbm
+%     \mathchardef\Ctwo="0943           %   "blackboard bold"  N
+%     \mathchardef\Ntwo="094E           %   "blackboard bold"  N
+%     \mathchardef\Qtwo="0951           %   "blackboard bold"  Q
+%     \mathchardef\Rtwo="0952           %   "blackboard bold"  R
+%     \mathchardef\Ztwo="095A           %   "blackboard bold"  Z
+%\font   \tenmsam=msam10           \textfont8=   \tenmsam
+%\font \sevenmsam=msam7          \scriptfont8= \sevenmsam
+%\font  \fivemsam=msam5    \scriptscriptfont8=  \fivemsam
+%\mathchardef\leqslant="3836
+%\mathchardef\geqslant="383E
+%\let\le=\leqslant
+%\let\ge=\geqslant
+%\let\leq=\leqslant
+%\let\geq=\geqslant
+%}
+
+
+%------------------------------------------------------------
+
+\newcommand\oabstract[1]{}
+%\def\oabstract#1{}
+\def\setlabstract{0}
+%------------------------------------------------------------
+\newcommand{\initabstract}{\closeout11 \closeout14 \closeout12
+\defrusspeceps
+
+\newpage
+
+         \bigskip
+\def\setlabstract{1}
+% \openin11=./tmptmp1.all \openin14=./tmptmp2.all
+ \openin9=./tmptmp1.all \openin14=./tmptmp2.all
+ \openin12=./tmpudk.all
+
+}
+%-------------------------------
+\newcommand{\initabstractt}{\closeout11 \closeout14 \closeout12
+\defrusspeceps
+
+%\newpage
+
+         \bigskip
+\def\setlabstract{1}
+% \openin11=./tmptmp1.all \openin14=./tmptmp2.all
+ \openin9=./tmptmp1.all \openin14=./tmptmp2.all
+ \openin12=./tmpudk.all
+
+}
+%-------------------------------
+\def\leaveabstract
+{
+\read14 to \lastpagenumber
+\message{read141: lastpagenumber=\lastpagenumber}
+\read9 to \firstpagenumber
+\message{read9: firstpagenumber=\firstpagenumber}
+\read12 to \udk
+}
+
+\def\labsvsp{0ex}
+\newcommand{\labstract}[4]{
+%\def\labstract#1#2#3#4{
+%\ifnum \setlabstract=1
+%---
+\ifeof14
+\def\lastpagenumber{\thepage}
+\else
+\read14 to \lastpagenumber
+\message{read142: lastpagenumber=\lastpagenumber}
+\fi
+\ifeof9
+\def\firstpagenumber{\thepage}
+\else
+\read9 to \firstpagenumber
+\message{read9: firstpagenumber=\firstpagenumber}
+\fi
+\ifeof12
+\def\udk{11111111}
+\else
+\read12 to \udk
+\fi
+%---
+
+\noindent
+УДК \udk
+\vspace{0.5ex}
+%\vspace{-0.1ex}
+
+%\footnotesize
+\small
+%\defrusspeceps
+#1%
+\hspace*{0.5mm}/{\it #2}%
+\hspace*{0.5mm}// Вестн. Моск. \hbox{ун-та.} Сер.~\Vol, Математика. Механика.
+\Year. \hbox{\No\hspace{0.5ex}\Nom}. C.~\mbox{\lastpagenumber\hspace{-0.15em}---\firstpagenumber\hspace{-0.35em}.}
+%\write\fludk{\textbox{#1}}
+\labstractI
+\def\labstractI{}
+\vspace{0.5ex}
+%\vspace{-0.1ex}
+
+%\footnotesize
+\small
+#3%
+%\write\fludk{#2}
+\vspace{0.5ex}
+%\vspace{-0.2ex}
+
+
+\noindent
+% \footnotesize
+\small
+#4%
+%\write\fludk{#3}
+\vspace{1.8ex}
+%\vspace{-0.8ex}
+%\fi
+\vspace{\labsvsp}
+
+%\message{Warning::: in No2 vspace is not standard!!!!}
+%\par
+}
+%------------------------------------------------------------
+\newcommand{\labstractb}[5]{
+%\def\labstract#1#2#3#4#5{
+%\ifnum \setlabstract=1
+%---
+\ifeof14
+\def\lastpagenumber{\thepage}
+\else
+\read14 to \lastpagenumber
+\message{read143: lastpagenumber=\lastpagenumber}
+\fi
+\ifeof9
+\def\firstpagenumber{\thepage}
+\else
+\read9 to \firstpagenumber
+\message{read9: firstpagenumber=\firstpagenumber}
+\fi
+\ifeof12
+\def\udk{11111111}
+\else
+\read12 to \udk
+\fi
+%---
+
+\noindent
+УДК #1
+\vspace{0.5ex}
+%\vspace{-0.1ex}
+
+%\footnotesize
+\small
+%\defrusspeceps
+#2%
+/{\it #3}%
+// Вестн. Моск. \hbox{ун-та.} Сер.~\Vol, Математика. Механика.
+\Year. \hbox{\no\hspace{0.5ex}\No}. C.~{\lastpagenumber\hspace{-0.15em}---\firstpagenumber\hspace{-0.35em}.}
+%\write\fludk{\textbox{#2}}
+\vspace{0.5ex} \labstractI
+%\def\labstractI{}
+%\vspace{-0.1ex}
+
+%\footnotesize
+\small
+#4%
+%\write\fludk{#3}
+\vspace{0.5ex}
+%\vspace{-0.1ex}
+
+\noindent
+% \footnotesize
+\small
+#5%
+%\write\fludk{#4}
+\vspace{1.5ex}
+%\vspace{-0.8ex}
+%\fi
+
+%\message{Warning::: in No2 vspace is not standard!!!!}
+%\par
+}
+%------------------------------------------------------------
+\chardef\llkk=192%
+\chardef\ppkk=193%
+\chardef\nnoomm=194%
+%------------------------------------------------------------
+\defrusspec
+%------------------------------------------------------------
+%\mathchardef\leqslant="3836
+%\mathchardef\geqslant="383E
+%\let\le=\leqslant
+%\let\ge=\geqslant
+%\let\leq=\leqslant
+%\let\geq=\geqslant
+%------------------------------------------------------------
+\newbox\picboxpr
+\newbox\picboxprp
+\def\postupila#1{
+\vspace{1.5mm}
+
+\setbox\picboxpr=\hbox{Поступила в редакцию}
+
+\hfill \copy\picboxpr
+
+%\hfill \mbox to \wd\picboxpr{#1}
+\hfill \hbox to \wd\picboxpr{\hspace*{1.5ex}{#1}\hfill}
+}
+%------------------------------------------------------------
+\def\posledor#1{
+\vspace{0.5mm}
+
+\setbox\picboxprp=\hbox{Поступила в редакцию}
+\setbox\picboxpr=\hbox to \wd\picboxprp{После доработки\hfill}
+
+\hfill \copy\picboxpr
+
+%\hfill \mbox to \wd\picboxpr{#1}
+\hfill \hbox to \wd\picboxpr{\hspace*{1.5ex}{#1}\hfill}
+}
+%------------------------------------------------------------
+\def\lew{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/le.eps}}}
+\def\gew{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/ge.eps}}}
+\def\subsubw{\mathrel{\epsfxsize=0.5em\epsfysize=1.5ex\epsfbox{c:/utils/emtex/pics/subsub.eps}}}
+\def\Doteq{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/Doteq.eps}}}
+\def\leqslantw{\le}
+\def\geqslantw{\ge}
+\def\leqw{\le}
+\def\geqw{\ge}
+%------------------------------------------------------------
+\def\defrusspeceps
+{
+\def\le{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/le.eps}}}
+\def\dasharrow{\mathrel{\epsfxsize=1.7em\epsfysize=1.2ex\epsfbox{c:/utils/emtex/pics/dasharrow.eps}}}
+\def\ge{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/ge.eps}}}
+\def\subsub{\mathrel{\epsfxsize=0.5em\epsfysize=1.5ex\epsfbox{c:/utils/emtex/pics/subsub.eps}}}
+\def\leqslant{\le}
+\def\geqslant{\ge}
+\def\leq{\le}
+\def\geq{\ge}
+}
+%\def\defrusspecepssmall{
+%\def\le{\mathrel{\epsfxsize=0.7em\epsfysize=1.3ex\epsfbox{c:/utils/emtex/pics/le.eps}}}
+%\def\ge{\mathrel{\epsfxsize=0.7em\epsfysize=1.3ex\epsfbox{c:/utils/emtex/pics/ge.eps}}}
+%\def\subsub{\mathrel{\epsfxsize=0.5em\epsfysize=1.5ex\epsfbox{c:/utils/emtex/pics/subsub.eps}}}
+%\def\leqslant{\le}
+%\def\geqslant{\ge}
+%\def\leq{\le}
+%\def\geq{\ge}
+%}
+\def\pred{\mathrel{\epsfxsize=0.5em\epsfysize=1.2ex\epsfbox{c:/utils/emtex/pics/pred.eps}}}
+\def\subsub{\mathrel{\epsfxsize=0.5em\epsfysize=1.2ex\epsfbox{c:/utils/emtex/pics/subsub.eps}}}
+%------------------------------------------------------------
+\def\defepsletters{
+\def\cE{\mathrel{\epsfxsize=1.em\epsfysize=2.0ex\epsfbox{cbe.eps}}}
+\def\cG{\mathrel{\epsfxsize=1.em\epsfysize=2.0ex\epsfbox{cbf.eps}}}
+\def\cF{\mathrel{\epsfxsize=1.em\epsfysize=2.0ex\epsfbox{cbf.eps}}}
+\def\bkappa{\mathrel{\epsfxsize=0.8em\epsfysize=1.6ex\epsfbox{cbkvap.eps}}}
+}
+%------------------------------------------------------------
+\def\picbreak{\linebreak \noindent}
+\def\picbreak{ \vspace*{-\parskip} \vspace*{-\baselineskip} \par \noindent}
+\def\spicbreak{\linebreak \vspace*{-\parskip} \vspace*{-\baselineskip} \par \noindent}
+
+\def\cleanbegin{
+\setcounter{page}{\firstpagenum}
+\baselineskip=\blskip
+\pagebreak
+%\vspace*{-3mm}
+%
+%  { \LARGE Математика}
+%\vspace*{1mm}
+}
+
+\def\mathbeginwithoutpagenum{
+%\setcounter{page}{\firstpagenum}
+\baselineskip=\blskip
+\pagebreak
+\vspace*{-4mm}
+
+  { \LARGE Математика}
+\vspace*{1mm}
+}
+
+
+\def\mathbegin{
+%\setcounter{page}{\firstpagenum}
+\baselineskip=\blskip
+\pagebreak
+\vspace*{-2.5mm}
+
+  { \LARGE Математика}
+\vspace*{-5.5mm}
+}
+
+\def\mechbegin{
+\baselineskip=\blskip
+\pagebreak
+\vspace*{-2.5mm}
+\setlength\headwidth{\textwidth}
+
+  { \LARGE Механика}
+\vspace*{-5.5mm}
+}
+
+\def\notesbegin{
+\defrusspec
+\baselineskip=\blskip
+\pagebreak
+\vspace*{-2.5mm}
+
+  { \LARGE Краткие сообщения}
+\vspace*{-5.5mm}
+}
+\def\spisoklit{
+
+\bigskip
+\vspace*{1.5mm}
+
+\centerline{\footnotesize СПИСОК \ ЛИТЕРАТУРЫ}
+\bigskip
+\vspace*{-1.5mm}
+
+}
+%===============================================================
+\def\upp#1{\vbox{\hbox{\scriptsize #1}\vspace*{0.5ex}}}
+\def\Vol{1}
+\def\setnoudk{0}
+\font\fcmrten=cmr10
+%\def\varkappa{\fcmrten \char'032}
+%\def\varkappa{\mbox{\sl\ae}}
+\def\labstracc#1#2{\labstract{#2}{#1}}
+%\def\lastpicline{\linebreak\hspace*{\parindent}}
+%\def\lastpicline{\linebreak\parindent}
+\def\lastpicline{\linebreak\hspace*{5ex}}
+\def\ws{\mbox{\raisebox{-0.8mm}{\epsfxsize=0.35em\epsfysize=2.3ex\epsfbox{paragrrr.eps}}}}
+%\def\varkappa{\fcmrten \char'032}
+\def\proof{{\bf Доказательство. }}
+\def\vm{\vspace*{-0.5\baselineskip}}
+\baselineskip=\blskip
+%===============================================================
+\def\defwheads%
+{
+\pagestyle{fancyplain}
+\lhead[\fancyplain{\sc\thepage}{\sc\thepage}]
+{\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+      математика.\ механика.\ \Year.\ \hbox{\nnum\hspace{0.5ex}\Nom}
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,\ математика.\ механика.\ \Year.\ \hbox{\nnum\hspace{0.5ex}\No}}}
+
+\rhead[\fancyplain{ \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,
+                    математика.\ механика.\ \Year.\ \nnum\hspace{0.5ex}\Nom
+%                    С.\hspace{0.1em}\thepage--\lastpagenumber
+}
+                  { \footnotesize \sc вестн.\ моск.\ \hbox{ун-та.}\ сер.\hspace{0.1em}1,\ математика.\ механика.\ \Year.\ \nnum\hspace{0.5ex}\No}]
+      {\fancyplain{\sc\thepage}{\sc\thepage}}
+}
+\def\bkappa{\mathrel{\epsfxsize=0.8em\epsfysize=1.6ex\epsfbox{cbkvap.eps}}}
+\def\picsymb#1{{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{#1}}}
+
+\def\winput#1{{
+%\pagebreak
+
+\input{#1}
+
+\pagebreak
+
+}}
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\def\wk{\mbox{\raisebox{-0.2mm}{\epsfxsize=0.7em\epsfysize=1.9ex\epsfbox{c:/utils/emtex/pics/k.eps}}}}
+%\def\square{\Box}
+%\def\mathbf#1{{\bf #1}}
+%\def\overset{???}
+%\def\lesssim{\mbox{\raisebox{-1mm}{%\mathrel%
+%             {\epsfxsize=0.7em\epsfysize=2.0ex\epsfbox%
+%              {c:/utils/emtex/pics/lesssim.eps}}}}\hspace*{0.3mm}}
+%\def\gtrsim{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/gtrsim.eps}}}
+%\def\overset#1#2{\stackrel{#1}{#2}}
+%\def\dasharrow{\mathrel{\epsfxsize=1.7em\epsfysize=1.6ex\epsfbox{c:/utils/emtex/pics/dasharrw.eps}}}
+%\def\nrightarrow{\mathrel{\epsfxsize=1.7em\epsfysize=1.6ex\epsfbox{c:/utils/emtex/pics/nrightar.eps}}}
+%\def\arrrrr{\hbox to 3mm{\vbox to 0.1mm{\hbox to 3mm{$\rightarrow$}}}}
+%\def\rightrightarrows{\,\,\mbox{\hbox to 3mm{\vbox{\arrrrr\vspace*{-1.9mm}\arrrrr}}}\,\,\,}
+%\def\tg{\,\mbox{\rm tg}\,}
+%\def\leftthreetimes{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/leftthtm.eps}}}
+%\def\nsubseteq{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/nsubseteq.eps}}}
+%\def\nsubseteq{\not\subseteq}
+\def\leqq{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/leqq.eps}}}
+\def\qeqq{\mathrel{\epsfxsize=0.7em\epsfysize=1.8ex\epsfbox{c:/utils/emtex/pics/geqq.eps}}}
+\def\cLw{\mathrel{\epsfxsize=1.2em\epsfysize=2.1ex\raisebox{-0.44mm}{\epsfbox{c:/utils/emtex/pics/cLw.eps}}}}
+\def\cAw{\mathrel{\epsfxsize=1.2em\epsfysize=2.3ex\raisebox{-0.7mm}{\epsfbox{c:/utils/emtex/pics/cAw.eps}}}}
+\def\cPw{\mathrel{\epsfxsize=1.2em\epsfysize=2.2ex\raisebox{-0.47mm}{\epsfbox{c:/utils/emtex/pics/cPw.eps}}}}
+\def\cRw{\mathrel{\epsfxsize=1.2em\epsfysize=2.3ex\raisebox{-0.7mm}{\epsfbox{c:/utils/emtex/pics/cRw.eps}}}}
+\def\cCw{\mathrel{\epsfxsize=1.2em\epsfysize=2.3ex\raisebox{-0.7mm}{\epsfbox{c:/utils/emtex/pics/cCw.eps}}}}
+%----------------------------------------------------------------
+\def\iabstracthh{}
+\def\iabstract#1#2#3#4{
+\par{\small
+{
+%\begin{quote}
+%\linewidth=145mm
+\parshape=1
+2cm 145mm  #1
+
+%\end{quote}
+}\par\iabstractx\def\iabstractx{}
+{\vspace*{1mm}\iabstracthh
+
+\parshape=1
+2cm 145mm {\it Ключевые слова: }#2
+\vspace*{-1mm}
+
+}
+\par\iabstractxx\def\iabstractxx{}
+{\vspace*{2mm}
+
+\parshape=1
+2cm 145mm #3
+
+}
+\par\iabstractxxx\def\iabstractxxx{}
+{\vspace*{1mm}
+
+\parshape=1
+2cm 145mm {\it Key words: }#4
+
+}\par}
+\vspace*{3mm}
+
+}
+%----------------------------------------------------------------
