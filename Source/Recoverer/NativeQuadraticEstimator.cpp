@@ -626,7 +626,7 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	{
 		Vertex_handle vertex = vertices[i];
 		Point_3 point;
-		if (numDeleted == 0 && i == iSpecial)
+		if (numDeletable == 0 && i == iSpecial)
 			continue;
 		if (i == iDeleted)
 			point = INNER_RESOLVED_POINT_FACTOR * vertex->point();
