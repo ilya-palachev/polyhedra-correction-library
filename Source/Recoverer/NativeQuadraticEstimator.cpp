@@ -580,7 +580,7 @@ static inline unsigned indexModulo(unsigned i, unsigned mod)
 }
 
 const double INNER_RESOLVED_POINT_FACTOR = 1e-6;
-const double SPECIAL_FACTOR = 0.7;
+const double SPECIAL_FACTOR = 0.6;
 void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
