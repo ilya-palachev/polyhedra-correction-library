@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2017 Ilya Palachev <iliyapalachev@gmail.com>
  *
  * This file is part of Polyhedra Correction Library.
  *
@@ -19,29 +19,20 @@
  */
 
 /**
- * @file dual.h
- * @brief Transformation of duality between planes and points.
+ * @file NativeEstimatorCommonFunctions.cpp
+ * @brief Common functions of native estimators (declaration).
  */
 
-#ifndef KERNELCGAL_DUAL_H
-#define KERNELCGAL_DUAL_H
+#ifndef NATIVEESTIMATORCOMMONFUNCTIONS_H
+#define NATIVEESTIMATORCOMMONFUNCTIONS_H
 
-#include "KernelCGAL/KernelCGAL.h"
+#include "Recoverer/SupportFunctionEstimator.h"
 
-/**
- * Creates a dual point for a given plane.
- *
- * @param p	The plane.
- * @return	The dual point.
- */
-Point_3 dual(const Plane_3 &p);
+std::vector<int> collectInnerPointsIDs(std::vector<Point_3> points);
 
-/**
- * Calculates dual plane for a given point.
- *
- * @param p	The point.
- * @return	The dual plane.
- */
-Plane_3 dual(const Point_3 &p);
+std::set<int> findTangientPointPlanesIDs(
+		Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
+		std::vector<int> index);
 
-#endif /* KERNELCGAL_DUAL_H */
+VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values);
+#endif /* NATIVEESTIMATORCOMMONFUNCTIONS_H */

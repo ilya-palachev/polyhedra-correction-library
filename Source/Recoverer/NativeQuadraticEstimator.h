@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2016 Ilya Palachev <iliyapalachev@gmail.com>
+ * Copyright (c) 2009-2017 Ilya Palachev <iliyapalachev@gmail.com>
  *
  * This file is part of Polyhedra Correction Library.
  *
@@ -19,29 +19,34 @@
  */
 
 /**
- * @file dual.h
- * @brief Transformation of duality between planes and points.
+ * @file NativeQuadraticEstimator.h
+ * @brief Native quadratic estimation engine (declaration).
  */
 
-#ifndef KERNELCGAL_DUAL_H
-#define KERNELCGAL_DUAL_H
+#include "Recoverer/SupportFunctionEstimator.h"
 
-#include "KernelCGAL/KernelCGAL.h"
+#ifndef NATIVEQUADRATICESTIMATOR_H
+#define NATIVEQUADRATICESTIMATOR_H
 
 /**
- * Creates a dual point for a given plane.
- *
- * @param p	The plane.
- * @return	The dual point.
+ * Native quadratic estimation engine.
  */
-Point_3 dual(const Plane_3 &p);
+class NativeQuadraticEstimator : public SupportFunctionEstimator
+{
+public:
+	/**
+	 * Default constructor
+	 *
+	 * @param data	Support function data
+	 */
+	NativeQuadraticEstimator(
+			SupportFunctionEstimationDataPtr supportFunctionData);
 
-/**
- * Calculates dual plane for a given point.
- *
- * @param p	The point.
- * @return	The dual plane.
- */
-Plane_3 dual(const Point_3 &p);
+	/** Default destructor. */
+	~NativeQuadraticEstimator();
+	
+	/** Runs the estimation process. */
+	virtual VectorXd run(void);
+};
 
-#endif /* KERNELCGAL_DUAL_H */
+#endif /* NATIVEQUADRATICESTIMATOR_H */

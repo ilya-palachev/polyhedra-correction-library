@@ -25,14 +25,14 @@
 
 #include "KernelCGAL/dual.h"
 
-Point_3 dual(Plane_3 p)
+Point_3 dual(const Plane_3 &p)
 {
 	double reciprocal = -1. / p.d();
 	return Point_3(p.a() * reciprocal, p.b() * reciprocal,
 			p.c() * reciprocal);
 }
 
-Plane_3 dual(Point_3 p)
+Plane_3 dual(const Point_3 &p)
 {
 	return Plane_3(p.x(), p.y(), p.z(), -1.);
 }

@@ -31,6 +31,8 @@
 #include "Polyhedron_3/Polyhedron_3.h"
 #include <CGAL/linear_least_squares_fitting_3.h>
 #include "Recoverer/Colouring.h"
+#include "NativeEstimatorCommonFunctions.h"
+#include "NativeQuadraticEstimator.h"
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
 		SupportFunctionEstimationDataPtr data) :
@@ -164,38 +166,6 @@ VectorXd runLinfEstimation(SupportFunctionEstimationDataPtr data)
 	return solution;
 }
 
-std::vector<int> collectInnerPointsIDs(std::vector<Point_3> points)
-{
-	DEBUG_START;
-	Delaunay::Lock_data_structure locking_ds(
-			CGAL::Bbox_3(-1000., -1000., -1000., 1000.,
-				1000., 1000.), 50);
-	Delaunay triangulation(points.begin(), points.end(),
-			&locking_ds);
-	auto infinity = triangulation.infinite_vertex();
-
-	std::vector<int> outerPlanesIDs;
-	int numPlanes = points.size();
-	for (int i = 0; i < numPlanes; ++i)
-	{
-		Point_3 point = points[i];
-		Delaunay::Locate_type lt;
-		int li, lj;
-		Delaunay::Cell_handle c = triangulation.locate(point,
-				lt, li, lj);
-
-		auto vertex = c->vertex(li);
-		ASSERT(lt == Delaunay::VERTEX
-					&& vertex->point() == point);
-		if (!triangulation.is_edge(vertex, infinity, c, li, lj))
-		{
-			outerPlanesIDs.push_back(i);
-		}
-	}
-	DEBUG_END;
-	return outerPlanesIDs;
-}
-
 int countInnerPoints(std::vector<Point_3> points)
 {
 	DEBUG_START;
@@ -247,44 +217,6 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 				<< std::endl;
 	}
 	DEBUG_END;
-}
-
-std::set<int> findTangientPointPlanesIDs(
-		Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
-		std::vector<int> index)
-{
-	DEBUG_START;
-	auto circulatorFirst = vertex->vertex_begin();
-	auto circulator = circulatorFirst;
-	std::set<int> planesIDs;
-	std::vector<int> planesIDsVector;
-	do
-	{
-		int iFacet = circulator->facet()->id;
-		if (iFacet > (int) polyhedron->size_of_facets())
-		{
-			ERROR_PRINT("%d > %ld", iFacet,
-					polyhedron->size_of_facets());
-			exit(EXIT_FAILURE);
-		}
-		planesIDs.insert(index[iFacet]);
-		planesIDsVector.push_back(index[iFacet]);
-		++circulator;
-	} while (circulator != circulatorFirst);
-
-	if (planesIDs.size() != 3)
-	{
-		ERROR_PRINT("%d != %d", (int) planesIDs.size(), 3);
-		std::cerr << "Indices:";
-		for (int i: planesIDsVector)
-			std::cerr << " " << i;
-		std::cerr << std::endl;
-		std::cerr << "degree of vertex " << vertex->id << " is "
-			<< vertex->degree() << std::endl;
-		exit(EXIT_FAILURE);
-	}
-	DEBUG_END;
-	return planesIDs;
 }
 
 Eigen::Vector3d decomposeDirection(SupportFunctionDataPtr data, int planeID,
@@ -460,39 +392,6 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 }
 
 
-static VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
-{
-	DEBUG_START;
-	VectorXd difference = values - data->supportValues();
-	std::vector<double> epsilons;
-	for (int i = 0; i < (int) difference.size(); ++i)
-	{
-		epsilons.push_back(difference(i));
-	}
-
-	auto points = data->getShiftedDualPoints_3(epsilons);
-	auto innerIndex = collectInnerPointsIDs(points);
-	std::cerr << innerIndex.size() << " points are inner" << std::endl;
-
-	std::vector<Plane_3> planes;
-	auto directions = data->supportDirections<Point_3>();
-	for (int i = 0; i < (int) directions.size(); ++i)
-	{
-		auto direction = directions[i];
-		Plane_3 plane(direction.x(), direction.y(), direction.z(),
-				-values(i));
-		planes.push_back(plane);
-	}
-	Polyhedron_3 polyhedron(planes);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			"recovered-by-native-estimator.ply") << polyhedron;
-
-	VectorXd solution =
-		polyhedron.findTangientPointsConcatenated(directions);
-	DEBUG_END;
-	return solution;
-}
-
 void validateEstimate(std::vector<Plane_3> planesOld, VectorXd valuesNew)
 {
 	DEBUG_START;
@@ -626,7 +525,10 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 		exit(EXIT_FAILURE);
 		break;
 	case ESTIMATION_PROBLEM_NORM_L_2:
-		solution = runL2Estimation(data);
+		if (getenv("LEGACY_QUADRATIC_ESTIMATOR"))
+			solution = runL2Estimation(data);
+		else
+			solution = NativeQuadraticEstimator(data).run();
 		break;
 	default:
 		ERROR_PRINT("Unknown problem type!");

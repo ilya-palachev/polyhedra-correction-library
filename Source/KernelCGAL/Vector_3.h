@@ -44,7 +44,7 @@ public:
 	 *
 	 * @param v	The PCL vector.
 	 */
-	Vector_3(Vector3d v): Kernel::Vector_3(v.x, v.y, v.z) {}
+	Vector_3(const Vector3d &v): Kernel::Vector_3(v.x, v.y, v.z) {}
 
 	/**
 	 * Constructs CGAL vector from 3 coordinates.
@@ -53,22 +53,16 @@ public:
 	 * @param y	The Y coordinate
 	 * @param z	The Z coordinate
 	 */
-	Vector_3(const double x, const double y, const double z):
+	Vector_3(double x, double y, double z):
 		Kernel::Vector_3(x, y, z) {}
 
 	/**
-	 * Constructs CGAL vector from statement like "a - b" where a and b are
-	 * CGAL points.
+	 * Constructs vector from another vector.
 	 *
-	 * TODO: It's too dirty hack. We'd avoid it.
-	 *
-	 * @param v	The result of "a - b"
+	 * @param v	The original vector
 	 */
-	Vector_3(CGAL::Type_equality_wrapper<
-			CGAL::Cartesian_base_no_ref_count<double,
-				CGAL::Epick>,
-			CGAL::Epick>::Vector_3 v):
-		Kernel::Vector_3(v.x(), v.y(), v.z()) {}
+	Vector_3(const Kernel::Vector_3 &v):
+		Kernel::Vector_3(v) {}
 };
 
 #endif /* KERNELCGAL_VECTOR_3_H_ */
