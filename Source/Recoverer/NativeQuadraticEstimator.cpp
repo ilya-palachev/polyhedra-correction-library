@@ -580,6 +580,7 @@ static inline unsigned indexModulo(unsigned i, unsigned mod)
 }
 
 const double INNER_RESOLVED_POINT_FACTOR = 1e-6;
+const double SPECIAL_FACTOR = 0.7;
 void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
@@ -621,17 +622,31 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		ASSERT(numSpecial == 1 && "This case not handled yet");
 
 	Vertex_handle vertexDeleted = vertices[iDeleted];
+	if (numDeletable == 0)
+	{
+		alpha *= SPECIAL_FACTOR;
+		std::cout << "  " << iSpecial << "-th vertex is special"
+			<< std::endl;
+	}
 	Vector_3 tangient = alpha * xOld + (1. - alpha) * xNew;
 	for (unsigned i = 0; i < vertices.size(); ++i)
 	{
 		Vertex_handle vertex = vertices[i];
 		Point_3 point;
-		if (numDeletable == 0 && i == iSpecial)
-			continue;
-		if (i == iDeleted)
+		if (numDeletable > 0 && i == iDeleted)
+		{
 			point = INNER_RESOLVED_POINT_FACTOR * vertex->point();
+			std::cout << "  " << i << "-th vertex is deletable"
+				<< std::endl;
+		}
 		else
+		{
 			point = calculateMove(vertex, tangient);
+		}
+		std::cout << "  Moving " << i << "-th vertex:"
+			<< std::endl;
+		std::cout << "    " << vertex->point() << std::endl;
+		std::cout << "    " << point << std::endl;
 		Vertex_handle vertexNew = move(vertex, point);
 		ASSERT(vertex == vertexNew && "Conflict happened");
 	}
