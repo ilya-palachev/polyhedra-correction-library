@@ -782,8 +782,8 @@ void DualPolyhedron_3::makeConsistent()
 	DEBUG_START;
 	unsigned iIteration = 0;
 	unsigned numResolved = countResolvedItems();
-	Cell_handle cellPrev;
-	unsigned iNearestPrev = 0;
+	Cell_handle cellPrev, cellPPrev;
+	unsigned iNearestPrev = 0, iNearestPPrev = 0;
 	while (numResolved < items.size())
 	{
 		std::cout << "===== Iteration #" << iIteration << " ====="
@@ -795,6 +795,13 @@ void DualPolyhedron_3::makeConsistent()
 		auto next = iterate(outerCells, items, infinite_vertex());
 		Cell_handle cell = next.first;
 		unsigned iNearest = next.second;
+		if (iIteration > 1)
+		{
+			ASSERT((cell != cellPPrev || iNearest != iNearestPPrev)
+					&& "Infinite loop of 2nd order");
+			cellPPrev = cellPrev;
+			iNearestPPrev = iNearestPrev;
+		}
 		if (iIteration > 0)
 		{
 			ASSERT((cell != cellPrev || iNearest != iNearestPrev)
