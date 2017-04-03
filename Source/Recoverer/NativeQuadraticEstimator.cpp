@@ -535,7 +535,11 @@ static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 	}
 	double alpha = (productNew - value) / (productNew - productOld);
 	if (alpha > 1.)
+	{
+		std::cout << "Truncating alpha: "  << alpha << " -> 1."
+			<< std::endl;
 		alpha = 1.;
+	}
 	DEBUG_END;
 	return alpha;
 }
@@ -580,7 +584,6 @@ static inline unsigned indexModulo(unsigned i, unsigned mod)
 }
 
 const double INNER_RESOLVED_POINT_FACTOR = 1e-6;
-const double SPECIAL_FACTOR = 0.6;
 void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
@@ -624,7 +627,6 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	Vertex_handle vertexDeleted = vertices[iDeleted];
 	if (numDeletable == 0)
 	{
-		alpha *= SPECIAL_FACTOR;
 		std::cout << "  " << iSpecial << "-th vertex is special"
 			<< std::endl;
 	}
@@ -720,7 +722,7 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 		Plane_3 plane = ::dual(vertex->point());
 		double alpha = calculateAlpha(xOld, xNew, plane);
 		std::cout << "Alpha #" << i << ": " << alpha << std::endl;
-		ASSERT(alpha <= 1. && "Wrongly computed alpha");
+		ASSERT(alpha < 1. && "Wrongly computed alpha");
 		if (alpha > alphaMax)
 		{
 			alphaMax = alpha;
