@@ -722,7 +722,7 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 		Plane_3 plane = ::dual(vertex->point());
 		double alpha = calculateAlpha(xOld, xNew, plane);
 		std::cout << "Alpha #" << i << ": " << alpha << std::endl;
-		ASSERT(alpha < 1. && "Wrongly computed alpha");
+		ASSERT(alpha <= 1. && "Wrongly computed alpha");
 		if (alpha > alphaMax)
 		{
 			alphaMax = alpha;
@@ -731,6 +731,7 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 	}
 	
 	std::cout << "Maximal alpha: " << alphaMax << std::endl;
+	ASSERT(alphaMax < 1. && "What to do then?");
 	if (alphaMax > 0.)
 	{
 		std::cout << "Full move is impossible, performing partial move"
