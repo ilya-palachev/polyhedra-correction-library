@@ -66,7 +66,7 @@ private:
 	void partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
-		const Vertex_handle &dominator, double alpha);
+		const Vertex_handle &dominator, double alpha, double alpha2);
 	void fullyMove(const std::vector<Vertex_handle> &vertices,
 		const Vector_3 &xNew, const std::vector<unsigned> &activeGroup);
 	void lift(Cell_handle cell, unsigned iNearest);
@@ -587,7 +587,7 @@ const double INNER_RESOLVED_POINT_FACTOR = 1e-6;
 void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
-		const Vertex_handle &dominator, double alpha)
+		const Vertex_handle &dominator, double alpha, double alpha2)
 {
 	DEBUG_START;
 	unsigned numDeletable = 0;
@@ -629,6 +629,9 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	{
 		std::cout << "  " << iSpecial << "-th vertex is special"
 			<< std::endl;
+		std::cout << "  Changing alpha: " << alpha << " -> ";
+		alpha = 0.7 * alpha + 0.3 * alpha2;
+		std::cout << alpha << std::endl;
 	}
 	Vector_3 tangient = alpha * xOld + (1. - alpha) * xNew;
 	for (unsigned i = 0; i < vertices.size(); ++i)
@@ -711,6 +714,7 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 	std::vector<Vertex_handle> vertices;
 	Vertex_handle dominator;
 	double alphaMax = 0.;
+	double alphaMax2 = 0.;
 	for (unsigned i = 0; i < NUM_CELL_VERTICES; ++i)
 	{
 		if (i == infinityIndex)
@@ -725,18 +729,21 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 		ASSERT(alpha <= 1. && "Wrongly computed alpha");
 		if (alpha > alphaMax)
 		{
+			alphaMax2 = alphaMax;
 			alphaMax = alpha;
 			dominator = vertex;
 		}
 	}
 	
 	std::cout << "Maximal alpha: " << alphaMax << std::endl;
+	std::cout << "Maximal alpha 2nd: " << alphaMax2 << std::endl;
 	ASSERT(alphaMax < 1. && "What to do then?");
 	if (alphaMax > 0.)
 	{
 		std::cout << "Full move is impossible, performing partial move"
 			<< std::endl;
-		partiallyMove(xOld, xNew, vertices, dominator, alphaMax);
+		partiallyMove(xOld, xNew, vertices, dominator, alphaMax,
+				alphaMax2);
 	}
 	else
 	{
