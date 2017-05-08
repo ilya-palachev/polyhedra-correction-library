@@ -683,7 +683,15 @@ void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 		ASSERT(number_of_vertices() == numOld);
 	}
 	for (const Vertex_handle vertex : vertices)
-		ASSERT(isOuterVertex(vertex));
+	{
+		if (!isOuterVertex(vertex))
+		{
+			std::cout << "Vertex #" << vertex->info()
+				<< ", i.e. " << vertex->point()
+				<< " became non-outer" << std::endl;
+			ASSERT(0 && "Vertex became non-outer");
+		}
+	}
 
 	unsigned numNewlyResolved = 0;
 	for (unsigned iPlane : activeGroup)
