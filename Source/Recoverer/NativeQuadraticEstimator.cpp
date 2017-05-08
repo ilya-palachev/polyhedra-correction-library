@@ -382,16 +382,27 @@ static void printCell(const Cell_handle &cell, const Vertex_handle &infinity)
 	DEBUG_END;
 }
 
-static std::pair<Cell_handle, unsigned> iterate(
-		const std::vector<Cell_handle> &cells,
+struct Step
+{
+	Cell_handle cell;
+	unsigned iNearest;
+	double distance;
+
+	Step(Cell_handle cell, unsigned iNearest, double distance)
+		: cell(cell), iNearest(iNearest), distance(distance) {}
+
+	bool operator<(const Step &other) const
+	{
+		return distance < other.distance;
+	}
+};
+
+static std::set<Step> iterate(	const std::vector<Cell_handle> &cells,
 		const std::vector<SupportItem> &items,
 		const Vertex_handle &infinity)
 {
 	DEBUG_START;
-	double distanceMin = MINIMIZATION_STARTING_VALUE;
-	Cell_handle nextCell;
-	/* FIXME: Use this ID to move to it only */
-	unsigned iNextNearest = 0;
+	std::set<Step> steps;
 	for (const Cell_handle &cell : cells)
 	{
 		const auto &associations = cell->info().associations;
@@ -404,19 +415,11 @@ static std::pair<Cell_handle, unsigned> iterate(
 		unsigned iNearest = getNearestOuterItemID(cell, items,
 				infinity);
 		double distance = cell->info().distance;
-		if (distance < distanceMin)
-		{
-			iNextNearest = iNearest;
-			distanceMin = distance;
-			nextCell = cell;
-		}
+		Step step(cell, iNearest, distance);
+		steps.insert(step);
 	}
-	std::cout << "Next cell to be iterated on: ";
-	printCell(nextCell, infinity);
-	std::cout << "Nearest plane ID: " << iNextNearest << std::endl;
-	std::cout << "Nearest distance: " << distanceMin << std::endl;
 	DEBUG_END;
-	return std::make_pair(nextCell, iNextNearest);
+	return steps;
 }
 
 static std::vector<unsigned> calculateActiveGroup(const Cell_handle &cell,
@@ -802,11 +805,24 @@ void DualPolyhedron_3::makeConsistent()
 			<< items.size() << std::endl;
 
 		const auto &outerCells = getOuterCells();
-		auto next = iterate(outerCells, items, infinite_vertex());
-		Cell_handle cell = next.first;
-		unsigned iNearest = next.second;
+		auto steps = iterate(outerCells, items, infinite_vertex());
+		auto it = steps.begin();
+		Cell_handle cell = it->cell;
+		unsigned iNearest = it->iNearest;
+		double distance = it->distance;
+		std::cout << "Next cell to be iterated on: ";
+		printCell(cell, infinite_vertex());
+		std::cout << "Nearest plane ID: " << iNearest << std::endl;
+		std::cout << "Nearest distance: " << distance << std::endl;
 		if (iIteration > 1)
 		{
+			if ((cell == cellPPrev) && (iNearest == iNearestPPrev))
+			{
+				++it;
+				cell = it->cell;
+				iNearest = it->iNearest;
+				distance = it->distance;
+			}
 			ASSERT((cell != cellPPrev || iNearest != iNearestPPrev)
 					&& "Infinite loop of 2nd order");
 			cellPPrev = cellPrev;
