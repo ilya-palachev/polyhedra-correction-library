@@ -797,6 +797,8 @@ void DualPolyhedron_3::makeConsistent()
 	unsigned numResolved = countResolvedItems();
 	Cell_handle cellPrev, cellPPrev;
 	unsigned iNearestPrev = 0, iNearestPPrev = 0;
+	std::set<std::pair<Cell_handle, unsigned>> touched;
+
 	while (numResolved < items.size())
 	{
 		std::cout << "===== Iteration #" << iIteration << " ====="
@@ -807,22 +809,25 @@ void DualPolyhedron_3::makeConsistent()
 		const auto &outerCells = getOuterCells();
 		auto steps = iterate(outerCells, items, infinite_vertex());
 		auto it = steps.begin();
-		Cell_handle cell = it->cell;
-		unsigned iNearest = it->iNearest;
-		double distance = it->distance;
+		while (touched.find(std::make_pair(it->cell, it->iNearest))
+				!= touched.end())
+			++it;
+
+		ASSERT(it != steps.end() && "No possible step has been found.");
+
+		Step step = *it;
+		Cell_handle cell = step.cell;
+		unsigned iNearest = step.iNearest;
+		touched.insert(std::make_pair(cell, iNearest));
+		double distance = step.distance;
+
 		std::cout << "Next cell to be iterated on: ";
 		printCell(cell, infinite_vertex());
 		std::cout << "Nearest plane ID: " << iNearest << std::endl;
 		std::cout << "Nearest distance: " << distance << std::endl;
+
 		if (iIteration > 1)
 		{
-			if ((cell == cellPPrev) && (iNearest == iNearestPPrev))
-			{
-				++it;
-				cell = it->cell;
-				iNearest = it->iNearest;
-				distance = it->distance;
-			}
 			ASSERT((cell != cellPPrev || iNearest != iNearestPPrev)
 					&& "Infinite loop of 2nd order");
 			cellPPrev = cellPrev;
