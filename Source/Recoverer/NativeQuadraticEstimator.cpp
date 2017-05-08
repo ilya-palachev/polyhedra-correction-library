@@ -69,7 +69,7 @@ private:
 		const Vertex_handle &dominator, double alpha, double alpha2);
 	void fullyMove(const std::vector<Vertex_handle> &vertices,
 		const Vector_3 &xNew, const std::vector<unsigned> &activeGroup);
-	void lift(Cell_handle cell, unsigned iNearest);
+	bool lift(Cell_handle cell, unsigned iNearest);
 	unsigned countResolvedItems() const;
 	std::vector<Cell_handle> getOuterCells() const;
 public:
@@ -504,7 +504,8 @@ static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup,
 	return result;
 }
 
-static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
+static std::pair<bool, double> calculateAlpha(const Vector_3 &xOld,
+		const Vector_3 &xNew,
 		const Plane_3 &planeOuter)
 {
 	DEBUG_START;
@@ -531,10 +532,9 @@ static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 		<< std::endl;
 	if (productDifference < 0.)
 	{
-		std::cout << "Considering negative product difference as no "
-			"difference at all" << std::endl;
+		std::cout << "Stop strange step processing" << std::endl;
 		DEBUG_END;
-		return 0.;
+		return std::make_pair(false, 0.);
 	}
 	double alpha = (productNew - value) / (productNew - productOld);
 	if (alpha > 1.)
@@ -544,7 +544,7 @@ static double calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew,
 		alpha = 1.;
 	}
 	DEBUG_END;
-	return alpha;
+	return std::make_pair(true, alpha);
 }
 
 bool isPositivelyDecomposable(const Point_3 &a, const Point_3 &b,
@@ -703,7 +703,7 @@ void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 	DEBUG_END;
 }
 
-void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
+bool DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 {
 	DEBUG_START;
 	Vector_3 xOld = cell->info().point - CGAL::Origin();
@@ -727,7 +727,11 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 
 		Vertex_handle vertex = mirror_vertex(cell, i);
 		Plane_3 plane = ::dual(vertex->point());
-		double alpha = calculateAlpha(xOld, xNew, plane);
+		double alpha;
+	        bool succeeded;
+		std::tie(succeeded, alpha) = calculateAlpha(xOld, xNew, plane);
+		if (!succeeded)
+			return false;
 		std::cout << "Alpha #" << i << ": " << alpha << std::endl;
 		ASSERT(alpha <= 1. && "Wrongly computed alpha");
 		if (alpha > alphaMax)
@@ -754,6 +758,7 @@ void DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 		fullyMove(vertices, xNew, activeGroup);
 	}
 	DEBUG_END;
+	return true;
 }
 
 unsigned DualPolyhedron_3::countResolvedItems() const
@@ -795,8 +800,6 @@ void DualPolyhedron_3::makeConsistent()
 	DEBUG_START;
 	unsigned iIteration = 0;
 	unsigned numResolved = countResolvedItems();
-	Cell_handle cellPrev, cellPPrev;
-	unsigned iNearestPrev = 0, iNearestPPrev = 0;
 	std::set<std::pair<Cell_handle, unsigned>> touched;
 
 	while (numResolved < items.size())
@@ -809,39 +812,23 @@ void DualPolyhedron_3::makeConsistent()
 		const auto &outerCells = getOuterCells();
 		auto steps = iterate(outerCells, items, infinite_vertex());
 		auto it = steps.begin();
-		while (touched.find(std::make_pair(it->cell, it->iNearest))
-				!= touched.end())
-			++it;
 
-		ASSERT(it != steps.end() && "No possible step has been found.");
-
-		Step step = *it;
-		Cell_handle cell = step.cell;
-		unsigned iNearest = step.iNearest;
-		touched.insert(std::make_pair(cell, iNearest));
-		double distance = step.distance;
-
-		std::cout << "Next cell to be iterated on: ";
-		printCell(cell, infinite_vertex());
-		std::cout << "Nearest plane ID: " << iNearest << std::endl;
-		std::cout << "Nearest distance: " << distance << std::endl;
-
-		if (iIteration > 1)
+		do
 		{
-			ASSERT((cell != cellPPrev || iNearest != iNearestPPrev)
-					&& "Infinite loop of 2nd order");
-			cellPPrev = cellPrev;
-			iNearestPPrev = iNearestPrev;
-		}
-		if (iIteration > 0)
-		{
-			ASSERT((cell != cellPrev || iNearest != iNearestPrev)
-					&& "Infinite loop");
-			cellPrev = cell;
-			iNearestPrev = iNearest;
-		}
+			while (touched.find(std::make_pair(
+				it->cell, it->iNearest)) != touched.end())
+				++it;
 
-		lift(cell, iNearest);
+			ASSERT(it != steps.end()
+					&& "No possible step has been found.");
+			touched.insert(std::make_pair(it->cell, it->iNearest));
+			std::cout << "Next cell to be iterated on: ";
+			printCell(it->cell, infinite_vertex());
+			std::cout << "Nearest plane ID: " << it->iNearest
+				<< std::endl;
+			std::cout << "Nearest distance: " << it->distance
+				<< std::endl;
+		} while (!lift(it->cell, it->iNearest));
 
 		/* FIXME: Optimize this by local graph traversal */
 		initialize();
