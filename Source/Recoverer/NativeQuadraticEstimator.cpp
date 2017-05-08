@@ -67,7 +67,7 @@ private:
 		const Vector_3 &xNew,
 		const std::vector<Vertex_handle> &vertices,
 		const Vertex_handle &dominator, double alpha, double alpha2);
-	void fullyMove(const std::vector<Vertex_handle> &vertices,
+	bool fullyMove(const std::vector<Vertex_handle> &vertices,
 		const Vector_3 &xNew, const std::vector<unsigned> &activeGroup);
 	bool lift(Cell_handle cell, unsigned iNearest);
 	unsigned countResolvedItems() const;
@@ -661,12 +661,18 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	DEBUG_END;
 }
 
-void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
+bool DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 		const Vector_3 &xNew, const std::vector<unsigned> &activeGroup)
 {
 	DEBUG_START;
+	std::vector<Point_3> initialPoints;
+	bool succeeded = true;
+
 	for (const Vertex_handle vertex : vertices)
+	{
 		ASSERT(isOuterVertex(vertex));
+		initialPoints.push_back(vertex->point());
+	}
 	for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
 	{
 		Vertex_handle vertex = vertices[i];
@@ -689,8 +695,21 @@ void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 			std::cout << "Vertex #" << vertex->info()
 				<< ", i.e. " << vertex->point()
 				<< " became non-outer" << std::endl;
-			ASSERT(0 && "Vertex became non-outer");
+			succeeded = false;
 		}
+	}
+
+	if (!succeeded)
+	{
+		std::cout << "Rolling back to non-moved positions."
+			<< std::endl;
+		for (unsigned i = 0; i < NUM_FACET_VERTICES; ++i)
+		{
+			Vertex_handle vertex = vertices[i];
+			move(vertex, initialPoints[i]);
+		}
+		DEBUG_END;
+		return false;
 	}
 
 	unsigned numNewlyResolved = 0;
@@ -709,6 +728,7 @@ void DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 	}
 	ASSERT(numNewlyResolved > 0 && "Nothing has been resolved");
 	DEBUG_END;
+	return true;
 }
 
 bool DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
@@ -763,7 +783,11 @@ bool DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 	else
 	{
 		std::cout << "Performing full move" << std::endl;
-		fullyMove(vertices, xNew, activeGroup);
+		if (!fullyMove(vertices, xNew, activeGroup))
+		{
+			DEBUG_END;
+			return false;
+		}
 	}
 	DEBUG_END;
 	return true;
