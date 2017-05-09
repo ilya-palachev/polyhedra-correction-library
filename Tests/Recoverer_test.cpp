@@ -50,6 +50,12 @@
 #define OPTION_COMPARE_WITH_FILE 'c'
 
 /**
+ * Option "-C" triggers special mode in which edges are detected based on
+ * contour-specific heuristics.
+ */
+#define OPTION_CONTOUR_MODE 'C'
+
+/**
  * Option "-d" sets the name of file with support directions.
  */
 #define OPTION_FILE_DIRECTIONS 'd'
@@ -156,7 +162,7 @@
  * Definition of the option set for recoverer test.
  */
 #define RECOVERER_OPTIONS_GETOPT_DESCRIPTION \
-	"a:Abc:d:e:f:hi:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
+	"a:Abc:Cd:e:f:hi:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
 
 struct PCLOption: public option
 {
@@ -391,6 +397,16 @@ static PCLOption optionsLong[] =
 	{
 		option
 		{
+			"contour-mode",
+			no_argument,
+			0,
+			OPTION_CONTOUR_MODE
+		},
+		"Enable contour mode"
+	},
+	{
+		option
+		{
 			"threshold",
 			required_argument,
 			0,
@@ -548,6 +564,9 @@ typedef struct
 
 	/** Shadow heuristics. */
 	bool shadowHeuristics;
+
+	/** Contour mode. */
+	bool contourMode;
 } CommandLineOptions;
 
 /** The number of possible test models. */
@@ -943,6 +962,7 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 	options->zMinimalNorm = 0.;
 	options->input.file.ifSupportFunctionData = false;
 	options->shadowHeuristics = false;
+	options->contourMode = false;
 	int optionIndex = 0;
 	while ((charCurr = getopt_long(argc, argv,
 		RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong,
@@ -1369,6 +1389,9 @@ static CommandLineOptions* parseCommandLine(int argc, char** argv)
 			break;
 		case OPTION_SHADOW_HEURISTICS:
 			options->shadowHeuristics = true;
+			break;
+		case OPTION_CONTOUR_MODE:
+			options->contourMode = true;
 			break;
 		case GETOPT_QUESTION:
 			STDERR_PRINT("Option \"-%c\" requires an argument "
@@ -1871,6 +1894,8 @@ static RecovererPtr makeRecoverer(CommandLineOptions* options)
 
 	if (options->shadowHeuristics)
 		recoverer->enableShadowHeuristics();
+	if (options->contourMode)
+		recoverer->enableContourMode();
 
 	DEBUG_END;
 	return recoverer;

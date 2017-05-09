@@ -115,6 +115,7 @@ set (SOURCE_pcl
 	Source/Polyhedron_3/Polyhedron_3.cpp
 	Source/Recoverer/ClpSupportFunctionEstimator.cpp
 	Source/Recoverer/Colouring.cpp
+	Source/Recoverer/ContourModeRecoverer.cpp
 	Source/Recoverer/CPLEXSupportFunctionEstimator.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/EdgeCorrector.cpp

@@ -131,6 +131,8 @@ private:
 	double zMinimalNorm_;
 
 	bool ifShadowHeuristics_;
+
+	bool ifContourMode_;
 public:
 
 	/**
@@ -230,6 +232,11 @@ public:
 	void enableShadowHeuristics()
 	{
 		ifShadowHeuristics_ = true;
+	}
+
+	void enableContourMode()
+	{
+		ifContourMode_ = true;
 	}
 
 	/**

@@ -39,6 +39,7 @@
 #include "Recoverer/NaiveFacetJoiner.h"
 #include "Recoverer/SupportPolyhedronCorrector.h"
 #include "Recoverer/EdgeCorrector.h"
+#include "Recoverer/ContourModeRecoverer.h"
 
 TimeMeasurer timer;
 std::stack<const char *> taskNames;
@@ -580,6 +581,12 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
+	if (ifContourMode_)
+	{
+		ContourModeRecoverer recoverer(dataShadow);
+		recoverer.run();
+	}
+
 	/* 0. Build support function data. */
 	pushTimer("support data extraction");
 	SupportFunctionDataConstructor constructor;
