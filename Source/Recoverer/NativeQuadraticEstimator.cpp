@@ -451,6 +451,11 @@ static std::vector<unsigned> calculateActiveGroup(const Cell_handle &cell,
 	}
 	std::cout << "  Number of current unresolved items: "
 		<< numUnresolvedCurrent << std::endl;
+	if (numUnresolvedCurrent == 0)
+	{
+		DEBUG_END;
+		return std::vector<unsigned>();
+	}
 	ASSERT(numUnresolvedCurrent > 0 && "Nothing to be resolved");
 	ASSERT(nearestFound && "Failed to find nearest point inside given "
 			"cell");
@@ -737,6 +742,12 @@ bool DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 	Vector_3 xOld = cell->info().point - CGAL::Origin();
 	std::cout << "Old tangient point: " << xOld << std::endl;
 	const auto activeGroup = calculateActiveGroup(cell, iNearest, items);
+	if (activeGroup.empty())
+	{
+		DEBUG_END;
+		return false;
+	}
+
 	Vector_3 xNew = leastSquaresPoint(activeGroup, items);
 	std::cout << "New tangient point: " << xNew << std::endl;
 
