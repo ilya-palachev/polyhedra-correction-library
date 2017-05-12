@@ -31,5 +31,7 @@ void ContourModeRecoverer::run()
 {
 	DEBUG_START;
 	std::cout << "Starting contour mode recovering..." << std::endl;
+	std::cout << "There are " << data->numContours << " contours"
+		<< std::endl;
 	DEBUG_END;
 }

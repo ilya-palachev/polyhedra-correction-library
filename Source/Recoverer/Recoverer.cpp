@@ -585,6 +585,8 @@ Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 	{
 		ContourModeRecoverer recoverer(dataShadow);
 		recoverer.run();
+		DEBUG_END;
+		return Polyhedron_3();
 	}
 
 	/* 0. Build support function data. */
