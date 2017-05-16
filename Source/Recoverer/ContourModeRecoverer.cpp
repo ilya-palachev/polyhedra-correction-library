@@ -24,7 +24,10 @@
  */
 
 #include <iostream>
+#include "Common.h"
+#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Recoverer/ContourModeRecoverer.h"
 
 void ContourModeRecoverer::run()
@@ -33,5 +36,55 @@ void ContourModeRecoverer::run()
 	std::cout << "Starting contour mode recovering..." << std::endl;
 	std::cout << "There are " << data->numContours << " contours"
 		<< std::endl;
+	ASSERT(!data->empty() && "The data must be non-empty");
+
+	double edgeLengthLimit = 0.;
+	if (!tryGetenvDouble("EDGE_LENGTH_LIMIT", edgeLengthLimit))
+	{
+		ERROR_PRINT("Failed to get EDGE_LENGTH_LIMIT");
+		DEBUG_END;
+		return;
+	}
+
+	int numLongSides = 0;
+	int numSidesTotal = 0;
+	int maxSidesNumberLocal = 0;
+	for (int i = 0; i < data->numContours; ++i)
+		maxSidesNumberLocal = std::max(maxSidesNumberLocal,
+				data->contours[i].ns);
+	std::cout << "Maximal sides number per contour: "
+		<< maxSidesNumberLocal << std::endl;
+
+	std::vector<int> numLongSidesLocal(maxSidesNumberLocal);
+	std::vector<std::vector<double>> angles(data->numContours);
+	for (int i = 0; i < data->numContours; ++i)
+	{
+		SContour *contour = &data->contours[i];
+		ASSERT(contour->id == i && "Wrong numeration");
+		int numLongSidesCurrent = 0;
+		angles[i] = std::vector<double>(contour->ns);
+		for (int j = 0; j < contour->ns; ++j)
+		{
+			++numSidesTotal;
+			SideOfContour *side = &contour->sides[j];
+			Vector_3 A1 = side->A1;
+			Vector_3 A2 = side->A2;
+			double length = sqrt((A1-A2).squared_length());
+			if (length >= edgeLengthLimit)
+			{
+				++numLongSides;
+				++numLongSidesCurrent;
+			}
+		}
+		++numLongSidesLocal[numLongSidesCurrent];
+	}
+	std::cout << "Total number of sides: " << numSidesTotal << std::endl;
+	std::cout << "There are " << numLongSides << " contour sides, which "
+		"length is greater than " << edgeLengthLimit << std::endl;
+	for (int i = 0; i < maxSidesNumberLocal; ++i)
+	{
+		std::cout << "    Number of contour with " << i <<
+			" long sides: " << numLongSidesLocal[i] << std::endl;
+	}
 	DEBUG_END;
 }
