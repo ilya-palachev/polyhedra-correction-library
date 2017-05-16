@@ -562,6 +562,14 @@ static Polyhedron_3 simplifyBody(Polyhedron_3 P, VectorXd consistentValues,
 Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
+	if (ifContourMode_)
+	{
+		ContourModeRecoverer recoverer(SData);
+		recoverer.run();
+		DEBUG_END;
+		return Polyhedron_3();
+	}
+
 	/* 1. Run classical support function estimation process. */
 	VectorXd consistentValues;
 	SupportFunctionEstimationDataPtr SEData;
@@ -581,14 +589,6 @@ Polyhedron_3 Recoverer::run(SupportFunctionDataPtr SData)
 Polyhedron_3 Recoverer::run(ShadowContourDataPtr dataShadow)
 {
 	DEBUG_START;
-	if (ifContourMode_)
-	{
-		ContourModeRecoverer recoverer(dataShadow);
-		recoverer.run();
-		DEBUG_END;
-		return Polyhedron_3();
-	}
-
 	/* 0. Build support function data. */
 	pushTimer("support data extraction");
 	SupportFunctionDataConstructor constructor;

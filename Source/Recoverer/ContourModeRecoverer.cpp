@@ -27,16 +27,33 @@
 #include "Common.h"
 #include "DebugAssert.h"
 #include "DebugPrint.h"
-#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Recoverer/ContourModeRecoverer.h"
+
+static unsigned getContoursNumber(SupportFunctionDataPtr data)
+{
+	DEBUG_START;
+	std::set<int> contourIDs;
+	for (int i = 0; i < data->size(); ++i)
+	{
+		auto item = (*data)[i];
+		int iContour = item.info->iContour;
+		contourIDs.insert(iContour);
+	}
+	std::cout << "Number of shadow contours: " << contourIDs.size()
+		<< std::endl;
+	for (int iContour : contourIDs)
+		ASSERT(iContour < int(contourIDs.size()) && "Wrong numeration");
+	DEBUG_END;
+	return contourIDs.size();
+}
 
 void ContourModeRecoverer::run()
 {
 	DEBUG_START;
 	std::cout << "Starting contour mode recovering..." << std::endl;
-	std::cout << "There are " << data->numContours << " contours"
+	std::cout << "There are " << data->size() << " support items "
 		<< std::endl;
-	ASSERT(!data->empty() && "The data must be non-empty");
+	ASSERT(data->size() > 0 && "The data must be non-empty");
 
 	double edgeLengthLimit = 0.;
 	if (!tryGetenvDouble("EDGE_LENGTH_LIMIT", edgeLengthLimit))
@@ -46,30 +63,40 @@ void ContourModeRecoverer::run()
 		return;
 	}
 
-	int numLongSides = 0;
-	int numSidesTotal = 0;
-	int maxSidesNumberLocal = 0;
-	for (int i = 0; i < data->numContours; ++i)
+	std::vector<std::vector<SupportFunctionDataItem>> contours(
+			getContoursNumber(data));
+	for (int i = 0; i < data->size(); ++i)
+	{
+		SupportFunctionDataItem item = (*data)[i];
+		int iContour = item.info->iContour;
+		contours[iContour].push_back(item);
+	}
+
+	unsigned maxSidesNumberLocal = 0;
+	for (auto &contour : contours)
+	{
 		maxSidesNumberLocal = std::max(maxSidesNumberLocal,
-				data->contours[i].ns);
+			unsigned(contour.size()));
+		for (unsigned i = 0; i < contour.size(); ++i)
+		{
+			ASSERT(contour[i].info->iSide == int(i)
+					&& "Wrong numeration");
+		}
+	}
 	std::cout << "Maximal sides number per contour: "
 		<< maxSidesNumberLocal << std::endl;
 
-	std::vector<int> numLongSidesLocal(maxSidesNumberLocal);
-	std::vector<std::vector<double>> angles(data->numContours);
-	for (int i = 0; i < data->numContours; ++i)
+	std::vector<unsigned> numLongSidesLocal(maxSidesNumberLocal);
+	unsigned numLongSides = 0;
+	for (unsigned i = 0; i < contours.size(); ++i)
 	{
-		SContour *contour = &data->contours[i];
-		ASSERT(contour->id == i && "Wrong numeration");
+		auto &contour = contours[i];
 		int numLongSidesCurrent = 0;
-		angles[i] = std::vector<double>(contour->ns);
-		for (int j = 0; j < contour->ns; ++j)
+		for (unsigned j = 0; j < contour.size(); ++j)
 		{
-			++numSidesTotal;
-			SideOfContour *side = &contour->sides[j];
-			Vector_3 A1 = side->A1;
-			Vector_3 A2 = side->A2;
-			double length = sqrt((A1-A2).squared_length());
+			auto item = contour[j];
+			double length = sqrt(
+					item.info->segment.squared_length());
 			if (length >= edgeLengthLimit)
 			{
 				++numLongSides;
@@ -78,10 +105,10 @@ void ContourModeRecoverer::run()
 		}
 		++numLongSidesLocal[numLongSidesCurrent];
 	}
-	std::cout << "Total number of sides: " << numSidesTotal << std::endl;
+
 	std::cout << "There are " << numLongSides << " contour sides, which "
 		"length is greater than " << edgeLengthLimit << std::endl;
-	for (int i = 0; i < maxSidesNumberLocal; ++i)
+	for (unsigned i = 0; i < maxSidesNumberLocal; ++i)
 	{
 		std::cout << "    Number of contour with " << i <<
 			" long sides: " << numLongSidesLocal[i] << std::endl;

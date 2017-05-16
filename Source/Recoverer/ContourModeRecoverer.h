@@ -26,13 +26,13 @@
 #ifndef CONTOUR_MODE_RECOVERER_H
 #define CONTOUR_MODE_RECOVERER_H
 
-#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 class ContourModeRecoverer
 {
-	ShadowContourDataPtr data;
+	SupportFunctionDataPtr data;
 public:
-	ContourModeRecoverer(ShadowContourDataPtr data) : data(data) {}
+	ContourModeRecoverer(SupportFunctionDataPtr data) : data(data) {}
 	void run();
 };
 
