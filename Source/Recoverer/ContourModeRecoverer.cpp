@@ -47,31 +47,14 @@ static unsigned getContoursNumber(SupportFunctionDataPtr data)
 	return contourIDs.size();
 }
 
-void ContourModeRecoverer::run()
+typedef std::vector<std::vector<SupportFunctionDataItem>> ContourVectorTy;
+typedef std::vector<std::vector<unsigned>> LongSideIDsTy;
+
+LongSideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
+		double edgeLengthLimit)
 {
 	DEBUG_START;
-	std::cout << "Starting contour mode recovering..." << std::endl;
-	std::cout << "There are " << data->size() << " support items "
-		<< std::endl;
-	ASSERT(data->size() > 0 && "The data must be non-empty");
-
-	double edgeLengthLimit = 0.;
-	if (!tryGetenvDouble("EDGE_LENGTH_LIMIT", edgeLengthLimit))
-	{
-		ERROR_PRINT("Failed to get EDGE_LENGTH_LIMIT");
-		DEBUG_END;
-		return;
-	}
-
-	std::vector<std::vector<SupportFunctionDataItem>> contours(
-			getContoursNumber(data));
-	for (int i = 0; i < data->size(); ++i)
-	{
-		SupportFunctionDataItem item = (*data)[i];
-		int iContour = item.info->iContour;
-		contours[iContour].push_back(item);
-	}
-
+	LongSideIDsTy longSideIDs(contours.size());
 	unsigned maxSidesNumberLocal = 0;
 	for (auto &contour : contours)
 	{
@@ -101,6 +84,7 @@ void ContourModeRecoverer::run()
 			{
 				++numLongSides;
 				++numLongSidesCurrent;
+				longSideIDs[i].push_back(j);
 			}
 		}
 		++numLongSidesLocal[numLongSidesCurrent];
@@ -113,5 +97,34 @@ void ContourModeRecoverer::run()
 		std::cout << "    Number of contour with " << i <<
 			" long sides: " << numLongSidesLocal[i] << std::endl;
 	}
+	DEBUG_END;
+	return longSideIDs;
+}
+
+void ContourModeRecoverer::run()
+{
+	DEBUG_START;
+	std::cout << "Starting contour mode recovering..." << std::endl;
+	std::cout << "There are " << data->size() << " support items "
+		<< std::endl;
+	ASSERT(data->size() > 0 && "The data must be non-empty");
+
+	double edgeLengthLimit = 0.;
+	if (!tryGetenvDouble("EDGE_LENGTH_LIMIT", edgeLengthLimit))
+	{
+		ERROR_PRINT("Failed to get EDGE_LENGTH_LIMIT");
+		DEBUG_END;
+		return;
+	}
+
+	ContourVectorTy contours(getContoursNumber(data));
+	for (int i = 0; i < data->size(); ++i)
+	{
+		SupportFunctionDataItem item = (*data)[i];
+		int iContour = item.info->iContour;
+		contours[iContour].push_back(item);
+	}
+
+	LongSideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
 	DEBUG_END;
 }
