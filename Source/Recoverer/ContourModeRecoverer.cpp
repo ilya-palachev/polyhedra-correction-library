@@ -48,13 +48,13 @@ static unsigned getContoursNumber(SupportFunctionDataPtr data)
 }
 
 typedef std::vector<std::vector<SupportFunctionDataItem>> ContourVectorTy;
-typedef std::vector<std::vector<unsigned>> LongSideIDsTy;
+typedef std::vector<std::vector<unsigned>> SideIDsTy;
 
-LongSideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
+SideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
 		double edgeLengthLimit)
 {
 	DEBUG_START;
-	LongSideIDsTy longSideIDs(contours.size());
+	SideIDsTy longSideIDs(contours.size());
 	unsigned maxSidesNumberLocal = 0;
 	for (auto &contour : contours)
 	{
@@ -101,6 +101,40 @@ LongSideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
 	return longSideIDs;
 }
 
+typedef std::vector<std::vector<double>> AnglesTy;
+
+static AnglesTy calculateAngles(const ContourVectorTy &contours,
+		const SideIDsTy &longSideIDs)
+{
+	DEBUG_START;
+	Vector_3 ez(0., 0., 1.);
+	AnglesTy angles(contours.size());
+	for (unsigned iContour = 0; iContour < contours.size(); ++iContour)
+	{
+		std::cout << "Angles for contour #" << iContour << ":"
+			<< std::endl;
+		for (unsigned iSide : longSideIDs[iContour])
+		{
+			SupportFunctionDataItem item
+				= contours[iContour][iSide];
+			Vector_3 norm = item.direction;
+			double angle = acos(norm * ez);
+			Vector_3 product = CGAL::cross_product(ez, norm);
+			if (product * item.info->normalShadow < 0.)
+				angle *= -1.;
+			angles[iContour].push_back(angle);
+			std::cout << "    Angle for side #" << iSide << ":\t";
+			if (angle >= 0.)
+				std::cout << " ";
+			std::cout << angle << ",\tlength: "
+				<< sqrt(item.info->segment.squared_length())
+				<< std::endl;
+		}
+	}
+	DEBUG_END;
+	return angles;
+}
+
 void ContourModeRecoverer::run()
 {
 	DEBUG_START;
@@ -125,6 +159,7 @@ void ContourModeRecoverer::run()
 		contours[iContour].push_back(item);
 	}
 
-	LongSideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
+	SideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
+	AnglesTy angles = calculateAngles(contours, longSideIDs);
 	DEBUG_END;
 }
