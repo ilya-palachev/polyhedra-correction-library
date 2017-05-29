@@ -70,6 +70,9 @@ SideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
 		<< maxSidesNumberLocal << std::endl;
 
 	std::vector<unsigned> numLongSidesLocal(maxSidesNumberLocal);
+	for (unsigned i = 0; i < maxSidesNumberLocal; ++i)
+		numLongSidesLocal[i] = 0.;
+
 	unsigned numLongSides = 0;
 	for (unsigned i = 0; i < contours.size(); ++i)
 	{
@@ -87,6 +90,9 @@ SideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
 				longSideIDs[i].push_back(j);
 			}
 		}
+		std::cout << "Contour " << i << " has " << numLongSidesCurrent
+			<< " long sides, and total " << contour.size()
+			<< std::endl;
 		++numLongSidesLocal[numLongSidesCurrent];
 	}
 
@@ -109,11 +115,19 @@ static AnglesTy calculateAngles(const ContourVectorTy &contours,
 	DEBUG_START;
 	Vector_3 ez(0., 0., 1.);
 	AnglesTy angles(contours.size());
+	bool fullLog = getenv("FULL_LOG") != nullptr;
 	for (unsigned iContour = 0; iContour < contours.size(); ++iContour)
 	{
-		std::cout << "Angles for contour #" << iContour << ":"
-			<< std::endl;
-		for (unsigned iSide : longSideIDs[iContour])
+		if (fullLog)
+			std::cout << "Angles for contour #" << iContour
+				<< ", which has "
+				<< longSideIDs[iContour].size()
+				<< " long sides from total "
+				<< contours[iContour].size()
+				<< " sides:" << std::endl;
+		unsigned iLong = 0;
+		for (unsigned iSide = 0; iSide < contours[iContour].size();
+				++iSide)
 		{
 			SupportFunctionDataItem item
 				= contours[iContour][iSide];
@@ -123,12 +137,25 @@ static AnglesTy calculateAngles(const ContourVectorTy &contours,
 			if (product * item.info->normalShadow < 0.)
 				angle *= -1.;
 			angles[iContour].push_back(angle);
-			std::cout << "    Angle for side #" << iSide << ":\t";
-			if (angle >= 0.)
-				std::cout << " ";
-			std::cout << angle << ",\tlength: "
-				<< sqrt(item.info->segment.squared_length())
-				<< std::endl;
+			double length = sqrt(
+				item.info->segment.squared_length());
+			if (longSideIDs[iContour][iLong] == iSide)
+			{
+				std::cout << COLOUR_YELLOW;
+				if (length > 1.)
+					std::cout << COLOUR_RED;
+				++iLong;
+			}
+			if (fullLog)
+			{
+				std::cout << "    Angle for side #" << iSide
+					<< ":\t";
+				if (angle >= 0.)
+					std::cout << " ";
+				std::cout << angle << ",\tlength: "
+					<< length << std::endl;
+			}
+			std::cout << COLOUR_NORM;
 		}
 	}
 	DEBUG_END;
