@@ -185,9 +185,14 @@ NeighborsTy detectNeighbors(ContourVectorTy contours, SideIDsTy longSideIDs,
 			<< " and " << iNext << std::endl;
 		for (unsigned i : longSideIDs[iContour])
 		{
+			double angle0 = angles[iContour][i];
+
+			// FIXME: Hardcoded constant!
+			if (fabs(angle0 + M_PI) < 0.01)
+				continue;
+
 			for (unsigned j : longSideIDs[iNext])
 			{
-				double angle0 = angles[iContour][i];
 				double angle1 = angles[iNext][j];
 				if (fabs(angle0 - angle1) < angleDiffLimit)
 				{
