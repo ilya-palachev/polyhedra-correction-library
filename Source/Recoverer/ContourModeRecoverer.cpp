@@ -162,6 +162,48 @@ static AnglesTy calculateAngles(const ContourVectorTy &contours,
 	return angles;
 }
 
+typedef std::vector<std::vector<std::pair<unsigned, unsigned>>> NeighborsTy;
+
+NeighborsTy detectNeighbors(ContourVectorTy contours, SideIDsTy longSideIDs,
+		AnglesTy angles)
+{
+	DEBUG_START;
+	double angleDiffLimit = 0.;
+	if (!tryGetenvDouble("ANGLE_DIFF_LIMIT", angleDiffLimit))
+	{
+		ERROR_PRINT("Failed to get ANGLE_DIFF_LIMIT");
+		DEBUG_END;
+		exit(EXIT_FAILURE);
+	}
+
+	NeighborsTy neighbors(contours.size());
+	for (unsigned iContour = 0; iContour < contours.size(); ++iContour)
+	{
+		unsigned iNext = (contours.size() + iContour + 1)
+			% contours.size();
+		std::cout << "Searching neighbors between contours " << iContour
+			<< " and " << iNext << std::endl;
+		for (unsigned i : longSideIDs[iContour])
+		{
+			for (unsigned j : longSideIDs[iNext])
+			{
+				double angle0 = angles[iContour][i];
+				double angle1 = angles[iNext][j];
+				if (fabs(angle0 - angle1) < angleDiffLimit)
+				{
+					std::cout << "Found neighbor (" << i
+						<< ", " << j << ")"
+						<< std::endl;
+					neighbors[iContour].push_back(
+						std::make_pair(i, j));
+				}
+			}
+		}
+	}
+	DEBUG_END;
+	return neighbors;
+}
+
 void ContourModeRecoverer::run()
 {
 	DEBUG_START;
@@ -188,5 +230,6 @@ void ContourModeRecoverer::run()
 
 	SideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
 	AnglesTy angles = calculateAngles(contours, longSideIDs);
+	NeighborsTy neighbors = detectNeighbors(contours, longSideIDs, angles);
 	DEBUG_END;
 }
