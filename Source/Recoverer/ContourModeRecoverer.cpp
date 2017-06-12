@@ -24,6 +24,8 @@
  */
 
 #include <iostream>
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues>
 #include "Common.h"
 #include "DebugAssert.h"
 #include "DebugPrint.h"
@@ -209,6 +211,190 @@ NeighborsTy detectNeighbors(ContourVectorTy contours, SideIDsTy longSideIDs,
 	return neighbors;
 }
 
+typedef std::vector<std::pair<unsigned, unsigned>> ClusterTy;
+typedef std::vector<ClusterTy> ClusterVectorTy;
+
+void printPair(const std::pair<unsigned, unsigned> pair)
+{
+	std::cout << "(" << pair.first << ", " << pair.second
+		<< ")" << std::endl;
+}
+
+ClusterTy getPossibleCluster(const ContourVectorTy &contours,
+		const NeighborsTy &neighbors, unsigned iContour,
+		unsigned iSide)
+{
+	DEBUG_START;
+	ClusterTy cluster;
+	unsigned iContourCurr = iContour;
+	unsigned iSideCurr = iSide;
+	do
+	{
+		cluster.push_back(std::make_pair(iContourCurr, iSideCurr));
+		unsigned iContourNext = (contours.size() + iContourCurr + 1)
+			% contours.size();
+		unsigned iSideNext = 0;
+		unsigned numPairs = 0;
+		for (const auto &pair : neighbors[iContourCurr])
+			if (pair.first == iSideCurr)
+			{
+				++numPairs;
+				iSideNext = pair.second;
+				std::cout << "  Found pair: ";
+				printPair(pair);
+			}
+		ASSERT(numPairs <= 1 && "Not implemented yet");
+		if (numPairs == 0)
+			break;
+
+		iContourCurr = iContourNext;
+		iSideCurr = iSideNext;
+	} while (iContourCurr != iContour);
+	DEBUG_END;
+	return cluster;
+}
+
+double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
+{
+	DEBUG_START;
+	std::vector<Vector_3> points;
+	Vector_3 center;
+	std::cout << "Starting the error calculation for cluster of "
+		<< cluster.size() << " items" << std::endl;
+
+	for (const auto &pair : cluster)
+	{
+		auto item = contours[pair.first][pair.second];
+		Vector_3 point = item.direction;
+		point = point * (1. / item.value);
+		points.push_back(point);
+		center = center + point;
+	}
+	center = center * (1. / cluster.size());
+	std::cout << "Center: " << center << std::endl;
+	for (auto &point : points)
+		point = point - center;
+
+	Eigen::MatrixXd A;
+	A.resize(points.size(), 3);
+	for (unsigned i = 0; i < points.size(); ++i)
+	{
+		Vector_3 point = points[i];
+		A(i, 0) = point.x();
+		A(i, 1) = point.y();
+		A(i, 2) = point.z();
+	}
+	std::cout << "Matrix A: " << A << std::endl;
+
+	Eigen::MatrixXd P;
+	P.resize(points.size(), points.size());
+	for (unsigned i = 0; i < points.size(); ++i)
+		for (unsigned j = 0; j < points.size(); ++j)
+			if (i == j)
+				P(i, j) = 1. - 1. / points.size();
+			else
+				P(i, j) = -1. / points.size();
+
+	Eigen::MatrixXd B = A.transpose() * P * A;
+	Eigen::EigenSolver<Eigen::MatrixXd> solver(B);
+	std::cout << "Matrix B: " << B << std::endl;
+	std::cout << "Eigenvalues: " << solver.eigenvalues() << std::endl;
+	unsigned iMax = 0;
+	double maxValue = 0.;
+	for (unsigned i = 0; i < 3; ++i)
+	{
+		std::complex<double> lambda = solver.eigenvalues()[i];
+		double value = std::real(lambda);
+		ASSERT(fabs(std::imag(lambda) < 1e-16));
+		ASSERT(value >= -1e-16);
+		if (value > maxValue)
+		{
+			maxValue = value;
+			iMax = i;
+		}
+		++i;
+	}
+
+	std::cout << "Maximal value: " << maxValue << std::endl;
+	Eigen::VectorXcd compVector = solver.eigenvectors().col(iMax);
+	std::cout << "Complex vector:" << compVector << std::endl;
+
+	ASSERT(fabs(std::imag(compVector(0))) < 1e-16);
+	ASSERT(fabs(std::imag(compVector(1))) < 1e-16);
+	ASSERT(fabs(std::imag(compVector(2))) < 1e-16);
+	Vector_3 vector(std::real(compVector(0)), std::real(compVector(1)),
+			std::real(compVector(2)));
+	std::cout << "Real vector: " << vector << std::endl;
+
+	double error = 0.;
+	for (const auto &point : points)
+		error += point * point - (point * vector) / (vector * vector);
+	std::cout << "Error: " << error << std::endl;
+
+	DEBUG_END;
+	return error;
+}
+
+ClusterTy clusterizeOne(const ContourVectorTy &contours,
+		const NeighborsTy &neighbors, unsigned iContour,
+		unsigned iSide, double maxClusterError)
+{
+	DEBUG_START;
+	std::cout << "Trying to clusterize contour " << iContour << ", side "
+		<< iSide << std::endl;
+	ClusterTy possibleCluster = getPossibleCluster(contours, neighbors,
+			iContour, iSide);
+	if (possibleCluster.empty())
+	{
+		DEBUG_END;
+		return possibleCluster;
+	}
+	std::cout << "Possible cluster: ";
+	for (const auto &pair : possibleCluster)
+		printPair(pair);
+	std::cout << std::endl;
+
+	ClusterTy cluster;
+	for (const auto &pair : possibleCluster)
+	{
+		ClusterTy clusterNew = cluster;
+		clusterNew.push_back(pair);
+		if (clusterNew.size() == 1
+			|| calculateError(contours, clusterNew)
+				<= maxClusterError)
+			cluster = clusterNew;
+		else
+			break;
+	}
+	DEBUG_END;
+	return cluster;
+}
+
+ClusterVectorTy clusterize(const ContourVectorTy &contours,
+		const NeighborsTy &neighbors, double maxClusterError)
+{
+	DEBUG_START;
+	ClusterVectorTy allClusters;
+	for (unsigned iContour = 0; iContour < contours.size(); ++iContour)
+	{
+		auto &contour = contours[iContour];
+		for (unsigned iSide = 0; iSide < contour.size(); ++iSide)
+		{
+			std::cout << "Trying to clusterize contour " << iContour
+				<< ", side " << iSide << " ***" << std::endl;
+			ClusterTy cluster = clusterizeOne(contours, neighbors,
+					iContour, iSide, maxClusterError);
+			if (!cluster.empty())
+				allClusters.push_back(cluster);
+
+		}
+	}
+	/* FIXME: Choose best clusters for each side here. */
+	auto clusters = allClusters;
+	DEBUG_END;
+	return clusters;
+}
+
 void ContourModeRecoverer::run()
 {
 	DEBUG_START;
@@ -236,5 +422,15 @@ void ContourModeRecoverer::run()
 	SideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
 	AnglesTy angles = calculateAngles(contours, longSideIDs);
 	NeighborsTy neighbors = detectNeighbors(contours, longSideIDs, angles);
+
+	double maxClusterError = 0.;
+	if (!tryGetenvDouble("MAX_CLUSTER_ERROR", maxClusterError))
+	{
+		ERROR_PRINT("Failed to get MAX_CLUSTER_ERROR");
+		DEBUG_END;
+		return;
+	}
+	ClusterVectorTy clusters = clusterize(contours, neighbors,
+			maxClusterError);
 	DEBUG_END;
 }
