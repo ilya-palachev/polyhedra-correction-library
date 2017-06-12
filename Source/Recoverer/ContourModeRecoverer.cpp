@@ -240,8 +240,6 @@ ClusterTy getPossibleCluster(const ContourVectorTy &contours,
 			{
 				++numPairs;
 				iSideNext = pair.second;
-				std::cout << "  Found pair: ";
-				printPair(pair);
 			}
 		ASSERT(numPairs <= 1 && "Not implemented yet");
 		if (numPairs == 0)
@@ -259,8 +257,6 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 	DEBUG_START;
 	std::vector<Vector_3> points;
 	Vector_3 center;
-	std::cout << "Starting the error calculation for cluster of "
-		<< cluster.size() << " items" << std::endl;
 
 	for (const auto &pair : cluster)
 	{
@@ -271,7 +267,6 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 		center = center + point;
 	}
 	center = center * (1. / cluster.size());
-	std::cout << "Center: " << center << std::endl;
 	for (auto &point : points)
 		point = point - center;
 
@@ -284,7 +279,6 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 		A(i, 1) = point.y();
 		A(i, 2) = point.z();
 	}
-	std::cout << "Matrix A: " << A << std::endl;
 
 	Eigen::MatrixXd P;
 	P.resize(points.size(), points.size());
@@ -297,15 +291,16 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 
 	Eigen::MatrixXd B = A.transpose() * P * A;
 	Eigen::EigenSolver<Eigen::MatrixXd> solver(B);
-	std::cout << "Matrix B: " << B << std::endl;
-	std::cout << "Eigenvalues: " << solver.eigenvalues() << std::endl;
 	unsigned iMax = 0;
 	double maxValue = 0.;
 	for (unsigned i = 0; i < 3; ++i)
 	{
 		std::complex<double> lambda = solver.eigenvalues()[i];
 		double value = std::real(lambda);
-		ASSERT(fabs(std::imag(lambda) < 1e-16));
+		if (fabs(std::imag(lambda)) >= 1e-16)
+			std::cout << "Imag: " << fabs(std::imag(lambda))
+				<< std::endl;
+		ASSERT(fabs(std::imag(lambda)) < 1e-16);
 		ASSERT(value >= -1e-16);
 		if (value > maxValue)
 		{
@@ -315,22 +310,24 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 		++i;
 	}
 
-	std::cout << "Maximal value: " << maxValue << std::endl;
 	Eigen::VectorXcd compVector = solver.eigenvectors().col(iMax);
-	std::cout << "Complex vector:" << compVector << std::endl;
 
+#if 0
 	ASSERT(fabs(std::imag(compVector(0))) < 1e-16);
 	ASSERT(fabs(std::imag(compVector(1))) < 1e-16);
 	ASSERT(fabs(std::imag(compVector(2))) < 1e-16);
+#endif
 	Vector_3 vector(std::real(compVector(0)), std::real(compVector(1)),
 			std::real(compVector(2)));
-	std::cout << "Real vector: " << vector << std::endl;
 
 	double error = 0.;
 	for (const auto &point : points)
 		error += point * point - (point * vector) / (vector * vector);
-	std::cout << "Error: " << error << std::endl;
 
+#if 1
+	std::cout << "  Error for " << points.size() << " points: " << error
+		<< std::endl;
+#endif
 	DEBUG_END;
 	return error;
 }
@@ -340,19 +337,15 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 		unsigned iSide, double maxClusterError)
 {
 	DEBUG_START;
-	std::cout << "Trying to clusterize contour " << iContour << ", side "
-		<< iSide << std::endl;
 	ClusterTy possibleCluster = getPossibleCluster(contours, neighbors,
 			iContour, iSide);
 	if (possibleCluster.empty())
 	{
+		std::cout << "  Stopping, possible cluster is empty..."
+			<< std::endl;
 		DEBUG_END;
 		return possibleCluster;
 	}
-	std::cout << "Possible cluster: ";
-	for (const auto &pair : possibleCluster)
-		printPair(pair);
-	std::cout << std::endl;
 
 	ClusterTy cluster;
 	for (const auto &pair : possibleCluster)
@@ -360,8 +353,8 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 		ClusterTy clusterNew = cluster;
 		clusterNew.push_back(pair);
 		if (clusterNew.size() == 1
-			|| calculateError(contours, clusterNew)
-				<= maxClusterError)
+			|| (calculateError(contours, clusterNew)
+				<= maxClusterError))
 			cluster = clusterNew;
 		else
 			break;
@@ -380,12 +373,18 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 		auto &contour = contours[iContour];
 		for (unsigned iSide = 0; iSide < contour.size(); ++iSide)
 		{
-			std::cout << "Trying to clusterize contour " << iContour
-				<< ", side " << iSide << " ***" << std::endl;
+			//std::cout << "Processing side " << iSide << std::endl;
+			std::cout << "";
 			ClusterTy cluster = clusterizeOne(contours, neighbors,
 					iContour, iSide, maxClusterError);
-			if (!cluster.empty())
+			if (!cluster.empty() && cluster.size() > 1)
+			{
+				std::cout << "Found cluster of "
+					<< cluster.size()
+					<< " items for contour " << iContour
+					<< ", side " << iSide << std::endl;
 				allClusters.push_back(cluster);
+			}
 
 		}
 	}
