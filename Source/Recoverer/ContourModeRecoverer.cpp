@@ -363,6 +363,57 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 	return cluster;
 }
 
+bool contains(const ClusterTy &a, const ClusterTy &b)
+{
+	DEBUG_START;
+	bool result = true;
+	for (const auto &pair : b)
+		if (std::find(a.begin(), a.end(), pair) == a.end())
+		{
+			result = false;
+			break;
+		}
+	DEBUG_END;
+	return result;
+}
+
+ClusterVectorTy chooseBestClusters(ClusterVectorTy allClusters)
+{
+	DEBUG_START;
+	std::sort(allClusters.begin(), allClusters.end(),
+		[](const ClusterTy &a, const ClusterTy &b) -> bool
+		{
+			return a.size() > b.size();
+		});
+
+	ClusterVectorTy clusters;
+	for (unsigned iCluster = 0; iCluster < allClusters.size(); ++iCluster)
+	{
+		ClusterTy cluster = allClusters[iCluster];
+		if (iCluster == 0)
+		{
+			clusters.push_back(cluster);
+			continue;
+		}
+
+		bool ifContains = false;
+		for (const auto &processedCluster : clusters)
+			if (contains(processedCluster, cluster))
+			{
+				ifContains = true;
+				break;
+			}
+
+		if (ifContains)
+			continue;
+
+		clusters.push_back(cluster);
+	}
+
+	DEBUG_END;
+	return clusters;
+}
+
 ClusterVectorTy clusterize(const ContourVectorTy &contours,
 		const NeighborsTy &neighbors, double maxClusterError)
 {
@@ -373,7 +424,10 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 		auto &contour = contours[iContour];
 		for (unsigned iSide = 0; iSide < contour.size(); ++iSide)
 		{
-			//std::cout << "Processing side " << iSide << std::endl;
+			/* 
+			 * FIXME: !!! Without this line the program doesn't
+			 * work!
+			 */
 			std::cout << "";
 			ClusterTy cluster = clusterizeOne(contours, neighbors,
 					iContour, iSide, maxClusterError);
@@ -388,8 +442,22 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 
 		}
 	}
-	/* FIXME: Choose best clusters for each side here. */
-	auto clusters = allClusters;
+
+	std::cout << "The number of clusters before post-processing: "
+		<< allClusters.size() << std::endl;
+	auto clusters = chooseBestClusters(allClusters);
+	std::cout << "Found clusters:" << std::endl;
+	unsigned iCluster = 0;
+	for (const auto &cluster : clusters)
+	{
+		std::cout << "  Cluster #" << iCluster++ << ": ";
+		for (const auto &pair : cluster)
+		{
+			printPair(pair);
+			std::cout << " ";
+		}
+		std::cout << std::endl;
+	}
 	DEBUG_END;
 	return clusters;
 }
@@ -431,5 +499,7 @@ void ContourModeRecoverer::run()
 	}
 	ClusterVectorTy clusters = clusterize(contours, neighbors,
 			maxClusterError);
+	std::cout << "The number of found clusters: " << clusters.size()
+		<< std::endl;
 	DEBUG_END;
 }
