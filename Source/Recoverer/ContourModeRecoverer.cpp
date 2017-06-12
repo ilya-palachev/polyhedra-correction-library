@@ -363,18 +363,15 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 	return cluster;
 }
 
-bool contains(const ClusterTy &a, const ClusterTy &b)
+unsigned countContained(const ClusterTy &a, const ClusterTy &b)
 {
 	DEBUG_START;
-	bool result = true;
+	unsigned numContained = 0;
 	for (const auto &pair : b)
-		if (std::find(a.begin(), a.end(), pair) == a.end())
-		{
-			result = false;
-			break;
-		}
+		if (std::find(a.begin(), a.end(), pair) != a.end())
+			++numContained;
 	DEBUG_END;
-	return result;
+	return numContained;
 }
 
 ClusterVectorTy chooseBestClusters(ClusterVectorTy allClusters)
@@ -396,15 +393,16 @@ ClusterVectorTy chooseBestClusters(ClusterVectorTy allClusters)
 			continue;
 		}
 
-		bool ifContains = false;
+		unsigned numContainedMax = 0;
 		for (const auto &processedCluster : clusters)
-			if (contains(processedCluster, cluster))
-			{
-				ifContains = true;
-				break;
-			}
+		{
+			unsigned numContained = countContained(
+					processedCluster, cluster);
+			if (numContained > numContainedMax)
+				numContainedMax = numContained;
+		}
 
-		if (ifContains)
+		if (numContainedMax >= cluster.size() - 1)
 			continue;
 
 		clusters.push_back(cluster);
