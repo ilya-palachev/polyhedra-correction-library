@@ -225,7 +225,7 @@ typedef std::vector<ClusterTy> ClusterVectorTy;
 void printPair(const std::pair<unsigned, unsigned> pair)
 {
 	std::cout << "(" << pair.first << ", " << pair.second
-		<< ")" << std::endl;
+		<< ")";
 }
 
 ClusterTy getPossibleCluster(const ContourVectorTy &contours,
@@ -509,5 +509,47 @@ void ContourModeRecoverer::run()
 			maxClusterError);
 	std::cout << "The number of found clusters: " << clusters.size()
 		<< std::endl;
+
+	std::map<std::pair<unsigned, unsigned>, unsigned> map;
+	for (const auto &cluster : clusters)
+	{
+		for (auto pair : cluster)
+		{
+			if (map.find(pair) == map.end())
+				map.insert(std::make_pair(pair, 1));
+			else
+				map[pair] = map[pair] + 1;
+		}
+	}
+
+	unsigned numMaxClusters = 0;
+	for (const auto &pair : map)
+		numMaxClusters = std::max(numMaxClusters, pair.second);
+	std::cout << "Maximal number of clusters per item: " << numMaxClusters
+		<< std::endl;
+
+	std::vector<std::vector<std::pair<unsigned, unsigned>>> mapSorted(
+			numMaxClusters + 1);
+	for (const auto &pair : map)
+	{
+		ASSERT(pair.second <= numMaxClusters);
+		mapSorted[pair.second].push_back(pair.first);
+	}
+
+	std::cout << "Statistics about items:" << std::endl;
+	for (unsigned n = 0; n < mapSorted.size(); ++n)
+		if (!mapSorted[n].empty())
+		{
+			std::cout << "There are " << mapSorted[n].size()
+				<< " items, which have " << n << " clusters: ";
+#if 0
+			for (const auto &pair : mapSorted[n])
+			{
+				printPair(pair);
+				std::cout << " ";
+			}
+#endif
+			std::cout << std::endl;
+		}
 	DEBUG_END;
 }
