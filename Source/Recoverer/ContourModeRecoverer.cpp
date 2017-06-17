@@ -26,9 +26,13 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
+#include <CGAL/Polyhedron_incremental_builder_3.h>
 #include "Common.h"
 #include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "PCLDumper.h"
+#include "Polyhedron_3/Polyhedron_3.h"
+#include "KernelCGAL/KernelCGAL.h"
 #include "Recoverer/ContourModeRecoverer.h"
 
 static unsigned getContoursNumber(SupportFunctionDataPtr data)
@@ -380,7 +384,8 @@ unsigned countContained(const ClusterTy &a, const ClusterTy &b)
 	return numContained;
 }
 
-ClusterVectorTy chooseBestClusters(ClusterVectorTy allClusters)
+ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours,
+		ClusterVectorTy allClusters)
 {
 	DEBUG_START;
 	std::sort(allClusters.begin(), allClusters.end(),
@@ -400,16 +405,31 @@ ClusterVectorTy chooseBestClusters(ClusterVectorTy allClusters)
 		}
 
 		unsigned numContainedMax = 0;
-		for (const auto &processedCluster : clusters)
+		unsigned numContainerItems = 0;
+		unsigned iBestCluster = 0;
+		for (unsigned iCluster = 0; iCluster < clusters.size();
+				++iCluster)
 		{
 			unsigned numContained = countContained(
-					processedCluster, cluster);
+					clusters[iCluster], cluster);
 			if (numContained > numContainedMax)
+			{
 				numContainedMax = numContained;
+				numContainerItems = clusters[iCluster].size();
+				iBestCluster = iCluster;
+			}
 		}
 
-		if (numContainedMax == cluster.size())
+		if (numContainedMax > cluster.size() / 2
+				&& cluster.size() < numContainerItems)
 			continue;
+		else if (cluster.size() == numContainerItems
+				&& calculateError(contours, cluster) >=
+				calculateError(contours, clusters[iBestCluster]))
+		{
+			clusters[iBestCluster] = cluster;
+			continue;
+		}
 
 		clusters.push_back(cluster);
 	}
@@ -451,7 +471,7 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 
 	std::cout << "The number of clusters before post-processing: "
 		<< allClusters.size() << std::endl;
-	auto clusters = chooseBestClusters(allClusters);
+	auto clusters = chooseBestClusters(contours, allClusters);
 #if 0
 	std::cout << "Found clusters:" << std::endl;
 	unsigned iCluster = 0;
@@ -470,46 +490,9 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 	return clusters;
 }
 
-void ContourModeRecoverer::run()
+void printClustersStatistics(const ClusterVectorTy &clusters)
 {
 	DEBUG_START;
-	std::cout << "Starting contour mode recovering..." << std::endl;
-	std::cout << "There are " << data->size() << " support items "
-		<< std::endl;
-	ASSERT(data->size() > 0 && "The data must be non-empty");
-
-	double edgeLengthLimit = 0.;
-	if (!tryGetenvDouble("EDGE_LENGTH_LIMIT", edgeLengthLimit))
-	{
-		ERROR_PRINT("Failed to get EDGE_LENGTH_LIMIT");
-		DEBUG_END;
-		return;
-	}
-
-	ContourVectorTy contours(getContoursNumber(data));
-	for (int i = 0; i < data->size(); ++i)
-	{
-		SupportFunctionDataItem item = (*data)[i];
-		int iContour = item.info->iContour;
-		contours[iContour].push_back(item);
-	}
-
-	SideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
-	AnglesTy angles = calculateAngles(contours, longSideIDs);
-	NeighborsTy neighbors = detectNeighbors(contours, longSideIDs, angles);
-
-	double maxClusterError = 0.;
-	if (!tryGetenvDouble("MAX_CLUSTER_ERROR", maxClusterError))
-	{
-		ERROR_PRINT("Failed to get MAX_CLUSTER_ERROR");
-		DEBUG_END;
-		return;
-	}
-	ClusterVectorTy clusters = clusterize(contours, neighbors,
-			maxClusterError);
-	std::cout << "The number of found clusters: " << clusters.size()
-		<< std::endl;
-
 	std::map<std::pair<unsigned, unsigned>, unsigned> map;
 	for (const auto &cluster : clusters)
 	{
@@ -551,5 +534,126 @@ void ContourModeRecoverer::run()
 #endif
 			std::cout << std::endl;
 		}
+	DEBUG_END;
+}
+
+template <class HDS>
+class ClusterPolyhedronBuilder : public CGAL::Modifier_base<HDS>
+{
+	Vector_3 center;
+	ContourVectorTy contours;
+	ClusterTy cluster;
+public:
+	ClusterPolyhedronBuilder(const Vector_3 &center,
+			const ContourVectorTy &contours,
+			const ClusterTy &cluster) :
+		center(center),
+		contours(contours),
+		cluster(cluster)
+	{
+		DEBUG_START;
+		DEBUG_END;
+	}
+
+	void operator()(HDS &hds)
+	{
+		DEBUG_START;
+		CGAL::Polyhedron_incremental_builder_3<HDS> builder(hds, true);
+		ASSERT(contours.size() > 0);
+		ASSERT(cluster.size() > 0);
+		unsigned numVertices = 2 * cluster.size() + 1;
+		unsigned numFacets = cluster.size();
+		unsigned numHalfedges = 6 * cluster.size();
+		std::cout << "For cluster with " << cluster.size()
+			<< " items we create polyhedron with " << numVertices
+			<< " vertices, " << numFacets << " facets, "
+			<< numHalfedges << " halfedges" << std::endl;
+		builder.begin_surface(numVertices, numFacets, numHalfedges);
+
+		builder.add_vertex(CGAL::Origin() + center);
+		for (const auto &pair : cluster)
+		{
+			unsigned iContour = pair.first;
+			unsigned iSide = pair.second;
+			Segment_3 segment = contours[iContour][iSide].info->segment;
+			builder.add_vertex(segment.source());
+			builder.add_vertex(segment.target());
+		}
+
+		for (unsigned i = 0; i < cluster.size(); ++i)
+		{
+			builder.begin_facet();
+			builder.add_vertex_to_facet(0);
+			builder.add_vertex_to_facet(2 * i + 1);
+			builder.add_vertex_to_facet(2 * i + 2);
+			builder.end_facet();
+		}
+
+		builder.end_surface();
+		DEBUG_END;
+	}
+
+};
+
+void ContourModeRecoverer::run()
+{
+	DEBUG_START;
+	std::cout << "Starting contour mode recovering..." << std::endl;
+	std::cout << "There are " << data->size() << " support items "
+		<< std::endl;
+	ASSERT(data->size() > 0 && "The data must be non-empty");
+
+	double edgeLengthLimit = 0.;
+	if (!tryGetenvDouble("EDGE_LENGTH_LIMIT", edgeLengthLimit))
+	{
+		ERROR_PRINT("Failed to get EDGE_LENGTH_LIMIT");
+		DEBUG_END;
+		return;
+	}
+
+	Vector_3 center;
+	ContourVectorTy contours(getContoursNumber(data));
+	for (int i = 0; i < data->size(); ++i)
+	{
+		SupportFunctionDataItem item = (*data)[i];
+		int iContour = item.info->iContour;
+		contours[iContour].push_back(item);
+		Segment_3 segment = item.info->segment;
+		center = center + (segment.source() - CGAL::Origin());
+		center = center + (segment.target() - CGAL::Origin());
+	}
+	center = center * (0.5 / data->size());
+	std::cout << "Center of contours: " << center << std::endl;
+
+	SideIDsTy longSideIDs = getLongSidesIDs(contours, edgeLengthLimit);
+	AnglesTy angles = calculateAngles(contours, longSideIDs);
+	NeighborsTy neighbors = detectNeighbors(contours, longSideIDs, angles);
+
+	double maxClusterError = 0.;
+	if (!tryGetenvDouble("MAX_CLUSTER_ERROR", maxClusterError))
+	{
+		ERROR_PRINT("Failed to get MAX_CLUSTER_ERROR");
+		DEBUG_END;
+		return;
+	}
+	ClusterVectorTy clusters = clusterize(contours, neighbors,
+			maxClusterError);
+	std::cout << "The number of found clusters: " << clusters.size()
+		<< std::endl;
+	printClustersStatistics(clusters);
+
+	for (unsigned iCluster = 0; iCluster < clusters.size(); ++iCluster)
+	{
+		Polyhedron_3 clusterP;
+		ClusterPolyhedronBuilder<Polyhedron_3::HalfedgeDS> builder(
+				center, contours, clusters[iCluster]);
+		clusterP.delegate(builder);
+		std::string suffix("cluster-");
+		suffix += std::to_string(iCluster);
+		suffix += ".ply";
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, suffix.c_str())
+			<< clusterP;
+	}
+
 	DEBUG_END;
 }
