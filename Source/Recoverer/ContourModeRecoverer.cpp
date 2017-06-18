@@ -398,7 +398,10 @@ ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours,
 	for (unsigned iCluster = 0; iCluster < allClusters.size(); ++iCluster)
 	{
 		ClusterTy cluster = allClusters[iCluster];
-		if (iCluster == 0)
+		if (cluster.size() < 3)
+			continue;
+
+		if (clusters.empty())
 		{
 			clusters.push_back(cluster);
 			continue;
