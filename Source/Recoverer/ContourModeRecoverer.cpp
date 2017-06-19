@@ -647,9 +647,14 @@ void ContourModeRecoverer::run()
 
 	for (unsigned iCluster = 0; iCluster < clusters.size(); ++iCluster)
 	{
+		std::cout << "******* Cluster #" << iCluster << " *******"
+			<< std::endl;
 		Polyhedron_3 clusterP;
+		ClusterTy cluster = clusters[iCluster];
+		double error = calculateError(contours, cluster);
+		std::cout << "        error: " << error << std::endl;
 		ClusterPolyhedronBuilder<Polyhedron_3::HalfedgeDS> builder(
-				center, contours, clusters[iCluster]);
+				center, contours, cluster);
 		clusterP.delegate(builder);
 		std::string suffix("cluster-");
 		suffix += std::to_string(iCluster);
