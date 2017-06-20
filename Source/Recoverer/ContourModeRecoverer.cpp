@@ -268,7 +268,7 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 {
 	DEBUG_START;
 	std::vector<Vector_3> points;
-	Vector_3 center;
+	Vector_3 center(0., 0., 0.);
 
 	for (const auto &pair : cluster)
 	{
