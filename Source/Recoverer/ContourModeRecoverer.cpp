@@ -342,9 +342,38 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 	return error;
 }
 
+double calculateLengthError(const ContourVectorTy &contours,
+		const ClusterTy &cluster)
+{
+	DEBUG_START;
+	std::vector<double> lengths;
+	for (const auto &pair : cluster)
+	{
+		auto item = contours[pair.first][pair.second];
+		double length = sqrt(item.info->segment.squared_length());
+		lengths.push_back(length);
+	}
+
+	double mean = 0.;
+	for (double length : lengths)
+		mean += length;
+	mean /= double(lengths.size());
+
+	double error = 0.;
+	for (double length : lengths)
+	{
+		double diff = length - error;
+		error += diff * diff;
+	}
+	error /= double(lengths.size());
+	error = sqrt(error);
+	DEBUG_END;
+	return error;
+}
+
 ClusterTy clusterizeOne(const ContourVectorTy &contours,
 		const NeighborsTy &neighbors, unsigned iContour,
-		unsigned iSide, double maxClusterError)
+		unsigned iSide, double maxClusterError, double maxLengthError)
 {
 	DEBUG_START;
 	ClusterTy possibleCluster = getPossibleCluster(contours, neighbors,
@@ -358,16 +387,25 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 	}
 
 	ClusterTy cluster;
+	unsigned iAttempt = 0;
 	for (const auto &pair : possibleCluster)
 	{
 		ClusterTy clusterNew = cluster;
 		clusterNew.push_back(pair);
+		std::cout << "  Attempt #" << iAttempt << std::endl;
+		double clusterError = calculateError(contours, clusterNew);
+		std::cout << "    Cluster error: " << clusterError << std::endl;
+		double lengthError = calculateLengthError(contours, clusterNew);
+		std::cout << "    Length  error: " << lengthError << std::endl;
 		if (clusterNew.size() == 1
-			|| (calculateError(contours, clusterNew)
-				<= maxClusterError))
+			|| (clusterError <= maxClusterError
+				&& lengthError <= maxLengthError))
 			cluster = clusterNew;
 		else
+		{
+			std::cout << "  Stopping attempts..." << std::endl;
 			break;
+		}
 	}
 	DEBUG_END;
 	return cluster;
@@ -442,7 +480,8 @@ ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours,
 }
 
 ClusterVectorTy clusterize(const ContourVectorTy &contours,
-		const NeighborsTy &neighbors, double maxClusterError)
+		const NeighborsTy &neighbors, double maxClusterError,
+		double maxLengthError)
 {
 	DEBUG_START;
 	ClusterVectorTy allClusters;
@@ -455,9 +494,11 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 			 * FIXME: !!! Without this line the program doesn't
 			 * work!
 			 */
-			std::cout << "";
+			std::cout << "Clusterizing contour #" << iContour
+				<< ", side #" << iSide << std::endl;;
 			ClusterTy cluster = clusterizeOne(contours, neighbors,
-					iContour, iSide, maxClusterError);
+					iContour, iSide, maxClusterError,
+					maxLengthError);
 			if (!cluster.empty() && cluster.size() > 1)
 			{
 #if 0
@@ -616,6 +657,7 @@ void ContourModeRecoverer::run()
 
 	Vector_3 center;
 	ContourVectorTy contours(getContoursNumber(data));
+	double maxLength = 0.;
 	for (int i = 0; i < data->size(); ++i)
 	{
 		SupportFunctionDataItem item = (*data)[i];
@@ -624,6 +666,7 @@ void ContourModeRecoverer::run()
 		Segment_3 segment = item.info->segment;
 		center = center + (segment.source() - CGAL::Origin());
 		center = center + (segment.target() - CGAL::Origin());
+		maxLength = std::max(maxLength, sqrt(segment.squared_length()));
 	}
 	center = center * (0.5 / data->size());
 	std::cout << "Center of contours: " << center << std::endl;
@@ -632,15 +675,20 @@ void ContourModeRecoverer::run()
 	AnglesTy angles = calculateAngles(contours, longSideIDs);
 	NeighborsTy neighbors = detectNeighbors(contours, longSideIDs, angles);
 
-	double maxClusterError = 0.;
+	double maxClusterError = maxLength; // Disable the check by default
 	if (!tryGetenvDouble("MAX_CLUSTER_ERROR", maxClusterError))
 	{
 		ERROR_PRINT("Failed to get MAX_CLUSTER_ERROR");
 		DEBUG_END;
 		return;
 	}
+
+	double maxLengthError = maxLength;
+	if (tryGetenvDouble("MAX_LENGTH_ERROR", maxLengthError))
+		std::cout << "Checking length error is enabled..." << std::endl;
+
 	ClusterVectorTy clusters = clusterize(contours, neighbors,
-			maxClusterError);
+			maxClusterError, maxLengthError);
 	std::cout << "The number of found clusters: " << clusters.size()
 		<< std::endl;
 	printClustersStatistics(clusters);
