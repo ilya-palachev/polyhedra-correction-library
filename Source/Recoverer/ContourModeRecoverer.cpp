@@ -362,7 +362,7 @@ double calculateLengthError(const ContourVectorTy &contours,
 	double error = 0.;
 	for (double length : lengths)
 	{
-		double diff = length - error;
+		double diff = length - mean;
 		error += diff * diff;
 	}
 	error /= double(lengths.size());
@@ -392,20 +392,32 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 	{
 		ClusterTy clusterNew = cluster;
 		clusterNew.push_back(pair);
+		if (clusterNew.size() == 1)
+		{
+			cluster = clusterNew;
+			continue;
+		}
+
 		std::cout << "  Attempt #" << iAttempt << std::endl;
 		double clusterError = calculateError(contours, clusterNew);
-		std::cout << "    Cluster error: " << clusterError << std::endl;
-		double lengthError = calculateLengthError(contours, clusterNew);
-		std::cout << "    Length  error: " << lengthError << std::endl;
-		if (clusterNew.size() == 1
-			|| (clusterError <= maxClusterError
-				&& lengthError <= maxLengthError))
-			cluster = clusterNew;
-		else
+		if (clusterError > maxClusterError)
 		{
-			std::cout << "  Stopping attempts..." << std::endl;
+			std::cout << "    Cluster error: " << clusterError
+				<< ", while limit is " << maxClusterError
+				<< std::endl;
 			break;
 		}
+
+		double lengthError = calculateLengthError(contours, clusterNew);
+		if (lengthError > maxLengthError)
+		{
+			std::cout << "    Length  error: " << lengthError
+				<< ", while limit is " << maxLengthError
+				<< std::endl;
+			break;
+		}
+
+		cluster = clusterNew;
 	}
 	DEBUG_END;
 	return cluster;
