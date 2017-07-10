@@ -210,8 +210,8 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 		<< numCriticalNonAssociatedEdges << std::endl;
 	std::cout << "Maximal edge length for critical non-associated edges: "
 		<< lengthMax << std::endl;
-	ASSERT(numCriticalNonAssociatedEdges == 0
-			&& "Some critical edges have no tangients!");
+	//ASSERT(numCriticalNonAssociatedEdges == 0
+	//		&& "Some critical edges have no tangients!");
 }
 
 std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
@@ -576,7 +576,7 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 		//checkConsistencyConstraints(u, h, U, H, points, FT, false);
 		checkConsistencyConstraints(u, h, U, H, points, FT, true);
 	}
-	printFixedTopology(FT);
+	//printFixedTopology(FT);
 	DEBUG_END;
 	return FT;
 }

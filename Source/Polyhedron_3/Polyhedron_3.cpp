@@ -526,7 +526,7 @@ void Polyhedron_3::initialize_indices(
 	{
 		std::cerr << "Equal indices: " << usedIndices.size() << " < "
 			<< index.size() << std::endl;
-		ASSERT(0 && "Equal indices found");
+		// ASSERT(0 && "Equal indices found");
 	}
 	indexPlanes_ = index;
 	DEBUG_END;
