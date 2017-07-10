@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 
 	const char *pathPolyhedron = argv[1];
 	const char *pathEdgesData = argv[2];
-	Polyhedron p;
-	if (!p.fscan_default_1_2(pathPolyhedron))
+	PolyhedronPtr p(new Polyhedron());
+	if (!p->fscan_default_1_2(pathPolyhedron))
 	{
 		printf("Failed to read polyhedron data!\n");
 		printUsage(argv[0]);
@@ -58,6 +58,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	std::cout << "Successfully read the polyhedron..." << std::endl;
 	ASSERT(pathEdgesData);
 
 	DEBUG_END;
