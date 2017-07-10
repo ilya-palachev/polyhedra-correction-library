@@ -120,6 +120,8 @@ public:
 
 	void enableModeZfixed()
 	{
+		std::cout << "Mode with fixed Z coordinate is enabled!"
+			<< std::endl;
 		modeZfixed = true;
 	}
 
