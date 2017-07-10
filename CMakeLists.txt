@@ -141,6 +141,7 @@ set (SOURCE_pcl
 
 set (SOURCE_tests
 	Tests/buildCluster.cpp
+	Tests/correct.cpp
 	Tests/experimentCGAL_convexHullDynamic.cpp
 	Tests/experimentCGAL_convexHullStatic.cpp
 	Tests/gaussStringTest.cpp
