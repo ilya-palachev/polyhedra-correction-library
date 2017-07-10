@@ -394,275 +394,109 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 //Example: MSS_MARQ_G_VS2_0.54_2012_09_18/polyhedron.dat
 /////////////////////////////////////
 
-#define STD_POLYHEDRON_FORMAT_HEADER_1 2
-#define STD_POLYHEDRON_FORMAT_HEADER_2 2
-#define STD_POLYHEDRON_FORMAT_HEADER_3 6
-#define STD_POLYHEDRON_FORMAT_HEADER_4 6
-static void _fini_fscan_default_1_2(FILE* fd, EdgeData* edgeData)
+class DefaultScaner
 {
-	DEBUG_START;
-	if (fd)
+	const unsigned maxLineLength = 1024;
+	const char *path;
+	FILE *fd;
+	char *line;
+
+public:
+	DefaultScaner(const char *path) : path(path), fd(nullptr), line(nullptr)
+	{}
+
+	~DefaultScaner()
 	{
-		fclose(fd);
+		if (fd)
+			fclose(fd);
+		if (line)
+			free(line);
 	}
 
-	if (edgeData)
+	bool open()
 	{
-		delete edgeData;
+		fd = (FILE*) fopen(path, "r");
+		return (fd != nullptr);
 	}
-	DEBUG_END;
-}
 
-bool readCommentStrings(FILE* fd, unsigned number)
-{
-	char scannedString[1024];
-	for (unsigned i = 0; i < number; ++i)
-		if (!fgets(scannedString, sizeof scannedString, fd)
-				|| *scannedString != '#')
-		{
-			std::cout << "String: " << scannedString << std::endl;
-			return false;
-		}
-	return true;
-}
-
-bool Polyhedron::fscan_default_1_2(const char *filename)
-{
-	DEBUG_START;
-	FILE* fd = (FILE*) fopen(filename, "r");
-	if (!fd)
+	char *getline()
 	{
-		ERROR_PRINT("Failed to open file %s", filename);
-		DEBUG_END;
+		if (!fd)
+			return nullptr;
+		if (line)
+			free(line);
+		line = (char*) malloc(maxLineLength * sizeof(char));
+		while (fgets(line, maxLineLength, fd))
+			if (line[0] != '#')
+				return line;
+		return nullptr;
+	}
+};
+
+bool Polyhedron::fscan_default_1_2(const char *path)
+{
+	DefaultScaner scaner(path);
+	if (!scaner.open())
+	{
+		ERROR_PRINT("Failed to open file %s", path);
 		return false;
 	}
 
-	char scannedString[1024];
-	EdgeData* edgeData = NULL;
-	if (!readCommentStrings(fd, STD_POLYHEDRON_FORMAT_HEADER_1))
+	char *line = scaner.getline();
+	int numVertices = 0, numFacets = 0, numEdges = 0;
+	if (!line || sscanf(line, "%d %d %d", &numVertices, &numFacets,
+				&numEdges) != 3)
 	{
-		ERROR_PRINT("Wrong format, in header #1");
-		_fini_fscan_default_1_2(fd, edgeData);
-		DEBUG_END;
-		return false;
-	}
-
-	int numEdges;
-	if (fscanf(fd, "%d", &numVertices) != 1
-			|| fscanf(fd, "%d", &numFacets) != 1
-			|| fscanf(fd, "%d", &numEdges) != 1)
-	{
-		ERROR_PRINT("Wrong format, in num_vertices, num_facets, num_edgeData");
-		_fini_fscan_default_1_2(fd, edgeData);
-		DEBUG_END;
+		ERROR_PRINT("Failed to read header");
 		return false;
 	}
 
 	vertices = new Vector3d[numVertices];
 	facets = new Facet[numFacets];
-	edgeData = new EdgeData();
-
-	if (!readCommentStrings(fd, STD_POLYHEDRON_FORMAT_HEADER_2))
-	{
-		ERROR_PRINT("Wrong format, in header #1");
-		_fini_fscan_default_1_2(fd, edgeData);
-		DEBUG_END;
-		return false;
-	}
 
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
-		int iVertexScanned;
-		Vector3d* currVertex = &vertices[iVertex];
-		if (fscanf(fd, "%d", &iVertexScanned) != 1
-				|| iVertexScanned != iVertex
-				|| fscanf(fd, "%lf", &currVertex->x) != 1
-				|| fscanf(fd, "%lf", &currVertex->y) != 1
-				|| fscanf(fd, "%lf", &currVertex->z) != 1)
+		int iVertexScanned = 0;
+		Vector3d *v = &vertices[iVertex];
+		char *line = scaner.getline();
+		if (!line || sscanf(line, "%d %lf %lf %lf", &iVertexScanned,
+			&v->x, &v->y, &v->z) != 4 || iVertexScanned != iVertex)
 		{
 			ERROR_PRINT("Wrong format, in vertex #%d", iVertex);
-			_fini_fscan_default_1_2(fd, edgeData);
-			DEBUG_END;
 			return false;
 		}
 	}
 
-	for (int i = 0; i < STD_POLYHEDRON_FORMAT_HEADER_3; ++i)
-	{
-		if (fscanf(fd, "%s", scannedString) != 1)
-		{
-			ERROR_PRINT("Wrong format, in header #3");
-			_fini_fscan_default_1_2(fd, edgeData);
-			DEBUG_END;
-			return false;
-		}
-		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
-	}
-
-	bool ifScanIndices = true;
 	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
 	{
-		int numVerticesFacet;
-		int indFacet;
-		bool ifNumVerticesFacetScaned = false;
-		if (ifScanIndices)
-		{
-			if (fscanf(fd, "%d", &indFacet) != 1)
-			{
-				ERROR_PRINT("Wrong format, in description of "
-						"facet #%d", iFacet);
-				_fini_fscan_default_1_2(fd, edgeData);
-				DEBUG_END;
-				return false;
-			}
-			if (iFacet == 0 && indFacet != 0)
-			{
-				ifScanIndices = false;
-				numVerticesFacet = indFacet;
-				ifNumVerticesFacetScaned = true;
-				indFacet = iFacet;
-			}
-		}
-		else
-		{
-			indFacet = iFacet;
-		}
-
-		Facet* currFacet = &facets[indFacet];
+		char *line = scaner.getline();
+		int iFacetScanned = 0;
+		int numIncVertices = 0;
 		Plane plane;
-		if (!ifNumVerticesFacetScaned)
+		if (!line || sscanf(line, "%d %d %lf %lf %lf %lf",
+			&iFacetScanned, &numIncVertices,
+			&plane.norm.x, &plane.norm.y, &plane.norm.z,
+			&plane.dist) != 6 || iFacetScanned != iFacet)
 		{
-			ifNumVerticesFacetScaned = (fscanf(fd, "%d",
-					&numVerticesFacet) == 1);
-		}
-		if (!ifNumVerticesFacetScaned || numVerticesFacet < 0
-			|| fscanf(fd, "%lf", &plane.norm.x) != 1
-			|| fscanf(fd, "%lf", &plane.norm.y) != 1
-			|| fscanf(fd, "%lf", &plane.norm.z) != 1
-			|| fscanf(fd, "%lf", &plane.dist) != 1)
-		{
-			ERROR_PRINT("Wrong format, in description of facet #%d", iFacet);
-			_fini_fscan_default_1_2(fd, edgeData);
-			DEBUG_END;
+			ERROR_PRINT("Wrong format, in facet #%d", iFacet);
 			return false;
 		}
-		DEBUG_PRINT("numVerticesFacet: %d", numVerticesFacet);
-		int *index = new int[3 * (numVerticesFacet + 1)];
-
-		*currFacet = Facet(iFacet, numVerticesFacet, plane,
-				index, get_ptr(), false);
-
-		for (int iVertex = 0; iVertex < currFacet->numVertices; ++iVertex)
+		int *index = new int[3 * (numIncVertices + 1)];
+		line = scaner.getline();
+		for (int i = 0; i < numIncVertices; ++i)
 		{
-			int* currVertex = &currFacet->indVertices[iVertex];
-			int result = fscanf(fd, "%d", currVertex);
-			DEBUG_PRINT("result: %d", result);
-			DEBUG_PRINT("currVertex: %d", *currVertex);
-			if (result != 1
-					|| *currVertex < 0 || *currVertex >= numVertices)
+			if (sscanf(line, "%d", &index[i]) != 1)
 			{
-				ERROR_PRINT("Wrong format, in vertex #%d of facet #%d",
-						iVertex, iFacet);
-				_fini_fscan_default_1_2(fd, edgeData);
-				DEBUG_END;
+				ERROR_PRINT("Wrong format, in facet #%d, "
+					"index #%d", iFacet, i);
 				return false;
 			}
 		}
-
-		DEBUG_VARIABLE int iVertexCycling;
-		if (fscanf(fd, "%s", scannedString) != 1)
-		{
-			ERROR_PRINT("Wrong format, in cycling vertex of facet #%d",
-					iFacet);
-			_fini_fscan_default_1_2(fd, edgeData);
-			DEBUG_END;
-			return false;
-		}
+		facets[iFacet] = Facet(iFacet, numIncVertices, plane, index,
+				get_ptr(), false);
 	}
-
-	for (int i = 0; i < STD_POLYHEDRON_FORMAT_HEADER_4; ++i)
-	{
-		if (fscanf(fd, "%s", scannedString) != 1)
-		{
-			ERROR_PRINT("Wrong format, in header #4");
-			_fini_fscan_default_1_2(fd, edgeData);
-			DEBUG_END;
-			return false;
-		}
-		DEBUG_PRINT("scanned word == \"%s\"", scannedString);
-	}
-
-	/* By default edges are not scanned from file,
-	 * because it has been found that they are sorted in a wrong way
-	 * for some given files. */
-#ifdef SCAN_EDGES_FROM_FILE
-#undef SCAN_EDGES_FROM_FILE
-#endif
-#ifdef SCAN_EDGES_FROM_FILE
-
-	This scanning is commented, because usual input is incorrect.
-
-	for (int iEdge = 0; iEdge < numEdges; ++iEdge)
-	{
-		int iVertex0, iVertex1, iFacet, iIndInFacet;
-		if (fscanf(fd, "%d", &iVertex0) != 1
-				|| iVertex0 < 0 || iVertex0 > numVertices
-				|| fscanf(fd, "%d", &iVertex1) != 1
-				|| iVertex1 < 0 || iVertex1 > numVertices
-				|| fscanf(fd, "%d", &iFacet) != 1
-				|| iFacet < 0 || iFacet > numFacets
-				|| fscanf(fd, "%d", &iIndInFacet) != 1
-				|| iIndInFacet < 0 || iIndInFacet >= facets[iFacet].numVertices
-				|| iVertex0 != facets[iFacet].indVertices[iIndInFacet])
-		{
-			ERROR_PRINT("Wrong format, in edge #%d",
-					iEdge);
-			_fini_fscan_default_1_2(fd, edgeData);
-			DEBUG_END;
-			return false;
-		}
-		edgeData->addEdge(numEdges, iVertex0, iVertex1, iFacet);
-	}
-
-	preprocessAdjacency();
-	EdgeData* edgeData2 = new EdgeData;
-	EdgeConstructor* edgeConstructor = new EdgeConstructor(get_ptr(),
-			edgeData2);
-	edgeConstructor->run(edgeData2);
-	if (*edgeData != *edgeData2)
-	{
-		ERROR_PRINT("Scanned edge data is not equal to obtained by standard"
-				" edge constructor");
-		_fini_fscan_default_1_2(fd, edgeData);
-		DEBUG_END;
-		return false;
-	}
-#else
-	preprocessAdjacency();
-#endif
-
-	_fini_fscan_default_1_2(fd, edgeData);
-
-#ifdef SCAN_EDGES_FROM_FILE
-	if (edgeData2 != NULL)
-	{
-		delete edgeData2
-		edgeData2 = NULL;
-	}
-	if (edgeConstructor != NULL)
-	{
-		delete edgeConstructor;
-		edgeConstructor = NULL;
-	}
-#endif
-
-	DEBUG_END;
 	return true;
 }
-#undef STD_POLYHEDRON_FORMAT_HEADER_1
-#undef STD_POLYHEDRON_FORMAT_HEADER_2
-#undef STD_POLYHEDRON_FORMAT_HEADER_3
-#undef STD_POLYHEDRON_FORMAT_HEADER_4
 
 /////////////////////////////////////
 // Format:
