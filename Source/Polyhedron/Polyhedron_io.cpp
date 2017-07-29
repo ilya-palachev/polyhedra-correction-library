@@ -443,7 +443,9 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 	}
 
 	char *line = scaner.getline();
-	int numVertices = 0, numFacets = 0, numEdges = 0;
+	numVertices = 0;
+	numFacets = 0;
+	int numEdges = 0;
 	if (!line || sscanf(line, "%d %d %d", &numVertices, &numFacets,
 				&numEdges) != 3)
 	{
@@ -485,12 +487,15 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 		line = scaner.getline();
 		for (int i = 0; i < numIncVertices; ++i)
 		{
-			if (sscanf(line, "%d", &index[i]) != 1)
+			char *prevLine = line;
+			long iVertex = strtol(line, &line, 10);
+			if (prevLine == line)
 			{
 				ERROR_PRINT("Wrong format, in facet #%d, "
 					"index #%d", iFacet, i);
 				return false;
 			}
+			index[i] = int(iVertex);
 		}
 		facets[iFacet] = Facet(iFacet, numIncVertices, plane, index,
 				get_ptr(), false);
