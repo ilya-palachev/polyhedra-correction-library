@@ -28,7 +28,9 @@
 #include <stdlib.h>
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "PCLDumper.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 
 static void printUsage(const char *name)
 {
@@ -57,6 +59,15 @@ int main(int argc, char **argv)
 		DEBUG_END;
 		return EXIT_FAILURE;
 	}
+	std::cout << "Number of vertices (custom): " << p->numVertices
+		<< std::endl;
+	globalPCLDumper.setNameBase(pathPolyhedron);
+	globalPCLDumper.enableVerboseMode();
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron.ply")
+		<< *(new Polyhedron(p));
+	Polyhedron_3 initP(p);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron_3.ply")
+		<< initP;
 
 	std::cout << "Successfully read the polyhedron..." << std::endl;
 	ASSERT(pathEdgesData);
