@@ -25,6 +25,9 @@
 
 #ifndef DEFAULT_SCANER_H
 #define DEFAULT_SCANER_H
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 class DefaultScaner
 {
@@ -59,8 +62,20 @@ public:
 			free(line);
 		line = (char*) malloc(maxLineLength * sizeof(char));
 		while (fgets(line, maxLineLength, fd))
-			if (line[0] != '#')
-				return line;
+			if (line[0] != '#' && strlen(line) > 0)
+			{
+				char *l = line;
+				bool onlySpaces = true;
+				while (*l != '\0')
+				{
+					if (!isspace(*l))
+						onlySpaces = false;
+					++l;
+				}
+
+				if (!onlySpaces)
+					return line;
+			}
 		return nullptr;
 	}
 };
