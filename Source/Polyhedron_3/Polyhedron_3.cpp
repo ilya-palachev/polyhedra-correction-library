@@ -302,7 +302,7 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 void Polyhedron_3::initialize_indices()
 {
 	DEBUG_START;
-	std::cerr << "Inidices are initialized!" << std::endl;
+	std::cerr << "Indices are initialized!" << std::endl;
 	whetherPrintEdgeColouringFacets = false;
 	facetColours = std::vector<Colour>(size_of_facets());
 	halfedgeColours = std::vector<Colour>(size_of_halfedges());
