@@ -23,6 +23,7 @@
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "DefaultScaner.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
@@ -393,45 +394,6 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 /////////////////////////////////////
 //Example: MSS_MARQ_G_VS2_0.54_2012_09_18/polyhedron.dat
 /////////////////////////////////////
-
-class DefaultScaner
-{
-	const unsigned maxLineLength = 1024;
-	const char *path;
-	FILE *fd;
-	char *line;
-
-public:
-	DefaultScaner(const char *path) : path(path), fd(nullptr), line(nullptr)
-	{}
-
-	~DefaultScaner()
-	{
-		if (fd)
-			fclose(fd);
-		if (line)
-			free(line);
-	}
-
-	bool open()
-	{
-		fd = (FILE*) fopen(path, "r");
-		return (fd != nullptr);
-	}
-
-	char *getline()
-	{
-		if (!fd)
-			return nullptr;
-		if (line)
-			free(line);
-		line = (char*) malloc(maxLineLength * sizeof(char));
-		while (fgets(line, maxLineLength, fd))
-			if (line[0] != '#')
-				return line;
-		return nullptr;
-	}
-};
 
 bool Polyhedron::fscan_default_1_2(const char *path)
 {
