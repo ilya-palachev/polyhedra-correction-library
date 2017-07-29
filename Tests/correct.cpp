@@ -31,6 +31,7 @@
 #include "PCLDumper.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron_3/Polyhedron_3.h"
+#include "DataContainers/EdgeInfo/EdgeInfo.h"
 
 static void printUsage(const char *name)
 {
@@ -70,7 +71,16 @@ int main(int argc, char **argv)
 		<< initP;
 
 	std::cout << "Successfully read the polyhedron..." << std::endl;
-	ASSERT(pathEdgesData);
+
+	std::vector<EdgeInfo> data;
+	if (!readEdgeInfoFile(pathEdgesData, data))
+	{
+		printf("Failed to read edge info data!\n");
+		printUsage(argv[0]);
+		DEBUG_END;
+		return EXIT_FAILURE;
+	}
+	std::cout << "Successfully read the edge info data..." << std::endl;
 
 	DEBUG_END;
 	return EXIT_SUCCESS;

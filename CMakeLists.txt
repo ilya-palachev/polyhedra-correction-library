@@ -71,6 +71,7 @@ set (SOURCE_pcl
 	Source/DataContainers/EdgeData/EdgeData.cpp
 	Source/DataContainers/EdgeData/Edge/Edge.cpp
 	Source/DataContainers/EdgeData/Edge/Edge_io.cpp
+	Source/DataContainers/EdgeInfo/EdgeInfo.cpp
 	Source/DataContainers/ShadowContourData/SContour/SContour.cpp
 	Source/DataContainers/ShadowContourData/SContour/SContour_io.cpp
 	Source/DataContainers/ShadowContourData/ShadowContourData.cpp
