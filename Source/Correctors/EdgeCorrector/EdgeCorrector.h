@@ -31,11 +31,12 @@
 
 class EdgeCorrector : public TNLP
 {
-	const Polyhedron_3 &p;
-	const std::vector<EdgeInfo> &data;
+	const std::vector<Plane_3> &planes;
+	const std::vector<EdgeInfo> &edges;
 public:
-	EdgeCorrector(const Polyhedron_3 &p, const EdgeIndo &data):
-		p(p), data(data) {}
+	EdgeCorrector(const std::vector<Plane_3> &planes,
+			const std::vector<Plane_3> &planes):
+		planes(planes), edges(edges) {}
 
 	bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			Index& nnz_h_lag, IndexStyleEnum& index_style);
@@ -47,7 +48,7 @@ public:
 		Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
 		bool init_lambda, Number *lambda);
 
-	bool eval_f(Index n, const Number *x, bool new_x, Number& obj_value);
+	bool eval_f(Index n, const Number *x, bool new_x, Number &obj_value);
 
 
 	bool eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f);

@@ -23,13 +23,14 @@
  * @brief The corrector of polyhedron, that is based on the edge contour data.
  */
 
+#include "DebugAssert.h"
 #include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
 bool EdgeCorector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
-	Index N = data.size(); /* Number of edges */
-	Index K = p.size_of_facets(); /* Number of facets */
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
 	n = 6 * N + 4 * K; /* 6 = 3 (coordinates) * 2 (ends of edge) */
 	                   /* 4 = 4 (coefficients of plane equation) */
 	m = 6 * N + K; /* = 4 * N (planarity) + K (normality) + */
@@ -45,6 +46,169 @@ bool EdgeCorector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	/*
 	 * Hessian of functional gives 9 non-zeros for each end of edge, i.e.
 	 * 9 * 2 * N = 18 * N non-zeros,
-	 * each planarity condition gives 3 non-zeros
+	 * each planarity condition gives 3 non-zeros,
+	 * each normality condition gives 3 non-zeros,
+	 * all fixed planes conditions are linear.
 	 */
+	nnz_h_lag = 30 * N + 3 * K; /* 18 * N + 3 * (4 * N) + 3 * K */
+
+	return true;
+}
+
+bool EdgeCorector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
+		Number *g_l, Number *g_u);
+{
+	const Number TNLP_INFINITY = 2e19;
+	for (Index i = 0; i < n; ++i)
+	{
+		x_l[i] = -TNLP_INFINITY;
+		x_u[i] = +TNLP_INFINITY;
+	}
+
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
+	for (Index j = 0; j < m; ++j)
+	{
+		if (j < 4 * N) /* planarity */
+			g_l[j] = g_u[j] = 0.;
+		else if (j < 4 * N + K) /* normality */
+			g_l[j] = g_u[j] = 1.;
+		else /* fixed planes */
+		{
+			int iCondition = j - (4 * N + K);
+			int iEdge = iCondition / 2;
+			int iEnd = iCondition % 2;
+			Segment_3 edge = edges[iEdge].initialEdge;
+			Vector_3 v = edge.direction().vector();
+			Point_3 end = edge.point(iEnd);
+			g_l[j] = g_u[j] = v * (end - CGAL::Origin());
+		}
+	}
+	return true;
+}
+
+double getCoordinate(const Plane_3 &plane, int i)
+{
+	switch(i)
+	{
+	case 0:
+		return plane.a();
+	case 1:
+		return plane.b();
+	case 2:
+		return plane.c();
+	case 3:
+		return plane.d();
+	default:
+		ASSERT(0 && "Impossible");
+		return 0.;
+	}
+}
+
+bool EdgeCorector::get_starting_point(Index n, bool init_x,
+		Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
+		bool init_lambda, Number *lambda)
+{
+	ASSERT(x && init_x && !init_z && !init_lambda);
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
+	for (Index i = 0; i < n; ++i)
+	{
+		if (i < 6 * N)
+		{
+			int iEdge = i / 6;
+			Segment_3 edge = edges[iEdge].initialEdge;
+			int iEnd = (i % 6) / 3;
+			Point_3 end = edge.point(iEnd);
+			int iCoord = (i % 6) % 3;
+			x[i] = end[iCoord];
+		}
+		else
+		{
+			int iCondition = i - 6 * N;
+			int iPlane = iCondition / 4;
+			Plane_3 plane = planes[iPlane];
+			int iCoord = iCondition % 4;
+			x[i] = getCordinate(plane, iCoord);
+		}
+	}
+	return true;
+}
+
+static std::vector<Segment_3> getSegments(int N, const Number *x)
+{
+	std::vector<Segment_3> segments;
+	for (int i = 0; i < N; ++i)
+	{
+		Point_3 source(x[6 * i + 0], x[6 * i + 1], x[6 * i + 2]);
+		Point_3 target(x[6 * i + 3], x[6 * i + 4], x[6 * i + 5]);
+		Segment_3 segment(source, target);
+		segments.push_back(segment);
+	}
+}
+
+double signedDistance(const Plane_3 &plane, const Point_3 &point)
+{
+	return plane.a() * point.x() + plane.b() * point.y()
+		+ plane.c() * point.z() + plane.d();
+}
+
+bool EdgeCorector::eval_f(Index n, const Number *x, bool new_x,
+		Number &obj_value)
+{
+	Index N = edges.size(); /* Number of edges */
+	auto segments = getSegments(N, x);
+	obj_value = 0.;
+	for (int i = 0; i < N; ++i)
+	{
+		double value = 0.;
+		const EdgeInfo &info = edges[i];
+		for (int iEnd = 0; iEnd < 2; ++iEnd)
+		{
+			Point_3 end = segments[i][iEnd];
+			for (const EdgePlane_3 &plane : info.planes)
+			{
+				double dist = signedDistance(plane, end);
+				value += dist * dist;
+			}
+		}
+		value *= sqrt(info.initialEdge.squared_length());
+		obj_value += value;
+	}
+	return true;
+}
+
+bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
+		Number *grad_f)
+{
+	Index N = edges.size(); /* Number of edges */
+
+	for (int i = 0; i < n; ++i)
+		grad_f[i] = 0.;
+
+	auto segments = getSegments(N, x);
+	for (int i = 0; i < 6 * N; ++i)
+	{
+		int iEdge = i / 6;
+		int iEnd = (i % 6) / 3;
+		int iCoord = (i % 6) % 3;
+		Point_3 end = segments[iEdge][iEnd];
+		for (const EdgePlane_3 &plane : info.planes)
+		{
+			double dist = signedDistance(plane, end);
+			grad_f[i] += dist * getCoordinate(plane, iCoord);
+		}
+		grad_f[i] *= 2. * sqrt(info.initialEdge.squared_length());
+	}
+
+	return true;
+}
+
+bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
+		Number *g)
+{
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
+	auto segments = getSegments(N, x);
+	return true;
 }

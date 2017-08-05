@@ -52,6 +52,7 @@ struct EdgeInfo
 
 	unsigned facetID1;
 	unsigned facetID2;
+	Segment_3 initialEdge; /* not contained in std format */
 	Segment_3 correctingEdge; /* may be unused */
 	std::vector<EdgePlane_3> planes;
 };
