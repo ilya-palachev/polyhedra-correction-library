@@ -147,6 +147,18 @@ static std::vector<Segment_3> getSegments(int N, const Number *x)
 	}
 }
 
+static std::vector<Plane_3> getPlanes(int N, int K, const Number *x)
+{
+	std::vector<Plane_3> planes;
+	x += 6 * N;
+	for (int i = 0; i < K; ++i)
+	{
+		Plane_3 plane(x[4 * i + 0], x[4 * i + 1], x[4 * i + 2],
+				x[4 * i + 3]);
+		planes.push_back(plane);
+	}
+}
+
 double signedDistance(const Plane_3 &plane, const Point_3 &point)
 {
 	return plane.a() * point.x() + plane.b() * point.y()
@@ -204,11 +216,199 @@ bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
 	return true;
 }
 
+static int getFacetID(const EdgeInfo &info, int iFacet)
+{
+	int facetID = 0;
+	switch (iFacet)
+	{
+	case 0:
+		facetID = info.facetID1;
+		break;
+	case 1:
+		facetID = info.facetID2;
+		break;
+	default:
+		ASSERT(0 && "Impossible");
+		break;
+	}
+
+	return facetID;
+}
+
 bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
 		Number *g)
 {
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 	auto segments = getSegments(N, x);
+	auto newPlanes = getPlanes(N, K, x);
+
+	for (Index i = 0; i < n; ++i)
+	{
+		if (i < 4 * N) /* planarity constraints */
+		{
+			int iEdge = i / 4;
+			const EdgeInfo &info = edges[iEdge];
+			Segment_3 edge = segments[iEdge];
+			int iEnd = (i % 4) / 2;
+			Point_3 end = edge[iEnd];
+			int iFacet = (i % 4) % 2;
+			int facetID = getFacetID(info, iFacet);
+			Plane_3 plane = newPlanes[facetID];
+			g[i] = signedDistance(plane, end);
+		}
+		else if (i < 4 * N + K) /* normality constraints */
+		{
+			int iPlane = i - 4 * N;
+			Plane_3 p = newPlanes[iPlane];
+			g[i] = p.a() * p.a() + p.b() + p.b() + p.c() + p.c();
+		}
+		else /* fixed planes constraints */
+		{
+			int ii = i - 4 * N - K;
+			int iEdge = ii / 2;
+			const EdgeInfo &info = edges[iEdge];
+			Vector_3 v = info.initialEdge.direction().vector();
+			Segment_3 edge = segments[iEdge];
+			int iEnd = ii % 2;
+			Point_3 end = edge[iEnd];
+			g[i] = v * (end - CGAL::Origin());
+		}
+	}
+
+	return true;
+}
+
+struct Triplet
+{
+	Index row;
+	Index col;
+	Number value;
+}
+
+static Triplet getPlanarityTriplet(int N, int i,
+		const std::vector<Segment_3> &segments,
+		const std::vector<Plane_3> &planes)
+{
+	Triplet triplet;
+	triplet.row = i / 7;
+
+	int iEdge = i / 28;
+	const EdgeInfo &info = edges[iEdge];
+	Segment_3 edge = segments[iEdge];
+
+	int iEnd = (i % 28) / 14;
+	Point_3 end = edge[iEnd];
+
+	int iFacet = ((i % 28) % 14) / 7;
+	int facetID = getFacetID(info, iFacet);
+	Plane_3 plane = newPlanes[facetID];
+
+	int iElement = ((i % 28) % 14) % 7;
+	ASSERT(iElement == i % 7);
+
+	switch (iElement)
+	{
+	case 0:
+		triplet.col = 6 * iEdge + 3 * iEnd + 0;
+		triplet.value = plane.a();
+		break;
+	case 1:
+		triplet.col = 6 * iEdge + 3 * iEnd + 1;
+		triplet.value = plane.b();
+		break;
+	case 2:
+		triplet.col = 6 * iEdge + 3 * iEnd + 2;
+		triplet.value = plane.c();
+		break;
+	case 3:
+		triplet.col = 6 * N + 4 * facetID + 0;
+		triplet.value = end.x();
+		break;
+	case 4:
+		triplet.col = 6 * N + 4 * facetID + 1;
+		triplet.value = end.y();
+		break;
+	case 5:
+		triplet.col = 6 * N + 4 * facetID + 2;
+		triplet.value = end.z();
+		break;
+	case 6:
+		triplet.col = 6 * N + 4 * facetID + 3;
+		triplet.value = 1.;
+		break;
+	default:
+		ASSERT(0 && "Impossible");
+		break;
+	}
+
+	return triplet;
+}
+
+static Triplet getNormalityTriplet(int N, int i,
+		const std::vector<Plane_3> &planes)
+{
+	Triplet triplet;
+	int iPlane = i / 3;
+	triplet.row = 28 * N + iPlane;
+	Plane_3 plane = planes[iPlane];
+
+	int iCoord = i % 3;
+
+	switch(iCoord)
+	{
+	case 0:
+		triplet.col = 6 * N + 4 * iPlane + 0;
+		triplet.value = 2. * plane.a();
+		break;
+	case 1:
+		triplet.col = 6 * N + 4 * iPlane + 1;
+		triplet.value = 2. * plane.b();
+		break;
+	case 2:
+		triplet.col = 6 * N + 4 * iPlane + 2;
+		triplet.value = 2. * plane.c();
+		break;
+	default:
+		ASSERT(0 && "Impossible");
+		break;
+	}
+
+	return triplet;
+}
+
+static Triplet getFixedPlanesTriplet(int N, int K, int i,
+		const std::vector<EdgeInfo> &edges,
+		const std::vector<Segment_3> &segments)
+{
+}
+
+bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
+		Index nnz_jac_g, Index *iRow, Index *jCol,
+		Number *jacValues)
+{
+	ASSERT((iRow && jCol && !jacValues) || (!iRow && !jCol && jacValues));
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
+	auto segments = getSegments(N, x);
+	auto newPlanes = getPlanes(N, K, x);
+	for (Index i = 0; i < nnz_jac_g; ++i)
+	{
+		Index row = 0;
+		Index col = 0;
+		Number value = 0.;
+		Triplet triplet;
+
+		if (i < 28 * N) /* planarity constraints */
+			triplet = getPlanarityTriplet(N, i, segments,
+					newPlanes);
+		else if (i < 28 * N + 3 * K) /* normality constraints */
+			triplet = getNormalityTriplet(N, i - 28 * N, newPlanes);
+		else /* fixed planes constraints */
+			triplet = getFixedPlanesTriplet(N, K,
+					i - 28 * N - 3 * K,
+					edges, segments);
+	}
+
 	return true;
 }
