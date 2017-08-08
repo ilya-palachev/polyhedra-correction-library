@@ -46,11 +46,11 @@ bool EdgeCorector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	/*
 	 * Hessian of functional gives 9 non-zeros for each end of edge, i.e.
 	 * 9 * 2 * N = 18 * N non-zeros,
-	 * each planarity condition gives 3 non-zeros,
+	 * each planarity condition gives 3+3=6 (for simmetry) non-zeros,
 	 * each normality condition gives 3 non-zeros,
 	 * all fixed planes conditions are linear.
 	 */
-	nnz_h_lag = 30 * N + 3 * K; /* 18 * N + 3 * (4 * N) + 3 * K */
+	nnz_h_lag = 42 * N + 3 * K; /* 18 * N + 6 * (4 * N) + 3 * K */
 
 	return true;
 }
@@ -381,6 +381,18 @@ static Triplet getFixedPlanesTriplet(int N, int K, int i,
 		const std::vector<EdgeInfo> &edges,
 		const std::vector<Segment_3> &segments)
 {
+	Triplet triplet;
+	int iEdge = i / 6;
+	Vector_3 v = edges[iEdge].direction().vector();
+
+	int iEnd = (i % 6) / 3;
+	triplet.row = 28 * N + 3 * K + 2 * iEdge + iEnd;
+
+	int iCoord = (i % 6) % 3;
+	triplet.col = i;
+	triplet.value = v[iCoord];
+	
+	return triplet;
 }
 
 bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
@@ -394,9 +406,6 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 	auto newPlanes = getPlanes(N, K, x);
 	for (Index i = 0; i < nnz_jac_g; ++i)
 	{
-		Index row = 0;
-		Index col = 0;
-		Number value = 0.;
 		Triplet triplet;
 
 		if (i < 28 * N) /* planarity constraints */
@@ -408,7 +417,45 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 			triplet = getFixedPlanesTriplet(N, K,
 					i - 28 * N - 3 * K,
 					edges, segments);
+
+		if (jacValue)
+			jacValues[i] = triplet.value;
+		else
+		{
+			iRow[i] = triplet.row;
+			jCol[i] = triplet.col;
+		}
 	}
 
+	return true;
+}
+
+bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
+		Index m, const Number *lambda, bool new_lambda,
+		Index nnz_h_lag, Index *iRow, Index *jCol,
+		Number *hValues)
+{
+	ASSERT((iRow && jCol && !hValues) || (!iRow && !jCol && hValues));
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
+
+	/* Incident edge IDs for each plane */
+	static bool initialized = false;
+	static std::vector<std::vector<int>> incidence(planes.size());
+
+	for (Index i = 0; i < nnz_h_lag; ++i)
+	{
+		Triplet triplet;
+
+		if (i < 30 * N) /* functional and upper-right part planarity */
+		{
+			int iEdge = i / 30;
+			const EdgeInfo& &info = edges[iEdge];
+
+		}
+		else /* lower-left part planarity and normality */
+		{
+		}
+	}
 	return true;
 }
