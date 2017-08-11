@@ -19,14 +19,14 @@
  */
 
 /**
- * @file EdgeCorector.cpp
+ * @file EdgeCorrector.cpp
  * @brief The corrector of polyhedron, that is based on the edge contour data.
  */
 
 #include "DebugAssert.h"
 #include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
-bool EdgeCorector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
+bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
 	Index N = edges.size(); /* Number of edges */
@@ -55,8 +55,8 @@ bool EdgeCorector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	return true;
 }
 
-bool EdgeCorector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
-		Number *g_l, Number *g_u);
+bool EdgeCorrector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
+		Number *g_l, Number *g_u)
 {
 	const Number TNLP_INFINITY = 2e19;
 	for (Index i = 0; i < n; ++i)
@@ -105,7 +105,7 @@ double getCoordinate(const Plane_3 &plane, int i)
 	}
 }
 
-bool EdgeCorector::get_starting_point(Index n, bool init_x,
+bool EdgeCorrector::get_starting_point(Index n, bool init_x,
 		Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
 		bool init_lambda, Number *lambda)
 {
@@ -127,9 +127,11 @@ bool EdgeCorector::get_starting_point(Index n, bool init_x,
 		{
 			int iCondition = i - 6 * N;
 			int iPlane = iCondition / 4;
+			ASSERT(iPlane < K);
 			Plane_3 plane = planes[iPlane];
+
 			int iCoord = iCondition % 4;
-			x[i] = getCordinate(plane, iCoord);
+			x[i] = getCoordinate(plane, iCoord);
 		}
 	}
 	return true;
@@ -145,6 +147,8 @@ static std::vector<Segment_3> getSegments(int N, const Number *x)
 		Segment_3 segment(source, target);
 		segments.push_back(segment);
 	}
+
+	return segments;
 }
 
 static std::vector<Plane_3> getPlanes(int N, int K, const Number *x)
@@ -157,6 +161,8 @@ static std::vector<Plane_3> getPlanes(int N, int K, const Number *x)
 				x[4 * i + 3]);
 		planes.push_back(plane);
 	}
+
+	return planes;
 }
 
 double signedDistance(const Plane_3 &plane, const Point_3 &point)
@@ -165,7 +171,7 @@ double signedDistance(const Plane_3 &plane, const Point_3 &point)
 		+ plane.c() * point.z() + plane.d();
 }
 
-bool EdgeCorector::eval_f(Index n, const Number *x, bool new_x,
+bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
 		Number &obj_value)
 {
 	Index N = edges.size(); /* Number of edges */
@@ -202,6 +208,8 @@ bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
 	for (int i = 0; i < 6 * N; ++i)
 	{
 		int iEdge = i / 6;
+		const EdgeInfo &info = edges[iEdge];
+
 		int iEnd = (i % 6) / 3;
 		int iCoord = (i % 6) % 3;
 		Point_3 end = segments[iEdge][iEnd];
@@ -279,18 +287,19 @@ bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
 	return true;
 }
 
-struct Triplet
+struct MyTriplet
 {
 	Index row;
 	Index col;
 	Number value;
-}
+};
 
-static Triplet getPlanarityTriplet(int N, int i,
+static MyTriplet getPlanarityTriplet(int N, int i,
+		const std::vector<EdgeInfo> &edges,
 		const std::vector<Segment_3> &segments,
 		const std::vector<Plane_3> &planes)
 {
-	Triplet triplet;
+	MyTriplet triplet;
 	triplet.row = i / 7;
 
 	int iEdge = i / 28;
@@ -302,7 +311,7 @@ static Triplet getPlanarityTriplet(int N, int i,
 
 	int iFacet = ((i % 28) % 14) / 7;
 	int facetID = getFacetID(info, iFacet);
-	Plane_3 plane = newPlanes[facetID];
+	Plane_3 plane = planes[facetID];
 
 	int iElement = ((i % 28) % 14) % 7;
 	ASSERT(iElement == i % 7);
@@ -345,10 +354,10 @@ static Triplet getPlanarityTriplet(int N, int i,
 	return triplet;
 }
 
-static Triplet getNormalityTriplet(int N, int i,
+static MyTriplet getNormalityTriplet(int N, int i,
 		const std::vector<Plane_3> &planes)
 {
-	Triplet triplet;
+	MyTriplet triplet;
 	int iPlane = i / 3;
 	triplet.row = 28 * N + iPlane;
 	Plane_3 plane = planes[iPlane];
@@ -377,13 +386,12 @@ static Triplet getNormalityTriplet(int N, int i,
 	return triplet;
 }
 
-static Triplet getFixedPlanesTriplet(int N, int K, int i,
-		const std::vector<EdgeInfo> &edges,
-		const std::vector<Segment_3> &segments)
+static MyTriplet getFixedPlanesTriplet(int N, int K, int i,
+		const std::vector<EdgeInfo> &edges)
 {
-	Triplet triplet;
+	MyTriplet triplet;
 	int iEdge = i / 6;
-	Vector_3 v = edges[iEdge].direction().vector();
+	Vector_3 v = edges[iEdge].initialEdge.direction().vector();
 
 	int iEnd = (i % 6) / 3;
 	triplet.row = 28 * N + 3 * K + 2 * iEdge + iEnd;
@@ -406,19 +414,18 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 	auto newPlanes = getPlanes(N, K, x);
 	for (Index i = 0; i < nnz_jac_g; ++i)
 	{
-		Triplet triplet;
+		MyTriplet triplet;
 
 		if (i < 28 * N) /* planarity constraints */
-			triplet = getPlanarityTriplet(N, i, segments,
+			triplet = getPlanarityTriplet(N, i, edges, segments,
 					newPlanes);
 		else if (i < 28 * N + 3 * K) /* normality constraints */
 			triplet = getNormalityTriplet(N, i - 28 * N, newPlanes);
 		else /* fixed planes constraints */
 			triplet = getFixedPlanesTriplet(N, K,
-					i - 28 * N - 3 * K,
-					edges, segments);
+					i - 28 * N - 3 * K, edges);
 
-		if (jacValue)
+		if (jacValues)
 			jacValues[i] = triplet.value;
 		else
 		{
@@ -430,31 +437,133 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 	return true;
 }
 
-bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
-		Index m, const Number *lambda, bool new_lambda,
-		Index nnz_h_lag, Index *iRow, Index *jCol,
+static double getSumForH(const EdgeInfo &info, int i, int j)
+{
+	double sum = 0.;
+	for (const EdgePlane_3 &plane : info.planes)
+	{
+		Vector_3 v(plane.a(), plane.b(), plane.c());
+		sum += v[i] * v[j];
+	}
+	sum += sqrt(info.initialEdge.squared_length());
+
+	return sum;
+}
+
+typedef std::vector<std::set<int>> IncidenceStructure;
+
+static MyTriplet getUpperHTriplet(Number obj_factor, const Number *lambda,
+		const std::vector<EdgeInfo> &edges, int i,
+		IncidenceStructure &IS)
+{
+	Index N = edges.size(); /* Number of edges */
+	MyTriplet triplet;
+
+	int iEdge = i / 30;
+	const EdgeInfo &info = edges[iEdge];
+
+	int iEnd = (i % 30) / 15;
+	int iCoord = (i % 15) / 5;
+	triplet.row = 6 * iEdge + 3 * iEnd + iCoord;
+
+	int iDeriv = i % 5;
+	if (iDeriv < 3) /* functional */
+	{
+		triplet.col = 6 * iEdge + 3 * iEnd + iDeriv;
+		triplet.value = 2. * obj_factor	* getSumForH(info, iCoord,
+				iDeriv);
+	}
+	else /* upper-right part planarity */
+	{
+		iDeriv -= 3;
+		unsigned facetID = (iDeriv == 0)
+			? info.facetID1
+			: info.facetID2;
+		triplet.col = 6 * N + 4 * facetID + iCoord;
+		triplet.value = lambda[4 * iEdge + 2 * iEnd + iDeriv];
+		IS[facetID].insert(iEdge);
+	}
+
+	return triplet;
+}
+
+static MyTriplet getLowerHTriplet(Number obj_factor, const Number *lambda,
+		const std::vector<EdgeInfo> &edges, int i,
+		const IncidenceStructure &IS, int &iFacet)
+{
+	Index N = edges.size(); /* Number of edges */
+
+	MyTriplet triplet;
+
+	int numIncident = IS[iFacet].size();
+	int nnzInRow = 2 * numIncident + 1;
+	int nnzForFacet = 3 * nnzInRow;
+	ASSERT(i < nnzForFacet && "Wrong logic in Hessian");
+
+	int iCoord = i / nnzInRow;
+	triplet.col = 6 * N + 4 * iFacet + iCoord;
+
+	int iDeriv = i % nnzInRow;
+	if (iDeriv == nnzInRow - 1) /* normality */
+		triplet.value = 2. * lambda[4 * N + iFacet];
+	else /* lower-left part planarity */
+	{
+		/* FIXME: Optimize this! */
+		int iEdge = *std::next(IS[iFacet].begin(), iDeriv / 2);
+		int iEnd = iDeriv % 2;
+		triplet.value = lambda[4 * iEdge + 2 * iEnd + iCoord];
+	}
+
+	if (i == nnzForFacet - 1) /* last non-zero element for current plane */
+		++iFacet;
+
+	return triplet;
+}
+
+bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
+		Number obj_factor, Index m, const Number *lambda,
+		bool new_lambda, Index nnz_h_lag, Index *iRow, Index *jCol,
 		Number *hValues)
 {
 	ASSERT((iRow && jCol && !hValues) || (!iRow && !jCol && hValues));
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 
-	/* Incident edge IDs for each plane */
-	static bool initialized = false;
-	static std::vector<std::vector<int>> incidence(planes.size());
+	/*
+	 * Incident edge IDs for each plane.
+	 * FIXME: Make this static, and don't recalculate it each time.
+	 */
+	IncidenceStructure IS(planes.size());
 
+	int iFacet = 0;
+	int iBase = 30 * N;
 	for (Index i = 0; i < nnz_h_lag; ++i)
 	{
-		Triplet triplet;
+		MyTriplet triplet;
 
 		if (i < 30 * N) /* functional and upper-right part planarity */
-		{
-			int iEdge = i / 30;
-			const EdgeInfo& &info = edges[iEdge];
-
-		}
+			triplet = getUpperHTriplet(obj_factor, lambda, edges, i,
+					IS);
 		else /* lower-left part planarity and normality */
 		{
+			int iFacetOld = iFacet;
+			triplet = getLowerHTriplet(obj_factor, lambda, edges,
+					i - iBase, IS, iFacet);
+			if (iFacetOld + 1 == iFacet)
+			{
+				ASSERT(iFacet < K);
+				iBase = i + 1;
+			}
+			else
+				ASSERT(iFacetOld == iFacet && "Impossible");
+		}
+
+		if (hValues)
+			hValues[i] = triplet.value;
+		else
+		{
+			iRow[i] = triplet.row;
+			jCol[i] = triplet.col;
 		}
 	}
 	return true;

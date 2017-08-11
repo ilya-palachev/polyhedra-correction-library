@@ -38,6 +38,7 @@ set (SOURCE_pcl
 	Source/Analyzers/SizeCalculator/SortedDouble/SortedDouble.cpp
 	Source/Common.cpp
 	Source/Correctors/Coalescer/Coalescer.cpp
+	Source/Correctors/EdgeCorrector/EdgeCorrector.cpp
 	Source/Correctors/EdgeReducer/EdgeReducer.cpp
 	Source/Correctors/GlobalShadowCorrector/GlobalShadowCorrector.cpp
 	Source/Correctors/GlobalShadowCorrector/GlobalShadowCorrector_derivateTest.cpp
