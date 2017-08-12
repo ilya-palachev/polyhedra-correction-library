@@ -152,7 +152,6 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 	unsigned numColouredHalfedges = 0;
 	for (auto &i : halfedgesMap)
 	{
-		assert(i.second != uninitialized_map_value);
 		if (!edges[i.second].tangients.empty())
 		{
 			polyhedron.halfedgeColours[i.first] = red;
