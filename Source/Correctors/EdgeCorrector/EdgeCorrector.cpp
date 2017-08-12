@@ -31,11 +31,27 @@ bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 {
 	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
+	std::cout << "    Number of edges:     " << N << std::endl;
+
 	Index K = planes.size(); /* Number of facets */
+	std::cout << "    Number of planes:    " << K << std::endl;
+
 	n = 6 * N + 4 * K; /* 6 = 3 (coordinates) * 2 (ends of edge) */
 	                   /* 4 = 4 (coefficients of plane equation) */
+	std::cout << "    Number of variables: " << n  << ", including:"
+		<< std::endl;
+	std::cout << "        Coordinates of edges ends: " << 3 * N
+		<< std::endl;
+	std::cout << "        Coordinates of planes coefficients: " << 4 * K
+		<< std::endl;
+
 	m = 6 * N + K; /* = 4 * N (planarity) + K (normality) + */
 	               /*   + 2 * N (fixed planes)*/
+	std::cout << "    Number of constraints: " << m << ", including:"
+		<< std::endl;
+	std::cout << "        Planarity constraints: " << 4 * N << std::endl;
+	std::cout << "        Normality constraints: " << K << std::endl;
+	std::cout << "        Fixed planes contraints: " << 2 * N << std::endl;
 
 	/*
 	 * Each planarity condition gives 7 non-zeros,
@@ -177,11 +193,10 @@ static std::vector<Plane_3> getPlanes(int N, int K, const Number *x)
 		return planes;
 	}
 
-	x += 6 * N;
 	for (int i = 0; i < K; ++i)
 	{
-		Plane_3 plane(x[4 * i + 0], x[4 * i + 1], x[4 * i + 2],
-				x[4 * i + 3]);
+		int ii = 6 * N + 4 * i;
+		Plane_3 plane(x[ii], x[ii + 1], x[ii + 2], x[ii + 3]);
 		planes.push_back(plane);
 	}
 
@@ -280,7 +295,7 @@ bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
 	auto segments = getSegments(N, x);
 	auto newPlanes = getPlanes(N, K, x);
 
-	for (Index i = 0; i < n; ++i)
+	for (Index i = 0; i < m; ++i)
 	{
 		if (i < 4 * N) /* planarity constraints */
 		{
@@ -298,7 +313,7 @@ bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
 		{
 			int iPlane = i - 4 * N;
 			Plane_3 p = newPlanes[iPlane];
-			g[i] = p.a() * p.a() + p.b() + p.b() + p.c() + p.c();
+			g[i] = p.a() * p.a() + p.b() * p.b() + p.c() * p.c();
 		}
 		else /* fixed planes constraints */
 		{
