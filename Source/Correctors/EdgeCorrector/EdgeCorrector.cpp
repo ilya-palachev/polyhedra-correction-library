@@ -389,7 +389,7 @@ static MyTriplet getNormalityTriplet(int N, int i,
 {
 	MyTriplet triplet;
 	int iPlane = i / 3;
-	triplet.row = 28 * N + iPlane;
+	triplet.row = 4 * N + iPlane;
 	Plane_3 plane = planes[iPlane];
 
 	int iCoord = i % 3;
@@ -424,7 +424,7 @@ static MyTriplet getFixedPlanesTriplet(int N, int K, int i,
 	Vector_3 v = edges[iEdge].initialEdge.direction().vector();
 
 	int iEnd = (i % 6) / 3;
-	triplet.row = 28 * N + 3 * K + 2 * iEdge + iEnd;
+	triplet.row = 4 * N + K + 2 * iEdge + iEnd;
 
 	int iCoord = (i % 6) % 3;
 	triplet.col = i;
@@ -449,19 +449,38 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 		MyTriplet triplet;
 
 		if (i < 28 * N) /* planarity constraints */
+		{
 			triplet = getPlanarityTriplet(N, i, edges, segments,
 					newPlanes);
+			ASSERT(triplet.row < 4 * N);
+			ASSERT(triplet.col < n);
+		}
 		else if (i < 28 * N + 3 * K) /* normality constraints */
+		{
 			triplet = getNormalityTriplet(N, i - 28 * N, newPlanes);
+			ASSERT(triplet.row >= 4 * N && triplet.row < 4 * N + K);
+			ASSERT(triplet.col >= 6 * N && triplet.col < n);
+		}
 		else /* fixed planes constraints */
+		{
 			triplet = getFixedPlanesTriplet(N, K,
 					i - 28 * N - 3 * K, edges);
+			ASSERT(triplet.row >= 4 * N + K && triplet.row < m);
+			ASSERT(triplet.col < 6 * N);
+		}
 
 		if (jacValues)
+		{
+			//std::cout << "jac_g: value " << triplet.value << std::endl;
 			jacValues[i] = triplet.value;
+		}
 		else
 		{
+			//std::cout << "jac_g: row " << triplet.row << " col "
+			//	<< triplet.col << std::endl;
+			ASSERT(triplet.row < m);
 			iRow[i] = triplet.row;
+			ASSERT(triplet.col < n);
 			jCol[i] = triplet.col;
 		}
 	}
