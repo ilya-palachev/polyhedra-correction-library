@@ -29,6 +29,7 @@
 bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
+	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 	n = 6 * N + 4 * K; /* 6 = 3 (coordinates) * 2 (ends of edge) */
@@ -52,12 +53,14 @@ bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	 */
 	nnz_h_lag = 42 * N + 3 * K; /* 18 * N + 6 * (4 * N) + 3 * K */
 
+	DEBUG_END;
 	return true;
 }
 
 bool EdgeCorrector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
 		Number *g_l, Number *g_u)
 {
+	DEBUG_START;
 	const Number TNLP_INFINITY = 2e19;
 	for (Index i = 0; i < n; ++i)
 	{
@@ -84,6 +87,7 @@ bool EdgeCorrector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
 			g_l[j] = g_u[j] = v * (end - CGAL::Origin());
 		}
 	}
+	DEBUG_END;
 	return true;
 }
 
@@ -109,6 +113,7 @@ bool EdgeCorrector::get_starting_point(Index n, bool init_x,
 		Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
 		bool init_lambda, Number *lambda)
 {
+	DEBUG_START;
 	ASSERT(x && init_x && !init_z && !init_lambda);
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
@@ -134,12 +139,22 @@ bool EdgeCorrector::get_starting_point(Index n, bool init_x,
 			x[i] = getCoordinate(plane, iCoord);
 		}
 	}
+	DEBUG_END;
 	return true;
 }
 
 static std::vector<Segment_3> getSegments(int N, const Number *x)
 {
 	std::vector<Segment_3> segments;
+
+	if (!x)
+	{
+		for (int i = 0; i < N; ++i)
+			segments.push_back(Segment_3(Point_3(0., 0., 0.),
+						Point_3(0., 0., 0.)));
+		return segments;
+	}
+
 	for (int i = 0; i < N; ++i)
 	{
 		Point_3 source(x[6 * i + 0], x[6 * i + 1], x[6 * i + 2]);
@@ -154,6 +169,14 @@ static std::vector<Segment_3> getSegments(int N, const Number *x)
 static std::vector<Plane_3> getPlanes(int N, int K, const Number *x)
 {
 	std::vector<Plane_3> planes;
+
+	if (!x)
+	{
+		for (int i = 0; i < K; ++i)
+			planes.push_back(Plane_3(0., 0., 0., 0.));
+		return planes;
+	}
+
 	x += 6 * N;
 	for (int i = 0; i < K; ++i)
 	{
@@ -174,6 +197,7 @@ double signedDistance(const Plane_3 &plane, const Point_3 &point)
 bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
 		Number &obj_value)
 {
+	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
 	auto segments = getSegments(N, x);
 	obj_value = 0.;
@@ -193,12 +217,15 @@ bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
 		value *= sqrt(info.initialEdge.squared_length());
 		obj_value += value;
 	}
+
+	DEBUG_END;
 	return true;
 }
 
 bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
 		Number *grad_f)
 {
+	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
 
 	for (int i = 0; i < n; ++i)
@@ -221,6 +248,7 @@ bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
 		grad_f[i] *= 2. * sqrt(info.initialEdge.squared_length());
 	}
 
+	DEBUG_END;
 	return true;
 }
 
@@ -246,6 +274,7 @@ static int getFacetID(const EdgeInfo &info, int iFacet)
 bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
 		Number *g)
 {
+	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 	auto segments = getSegments(N, x);
@@ -284,6 +313,7 @@ bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
 		}
 	}
 
+	DEBUG_END;
 	return true;
 }
 
@@ -407,7 +437,9 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 		Index nnz_jac_g, Index *iRow, Index *jCol,
 		Number *jacValues)
 {
-	ASSERT((iRow && jCol && !jacValues) || (!iRow && !jCol && jacValues));
+	DEBUG_START;
+	ASSERT((iRow && jCol && !jacValues && !x)
+		|| (!iRow && !jCol && jacValues && x));
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 	auto segments = getSegments(N, x);
@@ -434,6 +466,7 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 		}
 	}
 
+	DEBUG_END;
 	return true;
 }
 
@@ -480,7 +513,8 @@ static MyTriplet getUpperHTriplet(Number obj_factor, const Number *lambda,
 			? info.facetID1
 			: info.facetID2;
 		triplet.col = 6 * N + 4 * facetID + iCoord;
-		triplet.value = lambda[4 * iEdge + 2 * iEnd + iDeriv];
+		triplet.value = lambda ? lambda[4 * iEdge + 2 * iEnd + iDeriv]
+			: 0.;
 		IS[facetID].insert(iEdge);
 	}
 
@@ -505,13 +539,14 @@ static MyTriplet getLowerHTriplet(Number obj_factor, const Number *lambda,
 
 	int iDeriv = i % nnzInRow;
 	if (iDeriv == nnzInRow - 1) /* normality */
-		triplet.value = 2. * lambda[4 * N + iFacet];
+		triplet.value = lambda ? 2. * lambda[4 * N + iFacet] : 0.;
 	else /* lower-left part planarity */
 	{
 		/* FIXME: Optimize this! */
 		int iEdge = *std::next(IS[iFacet].begin(), iDeriv / 2);
 		int iEnd = iDeriv % 2;
-		triplet.value = lambda[4 * iEdge + 2 * iEnd + iCoord];
+		triplet.value = lambda ? lambda[4 * iEdge + 2 * iEnd + iCoord]
+			: 0.;
 	}
 
 	if (i == nnzForFacet - 1) /* last non-zero element for current plane */
@@ -525,7 +560,9 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 		bool new_lambda, Index nnz_h_lag, Index *iRow, Index *jCol,
 		Number *hValues)
 {
-	ASSERT((iRow && jCol && !hValues) || (!iRow && !jCol && hValues));
+	DEBUG_START;
+	ASSERT((iRow && jCol && !hValues && !x && !lambda)
+		|| (!iRow && !jCol && hValues && x && lambda));
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 
@@ -551,7 +588,7 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 					i - iBase, IS, iFacet);
 			if (iFacetOld + 1 == iFacet)
 			{
-				ASSERT(iFacet < K);
+				ASSERT(iFacet < K || i == nnz_h_lag - 1);
 				iBase = i + 1;
 			}
 			else
@@ -566,5 +603,77 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 			jCol[i] = triplet.col;
 		}
 	}
+
+	DEBUG_END;
 	return true;
+}
+
+void EdgeCorrector::finalize_solution(SolverReturn status, Index n,
+		const Number *x, const Number *z_L, const Number *z_U, Index m,
+		const Number *g, const Number *lambda, Number obj_value,
+		const IpoptData *ip_data,
+		IpoptCalculatedQuantities *ip_cq)
+{
+	DEBUG_START;
+	Index N = edges.size(); /* Number of edges */
+	Index K = planes.size(); /* Number of facets */
+	auto resultingSegments = getSegments(N, x);
+	auto resultingPlanes = getPlanes(N, K, x);
+
+	switch (status)
+	{
+	case Ipopt::SUCCESS:
+		MAIN_PRINT("SUCCESS");
+		break;
+	case Ipopt::MAXITER_EXCEEDED:
+		MAIN_PRINT("MAXITER_EXCEEDED");
+		break;
+	case Ipopt::CPUTIME_EXCEEDED:
+		MAIN_PRINT("CPUTIME_EXCEEDED");
+		break;
+	case Ipopt::STOP_AT_TINY_STEP:
+		MAIN_PRINT("STOP_AT_TINY_STEP");
+		break;
+	case Ipopt::STOP_AT_ACCEPTABLE_POINT:
+		MAIN_PRINT("STOP_AT_ACCEPTABLE_POINT");
+		break;
+	case Ipopt::LOCAL_INFEASIBILITY:
+		MAIN_PRINT("LOCAL_INFEASIBILITY");
+		break;
+	case Ipopt::USER_REQUESTED_STOP:
+		MAIN_PRINT("USER_REQUESTED_STOP");
+		break;
+	case Ipopt::FEASIBLE_POINT_FOUND:
+		MAIN_PRINT("FEASIBLE_POINT_FOUND");
+		break;
+	case Ipopt::DIVERGING_ITERATES:
+		MAIN_PRINT("DIVERGING_ITERATES");
+		break;
+	case Ipopt::RESTORATION_FAILURE:
+		MAIN_PRINT("RESTORATION_FAILURE");
+		break;
+	case Ipopt::ERROR_IN_STEP_COMPUTATION:
+		MAIN_PRINT("ERROR_IN_STEP_COMPUTATION");
+		break;
+	case Ipopt::INVALID_NUMBER_DETECTED:
+		MAIN_PRINT("INVALID_NUMBER_DETECTED");
+		break;
+	case Ipopt::TOO_FEW_DEGREES_OF_FREEDOM:
+		MAIN_PRINT("TOO_FEW_DEGREES_OF_FREEDOM");
+		break;
+	case Ipopt::INVALID_OPTION:
+		MAIN_PRINT("INVALID_OPTION");
+		break;
+	case Ipopt::OUT_OF_MEMORY:
+		MAIN_PRINT("OUT_OF_MEMORY");
+		break;
+	case Ipopt::INTERNAL_ERROR:
+		MAIN_PRINT("INTERNAL_ERROR");
+		break;
+	case Ipopt::UNASSIGNED:
+		MAIN_PRINT("UNASSIGNED");
+		break;
+	}
+
+	DEBUG_END;
 }

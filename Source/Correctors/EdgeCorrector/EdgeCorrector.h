@@ -26,7 +26,6 @@
 #ifndef EDGE_CORRECTOR_H
 #define EDGE_CORRECTOR_H
 #include <coin/IpTNLP.hpp>
-#include <coin/IpIpoptApplication.hpp>
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataContainers/EdgeInfo/EdgeInfo.h"
 
@@ -41,10 +40,22 @@ class EdgeCorrector : public TNLP
 {
 	const std::vector<Plane_3> &planes;
 	const std::vector<EdgeInfo> &edges;
+	std::vector<Segment_3> resultingSegments;
+	std::vector<Plane_3> resultingPlanes;
 public:
 	EdgeCorrector(const std::vector<Plane_3> &planes,
 			const std::vector<EdgeInfo> &edges):
 		planes(planes), edges(edges) {}
+
+	std::vector<Segment_3> getResultingSegments()
+	{
+		return resultingSegments;
+	}
+
+	std::vector<Plane_3> getResultingPlanes()
+	{
+		return resultingPlanes;
+	}
 
 	bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 			Index& nnz_h_lag, IndexStyleEnum& index_style);

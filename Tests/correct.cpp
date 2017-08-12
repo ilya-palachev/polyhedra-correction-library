@@ -26,12 +26,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <coin/IpIpoptApplication.hpp>
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataContainers/EdgeInfo/EdgeInfo.h"
+#include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
 static void printUsage(const char *name)
 {
@@ -81,6 +83,35 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	std::cout << "Successfully read the edge info data..." << std::endl;
+
+	std::vector<Plane_3> planes;
+	for (auto I = initP.planes_begin(), E = initP.planes_end(); I != E; ++I)
+		planes.push_back(*I);
+
+	EdgeCorrector *EC = new EdgeCorrector(planes, data);
+	Ipopt::IpoptApplication *app = IpoptApplicationFactory();
+
+	/* Intialize the IpoptApplication and process the options */
+	if (app->Initialize() != Ipopt::Solve_Succeeded)
+	{
+		MAIN_PRINT("*** Error during initialization!");
+		return EXIT_FAILURE;
+	}
+
+	/* Ask Ipopt to solve the problem */
+	auto status = app->OptimizeTNLP(EC);
+	if (status != Ipopt::Solve_Succeeded
+		&& status != Ipopt::Solved_To_Acceptable_Level)
+	{
+		MAIN_PRINT("** The problem FAILED!");
+		return EXIT_FAILURE;
+	}
+
+	MAIN_PRINT("*** The problem solved!");
+	auto resultingPlanes = EC->getResultingPlanes();
+	Polyhedron_3 resultingP(resultingPlanes);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply")
+		<< resultingP;
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
