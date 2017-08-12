@@ -98,6 +98,15 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	if (getenv("DERIVATIVE_TEST_FIRST"))
+		app->Options()->SetStringValue("derivative_test", "first-order");
+	else if (getenv("DERIVATIVE_TEST_SECOND"))
+		app->Options()->SetStringValue("derivative_test", "second-order");
+	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
+		app->Options()->SetStringValue("derivative_test", "only-second-order");
+	if (getenv("HESSIAN_APPROX"))
+		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+
 	/* Ask Ipopt to solve the problem */
 	auto status = app->OptimizeTNLP(EC);
 	if (status != Ipopt::Solve_Succeeded
