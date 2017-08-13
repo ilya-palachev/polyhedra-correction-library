@@ -685,8 +685,8 @@ void EdgeCorrector::finalize_solution(SolverReturn status, Index n,
 	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
-	auto resultingSegments = getSegments(N, x);
-	auto resultingPlanes = getPlanes(N, K, x);
+	resultingSegments = getSegments(N, x);
+	resultingPlanes = getPlanes(N, K, x);
 
 	switch (status)
 	{

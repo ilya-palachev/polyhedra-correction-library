@@ -130,6 +130,17 @@ int main(int argc, char **argv)
 
 	MAIN_PRINT("*** The problem solved!");
 	auto resultingPlanes = EC->getResultingPlanes();
+
+	std::cout << "Number of initial planes: " << planes.size() << std::endl;
+	std::cout << "Number of resulting planes: " << resultingPlanes.size()
+		<< std::endl;
+	ASSERT(planes.size() == resultingPlanes.size());
+	for (unsigned i = 0; i < planes.size(); ++i)
+	{
+		std::cout << "Plane #" << i << ": " << planes[i] << " -> "
+			<< resultingPlanes[i] << std::endl;
+	}
+
 	Polyhedron_3 resultingP(resultingPlanes);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply")
 		<< resultingP;
