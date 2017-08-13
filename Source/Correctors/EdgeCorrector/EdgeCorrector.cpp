@@ -26,6 +26,8 @@
 #include "DebugAssert.h"
 #include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
+#define EDGE_LENGTH_SCALING 0
+
 bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
@@ -229,9 +231,14 @@ bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
 				value += dist * dist;
 			}
 		}
-		value *= sqrt(info.initialEdge.squared_length());
+#if EDGE_LENGTH_SCALING
+		double length = sqrt(info.initialEdge.squared_length());
+		ASSERT(length > 0.);
+		value *= length;
+#endif
 		obj_value += value;
 	}
+	ASSERT(obj_value > 0.);
 
 	DEBUG_END;
 	return true;
@@ -260,7 +267,10 @@ bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
 			double dist = signedDistance(plane, end);
 			grad_f[i] += dist * getCoordinate(plane, iCoord);
 		}
-		grad_f[i] *= 2. * sqrt(info.initialEdge.squared_length());
+		grad_f[i] *= 2.;
+#if EDGE_LENGTH_SCALING
+		grad_f[i] *= sqrt(info.initialEdge.squared_length());
+#endif
 	}
 
 	DEBUG_END;
@@ -512,7 +522,9 @@ static double getSumForH(const EdgeInfo &info, int i, int j)
 		Vector_3 v(plane.a(), plane.b(), plane.c());
 		sum += v[i] * v[j];
 	}
-	sum += sqrt(info.initialEdge.squared_length());
+#if EDGE_LENGTH_SCALING
+	sum *= sqrt(info.initialEdge.squared_length());
+#endif
 
 	return sum;
 }
@@ -537,8 +549,7 @@ static MyTriplet getUpperHTriplet(Number obj_factor, const Number *lambda,
 	if (iDeriv < 3) /* functional */
 	{
 		triplet.col = 6 * iEdge + 3 * iEnd + iDeriv;
-		triplet.value = 2. * obj_factor	* getSumForH(info, iCoord,
-				iDeriv);
+		triplet.value = 2. * obj_factor * getSumForH(info, iCoord, iDeriv);
 	}
 	else /* upper-right part planarity */
 	{
@@ -569,18 +580,33 @@ static MyTriplet getLowerHTriplet(Number obj_factor, const Number *lambda,
 	ASSERT(i < nnzForFacet && "Wrong logic in Hessian");
 
 	int iCoord = i / nnzInRow;
-	triplet.col = 6 * N + 4 * iFacet + iCoord;
+	triplet.row = 6 * N + 4 * iFacet + iCoord;
 
 	int iDeriv = i % nnzInRow;
 	if (iDeriv == nnzInRow - 1) /* normality */
+	{
 		triplet.value = lambda ? 2. * lambda[4 * N + iFacet] : 0.;
+		triplet.col = triplet.col; /* diagonal element */
+	}
 	else /* lower-left part planarity */
 	{
 		/* FIXME: Optimize this! */
 		int iEdge = *std::next(IS[iFacet].begin(), iDeriv / 2);
 		int iEnd = iDeriv % 2;
-		triplet.value = lambda ? lambda[4 * iEdge + 2 * iEnd + iCoord]
+		int iEndFacetID = 0;
+
+		if (edges[iEdge].facetID1 == unsigned(iFacet))
+		{
+			iEndFacetID = 0;
+		}
+		else
+		{
+			ASSERT(edges[iEdge].facetID2 == unsigned(iFacet));
+			iEndFacetID = 1;
+		}
+		triplet.value = lambda ? lambda[4 * iEdge + 2 * iEnd + iEndFacetID]
 			: 0.;
+		triplet.col = 6 * iEdge + 3 * iEnd + iCoord;
 	}
 
 	if (i == nnzForFacet - 1) /* last non-zero element for current plane */
@@ -613,13 +639,17 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 		MyTriplet triplet;
 
 		if (i < 30 * N) /* functional and upper-right part planarity */
+		{
 			triplet = getUpperHTriplet(obj_factor, lambda, edges, i,
 					IS);
+			ASSERT(triplet.row >= 0 && triplet.row < 6 * N);
+		}
 		else /* lower-left part planarity and normality */
 		{
 			int iFacetOld = iFacet;
 			triplet = getLowerHTriplet(obj_factor, lambda, edges,
 					i - iBase, IS, iFacet);
+			ASSERT(triplet.row >= 6 * N && triplet.row < 6 * N + 4 * K);
 			if (iFacetOld + 1 == iFacet)
 			{
 				ASSERT(iFacet < K || i == nnz_h_lag - 1);
@@ -630,7 +660,11 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 		}
 
 		if (hValues)
+		{
+			if (triplet.row != triplet.col)
+				triplet.value *= 0.5;
 			hValues[i] = triplet.value;
+		}
 		else
 		{
 			iRow[i] = triplet.row;
