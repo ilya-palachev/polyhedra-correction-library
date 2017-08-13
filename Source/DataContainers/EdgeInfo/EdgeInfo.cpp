@@ -25,6 +25,7 @@
  */
 
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "DefaultScaner.h"
 #include "DataContainers/EdgeInfo/EdgeInfo.h"
 
@@ -126,3 +127,47 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 
 	return true;
 }
+
+bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data)
+{
+	p.initialize_indices();
+	unsigned iInfo = 0;
+	for (EdgeInfo &info : data)
+	{
+		auto facet1 = *std::next(p.facets_begin(), info.facetID1);
+		ASSERT(facet1.id == info.facetID1);
+		auto facet2 = *std::next(p.facets_begin(), info.facetID2);
+		ASSERT(facet2.id == info.facetID2);
+		auto circulator = facet1.facet_begin();
+		auto finish = circulator;
+		bool found = false;
+		do
+		{
+			if (circulator->opposite()->facet()->id == facet2.id)
+			{
+				found = true;
+				break;
+			}
+
+			++circulator;
+
+		} while(circulator != finish);
+
+		if (!found)
+		{
+			std::cerr << "Failed to find initial edge for info #"
+				<< iInfo << std::endl;
+			return false;
+		}
+
+		Point_3 start = circulator->vertex()->point();
+		Point_3 end = circulator->opposite()->vertex()->point();
+		Segment_3 edge(start, end);
+		info.initialEdge = edge;
+
+		++iInfo;
+	}
+
+	return true;
+}
+

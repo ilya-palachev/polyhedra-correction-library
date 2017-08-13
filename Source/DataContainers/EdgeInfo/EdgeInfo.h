@@ -58,4 +58,6 @@ struct EdgeInfo
 };
 
 bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data);
+
+bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data);
 #endif	/* EDGE_INFO_H */

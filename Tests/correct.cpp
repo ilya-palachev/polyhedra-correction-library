@@ -82,6 +82,12 @@ int main(int argc, char **argv)
 		DEBUG_END;
 		return EXIT_FAILURE;
 	}
+	if (!getInitialPosition(initP, data))
+	{
+		printf("Failed to initialize edges!\n");
+		DEBUG_END;
+		return EXIT_FAILURE;
+	}
 	std::cout << "Successfully read the edge info data..." << std::endl;
 
 	std::vector<Plane_3> planes;
@@ -98,10 +104,16 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	//app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetNumericValue("tol", 1e-3);
+	app->Options()->SetNumericValue("acceptable_tol", 1e-3);
 	if (getenv("DERIVATIVE_TEST_FIRST"))
 		app->Options()->SetStringValue("derivative_test", "first-order");
 	else if (getenv("DERIVATIVE_TEST_SECOND"))
+	{
 		app->Options()->SetStringValue("derivative_test", "second-order");
+		//app->Options()->SetIntegerValue("derivative_test_first_index", 144);
+	}
 	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
 		app->Options()->SetStringValue("derivative_test", "only-second-order");
 	if (getenv("HESSIAN_APPROX"))
