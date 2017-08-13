@@ -42,6 +42,37 @@ static void printUsage(const char *name)
 	DEBUG_END;
 }
 
+static Plane_3 normalizePlane(const Plane_3 &p)
+{
+	double a = p.a();
+	double b = p.b();
+	double c = p.c();
+	double d = p.d();
+	if (d > 0.)
+	{
+		a = -a;
+		b = -b;
+		c = -c;
+		d = -d;
+	}
+	double l = sqrt(a * a + b * b + c * c);
+	ASSERT(l > 1e-15);
+	a /= l;
+	b /= l;
+	c /= l;
+	d /= l;
+	return Plane_3(a, b, c, d);
+}
+
+static double planeDist(const Plane_3 &p0, const Plane_3 &p1)
+{
+	double a = p0.a() - p1.a();
+	double b = p0.b() - p1.b();
+	double c = p0.c() - p1.c();
+	double d = p0.d() - p1.d();
+	return sqrt(a * a + b * b + c * c + d * d);
+}
+
 int main(int argc, char **argv)
 {
 	DEBUG_START;
@@ -92,7 +123,9 @@ int main(int argc, char **argv)
 
 	std::vector<Plane_3> planes;
 	for (auto I = initP.planes_begin(), E = initP.planes_end(); I != E; ++I)
-		planes.push_back(*I);
+	{
+		planes.push_back(normalizePlane(*I));
+	}
 
 	EdgeCorrector *EC = new EdgeCorrector(planes, data);
 	Ipopt::IpoptApplication *app = IpoptApplicationFactory();
@@ -104,7 +137,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	//app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetStringValue("linear_solver", "ma57");
 	app->Options()->SetNumericValue("tol", 1e-3);
 	app->Options()->SetNumericValue("acceptable_tol", 1e-3);
 	if (getenv("DERIVATIVE_TEST_FIRST"))
@@ -135,13 +168,19 @@ int main(int argc, char **argv)
 	std::cout << "Number of resulting planes: " << resultingPlanes.size()
 		<< std::endl;
 	ASSERT(planes.size() == resultingPlanes.size());
+
+	std::vector<Plane_3> pp;
 	for (unsigned i = 0; i < planes.size(); ++i)
 	{
-		std::cout << "Plane #" << i << ": " << planes[i] << " -> "
-			<< resultingPlanes[i] << std::endl;
+		Plane_3 p0 = planes[i];
+		Plane_3 p = resultingPlanes[i];
+		if (planeDist(p0, p) > 1e-6)
+			std::cout << "Plane #" << i << ": " << p0
+				<< " -> " << p << std::endl;
+		pp.push_back(p);
 	}
 
-	Polyhedron_3 resultingP(resultingPlanes);
+	Polyhedron_3 resultingP(pp);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply")
 		<< resultingP;
 
