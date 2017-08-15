@@ -32,6 +32,7 @@
 #include "DebugAssert.h"
 #include "PCLDumper.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "DataContainers/EdgeInfo/EdgeInfo.h"
 #include "Correctors/EdgeCorrector/EdgeCorrector.h"
@@ -133,35 +134,133 @@ static Point_3 getCenter(const Polyhedron_3 &p)
 	return C;
 }
 
+static double signedDist(const Plane_3 &p, const Point_3 &C)
+{
+	return p.a() * C.x() + p.b() * C.y() + p.c() * C.z() + p.d();
+}
+
+static Plane_3 centerizePlane(const Plane_3 &p, const Point_3 &C, double sign)
+{
+	Plane_3 pp(p.a(), p.b(), p.c(),	p.d() + p.a() * C.x() + p.b() * C.y()
+			+ p.c() * C.z());
+
+	double a = pp.a();
+	double b = pp.b();
+	double c = pp.c();
+	double d = pp.d();
+	if (sign * signedDist(pp, C) < 0.)
+	{
+		a = -a;
+		b = -b;
+		c = -c;
+		d = -d;
+	}
+
+	pp = Plane_3(a, b, c, d);
+
+	return pp;
+}
+
 static std::vector<Plane_3> centerizePlanes(const std::vector<Plane_3> &planes,
 		const Point_3 &C)
 {
 	std::vector<Plane_3> centeredPlanes;
 	for (const Plane_3 &p : planes)
-		centeredPlanes.push_back(Plane_3(p.a(), p.b(), p.c(),
-			p.d() + p.a() * C.x() + p.b() * C.y()
-			+ p.c() * C.z()));
-
-	for (Plane_3 &p : centeredPlanes)
-	{
-		double a = p.a();
-		double b = p.b();
-		double c = p.c();
-		double d = p.d();
-		if (a * C.x() + b * C.y() + c * C.z() + d < 0.)
-		{
-			a = -a;
-			b = -b;
-			c = -c;
-			d = -d;
-		}
-
-		p = Plane_3(a, b, c, d);
-	}
-
+		centeredPlanes.push_back(centerizePlane(p, C, 1.));
 	return centeredPlanes;
 }
 
+std::ostream &operator<<(std::ostream &stream, std::shared_ptr<Polyhedron> p)
+{
+	stream << *p;
+	return stream;
+}
+
+/* FIXME: Copied from Polyhedron_io.cpp with slight modifications. */
+static std::shared_ptr<Polyhedron> convertWithAssociation(Polyhedron_3 p,
+		const Point_3 &C, const std::vector<Plane_3> &initPlanes)
+{
+	/* Check for non-emptiness. */
+	ASSERT(p.size_of_vertices());
+	ASSERT(p.size_of_facets());
+
+	int numVertices = p.size_of_vertices();
+	int numFacets = p.size_of_facets();
+
+	/* Allocate memory for arrays. */
+	Vector3d *vertices = new Vector3d[numVertices];
+	Facet *facets = new Facet[numFacets];
+
+	/* Transform vertexes. */
+	int iVertex = 0;
+	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end(); ++vertex)
+	{
+		Point_3 point = C + vertex->point();
+		vertices[iVertex++] = Vector3d(point.x(), point.y(), point.z());
+	}
+
+	/*
+	 * Transform facets.
+	 * This algorithm is based on example kindly provided at CGAL online user
+	 * manual. See example Polyhedron/polyhedron_prog_off.cpp
+	 */
+	int iFacet = 0;
+	auto plane = p.planes_begin();
+	auto facet = p.facets_begin();
+	/* Iterate through the std::lists of planes and facets. */
+	do
+	{
+		int id = p.indexPlanes_[iFacet];
+
+		facets[id].id = id;
+
+		/* Transform current plane. */
+		Plane_3 pi = centerizePlane(*plane,
+				Point_3(-C.x(), -C.y(), -C.z()),
+				signedDist(initPlanes[id], C));
+		facets[id].plane = Plane(Vector3d(pi.a(), pi.b(), pi.c()),
+				pi.d());
+
+		/*
+		 * Iterate through the std::list of halfedges incident to the curent CGAL
+		 * facet.
+		 */
+		auto halfedge = facet->facet_begin();
+
+		/* Facets in polyhedral surfaces are at least triangles. 	*/
+		CGAL_assertion(CGAL::circulator_size(halfedge) >= 3);
+
+		facets[id].numVertices = CGAL::circulator_size(halfedge);
+		facets[id].indVertices =
+			new int[3 * facets[id].numVertices + 1];
+		/*
+		 * TODO: It's too unsafe architecture if we do such things as setting
+		 * the size of internal array outside the API functions. Moreover, it
+		 * can cause us to write memory leaks.
+		 * indFacets and numFacets should no be public members.
+		 */
+
+		int iFacetVertex = 0;
+		do
+		{
+			facets[id].indVertices[iFacetVertex++] =
+				std::distance(p.vertices_begin(), halfedge->vertex());
+		} while (++halfedge != facet->facet_begin());
+
+		/* Add cycling vertex to avoid assertion during printing. */
+		facets[id].indVertices[facets[id].numVertices] =
+			facets[id].indVertices[0];
+
+		ASSERT(facets[id].correctPlane());
+
+		/* Increment the ID of facet. */
+		++iFacet;
+
+	} while (++plane != p.planes_end() && ++facet != p.facets_end());
+
+	return std::make_shared<Polyhedron>(numVertices, numFacets, vertices,
+			facets);
+}
 static void dumpResult(const std::vector<Plane_3> &planes,
 		const std::vector<Plane_3> &resultingPlanes, const Point_3 &C)
 {
@@ -188,16 +287,25 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 
 	/* To compare with the result: */
 	Polyhedron_3 initCenterizedP(centerizePlanes(planes, C));
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron-centerized.ply")
-		<< initCenterizedP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"init-polyhedron-centerized.ply") << initCenterizedP;
 
 	/*
 	 * FIXME: translate to proper positions and make associations with
 	 * initial facet IDs.
 	 */
-	Polyhedron_3 resultingP(centerizePlanes(resultingPlanes, C));
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply")
-		<< resultingP;
+	auto centerizedPlanes = centerizePlanes(resultingPlanes, C);
+	Polyhedron_3 resultingP(centerizedPlanes);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "result-raw.ply") << resultingP;
+	resultingP.initialize_indices(centerizedPlanes);
+
+	auto result = convertWithAssociation(resultingP, C, planes);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply") << result;
+
+	result->fprint_default_1_2("result.dat");
+	std::cout << "=========================================\n";
+	std::cout << "|| The result is printed to result.dat ||\n";
+	std::cout << "=========================================\n";
 }
 
 int main(int argc, char **argv)
