@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <coin/IpIpoptApplication.hpp>
+#include "Common.h"
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
@@ -78,18 +79,27 @@ std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 	}
 
 	app->Options()->SetStringValue("linear_solver", "ma57");
-	app->Options()->SetNumericValue("tol", 1e-3);
-	app->Options()->SetNumericValue("acceptable_tol", 1e-3);
+
+	double ipoptTol = 0.;
+	if (tryGetenvDouble("IPOPT_TOL", ipoptTol))
+		app->Options()->SetNumericValue("tol", ipoptTol);
+
+	double ipoptAcceptableTol = 0.;
+	if (tryGetenvDouble("IPOPT_ACCEPTABLE_TOL", ipoptAcceptableTol))
+		app->Options()->SetNumericValue("acceptable_tol", 1e-3);
+
 	if (getenv("DERIVATIVE_TEST_FIRST"))
-		app->Options()->SetStringValue("derivative_test", "first-order");
+		app->Options()->SetStringValue("derivative_test",
+			"first-order");
 	else if (getenv("DERIVATIVE_TEST_SECOND"))
-	{
-		app->Options()->SetStringValue("derivative_test", "second-order");
-	}
+		app->Options()->SetStringValue("derivative_test",
+			"second-order");
 	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
-		app->Options()->SetStringValue("derivative_test", "only-second-order");
+		app->Options()->SetStringValue("derivative_test",
+			"only-second-order");
 	if (getenv("HESSIAN_APPROX"))
-		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+		app->Options()->SetStringValue("hessian_approximation",
+			"limited-memory");
 
 	/* Ask Ipopt to solve the problem */
 	auto status = app->OptimizeTNLP(EC);
@@ -158,7 +168,7 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 	std::cout << "Number of initial planes: " << planes.size() << std::endl;
 	std::cout << "Number of resulting planes: " << resultingPlanes.size()
 		<< std::endl;
-	std::cout << "Center: " << C;
+	std::cout << "Center: " << C << std::endl;
 	ASSERT(planes.size() == resultingPlanes.size());
 
 	double maxDistance = 0.;
