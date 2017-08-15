@@ -64,6 +64,46 @@ static Plane_3 normalizePlane(const Plane_3 &p)
 	return Plane_3(a, b, c, d);
 }
 
+std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
+		const std::vector<EdgeInfo> &data)
+{
+	EdgeCorrector *EC = new EdgeCorrector(planes, data);
+	Ipopt::IpoptApplication *app = IpoptApplicationFactory();
+
+	/* Intialize the IpoptApplication and process the options */
+	if (app->Initialize() != Ipopt::Solve_Succeeded)
+	{
+		MAIN_PRINT("*** Error during initialization!");
+		exit(EXIT_FAILURE);
+	}
+
+	app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetNumericValue("tol", 1e-3);
+	app->Options()->SetNumericValue("acceptable_tol", 1e-3);
+	if (getenv("DERIVATIVE_TEST_FIRST"))
+		app->Options()->SetStringValue("derivative_test", "first-order");
+	else if (getenv("DERIVATIVE_TEST_SECOND"))
+	{
+		app->Options()->SetStringValue("derivative_test", "second-order");
+	}
+	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
+		app->Options()->SetStringValue("derivative_test", "only-second-order");
+	if (getenv("HESSIAN_APPROX"))
+		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+
+	/* Ask Ipopt to solve the problem */
+	auto status = app->OptimizeTNLP(EC);
+	if (status != Ipopt::Solve_Succeeded
+		&& status != Ipopt::Solved_To_Acceptable_Level)
+	{
+		MAIN_PRINT("** The problem FAILED!");
+		exit(EXIT_FAILURE);
+	}
+
+	MAIN_PRINT("*** The problem solved!");
+	return EC->getResultingPlanes();
+}
+
 static double planeDist(const Plane_3 &p0, const Plane_3 &p1)
 {
 	double a = p0.a() - p1.a();
@@ -201,43 +241,9 @@ int main(int argc, char **argv)
 	for (auto I = initP.planes_begin(), E = initP.planes_end(); I != E; ++I)
 		planes.push_back(normalizePlane(*I));
 
-	EdgeCorrector *EC = new EdgeCorrector(planes, data);
-	Ipopt::IpoptApplication *app = IpoptApplicationFactory();
+	std::vector<Plane_3> resultingPlanes = correctPlanes(planes, data);
 
-	/* Intialize the IpoptApplication and process the options */
-	if (app->Initialize() != Ipopt::Solve_Succeeded)
-	{
-		MAIN_PRINT("*** Error during initialization!");
-		return EXIT_FAILURE;
-	}
-
-	app->Options()->SetStringValue("linear_solver", "ma57");
-	app->Options()->SetNumericValue("tol", 1e-3);
-	app->Options()->SetNumericValue("acceptable_tol", 1e-3);
-	if (getenv("DERIVATIVE_TEST_FIRST"))
-		app->Options()->SetStringValue("derivative_test", "first-order");
-	else if (getenv("DERIVATIVE_TEST_SECOND"))
-	{
-		app->Options()->SetStringValue("derivative_test", "second-order");
-		//app->Options()->SetIntegerValue("derivative_test_first_index", 144);
-	}
-	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
-		app->Options()->SetStringValue("derivative_test", "only-second-order");
-	if (getenv("HESSIAN_APPROX"))
-		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
-
-	/* Ask Ipopt to solve the problem */
-	auto status = app->OptimizeTNLP(EC);
-	if (status != Ipopt::Solve_Succeeded
-		&& status != Ipopt::Solved_To_Acceptable_Level)
-	{
-		MAIN_PRINT("** The problem FAILED!");
-		return EXIT_FAILURE;
-	}
-
-	MAIN_PRINT("*** The problem solved!");
-
-	dumpResult(planes, EC->getResultingPlanes(), getCenter(initP));
+	dumpResult(planes, resultingPlanes, getCenter(initP));
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
