@@ -754,6 +754,40 @@ void Polyhedron::fprint_default_1(const char *filename)
 	DEBUG_END;
 }
 
+void Polyhedron::fprint_default_1_2(const char *filename)
+{
+	DEBUG_START;
+	FILE* file = (FILE*) fopen(filename, "w");
+	if (!file)
+	{
+		ERROR_PRINT("Error. Cannot open file %s\n",
+				filename);
+		fclose(file);
+		DEBUG_END;
+		return;
+	}
+
+	ALWAYS_PRINT(file, "# Produced by Polyhedra Correction Library, "
+			"written by Ilya Palachev <iliyapalachev@gmail.com>\n");
+	ALWAYS_PRINT(file, "# num_vertices   num_facets\n");
+	ALWAYS_PRINT(file, "%d %d\n", numVertices, numFacets);
+
+	ALWAYS_PRINT(file, "# vertices:\n");
+	ALWAYS_PRINT(file, "#   id   x y z\n");
+	for (int i = 0; i < numVertices; ++i)
+		ALWAYS_PRINT(file, "\t%d\t%.12f\t%.12f\t%.12f\n", i,
+				vertices[i].x, vertices[i].y, vertices[i].z);
+
+	ALWAYS_PRINT(file, "# facets:\n");
+	ALWAYS_PRINT(file, "#   id   num_of_sides   plane_coeff  (ax + by + cz + d = 0)\n");
+	ALWAYS_PRINT(file, "#   indices_of_vertices\n");
+	for (int i = 0; i < numFacets; ++i)
+		facets[i].fprint_default_1_2(file);
+	ALWAYS_PRINT(file, "# edges are not printed (they're not used by PCL)\n");
+	fclose(file);
+	DEBUG_END;
+}
+
 void Polyhedron::fprint_my_format(const char *filename)
 {
 	DEBUG_START;

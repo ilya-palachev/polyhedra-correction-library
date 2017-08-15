@@ -371,6 +371,10 @@ public:
 	 */
 	void fprint_default_1(const char* filename);
 
+	/** The same, but with slight modifications */
+	void fprint_default_1_2(const char *filename);
+
+
 	/**
 	 * Writes the polyhedron to the file in internal format.
 	 *

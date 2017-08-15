@@ -141,6 +141,17 @@ void Facet::fprint_default_1(FILE* file)
 	DEBUG_END;
 }
 
+void Facet::fprint_default_1_2(FILE* file)
+{
+	DEBUG_START;
+	ALWAYS_PRINT(file, "\t%d\t%d\t%.16lf\t%.16lf\t%.16lf\t%.16lf\n\t", id, numVertices,
+			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	for (int j = 0; j < numVertices; ++j)
+		ALWAYS_PRINT(file, " %d", indVertices[j]);
+	ALWAYS_PRINT(file, "\n");
+	DEBUG_END;
+}
+
 void Facet::fprint_my_format(FILE* file)
 {
 	DEBUG_START;

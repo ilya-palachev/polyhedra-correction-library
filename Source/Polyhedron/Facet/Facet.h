@@ -107,6 +107,7 @@ public:
 
 	void fprint_default_0(FILE* file);
 	void fprint_default_1(FILE* file);
+	void fprint_default_1_2(FILE* file);
 	void fprint_my_format(FILE* file);
 
 	void fprint_ply_vertex(FILE* file);
