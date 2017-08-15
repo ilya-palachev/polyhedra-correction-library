@@ -83,6 +83,73 @@ static Point_3 getCenter(const Polyhedron_3 &p)
 	return C;
 }
 
+static std::vector<Plane_3> centerizePlanes(const std::vector<Plane_3> &planes,
+		const Point_3 &C)
+{
+	std::vector<Plane_3> centeredPlanes;
+	for (const Plane_3 &p : planes)
+		centeredPlanes.push_back(Plane_3(p.a(), p.b(), p.c(),
+			p.d() + p.a() * C.x() + p.b() * C.y()
+			+ p.c() * C.z()));
+
+	for (Plane_3 &p : centeredPlanes)
+	{
+		double a = p.a();
+		double b = p.b();
+		double c = p.c();
+		double d = p.d();
+		if (a * C.x() + b * C.y() + c * C.z() + d < 0.)
+		{
+			a = -a;
+			b = -b;
+			c = -c;
+			d = -d;
+		}
+
+		p = Plane_3(a, b, c, d);
+	}
+
+	return centeredPlanes;
+}
+
+static void dumpResult(const std::vector<Plane_3> &planes,
+		const std::vector<Plane_3> &resultingPlanes, const Point_3 &C)
+{
+	std::cout << "Number of initial planes: " << planes.size() << std::endl;
+	std::cout << "Number of resulting planes: " << resultingPlanes.size()
+		<< std::endl;
+	std::cout << "Center: " << C;
+	ASSERT(planes.size() == resultingPlanes.size());
+
+	double maxDistance = 0.;
+	for (unsigned i = 0; i < planes.size(); ++i)
+	{
+		Plane_3 p0 = planes[i];
+		Plane_3 p = resultingPlanes[i];
+		double distance = planeDist(p0, p);
+		if (distance > 1e-6)
+			std::cout << "Plane #" << i << ": " << p0
+				<< " -> " << p << " # distance: " << distance
+				<< std::endl;
+		maxDistance = std::max(distance, maxDistance);
+	}
+
+	std::cout << "Maximal distance: " << maxDistance << std::endl;
+
+	/* To compare with the result: */
+	Polyhedron_3 initCenterizedP(centerizePlanes(planes, C));
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron-centerized.ply")
+		<< initCenterizedP;
+
+	/*
+	 * FIXME: translate to proper positions and make associations with
+	 * initial facet IDs.
+	 */
+	Polyhedron_3 resultingP(centerizePlanes(resultingPlanes, C));
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply")
+		<< resultingP;
+}
+
 int main(int argc, char **argv)
 {
 	DEBUG_START;
@@ -107,10 +174,9 @@ int main(int argc, char **argv)
 		<< std::endl;
 	globalPCLDumper.setNameBase(pathPolyhedron);
 	globalPCLDumper.enableVerboseMode();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron.ply")
-		<< *(new Polyhedron(p));
+
 	Polyhedron_3 initP(p);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron_3.ply")
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron.ply")
 		<< initP;
 
 	std::cout << "Successfully read the polyhedron..." << std::endl;
@@ -133,51 +199,9 @@ int main(int argc, char **argv)
 
 	std::vector<Plane_3> planes;
 	for (auto I = initP.planes_begin(), E = initP.planes_end(); I != E; ++I)
-		planes.push_back(*I);
+		planes.push_back(normalizePlane(*I));
 
-	std::vector<Plane_3> normalizedPlanes;
-	for (const Plane_3 &plane : planes)
-		normalizedPlanes.push_back(normalizePlane(plane));
-
-	Polyhedron_3 rebuiltP(planes);
-
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "rebuilt-p.ply")
-		<< rebuiltP;
-
-	Polyhedron_3 rebuiltPnormalized(normalizedPlanes);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "rebuilt-p-normalized.ply")
-		<< rebuiltPnormalized;
-
-	Point_3 C = getCenter(initP);
-	std::cout << "Center: " << C;
-	std::vector<Plane_3> centeredPlanes;
-	for (const Plane_3 &p : planes)
-		centeredPlanes.push_back(Plane_3(p.a(), p.b(), p.c(),
-			p.d() - p.a() * C.x() - p.b() * C.y()
-			- p.c() * C.z()));
-
-	for (Plane_3 &p : centeredPlanes)
-	{
-		double a = p.a();
-		double b = p.b();
-		double c = p.c();
-		double d = p.d();
-		if (a * C.x() + b * C.y() + c * C.z() + d < 0.)
-		{
-			a = -a;
-			b = -b;
-			c = -c;
-			d = -d;
-		}
-
-		p = Plane_3(a, b, c, d);
-	}
-
-	Polyhedron_3 rebuiltCentered(centeredPlanes);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "rebuilt-p-centered.ply")
-		<< rebuiltCentered;
-
-	EdgeCorrector *EC = new EdgeCorrector(normalizedPlanes, data);
+	EdgeCorrector *EC = new EdgeCorrector(planes, data);
 	Ipopt::IpoptApplication *app = IpoptApplicationFactory();
 
 	/* Intialize the IpoptApplication and process the options */
@@ -212,33 +236,8 @@ int main(int argc, char **argv)
 	}
 
 	MAIN_PRINT("*** The problem solved!");
-	auto resultingPlanes = EC->getResultingPlanes();
 
-	std::cout << "Number of initial planes: " << planes.size() << std::endl;
-	std::cout << "Number of resulting planes: " << resultingPlanes.size()
-		<< std::endl;
-	ASSERT(planes.size() == resultingPlanes.size());
-
-	std::vector<Plane_3> pp;
-	double maxDistance = 0.;
-	for (unsigned i = 0; i < planes.size(); ++i)
-	{
-		Plane_3 p0 = normalizedPlanes[i];
-		Plane_3 p = resultingPlanes[i];
-		double distance = planeDist(p0, p);
-		if (distance > 1e-6)
-			std::cout << "Plane #" << i << ": " << p0
-				<< " -> " << p << " # distance: " << distance
-				<< std::endl;
-		maxDistance = std::max(distance, maxDistance);
-		pp.push_back(p);
-	}
-
-	std::cout << "Maximal distance: " << maxDistance << std::endl;
-
-	Polyhedron_3 resultingP(pp);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "result.ply")
-		<< resultingP;
+	dumpResult(planes, EC->getResultingPlanes(), getCenter(initP));
 
 	DEBUG_END;
 	return EXIT_SUCCESS;
