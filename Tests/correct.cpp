@@ -66,6 +66,52 @@ static Plane_3 normalizePlane(const Plane_3 &p)
 	return Plane_3(a, b, c, d);
 }
 
+void setParameters(Ipopt::SmartPtr<Ipopt::OptionsList> options)
+{
+	const char *iptoptLinearSolver = getenv("IPOPT_LINEAR_SOLVER");
+	if (!iptoptLinearSolver)
+		iptoptLinearSolver = "ma57";
+	options->SetStringValue("linear_solver", iptoptLinearSolver);
+	if (!strcmp(iptoptLinearSolver, "ma27"))
+	{
+		/* This helps to improve performance from 0.6 to 0.5 sec */
+		options->SetNumericValue("ma27_liw_init_factor", 100.);
+		options->SetNumericValue("ma27_la_init_factor", 100.);
+	}
+	else if (!strcmp(iptoptLinearSolver, "ma57"))
+	{
+		/*
+		 * Decreases performance from 0.04 to 0.13 sec:
+		 * options->SetStringValue("ma57_automatic_scaling", "yes");
+		 */
+
+		/*
+		 * Not evident, whether this helps to increase the performance,
+		 * but it already helped to avoid memory reallocations.
+		 */
+		options->SetNumericValue("ma57_pre_alloc", 100.);
+	}
+
+	double ipoptTol = 0.;
+	if (tryGetenvDouble("IPOPT_TOL", ipoptTol))
+		options->SetNumericValue("tol", ipoptTol);
+
+	double ipoptAcceptableTol = 0.;
+	if (tryGetenvDouble("IPOPT_ACCEPTABLE_TOL", ipoptAcceptableTol))
+		options->SetNumericValue("acceptable_tol", 1e-3);
+
+	if (getenv("DERIVATIVE_TEST_FIRST"))
+		options->SetStringValue("derivative_test", "first-order");
+	else if (getenv("DERIVATIVE_TEST_SECOND"))
+		options->SetStringValue("derivative_test", "second-order");
+	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
+		options->SetStringValue("derivative_test", "only-second-order");
+	if (getenv("HESSIAN_APPROX"))
+		options->SetStringValue("hessian_approximation",
+				"limited-memory");
+
+}
+
 std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 		const std::vector<EdgeInfo> &data)
 {
@@ -79,32 +125,7 @@ std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 		exit(EXIT_FAILURE);
 	}
 
-	const char *iptoptLinearSolver = getenv("IPOPT_LINEAR_SOLVER");
-	if (!iptoptLinearSolver)
-		iptoptLinearSolver = "ma57";
-	app->Options()->SetStringValue("linear_solver", iptoptLinearSolver);
-
-	double ipoptTol = 0.;
-	if (tryGetenvDouble("IPOPT_TOL", ipoptTol))
-		app->Options()->SetNumericValue("tol", ipoptTol);
-
-	double ipoptAcceptableTol = 0.;
-	if (tryGetenvDouble("IPOPT_ACCEPTABLE_TOL", ipoptAcceptableTol))
-		app->Options()->SetNumericValue("acceptable_tol", 1e-3);
-
-	if (getenv("DERIVATIVE_TEST_FIRST"))
-		app->Options()->SetStringValue("derivative_test",
-			"first-order");
-	else if (getenv("DERIVATIVE_TEST_SECOND"))
-		app->Options()->SetStringValue("derivative_test",
-			"second-order");
-	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
-		app->Options()->SetStringValue("derivative_test",
-			"only-second-order");
-	if (getenv("HESSIAN_APPROX"))
-		app->Options()->SetStringValue("hessian_approximation",
-			"limited-memory");
-
+	setParameters(app->Options());
 	/* Ask Ipopt to solve the problem */
 	auto status = app->OptimizeTNLP(EC);
 	if (status != Ipopt::Solve_Succeeded
