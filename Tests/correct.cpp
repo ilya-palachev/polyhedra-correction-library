@@ -79,7 +79,10 @@ std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 		exit(EXIT_FAILURE);
 	}
 
-	app->Options()->SetStringValue("linear_solver", "ma57");
+	const char *iptoptLinearSolver = getenv("IPOPT_LINEAR_SOLVER");
+	if (!iptoptLinearSolver)
+		iptoptLinearSolver = "ma57";
+	app->Options()->SetStringValue("linear_solver", iptoptLinearSolver);
 
 	double ipoptTol = 0.;
 	if (tryGetenvDouble("IPOPT_TOL", ipoptTol))
@@ -290,10 +293,6 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
 			"init-polyhedron-centerized.ply") << initCenterizedP;
 
-	/*
-	 * FIXME: translate to proper positions and make associations with
-	 * initial facet IDs.
-	 */
 	auto centerizedPlanes = centerizePlanes(resultingPlanes, C);
 	Polyhedron_3 resultingP(centerizedPlanes);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "result-raw.ply") << resultingP;
