@@ -71,6 +71,10 @@ bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 	 */
 	nnz_h_lag = 42 * N + 3 * K; /* 18 * N + 6 * (4 * N) + 3 * K */
 
+	/* But we can specify only the upper part of the Hessian: */
+	nnz_h_lag -= 12 * N;
+	ASSERT(nnz_h_lag == 30 * N + 3 * K);
+
 	DEBUG_END;
 	return true;
 }
@@ -531,9 +535,8 @@ static double getSumForH(const EdgeInfo &info, int i, int j)
 
 typedef std::vector<std::set<int>> IncidenceStructure;
 
-static MyTriplet getUpperHTriplet(Number obj_factor, const Number *lambda,
-		const std::vector<EdgeInfo> &edges, int i,
-		IncidenceStructure &IS)
+static MyTriplet getHTriplet(Number obj_factor, const Number *lambda,
+		const std::vector<EdgeInfo> &edges, int i)
 {
 	Index N = edges.size(); /* Number of edges */
 	MyTriplet triplet;
@@ -560,57 +563,7 @@ static MyTriplet getUpperHTriplet(Number obj_factor, const Number *lambda,
 		triplet.col = 6 * N + 4 * facetID + iCoord;
 		triplet.value = lambda ? lambda[4 * iEdge + 2 * iEnd + iDeriv]
 			: 0.;
-		IS[facetID].insert(iEdge);
 	}
-
-	return triplet;
-}
-
-static MyTriplet getLowerHTriplet(Number obj_factor, const Number *lambda,
-		const std::vector<EdgeInfo> &edges, int i,
-		const IncidenceStructure &IS, int &iFacet)
-{
-	Index N = edges.size(); /* Number of edges */
-
-	MyTriplet triplet;
-
-	int numIncident = IS[iFacet].size();
-	int nnzInRow = 2 * numIncident + 1;
-	int nnzForFacet = 3 * nnzInRow;
-	ASSERT(i < nnzForFacet && "Wrong logic in Hessian");
-
-	int iCoord = i / nnzInRow;
-	triplet.row = 6 * N + 4 * iFacet + iCoord;
-
-	int iDeriv = i % nnzInRow;
-	if (iDeriv == nnzInRow - 1) /* normality */
-	{
-		triplet.value = lambda ? 2. * lambda[4 * N + iFacet] : 0.;
-		triplet.col = triplet.row; /* diagonal element */
-	}
-	else /* lower-left part planarity */
-	{
-		/* FIXME: Optimize this! */
-		int iEdge = *std::next(IS[iFacet].begin(), iDeriv / 2);
-		int iEnd = iDeriv % 2;
-		int iEndFacetID = 0;
-
-		if (edges[iEdge].facetID1 == unsigned(iFacet))
-		{
-			iEndFacetID = 0;
-		}
-		else
-		{
-			ASSERT(edges[iEdge].facetID2 == unsigned(iFacet));
-			iEndFacetID = 1;
-		}
-		triplet.value = lambda ? lambda[4 * iEdge + 2 * iEnd + iEndFacetID]
-			: 0.;
-		triplet.col = 6 * iEdge + 3 * iEnd + iCoord;
-	}
-
-	if (i == nnzForFacet - 1) /* last non-zero element for current plane */
-		++iFacet;
 
 	return triplet;
 }
@@ -626,37 +579,26 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 	Index N = edges.size(); /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 
-	/*
-	 * Incident edge IDs for each plane.
-	 * FIXME: Make this static, and don't recalculate it each time.
-	 */
-	IncidenceStructure IS(planes.size());
-
-	int iFacet = 0;
-	int iBase = 30 * N;
 	for (Index i = 0; i < nnz_h_lag; ++i)
 	{
 		MyTriplet triplet;
 
 		if (i < 30 * N) /* functional and upper-right part planarity */
 		{
-			triplet = getUpperHTriplet(obj_factor, lambda, edges, i,
-					IS);
+			triplet = getHTriplet(obj_factor, lambda, edges, i);
 			ASSERT(triplet.row >= 0 && triplet.row < 6 * N);
 		}
-		else /* lower-left part planarity and normality */
+		else /* normality */
 		{
-			int iFacetOld = iFacet;
-			triplet = getLowerHTriplet(obj_factor, lambda, edges,
-					i - iBase, IS, iFacet);
-			ASSERT(triplet.row >= 6 * N && triplet.row < 6 * N + 4 * K);
-			if (iFacetOld + 1 == iFacet)
-			{
-				ASSERT(iFacet < K || i == nnz_h_lag - 1);
-				iBase = i + 1;
-			}
-			else
-				ASSERT(iFacetOld == iFacet && "Impossible");
+			int ii = i - 30 * N;
+			int iFacet = ii / 3;
+			int iCoord = ii % 3;
+			triplet.row = 6 * N + 4 * iFacet + iCoord;
+			ASSERT(triplet.row >= 6 * N
+					&& triplet.row < 6 * N + 4 * K);
+			triplet.col = triplet.row;
+			triplet.value = lambda ? 2. * lambda[4 * N + iFacet]
+				: 0.;
 		}
 
 		if (hValues)
