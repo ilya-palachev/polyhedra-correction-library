@@ -586,7 +586,7 @@ static MyTriplet getLowerHTriplet(Number obj_factor, const Number *lambda,
 	if (iDeriv == nnzInRow - 1) /* normality */
 	{
 		triplet.value = lambda ? 2. * lambda[4 * N + iFacet] : 0.;
-		triplet.col = triplet.col; /* diagonal element */
+		triplet.col = triplet.row; /* diagonal element */
 	}
 	else /* lower-left part planarity */
 	{
