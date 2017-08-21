@@ -26,8 +26,6 @@
 #include "DebugAssert.h"
 #include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
-#define EDGE_LENGTH_SCALING 0
-
 bool EdgeCorrector::get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
 		Index& nnz_h_lag, IndexStyleEnum& index_style)
 {
@@ -235,11 +233,12 @@ bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
 				value += dist * dist;
 			}
 		}
-#if EDGE_LENGTH_SCALING
-		double length = sqrt(info.initialEdge.squared_length());
-		ASSERT(length > 0.);
-		value *= length;
-#endif
+		if (doEdgeLengthScaling)
+		{
+			double length = sqrt(info.initialEdge.squared_length());
+			ASSERT(length > 0.);
+			value *= length;
+		}
 		obj_value += value;
 	}
 	ASSERT(obj_value > 0.);
@@ -272,9 +271,8 @@ bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
 			grad_f[i] += dist * getCoordinate(plane, iCoord);
 		}
 		grad_f[i] *= 2.;
-#if EDGE_LENGTH_SCALING
-		grad_f[i] *= sqrt(info.initialEdge.squared_length());
-#endif
+		if (doEdgeLengthScaling)
+			grad_f[i] *= sqrt(info.initialEdge.squared_length());
 	}
 
 	DEBUG_END;
@@ -518,7 +516,8 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 	return true;
 }
 
-static double getSumForH(const EdgeInfo &info, int i, int j)
+static double getSumForH(bool doEdgeLengthScaling,
+		const EdgeInfo &info, int i, int j)
 {
 	double sum = 0.;
 	for (const EdgePlane_3 &plane : info.planes)
@@ -526,16 +525,16 @@ static double getSumForH(const EdgeInfo &info, int i, int j)
 		Vector_3 v(plane.a(), plane.b(), plane.c());
 		sum += v[i] * v[j];
 	}
-#if EDGE_LENGTH_SCALING
-	sum *= sqrt(info.initialEdge.squared_length());
-#endif
+	if (doEdgeLengthScaling)
+		sum *= sqrt(info.initialEdge.squared_length());
 
 	return sum;
 }
 
 typedef std::vector<std::set<int>> IncidenceStructure;
 
-static MyTriplet getHTriplet(Number obj_factor, const Number *lambda,
+static MyTriplet getHTriplet(bool doEdgeLengthScaling,
+		Number obj_factor, const Number *lambda,
 		const std::vector<EdgeInfo> &edges, int i)
 {
 	Index N = edges.size(); /* Number of edges */
@@ -552,7 +551,8 @@ static MyTriplet getHTriplet(Number obj_factor, const Number *lambda,
 	if (iDeriv < 3) /* functional */
 	{
 		triplet.col = 6 * iEdge + 3 * iEnd + iDeriv;
-		triplet.value = 2. * obj_factor * getSumForH(info, iCoord, iDeriv);
+		triplet.value = 2. * obj_factor * getSumForH(
+				doEdgeLengthScaling, info, iCoord, iDeriv);
 	}
 	else /* upper-right part planarity */
 	{
@@ -585,7 +585,8 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 
 		if (i < 30 * N) /* functional and upper-right part planarity */
 		{
-			triplet = getHTriplet(obj_factor, lambda, edges, i);
+			triplet = getHTriplet(doEdgeLengthScaling, obj_factor,
+					lambda, edges, i);
 			ASSERT(triplet.row >= 0 && triplet.row < 6 * N);
 		}
 		else /* normality */

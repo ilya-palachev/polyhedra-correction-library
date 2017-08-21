@@ -115,7 +115,8 @@ void setParameters(Ipopt::SmartPtr<Ipopt::OptionsList> options)
 std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 		const std::vector<EdgeInfo> &data)
 {
-	EdgeCorrector *EC = new EdgeCorrector(planes, data);
+	bool doEdgeScaling = (getenv("DISABLE_EDGE_SCALING") == nullptr);
+	EdgeCorrector *EC = new EdgeCorrector(doEdgeScaling, planes, data);
 	Ipopt::IpoptApplication *app = IpoptApplicationFactory();
 
 	/* Intialize the IpoptApplication and process the options */

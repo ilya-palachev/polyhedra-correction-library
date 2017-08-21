@@ -38,14 +38,17 @@ using Ipopt::IpoptCalculatedQuantities;
 
 class EdgeCorrector : public TNLP
 {
+	bool doEdgeLengthScaling;
 	const std::vector<Plane_3> &planes;
 	const std::vector<EdgeInfo> &edges;
 	std::vector<Segment_3> resultingSegments;
 	std::vector<Plane_3> resultingPlanes;
 public:
-	EdgeCorrector(const std::vector<Plane_3> &planes,
+	EdgeCorrector(bool doEdgeLengthScaling,
+			const std::vector<Plane_3> &planes,
 			const std::vector<EdgeInfo> &edges):
-		planes(planes), edges(edges) {}
+		doEdgeLengthScaling(doEdgeLengthScaling), planes(planes),
+		edges(edges) {}
 
 	std::vector<Segment_3> getResultingSegments()
 	{
