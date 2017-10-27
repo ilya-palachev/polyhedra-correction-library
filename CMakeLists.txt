@@ -201,10 +201,15 @@ set(CMAKE_SHARED_LINKER_FLAGS "-L${IPOPT_INSTALL_PREFIX}/lib")
 set(CMAKE_EXE_LINKER_FLAGS "-L${IPOPT_INSTALL_PREFIX}/lib")
 
 add_library(arrayOperations SHARED ${SOURCE_arrayOperations})
+add_library(arrayOperationsStatic STATIC ${SOURCE_arrayOperations})
 add_library(gaussString SHARED ${SOURCE_gaussString})
+add_library(gaussStringStatic STATIC ${SOURCE_gaussString})
 add_library(lsm SHARED ${SOURCE_lsm})
+add_library(lsmStatic STATIC ${SOURCE_lsm})
 add_library(vector3d SHARED ${SOURCE_vector3d})
+add_library(vector3dStatic STATIC ${SOURCE_vector3d})
 add_library(pcl SHARED ${SOURCE_pcl})
+add_library(pclStatic STATIC ${SOURCE_pcl})
 
 option(ENABLE_TSNNLS "Enable tsnnls solver (does not work)" OFF)
 option(ENABLE_IPOPT "Enable Ipopt solver" ON)
@@ -226,14 +231,30 @@ target_link_libraries(pcl
 	boost_system
 )
 
+target_link_libraries(pclStatic
+	pthread
+	arrayOperationsStatic
+	gaussStringStatic
+	lsmStatic
+	vector3dStatic
+	CGAL
+	gmp
+	mpfr
+	tbb
+	tbbmalloc
+	boost_system
+)
+
 if (ENABLE_TSNNLS)
 	target_link_libraries(pcl tsnnls)
+	target_link_libraries(pclStatic tsnnls)
 	add_definitions(-DUSE_TSNNLS)
 	message("!!! TSNNLS solver is enabled !!!")
 endif()
 
 if (ENABLE_IPOPT)
 	target_link_libraries(pcl dl ipopt coinmumps coinhsl blas lapack)
+	target_link_libraries(pclStatic dl ipopt coinmumps coinhsl blas lapack)
 	add_definitions(-DUSE_IPOPT)
 	add_definitions(-DHAVE_CSTDDEF)
 	add_definitions(-DFORTRAN_INTEGER_TYPE=int)
@@ -243,12 +264,14 @@ endif()
 
 if (ENABLE_GLPK)
 	target_link_libraries(pcl glpk)
+	target_link_libraries(pclStatic glpk)
 	add_definitions(-DUSE_GLPK)
 	message("!!! Glpk solver is enabled !!!")
 endif()
 
 if (ENABLE_CLP)
 	target_link_libraries(pcl Clp)
+	target_link_libraries(pclStatic Clp)
 	add_definitions(-DUSE_CLP)
 	message("!!! Clp solver is enabled !!!")
 endif()
@@ -260,6 +283,7 @@ endif()
 
 if (ENABLE_GRAPH_DUMPER)
 	target_link_libraries(pcl gexf xml2)
+	target_link_libraries(pclStatic gexf xml2)
 	add_definitions(-DUSE_GRAPH_DUMPER)
 	list (APPEND INCLUDE_DIRS_all "/usr/include/libgexf")
 	list (APPEND INCLUDE_DIRS_all "/usr/include/libxml2")
@@ -278,7 +302,9 @@ foreach(test_source_file ${SOURCE_tests})
 	get_filename_component(executable_name ${test_source_file} NAME_WE)
 	message("Adding executable ${executable_name}")
 	add_executable(${executable_name} ${test_source_file})
+	add_executable("${executable_name}Static" ${test_source_file})
 	target_link_libraries(${executable_name} pcl gaussString)
+	target_link_libraries("${executable_name}Static" gaussStringStatic pclStatic)
 endforeach()
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Valgrind")
