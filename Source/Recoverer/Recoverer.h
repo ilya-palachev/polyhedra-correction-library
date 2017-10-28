@@ -33,7 +33,6 @@
 #include <CGAL/Filtered_kernel.h>
 
 #include "PCLKernel/PCLKernel.h"
-#include "PCLKernel/PCLPoint_2_iostream.h"
 
 #include "Polyhedron/Polyhedron.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"

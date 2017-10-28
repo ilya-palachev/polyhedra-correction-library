@@ -87,4 +87,6 @@ public:
 	}
 };
 
+std::ostream &operator<<(std::ostream &os, const PCLPoint_2 &p);
+std::istream &operator>>(std::istream &is, PCLPoint_2 &p);
 #endif /* PCLPOINT_2_H */

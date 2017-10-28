@@ -87,6 +87,7 @@ set (SOURCE_pcl
 	Source/Dumpers/GraphDumperGEXF/GraphDumperGEXF.cpp
 	Source/KernelCGAL/dual.cpp
 	Source/PCLDumper.cpp
+	Source/PCLKernel/PCLPoint_2_iostream.cpp
 	Source/Polyhedron/Facet/Facet_area.cpp
 	Source/Polyhedron/Facet/Facet.cpp
 	Source/Polyhedron/Facet/Facet_inertia.cpp

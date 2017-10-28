@@ -1,6 +1,9 @@
 #ifndef MYPOINTC2_IOSTREAM_H
 #define MYPOINTC2_IOSTREAM_H
 
+#include <iostream>
+#include "PCLKernel/PCLPoint_2.h"
+
 std::ostream &
 operator<<(std::ostream &os, const PCLPoint_2 &p)
 {
@@ -16,8 +19,6 @@ operator<<(std::ostream &os, const PCLPoint_2 &p)
 		return os << "PCLPoint_2(" << p.x() << ", " << p.y() << ", " << p.id() << ')';
 	}
 }
-
-
 
 std::istream &
 operator>>(std::istream &is, PCLPoint_2 &p)
@@ -43,4 +44,5 @@ operator>>(std::istream &is, PCLPoint_2 &p)
 	}
 	return is;
 }
+
 #endif //MYPOINTC2_IOSTREAM_H
