@@ -232,6 +232,49 @@ target_link_libraries(pcl
 	boost_system
 )
 
+target_link_libraries(vector3d
+	gaussString
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_atomic.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_chrono.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_container.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_context.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_coroutine.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_date_time.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_exception.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_filesystem.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_graph.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_iostreams.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_locale.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_log.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_log_setup.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_c99.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_c99f.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_c99l.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_tr1.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_tr1f.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_tr1l.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_prg_exec_monitor.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_program_options.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_random.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_regex.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_serialization.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_signals.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_stacktrace_noop.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_stacktrace_windbg.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_system.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_test_exec_monitor.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_thread.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_timer.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_type_erasure.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_unit_test_framework.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_wave.a
+	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_wserialization.a
+)
+
+target_link_libraries(vector3dStatic
+	gaussStringStatic
+)
+
 target_link_libraries(pclStatic
 	pthread
 	arrayOperationsStatic
@@ -297,7 +340,10 @@ endif()
 
 add_definitions(-DSOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
-include_directories(${INCLUDE_DIRS_all})
+include_directories(${INCLUDE_DIRS_all}
+	"/home/ilya/git/polyhedra-correction-library/gmp/include/"
+	"/home/ilya/git/polyhedra-correction-library/mpfr/include/"
+	"/home/ilya/git/polyhedra-correction-library/components-15.3/include/boost/")
 
 foreach(test_source_file ${SOURCE_tests})
 	get_filename_component(executable_name ${test_source_file} NAME_WE)
@@ -305,7 +351,7 @@ foreach(test_source_file ${SOURCE_tests})
 	add_executable(${executable_name} ${test_source_file})
 	add_executable("${executable_name}Static" ${test_source_file})
 	target_link_libraries(${executable_name} pcl gaussString)
-	target_link_libraries("${executable_name}Static" gaussStringStatic pclStatic)
+	target_link_libraries("${executable_name}Static" pclStatic)
 endforeach()
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Valgrind")
@@ -350,33 +396,3 @@ endif ()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMMON_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
-
-add_subdirectory(Documentation)
-
-# add custom target distclean
-# cleans and removes cmake generated files etc.
-# Jan Woetzel 04/2003
-#
-
-if (UNIX)
-  add_custom_target (distclean @echo cleaning for source distribution)
-  set(DISTCLEANED
-   cmake.depends
-   cmake.check_depends
-   CMakeCache.txt
-   cmake.check_cache
-   *.cmake
-   Makefile
-   core core.*
-   gmon.out
-   *~
-  )
-  
-  add_custom_command (
-    DEPENDS clean
-    COMMENT "distribution clean"
-    COMMAND rm
-    ARGS    -Rf CMakeTmp ${DISTCLEANED}
-    TARGET  distclean
-  )
-endif (UNIX)
