@@ -234,41 +234,7 @@ target_link_libraries(pcl
 
 target_link_libraries(vector3d
 	gaussString
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_atomic.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_chrono.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_container.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_context.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_coroutine.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_date_time.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_exception.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_filesystem.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_graph.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_iostreams.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_locale.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_log.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_log_setup.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_c99.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_c99f.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_c99l.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_tr1.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_tr1f.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_math_tr1l.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_prg_exec_monitor.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_program_options.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_random.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_regex.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_serialization.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_signals.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_stacktrace_noop.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_stacktrace_windbg.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_system.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_test_exec_monitor.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_thread.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_timer.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_type_erasure.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_unit_test_framework.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_wave.a
-	/home/ilya/git/polyhedra-correction-library/components-15.3/lib/libboost_wserialization.a
+	/home/ilya/git/polyhedra-correction-library/boost_1_61_0/bin.v2/libs/system/build/gcc-mingw-4.8/release/target-os-windows/threading-multi/libboost_system.dll
 )
 
 target_link_libraries(vector3dStatic

@@ -24,6 +24,8 @@
  * shadow contour data.
  */
 
+#define _USE_MATH_DEFINES
+#undef __STRICT_ANSI__
 #include <cmath>
 
 #include "DebugPrint.h"
