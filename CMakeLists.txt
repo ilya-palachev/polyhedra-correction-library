@@ -67,7 +67,7 @@ set (SOURCE_pcl
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.cpp
-	Source/DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.cpp
+	#	Source/DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.cpp
 	Source/DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.cpp
 	Source/DataContainers/EdgeData/EdgeData.cpp
 	Source/DataContainers/EdgeData/Edge/Edge.cpp
@@ -81,9 +81,9 @@ set (SOURCE_pcl
 	Source/DataContainers/SupportFunctionData/SupportFunctionData.cpp
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItem.cpp
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.cpp
-	Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.cpp
-	Source/DataContainers/SupportFunctionEstimationData/SupportMatrix.cpp
-	Source/DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.cpp
+	#Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.cpp
+	#Source/DataContainers/SupportFunctionEstimationData/SupportMatrix.cpp
+	#Source/DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.cpp
 	Source/Dumpers/GraphDumperGEXF/GraphDumperGEXF.cpp
 	Source/KernelCGAL/dual.cpp
 	Source/PCLDumper.cpp
@@ -172,15 +172,6 @@ set (INCLUDE_DIRS_all
 	${CMAKE_SOURCE_DIR}/External/Vector3d
 	${CMAKE_SOURCE_DIR}/External/CGAL
 )
-
-foreach (module "eigen3" "coin")
-	foreach (prefix "/usr/local/include/" "/usr/include/")
-		set (dir "${prefix}/${module}")
-		if (EXISTS ${dir})
-			list (APPEND INCLUDE_DIRS_all ${dir})
-		endif ()
-	endforeach ()
-endforeach ()
 
 # Common compiler flags used for build:
 set(COMMON_FLAGS "-g")

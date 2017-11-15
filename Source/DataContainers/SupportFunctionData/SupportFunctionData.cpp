@@ -25,8 +25,9 @@
  */
 
 #include <sys/time.h>
+#if 0
 #include <Eigen/Dense>
-
+#endif
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "PCLDumper.h"
@@ -352,6 +353,7 @@ std::vector<std::vector<int>> getContoursIndices(
 	return contoursIndices;
 }
 
+#if 0
 int calculateRank(double threshold, std::vector<Plane_3> planes,
 		std::set<int> cluster)
 {
@@ -503,6 +505,7 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 			"naive-coloured-by-edge-clusters.ply");
 	DEBUG_END;
 }
+#endif
 
 std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 {

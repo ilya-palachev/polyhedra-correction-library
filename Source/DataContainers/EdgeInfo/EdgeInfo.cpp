@@ -135,9 +135,9 @@ bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data)
 	for (EdgeInfo &info : data)
 	{
 		auto facet1 = *std::next(p.facets_begin(), info.facetID1);
-		ASSERT(facet1.id == info.facetID1);
+		ASSERT(unsigned(facet1.id) == info.facetID1);
 		auto facet2 = *std::next(p.facets_begin(), info.facetID2);
-		ASSERT(facet2.id == info.facetID2);
+		ASSERT(unsigned(facet2.id) == info.facetID2);
 		auto circulator = facet1.facet_begin();
 		auto finish = circulator;
 		bool found = false;

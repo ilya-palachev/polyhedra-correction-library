@@ -18,6 +18,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES
+#undef __STRICT_ANSI__
 #include <cmath>
 
 #include "DebugPrint.h"
