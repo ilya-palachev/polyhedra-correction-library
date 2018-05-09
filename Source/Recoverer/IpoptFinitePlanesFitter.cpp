@@ -26,10 +26,10 @@
 
 #ifdef USE_IPOPT
 
-#include "IpIpoptCalculatedQuantities.hpp"
-#include "IpIpoptData.hpp"
-#include "IpTNLPAdapter.hpp"
-#include "IpOrigIpoptNLP.hpp"
+#include "coin/IpIpoptCalculatedQuantities.hpp"
+#include "coin/IpIpoptData.hpp"
+#include "coin/IpTNLPAdapter.hpp"
+#include "coin/IpOrigIpoptNLP.hpp"
 
 //#undef NDEBUG
 

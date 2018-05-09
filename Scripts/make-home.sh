@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-WORKSPACE_DIR="/home/ilya/git/polyhedra-correction-library"
+WORKSPACE_DIR="/home/ilya/thesis/polyhedra-correction-library"
 SOURCE_DIR=${WORKSPACE_DIR}
 BUILD_DIR=${WORKSPACE_DIR}/buildRelease
 
@@ -13,12 +13,12 @@ cd ${BUILD_DIR}
 
 if [ ! -f Makefile ]
 then
-	cmake ${SOURCE_DIR} -DCMAKE_BUILD_TYPE=Release -DENABLE_IPOPT=On -DENABLE_CPLEX=On -DENABLE_CLP=On -DENABLE_GLPK=On -DIPOPT_INSTALL_PREFIX="/home/ilya/git/Ipopt-3.12.1.gcc/build-2/"
+	cmake ${SOURCE_DIR} -DCMAKE_BUILD_TYPE=Release -DENABLE_IPOPT=On -DIPOPT_INSTALL_PREFIX="/home/ilya/thesis/Ipopt/install/release/"
 fi
 
 if [ -f Makefile ]
 then
-	make -j4
+	make -j8
 else
 	echo "No Makefile found!"
 fi

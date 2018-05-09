@@ -7,7 +7,7 @@
 std::ostream &
 operator<<(std::ostream &os, const PCLPoint_2 &p)
 {
-	switch(os.iword(CGAL::IO::mode)) {
+	switch(os.iword(CGAL::get_mode(os))) {
 	case CGAL::IO::ASCII :
 		return os << p.x() << ' ' << p.y() << ' ' << p.id();
 	case CGAL::IO::BINARY :
@@ -25,7 +25,7 @@ operator>>(std::istream &is, PCLPoint_2 &p)
 {
 	double x, y;
 	int id;
-	switch(is.iword(CGAL::IO::mode)) {
+	switch(is.iword(CGAL::get_mode(is))) {
 	case CGAL::IO::ASCII :
 		is >> x >> y >> id;
 		break;

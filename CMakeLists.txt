@@ -67,7 +67,7 @@ set (SOURCE_pcl
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.cpp
 	Source/DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.cpp
-	#	Source/DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.cpp
+	Source/DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.cpp
 	Source/DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.cpp
 	Source/DataContainers/EdgeData/EdgeData.cpp
 	Source/DataContainers/EdgeData/Edge/Edge.cpp
@@ -81,9 +81,9 @@ set (SOURCE_pcl
 	Source/DataContainers/SupportFunctionData/SupportFunctionData.cpp
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItem.cpp
 	Source/DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.cpp
-	#Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.cpp
-	#Source/DataContainers/SupportFunctionEstimationData/SupportMatrix.cpp
-	#Source/DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.cpp
+	Source/DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.cpp
+	Source/DataContainers/SupportFunctionEstimationData/SupportMatrix.cpp
+	Source/DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.cpp
 	Source/Dumpers/GraphDumperGEXF/GraphDumperGEXF.cpp
 	Source/KernelCGAL/dual.cpp
 	Source/PCLDumper.cpp
@@ -205,7 +205,7 @@ add_library(pclStatic STATIC ${SOURCE_pcl})
 
 option(ENABLE_TSNNLS "Enable tsnnls solver (does not work)" OFF)
 option(ENABLE_IPOPT "Enable Ipopt solver" ON)
-option(ENABLE_GLPK "Enable Glpk solver" ON)
+option(ENABLE_GLPK "Enable Glpk solver" OFF)
 option(ENABLE_GRAPH_DUMPER "Enable LibGEXF-based graph dumper" OFF)
 option(DISABLE_CGAL_DEBUG "Disable all CGAL internal checks" OFF)
 
@@ -225,7 +225,6 @@ target_link_libraries(pcl
 
 target_link_libraries(vector3d
 	gaussString
-	/home/ilya/git/polyhedra-correction-library/boost_1_61_0/bin.v2/libs/system/build/gcc-mingw-4.8/release/target-os-windows/threading-multi/libboost_system.dll
 )
 
 target_link_libraries(vector3dStatic
@@ -254,8 +253,8 @@ if (ENABLE_TSNNLS)
 endif()
 
 if (ENABLE_IPOPT)
-	target_link_libraries(pcl dl ipopt coinmumps coinhsl blas lapack)
-	target_link_libraries(pclStatic dl ipopt coinmumps coinhsl blas lapack)
+	target_link_libraries(pcl dl ipopt blas lapack)
+	target_link_libraries(pclStatic dl ipopt blas lapack)
 	add_definitions(-DUSE_IPOPT)
 	add_definitions(-DHAVE_CSTDDEF)
 	add_definitions(-DFORTRAN_INTEGER_TYPE=int)

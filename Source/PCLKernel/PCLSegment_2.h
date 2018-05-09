@@ -250,7 +250,7 @@ template < class R >
 std::ostream &
 operator<<(std::ostream &os, const PCLSegment_2<R> &s)
 {
-	switch(os.iword(CGAL::IO::mode)) {
+	switch(os.iword(CGAL::get_mode(os))) {
 	case CGAL::IO::ASCII :
 		return os << s.source() << ' ' << s.target();
 	case CGAL::IO::BINARY :
