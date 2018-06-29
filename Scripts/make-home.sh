@@ -18,7 +18,7 @@ fi
 
 if [ -f Makefile ]
 then
-	make -j8
+	make -j4
 else
 	echo "No Makefile found!"
 fi
