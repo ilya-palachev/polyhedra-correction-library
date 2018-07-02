@@ -150,6 +150,7 @@ set (SOURCE_tests
 	Tests/gaussStringTest.cpp
 	Tests/globalCorrection.cpp
 	Tests/GlobalCorrectionReal.cpp
+        Tests/HallTurlachDetector.cpp
 	Tests/intersectCubeCutted.cpp
 	Tests/intersectPolyhedron.cpp
 	Tests/joinFacets.cpp
