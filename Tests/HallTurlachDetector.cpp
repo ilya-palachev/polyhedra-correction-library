@@ -27,13 +27,18 @@
 #include <cstdlib>
 #include "PolyhedraCorrectionLibrary.h"
 
+static int getModulo(int value, int mod)
+{
+    return ((value % mod) + mod) % mod;
+}
+
 int main(int argc, char **argv)
 {
     DEBUG_START;
     /* Parse command line. */
-    if (argc != 3)
+    if (argc != 4)
     {
-        fprintf(stderr, "Usage: %s countours_file z_value\n", argv[0]);
+        fprintf(stderr, "Usage: %s countours_file z_value m_value\n", argv[0]);
         return EXIT_FAILURE;
     }
     char *path = argv[1];
@@ -44,6 +49,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error while reading z_value = %s\n", argv[2]);
         return EXIT_FAILURE;
     }
+    //int mValue = atoi(argv[3]);
     /* FIXME: Check the existance of the file. */
 
     /* Create fake empty polyhedron. */
@@ -103,9 +109,7 @@ int main(int argc, char **argv)
     double sum = 0.;
     for (unsigned i = 0; i < items.size(); ++i)
     {
-        fprintf(stdout, "  angle %.16lf : value %lf\n", items[i].first,
-                items[i].second);
-        unsigned iPrev = (i + items.size() - 1) % items.size();
+        unsigned iPrev = getModulo(i - 1, items.size());
         double diff = items[i].second - items[iPrev].second;
         sum += diff * diff;
     }
@@ -114,7 +118,7 @@ int main(int argc, char **argv)
     double sigma = sqrt(variance);
     fprintf(stdout, "Sigma: %.16lf\n", sigma);
 
-
+    
     DEBUG_END;
     return EXIT_SUCCESS;
 }
