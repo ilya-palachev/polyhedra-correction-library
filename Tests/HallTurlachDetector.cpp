@@ -19,8 +19,9 @@
  */
 
 /**
- * @file Recoverer_test.cpp
- * @brief Unit tests for Recoverer of the polyhedron.
+ * @file HallTurlachDetector.cpp
+ * @brief Detection of corners based on Hall-Turlach algorithm.
+ * Article URL: https://ieeexplore.ieee.org/abstract/document/754588/
  */
 
 #include <cstdlib>
