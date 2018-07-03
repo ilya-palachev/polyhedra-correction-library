@@ -99,11 +99,18 @@ int main(int argc, char **argv)
 
     std::sort(items.begin(), items.end());
     fprintf(stdout, "Support items:\n");
+    double sum = 0.;
     for (unsigned i = 0; i < items.size(); ++i)
     {
         fprintf(stdout, "  angle %.16lf : value %lf\n", items[i].first,
                 items[i].second);
+        unsigned iPrev = (i + items.size() - 1) % items.size();
+        double diff = items[i].second - items[iPrev].second;
+        sum += diff * diff;
     }
+    double variance = sum / (2. * items.size());
+    fprintf(stdout, "Variance estimate: %lf\n", variance);
+
 
     DEBUG_END;
     return EXIT_SUCCESS;
