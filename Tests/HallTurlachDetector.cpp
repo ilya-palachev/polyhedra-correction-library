@@ -27,9 +27,81 @@
 #include <cstdlib>
 #include "PolyhedraCorrectionLibrary.h"
 
+typedef std::vector<std::pair<double, double>> ItemsVector;
+
 static int getModulo(int value, int mod)
 {
     return ((value % mod) + mod) % mod;
+}
+
+static double getTheta(int i, const ItemsVector &items)
+{
+    return items[getModulo(i, items.size())].first;
+}
+
+static double getY(int i, const ItemsVector &items)
+{
+    return items[getModulo(i, items.size())].second;
+}
+
+static double getSine(int i, int j, const ItemsVector &items)
+{
+    return sin(getTheta(i, items) - getTheta(j, items));
+}
+
+static double getC(int i, int j, int m, const ItemsVector &items,
+                   bool positive)
+{
+    ASSERT(m >= 0);
+    ASSERT(unsigned(m) < items.size());
+
+    if (positive && i <= j && j <= i + m - 1)
+        return getSine(j + m, j + 2 * m, items);
+    else if (positive && i + m <= j && j <= i + 2 * m - 1)
+        return getSine(j + m, j - m, items);
+    else if (positive && i + 2 * m <= j && j <= i + 3 * m)
+        return getSine(j - 2 * m, j - m, items);
+    else if (!positive && i - 3 * m + 1 <= j && j <= i - 2 * m)
+        return getSine(j + m, j + 2 * m, items);
+    else if (!positive && i - 2 * m + 1 <= j && j <= i - m)
+        return getSine(j + m, j - m, items);
+    else if (!positive && i - m + 1 <= j && j <= i)
+        return getSine(j - 2 * m, j - m, items);
+
+    fprintf(stderr, "i = %d, j = %d, m = %d, positive = %d\n", i, j, m,
+            positive);
+    ASSERT(0 && "Impossible happened");
+    return 0.;
+}
+
+static double getDelta1(int i, int m, const ItemsVector &items, bool positive)
+{
+    double sum = 0.;
+    int lower = positive ? i : i - 3 * m + 1;
+    int upper = positive ? i + 3 * m - 1 : i;
+    for (int j = lower; j <= upper; ++j)
+        sum += getY(j, items) * getC(i, j, m, items, positive);
+    return sum;
+}
+
+static double getTau(int i, int m, const ItemsVector &items, bool positive)
+{
+    double sum = 0.;
+    int lower = positive ? i : i - 3 * m + 1;
+    int upper = positive ? i + 3 * m - 1 : i;
+    for (int j = lower; j <= upper; ++j)
+    {
+        double c = getC(i, j, m, items, positive);
+        sum += c * c;
+    }
+    return sqrt(sum);
+}
+
+static double getDelta(int i, int m, const ItemsVector &items, bool positive,
+                       double sigma)
+{
+    double denominator = sigma * getTau(i, m, items, positive);
+    return getDelta1(i, m, items, positive) / denominator;
 }
 
 int main(int argc, char **argv)
@@ -49,7 +121,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error while reading z_value = %s\n", argv[2]);
         return EXIT_FAILURE;
     }
-    //int mValue = atoi(argv[3]);
+    int mValue = atoi(argv[3]);
     /* FIXME: Check the existance of the file. */
 
     /* Create fake empty polyhedron. */
@@ -62,7 +134,7 @@ int main(int argc, char **argv)
     SCData->fscanDefault(path);
 
     int numContoursIntersecting = 0;
-    std::vector<std::pair<double, double>> items;
+    ItemsVector items;
     for (int iContour = 0; iContour < SCData->numContours; ++iContour)
     {
         SContour &contour = SCData->contours[iContour];
@@ -118,6 +190,13 @@ int main(int argc, char **argv)
     double sigma = sqrt(variance);
     fprintf(stdout, "Sigma: %.16lf\n", sigma);
 
+    for (unsigned i = 0; i < items.size(); ++i)
+    {
+        double deltaPlus = getDelta(i, mValue, items, true, sigma);
+        double deltaMinus = getDelta(i, mValue, items, false, sigma);
+        fprintf(stdout, "Delta #%d: (+): %lf (-): %lf\n", i, deltaPlus,
+                deltaMinus);
+    }
     
     DEBUG_END;
     return EXIT_SUCCESS;
