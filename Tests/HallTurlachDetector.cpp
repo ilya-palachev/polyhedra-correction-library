@@ -110,7 +110,9 @@ int main(int argc, char **argv)
         sum += diff * diff;
     }
     double variance = sum / (2. * items.size());
-    fprintf(stdout, "Variance estimate: %lf\n", variance);
+    fprintf(stdout, "Variance estimate: %.16lf\n", variance);
+    double sigma = sqrt(variance);
+    fprintf(stdout, "Sigma: %.16lf\n", sigma);
 
 
     DEBUG_END;
