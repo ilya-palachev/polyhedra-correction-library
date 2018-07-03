@@ -197,6 +197,8 @@ int main(int argc, char **argv)
     double sigma = sqrt(variance);
     fprintf(stdout, "Sigma: %.16lf\n", sigma);
 
+    std::vector<std::set<unsigned>> clusters(items.size());
+    unsigned iCluster = 0;
     for (unsigned i = 0; i < items.size(); ++i)
     {
         double deltaPlus = getDelta(i, mValue, items, true, sigma);
@@ -204,7 +206,40 @@ int main(int argc, char **argv)
         fprintf(stdout, "Delta #%d: (+): %lf (-): %lf", i, deltaPlus,
                 deltaMinus);
         if (fabs(deltaPlus) < tValue || fabs(deltaMinus) < tValue)
+        {
             fprintf(stdout, "  LOW !");
+            clusters[iCluster].insert(i);
+        }
+        else if (clusters[iCluster].size() > 0)
+            ++iCluster;
+        fprintf(stdout, "\n");
+    }
+
+    while (iCluster >= 0 && clusters[iCluster].size() == 0)
+        --iCluster;
+
+    if (iCluster >= 1)
+    {
+        unsigned iFirst = *(clusters[0].begin());
+        unsigned iLast = *(--clusters[iCluster].end());
+        if (iFirst == 0 && iLast == items.size() - 1)
+        {
+            clusters[0].insert(clusters[iCluster].begin(),
+                               clusters[iCluster].end());
+            clusters[iCluster].clear();
+        }
+    }
+
+    fprintf(stdout, "Clusters:\n");
+    for (iCluster = 0; iCluster < items.size(); ++iCluster)
+    {
+        if (clusters[iCluster].size() == 0)
+            continue;
+
+        fprintf(stdout, "  cluster #%d (size %lu): ", iCluster,
+                clusters[iCluster].size());
+        for (unsigned i : clusters[iCluster])
+            fprintf(stdout, " %d", i);
         fprintf(stdout, "\n");
     }
     
