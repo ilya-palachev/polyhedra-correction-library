@@ -215,11 +215,12 @@ int main(int argc, char **argv)
         fprintf(stdout, "\n");
     }
 
-    while (iCluster >= 0 && clusters[iCluster].size() == 0)
+    if (iCluster > 0 && clusters[iCluster].size() == 0)
         --iCluster;
 
     if (iCluster >= 1)
     {
+        fprintf(stdout, "First and last clusters - checking...\n");
         unsigned iFirst = *(clusters[0].begin());
         unsigned iLast = *(--clusters[iCluster].end());
         if (iFirst == 0 && iLast == items.size() - 1)
@@ -228,19 +229,29 @@ int main(int argc, char **argv)
                                clusters[iCluster].end());
             clusters[iCluster].clear();
         }
+        fprintf(stdout, "First and last clusters has been united.\n");
     }
 
-    fprintf(stdout, "Clusters:\n");
-    for (iCluster = 0; iCluster < items.size(); ++iCluster)
-    {
-        if (clusters[iCluster].size() == 0)
-            continue;
+    unsigned numClusters = iCluster;
+    if (clusters[iCluster].size() > 0)
+        ++numClusters;
 
-        fprintf(stdout, "  cluster #%d (size %lu): ", iCluster,
-                clusters[iCluster].size());
-        for (unsigned i : clusters[iCluster])
-            fprintf(stdout, " %d", i);
-        fprintf(stdout, "\n");
+    fprintf(stdout, "Number of clusters: %d\n", numClusters);
+
+    if (numClusters > 0)
+    {
+        fprintf(stdout, "Clusters:\n");
+        for (iCluster = 0; iCluster < items.size(); ++iCluster)
+        {
+            if (clusters[iCluster].size() == 0)
+                continue;
+
+            fprintf(stdout, "  cluster #%d (size %lu): ", iCluster,
+                    clusters[iCluster].size());
+            for (unsigned i : clusters[iCluster])
+                fprintf(stdout, " %d", i);
+            fprintf(stdout, "\n");
+        }
     }
     
     DEBUG_END;
