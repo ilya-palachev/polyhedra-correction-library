@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     SCData->fscanDefault(path);
 
     int numContoursIntersecting = 0;
-    std::vector<std::pair<double, double>> supportItems;
+    std::vector<std::pair<double, double>> items;
     for (int iContour = 0; iContour < SCData->numContours; ++iContour)
     {
         SContour &contour = SCData->contours[iContour];
@@ -81,7 +81,7 @@ int main(int argc, char **argv)
             /* Support angle and support value. */
             double theta = atan2(y, x);
             double h = sqrt(x * x + y * y);
-            supportItems.push_back(std::make_pair(theta, h));
+            items.push_back(std::make_pair(theta, h));
 
         }
         if (numIntersecting > 0)
@@ -97,12 +97,12 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    std::sort(supportItems.begin(), supportItems.end());
+    std::sort(items.begin(), items.end());
     fprintf(stdout, "Support items:\n");
-    for (unsigned i = 0; i < supportItems.size(); ++i)
+    for (unsigned i = 0; i < items.size(); ++i)
     {
-        fprintf(stdout, "  angle %.16lf : value %lf\n", supportItems[i].first,
-                supportItems[i].second);
+        fprintf(stdout, "  angle %.16lf : value %lf\n", items[i].first,
+                items[i].second);
     }
 
     DEBUG_END;
