@@ -108,9 +108,10 @@ int main(int argc, char **argv)
 {
     DEBUG_START;
     /* Parse command line. */
-    if (argc != 4)
+    if (argc != 5)
     {
-        fprintf(stderr, "Usage: %s countours_file z_value m_value\n", argv[0]);
+        fprintf(stderr, "Usage: %s countours_file z_value m_value t_value\n",
+                argv[0]);
         return EXIT_FAILURE;
     }
     char *path = argv[1];
@@ -122,6 +123,12 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     int mValue = atoi(argv[3]);
+    double tValue = strtod(argv[4], &mistake);
+    if (mistake && *mistake)
+    {
+        fprintf(stderr, "Error while reading z_value = %s\n", argv[4]);
+        return EXIT_FAILURE;
+    }
     /* FIXME: Check the existance of the file. */
 
     /* Create fake empty polyhedron. */
@@ -194,8 +201,11 @@ int main(int argc, char **argv)
     {
         double deltaPlus = getDelta(i, mValue, items, true, sigma);
         double deltaMinus = getDelta(i, mValue, items, false, sigma);
-        fprintf(stdout, "Delta #%d: (+): %lf (-): %lf\n", i, deltaPlus,
+        fprintf(stdout, "Delta #%d: (+): %lf (-): %lf", i, deltaPlus,
                 deltaMinus);
+        if (fabs(deltaPlus) < tValue || fabs(deltaMinus) < tValue)
+            fprintf(stdout, "  LOW !");
+        fprintf(stdout, "\n");
     }
     
     DEBUG_END;
