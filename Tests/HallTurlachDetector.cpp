@@ -104,32 +104,119 @@ static double getDelta(int i, int m, const ItemsVector &items, bool positive,
     return getDelta1(i, m, items, positive) / denominator;
 }
 
+static double getDerivativeEstimate(int i, int l, const ItemsVector &items)
+{
+    double cosJI = cos(getTheta(i - l, items) - getTheta(i, items));
+    double cosKI = cos(getTheta(i + l, items) - getTheta(i, items));
+    double enumerator = getY(i + l, items) * cosJI - getY(i - l, items) * cosKI;
+    double denominator = getSine(i + l, i - l, items);
+    return enumerator / denominator;
+}
+
+static double getXEstimate(int i, int l, const ItemsVector &items)
+{
+    double estimate = getY(i, items) * cos(getTheta(i, items));
+    estimate -= getDerivativeEstimate(i, l, items) * sin(getTheta(i, items));
+    return estimate;
+}
+
+static double getYEstimate(int i, int l, const ItemsVector &items)
+{
+    double estimate = getY(i, items) * sin(getTheta(i, items));
+    estimate += getDerivativeEstimate(i, l, items) * cos(getTheta(i, items));
+    return estimate;
+}
+
+static double getXEstimateAverage(int l, double lower, double upper,
+                                  const ItemsVector &items)
+{
+    int N = 0;
+    double average = 0.;
+    for (unsigned i = 0; i < items.size(); ++i)
+    {
+        double theta = getTheta(i, items);
+        if (theta > lower && theta < upper)
+	{
+            ++N;
+	    average += getXEstimate(i, l, items);
+	}
+    }
+    average /= N;
+    return average;
+}
+
+static double getYEstimateAverage(int l, double lower, double upper,
+                                  const ItemsVector &items)
+{
+    int N = 0;
+    double average = 0.;
+    for (unsigned i = 0; i < items.size(); ++i)
+    {
+        double theta = getTheta(i, items);
+        if (theta > lower && theta < upper)
+	{
+            ++N;
+	    average += getYEstimate(i, l, items);
+	}
+    }
+    average /= N;
+    return average;
+}
+
+static std::set<double> indicesToThetas(const std::set<unsigned> &cluster,
+                                        const ItemsVector &items)
+{
+    std::set<double> thetas;
+    for (unsigned i : cluster)
+        thetas.insert(getTheta(i, items));
+    return thetas;
+}
+
 int main(int argc, char **argv)
 {
     DEBUG_START;
     /* Parse command line. */
-    if (argc != 5)
+    if (argc != 7)
     {
-        fprintf(stderr, "Usage: %s countours_file z_value m_value t_value\n",
+        fprintf(stderr, "Usage: %s countours_file z m t l q\n",
                 argv[0]);
         return EXIT_FAILURE;
     }
+
+    /* Read the file path to contours. */
+    /* FIXME: Check the existance of the file. */
     char *path = argv[1];
+
+    /* Read the "z" value, i.e. the coordinate of plane on Oz axis. */
     char *mistake = NULL;
     double zValue = strtod(argv[2], &mistake);
     if (mistake && *mistake)
     {
-        fprintf(stderr, "Error while reading z_value = %s\n", argv[2]);
+        fprintf(stderr, "Error while reading z = %s\n", argv[2]);
         return EXIT_FAILURE;
     }
+
+    /* Read the "m" value, i.e. p'' + p averaging parameter. */
     int mValue = atoi(argv[3]);
+
+    /* Read the "t" value, i.e. the upper bound for small numbers. */
     double tValue = strtod(argv[4], &mistake);
     if (mistake && *mistake)
     {
-        fprintf(stderr, "Error while reading z_value = %s\n", argv[4]);
+        fprintf(stderr, "Error while reading t = %s\n", argv[4]);
         return EXIT_FAILURE;
     }
-    /* FIXME: Check the existance of the file. */
+
+    /* Read the "l" value, i.e. step for p' estimate calculation. */
+    int lValue = atoi(argv[5]);
+
+    /* Read the "q" value, i.e. the final estimate averaging parameter. */
+    double qValue = strtod(argv[6], &mistake);
+    if (mistake && *mistake)
+    {
+        fprintf(stderr, "Error while reading q = %s\n", argv[6]);
+        return EXIT_FAILURE;
+    }
 
     /* Create fake empty polyhedron. */
     PolyhedronPtr p(new Polyhedron());
@@ -243,14 +330,31 @@ int main(int argc, char **argv)
         fprintf(stdout, "Clusters:\n");
         for (iCluster = 0; iCluster < items.size(); ++iCluster)
         {
-            if (clusters[iCluster].size() == 0)
+            const std::set<unsigned> &cluster = clusters[iCluster];
+            if (cluster.size() == 0)
                 continue;
 
             fprintf(stdout, "  cluster #%d (size %lu): ", iCluster,
-                    clusters[iCluster].size());
-            for (unsigned i : clusters[iCluster])
+                    cluster.size());
+            for (unsigned i : cluster)
                 fprintf(stdout, " %d", i);
             fprintf(stdout, "\n");
+	    if (cluster.find(0) != cluster.end())
+	    {
+                fprintf(stdout, "    PI clusters not implemented.\n");
+		continue;
+	    }
+	    auto thetas = indicesToThetas(cluster, items);
+	    double thetaMin = *(thetas.begin());
+	    double thetaMax = *(--thetas.end());
+	    fprintf(stdout, "    min = %lf, max = %lf\n", thetaMin, thetaMax);
+	    double omega = (thetaMin + thetaMax) / 2.;
+	    double delta = (thetaMax - thetaMin) / 2.;
+	    double lower = omega - qValue * delta;
+	    double upper = omega + qValue * delta;
+	    double x = getXEstimateAverage(lValue, lower, upper, items);
+	    double y = getYEstimateAverage(lValue, lower, upper, items);
+	    fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
         }
     }
     
