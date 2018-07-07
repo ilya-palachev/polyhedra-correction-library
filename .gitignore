@@ -66,3 +66,7 @@ config/debug_exceptions.conf
 
 # CTags generated indexes
 tags
+
+# Symbolic links to headers directories
+Source/Eigen
+Source/coin
