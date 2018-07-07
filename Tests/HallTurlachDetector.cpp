@@ -28,6 +28,7 @@
 #include <cstdlib>
 
 typedef std::vector<std::pair<double, double>> ItemsVector;
+typedef std::vector<std::set<unsigned>> ClustersVector;
 
 static int getModulo(int value, int mod) { return ((value % mod) + mod) % mod; }
 
@@ -150,46 +151,53 @@ static std::set<double> indicesToThetas(const std::set<unsigned> &cluster,
   return thetas;
 }
 
-int main(int argc, char **argv) {
-  DEBUG_START;
-  /* Parse command line. */
-  if (argc != 7) {
-    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
-    return EXIT_FAILURE;
-  }
+struct Parameters {
+  char *path;
+  double z;
+  int m;
+  double t;
+  int l;
+  double q;
+};
 
+static Parameters readParameters(char **argv) {
+  Parameters p;
   /* Read the file path to contours. */
   /* FIXME: Check the existance of the file. */
-  char *path = argv[1];
+  p.path = argv[1];
 
   /* Read the "z" value, i.e. the coordinate of plane on Oz axis. */
   char *mistake = NULL;
-  double zValue = strtod(argv[2], &mistake);
+  p.z = strtod(argv[2], &mistake);
   if (mistake && *mistake) {
     fprintf(stderr, "Error while reading z = %s\n", argv[2]);
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
   /* Read the "m" value, i.e. p'' + p averaging parameter. */
-  int mValue = atoi(argv[3]);
+  p.m = atoi(argv[3]);
 
   /* Read the "t" value, i.e. the upper bound for small numbers. */
-  double tValue = strtod(argv[4], &mistake);
+  p.t = strtod(argv[4], &mistake);
   if (mistake && *mistake) {
     fprintf(stderr, "Error while reading t = %s\n", argv[4]);
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
   /* Read the "l" value, i.e. step for p' estimate calculation. */
-  int lValue = atoi(argv[5]);
+  p.l = atoi(argv[5]);
 
   /* Read the "q" value, i.e. the final estimate averaging parameter. */
-  double qValue = strtod(argv[6], &mistake);
+  p.q = strtod(argv[6], &mistake);
   if (mistake && *mistake) {
     fprintf(stderr, "Error while reading q = %s\n", argv[6]);
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
+  return p;
+}
+
+static ItemsVector getItems(char *path, double z) {
   /* Create fake empty polyhedron. */
   PolyhedronPtr p(new Polyhedron());
 
@@ -206,8 +214,8 @@ int main(int argc, char **argv) {
     int numIntersecting = 0;
     for (int iSide = 0; iSide < contour.ns; ++iSide) {
       SideOfContour &side = contour.sides[iSide];
-      double diff1 = side.A1.z - zValue;
-      double diff2 = side.A2.z - zValue;
+      double diff1 = side.A1.z - z;
+      double diff2 = side.A2.z - z;
       if (diff1 * diff2 >= 0.)
         continue;
 
@@ -215,7 +223,7 @@ int main(int argc, char **argv) {
 
       /* Find t, for which A^intersect = t * A1 + (1-t) * A2. */
       /* FIXME: Prevent zero division. */
-      double t = (zValue - side.A2.z) / (side.A1.z - side.A2.z);
+      double t = (z - side.A2.z) / (side.A1.z - side.A2.z);
 
       /* Find z and y coordinates of A^intersect. */
       double x = t * side.A1.x + (1 - t) * side.A2.x;
@@ -235,11 +243,14 @@ int main(int argc, char **argv) {
 
   if (numContoursIntersecting < SCData->numContours) {
     fprintf(stderr, "Error: Not all contours intersect plane {z = %lf}\n",
-            zValue);
-    return EXIT_FAILURE;
+            z);
+    exit(EXIT_FAILURE);
   }
 
-  std::sort(items.begin(), items.end());
+  return items;
+}
+
+double getSigma(const ItemsVector &items) {
   fprintf(stdout, "Support items:\n");
   double sum = 0.;
   for (unsigned i = 0; i < items.size(); ++i) {
@@ -252,13 +263,18 @@ int main(int argc, char **argv) {
   double sigma = sqrt(variance);
   fprintf(stdout, "Sigma: %.16lf\n", sigma);
 
-  std::vector<std::set<unsigned>> clusters(items.size());
+  return sigma;
+}
+
+ClustersVector getClusters(int m, double t, const ItemsVector &items) {
+  double sigma = getSigma(items);
+  ClustersVector clusters(items.size());
   unsigned iCluster = 0;
   for (unsigned i = 0; i < items.size(); ++i) {
-    double deltaPlus = getDelta(i, mValue, items, true, sigma);
-    double deltaMinus = getDelta(i, mValue, items, false, sigma);
+    double deltaPlus = getDelta(i, m, items, true, sigma);
+    double deltaMinus = getDelta(i, m, items, false, sigma);
     fprintf(stdout, "Delta #%d: (+): %lf (-): %lf", i, deltaPlus, deltaMinus);
-    if (fabs(deltaPlus) < tValue || fabs(deltaMinus) < tValue) {
+    if (fabs(deltaPlus) < t || fabs(deltaMinus) < t) {
       fprintf(stdout, "  LOW !");
       clusters[iCluster].insert(i);
     } else if (clusters[iCluster].size() > 0)
@@ -280,15 +296,28 @@ int main(int argc, char **argv) {
     fprintf(stdout, "First and last clusters has been united.\n");
   }
 
-  unsigned numClusters = iCluster;
-  if (clusters[iCluster].size() > 0)
-    ++numClusters;
+  while (clusters.back().empty())
+    clusters.pop_back();
+  fprintf(stdout, "Number of clusters: %lu\n", clusters.size());
 
-  fprintf(stdout, "Number of clusters: %d\n", numClusters);
+  return clusters;
+}
 
-  if (numClusters > 0) {
+int main(int argc, char **argv) {
+  DEBUG_START;
+  /* Parse command line. */
+  if (argc != 7) {
+    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
+    return EXIT_FAILURE;
+  }
+  auto parameters = readParameters(argv);
+  auto items = getItems(parameters.path, parameters.z);
+  std::sort(items.begin(), items.end());
+  auto clusters = getClusters(parameters.m, parameters.t, items);
+
+  if (clusters.size() > 0) {
     fprintf(stdout, "Clusters:\n");
-    for (iCluster = 0; iCluster < items.size(); ++iCluster) {
+    for (unsigned iCluster = 0; iCluster < items.size(); ++iCluster) {
       const std::set<unsigned> &cluster = clusters[iCluster];
       if (cluster.size() == 0)
         continue;
@@ -307,10 +336,10 @@ int main(int argc, char **argv) {
       fprintf(stdout, "    min = %lf, max = %lf\n", thetaMin, thetaMax);
       double omega = (thetaMin + thetaMax) / 2.;
       double delta = (thetaMax - thetaMin) / 2.;
-      double lower = omega - qValue * delta;
-      double upper = omega + qValue * delta;
-      double x = getXEstimateAverage(lValue, lower, upper, items);
-      double y = getYEstimateAverage(lValue, lower, upper, items);
+      double lower = omega - parameters.q * delta;
+      double upper = omega + parameters.q * delta;
+      double x = getXEstimateAverage(parameters.l, lower, upper, items);
+      double y = getYEstimateAverage(parameters.l, lower, upper, items);
       fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
     }
   }
