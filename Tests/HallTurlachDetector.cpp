@@ -303,6 +303,31 @@ ClustersVector getClusters(int m, double t, const ItemsVector &items) {
   return clusters;
 }
 
+std::pair<double, double> getMinMaxTheta(const std::set<unsigned> &cluster,
+                                         const ItemsVector &items) {
+  double thetaMin = 0.;
+  double thetaMax = 0.;
+  std::set<double> thetas = indicesToThetas(cluster, items);
+  if (cluster.find(0) != cluster.end() &&
+      cluster.find(items.size() - 1) != cluster.end()) {
+    // Corner interval contains PI
+    fprintf(stdout, "Handling PI cluster\n");
+    std::set<double> positive;
+    for (double theta : thetas) {
+      if (theta < 0.)
+        theta += 2. * M_PI;
+      positive.insert(theta);
+    }
+    thetaMin = *(positive.begin());
+    thetaMax = *(--positive.end()) - 2. * M_PI;
+  } else {
+    thetaMin = *(thetas.begin());
+    thetaMax = *(--thetas.end());
+  }
+
+  return std::make_pair(thetaMin, thetaMax);
+}
+
 int main(int argc, char **argv) {
   DEBUG_START;
   /* Parse command line. */
@@ -317,22 +342,15 @@ int main(int argc, char **argv) {
 
   if (clusters.size() > 0) {
     fprintf(stdout, "Clusters:\n");
-    for (unsigned iCluster = 0; iCluster < items.size(); ++iCluster) {
-      const std::set<unsigned> &cluster = clusters[iCluster];
-      if (cluster.size() == 0)
-        continue;
-
+    unsigned iCluster = 0;
+    for (const auto &cluster : clusters) {
       fprintf(stdout, "  cluster #%d (size %lu): ", iCluster, cluster.size());
       for (unsigned i : cluster)
         fprintf(stdout, " %d", i);
       fprintf(stdout, "\n");
-      if (cluster.find(0) != cluster.end()) {
-        fprintf(stdout, "    PI clusters not implemented.\n");
-        continue;
-      }
-      auto thetas = indicesToThetas(cluster, items);
-      double thetaMin = *(thetas.begin());
-      double thetaMax = *(--thetas.end());
+      auto pair = getMinMaxTheta(cluster, items);
+      double thetaMin = pair.first;
+      double thetaMax = pair.second;
       fprintf(stdout, "    min = %lf, max = %lf\n", thetaMin, thetaMax);
       double omega = (thetaMin + thetaMax) / 2.;
       double delta = (thetaMax - thetaMin) / 2.;
@@ -341,6 +359,7 @@ int main(int argc, char **argv) {
       double x = getXEstimateAverage(parameters.l, lower, upper, items);
       double y = getYEstimateAverage(parameters.l, lower, upper, items);
       fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
+      ++iCluster;
     }
   }
 
