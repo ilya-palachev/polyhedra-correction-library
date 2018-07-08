@@ -160,6 +160,7 @@ struct Parameters {
   double t;
   int l;
   double q;
+  char *pathPolyhedron;
 };
 
 static Parameters readParameters(char **argv) {
@@ -195,6 +196,10 @@ static Parameters readParameters(char **argv) {
     fprintf(stderr, "Error while reading q = %s\n", argv[6]);
     exit(EXIT_FAILURE);
   }
+
+  /* Read the file path to polyhedron data (3rd-party, already recovered). */
+  /* FIXME: Check the existance of the file. */
+  p.pathPolyhedron = argv[7];
 
   return p;
 }
@@ -364,12 +369,40 @@ static void estimateCorners(const Parameters &parameters) {
 int main(int argc, char **argv) {
   DEBUG_START;
   /* Parse command line. */
-  if (argc != 7) {
-    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
+  if (argc != 8) {
+    fprintf(stderr, "Usage: %s countours_file z m t l q polyhedron_file\n",
+            argv[0]);
     return EXIT_FAILURE;
   }
   auto parameters = readParameters(argv);
   estimateCorners(parameters);
+
+  PolyhedronPtr p(new Polyhedron());
+  p->fscan_default_1_2(parameters.pathPolyhedron);
+  Polyhedron_3 polyhedron(p);
+
+  unsigned id = 0;
+  for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
+       I != E; ++I) {
+    I->id = id++;
+  }
+
+  unsigned numHalfedges = 0;
+  std::set<unsigned> visited;
+  for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
+       I != E; ++I) {
+    if (visited.find(I->id) != visited.end())
+      continue;
+
+    visited.insert(I->id);
+    visited.insert(I->opposite()->id);
+    auto A = I->vertex()->point();
+    auto B = I->opposite()->vertex()->point();
+    if ((A.z() - parameters.z) * (B.z() - parameters.z) < 0.)
+      ++numHalfedges;
+  }
+  fprintf(stdout, "Number of halfedges: %u\n", numHalfedges)
+
   DEBUG_END;
   return EXIT_SUCCESS;
 }
