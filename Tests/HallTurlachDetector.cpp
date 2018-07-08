@@ -361,6 +361,8 @@ static void estimateCorners(const Parameters &parameters) {
       double x = getXEstimateAverage(parameters.l, lower, upper, items, piCase);
       double y = getYEstimateAverage(parameters.l, lower, upper, items, piCase);
       fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
+      double theta = atan2(y, x);
+      fprintf(stdout, "    theta = %lf\n", theta);
       ++iCluster;
     }
   }
@@ -387,8 +389,8 @@ int main(int argc, char **argv) {
     I->id = id++;
   }
 
-  unsigned numHalfedges = 0;
   std::set<unsigned> visited;
+  std::vector<std::tuple<double, double, double>> corners;
   for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
        I != E; ++I) {
     if (visited.find(I->id) != visited.end())
@@ -398,10 +400,31 @@ int main(int argc, char **argv) {
     visited.insert(I->opposite()->id);
     auto A = I->vertex()->point();
     auto B = I->opposite()->vertex()->point();
-    if ((A.z() - parameters.z) * (B.z() - parameters.z) < 0.)
-      ++numHalfedges;
+    if ((A.z() - parameters.z) * (B.z() - parameters.z) >= 0.)
+      continue;
+
+    /* FIXME: Get rid of copy-paste. */
+    double t = (parameters.z - A.z()) / (A.z() - B.z());
+
+    /* Find z and y coordinates of A^intersect. */
+    double x = t * A.x() + (1 - t) * B.x();
+    double y = t * A.y() + (1 - t) * B.y();
+
+    /* Support angle and support value. */
+    double theta = atan2(y, x);
+    corners.push_back(std::make_tuple(theta, x, y));
   }
-  fprintf(stdout, "Number of halfedges: %u\n", numHalfedges)
+  fprintf(stdout, "Number of corners in 3rd party model: %lu\n",
+          corners.size());
+  std::sort(corners.begin(), corners.end());
+
+  for (const auto &corner : corners) {
+    double theta = std::get<0>(corner);
+    double x = std::get<1>(corner);
+    double y = std::get<2>(corner);
+    fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
+    fprintf(stdout, "    theta = %lf\n", theta);
+  }
 
   DEBUG_END;
   return EXIT_SUCCESS;
