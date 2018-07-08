@@ -114,12 +114,13 @@ static double getYEstimate(int i, int l, const ItemsVector &items) {
 }
 
 static double getXEstimateAverage(int l, double lower, double upper,
-                                  const ItemsVector &items) {
+                                  const ItemsVector &items, bool piCase) {
   int N = 0;
   double average = 0.;
   for (unsigned i = 0; i < items.size(); ++i) {
     double theta = getTheta(i, items);
-    if (theta > lower && theta < upper) {
+    if ((!piCase && theta > lower && theta < upper) ||
+        (piCase && (theta > lower || theta < upper))) {
       ++N;
       average += getXEstimate(i, l, items);
     }
@@ -129,12 +130,13 @@ static double getXEstimateAverage(int l, double lower, double upper,
 }
 
 static double getYEstimateAverage(int l, double lower, double upper,
-                                  const ItemsVector &items) {
+                                  const ItemsVector &items, bool piCase) {
   int N = 0;
   double average = 0.;
   for (unsigned i = 0; i < items.size(); ++i) {
     double theta = getTheta(i, items);
-    if (theta > lower && theta < upper) {
+    if ((!piCase && theta > lower && theta < upper) ||
+        (piCase && (theta > lower || theta < upper))) {
       ++N;
       average += getYEstimate(i, l, items);
     }
@@ -304,12 +306,12 @@ ClustersVector getClusters(int m, double t, const ItemsVector &items) {
 }
 
 std::pair<double, double> getMinMaxTheta(const std::set<unsigned> &cluster,
-                                         const ItemsVector &items) {
+                                         const ItemsVector &items,
+                                         bool piCase) {
   double thetaMin = 0.;
   double thetaMax = 0.;
   std::set<double> thetas = indicesToThetas(cluster, items);
-  if (cluster.find(0) != cluster.end() &&
-      cluster.find(items.size() - 1) != cluster.end()) {
+  if (piCase) {
     // Corner interval contains PI
     fprintf(stdout, "Handling PI cluster\n");
     std::set<double> positive;
@@ -348,7 +350,9 @@ int main(int argc, char **argv) {
       for (unsigned i : cluster)
         fprintf(stdout, " %d", i);
       fprintf(stdout, "\n");
-      auto pair = getMinMaxTheta(cluster, items);
+      bool piCase = cluster.find(0) != cluster.end() &&
+                    cluster.find(items.size() - 1) != cluster.end();
+      auto pair = getMinMaxTheta(cluster, items, piCase);
       double thetaMin = pair.first;
       double thetaMax = pair.second;
       fprintf(stdout, "    min = %lf, max = %lf\n", thetaMin, thetaMax);
@@ -356,8 +360,8 @@ int main(int argc, char **argv) {
       double delta = (thetaMax - thetaMin) / 2.;
       double lower = omega - parameters.q * delta;
       double upper = omega + parameters.q * delta;
-      double x = getXEstimateAverage(parameters.l, lower, upper, items);
-      double y = getYEstimateAverage(parameters.l, lower, upper, items);
+      double x = getXEstimateAverage(parameters.l, lower, upper, items, piCase);
+      double y = getYEstimateAverage(parameters.l, lower, upper, items, piCase);
       fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
       ++iCluster;
     }
