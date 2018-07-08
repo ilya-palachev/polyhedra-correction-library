@@ -252,7 +252,7 @@ static ItemsVector getItems(char *path, double z) {
   return items;
 }
 
-double getSigma(const ItemsVector &items) {
+static double getSigma(const ItemsVector &items) {
   fprintf(stdout, "Support items:\n");
   double sum = 0.;
   for (unsigned i = 0; i < items.size(); ++i) {
@@ -268,7 +268,7 @@ double getSigma(const ItemsVector &items) {
   return sigma;
 }
 
-ClustersVector getClusters(int m, double t, const ItemsVector &items) {
+static ClustersVector getClusters(int m, double t, const ItemsVector &items) {
   double sigma = getSigma(items);
   ClustersVector clusters(items.size());
   unsigned iCluster = 0;
@@ -305,9 +305,9 @@ ClustersVector getClusters(int m, double t, const ItemsVector &items) {
   return clusters;
 }
 
-std::pair<double, double> getMinMaxTheta(const std::set<unsigned> &cluster,
-                                         const ItemsVector &items,
-                                         bool piCase) {
+static std::pair<double, double>
+getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
+               bool piCase) {
   double thetaMin = 0.;
   double thetaMax = 0.;
   std::set<double> thetas = indicesToThetas(cluster, items);
@@ -330,14 +330,7 @@ std::pair<double, double> getMinMaxTheta(const std::set<unsigned> &cluster,
   return std::make_pair(thetaMin, thetaMax);
 }
 
-int main(int argc, char **argv) {
-  DEBUG_START;
-  /* Parse command line. */
-  if (argc != 7) {
-    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
-    return EXIT_FAILURE;
-  }
-  auto parameters = readParameters(argv);
+static void estimateCorners(const Parameters &parameters) {
   auto items = getItems(parameters.path, parameters.z);
   std::sort(items.begin(), items.end());
   auto clusters = getClusters(parameters.m, parameters.t, items);
@@ -366,7 +359,17 @@ int main(int argc, char **argv) {
       ++iCluster;
     }
   }
+}
 
+int main(int argc, char **argv) {
+  DEBUG_START;
+  /* Parse command line. */
+  if (argc != 7) {
+    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
+    return EXIT_FAILURE;
+  }
+  auto parameters = readParameters(argv);
+  estimateCorners(parameters);
   DEBUG_END;
   return EXIT_SUCCESS;
 }
