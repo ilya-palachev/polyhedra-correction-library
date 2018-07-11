@@ -404,7 +404,7 @@ int main(int argc, char **argv) {
       continue;
 
     /* FIXME: Get rid of copy-paste. */
-    double t = (parameters.z - A.z()) / (A.z() - B.z());
+    double t = (parameters.z - B.z()) / (A.z() - B.z());
 
     /* Find z and y coordinates of A^intersect. */
     double x = t * A.x() + (1 - t) * B.x();
