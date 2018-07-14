@@ -153,6 +153,7 @@ set (SOURCE_tests
 	Tests/globalCorrection.cpp
 	Tests/GlobalCorrectionReal.cpp
         Tests/detectSectionCorners.cpp
+	Tests/detectSymmetricLensCorners.cpp
 	Tests/intersectCubeCutted.cpp
 	Tests/intersectPolyhedron.cpp
 	Tests/joinFacets.cpp
