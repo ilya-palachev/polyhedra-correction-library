@@ -234,35 +234,41 @@ getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
   return std::make_pair(thetaMin, thetaMax);
 }
 
-void estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
-                     int lParameter, double qParameter, bool reverse) {
+std::vector<std::pair<double, double>>
+estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
+                int lParameter, double qParameter, bool reverse) {
   std::sort(items.begin(), items.end());
   auto clusters = getClusters(mParameter, tParameter, items, reverse);
 
-  if (clusters.size() > 0) {
-    fprintf(stdout, "Clusters:\n");
-    unsigned iCluster = 0;
-    for (const auto &cluster : clusters) {
-      fprintf(stdout, "  cluster #%d (size %lu): ", iCluster, cluster.size());
-      for (unsigned i : cluster)
-        fprintf(stdout, " %d", i);
-      fprintf(stdout, "\n");
-      bool piCase = cluster.find(0) != cluster.end() &&
-                    cluster.find(items.size() - 1) != cluster.end();
-      auto pair = getMinMaxTheta(cluster, items, piCase);
-      double thetaMin = pair.first;
-      double thetaMax = pair.second;
-      fprintf(stdout, "    min = %lf, max = %lf\n", thetaMin, thetaMax);
-      double omega = (thetaMin + thetaMax) / 2.;
-      double delta = (thetaMax - thetaMin) / 2.;
-      double lower = omega - qParameter * delta;
-      double upper = omega + qParameter * delta;
-      double x = getXEstimateAverage(lParameter, lower, upper, items, piCase);
-      double y = getYEstimateAverage(lParameter, lower, upper, items, piCase);
-      fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
-      double theta = atan2(y, x);
-      fprintf(stdout, "    theta = %lf\n", theta);
-      ++iCluster;
-    }
+  std::vector<std::pair<double, double>> corners;
+  
+  if (clusters.empty())
+    return corners;
+
+  fprintf(stdout, "Clusters:\n");
+  unsigned iCluster = 0;
+  for (const auto &cluster : clusters) {
+    fprintf(stdout, "  cluster #%d (size %lu): ", iCluster, cluster.size());
+    for (unsigned i : cluster)
+      fprintf(stdout, " %d", i);
+    fprintf(stdout, "\n");
+    bool piCase = cluster.find(0) != cluster.end() &&
+                  cluster.find(items.size() - 1) != cluster.end();
+    auto pair = getMinMaxTheta(cluster, items, piCase);
+    double thetaMin = pair.first;
+    double thetaMax = pair.second;
+    fprintf(stdout, "    min = %lf, max = %lf\n", thetaMin, thetaMax);
+    double omega = (thetaMin + thetaMax) / 2.;
+    double delta = (thetaMax - thetaMin) / 2.;
+    double lower = omega - qParameter * delta;
+    double upper = omega + qParameter * delta;
+    double x = getXEstimateAverage(lParameter, lower, upper, items, piCase);
+    double y = getYEstimateAverage(lParameter, lower, upper, items, piCase);
+    fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
+    double theta = atan2(y, x);
+    fprintf(stdout, "    theta = %lf\n", theta);
+    corners.push_back(std::make_pair(x, y));
+    ++iCluster;
   }
+  return corners;
 }

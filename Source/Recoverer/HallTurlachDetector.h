@@ -32,7 +32,8 @@
 
 typedef std::vector<std::pair<double, double>> ItemsVector;
 
-void estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
-                     int lParameter, double qParameter, bool reverse);
+std::vector<std::pair<double, double>>
+estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
+                int lParameter, double qParameter, bool reverse);
 
 #endif /* HALLTURLACHDETECTOR_H */
