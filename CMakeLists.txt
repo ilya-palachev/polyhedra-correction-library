@@ -122,6 +122,7 @@ set (SOURCE_pcl
 	Source/Recoverer/CPLEXSupportFunctionEstimator.cpp
 	Source/Recoverer/CGALSupportFunctionEstimator.cpp
 	Source/Recoverer/EdgeCorrector.cpp
+	Source/Recoverer/HallTurlachDetector.cpp
 	Source/Recoverer/IpoptSupportFunctionEstimator.cpp
 	Source/Recoverer/IpoptFinitePlanesFitter.cpp
 	Source/Recoverer/IpoptTopologicalCorrector.cpp
