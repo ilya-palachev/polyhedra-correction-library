@@ -70,3 +70,7 @@ tags
 # Symbolic links to headers directories
 Source/Eigen
 Source/coin
+
+# File for gnuplot'ting:
+*.txt
+*.plot
