@@ -273,7 +273,8 @@ static double getSigma(const ItemsVector &items) {
   return sigma;
 }
 
-static ClustersVector getClusters(int m, double t, const ItemsVector &items) {
+static ClustersVector getClusters(int m, double t, const ItemsVector &items,
+                                  bool reverse) {
   double sigma = getSigma(items);
   ClustersVector clusters(items.size());
   unsigned iCluster = 0;
@@ -281,8 +282,11 @@ static ClustersVector getClusters(int m, double t, const ItemsVector &items) {
     double deltaPlus = getDelta(i, m, items, true, sigma);
     double deltaMinus = getDelta(i, m, items, false, sigma);
     fprintf(stdout, "Delta #%d: (+): %lf (-): %lf", i, deltaPlus, deltaMinus);
-    if (fabs(deltaPlus) < t || fabs(deltaMinus) < t) {
+    if (!reverse && (fabs(deltaPlus) < t || fabs(deltaMinus) < t)) {
       fprintf(stdout, "  LOW !");
+      clusters[iCluster].insert(i);
+    } else if (reverse && (fabs(deltaPlus) >= t || fabs(deltaMinus) >= t)) {
+      fprintf(stdout, "  HIGH !");
       clusters[iCluster].insert(i);
     } else if (clusters[iCluster].size() > 0)
       ++iCluster;
@@ -335,10 +339,10 @@ getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
   return std::make_pair(thetaMin, thetaMax);
 }
 
-static void estimateCorners(const Parameters &parameters) {
+static void estimateCorners(const Parameters &parameters, bool reverse) {
   auto items = getItems(parameters.path, parameters.z);
   std::sort(items.begin(), items.end());
-  auto clusters = getClusters(parameters.m, parameters.t, items);
+  auto clusters = getClusters(parameters.m, parameters.t, items, reverse);
 
   if (clusters.size() > 0) {
     fprintf(stdout, "Clusters:\n");
@@ -377,7 +381,7 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   auto parameters = readParameters(argv);
-  estimateCorners(parameters);
+  estimateCorners(parameters, true);
 
   PolyhedronPtr p(new Polyhedron());
   p->fscan_default_1_2(parameters.pathPolyhedron);
