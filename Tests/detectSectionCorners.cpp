@@ -19,9 +19,9 @@
  */
 
 /**
- * @file HallTurlachDetector.cpp
- * @brief Detection of corners based on Hall-Turlach algorithm.
- * Article URL: https://ieeexplore.ieee.org/abstract/document/754588/
+ * @file detectSectionCorners.cpp
+ * @brief Detection of corners in the horizontal planar section of polyhedron,
+ * for which we know only its shadow contours.
  */
 
 #include <cstdlib>
