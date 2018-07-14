@@ -160,7 +160,6 @@ struct Parameters {
   double t;
   int l;
   double q;
-  char *pathPolyhedron;
 };
 
 static Parameters readParameters(char **argv) {
@@ -196,10 +195,6 @@ static Parameters readParameters(char **argv) {
     fprintf(stderr, "Error while reading q = %s\n", argv[6]);
     exit(EXIT_FAILURE);
   }
-
-  /* Read the file path to polyhedron data (3rd-party, already recovered). */
-  /* FIXME: Check the existance of the file. */
-  p.pathPolyhedron = argv[7];
 
   return p;
 }
@@ -375,60 +370,12 @@ static void estimateCorners(const Parameters &parameters, bool reverse) {
 int main(int argc, char **argv) {
   DEBUG_START;
   /* Parse command line. */
-  if (argc != 8) {
-    fprintf(stderr, "Usage: %s countours_file z m t l q polyhedron_file\n",
-            argv[0]);
+  if (argc != 7) {
+    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
     return EXIT_FAILURE;
   }
   auto parameters = readParameters(argv);
   estimateCorners(parameters, true);
-
-  PolyhedronPtr p(new Polyhedron());
-  p->fscan_default_1_2(parameters.pathPolyhedron);
-  Polyhedron_3 polyhedron(p);
-
-  unsigned id = 0;
-  for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
-       I != E; ++I) {
-    I->id = id++;
-  }
-
-  std::set<unsigned> visited;
-  std::vector<std::tuple<double, double, double>> corners;
-  for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
-       I != E; ++I) {
-    if (visited.find(I->id) != visited.end())
-      continue;
-
-    visited.insert(I->id);
-    visited.insert(I->opposite()->id);
-    auto A = I->vertex()->point();
-    auto B = I->opposite()->vertex()->point();
-    if ((A.z() - parameters.z) * (B.z() - parameters.z) >= 0.)
-      continue;
-
-    /* FIXME: Get rid of copy-paste. */
-    double t = (parameters.z - B.z()) / (A.z() - B.z());
-
-    /* Find z and y coordinates of A^intersect. */
-    double x = t * A.x() + (1 - t) * B.x();
-    double y = t * A.y() + (1 - t) * B.y();
-
-    /* Support angle and support value. */
-    double theta = atan2(y, x);
-    corners.push_back(std::make_tuple(theta, x, y));
-  }
-  fprintf(stdout, "Number of corners in 3rd party model: %lu\n",
-          corners.size());
-  std::sort(corners.begin(), corners.end());
-
-  for (const auto &corner : corners) {
-    double theta = std::get<0>(corner);
-    double x = std::get<1>(corner);
-    double y = std::get<2>(corner);
-    fprintf(stdout, "    x = %lf, y = %lf\n", x, y);
-    fprintf(stdout, "    theta = %lf\n", theta);
-  }
 
   DEBUG_END;
   return EXIT_SUCCESS;
