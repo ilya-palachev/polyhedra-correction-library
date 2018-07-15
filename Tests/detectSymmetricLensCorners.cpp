@@ -29,14 +29,16 @@
  */
 
 #include <cstdlib>
+#include <random>
 #include "PolyhedraCorrectionLibrary.h"
 #include "Recoverer/HallTurlachDetector.h"
 
 
-static ItemsVector generateSymmetricLensItems(unsigned N)
+static ItemsVector generateSymmetricLensItems(unsigned N, double noiseSigma)
 {
-  /* FIXME: Implement normal noise. */
   ItemsVector items;
+  std::default_random_engine generator;
+  std::normal_distribution<double> distribution(1.0, noiseSigma * noiseSigma);
   for (unsigned i = 0; i < N; ++i) {
     double theta = (2. * M_PI * (double(i) + 0.5)) / N - M_PI;
     double h = 0.;
@@ -53,6 +55,7 @@ static ItemsVector generateSymmetricLensItems(unsigned N)
       h = 3. - 2. * cos(theta);
     else
       h = 3. + 2. * cos(theta);
+    h *= distribution(generator);
     items.push_back(std::make_pair(theta, h));
   }
   return items;
@@ -61,8 +64,8 @@ static ItemsVector generateSymmetricLensItems(unsigned N)
 int main(int argc, char **argv) {
   DEBUG_START;
   /* Parse command line. */
-  if (argc != 6) {
-    fprintf(stderr, "Usage: %s N m t l q\n", argv[0]);
+  if (argc != 7) {
+    fprintf(stderr, "Usage: %s N m t l q noise_sigma\n", argv[0]);
     return EXIT_FAILURE;
   }
   /* Read the "N" value, i.e. number of thetas. */
@@ -75,7 +78,7 @@ int main(int argc, char **argv) {
   char *mistake = NULL;
   double tParameter = strtod(argv[3], &mistake);
   if (mistake && *mistake) {
-    fprintf(stderr, "Error while reading t = %s\n", argv[4]);
+    fprintf(stderr, "Error while reading t = %s\n", argv[3]);
     exit(EXIT_FAILURE);
   }
 
@@ -86,10 +89,19 @@ int main(int argc, char **argv) {
   mistake = NULL;
   double qParameter = strtod(argv[5], &mistake);
   if (mistake && *mistake) {
-    fprintf(stderr, "Error while reading q = %s\n", argv[6]);
+    fprintf(stderr, "Error while reading q = %s\n", argv[5]);
     exit(EXIT_FAILURE);
   }
-  auto items = generateSymmetricLensItems(NParameter);
+
+  /* Read the noise sigma. */
+  mistake = NULL;
+  double noiseSigmaParameter = strtod(argv[6], &mistake);
+  if (mistake && *mistake) {
+    fprintf(stderr, "Error while reading noise_sigma = %s\n", argv[6]);
+    exit(EXIT_FAILURE);
+  }
+
+  auto items = generateSymmetricLensItems(NParameter, noiseSigmaParameter);
   auto corners = estimateCorners(items, mParameter, tParameter, lParameter,
                                  qParameter, true);
   fprintf(stdout, "%lu corners have been detected.\n", corners.size());
