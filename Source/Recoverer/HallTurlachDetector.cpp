@@ -236,7 +236,8 @@ getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
 
 std::vector<std::pair<double, double>>
 estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
-                int lParameter, double qParameter, bool reverse) {
+                int lParameter, double qParameter, double sParameter,
+                bool reverse) {
   std::sort(items.begin(), items.end());
   auto clusters = getClusters(mParameter, tParameter, items, reverse);
 
@@ -252,6 +253,10 @@ estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
     for (unsigned i : cluster)
       fprintf(stdout, " %d", i);
     fprintf(stdout, "\n");
+    if (cluster.size() < sParameter) {
+      fprintf(stdout, "  skipped\n");
+      continue;
+    }
     bool piCase = cluster.find(0) != cluster.end() &&
                   cluster.find(items.size() - 1) != cluster.end();
     auto pair = getMinMaxTheta(cluster, items, piCase);

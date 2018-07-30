@@ -64,8 +64,8 @@ static ItemsVector generateSymmetricLensItems(unsigned N, double noiseSigma)
 int main(int argc, char **argv) {
   DEBUG_START;
   /* Parse command line. */
-  if (argc != 7) {
-    fprintf(stderr, "Usage: %s N m t l q noise_sigma\n", argv[0]);
+  if (argc != 8) {
+    fprintf(stderr, "Usage: %s N m t l q noise_sigma s\n", argv[0]);
     return EXIT_FAILURE;
   }
   /* Read the "N" value, i.e. number of thetas. */
@@ -101,9 +101,17 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
+  /* Read the minimal size of cluster. */
+  mistake = NULL;
+  double sParameter = strtod(argv[7], &mistake);
+  if (mistake && *mistake) {
+    fprintf(stderr, "Error while reading s = %s\n", argv[7]);
+    exit(EXIT_FAILURE);
+  }
+
   auto items = generateSymmetricLensItems(NParameter, noiseSigmaParameter);
   auto corners = estimateCorners(items, mParameter, tParameter, lParameter,
-                                 qParameter, true);
+                                 qParameter, sParameter, false);
   fprintf(stdout, "%lu corners have been detected.\n", corners.size());
   DEBUG_END;
   return EXIT_SUCCESS;

@@ -84,8 +84,8 @@ static ItemsVector getItems(char *path, double z) {
 int main(int argc, char **argv) {
   DEBUG_START;
   /* Parse command line. */
-  if (argc != 7) {
-    fprintf(stderr, "Usage: %s countours_file z m t l q\n", argv[0]);
+  if (argc != 8) {
+    fprintf(stderr, "Usage: %s countours_file z m t l q s\n", argv[0]);
     return EXIT_FAILURE;
   }
   /* Read the file path to contours. */
@@ -119,9 +119,18 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Error while reading q = %s\n", argv[6]);
     exit(EXIT_FAILURE);
   }
+
+  /* Read the minimal size of cluster. */
+  mistake = NULL;
+  double sParameter = strtod(argv[7], &mistake);
+  if (mistake && *mistake) {
+    fprintf(stderr, "Error while reading s = %s\n", argv[7]);
+    exit(EXIT_FAILURE);
+  }
+
   auto items = getItems(path, zParameter);
   auto corners = estimateCorners(items, mParameter, tParameter, lParameter,
-                                 qParameter, true);
+                                 qParameter, sParameter, true);
   fprintf(stdout, "%lu corners have been detected.\n", corners.size());
   DEBUG_END;
   return EXIT_SUCCESS;
