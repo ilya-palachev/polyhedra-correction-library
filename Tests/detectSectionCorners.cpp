@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 
   auto items = getItems(path, zParameter);
   auto corners = estimateCorners(items, mParameter, tParameter, lParameter,
-                                 qParameter, sParameter, true);
+                                 qParameter, sParameter, false);
   fprintf(stdout, "%lu corners have been detected.\n", corners.size());
   DEBUG_END;
   return EXIT_SUCCESS;
