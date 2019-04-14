@@ -149,6 +149,7 @@ set (SOURCE_tests
 	Tests/correct.cpp
 	Tests/experimentCGAL_convexHullDynamic.cpp
 	Tests/experimentCGAL_convexHullStatic.cpp
+	Tests/fitTractableSet.cpp
 	Tests/gaussStringTest.cpp
 	Tests/globalCorrection.cpp
 	Tests/GlobalCorrectionReal.cpp
