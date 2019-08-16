@@ -97,25 +97,39 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	std::cout << "Preparing data..." << std::endl;
 	auto directions = generateDirections(n);
 	auto l1ball = generateL1Ball();
 
 	std::default_random_engine generator;
-	std::normal_distribution<double> noise(0., sqrt(0.1));
+	std::normal_distribution<double> noise(0., 0.1);
 	std::vector<SupportFunctionDataItem> exactItems;
 	std::vector<SupportFunctionDataItem> noisyItems;
 
 	for (const auto &direction : directions)
 	{
 		double value = calculateSupportFunction(l1ball, direction);
+		ASSERT(value > 0.);
 		exactItems.push_back(SupportFunctionDataItem(direction, value));
 		double noisyValue =  value + noise(generator);
+		ASSERT(noisyValue > 0.);
 		noisyItems.push_back(SupportFunctionDataItem(direction,
 					noisyValue));
 	}
-	SupportFunctionData exactData(exactItems);
-	SupportFunctionData noisyData(noisyItems);
+	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
+	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
 
+	std::cout << "Preparing recoverer..." << std::endl;
+	RecovererPtr recoverer(new Recoverer());
+	recoverer->setEstimatorType(IPOPT_ESTIMATOR);
+	recoverer->setProblemType(ESTIMATION_PROBLEM_NORM_L_2);
+	recoverer->enableContoursConvexification();
+	recoverer->enableMatrixScaling();
+	recoverer->enableBalancing();
+	recoverer->enableShadowHeuristics();
+
+	std::cout << "Running Ipopt estimator..." << std::endl;
+	recoverer->run(noisyData);
 
 	return EXIT_SUCCESS;
 }
