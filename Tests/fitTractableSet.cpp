@@ -48,7 +48,7 @@ std::vector<Vector3d> generateDirections(int n)
 		y /= lambda;
 		z /= lambda;
 		// Now (x, y, z) is uniformly distributed on the sphere
-		
+
 		Vector3d v(x, y, z);
 		directions.push_back(v);
 	}
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 	}
 
 	int n = atoi(argv[1]);
-	
+
 	if (n <= 0)
 	{
 		std::cerr << "Expected positive number of measurements"
@@ -102,12 +102,23 @@ int main(int argc, char **argv)
 
 	std::default_random_engine generator;
 	std::normal_distribution<double> noise(0., sqrt(0.1));
+	std::vector<SupportFunctionDataItem> exactItems;
+	std::vector<SupportFunctionDataItem> noisyItems;
+
 	for (const auto &direction : directions)
 	{
 		double value = calculateSupportFunction(l1ball, direction);
-		std::cout << direction << ": " << value << " -> "
-			<< value + noise(generator) << std::endl;
+		exactItems.push_back(SupportFunctionDataItem(direction, value));
+		double noisyValue =  value + noise(generator);
+		noisyItems.push_back(SupportFunctionDataItem(direction,
+					noisyValue));
+
+		std::cout << direction << ": " << value << " -> " << noisyValue
+			<< std::endl;
 	}
+	SupportFunctionData exactData(exactItems);
+	SupportFunctionData noisyData(noisyItems);
+
 
 	return EXIT_SUCCESS;
 }
