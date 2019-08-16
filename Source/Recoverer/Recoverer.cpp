@@ -69,12 +69,15 @@ Recoverer::Recoverer() :
 	balancingVector_(0., 0., 0.),
 	ifConvexifyContours(false),
 	ifScaleMatrix(false),
+	supportMatrixType_(SUPPORT_MATRIX_TYPE_EMPTY),
+	startingBodyType_(SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
 	fileNamePolyhedron_(NULL),
 	threshold_(0.),
 	zMinimalNorm_(0.),
-	ifShadowHeuristics_(false)
+	ifShadowHeuristics_(false),
+	ifContourMode_(false)
 {
 	DEBUG_START;
 	DEBUG_END;
