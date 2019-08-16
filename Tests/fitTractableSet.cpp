@@ -112,9 +112,6 @@ int main(int argc, char **argv)
 		double noisyValue =  value + noise(generator);
 		noisyItems.push_back(SupportFunctionDataItem(direction,
 					noisyValue));
-
-		std::cout << direction << ": " << value << " -> " << noisyValue
-			<< std::endl;
 	}
 	SupportFunctionData exactData(exactItems);
 	SupportFunctionData noisyData(noisyItems);
