@@ -47,6 +47,7 @@ IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
 		? 1 : (numVariablesX / 3);
 	numConsistencyConditions = data->numConditions();
 	numLocalityConditions = 2 * (numVariablesX / 3);
+	ASSERT(data->supportMatrix().nonZeros() > 0);
 	DEBUG_END;
 }
 
@@ -306,6 +307,7 @@ bool IpoptSupportFunctionEstimator::eval_jac_g(Index n, const Number* x,
 	ASSERT(m = numConsistencyConditions + numLocalityConditions);
 	ASSERT(n_ele_jac == data->supportMatrix().nonZeros()
 			+ 4 * numLocalityConditions);
+	ASSERT(n_ele_jac > 0);
 
 	SparseMatrix Q = data->supportMatrix();
 	int nonZeros = Q.nonZeros();

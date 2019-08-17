@@ -69,7 +69,7 @@ Recoverer::Recoverer() :
 	balancingVector_(0., 0., 0.),
 	ifConvexifyContours(false),
 	ifScaleMatrix(false),
-	supportMatrixType_(SUPPORT_MATRIX_TYPE_EMPTY),
+	supportMatrixType_(DEFAULT_SUPPORT_MATRIX_TYPE),
 	startingBodyType_(SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION),
 	problemType_(DEFAULT_ESTIMATION_PROBLEM_NORM),
 	numMaxContours(IF_ANALYZE_ALL_CONTOURS),
