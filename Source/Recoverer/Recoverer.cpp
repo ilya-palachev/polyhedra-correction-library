@@ -403,8 +403,9 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	DEBUG_START;
 	std::cout << "Number of support function items: " << SData->size()
 		<< std::endl;
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
-		<< SData;
+	if (ifShadowHeuristics_)
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-planes.ply")
+			<< SData;
 
 	/* 1. Build support function estimation SData. */
 	pushTimer("SEData preparation");
