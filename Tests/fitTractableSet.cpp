@@ -126,7 +126,6 @@ int main(int argc, char **argv)
 	recoverer->enableContoursConvexification();
 	recoverer->enableMatrixScaling();
 	recoverer->enableBalancing();
-	recoverer->enableShadowHeuristics();
 
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	recoverer->run(noisyData);
