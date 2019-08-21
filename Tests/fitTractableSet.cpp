@@ -126,9 +126,12 @@ int main(int argc, char **argv)
 	recoverer->enableContoursConvexification();
 	recoverer->enableMatrixScaling();
 	recoverer->enableBalancing();
+	globalPCLDumper.setNameBase("octahedron");
+	globalPCLDumper.enableVerboseMode();
 
 	std::cout << "Running Ipopt estimator..." << std::endl;
-	recoverer->run(noisyData);
+	auto polyhedron = recoverer->run(noisyData);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
 	return EXIT_SUCCESS;
 }
