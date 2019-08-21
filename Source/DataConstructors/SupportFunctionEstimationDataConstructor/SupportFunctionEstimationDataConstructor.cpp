@@ -435,7 +435,7 @@ static std::set<int> findNonZeroElementsInRow(SupportMatrix &matrix, int idRow)
 		{
 			if (it.row() == idRow)
 			{
-				DEBUG_PRINT("Nonzero element [%d][%d]",
+				DEBUG_PRINT("Nonzero element [%ld][%ld]",
 						it.row(), it.col());
 				idColNonZero.insert(it.col());
 			}
@@ -495,7 +495,7 @@ static long int checkStartingVector(VectorXd startingVector,
 		}
 	}
 
-	DEBUG_PRINT("(%d x %d) * (%ld x %ld) = (%ld x %ld)",
+	DEBUG_PRINT("(%ld x %ld) * (%ld x %ld) = (%ld x %ld)",
 			matrix->rows(), matrix->cols(),
 			startingVector.rows(), startingVector.cols(),
 			product.rows(), product.cols());
