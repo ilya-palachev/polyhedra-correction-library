@@ -72,7 +72,7 @@ static long int checkStartingVector(VectorXd startingVector,
 		SupportMatrix *matrix, SupportFunctionDataPtr data) UNUSED;
 
 SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor() :
-	ifScaleMatrix(false)
+	ifScaleMatrix(false), ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	DEBUG_END;

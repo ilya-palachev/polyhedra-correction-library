@@ -129,15 +129,15 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 	for (int i = 0; i < numDirections; ++i)
 	{
 		int numConditionsForOne = 0;
-		int iNext = (*data)[i].info->iNext;
 
 		for (int j = i + 1; j < numDirections; ++j)
 		{
-			int jNext = (*data)[j].info->iNext;
 			Segment query(pointsLower[i], pointsLower[j]);
 
 			bool success = false;
 			if (ifShadowHeuristics) {
+				int iNext = (*data)[i].info->iNext;
+				int jNext = (*data)[j].info->iNext;
 				Segment query0(pointsLower[i], pointsLower[j]);
 				Segment query1(pointsLower[i],
 						pointsLower[jNext]);
@@ -149,6 +149,11 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 					&& !tree.do_intersect(query1)
 					&& !tree.do_intersect(query2)
 					&& !tree.do_intersect(query3);
+				if (success)
+				{
+					flags.push_back(iNext == j);
+					flags.push_back(jNext == i);
+				}
 			}
 			else
 			{
@@ -158,10 +163,9 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 			if (success)
 			{
-				flags.push_back(iNext == j);
+
 				addCondition(triplets, iCondition, i, j,
 						directions[i]);
-				flags.push_back(jNext == i);
 				addCondition(triplets, iCondition, j, i,
 						directions[j]);
 				++numConditionsForOne;
@@ -184,7 +188,9 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 
 	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
 			numConditions, numValues);
-	matrix->setFlags(flags);
+	if (ifShadowHeuristics)
+		matrix->setFlags(flags);
+
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
 	return matrix;
