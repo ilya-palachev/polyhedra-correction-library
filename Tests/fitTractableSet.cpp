@@ -221,6 +221,46 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 	return vertices;
 }
 
+void fit(unsigned n, std::vector<Vector3d> &directions,
+		std::vector<Vector3d> &targetPoints, const char *title)
+{
+	std::default_random_engine generator;
+	std::normal_distribution<double> noise(0., 0.1);
+	std::vector<SupportFunctionDataItem> exactItems;
+	std::vector<SupportFunctionDataItem> noisyItems;
+
+	for (const auto &direction : directions)
+	{
+		double value = calculateSupportFunction(targetPoints, direction).first;
+		ASSERT(value > 0.);
+		exactItems.push_back(SupportFunctionDataItem(direction, value));
+		double noisyValue =  value + noise(generator);
+		ASSERT(noisyValue > 0.);
+		noisyItems.push_back(SupportFunctionDataItem(direction,
+					noisyValue));
+	}
+	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
+	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
+
+	std::cout << "Preparing recoverer..." << std::endl;
+	RecovererPtr recoverer(new Recoverer());
+	recoverer->setEstimatorType(IPOPT_ESTIMATOR);
+	recoverer->setProblemType(ESTIMATION_PROBLEM_NORM_L_2);
+	recoverer->enableContoursConvexification();
+	recoverer->enableMatrixScaling();
+	recoverer->enableBalancing();
+	globalPCLDumper.setNameBase(title);
+	globalPCLDumper.enableVerboseMode();
+
+	std::cout << "Running Ipopt estimator..." << std::endl;
+	auto polyhedron = recoverer->run(noisyData);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
+
+	auto simplex = generateSimplex(6);
+	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData, 6);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+}
+
 int main(int argc, char **argv)
 {
 	if (argc != 2)
@@ -241,42 +281,7 @@ int main(int argc, char **argv)
 	std::cout << "Preparing data..." << std::endl;
 	auto directions = generateDirections(n);
 	auto l1ball = generateL1Ball();
-
-	std::default_random_engine generator;
-	std::normal_distribution<double> noise(0., 0.1);
-	std::vector<SupportFunctionDataItem> exactItems;
-	std::vector<SupportFunctionDataItem> noisyItems;
-
-	for (const auto &direction : directions)
-	{
-		double value = calculateSupportFunction(l1ball, direction).first;
-		ASSERT(value > 0.);
-		exactItems.push_back(SupportFunctionDataItem(direction, value));
-		double noisyValue =  value + noise(generator);
-		ASSERT(noisyValue > 0.);
-		noisyItems.push_back(SupportFunctionDataItem(direction,
-					noisyValue));
-	}
-	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
-	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
-
-	std::cout << "Preparing recoverer..." << std::endl;
-	RecovererPtr recoverer(new Recoverer());
-	recoverer->setEstimatorType(IPOPT_ESTIMATOR);
-	recoverer->setProblemType(ESTIMATION_PROBLEM_NORM_L_2);
-	recoverer->enableContoursConvexification();
-	recoverer->enableMatrixScaling();
-	recoverer->enableBalancing();
-	globalPCLDumper.setNameBase("octahedron");
-	globalPCLDumper.enableVerboseMode();
-
-	std::cout << "Running Ipopt estimator..." << std::endl;
-	auto polyhedron = recoverer->run(noisyData);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
-
-	auto simplex = generateSimplex(6);
-	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData, 6);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+	fit(n, directions, l1ball, "octahedron");
 
 	return EXIT_SUCCESS;
 }
