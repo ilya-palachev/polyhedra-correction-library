@@ -155,15 +155,21 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	double errorBest = -1.;
 	MatrixXd Abest;
 
+	std::default_random_engine generator;
+	std::normal_distribution<double> distribution(0., 1.);
+	auto normal = [&] (int) {return distribution(generator);};
+
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
-		MatrixXd A = MatrixXd::Random(3, numLiftingDimensions);
+		MatrixXd A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+		ASSERT(A.rows() == 3);
+		ASSERT(A.cols() == numLiftingDimensions);
 
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
 			unsigned size = 3 * numLiftingDimensions;
 			MatrixXd ope = regularizer * MatrixXd::Identity(size, size);
-			MatrixXd vec = regularizer * A;
+			VectorXd vec = regularizer * matrixToVector(A);
 
 			for (unsigned k = 0; k < data->size(); ++k)
 			{
@@ -172,11 +178,16 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 						matrixToVector(A.transpose() * u)).second;
 				MatrixXd outerProduct = u * e.transpose();
 				VectorXd linearized = matrixToVector(outerProduct);
-				vec += outerProduct * (*data)[k].value;
+				vec += linearized * (*data)[k].value;
 				MatrixXd linearizedT = linearized.transpose();
 				ope += linearized * linearizedT;
 			}
-			A = ope.inverse() * vec;
+
+			MatrixXd Anew = ope.inverse() * vec;
+
+			A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
+			ASSERT(A.rows() == 3);
+			ASSERT(A.cols() == numLiftingDimensions);
 		}
 		double error = evaluateFit(A, data, simplexVertices);
 		if (error * errorBest < errorBest * errorBest)
@@ -184,10 +195,12 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			Abest = A;
 			errorBest = error;
 		}
+		std::cout << "Error on iteration #" << iOuter << ": "
+			<< errorBest << std::endl;
 	}
 
 	std::vector<Point_3> points;
-	for (unsigned i = 0; i < data->size(); ++i)
+	for (unsigned i = 0; i < numLiftingDimensions; ++i)
 	{
 		points.push_back(toCGALPoint(Abest.col(i)));
 	}
