@@ -196,6 +196,18 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	return hull;
 }
 
+static std::vector<VectorXd> generateSimplex(unsigned n)
+{
+	std::vector<VectorXd> vertices;
+	for (unsigned i = 0; i < n; ++i)
+	{
+		VectorXd v = VectorXd::Zero(n);
+		v(i) = 1.;
+		vertices.push_back(v);
+	}
+	return vertices;
+}
+
 int main(int argc, char **argv)
 {
 	if (argc != 2)
@@ -248,6 +260,10 @@ int main(int argc, char **argv)
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
+
+	auto simplex = generateSimplex(6);
+	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData, 6);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
 
 	return EXIT_SUCCESS;
 }
