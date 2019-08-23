@@ -26,6 +26,9 @@
 #include <iostream>
 #include <random>
 #include "PolyhedraCorrectionLibrary.h"
+#include <Eigen/LU>
+
+using Eigen::MatrixXd;
 
 std::vector<Vector3d> generateDirections(int n)
 {
@@ -68,16 +71,129 @@ std::vector<Vector3d> generateL1Ball()
 	return l1ball;
 }
 
-double calculateSupportFunction(const std::vector<Vector3d> &vertices,
+std::pair<double, Vector3d>
+calculateSupportFunction(const std::vector<Vector3d> &vertices,
 			const Vector3d &direction)
 {
-	double result = vertices[0] * direction;
-	for (const auto &vertex : vertices)
+	double maxProduct = vertices[0] * direction;
+	Vector3d tangient = vertices[0];
+	for (const Vector3d &vertex : vertices)
 	{
 		double product = vertex * direction;
-		result = std::max(product, result);
+		if (product > maxProduct)
+		{
+			maxProduct = product;
+			tangient = vertex;
+		}
 	}
-	return result;
+	return std::make_pair(maxProduct, tangient);
+}
+
+std::pair<double, VectorXd>
+calculateSupportFunction(const std::vector<VectorXd> &vertices,
+			const VectorXd &direction)
+{
+	double maxProduct = vertices[0].dot(direction);
+	VectorXd tangient = vertices[0];
+	for (const VectorXd &vertex : vertices)
+	{
+		double product = vertex.dot(direction);
+		if (product > maxProduct)
+		{
+			maxProduct = product;
+			tangient = vertex;
+		}
+	}
+	return std::make_pair(maxProduct, tangient);
+}
+
+static Eigen::Vector3d toEigenVector(const Vector3d &v)
+{
+	Eigen::Vector3d u;
+	u(0) = v.x;
+	u(1) = v.y;
+	u(2) = v.z;
+	return u;
+}
+
+static Eigen::VectorXd matrixToVector(const Eigen::MatrixXd &m)
+{
+	MatrixXd copy = m;
+	VectorXd v(Eigen::Map<Eigen::VectorXd>(copy.data(), copy.cols() * copy.rows()));
+	return v;
+}
+
+static Point_3 toCGALPoint(const Eigen::VectorXd &v)
+{
+	Point_3 p(v(0), v(1), v(2));
+	return p;
+}
+
+double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
+		const std::vector<VectorXd> &simplexVertices)
+{
+	double error = 0.;
+	Eigen::MatrixXd AT = A.transpose();
+	for (unsigned i = 0; i < data->size(); ++i)
+	{
+		auto item = (*data)[i];
+		MatrixXd direction = AT * toEigenVector(item.direction);
+		double diff = calculateSupportFunction(simplexVertices,
+				matrixToVector(direction)).first - item.value;
+		error += diff * diff;
+	}
+	return error;
+}
+
+Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
+		SupportFunctionDataPtr data,
+		unsigned numLiftingDimensions)
+{
+	unsigned numOuterIterations = 20;
+	unsigned numInnerIterations = 50;
+	double regularizer = 0.5;
+	double errorBest = -1.;
+	MatrixXd Abest;
+
+	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
+	{
+		MatrixXd A = MatrixXd::Random(3, numLiftingDimensions);
+
+		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
+		{
+			unsigned size = 3 * numLiftingDimensions;
+			MatrixXd ope = regularizer * MatrixXd::Identity(size, size);
+			MatrixXd vec = regularizer * A;
+
+			for (unsigned k = 0; k < data->size(); ++k)
+			{
+				VectorXd u = toEigenVector((*data)[k].direction);
+				MatrixXd e = calculateSupportFunction(simplexVertices,
+						matrixToVector(A.transpose() * u)).second;
+				MatrixXd outerProduct = u * e.transpose();
+				VectorXd linearized = matrixToVector(outerProduct);
+				vec += outerProduct * (*data)[k].value;
+				MatrixXd linearizedT = linearized.transpose();
+				ope += linearized * linearizedT;
+			}
+			A = ope.inverse() * vec;
+		}
+		double error = evaluateFit(A, data, simplexVertices);
+		if (error * errorBest < errorBest * errorBest)
+		{
+			Abest = A;
+			errorBest = error;
+		}
+	}
+
+	std::vector<Point_3> points;
+	for (unsigned i = 0; i < data->size(); ++i)
+	{
+		points.push_back(toCGALPoint(Abest.col(i)));
+	}
+	Polyhedron_3 hull;
+	CGAL::convex_hull_3(points.begin(), points.end(), hull);
+	return hull;
 }
 
 int main(int argc, char **argv)
@@ -108,7 +224,7 @@ int main(int argc, char **argv)
 
 	for (const auto &direction : directions)
 	{
-		double value = calculateSupportFunction(l1ball, direction);
+		double value = calculateSupportFunction(l1ball, direction).first;
 		ASSERT(value > 0.);
 		exactItems.push_back(SupportFunctionDataItem(direction, value));
 		double noisyValue =  value + noise(generator);
