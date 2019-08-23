@@ -71,6 +71,20 @@ std::vector<Vector3d> generateL1Ball()
 	return l1ball;
 }
 
+std::vector<Vector3d> generateLInfinityBall()
+{
+	std::vector<Vector3d> cube;
+	cube.push_back(Vector3d(1., 1., 1.));
+	cube.push_back(Vector3d(1., -1., 1.));
+	cube.push_back(Vector3d(-1., -1., 1.));
+	cube.push_back(Vector3d(-1., 1., 1.));
+	cube.push_back(Vector3d(1., 1., -1.));
+	cube.push_back(Vector3d(1., -1., -1.));
+	cube.push_back(Vector3d(-1., -1., -1.));
+	cube.push_back(Vector3d(-1., 1., -1.));
+	return cube;
+}
+
 std::pair<double, Vector3d>
 calculateSupportFunction(const std::vector<Vector3d> &vertices,
 			const Vector3d &direction)
@@ -222,6 +236,7 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 }
 
 void fit(unsigned n, std::vector<Vector3d> &directions,
+		unsigned numLiftingDimensions,
 		std::vector<Vector3d> &targetPoints, const char *title)
 {
 	std::default_random_engine generator;
@@ -256,8 +271,9 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
-	auto simplex = generateSimplex(6);
-	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData, 6);
+	auto simplex = generateSimplex(numLiftingDimensions);
+	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData,
+			numLiftingDimensions);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
 }
 
@@ -280,8 +296,12 @@ int main(int argc, char **argv)
 
 	std::cout << "Preparing data..." << std::endl;
 	auto directions = generateDirections(n);
+
 	auto l1ball = generateL1Ball();
-	fit(n, directions, l1ball, "octahedron");
+	fit(n, directions, 6, l1ball, "octahedron");
+
+	auto lInfinityBall = generateLInfinityBall();
+	fit(n, directions, 8, lInfinityBall, "cube");
 
 	return EXIT_SUCCESS;
 }
