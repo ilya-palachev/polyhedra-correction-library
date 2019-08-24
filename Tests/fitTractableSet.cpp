@@ -198,8 +198,9 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 				if (dualMode)
 				{
 					double h = Alinearized.dot(V);
-					vector += V * pow(h, -3.);
-					matrix += V * VT * y;
+					double factor = pow(h, -3.);
+					vector += V * factor;
+					matrix += V * VT * y * factor;
 				}
 				else
 				{
