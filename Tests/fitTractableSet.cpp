@@ -163,8 +163,8 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		SupportFunctionDataPtr data,
 		unsigned numLiftingDimensions, bool dualMode)
 {
-	unsigned numOuterIterations = 20;
-	unsigned numInnerIterations = 50;
+	unsigned numOuterIterations = 500;
+	unsigned numInnerIterations = 500;
 	double regularizer = 0.5;
 	double errorBest = -1.;
 	MatrixXd Abest;
@@ -229,9 +229,27 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	{
 		points.push_back(toCGALPoint(Abest.col(i)));
 	}
-	Polyhedron_3 hull;
-	CGAL::convex_hull_3(points.begin(), points.end(), hull);
-	return hull;
+
+	Polyhedron_3 result;
+
+	if (dualMode)
+	{
+		std::vector<Plane_3> planes;
+		for (const auto &point : points)
+		{
+			planes.push_back(dual(point));
+		}
+		Polyhedron_3 intersection(planes.begin(), planes.end());
+		result = intersection;
+	}
+	else
+	{
+		Polyhedron_3 hull;
+		CGAL::convex_hull_3(points.begin(), points.end(), hull);
+		result = hull;
+	}
+
+	return result;
 }
 
 static std::vector<VectorXd> generateSimplex(unsigned n)
@@ -248,6 +266,7 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 
 void fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
+		unsigned numLiftingDimensionsDual,
 		std::vector<Vector3d> &targetPoints, const char *title)
 {
 	std::default_random_engine generator;
@@ -282,10 +301,15 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
-	auto simplex = generateSimplex(numLiftingDimensions);
-	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData,
+	auto polyhedronAM = fitSimplexAffineImage(
+			generateSimplex(numLiftingDimensions), noisyData,
 			numLiftingDimensions, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+
+	auto polyhedronAMdual = fitSimplexAffineImage(
+			generateSimplex(numLiftingDimensionsDual), noisyData,
+			numLiftingDimensionsDual, true);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply") << polyhedronAMdual;
 }
 
 int main(int argc, char **argv)
@@ -309,10 +333,10 @@ int main(int argc, char **argv)
 	auto directions = generateDirections(n);
 
 	auto l1ball = generateL1Ball();
-	fit(n, directions, 6, l1ball, "octahedron");
+	fit(n, directions, 6, 8, l1ball, "octahedron");
 
 	auto lInfinityBall = generateLInfinityBall();
-	fit(n, directions, 8, lInfinityBall, "cube");
+	fit(n, directions, 8, 6, lInfinityBall, "cube");
 
 	return EXIT_SUCCESS;
 }
