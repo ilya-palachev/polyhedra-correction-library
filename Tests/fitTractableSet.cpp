@@ -182,8 +182,8 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
 			unsigned size = 3 * numLiftingDimensions;
-			MatrixXd ope = regularizer * MatrixXd::Identity(size, size);
-			VectorXd vec = regularizer * matrixToVector(A);
+			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
+			VectorXd vector = regularizer * matrixToVector(A);
 
 			for (unsigned k = 0; k < data->size(); ++k)
 			{
@@ -192,12 +192,12 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 						matrixToVector(A.transpose() * u)).second;
 				MatrixXd outerProduct = u * e.transpose();
 				VectorXd linearized = matrixToVector(outerProduct);
-				vec += linearized * (*data)[k].value;
+				vector += linearized * (*data)[k].value;
 				MatrixXd linearizedT = linearized.transpose();
-				ope += linearized * linearizedT;
+				matrix += linearized * linearizedT;
 			}
 
-			MatrixXd Anew = ope.inverse() * vec;
+			MatrixXd Anew = matrix.inverse() * vector;
 
 			A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
 			ASSERT(A.rows() == 3);
