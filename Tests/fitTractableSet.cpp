@@ -161,7 +161,7 @@ double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
 
 Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		SupportFunctionDataPtr data,
-		unsigned numLiftingDimensions)
+		unsigned numLiftingDimensions, bool dualMode)
 {
 	unsigned numOuterIterations = 20;
 	unsigned numInnerIterations = 50;
@@ -183,18 +183,29 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		{
 			unsigned size = 3 * numLiftingDimensions;
 			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
-			VectorXd vector = regularizer * matrixToVector(A);
+			VectorXd Alinearized = matrixToVector(A);
+			VectorXd vector = regularizer * Alinearized;
 
 			for (unsigned k = 0; k < data->size(); ++k)
 			{
 				VectorXd u = toEigenVector((*data)[k].direction);
 				MatrixXd e = calculateSupportFunction(simplexVertices,
 						matrixToVector(A.transpose() * u)).second;
-				MatrixXd outerProduct = u * e.transpose();
-				VectorXd linearized = matrixToVector(outerProduct);
-				vector += linearized * (*data)[k].value;
-				MatrixXd linearizedT = linearized.transpose();
-				matrix += linearized * linearizedT;
+				VectorXd V = matrixToVector(u * e.transpose());
+				MatrixXd VT = V.transpose();
+				double y = (*data)[k].value;
+
+				if (dualMode)
+				{
+					double h = Alinearized.dot(V);
+					vector += V * pow(h, -3.);
+					matrix += V * VT * y;
+				}
+				else
+				{
+					vector += V * y;
+					matrix += V * VT;
+				}
 			}
 
 			MatrixXd Anew = matrix.inverse() * vector;
@@ -273,7 +284,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 
 	auto simplex = generateSimplex(numLiftingDimensions);
 	auto polyhedronAM = fitSimplexAffineImage(simplex, noisyData,
-			numLiftingDimensions);
+			numLiftingDimensions, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
 }
 
