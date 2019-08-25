@@ -159,12 +159,146 @@ double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
 	return error;
 }
 
+bool isFinite(const MatrixXd &M)
+{
+	for (unsigned i = 0; i < M.rows(); ++i)
+		for (unsigned j = 0; j < M.cols(); ++j)
+			if (!std::isfinite(M(i, j)))
+				return false;
+	return true;
+}
+
+class ConvexAffinePooling
+{
+	// Input structures:
+	std::vector<VectorXd> simplexVertices;
+	MatrixXd A;
+	bool dualMode;
+
+	// Auxiliary structures:
+	MatrixXd AT;
+	std::vector<Point_3> points;
+	Polyhedron_3 P;
+public:
+	ConvexAffinePooling(const std::vector<VectorXd> &simplexVertices,
+			const MatrixXd &A, bool dualMode) :
+		simplexVertices(simplexVertices), A(A), dualMode(dualMode) {}
+
+	void init()
+	{
+		ASSERT(simplexVertices.size() == unsigned(A.cols()));
+		AT = A.transpose();
+
+		if (!dualMode)
+			return;
+
+		for (unsigned i = 0; i < simplexVertices.size(); ++i)
+		{
+			auto point = toCGALPoint(A.col(i));
+			std::cout << "Point: " << point << std::endl;
+			points.push_back(point);
+		}
+		std::vector<Plane_3> planes;
+		for (const auto &point : points)
+		{
+			auto plane = dual(point);
+			planes.push_back(plane);
+			std::cout << "Plane: " << plane << std::endl;
+		}
+		Polyhedron_3 intersection(planes.begin(), planes.end());
+		P = intersection;
+	}
+
+	VectorXd calculate(const VectorXd &u)
+	{
+		if (!dualMode)
+		{
+			MatrixXd e = calculateSupportFunction(simplexVertices,
+					matrixToVector(AT * u)).second;
+			return e;
+		}
+
+		auto vBest = P.vertices_begin();
+		double maxValue = -1e100; // FIXME
+		for (auto v = P.vertices_begin(); v != P.vertices_end(); ++v)
+		{
+			double value = u.dot(toEigenVector(v->point()));
+			if (value > maxValue)
+			{
+				maxValue = value;
+				vBest = v;
+			}
+		}
+
+		std::vector<int> indices;
+		std::vector<VectorXd> a;
+		std::cout << "Finding indices: ";
+		auto circulator = vBest->vertex_begin();
+		do
+		{
+			int id = circulator->facet()->id;
+			std::cout << id << " " << std::endl;
+			ASSERT(id >= 0);
+			ASSERT(unsigned(id) < points.size());
+
+			indices.push_back(id);
+			auto point = points[id];
+			std::cout << " (" << point << ") ";
+			a.push_back(toEigenVector(points[id]));
+
+			++circulator;
+		} 
+		while (circulator != vBest->vertex_begin());
+		ASSERT(indices.size() == 3);
+
+		MatrixXd M(3, 3);
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			VectorXd column = a[i];
+			for (unsigned j = 0; j < 3; ++j)
+			{
+				M(j, i) = column(j);
+			}
+		}
+		std::cout << "M: " << M << std::endl;
+		std::cout << "u: " << u << std::endl;
+		std::cout << "M.inverse(): " << M.inverse() << std::endl;
+		std::cout << "M.determinant(): " << M.determinant() << std::endl;
+		ASSERT(isFinite(M));
+		Eigen::Vector3d alpha = M.inverse() * u;
+		std::cout << "alpha: " << alpha << std::endl;
+		ASSERT(isFinite(alpha));
+		Plane_3 p = dual(vBest->point());
+		Point_3 norm(p.a(), p.b(), p.c());
+		ASSERT(isFinite(toEigenVector(norm)));
+		std::cout << "Considering plane: " << p << std::endl;
+		double product = toEigenVector(norm).dot(u);
+		std::cout << "Product: " << product << std::endl;
+		double factor = -p.d() / product;
+		std::cout << "Factor: " << factor << std::endl;
+		alpha *= factor;
+		std::cout << "alpha after factor: " << alpha << std::endl;
+		ASSERT(isFinite(alpha));
+
+		VectorXd result = VectorXd::Zero(simplexVertices.size());
+		for (unsigned i = 0; i < 3; ++i)
+		{
+			result(indices[i]) = alpha(i);
+		}
+
+		return result;
+	}
+};
+
 Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		SupportFunctionDataPtr data,
 		unsigned numLiftingDimensions, bool dualMode)
 {
-	unsigned numOuterIterations = 500;
-	unsigned numInnerIterations = 500;
+	std::cout << "Starting to fit in " << (dualMode ? "dual" : "primal")
+		<< " mode." << std::endl;
+
+	unsigned numOuterIterations = 100;
+	unsigned numInnerIterations = 100;
 	double regularizer = 0.5;
 	double errorBest = -1.;
 	MatrixXd Abest;
@@ -175,6 +309,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
+		std::cout << "Outer iteration " << iOuter << std::endl;
 		MatrixXd A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
@@ -183,16 +318,23 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		{
 			unsigned size = 3 * numLiftingDimensions;
 			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
+			ASSERT(isFinite(matrix));
 			VectorXd Alinearized = matrixToVector(A);
 			VectorXd vector = regularizer * Alinearized;
+
+			ConvexAffinePooling pool(simplexVertices, A, dualMode);
+			pool.init();
 
 			for (unsigned k = 0; k < data->size(); ++k)
 			{
 				VectorXd u = toEigenVector((*data)[k].direction);
-				MatrixXd e = calculateSupportFunction(simplexVertices,
-						matrixToVector(A.transpose() * u)).second;
+				MatrixXd e = pool.calculate(u);
+				if (dualMode)
+					std::cout << "e: " << e << std::endl;
+				ASSERT(isFinite(e));
 				VectorXd V = matrixToVector(u * e.transpose());
 				MatrixXd VT = V.transpose();
+				ASSERT(isFinite(VT));
 				double y = (*data)[k].value;
 
 				if (dualMode)
@@ -210,6 +352,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			}
 
 			MatrixXd Anew = matrix.inverse() * vector;
+			ASSERT(isFinite(Anew));
 
 			A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
 			ASSERT(A.rows() == 3);
@@ -333,11 +476,11 @@ int main(int argc, char **argv)
 	std::cout << "Preparing data..." << std::endl;
 	auto directions = generateDirections(n);
 
-	auto l1ball = generateL1Ball();
-	fit(n, directions, 6, 8, l1ball, "octahedron");
-
 	auto lInfinityBall = generateLInfinityBall();
 	fit(n, directions, 8, 6, lInfinityBall, "cube");
+
+	auto l1ball = generateL1Ball();
+	fit(n, directions, 6, 8, l1ball, "octahedron");
 
 	return EXIT_SUCCESS;
 }
