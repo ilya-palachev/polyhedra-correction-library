@@ -283,7 +283,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		<< " mode." << std::endl;
 
 	unsigned numOuterIterations = 100;
-	unsigned numInnerIterations = 500;
+	unsigned numInnerIterations = 100;
 	double regularizer = 0.5;
 	double errorBest = -1.;
 	MatrixXd Abest;
@@ -297,6 +297,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		MatrixXd A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
+		double errorInitial = evaluateFit(A, data, simplexVertices);
 
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
@@ -339,6 +340,16 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
 			ASSERT(A.rows() == 3);
 			ASSERT(A.cols() == numLiftingDimensions);
+
+			double error = evaluateFit(A, data, simplexVertices);
+			std::cout << "  Outer " << iOuter << " inner " << iInner
+				<< ", error: " << error << std::endl;
+
+			if (error > 1000. * errorInitial)
+			{
+				std::cout << "Early stop, algorithm doesn't coverge" << std::endl;
+				break;
+			}
 		}
 		double error = evaluateFit(A, data, simplexVertices);
 		if (error * errorBest < errorBest * errorBest)
@@ -462,8 +473,8 @@ int main(int argc, char **argv)
 	auto lInfinityBall = generateLInfinityBall();
 	fit(n, directions, 8, 6, lInfinityBall, "cube");
 
-	auto l1ball = generateL1Ball();
-	fit(n, directions, 6, 8, l1ball, "octahedron");
+	//auto l1ball = generateL1Ball();
+	//fit(n, directions, 6, 8, l1ball, "octahedron");
 
 	return EXIT_SUCCESS;
 }
