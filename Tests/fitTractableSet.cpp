@@ -216,17 +216,19 @@ public:
 			return e;
 		}
 
-		std::vector<int> goodVertices;
+		std::vector<int> goodFacets;
+		std::vector<int> commonVertices;
+		bool initialized = false;
+		Eigen::Vector3d singleAlpha;
+		auto vBest = P.vertices_begin();
 		for (auto v = P.vertices_begin(); v != P.vertices_end(); ++v)
 		{
 			std::vector<int> indices;
 			std::vector<VectorXd> a;
 			auto circulator = v->vertex_begin();
-			std::cout << "facet indices: ";
 			do
 			{
 				int id = circulator->facet()->id;
-				std::cout << id << " ";
 				ASSERT(id >= 0);
 				ASSERT(unsigned(id) < points.size());
 
@@ -236,7 +238,6 @@ public:
 				++circulator;
 			} 
 			while (circulator != v->vertex_begin());
-			std::cout << std::endl;
 
 			MatrixXd M(3, 3);
 			for (unsigned i = 0; i < 3; ++i)
@@ -249,7 +250,6 @@ public:
 			}
 			ASSERT(isFinite(M));
 			Eigen::Vector3d alpha = M.inverse() * u;
-			std::cout << "alpha: " << alpha << std::endl;
 			ASSERT(isFinite(alpha));
 
 			bool positive = true;
@@ -258,90 +258,59 @@ public:
 					positive = false;
 
 			if (positive)
-				goodVertices.push_back(v->id);
-		}
-
-		std::cout << "Number of good vertices: " << goodVertices.size()
-			<< std::endl;
-
-		auto vBest = P.vertices_begin();
-		double maxValue = -1e100; // FIXME
-		for (auto v = P.vertices_begin(); v != P.vertices_end(); ++v)
-		{
-			double value = u.dot(toEigenVector(v->point()));
-			std::cout << "value: " << value << std::endl;
-			if (value > maxValue)
 			{
-				maxValue = value;
+				goodFacets.push_back(v->id);
+				if (!initialized)
+				{
+					commonVertices = indices;
+					initialized = true;
+				}
+				else
+				{
+					std::vector<int> tmp = commonVertices;
+					auto it = std::set_intersection(commonVertices.begin(), commonVertices.end(), indices.begin(), indices.end(), tmp.begin());
+					tmp.resize(it - tmp.begin());
+					commonVertices = tmp;
+				}
+				singleAlpha = alpha;
 				vBest = v;
 			}
 		}
-		std::cout << "max value: " << maxValue << std::endl;
 
-		std::vector<int> indices;
-		std::vector<VectorXd> a;
-		auto circulator = vBest->vertex_begin();
-		std::cout << "facet indices: ";
-		do
-		{
-			int id = circulator->facet()->id;
-			std::cout << id << " ";
-			std::cout << std::endl;
-			std::cout << "plane: " << circulator->facet()->plane();
-			std::cout << std::endl;
-			std::cout << "point: " << points[id] << std::endl;
-			ASSERT(id >= 0);
-			ASSERT(unsigned(id) < points.size());
-
-			indices.push_back(id);
-			a.push_back(toEigenVector(points[id]));
-
-			++circulator;
-		} 
-		while (circulator != vBest->vertex_begin());
-		std::cout << std::endl;
-		std::cout << "all facet indices: ";
-		for (auto f = P.facets_begin(); f != P.facets_end(); ++f)
-		{
-			std::cout << f->id << " ";
-		}
-		std::cout << std::endl;
-		ASSERT(indices.size() == 3);
-
-		MatrixXd M(3, 3);
-		for (unsigned i = 0; i < 3; ++i)
-		{
-			VectorXd column = a[i];
-			for (unsigned j = 0; j < 3; ++j)
-			{
-				M(j, i) = column(j);
-			}
-		}
-		std::cout << "M: " << M << std::endl;
-		std::cout << "u: " << u << std::endl;
-		ASSERT(isFinite(M));
-		Eigen::Vector3d alpha = M.inverse() * u;
-		std::cout << "alpha: " << alpha << std::endl;
-		std::cout << "M * alpha: " << M * alpha << std::endl;
-
-		ASSERT(isFinite(alpha));
-		Plane_3 p = dual(vBest->point());
-		Point_3 norm(p.a(), p.b(), p.c());
-		ASSERT(isFinite(toEigenVector(norm)));
-		double product = toEigenVector(norm).dot(u);
-		double factor = -p.d() / product;
-		alpha *= factor;
-		ASSERT(isFinite(alpha));
-
+		//std::cout << "Number of good facets: " << goodFacets.size()
+		//	<< ", common vertices: " << commonVertices.size() << std::endl;
 
 		VectorXd result = VectorXd::Zero(simplexVertices.size());
-		for (unsigned i = 0; i < 3; ++i)
+		if (goodFacets.size() == 1 && commonVertices.size() == 3)
 		{
-			result(indices[i]) = alpha(i);
-			//ASSERT(alpha(i) > 0.);
+			Eigen::Vector3d alpha = singleAlpha;
+			ASSERT(isFinite(alpha));
+			Plane_3 p = dual(vBest->point());
+			Point_3 norm(p.a(), p.b(), p.c());
+			ASSERT(isFinite(toEigenVector(norm)));
+			double product = toEigenVector(norm).dot(u);
+			double factor = -p.d() / product;
+			alpha *= factor;
+			ASSERT(isFinite(alpha));
+
+			for (unsigned i = 0; i < 3; ++i)
+			{
+				result(commonVertices[i]) = alpha(i);
+				//ASSERT(alpha(i) >= -1e-8 * factor);
+			}
+
+		}
+		else if (goodFacets.size() > 1 && commonVertices.size() == 1)
+		{
+			result(commonVertices[0]) = 1.;
+		}
+		else
+		{
+			// Not implemented yet!
 		}
 
 		return result;
+
 	}
 };
 
@@ -384,7 +353,6 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			{
 				VectorXd u = toEigenVector((*data)[k].direction);
 				MatrixXd e = pool.calculate(u);
-				std::cout << "  e: " << e << std::endl;
 				ASSERT(isFinite(e));
 				VectorXd V = matrixToVector(u * e.transpose());
 				MatrixXd VT = V.transpose();
@@ -473,7 +441,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 		std::vector<Vector3d> &targetPoints, const char *title)
 {
 	std::default_random_engine generator;
-	std::normal_distribution<double> noise(0., 0.1);
+	std::normal_distribution<double> noise(0., 0.001);
 	std::vector<SupportFunctionDataItem> exactItems;
 	std::vector<SupportFunctionDataItem> noisyItems;
 
