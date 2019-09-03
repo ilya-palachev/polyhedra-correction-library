@@ -216,24 +216,80 @@ public:
 			return e;
 		}
 
+		std::vector<int> goodVertices;
+		for (auto v = P.vertices_begin(); v != P.vertices_end(); ++v)
+		{
+			std::vector<int> indices;
+			std::vector<VectorXd> a;
+			auto circulator = v->vertex_begin();
+			std::cout << "facet indices: ";
+			do
+			{
+				int id = circulator->facet()->id;
+				std::cout << id << " ";
+				ASSERT(id >= 0);
+				ASSERT(unsigned(id) < points.size());
+
+				indices.push_back(id);
+				a.push_back(toEigenVector(points[id]));
+
+				++circulator;
+			} 
+			while (circulator != v->vertex_begin());
+			std::cout << std::endl;
+
+			MatrixXd M(3, 3);
+			for (unsigned i = 0; i < 3; ++i)
+			{
+				VectorXd column = a[i];
+				for (unsigned j = 0; j < 3; ++j)
+				{
+					M(j, i) = column(j);
+				}
+			}
+			ASSERT(isFinite(M));
+			Eigen::Vector3d alpha = M.inverse() * u;
+			std::cout << "alpha: " << alpha << std::endl;
+			ASSERT(isFinite(alpha));
+
+			bool positive = true;
+			for (unsigned i = 0; i < 3; ++i)
+				if (alpha[i] <= -1e-8)
+					positive = false;
+
+			if (positive)
+				goodVertices.push_back(v->id);
+		}
+
+		std::cout << "Number of good vertices: " << goodVertices.size()
+			<< std::endl;
+
 		auto vBest = P.vertices_begin();
 		double maxValue = -1e100; // FIXME
 		for (auto v = P.vertices_begin(); v != P.vertices_end(); ++v)
 		{
 			double value = u.dot(toEigenVector(v->point()));
+			std::cout << "value: " << value << std::endl;
 			if (value > maxValue)
 			{
 				maxValue = value;
 				vBest = v;
 			}
 		}
+		std::cout << "max value: " << maxValue << std::endl;
 
 		std::vector<int> indices;
 		std::vector<VectorXd> a;
 		auto circulator = vBest->vertex_begin();
+		std::cout << "facet indices: ";
 		do
 		{
 			int id = circulator->facet()->id;
+			std::cout << id << " ";
+			std::cout << std::endl;
+			std::cout << "plane: " << circulator->facet()->plane();
+			std::cout << std::endl;
+			std::cout << "point: " << points[id] << std::endl;
 			ASSERT(id >= 0);
 			ASSERT(unsigned(id) < points.size());
 
@@ -243,6 +299,13 @@ public:
 			++circulator;
 		} 
 		while (circulator != vBest->vertex_begin());
+		std::cout << std::endl;
+		std::cout << "all facet indices: ";
+		for (auto f = P.facets_begin(); f != P.facets_end(); ++f)
+		{
+			std::cout << f->id << " ";
+		}
+		std::cout << std::endl;
 		ASSERT(indices.size() == 3);
 
 		MatrixXd M(3, 3);
@@ -254,8 +317,13 @@ public:
 				M(j, i) = column(j);
 			}
 		}
+		std::cout << "M: " << M << std::endl;
+		std::cout << "u: " << u << std::endl;
 		ASSERT(isFinite(M));
 		Eigen::Vector3d alpha = M.inverse() * u;
+		std::cout << "alpha: " << alpha << std::endl;
+		std::cout << "M * alpha: " << M * alpha << std::endl;
+
 		ASSERT(isFinite(alpha));
 		Plane_3 p = dual(vBest->point());
 		Point_3 norm(p.a(), p.b(), p.c());
@@ -265,10 +333,12 @@ public:
 		alpha *= factor;
 		ASSERT(isFinite(alpha));
 
+
 		VectorXd result = VectorXd::Zero(simplexVertices.size());
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			result(indices[i]) = alpha(i);
+			//ASSERT(alpha(i) > 0.);
 		}
 
 		return result;
@@ -314,6 +384,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			{
 				VectorXd u = toEigenVector((*data)[k].direction);
 				MatrixXd e = pool.calculate(u);
+				std::cout << "  e: " << e << std::endl;
 				ASSERT(isFinite(e));
 				VectorXd V = matrixToVector(u * e.transpose());
 				MatrixXd VT = V.transpose();
@@ -322,16 +393,10 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 				if (dualMode)
 				{
-					double h = Alinearized.dot(V);
-					double factor = pow(h, -3.);
-					vector += V * factor;
-					matrix += V * VT * y * factor;
+					y = 1. / y;
 				}
-				else
-				{
-					vector += V * y;
-					matrix += V * VT;
-				}
+				vector += V * y;
+				matrix += V * VT;
 			}
 
 			MatrixXd Anew = matrix.inverse() * vector;
@@ -435,6 +500,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
+#if 0
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
@@ -443,6 +509,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			generateSimplex(numLiftingDimensions), noisyData,
 			numLiftingDimensions, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+#endif
 
 	auto polyhedronAMdual = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual), noisyData,
