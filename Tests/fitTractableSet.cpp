@@ -168,6 +168,10 @@ bool isFinite(const MatrixXd &M)
 	return true;
 }
 
+unsigned numImplemented = 0;
+unsigned numNonImplemented = 0;
+bool negativeMode = false;
+
 class ConvexAffinePooling
 {
 	// Input structures:
@@ -277,11 +281,14 @@ public:
 			}
 		}
 
-		//std::cout << "Number of good facets: " << goodFacets.size()
-		//	<< ", common vertices: " << commonVertices.size() << std::endl;
+#if 0
+		std::cout << "Number of good facets: " << goodFacets.size()
+			<< ", common vertices: " << commonVertices.size() << std::endl;
+#endif
 
 		VectorXd result = VectorXd::Zero(simplexVertices.size());
-		if (goodFacets.size() == 1 && commonVertices.size() == 3)
+		if ((commonVertices.size() == 3 && goodFacets.size() == 1)
+			|| (commonVertices.size() == 2 && goodFacets.size() > 1))
 		{
 			Eigen::Vector3d alpha = singleAlpha;
 			ASSERT(isFinite(alpha));
@@ -298,15 +305,28 @@ public:
 				result(commonVertices[i]) = alpha(i);
 				//ASSERT(alpha(i) >= -1e-8 * factor);
 			}
+			++numImplemented;
 
 		}
-		else if (goodFacets.size() > 1 && commonVertices.size() == 1)
+		else if (commonVertices.size() == 1)
 		{
+			ASSERT(goodFacets.size() > 1);
 			result(commonVertices[0]) = 1.;
+			++numImplemented;
+		}
+		else if (goodFacets.size() == 0)
+		{
+			if (!negativeMode)
+			{
+				negativeMode = true;
+				result = calculate(-u);
+				negativeMode = false;
+			}
 		}
 		else
 		{
 			// Not implemented yet!
+			++numNonImplemented;
 		}
 
 		return result;
@@ -483,6 +503,9 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			generateSimplex(numLiftingDimensionsDual), noisyData,
 			numLiftingDimensionsDual, true);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply") << polyhedronAMdual;
+
+	std::cout << "Number of implemented cases: " << numImplemented << std::endl;
+	std::cout << "Number of non-implemented cases: " << numNonImplemented << std::endl;
 }
 
 int main(int argc, char **argv)
