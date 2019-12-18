@@ -211,13 +211,12 @@ public:
 		P = intersection;
 	}
 
-	VectorXd calculate(const VectorXd &u)
+	std::pair<double, VectorXd> calculateEandDistance(const VectorXd &u)
 	{
 		if (!dualMode)
 		{
-			MatrixXd e = calculateSupportFunction(simplexVertices,
-					matrixToVector(AT * u)).second;
-			return e;
+			return calculateSupportFunction(simplexVertices,
+					matrixToVector(AT * u));
 		}
 
 		std::vector<int> goodFacets;
@@ -287,8 +286,10 @@ public:
 #endif
 
 		VectorXd result = VectorXd::Zero(simplexVertices.size());
+		double distance = 0.;
 		if ((commonVertices.size() == 3 && goodFacets.size() == 1)
-			|| (commonVertices.size() == 2 && goodFacets.size() > 1))
+			|| (commonVertices.size() == 2 && goodFacets.size() == 2)
+			|| (commonVertices.size() == 1 && goodFacets.size() > 1))
 		{
 			Eigen::Vector3d alpha = singleAlpha;
 			ASSERT(isFinite(alpha));
@@ -296,8 +297,8 @@ public:
 			Point_3 norm(p.a(), p.b(), p.c());
 			ASSERT(isFinite(toEigenVector(norm)));
 			double product = toEigenVector(norm).dot(u);
-			double factor = -p.d() / product;
-			alpha *= factor;
+			distance = -p.d() / product;
+			alpha *= distance;
 			ASSERT(isFinite(alpha));
 
 			for (unsigned i = 0; i < 3; ++i)
@@ -308,28 +309,13 @@ public:
 			++numImplemented;
 
 		}
-		else if (commonVertices.size() == 1)
-		{
-			ASSERT(goodFacets.size() > 1);
-			result(commonVertices[0]) = 1.;
-			++numImplemented;
-		}
-		else if (goodFacets.size() == 0)
-		{
-			if (!negativeMode)
-			{
-				negativeMode = true;
-				result = calculate(-u);
-				negativeMode = false;
-			}
-		}
 		else
 		{
 			// Not implemented yet!
 			++numNonImplemented;
 		}
 
-		return result;
+		return std::make_pair(distance, result);
 
 	}
 };
@@ -357,6 +343,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
 		double errorInitial = evaluateFit(A, data, simplexVertices);
+		double errorLast = 0.;
 
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
@@ -368,21 +355,25 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 			ConvexAffinePooling pool(simplexVertices, A, dualMode);
 			pool.init();
+			double error = 0.;
 
 			for (unsigned k = 0; k < data->size(); ++k)
 			{
-				VectorXd u = toEigenVector((*data)[k].direction);
-				MatrixXd e = pool.calculate(u);
-				ASSERT(isFinite(e));
-				VectorXd V = matrixToVector(u * e.transpose());
-				MatrixXd VT = V.transpose();
-				ASSERT(isFinite(VT));
 				double y = (*data)[k].value;
 
 				if (dualMode)
 				{
 					y = 1. / y;
 				}
+				VectorXd u = toEigenVector((*data)[k].direction);
+				std::pair<double, VectorXd> result = pool.calculateEandDistance(u);
+				double diff = result.first - y;
+				error += diff * diff;
+				MatrixXd e = result.second;
+				ASSERT(isFinite(e));
+				VectorXd V = matrixToVector(u * e.transpose());
+				MatrixXd VT = V.transpose();
+				ASSERT(isFinite(VT));
 				vector += V * y;
 				matrix += V * VT;
 			}
@@ -394,7 +385,6 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			ASSERT(A.rows() == 3);
 			ASSERT(A.cols() == numLiftingDimensions);
 
-			double error = evaluateFit(A, data, simplexVertices);
 			std::cout << "  Outer " << iOuter << " inner " << iInner
 				<< ", error: " << error << std::endl;
 
@@ -403,12 +393,13 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 				std::cout << "Early stop, algorithm doesn't coverge" << std::endl;
 				break;
 			}
+			errorLast = error;
 		}
 		double error = evaluateFit(A, data, simplexVertices);
-		if (error * errorBest < errorBest * errorBest)
+		if (errorLast * errorBest < errorBest * errorBest)
 		{
 			Abest = A;
-			errorBest = error;
+			errorBest = errorLast;
 		}
 		std::cout << "Error on iteration #" << iOuter << ": "
 			<< errorBest << " (current is " << error << ")"
@@ -488,7 +479,6 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
-#if 0
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
@@ -497,7 +487,6 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			generateSimplex(numLiftingDimensions), noisyData,
 			numLiftingDimensions, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
-#endif
 
 	auto polyhedronAMdual = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual), noisyData,
