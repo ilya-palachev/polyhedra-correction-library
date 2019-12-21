@@ -385,8 +385,10 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			ASSERT(A.rows() == 3);
 			ASSERT(A.cols() == numLiftingDimensions);
 
+#if 0
 			std::cout << "  Outer " << iOuter << " inner " << iInner
 				<< ", error: " << error << std::endl;
+#endif
 
 			if (error > 1000. * errorInitial)
 			{
@@ -455,6 +457,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	std::normal_distribution<double> noise(0., 0.001);
 	std::vector<SupportFunctionDataItem> exactItems;
 	std::vector<SupportFunctionDataItem> noisyItems;
+	std::vector<SupportFunctionDataItem> dualItems;
 
 	for (const auto &direction : directions)
 	{
@@ -466,8 +469,25 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 		noisyItems.push_back(SupportFunctionDataItem(direction,
 					noisyValue));
 	}
+
+	for (const auto &direction : directions)
+	{
+		double maxValue = 0.;
+		for (const auto &item : noisyItems)
+		{
+			auto point = (1. / item.value) * item.direction;
+			double value = point * direction;
+			if (value > maxValue)
+				maxValue = value;
+		}
+		dualItems.push_back(SupportFunctionDataItem(direction,
+					maxValue));
+	}
+
 	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
 	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
+	SupportFunctionDataPtr dualData(new SupportFunctionData(dualItems));
+
 
 	std::cout << "Preparing recoverer..." << std::endl;
 	RecovererPtr recoverer(new Recoverer());
@@ -483,15 +503,25 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
+#if 0
 	auto polyhedronAM = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensions), noisyData,
 			numLiftingDimensions, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+#endif
 
+	auto polyhedronAMdualStar = fitSimplexAffineImage(
+			generateSimplex(numLiftingDimensionsDual), dualData,
+			numLiftingDimensionsDual, false);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-star-recovered.ply")
+		<< polyhedronAMdualStar;
+
+#if 0
 	auto polyhedronAMdual = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual), noisyData,
 			numLiftingDimensionsDual, true);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply") << polyhedronAMdual;
+#endif
 
 	std::cout << "Number of implemented cases: " << numImplemented << std::endl;
 	std::cout << "Number of non-implemented cases: " << numNonImplemented << std::endl;
