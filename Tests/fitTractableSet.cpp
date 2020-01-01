@@ -516,6 +516,16 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-star-recovered.ply")
 		<< polyhedronAMdualStar;
 
+	std::vector<Plane_3> planes;
+	for (auto it = polyhedronAMdualStar.vertices_begin();
+			it != polyhedronAMdualStar.vertices_end(); ++it)
+	{
+		auto point = it->point();
+		planes.push_back(dual(point));
+	}
+	Polyhedron_3 intersection(planes.begin(), planes.end());
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-star-recovered.ply")
+		<< intersection;
 #if 0
 	auto polyhedronAMdual = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual), noisyData,
