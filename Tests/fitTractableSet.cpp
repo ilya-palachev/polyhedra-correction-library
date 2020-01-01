@@ -503,12 +503,10 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
-#if 0
 	auto polyhedronAM = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensions), noisyData,
 			numLiftingDimensions, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
-#endif
 
 	auto polyhedronAMdualStar = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual), dualData,
