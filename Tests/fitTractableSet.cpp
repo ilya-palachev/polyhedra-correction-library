@@ -448,6 +448,39 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 	return vertices;
 }
 
+static void printDual(Polyhedron_3 p, const char *filename)
+{
+	std::vector<Plane_3> planes;
+	for (auto it = p.vertices_begin(); it != p.vertices_end(); ++it)
+	{
+		auto point = it->point();
+		planes.push_back(dual(point));
+	}
+	Polyhedron_3 intersection(planes.begin(), planes.end());
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, filename) << intersection;
+}
+
+static std::vector<SupportFunctionDataItem> dual(
+		const std::vector<Vector3d> directions,
+		const std::vector<SupportFunctionDataItem> &items)
+{
+	std::vector<SupportFunctionDataItem> dualItems;
+	for (const auto &direction : directions)
+	{
+		double maxValue = 0.;
+		for (const auto &item : items)
+		{
+			auto point = (1. / item.value) * item.direction;
+			double value = point * direction;
+			if (value > maxValue)
+				maxValue = value;
+		}
+		dualItems.push_back(SupportFunctionDataItem(direction,
+					maxValue));
+	}
+	return dualItems;
+}
+
 void fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
@@ -457,7 +490,6 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	std::normal_distribution<double> noise(0., 0.001);
 	std::vector<SupportFunctionDataItem> exactItems;
 	std::vector<SupportFunctionDataItem> noisyItems;
-	std::vector<SupportFunctionDataItem> dualItems;
 
 	for (const auto &direction : directions)
 	{
@@ -470,24 +502,11 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 					noisyValue));
 	}
 
-	for (const auto &direction : directions)
-	{
-		double maxValue = 0.;
-		for (const auto &item : noisyItems)
-		{
-			auto point = (1. / item.value) * item.direction;
-			double value = point * direction;
-			if (value > maxValue)
-				maxValue = value;
-		}
-		dualItems.push_back(SupportFunctionDataItem(direction,
-					maxValue));
-	}
 
 	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
 	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
-	SupportFunctionDataPtr dualData(new SupportFunctionData(dualItems));
-
+	SupportFunctionDataPtr dualData(
+			new SupportFunctionData(dual(directions, noisyItems)));
 
 	std::cout << "Preparing recoverer..." << std::endl;
 	RecovererPtr recoverer(new Recoverer());
@@ -513,17 +532,22 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			numLiftingDimensionsDual, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-star-recovered.ply")
 		<< polyhedronAMdualStar;
+	printDual(polyhedronAMdualStar, "am-star-recovered.ply");
 
-	std::vector<Plane_3> planes;
-	for (auto it = polyhedronAMdualStar.vertices_begin();
-			it != polyhedronAMdualStar.vertices_end(); ++it)
-	{
-		auto point = it->point();
-		planes.push_back(dual(point));
-	}
-	Polyhedron_3 intersection(planes.begin(), planes.end());
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-star-recovered.ply")
-		<< intersection;
+	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
+			directions.end());
+	auto consistentData = polyhedron.calculateSupportData(directionsPCL);
+	SupportFunctionDataPtr consistentDualData(
+			new SupportFunctionData(dual(directions,
+					consistentData->getItems())));
+	auto polyhedronAMdualStarLSE = fitSimplexAffineImage(
+			generateSimplex(numLiftingDimensionsDual),
+			consistentDualData, numLiftingDimensionsDual, false);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT,
+			"am-dual-star-lse-recovered.ply")
+		<< polyhedronAMdualStarLSE;
+	printDual(polyhedronAMdualStarLSE, "am-star-lse-recovered.ply");
+
 #if 0
 	auto polyhedronAMdual = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual), noisyData,

@@ -146,6 +146,11 @@ public:
 	 */
 	SupportFunctionDataPtr removeEqual();
 
+	std::vector<SupportFunctionDataItem> getItems()
+	{
+		return items;
+	}
+
 	/**
 	 * Gets the vector of support directions.
 	 *
