@@ -154,7 +154,7 @@ void Recoverer::setFileNamePolyhedron(char *fileNamePolyhedron)
 
 #define ACCEPTED_TOL 1e-6
 
-static void printEstimationReport(SparseMatrix Q, VectorXd h0, VectorXd h)
+void printEstimationReport(VectorXd h0, VectorXd h)
 {
 	DEBUG_START;
 	if (h.size() != h0.size())
@@ -314,8 +314,7 @@ static Polyhedron_3 producePolyhedron(
 	{
 		/* Write the estimation report about this polyhedron. */
 		std::cout << "Report about \"" << title << "\":" << std::endl;
-		printEstimationReport(data->supportMatrix(),
-				data->supportVector(), values);
+		printEstimationReport(data->supportVector(), values);
 	}
 
 	DEBUG_END;
