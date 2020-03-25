@@ -402,13 +402,16 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 {
 	DEBUG_START;
 	std::vector<Vector_3> vertices = polyhedron.getVertices();
+	ASSERT(vertices.size() > 0);
 
 	std::vector<SupportFunctionDataItem> items;
 
+	int iDirection = 0;
+	int numNegative = 0;
 	for (auto &direction: directions)
 	{
 		Vector_3 vDirection = direction - CGAL::ORIGIN;
-		double scalarProductMax = 0.;
+		double scalarProductMax = -1e100;
 		Vector_3 supportPoint(0., 0., 0.);
 		int iVertexTangient = 0;
 		int iVertex = 0;
@@ -424,13 +427,26 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 			++iVertex;
 		}
 		tangientIDs_.push_back(iVertexTangient);
-		ASSERT(scalarProductMax > 0);
+		if (scalarProductMax <= 0.)
+		{
+			ERROR_PRINT("scalar product max: %lf", scalarProductMax);
+			std::cerr << "direction count: " << iDirection << std::endl;
+			std::cerr << "direction: " << direction << std::endl;
+			std::cerr << "support point: " << supportPoint << std::endl;
+			++numNegative;
+		}
+		// ASSERT(scalarProductMax > 0.);
 		SupportFunctionDataItem item(direction, scalarProductMax);
 		item.info = SupportFunctionDataItemInfoPtr(
 			new SupportFunctionDataItemInfo());
 		item.info->point = supportPoint;
 		items.push_back(item);
+		++iDirection;
 	}
+	if (numNegative > 0)
+		ERROR_PRINT("Number of negative: %d, total: %lu", numNegative, directions.size());
+	ASSERT(numNegative == 0);
+
 	DEBUG_END;
 	return SupportFunctionDataPtr(new SupportFunctionData(items));
 }
