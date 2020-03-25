@@ -431,6 +431,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	else
 	{
 		Polyhedron_3 hull;
+		// FIXME: CGAL has a bug: all planes in the hull are the same.
 		CGAL::convex_hull_3(points.begin(), points.end(), hull);
 		result = hull;
 	}
@@ -450,7 +451,7 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 	return vertices;
 }
 
-static void printDual(Polyhedron_3 p, const char *filename)
+static Polyhedron_3 dual(Polyhedron_3 p)
 {
 	std::vector<Plane_3> planes;
 	for (auto it = p.vertices_begin(); it != p.vertices_end(); ++it)
@@ -459,7 +460,7 @@ static void printDual(Polyhedron_3 p, const char *filename)
 		planes.push_back(dual(point));
 	}
 	Polyhedron_3 intersection(planes.begin(), planes.end());
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, filename) << intersection;
+	return intersection;
 }
 
 static std::vector<SupportFunctionDataItem> dual(
@@ -534,7 +535,8 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			numLiftingDimensionsDual, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-star-recovered.ply")
 		<< polyhedronAMdualStar;
-	printDual(polyhedronAMdualStar, "am-star-recovered.ply");
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-star-recovered.ply")
+		<< dual(polyhedronAMdualStar);
 
 	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
 			directions.end());
@@ -548,7 +550,9 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT,
 			"am-dual-star-lse-recovered.ply")
 		<< polyhedronAMdualStarLSE;
-	printDual(polyhedronAMdualStarLSE, "am-star-lse-recovered.ply");
+	auto polyhedronAMStarLSE = dual(polyhedronAMdualStarLSE);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT,
+			"am-star-lse-recovered.ply") << polyhedronAMStarLSE;
 
 #if 0
 	auto polyhedronAMdual = fitSimplexAffineImage(
@@ -557,9 +561,16 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply") << polyhedronAMdual;
 #endif
 
-	auto Pcurrent = polyhedronAMdualStarLSE;
-	for (int i = 0; i < 3; ++i)
+	auto Pcurrent = polyhedronAMStarLSE;
+	for (int i = 0; i < 10; ++i)
 	{
+		for (auto I = Pcurrent.facets_begin(), E = Pcurrent.facets_end();
+				                        I != E; ++I)
+		{
+			Plane_3 plane = I->plane();
+			std::cout << "plane: " << plane << std::endl;
+			// CHECK: planes should be not identical
+		}
 		SupportPolyhedronCorrector corrector(Pcurrent, noisyData);
 		Pcurrent = corrector.run();
 		auto name = std::string("corrected") + std::to_string(i) + ".ply";
