@@ -170,6 +170,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 			I != E; ++I)
 	{
 		Plane_3 plane = I->plane();
+		std::cout << "plane: " << plane << std::endl;
 		Vector_3 norm = plane.orthogonal_vector();
 		double length = sqrt(norm.squared_length());
 		norm = norm * (1. / length);
