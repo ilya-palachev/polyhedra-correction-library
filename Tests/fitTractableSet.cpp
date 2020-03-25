@@ -484,6 +484,16 @@ static std::vector<SupportFunctionDataItem> dual(
 	return dualItems;
 }
 
+void printEstimationReport(VectorXd h0, VectorXd h);
+
+void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
+{
+	VectorXd h0 = data->supportValues();
+	auto directions = data->supportDirections<PCLPoint_3>();
+	VectorXd h = p.calculateSupportData(directions)->supportValues();
+	printEstimationReport(h0, h);
+}
+
 void fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
@@ -528,6 +538,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedronAM = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensions), noisyData,
 			numLiftingDimensions, false);
+	printEstimationReport(polyhedronAM, noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
 
 	auto polyhedronAMdualStar = fitSimplexAffineImage(
@@ -535,8 +546,9 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			numLiftingDimensionsDual, false);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-star-recovered.ply")
 		<< polyhedronAMdualStar;
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-star-recovered.ply")
-		<< dual(polyhedronAMdualStar);
+	auto polyhedronAMstar = dual(polyhedronAMdualStar);
+	printEstimationReport(polyhedronAMstar, noisyData);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-star-recovered.ply") << polyhedronAMstar;
 
 	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
 			directions.end());
@@ -551,6 +563,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			"am-dual-star-lse-recovered.ply")
 		<< polyhedronAMdualStarLSE;
 	auto polyhedronAMStarLSE = dual(polyhedronAMdualStarLSE);
+	printEstimationReport(polyhedronAMStarLSE, noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT,
 			"am-star-lse-recovered.ply") << polyhedronAMStarLSE;
 
@@ -562,7 +575,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 #endif
 
 	auto Pcurrent = polyhedronAMStarLSE;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
 		for (auto I = Pcurrent.facets_begin(), E = Pcurrent.facets_end();
 				                        I != E; ++I)
@@ -573,6 +586,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 		}
 		SupportPolyhedronCorrector corrector(Pcurrent, noisyData);
 		Pcurrent = corrector.run();
+		printEstimationReport(Pcurrent, noisyData);
 		auto name = std::string("corrected") + std::to_string(i) + ".ply";
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name) << Pcurrent;
 	}
