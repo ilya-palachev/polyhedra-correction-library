@@ -25,8 +25,10 @@
 
 #include <iostream>
 #include <random>
-#include "PolyhedraCorrectionLibrary.h"
 #include <Eigen/LU>
+
+#include "PolyhedraCorrectionLibrary.h"
+#include "Recoverer/SupportPolyhedronCorrector.h"
 
 using Eigen::MatrixXd;
 
@@ -554,6 +556,15 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			numLiftingDimensionsDual, true);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply") << polyhedronAMdual;
 #endif
+
+	auto Pcurrent = polyhedronAMdualStarLSE;
+	for (int i = 0; i < 3; ++i)
+	{
+		SupportPolyhedronCorrector corrector(Pcurrent, noisyData);
+		Pcurrent = corrector.run();
+		auto name = std::string("corrected") + std::to_string(i) + ".ply";
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name) << Pcurrent;
+	}
 
 	std::cout << "Number of implemented cases: " << numImplemented << std::endl;
 	std::cout << "Number of non-implemented cases: " << numNonImplemented << std::endl;
