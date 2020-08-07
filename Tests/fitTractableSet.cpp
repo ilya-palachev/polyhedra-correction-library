@@ -498,6 +498,8 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
 	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
 
+	// 1. Gardner & Kiderlen LSE algorithm for noisy primal data
+
 	std::cout << "Preparing recoverer..." << std::endl;
 	RecovererPtr recoverer(new Recoverer());
 	recoverer->setEstimatorType(IPOPT_ESTIMATOR);
@@ -512,9 +514,15 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
+
+	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
+
+	// Approximate support function evaluations in dual space from the dual image
+	// of the recovered body
 	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
 			directions.end());
 	auto consistentDualData2 = dual(polyhedron).calculateSupportData(directionsPCL);
+
 	auto polyhedronAMdual2 = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual),
 			consistentDualData2, numLiftingDimensionsDual, false);
@@ -524,6 +532,10 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	printEstimationReport(polyhedronAM2, noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am2-recovered.ply")
 		<< polyhedronAM2;
+
+
+	// 3. Alternating minimization to recover the body with the shape estimated
+	//    at the previous step
 
 	auto Pcurrent = polyhedronAM2;
 	for (int i = 0; i < 2; ++i)
