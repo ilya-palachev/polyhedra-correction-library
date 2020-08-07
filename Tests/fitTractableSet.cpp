@@ -27,6 +27,7 @@
 #include <random>
 #include <Eigen/LU>
 
+#include "Common.h"
 #include "PolyhedraCorrectionLibrary.h"
 #include "Recoverer/SupportPolyhedronCorrector.h"
 
@@ -330,8 +331,25 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		<< " mode." << std::endl;
 
 	unsigned numOuterIterations = 100;
+	double numOuterIterationsEnv = -1.;
+	tryGetenvDouble("N_OUTER", numOuterIterationsEnv);
+	if (numOuterIterationsEnv > 0.)
+		numOuterIterations = static_cast<int>(numOuterIterationsEnv);
+
 	unsigned numInnerIterations = 100;
+	double numInnerIterationsEnv = -1;
+	tryGetenvDouble("N_INNER", numInnerIterationsEnv);
+	if (numInnerIterationsEnv > 0.)
+		numInnerIterations = static_cast<int>(numInnerIterationsEnv);
+
 	double regularizer = 0.5;
+	tryGetenvDouble("REGULARIZER", regularizer);
+
+	std::cout << "The following hyperparameters are used:" << std::endl;
+	std::cout << "  Number of outer iterations: " << numOuterIterations << std::endl;
+	std::cout << "  Number of inner iterations: " << numInnerIterations << std::endl;
+	std::cout << "                 Regularizer: " << regularizer << std::endl;
+
 	double errorBest = -1.;
 	MatrixXd Abest;
 
@@ -387,10 +405,9 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			ASSERT(A.rows() == 3);
 			ASSERT(A.cols() == numLiftingDimensions);
 
-#if 0
-			std::cout << "  Outer " << iOuter << " inner " << iInner
-				<< ", error: " << error << std::endl;
-#endif
+			if (getenv("DEBUG_AM"))
+				std::cout << "  Outer " << iOuter << " inner " << iInner
+					<< ", error: " << error << std::endl;
 
 			if (error > 1000. * errorInitial)
 			{
@@ -533,6 +550,8 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am2-recovered.ply")
 		<< polyhedronAM2;
 
+	if (getenv("EARLY_STOP"))
+		return;
 
 	// 3. Alternating minimization to recover the body with the shape estimated
 	//    at the previous step
