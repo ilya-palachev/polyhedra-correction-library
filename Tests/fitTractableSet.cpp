@@ -558,6 +558,14 @@ std::vector<Vector3d> calculateDualTargetPoints(std::vector<Vector3d> &targetPoi
 	return dualTargetPoints;
 }
 
+double calculateError(SupportFunctionDataPtr a, SupportFunctionDataPtr b)
+{
+	auto valuesA = a->supportValues();
+	auto valuesB = b->supportValues();
+	auto diff = valuesB - valuesA;
+	return diff.squaredNorm();
+}
+
 double fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
@@ -565,19 +573,21 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 {
 	SupportFunctionDataPtr noisyData;
 	SupportFunctionDataPtr dualData;
+	SupportFunctionDataPtr dualDataNotNoisy;
 	double variance = 0.001;
+	tryGetenvDouble("NOISE_VARIANCE", variance);
 
 	if (getenv("GAUGE_MODE"))
 	{
 		// 1A. Calculate gauge function of primal body through support function of dual body
 		auto dualTargetPoints = calculateDualTargetPoints(targetPoints);
 		dualData = generateSupportData(directions, dualTargetPoints, variance);
-		noisyData = dualData; // This is used for error calculation only
+		dualDataNotNoisy = generateSupportData(directions, dualTargetPoints, 0.);
 	}
 	else
 	{
 		// 1B. Provisional estimate for dual support function evaluations
-		auto noisyData = generateSupportData(directions, targetPoints, variance);
+		noisyData = generateSupportData(directions, targetPoints, variance);
 		dualData = calculateProvisionalEstimate(directions, noisyData, title);
 	}
 
@@ -592,7 +602,15 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual2-recovered.ply")
 		<< polyhedronAMdual2;
 	auto polyhedronAM2 = dual(polyhedronAMdual2);
-	printEstimationReport(polyhedronAM2, noisyData);
+	if (getenv("GAUGE_MODE"))
+	{
+		printEstimationReport(polyhedronAMdual2, dualData);
+		std::vector<PCLPoint_3> directionsPCL(directions.begin(),
+				                        directions.end());
+		return calculateError(dualDataNotNoisy, polyhedronAMdual2.calculateSupportData(directionsPCL));
+	}
+	else
+		printEstimationReport(polyhedronAM2, noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am2-recovered.ply")
 		<< polyhedronAM2;
 
