@@ -491,6 +491,33 @@ void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
 	printEstimationReport(h0, h);
 }
 
+SupportFunctionDataPtr
+calculateProvisionalEstimate(std::vector<Vector3d> &directions,
+		SupportFunctionDataPtr noisyData, const char *title)
+{
+	// Gardner & Kiderlen LSE algorithm for noisy primal data
+
+	std::cout << "Preparing recoverer..." << std::endl;
+	RecovererPtr recoverer(new Recoverer());
+	recoverer->setEstimatorType(IPOPT_ESTIMATOR);
+	recoverer->setProblemType(ESTIMATION_PROBLEM_NORM_L_2);
+	recoverer->enableContoursConvexification();
+	recoverer->enableMatrixScaling();
+	recoverer->enableBalancing();
+	globalPCLDumper.setNameBase(title);
+	globalPCLDumper.enableVerboseMode();
+
+	std::cout << "Running Ipopt estimator..." << std::endl;
+	auto polyhedron = recoverer->run(noisyData);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
+
+	// Approximate support function evaluations in dual space from the dual image
+	// of the recovered body
+	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
+			directions.end());
+	return dual(polyhedron).calculateSupportData(directionsPCL);
+}
+
 double fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
@@ -511,34 +538,15 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	}
 	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
 
-	// 1. Gardner & Kiderlen LSE algorithm for noisy primal data
+	// 1. Provisional estimate for dual support function evaluations
 
-	std::cout << "Preparing recoverer..." << std::endl;
-	RecovererPtr recoverer(new Recoverer());
-	recoverer->setEstimatorType(IPOPT_ESTIMATOR);
-	recoverer->setProblemType(ESTIMATION_PROBLEM_NORM_L_2);
-	recoverer->enableContoursConvexification();
-	recoverer->enableMatrixScaling();
-	recoverer->enableBalancing();
-	globalPCLDumper.setNameBase(title);
-	globalPCLDumper.enableVerboseMode();
-
-	std::cout << "Running Ipopt estimator..." << std::endl;
-	auto polyhedron = recoverer->run(noisyData);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
-
+	auto consistentDualData = calculateProvisionalEstimate(directions, noisyData, title);
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
-	// Approximate support function evaluations in dual space from the dual image
-	// of the recovered body
-	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
-			directions.end());
-	auto consistentDualData2 = dual(polyhedron).calculateSupportData(directionsPCL);
-
 	auto pair = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual),
-			consistentDualData2, numLiftingDimensionsDual, false);
+			consistentDualData, numLiftingDimensionsDual, false);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
