@@ -498,22 +498,17 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 {
 	std::default_random_engine generator;
 	std::normal_distribution<double> noise(0., 0.001);
-	std::vector<SupportFunctionDataItem> exactItems;
 	std::vector<SupportFunctionDataItem> noisyItems;
 
 	for (const auto &direction : directions)
 	{
 		double value = calculateSupportFunction(targetPoints, direction).first;
 		ASSERT(value > 0.);
-		exactItems.push_back(SupportFunctionDataItem(direction, value));
 		double noisyValue =  value + noise(generator);
 		ASSERT(noisyValue > 0.);
 		noisyItems.push_back(SupportFunctionDataItem(direction,
 					noisyValue));
 	}
-
-
-	SupportFunctionDataPtr exactData(new SupportFunctionData(exactItems));
 	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
 
 	// 1. Gardner & Kiderlen LSE algorithm for noisy primal data
