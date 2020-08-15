@@ -518,14 +518,15 @@ calculateProvisionalEstimate(std::vector<Vector3d> &directions,
 	return dual(polyhedron).calculateSupportData(directionsPCL);
 }
 
-double fit(unsigned n, std::vector<Vector3d> &directions,
-		unsigned numLiftingDimensions,
-		unsigned numLiftingDimensionsDual,
-		std::vector<Vector3d> &targetPoints, const char *title)
+SupportFunctionDataPtr
+generateSupportData(std::vector<Vector3d> &directions,
+		std::vector<Vector3d> &targetPoints,
+		double variance)
 {
+
 	std::default_random_engine generator;
-	std::normal_distribution<double> noise(0., 0.001);
-	std::vector<SupportFunctionDataItem> noisyItems;
+	std::normal_distribution<double> noise(0., variance);
+	std::vector<SupportFunctionDataItem> items;
 
 	for (const auto &direction : directions)
 	{
@@ -533,10 +534,18 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 		ASSERT(value > 0.);
 		double noisyValue =  value + noise(generator);
 		ASSERT(noisyValue > 0.);
-		noisyItems.push_back(SupportFunctionDataItem(direction,
-					noisyValue));
+		items.push_back(SupportFunctionDataItem(direction, noisyValue));
 	}
-	SupportFunctionDataPtr noisyData(new SupportFunctionData(noisyItems));
+	SupportFunctionDataPtr data(new SupportFunctionData(items));
+	return data;
+}
+
+double fit(unsigned n, std::vector<Vector3d> &directions,
+		unsigned numLiftingDimensions,
+		unsigned numLiftingDimensionsDual,
+		std::vector<Vector3d> &targetPoints, const char *title)
+{
+	auto noisyData = generateSupportData(directions, targetPoints, 0.001);
 
 	// 1. Provisional estimate for dual support function evaluations
 
