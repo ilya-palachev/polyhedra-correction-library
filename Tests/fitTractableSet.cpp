@@ -540,22 +540,52 @@ generateSupportData(std::vector<Vector3d> &directions,
 	return data;
 }
 
+std::vector<Vector3d> calculateDualTargetPoints(std::vector<Vector3d> &targetPoints)
+{
+	std::vector<Plane_3> planes;
+	for (const auto &point : targetPoints)
+	{
+		planes.push_back(dual(point));
+	}
+	Polyhedron_3 dualBody(planes.begin(), planes.end());
+
+	std::vector<Vector3d> dualTargetPoints;
+	for (auto v = dualBody.vertices_begin(); v != dualBody.vertices_end(); ++v)
+	{
+		dualTargetPoints.push_back(Vector3d(v->point()));
+	}
+
+	return dualTargetPoints;
+}
+
 double fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
 		std::vector<Vector3d> &targetPoints, const char *title)
 {
-	auto noisyData = generateSupportData(directions, targetPoints, 0.001);
+	SupportFunctionDataPtr noisyData;
+	SupportFunctionDataPtr dualData;
+	double variance = 0.001;
 
-	// 1. Provisional estimate for dual support function evaluations
-
-	auto consistentDualData = calculateProvisionalEstimate(directions, noisyData, title);
+	if (getenv("GAUGE_MODE"))
+	{
+		// 1A. Calculate gauge function of primal body through support function of dual body
+		auto dualTargetPoints = calculateDualTargetPoints(targetPoints);
+		dualData = generateSupportData(directions, dualTargetPoints, variance);
+		noisyData = dualData; // This is used for error calculation only
+	}
+	else
+	{
+		// 1B. Provisional estimate for dual support function evaluations
+		auto noisyData = generateSupportData(directions, targetPoints, variance);
+		dualData = calculateProvisionalEstimate(directions, noisyData, title);
+	}
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
 	auto pair = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual),
-			consistentDualData, numLiftingDimensionsDual, false);
+			dualData, numLiftingDimensionsDual, false);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
