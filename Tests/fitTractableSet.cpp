@@ -323,7 +323,8 @@ public:
 	}
 };
 
-Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
+std::pair<Polyhedron_3, double>
+fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		SupportFunctionDataPtr data,
 		unsigned numLiftingDimensions, bool dualMode)
 {
@@ -453,7 +454,7 @@ Polyhedron_3 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		result = hull;
 	}
 
-	return result;
+	return std::make_pair(result, errorBest);
 }
 
 static std::vector<VectorXd> generateSimplex(unsigned n)
@@ -490,7 +491,7 @@ void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
 	printEstimationReport(h0, h);
 }
 
-void fit(unsigned n, std::vector<Vector3d> &directions,
+double fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
 		std::vector<Vector3d> &targetPoints, const char *title)
@@ -540,9 +541,12 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 			directions.end());
 	auto consistentDualData2 = dual(polyhedron).calculateSupportData(directionsPCL);
 
-	auto polyhedronAMdual2 = fitSimplexAffineImage(
+	auto pair = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual),
 			consistentDualData2, numLiftingDimensionsDual, false);
+	auto polyhedronAMdual2 = pair.first;
+	double error = pair.second;
+	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual2-recovered.ply")
 		<< polyhedronAMdual2;
 	auto polyhedronAM2 = dual(polyhedronAMdual2);
@@ -551,7 +555,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 		<< polyhedronAM2;
 
 	if (getenv("EARLY_STOP"))
-		return;
+		return error;
 
 	// 3. Alternating minimization to recover the body with the shape estimated
 	//    at the previous step
@@ -575,6 +579,7 @@ void fit(unsigned n, std::vector<Vector3d> &directions,
 
 	std::cout << "Number of implemented cases: " << numImplemented << std::endl;
 	std::cout << "Number of non-implemented cases: " << numNonImplemented << std::endl;
+	return error;
 }
 
 int main(int argc, char **argv)
@@ -594,11 +599,26 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	std::cout << "Preparing data..." << std::endl;
-	auto directions = generateDirections(n);
-
 	auto lInfinityBall = generateLInfinityBall();
-	fit(n, directions, 8, 6, lInfinityBall, "cube");
+	if (!getenv("RANGE_MODE"))
+	{
+		std::cout << "Preparing data..." << std::endl;
+		auto directions = generateDirections(n);
+
+		double error = fit(n, directions, 8, 6, lInfinityBall, "cube");
+		std::cout << "RESULT " << n << " " << error << std::endl;
+		return EXIT_SUCCESS;
+	}
+
+	for (int n_current = 10; n_current <= n; n_current += 10)
+	{
+		std::cout << "Preparing data..." << std::endl;
+		auto directions = generateDirections(n_current);
+
+		double error = fit(n_current, directions, 8, 6, lInfinityBall, "cube");
+		std::cout << "RESULT " << n_current << " " << error << std::endl;
+	}
+
 
 	//auto l1ball = generateL1Ball();
 	//fit(n, directions, 6, 8, l1ball, "octahedron");
