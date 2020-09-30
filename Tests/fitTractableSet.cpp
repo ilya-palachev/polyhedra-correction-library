@@ -603,6 +603,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual2-recovered.ply")
 		<< polyhedronAMdual2;
 	auto polyhedronAM2 = dual(polyhedronAMdual2);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am2-recovered.ply")
+		<< polyhedronAM2;
+
 	if (getenv("GAUGE_MODE"))
 	{
 		printEstimationReport(polyhedronAMdual2, dualData);
@@ -612,8 +615,6 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	}
 	else
 		printEstimationReport(polyhedronAM2, noisyData);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am2-recovered.ply")
-		<< polyhedronAM2;
 
 	if (getenv("EARLY_STOP"))
 		return error;
