@@ -493,7 +493,7 @@ void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
 
 SupportFunctionDataPtr
 calculateProvisionalEstimate(std::vector<Vector3d> &directions,
-		SupportFunctionDataPtr noisyData, const char *title)
+		SupportFunctionDataPtr noisyData)
 {
 	// Gardner & Kiderlen LSE algorithm for noisy primal data
 
@@ -504,8 +504,6 @@ calculateProvisionalEstimate(std::vector<Vector3d> &directions,
 	recoverer->enableContoursConvexification();
 	recoverer->enableMatrixScaling();
 	recoverer->enableBalancing();
-	globalPCLDumper.setNameBase(title);
-	globalPCLDumper.enableVerboseMode();
 
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
@@ -577,6 +575,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	double variance = 0.001;
 	tryGetenvDouble("NOISE_VARIANCE", variance);
 
+	globalPCLDumper.setNameBase(title);
+	globalPCLDumper.enableVerboseMode();
+
 	if (getenv("GAUGE_MODE"))
 	{
 		// 1A. Calculate gauge function of primal body through support function of dual body
@@ -588,7 +589,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	{
 		// 1B. Provisional estimate for dual support function evaluations
 		noisyData = generateSupportData(directions, targetPoints, variance);
-		dualData = calculateProvisionalEstimate(directions, noisyData, title);
+		dualData = calculateProvisionalEstimate(directions, noisyData);
 	}
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
