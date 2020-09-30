@@ -88,6 +88,22 @@ std::vector<Vector3d> generateLInfinityBall()
 	return cube;
 }
 
+std::vector<Vector3d> generateCubeCut()
+{
+	std::vector<Vector3d> cube;
+	cube.push_back(Vector3d(1., 1., 0.5));
+	cube.push_back(Vector3d(1., 0.5, 1.));
+	cube.push_back(Vector3d(0.5, 1., 1.));
+	cube.push_back(Vector3d(1., -1., 1.));
+	cube.push_back(Vector3d(-1., -1., 1.));
+	cube.push_back(Vector3d(-1., 1., 1.));
+	cube.push_back(Vector3d(1., 1., -1.));
+	cube.push_back(Vector3d(1., -1., -1.));
+	cube.push_back(Vector3d(-1., -1., -1.));
+	cube.push_back(Vector3d(-1., 1., -1.));
+	return cube;
+}
+
 std::pair<double, Vector3d>
 calculateSupportFunction(const std::vector<Vector3d> &vertices,
 			const Vector3d &direction)
@@ -646,9 +662,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 int main(int argc, char **argv)
 {
-	if (argc != 2)
+	if (argc != 3)
 	{
-		std::cerr << "Expected 1 argument" << std::endl;
+		std::cerr << "Expected 2 arguments" << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -661,13 +677,40 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	auto lInfinityBall = generateLInfinityBall();
+	std::vector<Vector3d> body;
+	unsigned numLiftingDimensions = 0, numLiftingDimensionsDual = 0;
+	const char *title = argv[2];
+	if (!strcmp("cube", title))
+	{
+		body = generateLInfinityBall();
+		numLiftingDimensions = 8;
+		numLiftingDimensionsDual = 6;
+	}
+	else if (!strcmp("cubecut", title))
+	{
+		body = generateCubeCut();
+		numLiftingDimensions = 10;
+		numLiftingDimensionsDual = 7;
+	}
+	else if (!strcmp("octahedron", title))
+	{
+		body = generateL1Ball();
+		numLiftingDimensions = 6;
+		numLiftingDimensionsDual = 8;
+	}
+	else
+	{
+		std::cerr << "Unknown body" << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	if (!getenv("RANGE_MODE"))
 	{
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n);
 
-		double error = fit(n, directions, 8, 6, lInfinityBall, "cube");
+		double error = fit(n, directions, numLiftingDimensions,
+				numLiftingDimensionsDual, body, title);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -677,13 +720,10 @@ int main(int argc, char **argv)
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n_current);
 
-		double error = fit(n_current, directions, 8, 6, lInfinityBall, "cube");
+		double error = fit(n_current, directions, numLiftingDimensions,
+				numLiftingDimensionsDual, body, title);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
-
-
-	//auto l1ball = generateL1Ball();
-	//fit(n, directions, 6, 8, l1ball, "octahedron");
 
 	return EXIT_SUCCESS;
 }
