@@ -32,13 +32,15 @@
 #include "Recoverer/IpoptSupportFunctionEstimator.h"
 
 IpoptSupportFunctionEstimator::IpoptSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data) :
+		SupportFunctionEstimationDataPtr data,
+		const char *linearSolver) :
 	SupportFunctionEstimator(data),
 	numVariablesX(),
 	numVariablesEpsilon(),
 	numConsistencyConditions(),
 	numLocalityConditions(),
-	solution()
+	solution(),
+	linearSolver_(linearSolver)
 {
 	DEBUG_START;
 	numVariablesX = data->numValues();
@@ -556,7 +558,7 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	//app->Options()->SetNumericValue("tol", 1e-3);
 	//app->Options()->SetNumericValue("acceptable_tol", 1e-3);
 	//app->Options()->SetIntegerValue("max_iter", 3000000);
-	app->Options()->SetStringValue("linear_solver", "ma57");
+	app->Options()->SetStringValue("linear_solver", linearSolver_);
 
 	/* Ask Ipopt to solve the problem */
 	status = app->OptimizeTNLP(this);

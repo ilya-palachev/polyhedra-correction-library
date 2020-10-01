@@ -132,6 +132,8 @@ private:
 	bool ifShadowHeuristics_;
 
 	bool ifContourMode_;
+
+	const char *linearSolver_;
 public:
 
 	/**
@@ -236,6 +238,11 @@ public:
 	void enableContourMode()
 	{
 		ifContourMode_ = true;
+	}
+
+	void setLinearSolver(const char *linearSolver)
+	{
+		linearSolver_ = linearSolver;
 	}
 
 	/**

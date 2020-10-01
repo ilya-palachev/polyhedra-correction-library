@@ -57,13 +57,16 @@ private:
 
 	/** The solution returned by Ipopt. */
 	VectorXd solution;
+
+	const char *linearSolver_;
 public:
 	/**
 	 * Default constructor
 	 *
 	 * @param data	Support function estimation data (input)
 	 */
-	IpoptSupportFunctionEstimator(SupportFunctionEstimationDataPtr data);
+	IpoptSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
+			const char *linearSolver);
 
 	/** Default destructor. */
 	~IpoptSupportFunctionEstimator();

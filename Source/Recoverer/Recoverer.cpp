@@ -77,7 +77,8 @@ Recoverer::Recoverer() :
 	threshold_(0.),
 	zMinimalNorm_(0.),
 	ifShadowHeuristics_(false),
-	ifContourMode_(false)
+	ifContourMode_(false),
+	linearSolver_("ma57")
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -206,7 +207,8 @@ void printEstimationReport(VectorXd h0, VectorXd h)
 static SupportFunctionEstimator *constructEstimator(
 		SupportFunctionEstimationDataPtr data,
 		RecovererEstimatorType estimatorType,
-		EstimationProblemNorm problemType)
+		EstimationProblemNorm problemType,
+		const char *linearSolver)
 {
 	DEBUG_START;
 
@@ -225,7 +227,9 @@ static SupportFunctionEstimator *constructEstimator(
 	ESTIMATOR_CASE(TSNNLS_ESTIMATOR, TsnnlsSupportFunctionEstimator);
 #endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
-	ESTIMATOR_CASE(IPOPT_ESTIMATOR, IpoptSupportFunctionEstimator);
+	case IPOPT_ESTIMATOR:
+		estimator = new IpoptSupportFunctionEstimator(data, linearSolver);
+		break;
 #endif /* USE_IPOPT */
 #ifdef USE_GLPK
 	ESTIMATOR_CASE(GLPK_ESTIMATOR, GlpkSupportFunctionEstimator);
@@ -423,7 +427,7 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	/* 2. Build support function estimator. */
 	pushTimer("Estimation");
 	SupportFunctionEstimator *estimator = constructEstimator(SEData,
-			estimatorType, problemType_);
+			estimatorType, problemType_, linearSolver_);
 	if (ifShadowHeuristics_)
 		estimator->enableShadowHeuristics();
 
