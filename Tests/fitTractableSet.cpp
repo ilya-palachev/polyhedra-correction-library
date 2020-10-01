@@ -520,6 +520,7 @@ calculateProvisionalEstimate(std::vector<Vector3d> &directions,
 	recoverer->enableContoursConvexification();
 	recoverer->enableMatrixScaling();
 	recoverer->enableBalancing();
+	recoverer->setLinearSolver("ma27");
 
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
