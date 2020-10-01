@@ -104,6 +104,33 @@ std::vector<Vector3d> generateCubeCut()
 	return cube;
 }
 
+std::vector<Vector3d> generateDodecahedron()
+{
+	std::vector<Vector3d> body;
+	body.push_back(Vector3d(1., 1., 1.));
+	body.push_back(Vector3d(1., 1., -1.));
+	body.push_back(Vector3d(1., -1., 1.));
+	body.push_back(Vector3d(1., -1., -1.));
+	body.push_back(Vector3d(-1., 1., 1.));
+	body.push_back(Vector3d(-1., 1., -1.));
+	body.push_back(Vector3d(-1., -1., 1.));
+	body.push_back(Vector3d(-1., -1., -1.));
+	double phi = 0.5 + sqrt(1.2);
+	body.push_back(Vector3d(0., 1. / phi, phi));
+	body.push_back(Vector3d(0., 1. / phi, -phi));
+	body.push_back(Vector3d(0., -1. / phi, phi));
+	body.push_back(Vector3d(0., -1. / phi, -phi));
+	body.push_back(Vector3d(1. / phi, phi, 0));
+	body.push_back(Vector3d(1. / phi, -phi, 0));
+	body.push_back(Vector3d(-1. / phi, phi, 0));
+	body.push_back(Vector3d(-1. / phi, -phi, 0));
+	body.push_back(Vector3d(phi, 0, 1. / phi));
+	body.push_back(Vector3d(phi, 0, -1. / phi));
+	body.push_back(Vector3d(-phi, 0, 1. / phi));
+	body.push_back(Vector3d(-phi, 0, -1. / phi));
+	return body;
+}
+
 std::pair<double, Vector3d>
 calculateSupportFunction(const std::vector<Vector3d> &vertices,
 			const Vector3d &direction)
@@ -702,6 +729,12 @@ int main(int argc, char **argv)
 		body = generateL1Ball();
 		numLiftingDimensions = 6;
 		numLiftingDimensionsDual = 8;
+	}
+	else if (!strcmp("dodecahedron", title))
+	{
+		body = generateDodecahedron();
+		numLiftingDimensions = 20;
+		numLiftingDimensionsDual = 12;
 	}
 	else
 	{
