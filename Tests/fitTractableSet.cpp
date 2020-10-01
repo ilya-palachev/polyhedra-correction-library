@@ -509,7 +509,8 @@ void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
 
 SupportFunctionDataPtr
 calculateProvisionalEstimate(std::vector<Vector3d> &directions,
-		SupportFunctionDataPtr noisyData)
+		SupportFunctionDataPtr noisyData,
+		const char *linearSolver)
 {
 	// Gardner & Kiderlen LSE algorithm for noisy primal data
 
@@ -520,7 +521,8 @@ calculateProvisionalEstimate(std::vector<Vector3d> &directions,
 	recoverer->enableContoursConvexification();
 	recoverer->enableMatrixScaling();
 	recoverer->enableBalancing();
-	recoverer->setLinearSolver("ma27");
+	std::cout << "Using linear solver " << linearSolver << std::endl;
+	recoverer->setLinearSolver(linearSolver);
 
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
@@ -584,7 +586,8 @@ double calculateError(SupportFunctionDataPtr a, SupportFunctionDataPtr b)
 double fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
-		std::vector<Vector3d> &targetPoints, const char *title)
+		std::vector<Vector3d> &targetPoints, const char *title,
+		const char *linearSolver)
 {
 	SupportFunctionDataPtr noisyData;
 	SupportFunctionDataPtr dualData;
@@ -606,7 +609,8 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	{
 		// 1B. Provisional estimate for dual support function evaluations
 		noisyData = generateSupportData(directions, targetPoints, variance);
-		dualData = calculateProvisionalEstimate(directions, noisyData);
+		dualData = calculateProvisionalEstimate(directions, noisyData,
+				linearSolver);
 	}
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
@@ -663,9 +667,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 int main(int argc, char **argv)
 {
-	if (argc != 3)
+	if (argc != 4)
 	{
-		std::cerr << "Expected 2 arguments" << std::endl;
+		std::cerr << "Expected 3 arguments" << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -705,13 +709,16 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	const char *linearSolver = argv[3];
+
 	if (!getenv("RANGE_MODE"))
 	{
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n);
 
 		double error = fit(n, directions, numLiftingDimensions,
-				numLiftingDimensionsDual, body, title);
+				numLiftingDimensionsDual, body, title,
+				linearSolver);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -722,7 +729,8 @@ int main(int argc, char **argv)
 		auto directions = generateDirections(n_current);
 
 		double error = fit(n_current, directions, numLiftingDimensions,
-				numLiftingDimensionsDual, body, title);
+				numLiftingDimensionsDual, body, title,
+				linearSolver);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
 
