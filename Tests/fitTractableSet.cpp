@@ -136,6 +136,7 @@ std::pair<double, Vector3d>
 calculateSupportFunction(const std::vector<Vector3d> &vertices,
 			const Vector3d &direction)
 {
+	ASSERT(vertices.size() > 0);
 	double maxProduct = vertices[0] * direction;
 	Vector3d tangient = vertices[0];
 	for (const Vector3d &vertex : vertices)
@@ -756,7 +757,7 @@ int runSyntheticCase(char **argv)
 
 		double error = fit(n, directions, numLiftingDimensions,
 				numLiftingDimensionsDual, body, title,
-				linearSolver, false, nullptr);
+				linearSolver, true, nullptr);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -768,7 +769,7 @@ int runSyntheticCase(char **argv)
 
 		double error = fit(n_current, directions, numLiftingDimensions,
 				numLiftingDimensionsDual, body, title,
-				linearSolver, false, nullptr);
+				linearSolver, true, nullptr);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
 
@@ -818,7 +819,7 @@ int runRealCase(char **argv)
 	std::vector<Vector3d> fake;
 	double error = fit(directions.size(), directions, numVertices,
 			numFacets, fake, title, linearSolver,
-			true, data);
+			false, data);
 	// FIXME: Shift the body back by this vector:
 	std::cout << "Balancing vector: " << balancingVector << std::endl;
 	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
