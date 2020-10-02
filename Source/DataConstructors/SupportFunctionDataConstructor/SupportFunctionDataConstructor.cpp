@@ -445,7 +445,6 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 	}
 	if (numNegative > 0)
 		ERROR_PRINT("Number of negative: %d, total: %lu", numNegative, directions.size());
-	ASSERT(numNegative == 0);
 
 	DEBUG_END;
 	return SupportFunctionDataPtr(new SupportFunctionData(items));

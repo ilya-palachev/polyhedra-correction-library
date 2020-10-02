@@ -530,8 +530,12 @@ void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
 {
 	VectorXd h0 = data->supportValues();
 	auto directions = data->supportDirections<PCLPoint_3>();
+	std::cout << "Calculating support values..." << std::endl;
 	VectorXd h = p.calculateSupportData(directions)->supportValues();
+	std::cout << "Calculating support values... Done" << std::endl;
+	std::cout << "Printing estimation report..." << std::endl;
 	printEstimationReport(h0, h);
+	std::cout << "Printing estimation report... Done" << std::endl;
 }
 
 SupportFunctionDataPtr
