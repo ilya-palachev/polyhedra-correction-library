@@ -30,6 +30,7 @@
 #include "Common.h"
 #include "PolyhedraCorrectionLibrary.h"
 #include "Recoverer/SupportPolyhedronCorrector.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 
 using Eigen::MatrixXd;
 
@@ -618,9 +619,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 		unsigned numLiftingDimensions,
 		unsigned numLiftingDimensionsDual,
 		std::vector<Vector3d> &targetPoints, const char *title,
-		const char *linearSolver)
+		const char *linearSolver, bool synthetic,
+		SupportFunctionDataPtr noisyData)
 {
-	SupportFunctionDataPtr noisyData;
 	SupportFunctionDataPtr dualData;
 	SupportFunctionDataPtr dualDataNotNoisy;
 	double variance = 0.001;
@@ -631,10 +632,16 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 	if (getenv("GAUGE_MODE"))
 	{
+		ASSERT(synthetic);
 		// 1A. Calculate gauge function of primal body through support function of dual body
 		auto dualTargetPoints = calculateDualTargetPoints(targetPoints);
 		dualData = generateSupportData(directions, dualTargetPoints, variance);
 		dualDataNotNoisy = generateSupportData(directions, dualTargetPoints, 0.);
+	}
+	else if (!synthetic)
+	{
+		dualData = calculateProvisionalEstimate(directions, noisyData,
+				linearSolver);
 	}
 	else
 	{
@@ -696,14 +703,8 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	return error;
 }
 
-int main(int argc, char **argv)
+int runSyntheticCase(char **argv)
 {
-	if (argc != 4)
-	{
-		std::cerr << "Expected 3 arguments" << std::endl;
-		return EXIT_FAILURE;
-	}
-
 	int n = atoi(argv[1]);
 
 	if (n <= 0)
@@ -755,7 +756,7 @@ int main(int argc, char **argv)
 
 		double error = fit(n, directions, numLiftingDimensions,
 				numLiftingDimensionsDual, body, title,
-				linearSolver);
+				linearSolver, false, nullptr);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -767,9 +768,73 @@ int main(int argc, char **argv)
 
 		double error = fit(n_current, directions, numLiftingDimensions,
 				numLiftingDimensionsDual, body, title,
-				linearSolver);
+				linearSolver, false, nullptr);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
 
 	return EXIT_SUCCESS;
+}
+
+int runRealCase(char **argv)
+{
+	const char *path = argv[1];
+	int numVertices = atoi(argv[2]);
+	if (numVertices <= 0)
+	{
+		std::cerr << "Expected positive number of vertices"
+			<< std::endl;
+		return EXIT_FAILURE;
+	}
+	int numFacets = atoi(argv[3]);
+	if (numFacets <= 0)
+	{
+		std::cerr << "Expected positive number of facets"
+			<< std::endl;
+		return EXIT_FAILURE;
+	}
+
+
+	const char *linearSolver = argv[4];
+
+	const char *title = "diamond";
+
+	/* Create fake empty polyhedron. */
+        PolyhedronPtr p(new Polyhedron());
+
+        /* Create shadow contour data and associate p with it. */
+        ShadowContourDataPtr SCData(new ShadowContourData(p));
+
+        /* Read shadow contours data from file. */
+        SCData->fscanDefault(path);
+
+	SupportFunctionDataConstructor constructor;
+
+	constructor.enableBalanceShadowContours();
+	constructor.enableConvexifyShadowContour();
+	SupportFunctionDataPtr data = constructor.run(SCData, SCData->numContours);
+	Vector3d balancingVector = constructor.balancingVector();
+
+	auto directions = data->supportDirections<Vector3d>();
+	std::vector<Vector3d> fake;
+	double error = fit(directions.size(), directions, numVertices,
+			numFacets, fake, title, linearSolver,
+			true, data);
+	// FIXME: Shift the body back by this vector:
+	std::cout << "Balancing vector: " << balancingVector << std::endl;
+	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
+
+	return EXIT_SUCCESS;
+}
+
+int main(int argc, char **argv)
+{
+	if (argc == 4)
+		return runSyntheticCase(argv);
+	if (argc == 5)
+		return runRealCase(argv);
+
+	std::cerr << "Expected 4 or 5 arguments:" << std::endl;
+	std::cerr << "\t" << argv[0] << "measurements_number body_name linear_solver" << std::endl;
+	std::cerr << "\t" << argv[0] << "shadow_contours_path n_vertices n_facets liner_solver" << std::endl;
+	return EXIT_FAILURE;
 }
