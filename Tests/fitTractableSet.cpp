@@ -391,10 +391,20 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	double regularizer = 0.5;
 	tryGetenvDouble("REGULARIZER", regularizer);
 
+	double eta = 0.1;
+	tryGetenvDouble("ETA", eta);
+
 	std::cout << "The following hyperparameters are used:" << std::endl;
 	std::cout << "  Number of outer iterations: " << numOuterIterations << std::endl;
 	std::cout << "  Number of inner iterations: " << numInnerIterations << std::endl;
-	std::cout << "                 Regularizer: " << regularizer << std::endl;
+	if (getenv("GRADIENT_DESCENT"))
+	{
+		std::cout << "                         Eta: " << eta << std::endl;
+	}
+	else
+	{
+		std::cout << "                 Regularizer: " << regularizer << std::endl;
+	}
 
 	double errorBest = -1.;
 	MatrixXd Abest;
@@ -438,16 +448,30 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 				MatrixXd e = result.second;
 				ASSERT(isFinite(e));
 				VectorXd V = matrixToVector(u * e.transpose());
-				MatrixXd VT = V.transpose();
-				ASSERT(isFinite(VT));
-				vector += V * y;
-				matrix += V * VT;
+				if (getenv("GRADIENT_DESCENT"))
+				{
+					vector += V * diff;
+				}
+				else
+				{
+					MatrixXd VT = V.transpose();
+					ASSERT(isFinite(VT));
+					vector += V * y;
+					matrix += V * VT;
+				}
 			}
 
-			MatrixXd Anew = matrix.inverse() * vector;
-			ASSERT(isFinite(Anew));
+			if (getenv("GRADIENT_DESCENT"))
+			{
+				A -= eta * vector;
+			}
+			else
+			{
+				MatrixXd Anew = matrix.inverse() * vector;
+				ASSERT(isFinite(Anew));
 
-			A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
+				A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
+			}
 			ASSERT(A.rows() == 3);
 			ASSERT(A.cols() == numLiftingDimensions);
 
