@@ -631,7 +631,21 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
-	if (getenv("GAUGE_MODE"))
+	if (getenv("PRIMAL_MODE"))
+	{
+		ASSERT(synthetic);
+		SupportFunctionDataPtr data = generateSupportData(directions, targetPoints, variance);
+
+		auto pair = fitSimplexAffineImage(
+				generateSimplex(numLiftingDimensions),
+				data, numLiftingDimensions, false);
+		auto polyhedronAM = pair.first;
+		double error = pair.second;
+		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
+		globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+		return error;
+	}
+	else if (getenv("GAUGE_MODE"))
 	{
 		ASSERT(synthetic);
 		// 1A. Calculate gauge function of primal body through support function of dual body
