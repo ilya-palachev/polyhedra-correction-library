@@ -50,7 +50,6 @@ bool Facet::test_self_intersection()
 		for (j = 0; j < numVertices; ++j)
 		{
 			if (j == i)
-				DEBUG_END;
 				continue;
 			vj0 = vertices[indVertices[j]];
 			vj1 = vertices[indVertices[j + 1]];
@@ -58,8 +57,10 @@ bool Facet::test_self_intersection()
 			tmp1 = (vi1 - vi0) % (vj1 - vi0);
 			s = tmp0 * tmp1;
 			if (s < 0)
+			{
 				DEBUG_END;
 				return true;
+			}
 		}
 	}
 	DEBUG_END;

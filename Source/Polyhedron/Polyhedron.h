@@ -38,6 +38,7 @@ typedef std::shared_ptr<Polyhedron> PolyhedronPtr;
 #include <memory>
 #include <list>
 
+#include <CGAL/Polyhedron_3.h>
 #include "KernelCGAL/KernelCGAL.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 
@@ -158,7 +159,8 @@ public:
 	 *
 	 * @param p	Standard CGAL polyhedron
 	 */
-	Polyhedron(BasePolyhedron_3 p);
+	template <class KernelT, class ItemsIndexedT>
+	Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p);
 
 	/**
 	 * Constructs polyhedron that consists of facets that are equal to given

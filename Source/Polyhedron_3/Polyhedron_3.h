@@ -39,7 +39,9 @@ typedef Plane_3 PCLPlane_3;
 #include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/convex_hull_3.h>
+#include <CGAL/Polyhedron_3.h>
 
+#include "KernelCGAL/ItemsIndexed.h"
 #include "SparseMatrixEigen.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Polyhedron/Polyhedron.h"
@@ -55,7 +57,8 @@ typedef struct
 /** Define point creator */
 typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
 
-class Polyhedron_3 : public BasePolyhedron_3
+template <class KernelT, class ItemsIndexedT>
+class BasePolyhedron_3 : public CGAL::Polyhedron_3<KernelT, ItemsIndexedT>
 {
 public:
 	/** Whether to print "edge-colouring facets" in the PLY output. */
@@ -70,14 +73,14 @@ public:
 	/**
 	 * Constructs empty CGAL polyhedron from nothing.
 	 */
-	Polyhedron_3(): BasePolyhedron_3() {}
+	BasePolyhedron_3(): CGAL::Polyhedron_3<KernelT, ItemsIndexedT>() {}
 
 	/**
 	 * Constructs CGAL polyhedron from PCL polyhedron.
 	 *
 	 * @param p	The PCL polyhedron.
 	 */
-	Polyhedron_3(Polyhedron p);
+	BasePolyhedron_3(Polyhedron p);
 
 	/**
 	 * Constructs CGAL polyhedron as an intersection of halfspaces.
@@ -88,7 +91,7 @@ public:
 	 * 			planes container.
 	 */
 	template <class PlaneIterator>
-	Polyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd);
+	BasePolyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd);
 
 	/**
 	 * Constructs CGAL polyhedron as an intersection of halfspaces.
@@ -96,8 +99,8 @@ public:
 	 * @param planes	The vector of planes that correspond to
 	 * 			halfspaces.
 	 */
-	Polyhedron_3(std::vector<PCLPlane_3> planes) :
-		Polyhedron_3(planes.begin(), planes.end())
+	BasePolyhedron_3(std::vector<PCLPlane_3> planes) :
+		BasePolyhedron_3(planes.begin(), planes.end())
 	{}
 
 	/**
@@ -151,17 +154,6 @@ public:
 			std::vector<PCLPoint_3> directions);
 
 	/**
-	 * Writes polyhedron to stream in PLY format, by converting it to PCL
-	 * polyhedron and then printing it in PLY format.
-	 *
-	 * @param stream	Output stream
-	 * @param p		The polyhedron
-	 *
-	 * @return		The stream ready for further outputs
-	 */
-	friend std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p);
-
-	/**
 	 * Initializes the indices of the polyhedron.
 	 */
 	void initialize_indices();
@@ -173,7 +165,8 @@ public:
 	 * @param direction	The 3D direction.
 	 * @return		The pair tangient point and direction.
 	 */
-	std::pair<Polyhedron_3::Vertex_iterator, double>
+	template <class VertexIteratorT>
+	std::pair<VertexIteratorT, double>
 	findTangientVertex(PCLPoint_3 direction);
 
 	/**
@@ -224,7 +217,24 @@ public:
  * @param facet			The facet.
  * @param planesOriginal	The vector of original planes.
  */
-int findBestPlaneOriginal(Polyhedron_3::Facet& facet,
+int findBestPlaneOriginal(BasePolyhedron_3<Kernel, ItemsIndexed>::Facet& facet,
 		std::vector<PCLPlane_3> planesOriginal);
+
+#define CGAL_GRAPH_TRAITS_INHERITANCE_TEMPLATE_PARAMS typename KernelT, typename ItemsIndexedT
+#define CGAL_GRAPH_TRAITS_INHERITANCE_CLASS_NAME BasePolyhedron_3<KernelT, ItemsIndexedT>
+#define CGAL_GRAPH_TRAITS_INHERITANCE_BASE_CLASS_NAME CGAL::Polyhedron_3<KernelT, ItemsIndexedT>
+#include <CGAL/boost/graph/graph_traits_inheritance_macros.h>
+typedef BasePolyhedron_3<Kernel, ItemsIndexed> Polyhedron_3;
+
+/**
+ * Writes polyhedron to stream in PLY format, by converting it to PCL
+ * polyhedron and then printing it in PLY format.
+ *
+ * @param stream	Output stream
+ * @param p		The polyhedron
+ *
+ * @return		The stream ready for further outputs
+ */
+std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p);
 
 #endif /* POLYHEDRONCGAL_H_ */

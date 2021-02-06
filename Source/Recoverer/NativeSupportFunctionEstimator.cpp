@@ -306,7 +306,7 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	for (int &iOuter: outerIndex)
 	{
 		rightSide(iOuter) = 0.;
-		auto pair = intersection->findTangientVertex(
+		auto pair = intersection->findTangientVertex<Polyhedron_3::Vertex_iterator>(
 				directions[iOuter]);
 		auto tangient = pair.first;
 
@@ -363,7 +363,7 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 	Polyhedron_3::Vertex_iterator tangient;
 	for (int &iOuter: outerIndex)
 	{
-		auto pair = intersection->findTangientVertex(
+		auto pair = intersection->findTangientVertex<Polyhedron_3::Vertex_iterator>(
 				directions[iOuter]);
 		auto vertex = pair.first;
 		if (!vertex->is_trivalent())
@@ -408,7 +408,7 @@ void validateEstimate(std::vector<Plane_3> planesOld, VectorXd valuesNew)
 	{
 		Plane_3 plane = planesNew[i];
 		Point_3 direction(plane.a(), plane.b(), plane.c());
-		auto pair = intersection.findTangientVertex(direction);
+		auto pair = intersection.findTangientVertex<Polyhedron_3::Vertex_iterator>(direction);
 		double value = pair.second;
 		if (value < valuesNew[i])
 		{

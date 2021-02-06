@@ -23,6 +23,8 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Vector3d.h"
+#include "KernelCGAL/KernelCGAL.h"
+#include "KernelCGAL/ItemsIndexed.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
@@ -96,7 +98,8 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
 	DEBUG_END;
 }
 
-Polyhedron::Polyhedron(BasePolyhedron_3 p)
+template <class KernelT, class ItemsIndexedT>
+Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 {
 	DEBUG_START;
 
@@ -178,6 +181,8 @@ Polyhedron::Polyhedron(BasePolyhedron_3 p)
 
 	DEBUG_END;
 }
+
+template Polyhedron::Polyhedron(CGAL::Polyhedron_3<Kernel, ItemsIndexed> p);
 
 Polyhedron::Polyhedron(ShadowContourDataPtr data)
 {

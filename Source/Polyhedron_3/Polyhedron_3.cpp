@@ -126,7 +126,8 @@ public:
 	}
 };
 
-Polyhedron_3::Polyhedron_3(Polyhedron p)
+template<>
+Polyhedron_3::BasePolyhedron_3(Polyhedron p)
 {
 	DEBUG_START;
 
@@ -148,6 +149,7 @@ Polyhedron_3::Polyhedron_3(Polyhedron p)
 	DEBUG_END;
 }
 
+template<>
 void Polyhedron_3::shift(Vector_3 vector)
 {
 	for (auto v = vertices_begin(); v != vertices_end(); ++v)
@@ -158,6 +160,7 @@ void Polyhedron_3::shift(Vector_3 vector)
 		Plane_from_facet());
 }
 
+template<>
 std::vector<Vector_3> Polyhedron_3::getVertices()
 {
 	DEBUG_START;
@@ -170,7 +173,7 @@ std::vector<Vector_3> Polyhedron_3::getVertices()
 	return vertices;
 }
 
-
+template<>
 VectorXd Polyhedron_3::calculateSupportValues(
 	std::vector<PCLPoint_3> directions)
 {
@@ -181,6 +184,7 @@ VectorXd Polyhedron_3::calculateSupportValues(
 	return values;
 }
 
+template<>
 std::vector<Vector3d> Polyhedron_3::calculateSupportPoints(
 	std::vector<PCLPoint_3> directions)
 {
@@ -191,7 +195,8 @@ std::vector<Vector3d> Polyhedron_3::calculateSupportPoints(
 	return points;
 }
 
-SupportFunctionDataPtr Polyhedron_3::calculateSupportData(
+template <class KernelT, class ItemsIndexedT>
+SupportFunctionDataPtr BasePolyhedron_3<KernelT, ItemsIndexedT>::calculateSupportData(
 	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
@@ -299,34 +304,35 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	return stream;
 }
 
-void Polyhedron_3::initialize_indices()
+template <class KernelT, class ItemsIndexedT>
+void BasePolyhedron_3<KernelT, ItemsIndexedT>::initialize_indices()
 {
 	DEBUG_START;
 	whetherPrintEdgeColouringFacets = false;
-	facetColours = std::vector<Colour>(size_of_facets());
-	halfedgeColours = std::vector<Colour>(size_of_halfedges());
+	facetColours = std::vector<Colour>(this->size_of_facets());
+	halfedgeColours = std::vector<Colour>(this->size_of_halfedges());
 	Colour grey;
 	grey.red = 100;
 	grey.green = 100;
 	grey.blue = 100;
 
-	auto vertex = vertices_begin();
-	for (int i = 0; i < (int) size_of_vertices(); ++i)
+	auto vertex = this->vertices_begin();
+	for (int i = 0; i < (int) this->size_of_vertices(); ++i)
 	{
 		vertex->id = i;
 		++vertex;
 	}
 
-	auto facet = facets_begin();
-	for (int i = 0; i < (int) size_of_facets(); ++i)
+	auto facet = this->facets_begin();
+	for (int i = 0; i < (int) this->size_of_facets(); ++i)
 	{
 		facet->id = i;
 		facetColours[i] = grey;
 		++facet;
 	}
 
-	auto halfedge = halfedges_begin();
-	for (int i = 0; i < (int) size_of_halfedges(); ++i)
+	auto halfedge = this->halfedges_begin();
+	for (int i = 0; i < (int) this->size_of_halfedges(); ++i)
 	{
 		halfedge->id = i;
 		halfedgeColours[i] = grey;
@@ -335,6 +341,8 @@ void Polyhedron_3::initialize_indices()
 	DEBUG_END;
 }
 
+template <>
+template <>
 std::pair<Polyhedron_3::Vertex_iterator, double>
 Polyhedron_3::findTangientVertex(PCLPoint_3 direction)
 {
@@ -362,6 +370,7 @@ Polyhedron_3::findTangientVertex(PCLPoint_3 direction)
 	return std::make_pair(tangient, maximum);
 }
 
+template <>
 VectorXd Polyhedron_3::findTangientPointsConcatenated(
 		std::vector<PCLPoint_3> directions)
 {
@@ -370,7 +379,7 @@ VectorXd Polyhedron_3::findTangientPointsConcatenated(
 	for (int i = 0; i < (int) directions.size(); ++i)
 	{
 		 auto direction = directions[i];
-		 auto pair = findTangientVertex(direction);
+		 auto pair = findTangientVertex<Polyhedron_3::Vertex_iterator>(direction);
 		 auto vertex = pair.first;
 		 auto point = vertex->point();
 		 solution(3 * i) = point.x();
@@ -504,6 +513,7 @@ PCLPlane_3 nearestPlane(PCLPlane_3 alpha, std::vector<PCLPlane_3> planes)
 	return planeBest;
 }
 
+template <>
 template <class PlaneIterator>
 void Polyhedron_3::initialize_indices(
 		PlaneIterator planesBegin,
@@ -532,8 +542,9 @@ void Polyhedron_3::initialize_indices(
 	DEBUG_END;
 }
 
+template <>
 template <class PlaneIterator>
-Polyhedron_3::Polyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd)
+Polyhedron_3::BasePolyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd)
 {
 	DEBUG_START;
 	CGAL::internal::halfspaces_intersection(planesBegin, planesEnd,
@@ -546,7 +557,7 @@ Polyhedron_3::Polyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd)
 }
 
 typedef std::vector<PCLPlane_3>::iterator PlaneVectorIterator;
-template Polyhedron_3::Polyhedron_3<PlaneVectorIterator>(
+template Polyhedron_3::BasePolyhedron_3<PlaneVectorIterator>(
 		PlaneVectorIterator,
 		PlaneVectorIterator);
 template std::pair<int, PCLPlane_3>
@@ -559,7 +570,7 @@ template void Polyhedron_3::initialize_indices<PlaneVectorIterator>(
 		PlaneVectorIterator planesEnd);
 
 typedef std::list<PCLPlane_3>::iterator PlaneListIterator;
-template Polyhedron_3::Polyhedron_3<PlaneListIterator>(
+template Polyhedron_3::BasePolyhedron_3<PlaneListIterator>(
 		PlaneListIterator,
 		PlaneListIterator);
 template std::pair<int, PCLPlane_3>
