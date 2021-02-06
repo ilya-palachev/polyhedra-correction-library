@@ -26,6 +26,8 @@
 #ifndef FACEINDEXED_H_
 #define FACEINDEXED_H_
 
+#include <CGAL/HalfedgeDS_face_base.h>
+
 /** A face type with an ID member variable. */
 template <class Refs, class Plane>
 class FaceIndexed : public CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true,

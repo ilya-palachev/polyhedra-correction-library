@@ -26,6 +26,8 @@
 #ifndef HALFEDGEINDEXED_H_
 #define HALFEDGEINDEXED_H_
 
+#include <CGAL/HalfedgeDS_halfedge_base.h>
+
 /** A halfedge type with an ID member variable. */
 template <class Refs>
 class HalfedgeIndexed : public CGAL::HalfedgeDS_halfedge_base<Refs>

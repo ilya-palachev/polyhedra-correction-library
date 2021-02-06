@@ -26,6 +26,8 @@
 #ifndef VERTEXINDEXED_H_
 #define VERTEXINDEXED_H_
 
+#include <CGAL/HalfedgeDS_vertex_base.h>
+
 #include "KernelCGAL/Point_3.h"
 
 /** A vertex type with an ID member variable. */

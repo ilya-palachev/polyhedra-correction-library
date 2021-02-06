@@ -26,6 +26,8 @@
 #ifndef ITEMSINDEXED_H_
 #define ITEMSINDEXED_H_
 
+#include <CGAL/Polyhedron_items_3.h>
+
 #include "KernelCGAL/VertexIndexed.h"
 #include "KernelCGAL/FaceIndexed.h"
 #include "KernelCGAL/HalfedgeIndexed.h"

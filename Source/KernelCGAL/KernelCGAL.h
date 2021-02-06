@@ -35,14 +35,6 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
 typedef Kernel::Segment_3 Segment_3;
 typedef Kernel::Line_3 Line_3;
-
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/HalfedgeDS_vector.h>
-
-#include "KernelCGAL/ItemsIndexed.h"
-typedef CGAL::Polyhedron_3<Kernel, ItemsIndexed,
-	CGAL::HalfedgeDS_vector> BasePolyhedron_3;
-
 #include "dual.h"
 
 #endif /* KERNELCGAL_H_ */
