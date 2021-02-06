@@ -70,7 +70,7 @@ private:
 class EdgeComparison
 {
 public:
-	inline bool operator() (Edge edge0, Edge edge1)
+	inline bool operator() (const Edge &edge0, const Edge &edge1) const
 	{
 		return edge0.v0 < edge1.v0 ||
 				(edge0.v0 == edge1.v0 && edge0.v1 < edge1.v1);

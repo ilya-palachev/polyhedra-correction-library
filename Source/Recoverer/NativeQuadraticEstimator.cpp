@@ -626,7 +626,7 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	if (numDeletable == 0)
 		ASSERT(numSpecial == 1 && "This case not handled yet");
 
-	Vertex_handle vertexDeleted = vertices[iDeleted];
+	Vertex_handle vertexDeleted = vertices[iDeleted];  /* FIXME: do deletion*/
 	if (numDeletable == 0)
 	{
 		std::cout << "  " << iSpecial << "-th vertex is special"
