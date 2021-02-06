@@ -93,16 +93,16 @@ void TrustedEdgesDetector::initialize()
 	int iVertex = 0;
 	vertices_ = std::vector<Polyhedron_3::Vertex_iterator>(
 			directions_.size());
-	CGAL::Origin origin;
+	auto O = CGAL::Origin();
 	for (auto vertex = sphere_.vertices_begin();
 			vertex != sphere_.vertices_end(); ++vertex)
 	{
 		double lengthMinimal = 1e100;
 		int iDirectionBest = 0;
-		Vector_3 vector = vertex->point() - origin;
+		Vector_3 vector = vertex->point() - O;
 		for (int i = 0; i < (int) directions_.size(); ++i)
 		{
-			Vector_3 difference = vector - directions_[i];
+			Vector_3 difference = vector - (directions_[i] - O);
 			double length = sqrt(difference.squared_length());
 			if (length < lengthMinimal)
 			{
@@ -192,7 +192,7 @@ static void printPolyhedronWithColouredBigEdges(Polyhedron_3 polyhedron)
 }
 #endif
 
-double distance(Point_3 a, Point_3 b)
+double distance(Vector_3 a, Vector_3 b)
 {
 	DEBUG_START;
 	double distanceSquared = (a - b).squared_length();
@@ -201,11 +201,12 @@ double distance(Point_3 a, Point_3 b)
 	return result;
 }
 
-double distance(Point_3 point, Segment_3 segment)
+double distance(Vector_3 point, Segment_3 segment)
 {
 	DEBUG_START;
-	Point_3 begin = segment.source();
-	Point_3 end = segment.target();
+	auto O = CGAL::Origin();
+	Vector_3 begin = segment.source() - O;
+	Vector_3 end = segment.target() - O;
 	Vector_3 vector = end - begin;
 	double result = 0.;
 	if (vector * (point - begin) <= 0.)
@@ -223,7 +224,7 @@ double distance(Point_3 point, Segment_3 segment)
 		double difference = fabs(left - right);
 		while (difference > EPS_MIN_DOUBLE * 100.)
 		{
-			Point_3 middle = 0.5 * (begin + end);
+			Vector_3 middle = 0.5 * (begin + end);
 			if (left > right)
 			{
 				begin = middle;
@@ -271,9 +272,10 @@ double distance(Segment_3 a, Segment_3 b)
 double distance(Segment_3 segment, SupportFunctionDataItemInfo info)
 {
 	DEBUG_START;
-	Point_3 source = segment.source() - (segment.source()
+	auto O = CGAL::Origin();
+	Point_3 source = segment.source() - ((segment.source() - O)
 			* info.normalShadow) * info.normalShadow;
-	Point_3 target = segment.target() - (segment.target()
+	Point_3 target = segment.target() - ((segment.target() - O)
 			* info.normalShadow) * info.normalShadow;
 	Segment_3 segmentProjected(source, target);
 	double result = distance(segmentProjected, info.segment);

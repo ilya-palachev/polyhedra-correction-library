@@ -82,7 +82,7 @@ TangientPointInformation::TangientPointInformation(int iDirection,
 	std::cerr << "... The best is #" << vertex->id << " : "
 		<< *this << std::endl;
 #endif
-	supportValue_ = direction * vertex->point();
+	supportValue_ = direction * (vertex->point() - CGAL::Origin());
 	inverse_ = calculateInverse();
 	DEBUG_END;
 }

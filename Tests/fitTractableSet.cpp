@@ -169,12 +169,12 @@ calculateSupportFunction(const std::vector<VectorXd> &vertices,
 	return std::make_pair(maxProduct, tangient);
 }
 
-static Eigen::Vector3d toEigenVector(const Vector3d &v)
+static Eigen::Vector3d toEigenVector(Point_3 v)
 {
 	Eigen::Vector3d u;
-	u(0) = v.x;
-	u(1) = v.y;
-	u(2) = v.z;
+	u(0) = v.x();
+	u(1) = v.y();
+	u(2) = v.z();
 	return u;
 }
 
@@ -671,7 +671,7 @@ std::vector<Vector3d> calculateDualTargetPoints(std::vector<Vector3d> &targetPoi
 	std::vector<Vector3d> dualTargetPoints;
 	for (auto v = dualBody.vertices_begin(); v != dualBody.vertices_end(); ++v)
 	{
-		dualTargetPoints.push_back(Vector3d(v->point()));
+		dualTargetPoints.push_back(Vector3d::fromCGAL(v->point()));
 	}
 
 	return dualTargetPoints;

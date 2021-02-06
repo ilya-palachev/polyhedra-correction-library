@@ -436,10 +436,11 @@ SupportFunctionDataPtr SupportFunctionDataConstructor::run(
 			++numNegative;
 		}
 		// ASSERT(scalarProductMax > 0.);
-		SupportFunctionDataItem item(direction, scalarProductMax);
+		SupportFunctionDataItem item(Vector3d::fromCGAL(direction),
+				scalarProductMax);
 		item.info = SupportFunctionDataItemInfoPtr(
 			new SupportFunctionDataItemInfo());
-		item.info->point = supportPoint;
+		item.info->point = Vector3d::fromCGAL(supportPoint);
 		items.push_back(item);
 		++iDirection;
 	}

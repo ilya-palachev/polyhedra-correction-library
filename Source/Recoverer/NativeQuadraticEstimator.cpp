@@ -546,8 +546,8 @@ static std::pair<bool, double> calculateAlpha(const Vector_3 &xOld,
 	return std::make_pair(true, alpha);
 }
 
-bool isPositivelyDecomposable(const Point_3 &a, const Point_3 &b,
-		const Point_3 &c, const Point_3 &decomposed)
+bool isPositivelyDecomposable(const Vector_3 &a, const Vector_3 &b,
+		const Vector_3 &c, const Vector_3 &decomposed)
 {
 	DEBUG_START;
 	Eigen::Matrix3d matrix;
@@ -598,12 +598,13 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 	unsigned iSpecial = vertices.size();
 	for (unsigned i = 0; i < vertices.size(); ++i)
 	{
+		auto O = CGAL::Origin();
 		unsigned iPrev = indexModulo(i - 1, vertices.size());
 		unsigned iNext = indexModulo(i + 1, vertices.size());
-		Point_3 prev = vertices[iPrev]->point();
-		Point_3 next = vertices[iNext]->point();
-		Point_3 curr = vertices[i]->point();
-		Point_3 dom = dominator->point();
+		Vector_3 prev = vertices[iPrev]->point() - O;
+		Vector_3 next = vertices[iNext]->point() - O;
+		Vector_3 curr = vertices[i]->point() - O;
+		Vector_3 dom = dominator->point() - O;
 
 		if (isPositivelyDecomposable(prev, next, dom, curr))
 		{
@@ -611,8 +612,7 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 			++numDeletable;
 		}
 
-		Vector_3 product = CGAL::cross_product(prev - CGAL::Origin(),
-				next - CGAL::Origin());
+		Vector_3 product = CGAL::cross_product(prev, next);
 		if ((product * curr) * (product * dom) < 0.)
 		{
 			iSpecial = i;
@@ -642,7 +642,8 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld,
 		Point_3 point;
 		if (numDeletable > 0 && i == iDeleted)
 		{
-			point = INNER_RESOLVED_POINT_FACTOR * vertex->point();
+			auto O = CGAL::Origin();
+			point = O + INNER_RESOLVED_POINT_FACTOR * (vertex->point() - O);
 			std::cout << "  " << i << "-th vertex is deletable"
 				<< std::endl;
 		}

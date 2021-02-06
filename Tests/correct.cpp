@@ -151,12 +151,12 @@ static double planeDist(const Plane_3 &p0, const Plane_3 &p1)
 
 static Point_3 getCenter(const Polyhedron_3 &p)
 {
-	Point_3 C(0., 0., 0.);
+	Vector_3 C(0., 0., 0.);
+	auto O = CGAL::Origin();
 	for (auto I = p.vertices_begin(), E = p.vertices_end(); I != E; ++I)
-		C = C + (I->point() - CGAL::Origin());
+		C = C + (I->point() - O);
 	C = C * (1. / p.size_of_vertices());
-
-	return C;
+	return O + C;
 }
 
 static double signedDist(const Plane_3 &p, const Point_3 &C)
@@ -220,7 +220,8 @@ static std::shared_ptr<Polyhedron> convertWithAssociation(Polyhedron_3 p,
 	int iVertex = 0;
 	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end(); ++vertex)
 	{
-		Point_3 point = C + vertex->point();
+		auto O = CGAL::Origin();
+		Point_3 point = C + (vertex->point() - O);
 		vertices[iVertex++] = Vector3d(point.x(), point.y(), point.z());
 	}
 

@@ -27,6 +27,7 @@
 #define VECTOR3D_H
 
 #include <cmath>
+#include <istream>
 #include <ostream>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -77,15 +78,13 @@ public:
 	}
 
 	/**
-	 * Constructor by CGAL Point_3 object.
+	 * Converter fromCGAL Point_3 object.
 	 *
 	 * @param p	The CGAL point.
 	 */
-	Vector3d(KernelVector3dLocal::Point_3 p) :
-		x(p.x()),
-		y(p.y()),
-		z(p.z())
+	static Vector3d fromCGAL(KernelVector3dLocal::Point_3 p)
 	{
+		return Vector3d(p.x(), p.y(), p.z());
 	}
 
 	/**
@@ -93,11 +92,9 @@ public:
 	 *
 	 * @param v	The CGAL vector.
 	 */
-	Vector3d(KernelVector3dLocal::Vector_3 v) :
-		x(v.x()),
-		y(v.y()),
-		z(v.z())
+	static Vector3d fromCGAL(KernelVector3dLocal::Vector_3 v)
 	{
+		return Vector3d(v.x(), v.y(), v.z());
 	}
 
 	/**

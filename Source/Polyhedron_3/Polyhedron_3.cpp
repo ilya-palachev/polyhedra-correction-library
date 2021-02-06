@@ -350,7 +350,8 @@ Polyhedron_3::findTangientVertex(PCLPoint_3 direction)
 			continue;
 		}
 		auto point = vertex->point();
-		double product = direction * (point - CGAL::ORIGIN);
+		auto O = CGAL::Origin();
+		double product = (direction - O) * (point - O);
 		if (product > maximum)
 		{
 			maximum = product;
