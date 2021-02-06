@@ -31,8 +31,8 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/point_generators_3.h>
 #include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/Polyhedron_3.h>
-#include <CGAL/convex_hull_3_to_polyhedron_3.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/convex_hull_3_to_face_graph.h>
 #include <CGAL/algorithm.h>
 #include <list>
 
@@ -44,7 +44,7 @@ typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef K::Point_3 Point_3;
 typedef CGAL::Delaunay_triangulation_3<K> Delaunay;
 typedef Delaunay::Vertex_handle Vertex_handle;
-typedef CGAL::Polyhedron_3<K> Polyhedron_3;
+typedef CGAL::Surface_mesh<Point_3> Surface_mesh;
 
 /**
  * Prints the usage of this test.
@@ -104,10 +104,10 @@ int main(int argc, char** argv)
 	 * copy the convex hull of points into a polyhedron and use it
 	 * to get the number of points on the convex hull
 	 */
-	Polyhedron_3 chull0;
-	CGAL::convex_hull_3_to_polyhedron_3(T,chull0);
+	Surface_mesh chull0;
+	CGAL::convex_hull_3_to_face_graph(T, chull0);
 	
-	std::cout << "The convex hull contains " << chull0.size_of_vertices()
+	std::cout << "The convex hull contains " << num_vertices(chull0)
 		<< " vertices" << std::endl;
 	
 	/* end time measurement */
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 	
 	/* Remove 90% of points. */
 	float nReduced = (1. - 1. / (float) FACTOR_OF_VERTICES_REDUCTION) *
-		chull0.size_of_vertices();
+		num_vertices(chull0);
 		
 	std::list<Vertex_handle>::iterator v_set_it = vertices.begin();
 	for (int i = 0; i < nReduced; i++)
@@ -132,14 +132,14 @@ int main(int argc, char** argv)
 	 * copy the convex hull of points into a polyhedron and use it
 	 * to get the number of points on the convex hull
 	 */
-	Polyhedron_3 chull;
-	CGAL::convex_hull_3_to_polyhedron_3(T,chull);
+	Surface_mesh chull;
+	CGAL::convex_hull_3_to_face_graph(T, chull);
 	
 	/* end time measurement */
 	double timeSecond = timer.popTimer();
 	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
 	
-	std::cout << "The convex hull contains " << chull.size_of_vertices()
+	std::cout << "The convex hull contains " << num_vertices(chull)
 		<< " vertices" << std::endl;
 
 	DEBUG_END;
