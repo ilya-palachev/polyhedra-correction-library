@@ -165,7 +165,8 @@ buildFacetIndices(
 		int iFacetCutting)
 {
 	polyhedron.initialize_indices();
-	auto facet = polyhedron.facets_begin() + iFacetCutting;
+	auto facet = polyhedron.facets_begin();
+	for (int i = 0; i < iFacetCutting; ++i, ++facet);
 	std::set<int> indicesCutting;
 	auto circulator = facet->facet_begin();
 	do
@@ -196,7 +197,8 @@ buildPlanesDescriptions(
 	{
 		ProblemPointDescription description;
 		description.iVertex = iVertex;
-		auto vertex = polyhedron.vertices_begin() + iVertex;
+		auto vertex = polyhedron.vertices_begin();
+		for (int i = 0; i < iVertex; ++i, ++vertex);
 		description.initialPosition = vertex->point();
 		auto circulator = vertex->vertex_begin();
 		bool ifVertexCorrect = false;
@@ -778,7 +780,9 @@ int main(int argc, char **argv)
 			pyramidCut, iFacetCutting, numShadowContours);
 	dumpDescriptions(descriptions);
 
-	Plane_3 plane = (pyramidCut.facets_begin() + iFacetCutting)->plane();
+	auto it = pyramidCut.facets_begin();
+	for (int i = 0; i < iFacetCutting; ++i, ++it);
+	Plane_3 plane = it->plane();
 	Plane_3 planeTrue = plane;
 	char *maxDeltaStr = getenv("PLANE_SHIFT");
 	if (maxDeltaStr)
