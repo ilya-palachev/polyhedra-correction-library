@@ -176,14 +176,15 @@ set (INCLUDE_DIRS_all
 	${CMAKE_SOURCE_DIR}/External/LSM
 	${CMAKE_SOURCE_DIR}/External/Vector3d
 	${CMAKE_SOURCE_DIR}/External/CGAL
+	"/usr/include/eigen3/"
+	"${IPOPT_INSTALL_PREFIX}/include/"
 )
 
 # Common compiler flags used for build:
 set(COMMON_FLAGS "-g")
 # Enable C++11:
-set(COMMON_FLAGS "${COMMON_FLAGS} -std=c++11")
-# Enable the most strict compiler errors:
-set(COMMON_FLAGS "${COMMON_FLAGS} -Wall -Werror -pedantic")
+set(COMMON_FLAGS "${COMMON_FLAGS} -std=c++17 -fext-numeric-literals")
+set(COMMON_FLAGS "${COMMON_FLAGS} -Wall")
 # Enable rounding math option (required by CGAL):
 # TODO: For ICC we need to set -fp-model here.
 set(COMMON_FLAGS "${COMMON_FLAGS} -frounding-math")
@@ -220,7 +221,6 @@ target_link_libraries(pcl
 	gaussString
 	lsm
 	vector3d
-	CGAL
 	gmp
 	mpfr
 	tbb
@@ -242,7 +242,6 @@ target_link_libraries(pclStatic
 	gaussStringStatic
 	lsmStatic
 	vector3dStatic
-	CGAL
 	gmp
 	mpfr
 	tbb
