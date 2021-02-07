@@ -572,6 +572,7 @@ VectorXd IpoptSupportFunctionEstimator::run(void)
 	}
 
 	DEBUG_END;
+    ASSERT(solution.size() > 0);
 	return solution;
 }
 

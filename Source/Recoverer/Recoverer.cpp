@@ -440,6 +440,7 @@ Recoverer::runEstimation(SupportFunctionDataPtr SData)
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-estimate.mat")
 		<< estimate;
 	popTimer();
+    ASSERT(estimate.size() > 0);
 
 	/* 4. Validate the result of estimation. */
 	if(!constructor.checkResult(SEData, supportMatrixType_, estimate))
