@@ -929,7 +929,7 @@ int main(int argc, char **argv)
 		return runRealCase(argv);
 
 	std::cerr << "Expected 4 or 5 arguments:" << std::endl;
-	std::cerr << "\t" << argv[0] << "measurements_number body_name linear_solver" << std::endl;
-	std::cerr << "\t" << argv[0] << "shadow_contours_path n_vertices n_facets liner_solver" << std::endl;
+	std::cerr << "\t" << argv[0] << " measurements_number body_name linear_solver" << std::endl;
+	std::cerr << "\t" << argv[0] << " shadow_contours_path n_vertices n_facets liner_solver" << std::endl;
 	return EXIT_FAILURE;
 }
