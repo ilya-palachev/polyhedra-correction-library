@@ -370,7 +370,7 @@ public:
 
 std::pair<Polyhedron_3, double>
 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
-		SupportFunctionDataPtr data,
+		SupportFunctionDataPtr data, std::vector<Vector3d> startingBody,
 		unsigned numLiftingDimensions, bool dualMode)
 {
 	std::cout << "Starting to fit in " << (dualMode ? "dual" : "primal")
@@ -381,6 +381,10 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	tryGetenvDouble("N_OUTER", numOuterIterationsEnv);
 	if (numOuterIterationsEnv > 0.)
 		numOuterIterations = static_cast<int>(numOuterIterationsEnv);
+    if (getenv("USE_STARTING_BODY"))
+    {
+        numOuterIterations = 1;
+    }
 
 	unsigned numInnerIterations = 100;
 	double numInnerIterationsEnv = -1;
@@ -388,7 +392,7 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	if (numInnerIterationsEnv > 0.)
 		numInnerIterations = static_cast<int>(numInnerIterationsEnv);
 
-	double regularizer = 0.5;
+    double regularizer = 0.5;
 	tryGetenvDouble("REGULARIZER", regularizer);
 
 	double eta = 1.;
@@ -420,6 +424,13 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
 		MatrixXd A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+        if (getenv("USE_STARTING_BODY"))
+        {
+            ASSERT(!startingBody.empty());
+            for (auto point : startingBody)
+                A << toEigenVector(point);
+            ASSERT(A.coeff(0, 0) == startingBody[0].x);
+        }
 		MatrixXd Anew = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
@@ -694,7 +705,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 {
 	SupportFunctionDataPtr dualData;
 	SupportFunctionDataPtr dualDataNotNoisy;
-	double variance = 0.001;
+	double variance = 0.01;
 	tryGetenvDouble("NOISE_VARIANCE", variance);
 
 	globalPCLDumper.setNameBase(title);
@@ -707,7 +718,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 		auto pair = fitSimplexAffineImage(
 				generateSimplex(numLiftingDimensions),
-				data, numLiftingDimensions, false);
+				data, targetPoints, numLiftingDimensions, false);
 		auto polyhedronAM = pair.first;
 		double error = pair.second;
 		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
@@ -739,7 +750,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 	auto pair = fitSimplexAffineImage(
 			generateSimplex(numLiftingDimensionsDual),
-			dualData, numLiftingDimensionsDual, false);
+			dualData, targetPoints, numLiftingDimensionsDual, false);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
