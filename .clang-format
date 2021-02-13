@@ -1,0 +1,10 @@
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: None
+AllowAllConstructorInitializersOnNextLine: true
+BreakBeforeBraces: Allman
+BreakConstructorInitializers: AfterColon
+ColumnLimit: 80
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
