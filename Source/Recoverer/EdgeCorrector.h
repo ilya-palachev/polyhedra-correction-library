@@ -27,8 +27,8 @@
 #ifndef EDGECORRECTOR_H
 #define EDGECORRECTOR_H
 
-#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Polyhedron_3/Polyhedron_3.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /**
  * Correction of polyhedron based on support funciton measurements and edge
@@ -41,13 +41,14 @@ class EdgeCorrector
 
 	/** The support function data that should be considered. */
 	SupportFunctionDataPtr SData;
-
 public:
 	/** Creates the corector for given polyhedron and data. */
-	EdgeCorrector(Polyhedron_3 initialP, SupportFunctionDataPtr SData);
+	EdgeCorrector(Polyhedron_3 initialP,
+			SupportFunctionDataPtr SData);
 
 	/** Runs the correction process and builds the polyhedron. */
 	Polyhedron_3 run();
+
 };
 
 struct SimpleEdge_3

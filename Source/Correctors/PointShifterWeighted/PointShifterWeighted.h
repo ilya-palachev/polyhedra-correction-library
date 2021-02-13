@@ -21,34 +21,33 @@
 #ifndef POINTSHIFTERWEIGHTED_H_
 #define POINTSHIFTERWEIGHTED_H_
 
-#include "Correctors/PCorrector/PCorrector.h"
 #include "Vector3d.h"
+#include "Correctors/PCorrector/PCorrector.h"
 
-class PointShifterWeighted : public PCorrector
+class PointShifterWeighted: public PCorrector
 {
 private:
 	int n;
-	double *x;
-	double *x1;
-	double *fx;
-	double *A;
+	double* x;
+	double* x1;
+	double* fx;
+	double* A;
 	int id;
-	bool *khi;
-	double *tmp0;
-	double *tmp1;
-	double *tmp2;
-	double *tmp3;
+	bool* khi;
+	double* tmp0;
+	double* tmp1;
+	double* tmp2;
+	double* tmp3;
 	double K;
 
 	void calculateFunctional();
 	void calculateFuncitonalDerivative();
 
 	void init();
-
 public:
 	PointShifterWeighted();
 	PointShifterWeighted(PolyhedronPtr p);
-	PointShifterWeighted(Polyhedron *p);
+	PointShifterWeighted(Polyhedron* p);
 	~PointShifterWeighted();
 
 	void run(int id, Vector3d delta);

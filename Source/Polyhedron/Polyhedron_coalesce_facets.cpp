@@ -18,10 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Correctors/Coalescer/Coalescer.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Correctors/Coalescer/Coalescer.h"
 
 #define EPS_PARALL 1e-16
 #define MAX_MIN_DIST 1e+1
@@ -29,16 +29,16 @@
 void Polyhedron::coalesceFacets(int fid0, int fid1)
 {
 	DEBUG_START;
-	Coalescer *coalescer = new Coalescer(get_ptr());
+	Coalescer* coalescer = new Coalescer(get_ptr());
 	coalescer->run(fid0, fid1);
 	delete coalescer;
 	DEBUG_END;
 }
 
-void Polyhedron::coalesceFacets(int n, int *fid)
+void Polyhedron::coalesceFacets(int n, int* fid)
 {
 	DEBUG_START;
-	Coalescer *coalescer = new Coalescer(get_ptr());
+	Coalescer* coalescer = new Coalescer(get_ptr());
 	coalescer->run(n, fid);
 	delete coalescer;
 	DEBUG_END;

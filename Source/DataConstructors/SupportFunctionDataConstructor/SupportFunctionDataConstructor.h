@@ -26,10 +26,10 @@
 #ifndef SUPPORT_FUNCTION_DATA_CONSTRUCTOR_H
 #define SUPPORT_FUNCTION_DATA_CONSTRUCTOR_H
 
-#include "DataContainers/ShadowContourData/SContour/SContour.h"
-#include "DataContainers/ShadowContourData/ShadowContourData.h"
-#include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 
 /** Constructs support function data from different types of related data. */
@@ -97,7 +97,7 @@ public:
 	 * support direcitons.
 	 */
 	SupportFunctionDataPtr run(std::vector<Point_3> directions,
-							   Polyhedron_3 polyhedron);
+		Polyhedron_3 polyhedron);
 
 	/**
 	 * Gets IDs of tangient vertices that have been obtained during the

@@ -27,27 +27,33 @@
  * - implementation.
  */
 
-#include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 #include "DebugPrint.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 
 SupportFunctionDataItem::SupportFunctionDataItem() :
-	direction(Vector3d(0., 0., 0.)), value(0.), info(NULL)
+	direction(Vector3d(0., 0., 0.)),
+	value(0.),
+	info(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 SupportFunctionDataItem::SupportFunctionDataItem(
-	const SupportFunctionDataItem &item) :
-	direction(item.direction), value(item.value), info(item.info)
+		const SupportFunctionDataItem &item) :
+	direction(item.direction),
+	value(item.value),
+	info(item.info)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 SupportFunctionDataItem::SupportFunctionDataItem(const Vector3d d,
-												 const double v) :
-	direction(d), value(v), info(NULL)
+		const double v) :
+	direction(d),
+	value(v),
+	info(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -58,8 +64,8 @@ SupportFunctionDataItem::~SupportFunctionDataItem()
 	DEBUG_END;
 }
 
-SupportFunctionDataItem &
-SupportFunctionDataItem::operator=(const SupportFunctionDataItem &item)
+SupportFunctionDataItem &SupportFunctionDataItem::operator=(
+		const SupportFunctionDataItem &item)
 {
 	DEBUG_START;
 	direction = item.direction;

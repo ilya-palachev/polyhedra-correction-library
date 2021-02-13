@@ -55,7 +55,7 @@ protected:
 /** Checks for crash in case when the set is not set. */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPlaneNotSet)
 {
-	EXPECT_DEATH({ extractor->run(side); }, ".*");
+	EXPECT_DEATH({extractor->run(side);}, ".*");
 }
 
 /** Checks that function setPlane works. */
@@ -68,27 +68,25 @@ TEST_F(SupportFunctionDataItemExtractorByPlaneTest, SetPlaneWorks)
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointsEqual)
 {
 	EXPECT_DEATH(
-		{
-			extractor->setPlane(Plane());
-			side->A1 = Vector3d(1., 2., 3.);
-			side->A2 = side->A1;
-			extractor->run(side);
-		},
-		".*");
+	{
+		extractor->setPlane(Plane());
+		side->A1 = Vector3d(1., 2., 3.);
+		side->A2 = side->A1;
+		extractor->run(side);
+	}, ".*");
 }
 
 /** Checks for crash in case when point does not lie in the plane. */
 TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointNotInPlane)
 {
 	EXPECT_DEATH(
-		{
-			extractor->setPlane(Plane(Vector3d(1., 0., 0.), 0.));
-			side->A1 =
-				Vector3d(EPS_SHADOW_CONTOUR_PLANARITY_LIMIT + 1e-1, 0., 0.);
-			side->A2 = side->A1 + Vector3d(1e-16, 0., 0.);
-			extractor->run(side);
-		},
-		".*");
+	{
+		extractor->setPlane(Plane(Vector3d(1., 0., 0.), 0.));
+		side->A1 = Vector3d(EPS_SHADOW_CONTOUR_PLANARITY_LIMIT + 1e-1,
+			0., 0.);
+		side->A2 = side->A1 + Vector3d(1e-16, 0., 0.);
+		extractor->run(side);
+	}, ".*");
 }
 
 /**
@@ -104,13 +102,15 @@ TEST_F(SupportFunctionDataItemExtractorByPlaneTest, Adequate)
 
 	Vector3d directionExpected(0., sqrt(0.5), sqrt(0.5));
 	EXPECT_TRUE(equal(directionExpected, item.direction,
-					  EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
-		<< "Result of extracting is support direction " << item.direction
-		<< ", while expected is " << directionExpected;
+		EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
+		<< "Result of extracting is support direction "
+		<< item.direction << ", while expected is "
+		<< directionExpected;
 
 	double valueExpected = sqrt(0.5);
 	EXPECT_TRUE(equal(valueExpected, item.value,
-					  EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
+		EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
 		<< "Result of extracting is support value " << item.value
 		<< ", while expected is " << valueExpected;
 }
+

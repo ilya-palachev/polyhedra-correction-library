@@ -31,16 +31,15 @@ struct glp_prob_wrapper
 {
 	glp_prob *problem;
 
-	glp_prob_wrapper(glp_prob *p) : problem(p)
-	{
-	}
+	glp_prob_wrapper(glp_prob *p): problem(p) {}
 
-	friend std::ostream &operator<<(std::ostream &stream, glp_prob_wrapper &p)
+	friend std::ostream &operator<<(std::ostream &stream,
+			glp_prob_wrapper &p)
 	{
 		DEBUG_START;
-		char *name = tmpnam(NULL);
+		char *name= tmpnam(NULL);
 		glp_write_lp(p.problem, NULL, name);
-		std::ifstream tmpstream;
+	        std::ifstream tmpstream;
 		tmpstream.open(name, std::ifstream::in);
 		stream << tmpstream.rdbuf();
 		tmpstream.close();
@@ -53,17 +52,15 @@ struct glp_prob_wrapper_mps
 {
 	glp_prob *problem;
 
-	glp_prob_wrapper_mps(glp_prob *p) : problem(p)
-	{
-	}
+	glp_prob_wrapper_mps(glp_prob *p): problem(p) {}
 
 	friend std::ostream &operator<<(std::ostream &stream,
-									glp_prob_wrapper_mps &p)
+			glp_prob_wrapper_mps &p)
 	{
 		DEBUG_START;
-		char *name = tmpnam(NULL);
+		char *name= tmpnam(NULL);
 		glp_write_mps(p.problem, GLP_MPS_FILE, NULL, name);
-		std::ifstream tmpstream;
+	        std::ifstream tmpstream;
 		tmpstream.open(name, std::ifstream::in);
 		stream << tmpstream.rdbuf();
 		tmpstream.close();

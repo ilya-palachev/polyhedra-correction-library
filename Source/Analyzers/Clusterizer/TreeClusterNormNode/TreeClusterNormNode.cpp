@@ -19,22 +19,25 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 
 TreeClusterNormNode::TreeClusterNormNode() :
-	cluster(NULL), parent(NULL), child0(NULL), child1(NULL)
+				cluster(NULL),
+				parent(NULL),
+				child0(NULL),
+				child1(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-TreeClusterNormNode::TreeClusterNormNode(const TreeClusterNormNode &orig) :
-	cluster(orig.cluster),
-	parent(orig.parent),
-	child0(orig.child0),
-	child1(orig.child1)
+TreeClusterNormNode::TreeClusterNormNode(const TreeClusterNormNode& orig) :
+				cluster(orig.cluster),
+				parent(orig.parent),
+				child0(orig.child0),
+				child1(orig.child1)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -46,7 +49,7 @@ TreeClusterNormNode::~TreeClusterNormNode()
 	DEBUG_END;
 }
 
-void TreeClusterNormNode::fprint(FILE *file, int level)
+void TreeClusterNormNode::fprint(FILE* file, int level)
 {
 	DEBUG_START;
 
@@ -67,8 +70,8 @@ void TreeClusterNormNode::fprint(FILE *file, int level)
 	DEBUG_END;
 }
 
-void TreeClusterNormNode::fprint_dendrogramma_lev(FILE *file, int level,
-												  int fix)
+void TreeClusterNormNode::fprint_dendrogramma_lev(FILE* file, int level,
+		int fix)
 {
 	DEBUG_START;
 
@@ -99,3 +102,4 @@ void TreeClusterNormNode::fprint_dendrogramma_lev(FILE *file, int level,
 	}
 	DEBUG_END;
 }
+

@@ -24,8 +24,8 @@
 
 #include <memory>
 
-#include "Polyhedron/Polyhedron.h"
 #include "Vector3d.h"
+#include "Polyhedron/Polyhedron.h"
 
 class SpherePoint
 {
@@ -35,18 +35,18 @@ public:
 	double psi;
 
 	SpherePoint();
-	SpherePoint(const Vector3d &vector_orig);
-	SpherePoint(const Vector3d &vector_orig, const double phi_orig,
-				const double psi_orig);
+	SpherePoint(const Vector3d& vector_orig);
+	SpherePoint(const Vector3d& vector_orig, const double phi_orig,
+			const double psi_orig);
 	SpherePoint(const double phi_orig, const double psi_orig);
-	SpherePoint(const SpherePoint &orig);
+	SpherePoint(const SpherePoint& orig);
 	~SpherePoint();
-	SpherePoint &operator=(const SpherePoint &orig);
+	SpherePoint& operator =(const SpherePoint& orig);
 };
 
-double distSpherePoint(SpherePoint &point0, SpherePoint &point1);
+double distSpherePoint(SpherePoint& point0, SpherePoint& point1);
 
-SpherePoint &MassCentre(int n, int *indexFacet, PolyhedronPtr poly);
-SpherePoint &MassCentre(int n, SpherePoint *points);
+SpherePoint& MassCentre(int n, int* indexFacet, PolyhedronPtr poly);
+SpherePoint& MassCentre(int n, SpherePoint* points);
 
 #endif /* SPHEREPOINT_H */

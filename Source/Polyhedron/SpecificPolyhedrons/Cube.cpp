@@ -20,19 +20,23 @@
 
 #include <memory>
 
-#include "DebugAssert.h"
 #include "DebugPrint.h"
-#include "Polyhedron/Facet/Facet.h"
+#include "DebugAssert.h"
 #include "Polyhedron/SpecificPolyhedrons/Cube.h"
+#include "Polyhedron/Facet/Facet.h"
 
-Cube::Cube() : height(0.), center(Vector3d(0., 0., 0.))
+Cube::Cube() :
+		height(0.),
+		center(Vector3d(0., 0.,  0.))
 {
 	DEBUG_START;
 	init();
 	DEBUG_END;
 }
 
-Cube::Cube(double h) : height(h), center(Vector3d(0., 0., 0.))
+Cube::Cube(double h) :
+		height(h),
+		center(Vector3d(0., 0., 0.))
 {
 	DEBUG_START;
 	init();
@@ -40,14 +44,17 @@ Cube::Cube(double h) : height(h), center(Vector3d(0., 0., 0.))
 }
 
 Cube::Cube(double h, double x, double y, double z) :
-	height(h), center(Vector3d(x, y, z))
+		height(h),
+		center(Vector3d(x, y, z))
 {
 	DEBUG_START;
 	init();
 	DEBUG_END;
 }
 
-Cube::Cube(double h, Vector3d c) : height(h), center(c)
+Cube::Cube(double h, Vector3d c) :
+		height(h),
+		center(c)
 {
 	DEBUG_START;
 	init();
@@ -73,21 +80,21 @@ void Cube::init()
 	double halfHeight = height;
 
 	vertices[0] = Vector3d(center.x - halfHeight, center.y - halfHeight,
-						   center.z - halfHeight);
+			center.z - halfHeight);
 	vertices[1] = Vector3d(center.x + halfHeight, center.y - halfHeight,
-						   center.z - halfHeight);
+			center.z - halfHeight);
 	vertices[2] = Vector3d(center.x + halfHeight, center.y + halfHeight,
-						   center.z - halfHeight);
+			center.z - halfHeight);
 	vertices[3] = Vector3d(center.x - halfHeight, center.y + halfHeight,
-						   center.z - halfHeight);
+			center.z - halfHeight);
 	vertices[4] = Vector3d(center.x - halfHeight, center.y - halfHeight,
-						   center.z + halfHeight);
+			center.z + halfHeight);
 	vertices[5] = Vector3d(center.x + halfHeight, center.y - halfHeight,
-						   center.z + halfHeight);
+			center.z + halfHeight);
 	vertices[6] = Vector3d(center.x + halfHeight, center.y + halfHeight,
-						   center.z + halfHeight);
+			center.z + halfHeight);
 	vertices[7] = Vector3d(center.x - halfHeight, center.y + halfHeight,
-						   center.z + halfHeight);
+			center.z + halfHeight);
 
 	for (int ifacet = 0; ifacet < numFacets; ++ifacet)
 	{

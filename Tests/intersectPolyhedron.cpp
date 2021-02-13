@@ -20,9 +20,9 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-void test(const char *name, int type, double a, double b, double c, double d);
+void test(const char* name, int type, double a, double b, double c, double d);
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	DEBUG_START;
 	test("poly-small", 0, 0., 0., 1., 3.);
@@ -37,8 +37,8 @@ int main(int argc, char **argv)
 	Vector3d origin, normal;
 	double a, b, c, d;
 
-	origin = Vector3d(-3308.14593415889, -85.2348088534985, -2744.2585328124) *
-			 0.001;
+	origin = Vector3d(-3308.14593415889, -85.2348088534985, -2744.2585328124)
+			* 0.001;
 	normal = Vector3d(0.9907942064402, 0.134257976187036, -0.017367680175984);
 	a = normal.x;
 	b = normal.y;
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	DEBUG_END;
 }
 
-void test(const char *name, int type, double a, double b, double c, double d)
+void test(const char* name, int type, double a, double b, double c, double d)
 {
 	DEBUG_START;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -87,7 +87,7 @@ void test(const char *name, int type, double a, double b, double c, double d)
 	}
 
 	poly.fprint_ply_scale(1000., file_name_out0,
-						  "made-by-Polyhedron_join_facets_2");
+			"made-by-Polyhedron_join_facets_2");
 
 	poly.get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	fprintf(stdout, "boundary : \n");
@@ -99,14 +99,14 @@ void test(const char *name, int type, double a, double b, double c, double d)
 	poly.intersect(Plane(Vector3d(a, b, c), d));
 
 	time_t seconds = time(NULL);
-	tm *timeinfo = localtime(&seconds);
+	tm* timeinfo = localtime(&seconds);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d.ply", name,
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
 	poly.fprint_ply_scale(1000., file_name_out,
-						  "made-by-Polyhedron_join_facets_2");
+			"made-by-Polyhedron_join_facets_2");
 
 	if (file_name_in != NULL)
 		delete[] file_name_in;
@@ -116,3 +116,4 @@ void test(const char *name, int type, double a, double b, double c, double d)
 		delete[] file_name_out;
 	DEBUG_END;
 }
+

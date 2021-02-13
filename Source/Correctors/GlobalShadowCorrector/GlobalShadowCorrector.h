@@ -33,11 +33,8 @@ class GSAssociator;
 
 enum MethodCorrector
 {
-	METHOD_UNKNOWN,
-	METHOD_GRADIENT_DESCENT,
-	METHOD_GRADIENT_DESCENT_FAST,
-	METHOD_CONJUGATE_GRADIENT,
-	METHOD_ALL
+	METHOD_UNKNOWN, METHOD_GRADIENT_DESCENT, METHOD_GRADIENT_DESCENT_FAST,
+	METHOD_CONJUGATE_GRADIENT, METHOD_ALL
 };
 /* Number of different methods of the corrector. */
 const int NUMBER_METHOD_CORRECTOR = 3;
@@ -52,11 +49,8 @@ typedef struct _GSCorrectorParameters GSCorrectorParameters;
 
 enum GSCorrectorExitReason
 {
-	GSC_SUCCESS,
-	GSC_BIG_ERROR_ABSOLUTE,
-	GSC_BIG_ERROR_RELATIVE,
-	GSC_SMALL_GRADIENT,
-	GSC_SMALL_MOVEMENT
+	GSC_SUCCESS, GSC_BIG_ERROR_ABSOLUTE, GSC_BIG_ERROR_RELATIVE,
+	GSC_SMALL_GRADIENT, GSC_SMALL_MOVEMENT
 };
 
 struct _GSCorrectorStatus
@@ -67,6 +61,7 @@ struct _GSCorrectorStatus
 	double valueCausedExit;
 };
 typedef struct _GSCorrectorStatus GSCorrectorStatus;
+
 
 const double EPS_LOOP_STOP_DEFAULT = 1e-6;
 const double DELTA_GRADIENT_STEP_DEFAULT = 1e-4;
@@ -80,18 +75,19 @@ const double DEFAULT_MAX_DELTA = 1.;
 
 const double EPSILON_FOR_DIVISION = 1e-16;
 
-class GlobalShadowCorrector : public PCorrector
+class GlobalShadowCorrector: public PCorrector
 {
 protected:
 	EdgeDataPtr edgeData;
 	ShadowContourDataPtr contourData;
 
 private:
+
 	/* Basic parameters of algorithm. */
 	GSCorrectorParameters parameters;
 
-	/* For opportunity of partial correction, we store a std::list with facet
-	 * id's that are to be corrected. */
+	/* For opportunity of partial correction, we store a std::list with facet id's
+	 * that are to be corrected. */
 	std::list<int> facetsCorrected;
 
 	/* In all algorithms we process only those facets which have some
@@ -101,11 +97,11 @@ private:
 
 	/* Array for storing current values of gradient - used in all gradient
 	 * methods. */
-	double *gradient;
+	double* gradient;
 
 	/* Array for storing previous values of S_{k}^{j} - used in conjugate
 	 * gradient method only. */
-	double *gradientPrevious;
+	double* gradientPrevious;
 
 	/* Euclid norm of current and previous gradient - used in conjugate
 	 * gradient method only. */
@@ -123,7 +119,7 @@ private:
 	/* Array for storing previous values of planes' coefficients.
 	 * This is used in trick when we freeze some rational expressions
 	 * to make functional quadratical. */
-	Plane *prevPlanes;
+	Plane* prevPlanes;
 
 	/* Number of dimensions of space where the functional is minimized. */
 	int dim;
@@ -133,7 +129,7 @@ private:
 	 * deletes the std::list facetNotAssociated.
 	 *
 	 * This issue has been found by the use of Valgrind (Memcheck) tool. */
-	GSAssociator *associator;
+	GSAssociator* associator;
 
 	void preprocess();
 	void preprocessAssociations();
@@ -156,21 +152,21 @@ private:
 	double calculateFunctionalDerivative_1(int iFacet, int iCoefficient);
 
 	GSCorrectorStatus repairAndRun(MethodCorrector method,
-								   Plane *planesInitial);
+			Plane* planesInitial);
 	GSCorrectorStatus runCorrectionDo();
 
 	void init();
-
 public:
 	GlobalShadowCorrector();
 	GlobalShadowCorrector(PolyhedronPtr p, ShadowContourDataPtr scd,
-						  GSCorrectorParameters *_parameters);
-	GlobalShadowCorrector(Polyhedron *p, ShadowContourDataPtr scd,
-						  GSCorrectorParameters *_parameters);
+		GSCorrectorParameters* _parameters);
+	GlobalShadowCorrector(Polyhedron* p, ShadowContourDataPtr scd,
+				GSCorrectorParameters* _parameters);
 	virtual ~GlobalShadowCorrector();
 	void setFacetsCorrected(std::list<int> _facetsCorrected);
 
 	void runCorrection();
+
 };
 
 #endif /* GLOBALSHADECORRECTOR_H_ */

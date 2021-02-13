@@ -18,15 +18,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Correctors/VertexGrouper/VertexGrouper.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Correctors/VertexGrouper/VertexGrouper.h"
 
 int Polyhedron::groupVertices(int idSavedVertex)
 {
 	DEBUG_START;
-	VertexGrouper *vertexGrouper = new VertexGrouper(get_ptr());
+	VertexGrouper* vertexGrouper = new VertexGrouper(get_ptr());
 	int numGroupedPoints = vertexGrouper->run(idSavedVertex);
 	delete vertexGrouper;
 	return numGroupedPoints;

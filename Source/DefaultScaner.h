@@ -25,9 +25,9 @@
 
 #ifndef DEFAULT_SCANER_H
 #define DEFAULT_SCANER_H
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 class DefaultScaner
 {
@@ -38,8 +38,7 @@ class DefaultScaner
 
 public:
 	DefaultScaner(const char *path) : path(path), fd(nullptr), line(nullptr)
-	{
-	}
+	{}
 
 	~DefaultScaner()
 	{
@@ -51,7 +50,7 @@ public:
 
 	bool open()
 	{
-		fd = (FILE *)fopen(path, "r");
+		fd = (FILE*) fopen(path, "r");
 		return (fd != nullptr);
 	}
 
@@ -61,7 +60,7 @@ public:
 			return nullptr;
 		if (line)
 			free(line);
-		line = (char *)malloc(maxLineLength * sizeof(char));
+		line = (char*) malloc(maxLineLength * sizeof(char));
 		while (fgets(line, maxLineLength, fd))
 			if (line[0] != '#' && strlen(line) > 0)
 			{

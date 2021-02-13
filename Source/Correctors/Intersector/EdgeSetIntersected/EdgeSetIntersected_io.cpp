@@ -18,16 +18,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
 
-void EdgeSetIntersected::my_fprint(FILE *file)
+void EdgeSetIntersected::my_fprint(FILE* file)
 {
 	DEBUG_START;
 	int i;
-	REGULAR_PRINT(file, "---------- EdgeSetIntersected (%d). ----------\n",
-				  num);
+	REGULAR_PRINT(file, "---------- EdgeSetIntersected (%d). ----------\n", num);
 	if (num > 0)
 	{
 		REGULAR_PRINT(file, "edge0 : ");
@@ -41,3 +40,4 @@ void EdgeSetIntersected::my_fprint(FILE *file)
 	}
 	DEBUG_END;
 }
+

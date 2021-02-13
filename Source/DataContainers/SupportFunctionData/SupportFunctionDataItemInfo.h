@@ -27,8 +27,8 @@
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_INFO_H
 #define SUPPORT_FUNCTION_DATA_ITEM_INFO_H
 
-#include "KernelCGAL/KernelCGAL.h"
 #include <memory>
+#include "KernelCGAL/KernelCGAL.h"
 
 class SupportFunctionDataItemInfo
 {
@@ -61,8 +61,8 @@ public:
 	SupportFunctionDataItemInfo();
 
 	/** Assignment operator. */
-	SupportFunctionDataItemInfo &
-	operator=(const SupportFunctionDataItemInfo &i);
+	SupportFunctionDataItemInfo &operator=(
+			const SupportFunctionDataItemInfo &i);
 
 	/** Virtual destructor. */
 	virtual ~SupportFunctionDataItemInfo();

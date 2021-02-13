@@ -21,26 +21,27 @@
 /* Includes. */
 
 /* Standard includes: */
-#include <assert.h>
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
+#include <assert.h>
 #include <dlfcn.h>
 #include <time.h>
 
 /* Standard Template Library includes: */
-#include <algorithm>
 #include <list>
-#include <memory>
-#include <queue>
 #include <set>
+#include <queue>
+#include <algorithm>
+#include <memory>
 
 /* Includes from auxiliary external libraries (built-in): */
-#include "Gauss_string.h"
+#include "Vector3d.h"
 #include "LeastSquaresMethod.h"
 #include "Vector3d.h"
 #include "array_operations.h"
+#include "Gauss_string.h"
 
 class Polyhedron;
 
@@ -101,61 +102,62 @@ class SortedSetOfPairs;
 
 class GraphDumperGEXF;
 
-#include "Polyhedron/Facet/Facet.h"
-#include "Polyhedron/Polyhedron.h"
-#include "Polyhedron/SpecificPolyhedrons/Cube.h"
-#include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
-#include "Polyhedron/SpecificPolyhedrons/Prism.h"
-#include "Polyhedron/SpecificPolyhedrons/Pyramid.h"
-#include "Polyhedron/VertexInfo/VertexInfo.h"
 
-#include "DataContainers/EdgeData/Edge/Edge.h"
-#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
-#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "Polyhedron/SpecificPolyhedrons/Cube.h"
+#include "Polyhedron/SpecificPolyhedrons/Pyramid.h"
+#include "Polyhedron/SpecificPolyhedrons/Prism.h"
+#include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
+
 #include "DataContainers/PData/PData.h"
-#include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
+#include "DataContainers/EdgeData/Edge/Edge.h"
+#include "DataContainers/EdgeData/EdgeData.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 #include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
 
-#include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
 #include "DataConstructors/PDataConstructor/PDataConstructor.h"
+#include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
 #include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
 
-#include "Correctors/Coalescer/Coalescer.h"
-#include "Correctors/GlobalShadowCorrector/GSAssociator/GSAssociator.h"
-#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
-#include "Correctors/Intersector/EdgeList/EdgeList.h"
-#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
-#include "Correctors/Intersector/FacetIntersector.h"
-#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
-#include "Correctors/Intersector/Intersector.h"
 #include "Correctors/PCorrector/PCorrector.h"
-#include "Correctors/PointShifter/PointShifter.h"
-#include "Correctors/PointShifterLinear/PointShifterLinear.h"
-#include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
+#include "Correctors/Intersector/Intersector.h"
+#include "Correctors/Intersector/FacetIntersector.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+#include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "Correctors/GlobalShadowCorrector/GSAssociator/GSAssociator.h"
+#include "Correctors/Coalescer/Coalescer.h"
 #include "Correctors/VertexGrouper/VertexGrouper.h"
+#include "Correctors/PointShifter/PointShifter.h"
+#include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
+#include "Correctors/PointShifterLinear/PointShifterLinear.h"
 
 #include "Correctors/EdgeReducer/EdgeReducer.h"
 #include "Polyhedron/Verifier/Verifier.h"
 
-#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
-#include "Analyzers/Clusterizer/Clusterizer.h"
-#include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
-#include "Analyzers/Clusterizer/SortedSetOfPairs/SortedSetOfPairs.h"
-#include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
-#include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
-#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
-#include "Analyzers/ShadowContourClusterizer/ShadowContourClusterizer.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
+#include "Analyzers/Clusterizer/Clusterizer.h"
+#include "Analyzers/Clusterizer/SortedSetOfPairs/SortedSetOfPairs.h"
+#include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
+#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
+#include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
+#include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+#include "Analyzers/ShadowContourClusterizer/ShadowContourClusterizer.h"
 
 #include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
 
 #include "Recoverer/Recoverer.h"
 
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "PCLDumper.h"

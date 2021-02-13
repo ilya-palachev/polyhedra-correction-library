@@ -18,11 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
 
-void FutureFacet::my_fprint(FILE *file)
+void FutureFacet::my_fprint(FILE* file)
 {
 	DEBUG_START;
 	int i;

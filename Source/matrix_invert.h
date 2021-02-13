@@ -19,29 +19,30 @@
  */
 
 #ifndef MATRIX_INVERT_H
-#define MATRIX_INVERT_H
+#define	MATRIX_INVERT_H
 
-#include "DebugPrint.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "DebugPrint.h"
 
 #define eps 1e-32
 
-void I(double *Mat, int numCol, int i, int j);
-void II(double *Mat, int numCol, int i, double l, int begin);
-void III(double *Mat, int numCol, int i, int j, double l, int begin);
-int invert(double *Mat, double *Res, int num);
-void swap(double *a, double *b);
-int mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
-		 int numCol1, double *Res);
-int sub_mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
-			 int numCol1, double *Res);
-void subb(double *b0, double *b1, int n);
-double norm(double *Mat, int num);
-double normb(double *b, int n);
+void I(double* Mat, int numCol, int i, int j);
+void II(double* Mat, int numCol, int i, double l, int begin);
+void III(double* Mat, int numCol, int i, int j, double l, int begin);
+int invert(double* Mat, double* Res, int num);
+void swap(double* a, double* b);
+int mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
+		int numCol1, double* Res);
+int sub_mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
+		int numCol1, double* Res);
+void subb(double* b0, double* b1, int n);
+double norm(double* Mat, int num);
+double normb(double* b, int n);
 
-void I(double *Mat, int numCol, int i, int j)
+void I(double* Mat, int numCol, int i, int j)
 {
 	int k;
 	double *pi, *pj;
@@ -49,7 +50,7 @@ void I(double *Mat, int numCol, int i, int j)
 		swap(pi++, pj++);
 }
 
-void II(double *Mat, int numCol, int i, double l, int begin)
+void II(double* Mat, int numCol, int i, double l, int begin)
 {
 	int k;
 	double *p;
@@ -57,17 +58,16 @@ void II(double *Mat, int numCol, int i, double l, int begin)
 		*(p++) /= l;
 }
 
-void III(double *Mat, int numCol, int i, int j, double l, int begin)
+void III(double* Mat, int numCol, int i, int j, double l, int begin)
 {
 	int k;
 	double *pi, *pj;
-	for (pi = Mat + numCol * i + begin, pj = Mat + numCol * j + begin,
-		k = begin;
-		 k < numCol; k++)
+	for (pi = Mat + numCol * i + begin, pj = Mat + numCol * j + begin, k = begin;
+			k < numCol; k++)
 		*(pi++) -= *(pj++) * l;
 }
 
-int invert(double *Mat, double *Res, int num)
+int invert(double* Mat, double* Res, int num)
 {
 	int i, j, step, imax;
 	double *p, o, tmp;
@@ -124,7 +124,7 @@ int invert(double *Mat, double *Res, int num)
 	return 1;
 }
 
-void swap(double *a, double *b)
+void swap(double* a, double* b)
 {
 	double sw;
 	sw = *a;
@@ -132,8 +132,8 @@ void swap(double *a, double *b)
 	*b = sw;
 }
 
-int mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
-		 int numCol1, double *Res)
+int mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
+		int numCol1, double* Res)
 {
 	int i, j, t;
 	double s00 = 0., s01 = 0., s10 = 0., s11 = 0.;
@@ -153,8 +153,8 @@ int mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 				s00 += Mat0[numCol0 * i + t] * Mat1[numCol1 * t + j];
 				s01 += Mat0[numCol0 * i + t] * Mat1[numCol1 * t + j + 1];
 				s10 += Mat0[numCol0 * i + t + numCol0] * Mat1[numCol1 * t + j];
-				s11 +=
-					Mat0[numCol0 * i + t + numCol0] * Mat1[numCol1 * t + j + 1];
+				s11 += Mat0[numCol0 * i + t + numCol0]
+						* Mat1[numCol1 * t + j + 1];
 			}
 			Res[numCol1 * i + j] = s00;
 			Res[numCol1 * i + j + 1] = s01;
@@ -169,10 +169,10 @@ int mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 			s01 = 0.;
 			for (t = 0; t < numCol0; t++)
 			{
-				s00 += Mat0[numStr0 * numCol0 - numCol0 + t] *
-					   Mat1[numCol1 * t + i];
-				s01 += Mat0[numStr0 * numCol0 - numCol0 + t] *
-					   Mat1[numCol1 * t + i + 1];
+				s00 += Mat0[numStr0 * numCol0 - numCol0 + t]
+						* Mat1[numCol1 * t + i];
+				s01 += Mat0[numStr0 * numCol0 - numCol0 + t]
+						* Mat1[numCol1 * t + i + 1];
 			}
 			Res[numStr0 * numCol1 - numCol1 + i] = s00;
 			Res[numStr0 * numCol1 - numCol1 + i + 1] = s01;
@@ -187,8 +187,8 @@ int mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 			for (t = 0; t < numCol0; t++)
 			{
 				s00 += Mat0[numCol0 * i + t] * Mat1[numCol1 * t + numCol1 - 1];
-				s10 += Mat0[numCol0 * i + numCol0 + t] *
-					   Mat1[numCol1 * t + numCol1 - 1];
+				s10 += Mat0[numCol0 * i + numCol0 + t]
+						* Mat1[numCol1 * t + numCol1 - 1];
 			}
 			Res[i * numCol1 + numCol1 - 1] = s00;
 			Res[i * numCol1 + numCol1 + numCol1 - 1] = s10;
@@ -198,15 +198,15 @@ int mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 	{
 		s00 = 0;
 		for (t = 0; t < numCol0; t++)
-			s00 += Mat0[numStr0 * numCol0 - numCol0 + t] *
-				   Mat1[numCol1 * t + numCol1 - 1];
+			s00 += Mat0[numStr0 * numCol0 - numCol0 + t]
+					* Mat1[numCol1 * t + numCol1 - 1];
 		Res[numStr0 * numCol1 - 1] = s00;
 	}
 	return 0;
 }
 
-int sub_mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
-			 int numCol1, double *Res)
+int sub_mult(double* Mat0, int numStr0, int numCol0, double* Mat1, int numStr1,
+		int numCol1, double* Res)
 {
 	int i, j, t;
 	double s00 = 0., s01 = 0., s10 = 0., s11 = 0.;
@@ -226,8 +226,8 @@ int sub_mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 				s00 += Mat0[numCol0 * i + t] * Mat1[numCol1 * t + j];
 				s01 += Mat0[numCol0 * i + t] * Mat1[numCol1 * t + j + 1];
 				s10 += Mat0[numCol0 * i + t + numCol0] * Mat1[numCol1 * t + j];
-				s11 +=
-					Mat0[numCol0 * i + t + numCol0] * Mat1[numCol1 * t + j + 1];
+				s11 += Mat0[numCol0 * i + t + numCol0]
+						* Mat1[numCol1 * t + j + 1];
 			}
 			Res[numCol1 * i + j] -= s00;
 			Res[numCol1 * i + j + 1] -= s01;
@@ -242,10 +242,10 @@ int sub_mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 			s01 = 0.;
 			for (t = 0; t < numCol0; t++)
 			{
-				s00 += Mat0[numStr0 * numCol0 - numCol0 + t] *
-					   Mat1[numCol1 * t + i];
-				s01 += Mat0[numStr0 * numCol0 - numCol0 + t] *
-					   Mat1[numCol1 * t + i + 1];
+				s00 += Mat0[numStr0 * numCol0 - numCol0 + t]
+						* Mat1[numCol1 * t + i];
+				s01 += Mat0[numStr0 * numCol0 - numCol0 + t]
+						* Mat1[numCol1 * t + i + 1];
 			}
 			Res[numStr0 * numCol1 - numCol1 + i] -= s00;
 			Res[numStr0 * numCol1 - numCol1 + i + 1] -= s01;
@@ -260,8 +260,8 @@ int sub_mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 			for (t = 0; t < numCol0; t++)
 			{
 				s00 += Mat0[numCol0 * i + t] * Mat1[numCol1 * t + numCol1 - 1];
-				s10 += Mat0[numCol0 * i + numCol0 + t] *
-					   Mat1[numCol1 * t + numCol1 - 1];
+				s10 += Mat0[numCol0 * i + numCol0 + t]
+						* Mat1[numCol1 * t + numCol1 - 1];
 			}
 			Res[i * numCol1 + numCol1 - 1] -= s00;
 			Res[i * numCol1 + numCol1 + numCol1 - 1] -= s10;
@@ -271,21 +271,21 @@ int sub_mult(double *Mat0, int numStr0, int numCol0, double *Mat1, int numStr1,
 	{
 		s00 = 0;
 		for (t = 0; t < numCol0; t++)
-			s00 += Mat0[numStr0 * numCol0 - numCol0 + t] *
-				   Mat1[numCol1 * t + numCol1 - 1];
+			s00 += Mat0[numStr0 * numCol0 - numCol0 + t]
+					* Mat1[numCol1 * t + numCol1 - 1];
 		Res[numStr0 * numCol1 - 1] -= s00;
 	}
 	return 0;
 }
 
-void subb(double *b0, double *b1, int n)
+void subb(double* b0, double* b1, int n)
 {
 	int i;
 	for (i = 0; i < n; i++)
 		b0[i] -= b1[i];
 }
 
-double norm(double *Mat, int num)
+double norm(double* Mat, int num)
 {
 	int i, j;
 	double tmp, max = 0., *p0, *p1, s0 = 0., s1 = 0., s2 = 0., s3 = 0.;
@@ -366,7 +366,7 @@ double norm(double *Mat, int num)
 	return max;
 }
 
-double normb(double *b, int n)
+double normb(double* b, int n)
 {
 	int i;
 	double tmp, max;
@@ -377,8 +377,10 @@ double normb(double *b, int n)
 			max = tmp;
 	}
 	return max;
+
 }
 
 #undef eps
 
-#endif /* MATRIX_INVERT_H */
+#endif	/* MATRIX_INVERT_H */
+

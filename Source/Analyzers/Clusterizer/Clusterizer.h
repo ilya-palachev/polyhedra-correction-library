@@ -24,19 +24,19 @@
 
 #include <memory>
 
-#include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
-#include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
-#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Analyzers/Clusterizer/TreeClusterNormNode/TreeClusterNormNode.h"
+#include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
+#include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
 
-class Clusterizer : public PAnalyzer
+class Clusterizer: public PAnalyzer
 {
 private:
-	int *cluster;
-	int *A;
-	bool *inc;
-	double *dist;
+	int* cluster;
+	int* A;
+	bool* inc;
+	double* dist;
 
 public:
 	Clusterizer();
@@ -44,13 +44,12 @@ public:
 	~Clusterizer();
 	int clusterize(double p);
 	void clusterize2(double p);
-	TreeClusterNorm &build_TreeClusterNorm();
-	void giveClusterNodeArray(TreeClusterNormNode *nodeArray,
-							  MatrixDistNorm &matrix);
-	void reClusterNodeArray(TreeClusterNormNode *nodeArray_in,
-							MatrixDistNorm &matrix_in,
-							TreeClusterNormNode *nodeArray_out,
-							MatrixDistNorm &matrix_out);
+	TreeClusterNorm& build_TreeClusterNorm();
+	void giveClusterNodeArray(TreeClusterNormNode* nodeArray,
+			MatrixDistNorm& matrix);
+	void reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
+			MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
+			MatrixDistNorm& matrix_out);
 };
 
 #endif /* CLUSTERIZER_H_ */

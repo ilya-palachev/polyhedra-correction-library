@@ -24,18 +24,18 @@
  * blink contours.
  */
 
-#include "Common.h"
-#include "Correctors/EdgeCorrector/EdgeCorrector.h"
-#include "DataContainers/EdgeInfo/EdgeInfo.h"
-#include "DebugAssert.h"
-#include "DebugPrint.h"
-#include "PCLDumper.h"
-#include "Polyhedron/Facet/Facet.h"
-#include "Polyhedron/Polyhedron.h"
-#include "Polyhedron_3/Polyhedron_3.h"
-#include <coin/IpIpoptApplication.hpp>
 #include <stdio.h>
 #include <stdlib.h>
+#include <coin/IpIpoptApplication.hpp>
+#include "Common.h"
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "PCLDumper.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron_3/Polyhedron_3.h"
+#include "DataContainers/EdgeInfo/EdgeInfo.h"
+#include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
 static void printUsage(const char *name)
 {
@@ -107,11 +107,13 @@ void setParameters(Ipopt::SmartPtr<Ipopt::OptionsList> options)
 	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
 		options->SetStringValue("derivative_test", "only-second-order");
 	if (getenv("HESSIAN_APPROX"))
-		options->SetStringValue("hessian_approximation", "limited-memory");
+		options->SetStringValue("hessian_approximation",
+				"limited-memory");
+
 }
 
 std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
-								   const std::vector<EdgeInfo> &data)
+		const std::vector<EdgeInfo> &data)
 {
 	bool doEdgeScaling = (getenv("DISABLE_EDGE_SCALING") == nullptr);
 	EdgeCorrector *EC = new EdgeCorrector(doEdgeScaling, planes, data);
@@ -127,8 +129,8 @@ std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 	setParameters(app->Options());
 	/* Ask Ipopt to solve the problem */
 	auto status = app->OptimizeTNLP(EC);
-	if (status != Ipopt::Solve_Succeeded &&
-		status != Ipopt::Solved_To_Acceptable_Level)
+	if (status != Ipopt::Solve_Succeeded
+		&& status != Ipopt::Solved_To_Acceptable_Level)
 	{
 		MAIN_PRINT("** The problem FAILED!");
 		exit(EXIT_FAILURE);
@@ -164,8 +166,8 @@ static double signedDist(const Plane_3 &p, const Point_3 &C)
 
 static Plane_3 centerizePlane(const Plane_3 &p, const Point_3 &C, double sign)
 {
-	Plane_3 pp(p.a(), p.b(), p.c(),
-			   p.d() + p.a() * C.x() + p.b() * C.y() + p.c() * C.z());
+	Plane_3 pp(p.a(), p.b(), p.c(),	p.d() + p.a() * C.x() + p.b() * C.y()
+			+ p.c() * C.z());
 
 	double a = pp.a();
 	double b = pp.b();
@@ -185,7 +187,7 @@ static Plane_3 centerizePlane(const Plane_3 &p, const Point_3 &C, double sign)
 }
 
 static std::vector<Plane_3> centerizePlanes(const std::vector<Plane_3> &planes,
-											const Point_3 &C)
+		const Point_3 &C)
 {
 	std::vector<Plane_3> centeredPlanes;
 	for (const Plane_3 &p : planes)
@@ -200,9 +202,8 @@ std::ostream &operator<<(std::ostream &stream, std::shared_ptr<Polyhedron> p)
 }
 
 /* FIXME: Copied from Polyhedron_io.cpp with slight modifications. */
-static std::shared_ptr<Polyhedron>
-convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
-					   const std::vector<Plane_3> &initPlanes)
+static std::shared_ptr<Polyhedron> convertWithAssociation(Polyhedron_3 p,
+		const Point_3 &C, const std::vector<Plane_3> &initPlanes)
 {
 	/* Check for non-emptiness. */
 	ASSERT(p.size_of_vertices());
@@ -240,13 +241,15 @@ convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
 		facets[id].id = id;
 
 		/* Transform current plane. */
-		Plane_3 pi = centerizePlane(*plane, Point_3(-C.x(), -C.y(), -C.z()),
-									signedDist(initPlanes[id], C));
-		facets[id].plane = Plane(Vector3d(pi.a(), pi.b(), pi.c()), pi.d());
+		Plane_3 pi = centerizePlane(*plane,
+				Point_3(-C.x(), -C.y(), -C.z()),
+				signedDist(initPlanes[id], C));
+		facets[id].plane = Plane(Vector3d(pi.a(), pi.b(), pi.c()),
+				pi.d());
 
 		/*
-		 * Iterate through the std::list of halfedges incident to the curent
-		 * CGAL facet.
+		 * Iterate through the std::list of halfedges incident to the curent CGAL
+		 * facet.
 		 */
 		auto halfedge = facet->facet_begin();
 
@@ -254,7 +257,8 @@ convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
 		CGAL_assertion(CGAL::circulator_size(halfedge) >= 3);
 
 		facets[id].numVertices = CGAL::circulator_size(halfedge);
-		facets[id].indVertices = new int[3 * facets[id].numVertices + 1];
+		facets[id].indVertices =
+			new int[3 * facets[id].numVertices + 1];
 		/*
 		 * TODO: It's too unsafe architecture if we do such things as setting
 		 * the size of internal array outside the API functions. Moreover, it
@@ -281,15 +285,14 @@ convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
 	} while (++plane != p.planes_end() && ++facet != p.facets_end());
 
 	return std::make_shared<Polyhedron>(numVertices, numFacets, vertices,
-										facets);
+			facets);
 }
 static void dumpResult(const std::vector<Plane_3> &planes,
-					   const std::vector<Plane_3> &resultingPlanes,
-					   const Point_3 &C)
+		const std::vector<Plane_3> &resultingPlanes, const Point_3 &C)
 {
 	std::cout << "Number of initial planes: " << planes.size() << std::endl;
 	std::cout << "Number of resulting planes: " << resultingPlanes.size()
-			  << std::endl;
+		<< std::endl;
 	std::cout << "Center: " << C << std::endl;
 	ASSERT(planes.size() == resultingPlanes.size());
 
@@ -300,8 +303,9 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 		Plane_3 p = resultingPlanes[i];
 		double distance = planeDist(p0, p);
 		if (distance > 1e-6)
-			std::cout << "Plane #" << i << ": " << p0 << " -> " << p
-					  << " # distance: " << distance << std::endl;
+			std::cout << "Plane #" << i << ": " << p0
+				<< " -> " << p << " # distance: " << distance
+				<< std::endl;
 		maxDistance = std::max(distance, maxDistance);
 	}
 
@@ -309,8 +313,8 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 
 	/* To compare with the result: */
 	Polyhedron_3 initCenterizedP(centerizePlanes(planes, C));
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron-centerized.ply")
-		<< initCenterizedP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+			"init-polyhedron-centerized.ply") << initCenterizedP;
 
 	auto centerizedPlanes = centerizePlanes(resultingPlanes, C);
 	Polyhedron_3 resultingP(centerizedPlanes);
@@ -346,12 +350,14 @@ int main(int argc, char **argv)
 		DEBUG_END;
 		return EXIT_FAILURE;
 	}
-	std::cout << "Number of vertices (custom): " << p->numVertices << std::endl;
+	std::cout << "Number of vertices (custom): " << p->numVertices
+		<< std::endl;
 	globalPCLDumper.setNameBase(pathPolyhedron);
 	globalPCLDumper.enableVerboseMode();
 
 	Polyhedron_3 initP(p);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron.ply") << initP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron.ply")
+		<< initP;
 
 	std::cout << "Successfully read the polyhedron..." << std::endl;
 

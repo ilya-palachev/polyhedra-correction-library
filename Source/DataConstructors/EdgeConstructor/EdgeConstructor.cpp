@@ -18,13 +18,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "DataConstructors/EdgeConstructor/EdgeConstructor.h"
 #include "DataContainers/EdgeData/EdgeData.h"
-#include "DebugAssert.h"
-#include "DebugPrint.h"
 #include "Polyhedron/Facet/Facet.h"
 
-EdgeConstructor::EdgeConstructor(PolyhedronPtr p) : PDataConstructor(p)
+EdgeConstructor::EdgeConstructor(PolyhedronPtr p) :
+				PDataConstructor(p)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -45,17 +46,15 @@ void EdgeConstructor::run(EdgeDataPtr edgeData)
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
 		int numVerticesInFacet = polyhedron->facets[i].numVertices;
-		int *index = polyhedron->facets[i].indVertices;
+		int * index = polyhedron->facets[i].indVertices;
 		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex)
 		{
-			edgeData->addEdge(
-				index[iVertex],							  // First vertices
-				index[iVertex + 1],						  // Second vertices
-				i,										  // Current facets id
-				index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
+			edgeData->addEdge(index[iVertex], // First vertices
+					index[iVertex + 1], // Second vertices
+					i, // Current facets id
+					index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
 			DEBUG_PRINT("After iteration #%d we have the "
-						"following edge data:",
-						(int)edgeData->edges.size());
+					"following edge data:", (int) edgeData->edges.size());
 			edge = edgeData->edges.begin();
 			for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 			{

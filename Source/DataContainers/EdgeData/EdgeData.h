@@ -90,10 +90,11 @@ public:
 	 * if a new element was inserted or false if an equivalent element already
 	 * existed (see c++ reference).
 	 * */
-	std::pair<EdgeSetIterator, bool> addEdge(Edge &edge);
+	std::pair<EdgeSetIterator, bool> addEdge(Edge& edge);
 
-	bool operator==(EdgeData &e);
-	bool operator!=(EdgeData &e);
+	bool operator ==(EdgeData& e);
+	bool operator !=(EdgeData& e);
+
 };
 
 #endif /* EDGEDATA_H_ */

@@ -24,10 +24,10 @@
  * - implementation.
  */
 
-#include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 #include "Constants.h"
 #include "DebugPrint.h"
 #include "Vector3d.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 
 SupportFunctionDataItemInfo::SupportFunctionDataItemInfo() :
 	point(Vector3d(0., 0., 0.)),
@@ -42,8 +42,8 @@ SupportFunctionDataItemInfo::SupportFunctionDataItemInfo() :
 	DEBUG_END;
 }
 
-SupportFunctionDataItemInfo &
-SupportFunctionDataItemInfo::operator=(const SupportFunctionDataItemInfo &info)
+SupportFunctionDataItemInfo &SupportFunctionDataItemInfo::operator=(
+			const SupportFunctionDataItemInfo &info)
 {
 	DEBUG_START;
 	point = info.point;

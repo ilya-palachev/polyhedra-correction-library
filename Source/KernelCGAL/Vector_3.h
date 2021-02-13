@@ -31,24 +31,20 @@
 /**
  * CGAL Vector_3 class with PCL extensions
  */
-class Vector_3 : public Kernel::Vector_3
+class Vector_3: public Kernel::Vector_3
 {
 public:
 	/**
 	 * Constructs zero CGAL vector from nothing.
 	 */
-	Vector_3() : Kernel::Vector_3()
-	{
-	}
+	Vector_3(): Kernel::Vector_3() {}
 
 	/**
 	 * Constructs CGAL vector from PCL vector.
 	 *
 	 * @param v	The PCL vector.
 	 */
-	Vector_3(const Vector3d &v) : Kernel::Vector_3(v.x, v.y, v.z)
-	{
-	}
+	Vector_3(const Vector3d &v): Kernel::Vector_3(v.x, v.y, v.z) {}
 
 	/**
 	 * Constructs CGAL vector from 3 coordinates.
@@ -57,18 +53,16 @@ public:
 	 * @param y	The Y coordinate
 	 * @param z	The Z coordinate
 	 */
-	Vector_3(double x, double y, double z) : Kernel::Vector_3(x, y, z)
-	{
-	}
+	Vector_3(double x, double y, double z):
+		Kernel::Vector_3(x, y, z) {}
 
 	/**
 	 * Constructs vector from another vector.
 	 *
 	 * @param v	The original vector
 	 */
-	Vector_3(const Kernel::Vector_3 &v) : Kernel::Vector_3(v)
-	{
-	}
+	Vector_3(const Kernel::Vector_3 &v):
+		Kernel::Vector_3(v) {}
 };
 
 #endif /* KERNELCGAL_VECTOR_3_H_ */

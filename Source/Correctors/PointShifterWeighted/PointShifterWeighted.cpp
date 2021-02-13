@@ -18,39 +18,67 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "Gauss_string.h"
+#include "Correctors/PointShifterWeighted/PointShifterWeighted.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 
-double norm_vector(int n, double *a);
+double norm_vector(int n, double* a);
 
-void print_matrix(FILE *file, int n, int m, double *A);
+void print_matrix(FILE* file, int n, int m, double* A);
 
-void print_matrix_bool(FILE *file, int n, int m, bool *A);
+void print_matrix_bool(FILE* file, int n, int m, bool* A);
+
 
 #define EPSILON 1e-11
 #define EPS_DERIVATE 1e-8
 
 PointShifterWeighted::PointShifterWeighted() :
-	PCorrector(), x(), x1(), fx(), A(), khi(), tmp0(), tmp1(), tmp2(), tmp3()
+		PCorrector(),
+		x(),
+		x1(),
+		fx(),
+		A(),
+		khi(),
+		tmp0(),
+		tmp1(),
+		tmp2(),
+		tmp3()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 PointShifterWeighted::PointShifterWeighted(PolyhedronPtr p) :
-	PCorrector(p), x(), x1(), fx(), A(), khi(), tmp0(), tmp1(), tmp2(), tmp3()
+				PCorrector(p),
+				x(),
+				x1(),
+				fx(),
+				A(),
+				khi(),
+				tmp0(),
+				tmp1(),
+				tmp2(),
+				tmp3()
 {
 	DEBUG_START;
 	init();
 	DEBUG_END;
 }
 
-PointShifterWeighted::PointShifterWeighted(Polyhedron *p) :
-	PCorrector(p), x(), x1(), fx(), A(), khi(), tmp0(), tmp1(), tmp2(), tmp3()
+PointShifterWeighted::PointShifterWeighted(Polyhedron* p) :
+				PCorrector(p),
+				x(),
+				x1(),
+				fx(),
+				A(),
+				khi(),
+				tmp0(),
+				tmp1(),
+				tmp2(),
+				tmp3()
 {
 	DEBUG_START;
 	init();
@@ -72,8 +100,7 @@ void PointShifterWeighted::init()
 
 	for (int i = 0; i < polyhedron->numVertices; ++i)
 		for (int j = 0; j < polyhedron->numFacets; ++j)
-			khi[i * polyhedron->numFacets + j] =
-				(polyhedron->facets[j].find_vertex(i) != -1);
+			khi[i * polyhedron->numFacets + j] = (polyhedron->facets[j].find_vertex(i) != -1);
 	DEBUG_END;
 }
 
@@ -144,7 +171,7 @@ PointShifterWeighted::~PointShifterWeighted()
 #define c(i) x[nc(i)]
 #define d(i) x[nd(i)]
 
-#define khi(i, j) khi[(i)*polyhedron->numVertices + (j)]
+#define khi(i, j) khi[(i) * polyhedron->numVertices + (j)]
 
 void PointShifterWeighted::run(int id, Vector3d delta)
 {
@@ -172,15 +199,15 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 			yy = polyhedron->vertices[index[i]].y;
 			zz = polyhedron->vertices[index[i]].z;
 			DEBUG_PRINT("v%d -> f%d : %lf\n", index[i], j,
-						a * xx + b * yy + c * zz + d);
+					a * xx + b * yy + c * zz + d);
 		}
 	}
 
 	polyhedron->vertices[id] = polyhedron->vertices[id] + delta;
 	n = 4 * polyhedron->numFacets + 3 * (polyhedron->numVertices - 1);
 
-	print_matrix_bool(stdout, polyhedron->numVertices, polyhedron->numFacets,
-					  khi);
+
+	print_matrix_bool(stdout, polyhedron->numVertices, polyhedron->numFacets, khi);
 
 	for (int i = 0; i < n; ++i)
 	{
@@ -266,7 +293,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 			yy = polyhedron->vertices[index[i]].y;
 			zz = polyhedron->vertices[index[i]].z;
 			DEBUG_PRINT("v%d -> f%d : %lf\n", index[i], j,
-						a * xx + b * yy + c * zz + d);
+					a * xx + b * yy + c * zz + d);
 		}
 	}
 
@@ -302,16 +329,18 @@ void PointShifterWeighted::calculateFunctional()
 				bj = polyhedron->facets[j].plane.norm.y;
 				cj = polyhedron->facets[j].plane.norm.z;
 				dj = polyhedron->facets[j].plane.dist;
-				coeff = (aj + a(j)) * (xi + x(i)) + (bj + b(j)) * (yi + y(i)) +
-						(cj + c(j)) * (zi + z(i)) + dj + d(j);
+				coeff = (aj + a(j)) * (xi + x(i))
+				+ (bj + b(j)) * (yi + y(i))
+				+ (cj + c(j)) * (zi + z(i))
+				+ dj + d(j);
 				sx += coeff * (aj + a(j));
 				sy += coeff * (bj + b(j));
 				sz += coeff * (cj + c(j));
 			}
 		}
-		fx[nx(i)] = 2 * x(i) + 2 * K * sx;
-		fx[ny(i)] = 2 * y(i) + 2 * K * sy;
-		fx[nz(i)] = 2 * z(i) + 2 * K * sz;
+		fx[nx(i)] = 2 * x(i)+ 2 * K * sx;
+		fx[ny(i)] = 2 * y(i)+ 2 * K * sy;
+		fx[nz(i)] = 2 * z(i)+ 2 * K * sz;
 	}
 
 	for (j = 0; j < polyhedron->numFacets; ++j)
@@ -333,8 +362,10 @@ void PointShifterWeighted::calculateFunctional()
 				zi = polyhedron->vertices[i].z;
 				if (i == id)
 				{
-					coeff = (aj + a(j)) * xi + (bj + b(j)) * yi +
-							(cj + c(j)) * zi + dj + d(j);
+					coeff = (aj + a(j)) * xi
+					+ (bj + b(j)) * yi
+					+ (cj + c(j)) * zi
+					+ dj + d(j);
 					sa += coeff * xi;
 					sb += coeff * yi;
 					sc += coeff * zi;
@@ -342,9 +373,10 @@ void PointShifterWeighted::calculateFunctional()
 				}
 				else
 				{
-					coeff = (aj + a(j)) * (xi + x(i)) +
-							(bj + b(j)) * (yi + y(i)) +
-							(cj + c(j)) * (zi + z(i)) + dj + d(j);
+					coeff = (aj + a(j)) * (xi + x(i))
+					+ (bj + b(j)) * (yi + y(i))
+					+ (cj + c(j)) * (zi + z(i))
+					+ dj + d(j);
 					sa += coeff * (xi + x(i));
 					sb += coeff * (yi + y(i));
 					sc += coeff * (zi + z(i));
@@ -352,10 +384,10 @@ void PointShifterWeighted::calculateFunctional()
 				}
 			}
 		}
-		fx[na(j)] = 2 * a(j) + 2 * K * sa;
-		fx[nb(j)] = 2 * b(j) + 2 * K * sb;
-		fx[nc(j)] = 2 * c(j) + 2 * K * sc;
-		fx[nd(j)] = 2 * d(j) + 2 * K * sd;
+		fx[na(j)] = 2 * a(j)+ 2 * K * sa;
+		fx[nb(j)] = 2 * b(j)+ 2 * K * sb;
+		fx[nc(j)] = 2 * c(j)+ 2 * K * sc;
+		fx[nd(j)] = 2 * d(j)+ 2 * K * sd;
 	}
 	DEBUG_END;
 }
@@ -386,3 +418,4 @@ void PointShifterWeighted::calculateFuncitonalDerivative()
 	}
 	DEBUG_END;
 }
+

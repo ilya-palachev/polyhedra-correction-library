@@ -24,9 +24,9 @@
  * (implementation).
  */
 
-#include "TimeMeasurer.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "TimeMeasurer.h"
 
 /**
  * Creates empty time measurer
@@ -37,17 +37,19 @@ TimeMeasurer::TimeMeasurer()
 	DEBUG_END;
 }
 
+
 /**
  * Copies exisiting time measurer to existing one
  *
  * @param other time measurer to be copied.
  */
-TimeMeasurer::TimeMeasurer(const TimeMeasurer &other)
+TimeMeasurer::TimeMeasurer(const TimeMeasurer& other)
 {
 	DEBUG_START;
 	timers = other.timers;
 	DEBUG_END;
 }
+
 
 /**
  * Frees time measurer.
@@ -64,8 +66,8 @@ TimeMeasurer::~TimeMeasurer()
  *
  * @param other the measurer to be assigned to
  */
-TimeMeasurer &TimeMeasurer::operator=(const TimeMeasurer &other)
-{
+TimeMeasurer& TimeMeasurer::operator=(const TimeMeasurer& other)
+{	
 	DEBUG_START;
 	timers = other.timers;
 	DEBUG_END;
@@ -80,13 +82,13 @@ TimeMeasurer &TimeMeasurer::operator=(const TimeMeasurer &other)
  * @retval true if equal
  * @retval false if unequal
  */
-bool TimeMeasurer::operator==(const TimeMeasurer &other) const
+bool TimeMeasurer::operator==(const TimeMeasurer& other) const
 {
 	DEBUG_START;
-
+	
 	auto it_timer1 = timers.begin();
 	auto it_timer2 = other.timers.begin();
-
+	
 	while (it_timer1 != timers.end() && it_timer2 != other.timers.end())
 	{
 		if (*it_timer1 != *it_timer2)
@@ -95,7 +97,7 @@ bool TimeMeasurer::operator==(const TimeMeasurer &other) const
 			return false;
 		}
 	}
-
+	
 	DEBUG_END;
 	return true;
 }
@@ -108,7 +110,7 @@ bool TimeMeasurer::operator==(const TimeMeasurer &other) const
  * @retval true if equal
  * @retval false if unequal
  */
-bool TimeMeasurer::operator!=(const TimeMeasurer &other) const
+bool TimeMeasurer::operator!=(const TimeMeasurer& other) const
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -147,9 +149,10 @@ double TimeMeasurer::popTimer()
 	Timer timerBegin = timers.back();
 
 	long int usecondsDiff =
-		MILLION * (timerEnd.getSeconds() - timerBegin.getSeconds()) +
-		timerEnd.getUSeconds() - timerBegin.getUSeconds();
+			MILLION * (timerEnd.getSeconds() - timerBegin.getSeconds())
+			+ timerEnd.getUSeconds() - timerBegin.getUSeconds();
 
 	DEBUG_END;
-	return usecondsDiff / (double)MILLION;
+	return usecondsDiff / (double) MILLION;
 }
+

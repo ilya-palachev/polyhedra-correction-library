@@ -18,46 +18,48 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/EdgeData/EdgeContourAssociation/EdgeContourAssociation.h"
 
 EdgeContourAssociation::EdgeContourAssociation() :
-	indContour(-1), indNearestSide(-1), ifProperDirection(false), weight(0.)
+				indContour(-1),
+				indNearestSide(-1),
+				ifProperDirection(false),
+				weight(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 EdgeContourAssociation::EdgeContourAssociation(int indContour_orig,
-											   int indNearestSide_orig,
-											   bool ifProperDirection_orig,
-											   double weight_orig) :
-	indContour(indContour_orig),
-	indNearestSide(indNearestSide_orig),
-	ifProperDirection(ifProperDirection_orig),
-	weight(weight_orig)
+		int indNearestSide_orig, bool ifProperDirection_orig,
+		double weight_orig) :
+				indContour(indContour_orig),
+				indNearestSide(indNearestSide_orig),
+				ifProperDirection(ifProperDirection_orig),
+				weight(weight_orig)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 EdgeContourAssociation::EdgeContourAssociation(int indContour_orig) :
-	indContour(indContour_orig),
-	indNearestSide(-1),
-	ifProperDirection(false),
-	weight(0.)
+				indContour(indContour_orig),
+				indNearestSide(-1),
+				ifProperDirection(false),
+				weight(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 EdgeContourAssociation::EdgeContourAssociation(
-	const EdgeContourAssociation &orig) :
-	indContour(orig.indContour),
-	indNearestSide(orig.indNearestSide),
-	ifProperDirection(orig.ifProperDirection),
-	weight(orig.weight)
+		const EdgeContourAssociation& orig) :
+				indContour(orig.indContour),
+				indNearestSide(orig.indNearestSide),
+				ifProperDirection(orig.ifProperDirection),
+				weight(orig.weight)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -68,3 +70,4 @@ EdgeContourAssociation::~EdgeContourAssociation()
 	DEBUG_START;
 	DEBUG_END;
 }
+

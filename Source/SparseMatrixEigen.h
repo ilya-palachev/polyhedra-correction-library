@@ -37,7 +37,7 @@
  * @return True, if matrix are totally equal at topological and FP sence
  */
 bool operator==(const Eigen::SparseMatrix<double> matrixLeft,
-				const Eigen::SparseMatrix<double> matrixRight);
+	const Eigen::SparseMatrix<double> matrixRight);
 
 typedef Eigen::SparseMatrix<double> SparseMatrix;
 
@@ -48,5 +48,6 @@ typedef Eigen::VectorXd VectorXd;
 typedef Eigen::RowVectorXd RowVectorXd;
 
 typedef Eigen::VectorXi VectorXi;
+
 
 #endif

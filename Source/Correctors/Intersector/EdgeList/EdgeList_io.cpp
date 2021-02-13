@@ -18,11 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Correctors/Intersector/EdgeList/EdgeList.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
 
-void EdgeList::my_fprint(FILE *file)
+void EdgeList::my_fprint(FILE* file)
 {
 	DEBUG_START;
 	int i;

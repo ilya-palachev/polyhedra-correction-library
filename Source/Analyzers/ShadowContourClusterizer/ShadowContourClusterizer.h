@@ -30,8 +30,8 @@
 #include <memory>
 
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
-#include "DataContainers/ShadowContourData/ShadowContourData.h"
 #include "Polyhedron/Polyhedron.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
 
 /**
  * Shadow contour clusterizer. Can detect different observations of the same
@@ -40,6 +40,7 @@
 class ShadowContourClusterizer : public PAnalyzer
 {
 public:
+
 	/* Empty constructor. */
 	ShadowContourClusterizer();
 
@@ -56,7 +57,7 @@ public:
 	 * @param contourData	Shadow contour data (set of given contours)
 	 * @param fileNamePlot	The of file used as output file parsed by GNU Plot.
 	 */
-	void buildPlot(ShadowContourDataPtr contourData, const char *fileNamePlot);
+	void buildPlot(ShadowContourDataPtr contourData, const char* fileNamePlot);
 };
 
 typedef std::shared_ptr<ShadowContourClusterizer> ShadowContourClusterizerPtr;

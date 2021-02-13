@@ -32,9 +32,9 @@
 
 #include <memory>
 
-#include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 #include "DebugPrint.h"
 #include "Vector3d.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionDataItemInfo.h"
 
 /** Support function item with additional info. */
 class SupportFunctionDataItem
@@ -75,7 +75,8 @@ public:
 	 *
 	 * @param item	The original item.
 	 */
-	SupportFunctionDataItem &operator=(const SupportFunctionDataItem &item);
+	SupportFunctionDataItem &operator=(const SupportFunctionDataItem
+			&item);
 };
 
 /** Shared pointer to support function data item. */
@@ -89,11 +90,11 @@ typedef std::shared_ptr<SupportFunctionDataItem> SupportFunctionDataItemPtr;
  * @return True, if they are equal.
  */
 inline bool operator==(const SupportFunctionDataItem &left,
-					   const SupportFunctionDataItem &right)
+	const SupportFunctionDataItem &right)
 {
 	DEBUG_START;
-	bool ifEqual =
-		left.direction == right.direction && equal(left.value, right.value);
+	bool ifEqual = left.direction == right.direction
+		&& equal(left.value, right.value);
 	DEBUG_END;
 	return ifEqual;
 }
@@ -106,7 +107,7 @@ inline bool operator==(const SupportFunctionDataItem &left,
  * @return True, if they are inequal.
  */
 inline bool operator!=(const SupportFunctionDataItem &left,
-					   const SupportFunctionDataItem &right)
+	const SupportFunctionDataItem &right)
 {
 	DEBUG_START;
 	bool ifInequal = !(left == right);

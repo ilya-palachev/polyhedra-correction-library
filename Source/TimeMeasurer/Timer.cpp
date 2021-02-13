@@ -20,8 +20,8 @@
 
 #include <sys/time.h>
 
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "Timer.h"
 
 Timer::Timer()
@@ -32,12 +32,13 @@ Timer::Timer()
 	DEBUG_END;
 }
 
-Timer::Timer(const Timer &other)
+Timer::Timer(const Timer& other)
 {
 	DEBUG_START;
 	seconds_ = other.seconds_;
 	useconds_ = other.useconds_;
 	DEBUG_END;
+
 }
 
 Timer::~Timer()
@@ -46,7 +47,7 @@ Timer::~Timer()
 	DEBUG_END;
 }
 
-Timer &Timer::operator=(const Timer &other)
+Timer& Timer::operator=(const Timer& other)
 {
 	DEBUG_START;
 	seconds_ = other.seconds_;
@@ -55,12 +56,12 @@ Timer &Timer::operator=(const Timer &other)
 	return *this;
 }
 
-bool Timer::operator==(const Timer &other) const
+bool Timer::operator==(const Timer& other) const
 {
 	return seconds_ == other.seconds_ && useconds_ == other.useconds_;
 }
 
-bool Timer::operator!=(const Timer &other) const
+bool Timer::operator!=(const Timer& other) const
 {
 	return seconds_ != other.seconds_ || useconds_ != other.useconds_;
 }
@@ -79,14 +80,14 @@ void Timer::setSeconds(long int seconds)
 {
 	DEBUG_START;
 	seconds_ = seconds;
-	DEBUG_END;
+	DEBUG_END;	
 }
 
 void Timer::setUSeconds(long int useconds)
 {
 	DEBUG_START;
 	useconds_ = useconds;
-	DEBUG_END;
+	DEBUG_END;	
 }
 
 void Timer::start()

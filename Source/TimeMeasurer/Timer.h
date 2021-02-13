@@ -26,21 +26,20 @@ class Timer
 private:
 	long int seconds_;
 	long int useconds_;
-
 public:
 	Timer();
-	Timer(const Timer &other);
+	Timer(const Timer& other);
 	virtual ~Timer();
-	Timer &operator=(const Timer &other);
-	bool operator==(const Timer &other) const;
-	bool operator!=(const Timer &other) const;
-
+	Timer& operator=(const Timer& other);
+	bool operator==(const Timer& other) const;
+	bool operator!=(const Timer& other) const;
+	
 	long int getSeconds();
 	long int getUSeconds();
-
+	
 	void setSeconds(long int seconds);
 	void setUSeconds(long int useconds);
-
+	
 	void start();
 };
 

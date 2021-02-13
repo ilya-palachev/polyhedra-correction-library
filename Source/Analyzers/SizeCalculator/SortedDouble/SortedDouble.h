@@ -26,13 +26,14 @@ class SortedDouble
 public:
 	int len;
 	int num;
-	double *array;
+	double* array;
 
 	SortedDouble(int Len);
 	~SortedDouble();
 
 	void add(double x);
 	double calclulate();
+
 };
 
 #endif /* SORTEDDOUBLE_H_ */

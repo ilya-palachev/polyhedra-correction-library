@@ -18,11 +18,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataConstructors/PDataConstructor/PDataConstructor.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataConstructors/PDataConstructor/PDataConstructor.h"
 
-PDataConstructor::PDataConstructor(PolyhedronPtr p) : polyhedron(p)
+PDataConstructor::PDataConstructor(PolyhedronPtr p) :
+				polyhedron(p)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -33,3 +34,4 @@ PDataConstructor::~PDataConstructor()
 	DEBUG_START;
 	DEBUG_END;
 }
+

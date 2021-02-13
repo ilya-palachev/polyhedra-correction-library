@@ -23,19 +23,19 @@
  * @brief Native estimation engine (implementation).
  */
 
-#include "Recoverer/NativeSupportFunctionEstimator.h"
-#include "DebugAssert.h"
+#include <Eigen/LU>
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "PCLDumper.h"
+#include "Recoverer/NativeSupportFunctionEstimator.h"
+#include "Polyhedron_3/Polyhedron_3.h"
+#include <CGAL/linear_least_squares_fitting_3.h>
+#include "Recoverer/Colouring.h"
 #include "NativeEstimatorCommonFunctions.h"
 #include "NativeQuadraticEstimator.h"
-#include "PCLDumper.h"
-#include "Polyhedron_3/Polyhedron_3.h"
-#include "Recoverer/Colouring.h"
-#include <CGAL/linear_least_squares_fitting_3.h>
-#include <Eigen/LU>
 
 NativeSupportFunctionEstimator::NativeSupportFunctionEstimator(
-	SupportFunctionEstimationDataPtr data) :
+		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
@@ -52,8 +52,8 @@ NativeSupportFunctionEstimator::~NativeSupportFunctionEstimator()
 #include <CGAL/Delaunay_triangulation_3.h>
 typedef CGAL::Triangulation_data_structure_3<
 	CGAL::Triangulation_vertex_base_3<Kernel>,
-	CGAL::Triangulation_cell_base_3<Kernel>, CGAL::Parallel_tag>
-	Tds;
+		CGAL::Triangulation_cell_base_3<Kernel>,
+			CGAL::Parallel_tag> Tds;
 typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 
 int findPoint(std::vector<Point_3> points, Point_3 query)
@@ -76,7 +76,7 @@ int findPoint(std::vector<Point_3> points, Point_3 query)
 }
 
 static std::vector<int> collectOuterPlanesIDs(SupportFunctionDataPtr data,
-											  double epsilon)
+		double epsilon)
 {
 	DEBUG_START;
 	/* Get duals of higher and lower support planes */
@@ -85,9 +85,10 @@ static std::vector<int> collectOuterPlanesIDs(SupportFunctionDataPtr data,
 
 	/* Construct 3D Delaunay triangulation of points. */
 	Delaunay::Lock_data_structure locking_ds(
-		CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000., 1000.), 50);
+			CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000.,
+				1000.), 50);
 	Delaunay triangulation(pointsHigher.begin(), pointsHigher.end(),
-						   &locking_ds);
+			&locking_ds);
 	auto infinity = triangulation.infinite_vertex();
 
 	std::vector<int> outerPlanesIDs;
@@ -102,7 +103,7 @@ static std::vector<int> collectOuterPlanesIDs(SupportFunctionDataPtr data,
 		}
 	}
 	std::cerr << "IDs of outer planes: ";
-	for (int &id : outerPlanesIDs)
+	for (int &id: outerPlanesIDs)
 	{
 		std::cerr << id << " ";
 	}
@@ -139,13 +140,13 @@ VectorXd runLinfEstimation(SupportFunctionEstimationDataPtr data)
 	double badEpsilon = 0.;
 	double goodEpsilon = startingEpsilon;
 	int iIteration = 0;
-	std::cout << "startingEpsilon = " << startingEpsilon << std::endl;
+	std::cout << "startingEpsilon = " << startingEpsilon <<std::endl;
 	while (goodEpsilon - badEpsilon > BEST_EPSILON_PRECISION)
 	{
-		double epsilon =
-			badEpsilon + (goodEpsilon - badEpsilon) * SEARCH_MULTIPLIER;
-		std::cerr << "Native estimator: iteration #" << iIteration
-				  << ": epsilon = " << epsilon << "... ";
+		double epsilon = badEpsilon +
+			(goodEpsilon - badEpsilon) * SEARCH_MULTIPLIER;
+		std::cerr << "Native estimator: iteration #" << iIteration <<
+			": epsilon = " << epsilon << "... ";
 		std::vector<int> outerPlanesIDs =
 			collectOuterPlanesIDs(supportData, epsilon);
 		if (outerPlanesIDs.size() == 0)
@@ -174,18 +175,18 @@ int countInnerPoints(std::vector<Point_3> points)
 }
 
 void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
-								   std::vector<int> index)
+		std::vector<int> index)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr supportData = data->supportData();
 	auto planes = supportData->supportPlanes();
 	std::vector<int> contoursCounter(planes.size());
-	for (int i = 0; i < (int)planes.size(); ++i)
+	for (int i = 0; i < (int) planes.size(); ++i)
 	{
 		contoursCounter[i] = -1;
 	}
 	std::vector<int> contoursNumSides(planes.size());
-	for (auto &i : index)
+	for (auto &i: index)
 	{
 		auto item = (*supportData)[i];
 		int iContour = item.info->iContour;
@@ -197,33 +198,36 @@ void runContoursCounterDiagnostics(SupportFunctionEstimationDataPtr data,
 		else
 		{
 			contoursCounter[iContour] += 1;
-			if (contoursNumSides[iContour] != item.info->numSidesContour)
+			if (contoursNumSides[iContour]
+					!= item.info->numSidesContour)
 			{
 				std::cerr << "Wrong info about sides number "
-						  << "in contour" << iContour << std::endl;
+					<< "in contour" << iContour
+					<< std::endl;
 			}
 		}
 	}
 
-	for (int i = 0; i < (int)contoursCounter.size(); ++i)
+	for (int i = 0; i < (int) contoursCounter.size(); ++i)
 	{
 		if (contoursCounter[i] > 0)
-			std::cerr << "Contour " << i << " has " << contoursCounter[i]
-					  << " consistent of " << contoursNumSides[i] << " sides."
-					  << std::endl;
+			std::cerr << "Contour " << i << " has "
+				<< contoursCounter[i] << " consistent of "
+				<< contoursNumSides[i] << " sides."
+				<< std::endl;
 	}
 	DEBUG_END;
 }
 
 Eigen::Vector3d decomposeDirection(SupportFunctionDataPtr data, int planeID,
-								   std::set<int> planesIDs)
+		std::set<int> planesIDs)
 {
 	DEBUG_START;
 	auto directions = data->supportDirections<Vector3d>();
 
 	Eigen::Matrix3d matrix;
 	int i = 0;
-	for (int id : planesIDs)
+	for (int id: planesIDs)
 	{
 		auto direction = directions[id];
 		matrix(0, i) = direction.x;
@@ -246,7 +250,7 @@ Eigen::Vector3d decomposeDirection(SupportFunctionDataPtr data, int planeID,
 }
 
 double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
-							 std::set<int> planesIDs)
+		std::set<int> planesIDs)
 {
 	DEBUG_START;
 	auto values = data->supportValues();
@@ -255,7 +259,7 @@ double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
 
 	double numerator = values(planeID);
 	int i = 0;
-	for (int id : planesIDs)
+	for (int id: planesIDs)
 	{
 		numerator -= solution(i) * values(id);
 		++i;
@@ -273,18 +277,21 @@ double calculateMinimalShift(SupportFunctionDataPtr data, int planeID,
 	return epsilon;
 }
 
+
 std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
-											  Polyhedron_3 *intersection,
-											  std::vector<int> index)
+		Polyhedron_3 *intersection, std::vector<int> index)
 {
 	DEBUG_START;
-	auto outerIndex = collectInnerPointsIDs(data->getShiftedDualPoints_3(0.));
+	auto outerIndex = collectInnerPointsIDs(
+			data->getShiftedDualPoints_3(0.));
 	auto directions = data->supportDirections<Vector3d>();
 	auto values = data->supportValues();
 
 	typedef Eigen::Triplet<double> Triplet;
-	auto comparison = [](Triplet a, Triplet b) {
-		return a.row() < b.row() || (a.row() == b.row() && a.col() < b.col());
+	auto comparison = [](Triplet a, Triplet b)
+	{
+		return a.row() < b.row() ||
+			(a.row() == b.row() && a.col() < b.col());
 	};
 	std::set<Triplet, decltype(comparison)> triplets(comparison);
 	int numValues = values.size();
@@ -296,27 +303,27 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 	}
 
 	Polyhedron_3::Vertex_iterator tangient;
-	for (int &iOuter : outerIndex)
+	for (int &iOuter: outerIndex)
 	{
 		rightSide(iOuter) = 0.;
-		auto pair =
-			intersection->findTangientVertex<Polyhedron_3::Vertex_iterator>(
+		auto pair = intersection->findTangientVertex<Polyhedron_3::Vertex_iterator>(
 				directions[iOuter]);
 		auto tangient = pair.first;
 
-		auto planesIDs =
-			findTangientPointPlanesIDs(intersection, tangient, index);
+		auto planesIDs = findTangientPointPlanesIDs(intersection,
+				tangient, index);
 		auto coefficients = decomposeDirection(data, iOuter, planesIDs);
 		int i = 0;
-		for (int iPlane : planesIDs)
+		for (int iPlane: planesIDs)
 		{
 			rightSide(iPlane) += coefficients[i] * values(iOuter);
 			Triplet triplet(iOuter, iPlane, -coefficients[i]);
 			triplets.insert(triplet);
 			int j = 0;
-			for (int jPlane : planesIDs)
+			for (int jPlane: planesIDs)
 			{
-				double value = coefficients[i] * coefficients[j];
+				double value = coefficients[i]
+					* coefficients[j];
 				Triplet triplet(iPlane, jPlane, value);
 				auto iterator = triplets.find(triplet);
 				if (iterator == triplets.end())
@@ -342,28 +349,27 @@ std::pair<SparseMatrix, VectorXd> buildMatrix(SupportFunctionDataPtr data,
 }
 
 void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
-								 Polyhedron_3 *intersection,
-								 std::vector<int> index)
+		Polyhedron_3 *intersection, std::vector<int> index)
 {
 	DEBUG_START;
 
-	auto outerIndex = collectInnerPointsIDs(data->getShiftedDualPoints_3(0.));
+	auto outerIndex = collectInnerPointsIDs(
+			data->getShiftedDualPoints_3(0.));
 	auto directions = data->supportDirections<Vector3d>();
 	auto values = data->supportValues();
 
 	double minimal = 0.;
 	int iWorst = -1;
 	Polyhedron_3::Vertex_iterator tangient;
-	for (int &iOuter : outerIndex)
+	for (int &iOuter: outerIndex)
 	{
-		auto pair =
-			intersection->findTangientVertex<Polyhedron_3::Vertex_iterator>(
+		auto pair = intersection->findTangientVertex<Polyhedron_3::Vertex_iterator>(
 				directions[iOuter]);
 		auto vertex = pair.first;
 		if (!vertex->is_trivalent())
 		{
-			ERROR_PRINT("vertex has %ld degree %d", vertex->id,
-						(int)vertex->degree());
+			ERROR_PRINT("vertex has %ld degree %d",
+					vertex->id, (int) vertex->degree());
 			ERROR_PRINT("Not implemented yet!");
 			exit(EXIT_FAILURE);
 		}
@@ -377,41 +383,42 @@ void runInconsistencyDiagnostics(SupportFunctionDataPtr data,
 		}
 	}
 	std::cerr << "Worst plane: " << iWorst << " " << minimal << std::endl;
-	auto planesIDs = findTangientPointPlanesIDs(intersection, tangient, index);
+	auto planesIDs = findTangientPointPlanesIDs(intersection, tangient,
+			index);
 	double epsilon = calculateMinimalShift(data, iWorst, planesIDs);
 	std::cerr << "epsilon = " << epsilon << std::endl;
 
 	DEBUG_END;
 }
 
+
 void validateEstimate(std::vector<Plane_3> planesOld, VectorXd valuesNew)
 {
 	DEBUG_START;
 	std::vector<Plane_3> planesNew(planesOld.size());
-	for (int i = 0; i < (int)valuesNew.size(); ++i)
+	for (int i = 0; i < (int) valuesNew.size(); ++i)
 	{
 		Plane_3 plane = planesOld[i];
-		planesNew[i] = Plane_3(plane.a(), plane.b(), plane.c(), -valuesNew[i]);
+		planesNew[i] = Plane_3(plane.a(), plane.b(), plane.c(),
+				-valuesNew[i]);
 	}
 	Polyhedron_3 intersection(planesNew);
 	int numOuterPlanes = 0;
-	for (int i = 0; i < (int)valuesNew.size(); ++i)
+	for (int i = 0; i < (int) valuesNew.size(); ++i)
 	{
 		Plane_3 plane = planesNew[i];
 		Point_3 direction(plane.a(), plane.b(), plane.c());
-		auto pair =
-			intersection.findTangientVertex<Polyhedron_3::Vertex_iterator>(
-				direction);
+		auto pair = intersection.findTangientVertex<Polyhedron_3::Vertex_iterator>(direction);
 		double value = pair.second;
 		if (value < valuesNew[i])
 		{
 			std::cerr << "Value #" << i << ": " << value << " < "
-					  << valuesNew[i] << std::endl;
+				<< valuesNew[i] << std::endl;
 			++numOuterPlanes;
 		}
 	}
-	std::cerr << "Number of outer planes: " << numOuterPlanes << " from total "
-			  << planesOld.size() << std::endl;
+	std::cerr << "Number of outer planes: " << numOuterPlanes <<
+		" from total " << planesOld.size() << std::endl;
 	DEBUG_END;
 }
 
@@ -425,7 +432,7 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 	intersection.initialize_indices(planes);
 	auto index = intersection.indexPlanes_;
 	std::cerr << "Intersection contains " << intersection.size_of_facets()
-			  << " of " << planes.size() << " planes." << std::endl;
+		<< " of " << planes.size() << " planes." << std::endl;
 
 	if (getenv("PCL_CONTOURS_COUNTER_DIAGNOSTICS"))
 		runContoursCounterDiagnostics(data, index);
@@ -434,8 +441,7 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 
 	Polyhedron *pCopy = new Polyhedron(intersection);
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-					"intersection-for-matrix-building.ply")
-		<< *pCopy;
+			"intersection-for-matrix-building.ply") << *pCopy;
 
 	auto problem = buildMatrix(supportData, &intersection, index);
 	auto matrix = problem.first;
@@ -486,15 +492,17 @@ void runBadPlanesSearch(SupportFunctionEstimationDataPtr data)
 	{
 		std::vector<Point_3> pointsTested = points;
 		pointsTested.erase(pointsTested.begin() + i);
-		int numInnerPointsTested = countInnerPoints(pointsTested);
-		int numSavedPoints = numInnerPoints - numInnerPointsTested;
+		int numInnerPointsTested = countInnerPoints(
+				pointsTested);
+		int numSavedPoints = numInnerPoints
+			- numInnerPointsTested;
 		saved[numSavedPoints]++;
 	}
 
 	for (int i = 0; i < numPoints; ++i)
 		if (saved[i] > 0)
-			std::cerr << saved[i] << " points can save " << i << " points."
-					  << std::endl;
+			std::cerr << saved[i] << " points can save "
+				<< i << " points." << std::endl;
 	DEBUG_END;
 }
 
@@ -502,8 +510,8 @@ VectorXd NativeSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
 	VectorXd solution;
-
-	switch (problemType_)
+	
+	switch(problemType_)
 	{
 	case ESTIMATION_PROBLEM_NORM_L_INF:
 		DEBUG_END;

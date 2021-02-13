@@ -24,9 +24,9 @@
  * - implementation.
  */
 
-#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.h"
 
 SupportFunctionDataItemExtractor::SupportFunctionDataItemExtractor()
 {
@@ -40,8 +40,8 @@ SupportFunctionDataItemExtractor::~SupportFunctionDataItemExtractor()
 	DEBUG_END;
 }
 
-SupportFunctionDataItem
-SupportFunctionDataItemExtractor::run(SideOfContour *side)
+SupportFunctionDataItem SupportFunctionDataItemExtractor::run(
+		SideOfContour *side)
 {
 	DEBUG_START;
 	ASSERT(0 && "Called empty extractor instead of implemented one");

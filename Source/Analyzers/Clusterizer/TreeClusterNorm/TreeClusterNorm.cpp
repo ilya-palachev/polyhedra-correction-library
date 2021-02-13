@@ -19,25 +19,27 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "Analyzers/Clusterizer/TreeClusterNorm/TreeClusterNorm.h"
 #include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
-#include "DebugAssert.h"
-#include "DebugPrint.h"
 
-TreeClusterNorm::TreeClusterNorm() : root(NULL)
+TreeClusterNorm::TreeClusterNorm() :
+				root(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-TreeClusterNorm::TreeClusterNorm(const TreeClusterNorm &orig) : root(orig.root)
+TreeClusterNorm::TreeClusterNorm(const TreeClusterNorm& orig) :
+				root(orig.root)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-TreeClusterNorm::TreeClusterNorm(TreeClusterNormNode *root_orig) :
-	root(root_orig)
+TreeClusterNorm::TreeClusterNorm(TreeClusterNormNode* root_orig) :
+				root(root_orig)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -49,14 +51,14 @@ TreeClusterNorm::~TreeClusterNorm()
 	DEBUG_END;
 }
 
-void TreeClusterNorm::fprint(FILE *file)
+void TreeClusterNorm::fprint(FILE* file)
 {
 	DEBUG_START;
 	root->fprint(file, 0);
 	DEBUG_END;
 }
 
-void TreeClusterNorm::fprint_dendrogamma_lev(FILE *file)
+void TreeClusterNorm::fprint_dendrogamma_lev(FILE* file)
 {
 	DEBUG_START;
 	for (int i = 0; i < 4; i++)

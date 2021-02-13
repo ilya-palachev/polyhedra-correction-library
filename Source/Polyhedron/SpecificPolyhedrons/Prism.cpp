@@ -22,12 +22,17 @@
 #undef __STRICT_ANSI__
 #include <cmath>
 
-#include "DebugAssert.h"
 #include "DebugPrint.h"
-#include "Polyhedron/Facet/Facet.h"
+#include "DebugAssert.h"
 #include "Polyhedron/SpecificPolyhedrons/Prism.h"
+#include "Polyhedron/Facet/Facet.h"
 
-Prism::Prism() : Polyhedron(), numVerticesBase(3), height(0.), radius(0.)
+
+Prism::Prism() :
+		Polyhedron(),
+		numVerticesBase(3),
+		height(0.),
+		radius(0.)
 {
 	DEBUG_START;
 	init();
@@ -35,7 +40,10 @@ Prism::Prism() : Polyhedron(), numVerticesBase(3), height(0.), radius(0.)
 }
 
 Prism::Prism(int nv, double h, double r) :
-	Polyhedron(), numVerticesBase(nv), height(h), radius(r)
+		Polyhedron(),
+		numVerticesBase(nv),
+		height(h),
+		radius(r)
 {
 	DEBUG_START;
 	init();
@@ -57,11 +65,11 @@ void Prism::init()
 
 	for (int i = 0; i < numVerticesBase; ++i)
 		vertices[i] = Vector3d(cos(2 * M_PI * i / numVerticesBase),
-							   sin(2 * M_PI * i / numVerticesBase), 0.);
+				sin(2 * M_PI * i / numVerticesBase), 0.);
 	for (int i = 0; i < numVerticesBase; ++i)
-		vertices[numVerticesBase + i] =
-			Vector3d(cos(2 * M_PI * i / numVerticesBase),
-					 sin(2 * M_PI * i / numVerticesBase), height);
+		vertices[numVerticesBase + i] = Vector3d(
+				cos(2 * M_PI * i / numVerticesBase),
+				sin(2 * M_PI * i / numVerticesBase), height);
 
 	facets = new Facet[numVerticesBase + 2];
 
@@ -76,10 +84,10 @@ void Prism::init()
 		index[1] = (i + 1) % numVerticesBase;
 		index[2] = index[1] + numVerticesBase;
 		index[3] = index[0] + numVerticesBase;
-		plane =
-			Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
-		facets[i] =
-			Facet(i, NUM_VERTICES_IN_PRISM_ELEMENT, plane, index, NULL, false);
+		plane = Plane(vertices[index[0]], vertices[index[1]],
+				vertices[index[2]]);
+		facets[i] = Facet(i, NUM_VERTICES_IN_PRISM_ELEMENT, plane,
+			index, NULL, false);
 	}
 
 	index = new int[3 * numVerticesBase + 1];
@@ -88,15 +96,15 @@ void Prism::init()
 		index[i] = numVerticesBase - 1 - i;
 
 	plane = Plane(Vector3d(0., 0., -1.), 0.);
-	facets[numVerticesBase] =
-		Facet(numVerticesBase, numVerticesBase, plane, index, NULL, false);
+	facets[numVerticesBase] = Facet(numVerticesBase, numVerticesBase, plane,
+			index, NULL, false);
 
 	for (int i = 0; i < numVerticesBase; ++i)
 		index[i] = i + numVerticesBase;
 
 	plane = Plane(Vector3d(0., 0., 1.), -height);
-	facets[numVerticesBase + 1] =
-		Facet(numVerticesBase + 1, numVerticesBase, plane, index, NULL, false);
+	facets[numVerticesBase + 1] = Facet(numVerticesBase + 1, numVerticesBase,
+			plane, index, NULL, false);
 
 	numVertices = 2 * numVerticesBase;
 	numFacets = numVerticesBase + 2;

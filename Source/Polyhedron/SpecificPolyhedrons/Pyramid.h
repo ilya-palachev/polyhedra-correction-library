@@ -25,15 +25,13 @@
 
 #include "Polyhedron/Polyhedron.h"
 
-class Pyramid : public Polyhedron
-{
+class Pyramid: public Polyhedron {
 private:
 	int numVerticesBase;
 	double height;
 	double radius;
 
 	void init();
-
 public:
 	Pyramid();
 	Pyramid(int nv, double h, double r);

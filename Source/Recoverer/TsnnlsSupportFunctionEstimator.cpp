@@ -20,14 +20,14 @@
 
 #ifdef USE_TSNNLS
 
-#include "TsnnlsSupportFunctionEstimator.h"
-#include "Constants.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
+#include "TsnnlsSupportFunctionEstimator.h"
 
 TsnnlsSupportFunctionEstimator::TsnnlsSupportFunctionEstimator(
-	SupportFunctionEstimationData *data) :
-	SupportFunctionEstimator(data)
+		SupportFunctionEstimationData *data) :
+		SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -39,11 +39,11 @@ TsnnlsSupportFunctionEstimator::~TsnnlsSupportFunctionEstimator()
 	DEBUG_END;
 }
 
-static taucs_ccs_matrix *convertEigenToTaucs(SparseMatrix matrix)
+static taucs_ccs_matrix* convertEigenToTaucs(SparseMatrix matrix)
 {
 	DEBUG_START;
-	auto matrixTaucs =
-		taucs_ccs_new(matrix.rows(), matrix.cols(), matrix.nonZeros());
+	auto matrixTaucs = taucs_ccs_new(matrix.rows(), matrix.cols(),
+			matrix.nonZeros());
 
 	ASSERT(0 && "Not implemented yet.");
 	/*
@@ -53,12 +53,12 @@ static taucs_ccs_matrix *convertEigenToTaucs(SparseMatrix matrix)
 	return matrixTaucs;
 }
 
-static void analyzeTaucsMatrix(taucs_ccs_matrix *Q, bool ifAnalyzeExpect)
+static void analyzeTaucsMatrix(taucs_ccs_matrix* Q, bool ifAnalyzeExpect)
 {
 	DEBUG_START;
 #ifndef NDEBUG
 
-	int *numElemRow = (int *)calloc(Q->m, sizeof(int));
+	int* numElemRow = (int*) calloc (Q->m, sizeof(int));
 
 	for (int iCol = 0; iCol < Q->n + 1; ++iCol)
 	{
@@ -68,13 +68,13 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix *Q, bool ifAnalyzeExpect)
 			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
 			{
 				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
-							Q->values.d[iRow]);
+						Q->values.d[iRow]);
 				numElemRow[Q->rowind[iRow]]++;
 			}
 		}
 	}
 	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
-				Q->colptr[Q->n] - Q->colptr[0]);
+			Q->colptr[Q->n] - Q->colptr[0]);
 
 	if (ifAnalyzeExpect)
 	{
@@ -82,24 +82,23 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix *Q, bool ifAnalyzeExpect)
 		for (int iRow = 0; iRow < Q->m; ++iRow)
 		{
 			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
-						numElemRow[iRow]);
+					numElemRow[iRow]);
 			if (numElemRow[iRow] != NUM_NONZERO_COEFFICIENTS_IN_CONDITION)
 			{
 				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
-							"row");
+						"row");
 				++numUnexcpectedNonzeros;
 			}
 		}
 		DEBUG_PRINT("Number of rows with unexpected number of nonzero elements "
-					"is %d",
-					numUnexcpectedNonzeros);
+				"is %d", numUnexcpectedNonzeros);
 	}
 	free(numElemRow);
 #endif
 	DEBUG_END;
 }
 
-static double l1_distance(int n, double *x, double *y)
+static double l1_distance(int n, double* x, double* y)
 {
 	DEBUG_START;
 	double result = 0.;
@@ -125,7 +124,7 @@ static double l1_norm(int n, double* x)
 }
 #endif
 
-static double l2_distance(int n, double *x, double *y)
+static double l2_distance(int n, double* x, double* y)
 {
 	DEBUG_START;
 	double result = 0.;
@@ -151,7 +150,7 @@ static double l2_norm(int n, double* x)
 }
 #endif
 
-static double linf_distance(int n, double *x, double *y)
+static double linf_distance(int n, double* x, double* y)
 {
 	DEBUG_START;
 	double result = 0.;
@@ -184,14 +183,14 @@ void TsnnlsSupportFunctionEstimator::run()
 	double *hvalues = NULL;
 
 	/* 1. Build the transpose of support matrix. */
-	taucs_ccs_matrix *Qt = convertEigenToTaucs(data->supportMatrix());
+	taucs_ccs_matrix* Qt = convertEigenToTaucs(data->supportMatrix());
 	analyzeTaucsMatrix(Qt, false);
 	DEBUG_PRINT("Matrix has been built.");
 	DEBUG_PRINT("Qt has %d rows and %d columns", Qt->m, Qt->n);
 
 	/* 1. Enable highest level of verbosity in TSNNLS package. */
 	tsnnls_verbosity(10);
-	char *strStderr = strdup("stderr");
+	char* strStderr = strdup("stderr");
 	taucs_logfile(strStderr);
 
 	/*
@@ -217,40 +216,41 @@ void TsnnlsSupportFunctionEstimator::run()
 	 * 		RETURN
 	 */
 
-	double *Qtvals = taucs_convert_ccs_to_doubles(Qt);
-	taucs_ccs_matrix *fixed =
-		taucs_construct_sorted_ccs_matrix(Qtvals, Qt->n, Qt->m);
+	double* Qtvals = taucs_convert_ccs_to_doubles(Qt);
+	taucs_ccs_matrix* fixed = taucs_construct_sorted_ccs_matrix(Qtvals, Qt->n,
+			Qt->m);
 	free(Qtvals);
 	taucs_ccs_free(Qt);
 	Qt = fixed;
 
-	taucs_ccs_matrix *Q = taucs_ccs_transpose(Qt);
+	taucs_ccs_matrix* Q = taucs_ccs_transpose(Qt);
 	double conditionNumberQ = taucs_rcond(Q);
-	DEBUG_PRINT("rcond(Q) = %.16lf", conditionNumberQ);
+	DEBUG_PRINT("rcond(Q) = %.16lf",
+			conditionNumberQ);
 
-	double inRelErrTolerance =
-		conditionNumberQ * conditionNumberQ * EPS_MIN_DOUBLE;
+	double inRelErrTolerance = conditionNumberQ * conditionNumberQ *
+			EPS_MIN_DOUBLE;
 	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
 
 	double outResidualNorm;
 
 	/* 3. Run the main TSNNLS algorithm of minimization. */
-	double *h =
-		t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100., 1);
-	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void *)h);
+	double* h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100.,
+			1);
+	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void*) h);
 
-	char *errorTsnnls;
+	char* errorTsnnls;
 	tsnnls_error(&errorTsnnls);
 	ALWAYS_PRINT(stdout, "Error from tsnnls: %s", errorTsnnls);
 
 	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
 
 	ALWAYS_PRINT(stdout, "||h - h0||_{1} = %.16lf",
-				 l1_distance(numHvalues, hvalues, h));
+			l1_distance(numHvalues, hvalues, h));
 	ALWAYS_PRINT(stdout, "||h - h0||_{2} = %.16lf",
-				 l2_distance(numHvalues, hvalues, h));
+			l2_distance(numHvalues, hvalues, h));
 	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf",
-				 linf_distance(numHvalues, hvalues, h));
+			linf_distance(numHvalues, hvalues, h));
 
 	VectorXd estimation(numHvalues);
 	for (int i = 0; i < numHvalues; ++i)

@@ -26,16 +26,17 @@
 #ifndef PCLKERNEL_H
 #define PCLKERNEL_H
 
+#include <CGAL/Cartesian.h>
+#include "PCLKernel/PCLPoint_2.h"
+#include "PCLKernel/PCLSegment_2.h"
 #include "PCLKernel/PCLConstruct_bbox_2.h"
 #include "PCLKernel/PCLConstruct_coord_iterator.h"
 #include "PCLKernel/PCLConstruct_point_2.h"
-#include "PCLKernel/PCLPoint_2.h"
-#include "PCLKernel/PCLSegment_2.h"
-#include <CGAL/Cartesian.h>
 
 /* K_ is the new kernel, and K_base is the old kernel. */
 template <typename K_, typename K_Base>
-class PCLCartesian_base : public K_Base::template Base<K_>::Type
+class PCLCartesian_base
+	: public K_Base::template Base<K_>::Type
 {
 	typedef typename K_Base::template Base<K_>::Type OldK;
 
@@ -44,17 +45,18 @@ public:
 	typedef PCLPoint_2 Point_2;
 	typedef PCLSegment_2<Kernel> Segment_2;
 	typedef PCLConstruct_point_2<Kernel, OldK> Construct_point_2;
-	typedef const double *Cartesian_const_iterator_2;
+	typedef const double* Cartesian_const_iterator_2;
 	typedef PCLConstruct_coord_iterator Construct_cartesian_const_iterator_2;
-	typedef PCLConstruct_bbox_2<typename OldK::Construct_bbox_2>
-		Construct_bbox_2;
+	typedef PCLConstruct_bbox_2<typename OldK::Construct_bbox_2> Construct_bbox_2;
 
-	Construct_point_2 construct_point_2_object() const
+	Construct_point_2
+	construct_point_2_object() const
 	{
 		return Construct_point_2();
 	}
 
-	Construct_bbox_2 construct_bbox_2_object() const
+	Construct_bbox_2
+	construct_bbox_2_object() const
 	{
 		return Construct_bbox_2();
 	}
@@ -65,16 +67,19 @@ public:
 		return Construct_cartesian_const_iterator_2();
 	}
 
-	template <typename Kernel2> struct Base
+	template <typename Kernel2>
+	struct Base
 	{
 		typedef PCLCartesian_base<Kernel2, K_Base> Type;
 	};
+
 };
 
 template <typename FT_>
-struct PCLKernel : public CGAL::Type_equality_wrapper<
-					   PCLCartesian_base<PCLKernel<FT_>, CGAL::Cartesian<FT_>>,
-					   PCLKernel<FT_>>
-{
-};
+struct PCLKernel
+		: public CGAL::Type_equality_wrapper<
+		PCLCartesian_base<PCLKernel<FT_>, CGAL::Cartesian<FT_>>,
+				PCLKernel<FT_>>
+{};
 #endif /* PCLKERNEL_H */
+

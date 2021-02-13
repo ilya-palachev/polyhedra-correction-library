@@ -20,12 +20,12 @@
 
 #include <cmath>
 
-#include "Correctors/Intersector/EdgeList/EdgeList.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
-#include "Polyhedron/Facet/Facet.h"
+#include "DebugAssert.h"
 #include "Vector3d.h"
 #include "array_operations.h"
+#include "Correctors/Intersector/EdgeList/EdgeList.h"
+#include "Polyhedron/Facet/Facet.h"
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm)
 {
@@ -35,12 +35,11 @@ void EdgeList::add_edge(int v0, int v1, int i0, int i1, double sm)
 }
 
 void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
-						double sm)
+		double sm)
 {
 	DEBUG_START;
 	DEBUG_PRINT("add_edge(v0 = %d, v1 = %d, next_f = %d, next_d = %d, \
-			sm = %lf)\n",
-				v0, v1, next_f, next_d, sm);
+			sm = %lf)\n", v0, v1, next_f, next_d, sm);
 
 	if (v0 > v1)
 	{
@@ -49,7 +48,7 @@ void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
 		v1 = tmp;
 	}
 
-	int first = 0;	// Первый элемент в массиве
+	int first = 0; // Первый элемент в массиве
 	int last = num; // Последний элемент в массиве
 
 	while (first < last)
@@ -78,7 +77,7 @@ void EdgeList::add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
 	DEBUG_END;
 }
 
-void EdgeList::send(EdgeSetIntersected *edge_set)
+void EdgeList::send(EdgeSetIntersected* edge_set)
 {
 	DEBUG_START;
 	int i;
@@ -89,7 +88,7 @@ void EdgeList::send(EdgeSetIntersected *edge_set)
 	DEBUG_END;
 }
 
-void EdgeList::send_edges(EdgeSetIntersected *edge_set)
+void EdgeList::send_edges(EdgeSetIntersected* edge_set)
 {
 	DEBUG_START;
 	int i;
@@ -144,7 +143,7 @@ void EdgeList::null_isUsed()
 	DEBUG_END;
 }
 
-// bool EdgeList::get_first_edge(int& v0, int& v1) {
+//bool EdgeList::get_first_edge(int& v0, int& v1) {
 //	if (num < 1) {
 //		v0 = v1 = - 1;
 //		return false;
@@ -162,7 +161,7 @@ void EdgeList::null_isUsed()
 //	return false;
 //}
 
-void EdgeList::get_first_edge(int &v0, int &v1, int &next_f, int &next_d)
+void EdgeList::get_first_edge(int& v0, int& v1, int& next_f, int& next_d)
 {
 	DEBUG_START;
 
@@ -194,14 +193,14 @@ void EdgeList::get_first_edge(int &v0, int &v1, int &next_f, int &next_d)
 	DEBUG_END;
 }
 
-void EdgeList::get_first_edge(int &v0, int &v1)
+void EdgeList::get_first_edge(int& v0, int& v1)
 {
 	int next_f, next_d;
 	get_first_edge(v0, v1, next_f, next_d);
 }
 
-void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
-							 int &next_f, int &next_d)
+void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& i0, int& i1,
+		int& next_f, int& next_d)
 {
 	DEBUG_START;
 	int i, tmp, i_next = -1;
@@ -215,12 +214,12 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 	plane = poly->facets[next_f].plane;
 
 	double err;
-	err = qmod(plane.norm - iplane.norm) +
-		  (plane.dist - iplane.dist) * (plane.dist - iplane.dist);
+	err = qmod(plane.norm - iplane.norm)
+			+ (plane.dist - iplane.dist) * (plane.dist - iplane.dist);
 	if (num < 1 && (fabs(err) > 1e-16))
 	{
-		err = qmod(plane.norm + iplane.norm) +
-			  (plane.dist + iplane.dist) * (plane.dist + iplane.dist);
+		err = qmod(plane.norm + iplane.norm)
+				+ (plane.dist + iplane.dist) * (plane.dist + iplane.dist);
 	}
 
 	if (num < 1 && fabs(err) <= 0.0000000000000001)
@@ -236,8 +235,8 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 			if (id0 == -1 || id1 == -1)
 			{
 				ERROR_PRINT("\tError: cannot find vertexes %d (%d) "
-							"and %d (%d) facet %d.\n",
-							v0, id0, v1, id1, next_f);
+						"and %d (%d) facet %d.\n",
+						v0, id0, v1, id1, next_f);
 				DEBUG_END;
 				return;
 			}
@@ -281,8 +280,8 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 			else
 			{
 				ERROR_PRINT("Error. Cannot define the direction.");
-				ERROR_PRINT("sign(%d) = %d, sign(%d) = %d, drctn = %d", v0,
-							sign0, v1, sign1, next_d);
+				ERROR_PRINT("sign(%d) = %d, sign(%d) = %d, drctn = %d",
+						v0, sign0, v1, sign1, next_d);
 				DEBUG_END;
 				return;
 			}
@@ -291,20 +290,21 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 			sign1 = poly->signum(poly->vertices[v1], iplane);
 			if (sign1 == 1)
 			{
-				// next_f = :
+				//next_f = :
 				poly->facets[next_f].find_next_facet(incr == 1 ? v0 : v1,
-													 next_f);
+						next_f);
 				next_d = 0;
 			}
 			else
 			{
 				next_d = incr;
 			}
+
 		}
 		v1 = v0;
 #ifdef DEBUG1
-		DEBUG_PRINT("\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n", v0, v1,
-					next_f);
+		DEBUG_PRINT("\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n",
+				v0, v1, next_f);
 #endif
 
 		DEBUG_END;
@@ -313,7 +313,7 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 	else if (num < 1)
 	{
 		ERROR_PRINT("Error. num < 1,  err = %.16lf, if = %d\n", err,
-					fabs(err) < 1e-16);
+				fabs(err) < 1e-16);
 		DEBUG_END;
 		return;
 	}
@@ -324,7 +324,8 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 		v1 = tmp;
 	}
 #ifdef DEBUG1
-	DEBUG_PRINT("EdgeList::get_next_edge %d\n", id);
+	DEBUG_PRINT("EdgeList::get_next_edge %d\n",
+			id);
 	//        this->my_fprint(stdout);
 #endif
 	for (i = 0; i < num; ++i)
@@ -370,8 +371,8 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 				next_d = next_direction[i];
 			isUsed[i_next] = true;
 #ifdef DEBUG1
-			DEBUG_PRINT("\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n", v0,
-						v1, next_f);
+			DEBUG_PRINT("\tRESULTING NEXT EDGE : %d %d - GO TO FACET %d\n",
+					v0, v1, next_f);
 #endif
 
 			DEBUG_END;
@@ -384,8 +385,8 @@ void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
 	DEBUG_END;
 }
 
-void EdgeList::get_next_edge(Plane iplane, int &v0, int &v1, int &next_f,
-							 int &next_d)
+void EdgeList::get_next_edge(Plane iplane, int& v0, int& v1, int& next_f,
+		int& next_d)
 {
 	DEBUG_START;
 	int i0, i1;

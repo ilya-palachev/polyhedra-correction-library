@@ -30,10 +30,10 @@
 
 #include <memory>
 
-#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "SparseMatrixEigen.h"
-#include "SupportMatrix.h"
 #include "Vector3d.h"
+#include "SupportMatrix.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /** Each condition has exactly not more than  4 non-zero coefficients. */
 #define NUM_NONZERO_COEFFICIENTS_IN_CONDITION 4
@@ -123,7 +123,6 @@ private:
 
 	/** Whether the data is constructed with shadow heuristics. */
 	double ifShadowHeuristics_;
-
 public:
 	/** Default empty constructor. */
 	SupportFunctionEstimationData();
@@ -143,12 +142,9 @@ public:
 	 * @param supportData		The original support function data.
 	 */
 	SupportFunctionEstimationData(SupportMatrix supportMatrix,
-								  VectorXd supportVector,
-								  VectorXd startingVector,
-								  std::vector<Vector3d> supportDirections,
-								  double epsilon,
-								  SupportFunctionDataPtr supportData,
-								  bool ifShadowHeuristics);
+		VectorXd supportVector, VectorXd startingVector,
+		std::vector<Vector3d> supportDirections, double epsilon,
+		SupportFunctionDataPtr supportData, bool ifShadowHeuristics);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();

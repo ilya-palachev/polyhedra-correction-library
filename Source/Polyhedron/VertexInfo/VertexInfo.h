@@ -19,7 +19,7 @@
  */
 
 #ifndef VERTEXINFO_H
-#define VERTEXINFO_H
+#define	VERTEXINFO_H
 
 #include <memory>
 
@@ -32,17 +32,17 @@ public:
 	int id;
 	int numFacets;
 	Vector3d vector;
-	int *indFacets;
+	int* indFacets;
 	std::weak_ptr<Polyhedron> parentPolyhedron;
 
 public:
 	VertexInfo();
 	VertexInfo(const int id_orig, const int nf_orig, const Vector3d vector_orig,
-			   const int *index_orig, PolyhedronPtr poly_orig);
+			const int* index_orig, PolyhedronPtr poly_orig);
 	VertexInfo(const int id_orig, const Vector3d vector_orig,
-			   PolyhedronPtr poly_orig);
+			PolyhedronPtr poly_orig);
 
-	VertexInfo &operator=(const VertexInfo &orig);
+	VertexInfo& operator =(const VertexInfo& orig);
 	~VertexInfo();
 
 	int get_nf();
@@ -51,10 +51,11 @@ public:
 	void find_and_replace_facet(int from, int to);
 	void find_and_replace_vertex(int from, int to);
 
-	void fprint_my_format(FILE *file);
-	void my_fprint_all(FILE *file);
+	void fprint_my_format(FILE* file);
+	void my_fprint_all(FILE* file);
 
 	int intersection_find_next_facet(Plane iplane, int facet_id);
 };
 
-#endif /* VERTEXINFO_H */
+#endif	/* VERTEXINFO_H */
+

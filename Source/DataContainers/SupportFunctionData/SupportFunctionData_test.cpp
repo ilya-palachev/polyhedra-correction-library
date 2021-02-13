@@ -45,9 +45,12 @@ protected:
 		 * Prepare the vector of items - it will by used later multiple
 		 * times.
 		 */
-		items.push_back(SupportFunctionDataItem(Vector3d(1., 0., 0.), 1.));
-		items.push_back(SupportFunctionDataItem(Vector3d(0., 1., 0.), 1.));
-		items.push_back(SupportFunctionDataItem(Vector3d(0., 0., 1.), 1.));
+		items.push_back(SupportFunctionDataItem(Vector3d(1., 0., 0.),
+			1.));
+		items.push_back(SupportFunctionDataItem(Vector3d(0., 1., 0.),
+			1.));
+		items.push_back(SupportFunctionDataItem(Vector3d(0., 0., 1.),
+			1.));
 
 		data.reset(new SupportFunctionData(items));
 	}
@@ -129,8 +132,8 @@ TEST_F(SupportFunctionDataTest, AssignmentOperatorWorks)
 /** Checks that subscription operator works. */
 TEST_F(SupportFunctionDataTest, SubscriptionOperatorWorks)
 {
-	EXPECT_DEATH({ auto item = (*data)[-1]; }, ".*");
-	EXPECT_DEATH({ auto item = (*data)[data->size() + 1]; }, ".*");
+	EXPECT_DEATH({auto item = (*data)[-1];}, ".*");
+	EXPECT_DEATH({auto item = (*data)[data->size() + 1];}, ".*");
 	for (long int i = 0; i < data->size(); ++i)
 	{
 		EXPECT_EQ((*data)[i], items[i]);
@@ -151,15 +154,15 @@ TEST_F(SupportFunctionDataTest, FunctionRemoveEqualWorks)
 	Vector3d v(1., 0., 0.);
 	itemsWithEqualities.push_back(SupportFunctionDataItem(v, 1.));
 	itemsWithEqualities.push_back(SupportFunctionDataItem(v, 2.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(EPS_SUPPORT_DIRECTION_EQUALITY, 0., 0.), 1.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(0., EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(0., 0., EPS_SUPPORT_DIRECTION_EQUALITY), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v +
+		Vector3d(EPS_SUPPORT_DIRECTION_EQUALITY, 0., 0.), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v +
+		Vector3d(0., EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v +
+		Vector3d(0., 0., EPS_SUPPORT_DIRECTION_EQUALITY), 1.));
 	itemsWithEqualities.push_back(SupportFunctionDataItem(2. * v, 1.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(0., 2. * EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v +
+		Vector3d(0., 2. * EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
 
 	/* Create vector of inequal items of previous vector. */
 	std::vector<SupportFunctionDataItem> itemsWithoutEqualities;

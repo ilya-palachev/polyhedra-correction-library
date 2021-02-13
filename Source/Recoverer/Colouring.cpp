@@ -24,22 +24,22 @@
  * (implementation).
  */
 
-#include "Recoverer/Colouring.h"
-#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
-#include "DebugAssert.h"
-#include "DebugPrint.h"
-#include "PCLDumper.h"
-#include "Polyhedron/Facet/Facet.h"
-#include "Polyhedron/Polyhedron.h"
-#include <set>
 #include <vector>
+#include <set>
+#include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "PCLDumper.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "Recoverer/Colouring.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
 
 static int findBestPlaneID(Plane_3 plane, std::vector<Plane_3> planes)
 {
 	DEBUG_START;
 	double minimal = 1e100;
 	int iPlaneMinimal = 0;
-	for (int iPlane = 0; iPlane < (int)planes.size(); ++iPlane)
+	for (int iPlane = 0; iPlane < (int) planes.size(); ++iPlane)
 	{
 		double a = plane.a() - planes[iPlane].a();
 		double b = plane.b() - planes[iPlane].b();
@@ -56,9 +56,10 @@ static int findBestPlaneID(Plane_3 plane, std::vector<Plane_3> planes)
 	return iPlaneMinimal;
 }
 
-static std::vector<std::vector<int>>
-getClustersFacetsIndices(PolyhedronPtr polyhedron, std::vector<Plane_3> planes,
-						 std::vector<std::vector<int>> clustersIndices)
+static std::vector<std::vector<int>> getClustersFacetsIndices(
+		PolyhedronPtr polyhedron,
+		std::vector<Plane_3> planes,
+		std::vector<std::vector<int>> clustersIndices)
 {
 	DEBUG_START;
 	std::vector<std::vector<int>> clustersFacetsIDs(clustersIndices.size());
@@ -68,12 +69,12 @@ getClustersFacetsIndices(PolyhedronPtr polyhedron, std::vector<Plane_3> planes,
 		Plane_3 plane(facet->plane);
 		int id = findBestPlaneID(plane, planes);
 		int iCluster = 0;
-		for (auto clusterIndices : clustersIndices)
+		for (auto clusterIndices: clustersIndices)
 		{
 			bool ifFound = false;
-			for (int iItem = 0; iItem < (int)clusterIndices.size(); ++iItem)
-			{
-				if (clusterIndices[iItem] == id)
+			for (int iItem = 0; iItem < (int) clusterIndices.size();
+					++iItem)
+			{	if (clusterIndices[iItem] == id)
 				{
 					ifFound = true;
 					break;
@@ -92,21 +93,21 @@ getClustersFacetsIndices(PolyhedronPtr polyhedron, std::vector<Plane_3> planes,
 }
 
 void printColouredIntersection(std::vector<Plane_3> planes,
-							   std::vector<std::vector<int>> clustersIndices,
-							   const char *suffix)
+		std::vector<std::vector<int>> clustersIndices,
+		const char *suffix)
 {
 	DEBUG_START;
 	Polyhedron_3 intersection(planes);
 	PolyhedronPtr polyhedron(new Polyhedron(intersection));
-	auto clustersFacetsIDs =
-		getClustersFacetsIndices(polyhedron, planes, clustersIndices);
+	auto clustersFacetsIDs = getClustersFacetsIndices(polyhedron, planes,
+			clustersIndices);
 	srand(time(NULL));
-	for (auto clusterFacetsIDs : clustersFacetsIDs)
+	for (auto clusterFacetsIDs: clustersFacetsIDs)
 	{
 		unsigned char red = rand() % 256;
 		unsigned char green = rand() % 256;
 		unsigned char blue = rand() % 256;
-		for (int iFacet : clusterFacetsIDs)
+		for (int iFacet: clusterFacetsIDs)
 		{
 			polyhedron->facets[iFacet].set_rgb(red, green, blue);
 		}
@@ -117,17 +118,17 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 }
 
 void printColouredIntersection(std::vector<Plane_3> planes,
-							   std::vector<std::set<int>> clustersIndices,
-							   const char *suffix)
+		std::vector<std::set<int>> clustersIndices,
+		const char *suffix)
 {
 	DEBUG_START;
 	std::vector<std::vector<int>> semiClusters;
 	int iCluster = 0;
-	for (auto cluster : clustersIndices)
+	for (auto cluster: clustersIndices)
 	{
 		std::vector<int> semiCluster;
 		std::cerr << "Cluster #" << iCluster << ": ";
-		for (int id : cluster)
+		for (int id: cluster)
 		{
 			std::cerr << id << " ";
 			semiCluster.push_back(id);
@@ -141,19 +142,19 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 }
 
 void printColouredPolyhedron(Polyhedron_3 polyhedron,
-							 std::vector<std::set<int>> clustersIndices,
-							 const char *suffix)
+		std::vector<std::set<int>> clustersIndices,
+		const char *suffix)
 {
 	DEBUG_START;
 	PolyhedronPtr polyhedronPCL(new Polyhedron(polyhedron));
 	srand(time(NULL));
-	for (auto clusterIndices : clustersIndices)
+	for (auto clusterIndices: clustersIndices)
 	{
 		unsigned char red = rand() % 256;
 		unsigned char green = rand() % 256;
 		unsigned char blue = rand() % 256;
 
-		for (int iFacet : clusterIndices)
+		for (int iFacet: clusterIndices)
 		{
 			polyhedronPCL->facets[iFacet].set_rgb(red, green, blue);
 		}
@@ -164,7 +165,8 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
 }
 
 void printColouredPolyhedron(Polyhedron_3 polyhedron,
-							 std::set<int> clusterIndices, const char *suffix)
+		std::set<int> clusterIndices,
+		const char *suffix)
 {
 	DEBUG_START;
 	std::vector<std::set<int>> cluster;
@@ -173,19 +175,19 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
 	DEBUG_END;
 }
 
-void printColouredPolyhedronAndLoadParaview(
-	Polyhedron_3 polyhedron, std::vector<std::set<int>> clustersIndices)
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
+		std::vector<std::set<int>> clustersIndices)
 {
 	DEBUG_START;
 	PolyhedronPtr polyhedronPCL(new Polyhedron(polyhedron));
 	srand(time(NULL));
-	for (auto clusterIndices : clustersIndices)
+	for (auto clusterIndices: clustersIndices)
 	{
 		unsigned char red = rand() % 256;
 		unsigned char green = rand() % 256;
 		unsigned char blue = rand() % 256;
 
-		for (int iFacet : clusterIndices)
+		for (int iFacet: clusterIndices)
 		{
 			polyhedronPCL->facets[iFacet].set_rgb(red, green, blue);
 		}
@@ -201,7 +203,8 @@ void printColouredPolyhedronAndLoadParaview(
 	std::string paraviewCommand("paraview --data=");
 	paraviewCommand += polyhedronFileName;
 	int exitValueParaview = system(paraviewCommand.c_str());
-	std::cerr << "Paraview exit with value " << exitValueParaview << std::endl;
+	std::cerr << "Paraview exit with value " << exitValueParaview
+		<< std::endl;
 	remove(polyhedronFileName.c_str());
 	if (exitValueParaview != 0)
 		exit(EXIT_FAILURE);
@@ -209,7 +212,7 @@ void printColouredPolyhedronAndLoadParaview(
 }
 
 void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
-											std::set<int> clusterIndices)
+		std::set<int> clusterIndices)
 {
 	DEBUG_START;
 	std::vector<std::set<int>> cluster;

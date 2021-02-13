@@ -20,27 +20,36 @@
 
 #include <cmath>
 
-#include "Constants.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Constants.h"
 #include "Gauss_string.h"
-#include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/Verifier/Verifier.h"
+#include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 
-Verifier::Verifier() : polyhedron(), ifPrint(false), edgesWS()
+Verifier::Verifier() :
+		polyhedron(),
+		ifPrint(false),
+		edgesWS()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-Verifier::Verifier(PolyhedronPtr p) : polyhedron(p), ifPrint(true), edgesWS()
+Verifier::Verifier(PolyhedronPtr p) :
+		polyhedron(p),
+		ifPrint(true),
+		edgesWS()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-Verifier::Verifier(Polyhedron *p) : polyhedron(), ifPrint(true), edgesWS()
+Verifier::Verifier(Polyhedron* p) :
+		polyhedron(),
+		ifPrint(true),
+		edgesWS()
 {
 	DEBUG_START;
 	polyhedron.reset(p);
@@ -48,14 +57,18 @@ Verifier::Verifier(Polyhedron *p) : polyhedron(), ifPrint(true), edgesWS()
 }
 
 Verifier::Verifier(PolyhedronPtr p, bool _ifPrint) :
-	polyhedron(p), ifPrint(_ifPrint), edgesWS()
+		polyhedron(p),
+		ifPrint(_ifPrint),
+		edgesWS()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-Verifier::Verifier(Polyhedron *p, bool _ifPrint) :
-	polyhedron(p), ifPrint(_ifPrint), edgesWS()
+Verifier::Verifier(Polyhedron* p, bool _ifPrint) :
+		polyhedron(p),
+		ifPrint(_ifPrint),
+		edgesWS()
 {
 	DEBUG_START;
 	polyhedron.reset(p);
@@ -100,7 +113,7 @@ int Verifier::countInnerConsections()
 	int i, count;
 
 	double *A, *b;
-	Vector3d *vertex_old;
+	Vector3d* vertex_old;
 
 	A = new double[4];
 	b = new double[2];
@@ -127,8 +140,8 @@ int Verifier::countInnerConsections()
 	return count;
 }
 
-int Verifier::countInnerConsectionsFacet(int fid, double *A, double *b,
-										 Vector3d *vertex_old)
+int Verifier::countInnerConsectionsFacet(int fid, double* A,
+		double* b, Vector3d* vertex_old)
 {
 
 	DEBUG_START;
@@ -164,17 +177,16 @@ int Verifier::countInnerConsectionsFacet(int fid, double *A, double *b,
 	{
 		for (j = i + 1; j < nv; ++j)
 		{
-			count += countInnerConsectionsPair(
-				fid, index[i % nv], index[(i + 1) % nv], index[j % nv],
-				index[(j + 1) % nv], A, b);
+			count += countInnerConsectionsPair(fid, index[i % nv],
+					index[(i + 1) % nv], index[j % nv], index[(j + 1) % nv], A,
+					b);
 		}
 	}
 	if (ifPrint)
 	{
 		if (count > 0)
 		{
-			DEBUG_PRINT("\t\tIn facet %d: %d inner consections found\n", fid,
-						count);
+			DEBUG_PRINT("\t\tIn facet %d: %d inner consections found\n", fid, count);
 			polyhedron->facets[fid].my_fprint(stdout);
 		}
 	}
@@ -188,8 +200,8 @@ int Verifier::countInnerConsectionsFacet(int fid, double *A, double *b,
 	return count;
 }
 
-int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
-										int id3, double *A, double *b)
+int Verifier::countInnerConsectionsPair(int fid, int id0,
+		int id1, int id2, int id3, double* A, double* b)
 {
 	DEBUG_START;
 
@@ -199,9 +211,11 @@ int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
 	double nx, ny, nz;
 	double x0, x1, x2, x3, y0, y1, y2, y3, z0, z1, z2, z3;
 
-	if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 ||
-		id0 >= polyhedron->numVertices || id1 >= polyhedron->numVertices ||
-		id2 >= polyhedron->numVertices || id3 >= polyhedron->numVertices)
+	if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0
+			|| id0 >= polyhedron->numVertices
+			|| id1 >= polyhedron->numVertices
+			|| id2 >= polyhedron->numVertices
+			|| id3 >= polyhedron->numVertices)
 	{
 		if (ifPrint)
 		{
@@ -215,8 +229,8 @@ int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
 	{
 		if (ifPrint)
 		{
-			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0,
-						id1, id2, id3);
+			DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) are equal edges\n", id0, id1,
+					id2, id3);
 		}
 		DEBUG_END;
 		return 2;
@@ -224,17 +238,16 @@ int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
 
 	if (id1 == id2)
 	{
-		if (qmod((polyhedron->vertices[id1] - polyhedron->vertices[id0]) %
-				 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) <
-				EPS_PARALLEL &&
-			(polyhedron->vertices[id1] - polyhedron->vertices[id0]) *
-					(polyhedron->vertices[id3] - polyhedron->vertices[id2]) <
-				0)
+		if (qmod(
+				(polyhedron->vertices[id1] - polyhedron->vertices[id0])
+						% (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL
+				&& (polyhedron->vertices[id1] - polyhedron->vertices[id0])
+						* (polyhedron->vertices[id3] - polyhedron->vertices[id2]) < 0)
 		{
 			if (ifPrint)
 			{
-				DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
-							id0, id1, id2, id3);
+				DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n", id0,
+						id1, id2, id3);
 			}
 			DEBUG_END;
 			return 2;
@@ -248,17 +261,16 @@ int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
 
 	if (id0 == id3)
 	{
-		if (qmod((polyhedron->vertices[id1] - polyhedron->vertices[id0]) %
-				 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) <
-				EPS_PARALLEL &&
-			(polyhedron->vertices[id1] - polyhedron->vertices[id0]) *
-					(polyhedron->vertices[id3] - polyhedron->vertices[id2]) >
-				0)
+		if (qmod(
+				(polyhedron->vertices[id1] - polyhedron->vertices[id0])
+						% (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL
+				&& (polyhedron->vertices[id1] - polyhedron->vertices[id0])
+						* (polyhedron->vertices[id3] - polyhedron->vertices[id2]) > 0)
 		{
 			if (ifPrint)
 			{
-				DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n",
-							id0, id1, id2, id3);
+				DEBUG_PRINT("\t\t\t(%d, %d) and (%d, %d) consect untrivially\n", id0,
+						id1, id2, id3);
 			}
 			DEBUG_END;
 			return 2;
@@ -270,9 +282,9 @@ int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
 		}
 	}
 
-	if (qmod((polyhedron->vertices[id1] - polyhedron->vertices[id0]) %
-			 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) <
-		EPS_PARALLEL)
+	if (qmod(
+			(polyhedron->vertices[id1] - polyhedron->vertices[id0])
+					% (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL)
 	{
 		DEBUG_END;
 		return 0;
@@ -341,8 +353,8 @@ int Verifier::countInnerConsectionsPair(int fid, int id0, int id1, int id2,
 	{
 		if (ifPrint)
 		{
-			DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1,
-						id2, id3);
+			DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2,
+					id3);
 		}
 		DEBUG_END;
 		return 1;
@@ -384,13 +396,13 @@ int Verifier::countOuterConsectionsFacet(int fid)
 	count = 0;
 	for (i = 0; i < nv; ++i)
 	{
-		count += countOuterConsectionsEdge(index[i % nv], index[(i + 1) % nv]);
+		count += countOuterConsectionsEdge(index[i % nv],
+				index[(i + 1) % nv]);
 	}
 	if (ifPrint)
 	{
 		if (count > 0)
-			DEBUG_PRINT("\t\tIn facet %d: %d outer consections found\n", fid,
-						count);
+			DEBUG_PRINT("\t\tIn facet %d: %d outer consections found\n", fid, count);
 	}
 	DEBUG_END;
 	return count;
@@ -411,14 +423,15 @@ int Verifier::countOuterConsectionsEdge(int id0, int id1)
 	if (ifPrint)
 	{
 		if (count > 0)
-			DEBUG_PRINT("\t\t\tFor edge (%d, %d): %d outer consections found\n",
-						id0, id1, count);
+			DEBUG_PRINT("\t\t\tFor edge (%d, %d): %d outer consections found\n", id0,
+					id1, count);
 	}
 	DEBUG_END;
 	return count;
 }
 
-int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
+int Verifier::countOuterConsectionsPair(int id0, int id1,
+		int fid)
 {
 	DEBUG_START;
 
@@ -426,16 +439,14 @@ int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
 	double AA, b, u, delta, alpha, sum;
 	Vector3d A, A0, A1, normal;
 
-	if (polyhedron->facets[fid].find_vertex(id0) >= 0 ||
-		polyhedron->facets[fid].find_vertex(id1) >= 0)
+	if (polyhedron->facets[fid].find_vertex(id0) >= 0 || polyhedron->facets[fid].find_vertex(id1) >= 0)
 	{
 		DEBUG_PRINT("contains.\n");
 		DEBUG_END;
 		return 0;
 	}
 
-	AA = polyhedron->facets[fid].plane.norm *
-		 (polyhedron->vertices[id0] - polyhedron->vertices[id1]);
+	AA = polyhedron->facets[fid].plane.norm * (polyhedron->vertices[id0] - polyhedron->vertices[id1]);
 
 	if (fabs(AA) < EPS_PARALLEL)
 	{
@@ -444,8 +455,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
 		return 0;
 	}
 
-	b = -polyhedron->facets[fid].plane.norm * polyhedron->vertices[id1] -
-		polyhedron->facets[fid].plane.dist;
+	b = -polyhedron->facets[fid].plane.norm * polyhedron->vertices[id1] - polyhedron->facets[fid].plane.dist;
 	u = b / AA;
 
 	if (u > 1. || u < 0.)
@@ -454,8 +464,8 @@ int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
 		DEBUG_END;
 		return 0;
 	}
-	DEBUG_PRINT("\ttesting whether edge (%d, %d) consects facet %d.\n", id0,
-				id1, fid);
+	DEBUG_PRINT("\ttesting whether edge (%d, %d) consects facet %d.\n",
+			id0, id1, fid);
 	DEBUG_PRINT("\t\tu = %lf\n", u);
 
 	A = u * polyhedron->vertices[id0] + (1. - u) * polyhedron->vertices[id1];
@@ -492,8 +502,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
 	{
 		if (ifPrint)
 		{
-			DEBUG_PRINT("\t\t\t\tEdge (%d, %d) consects facet %d\n", id0, id1,
-						fid);
+			DEBUG_PRINT("\t\t\t\tEdge (%d, %d) consects facet %d\n", id0, id1, fid);
 		}
 		DEBUG_END;
 		return 1;
@@ -506,9 +515,9 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 
 	std::queue<std::pair<int, int>> edgesQueue;
 	for (EdgeSetIterator edge = edgeData->edges.begin();
-		 edge != edgeData->edges.end(); ++edge)
+			edge != edgeData->edges.end(); ++edge)
 	{
-		edgesQueue.push(std::pair<int, int>(edge->v0, edge->v1));
+		edgesQueue.push(std::pair<int, int> (edge->v0, edge->v1));
 	}
 
 	int numEdgesDesctructed = 0;
@@ -518,14 +527,14 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 	while (!edgesQueue.empty())
 	{
 		DEBUG_PRINT("Iteration %d - start. Number of edges is queue = %ld",
-					iIteration++, (long int)edgesQueue.size());
+				iIteration++, (long int) edgesQueue.size());
 
 		std::pair<int, int> vertexPair = edgesQueue.front();
 		DEBUG_PRINT("Processed edge: [%d, %d]", vertexPair.first,
-					vertexPair.second);
+				vertexPair.second);
 
-		EdgeSetIterator edge =
-			edgeData->findEdge(vertexPair.first, vertexPair.second);
+		EdgeSetIterator edge = edgeData->findEdge(vertexPair.first,
+				vertexPair.second);
 
 		if (edge == edgeData->edges.end())
 		{
@@ -542,24 +551,22 @@ int Verifier::checkEdges(EdgeDataPtr edgeData)
 			++numEdgesDesctructed;
 		}
 
-		DEBUG_PRINT("edges added   : %ld", (long int)edgesWS.edgesAdded.size());
-		DEBUG_PRINT("edges edited  : %ld",
-					(long int)edgesWS.edgesEdited.size());
-		DEBUG_PRINT("edges removed : %ld",
-					(long int)edgesWS.edgesErased.size());
+		DEBUG_PRINT("edges added   : %ld", (long int) edgesWS.edgesAdded.size());
+		DEBUG_PRINT("edges edited  : %ld", (long int) edgesWS.edgesEdited.size());
+		DEBUG_PRINT("edges removed : %ld", (long int) edgesWS.edgesErased.size());
 
 		/* Push working sets of added and edited edges to the queue of checked
 		 * edges. */
 		for (std::set<std::pair<int, int>>::iterator itPair =
-				 edgesWS.edgesAdded.begin();
-			 itPair != edgesWS.edgesAdded.end(); ++itPair)
+				edgesWS.edgesAdded.begin();
+				itPair != edgesWS.edgesAdded.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
 
 		for (std::set<std::pair<int, int>>::iterator itPair =
-				 edgesWS.edgesEdited.begin();
-			 itPair != edgesWS.edgesEdited.end(); ++itPair)
+				edgesWS.edgesEdited.begin();
+				itPair != edgesWS.edgesEdited.end(); ++itPair)
 		{
 			edgesQueue.push(*itPair);
 		}
@@ -586,35 +593,35 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Checking edge [%d, %d], f0 = %d, f1 = %d", edge->v0, edge->v1,
-				edge->f0, edge->f1);
-	DEBUG_VARIABLE double dist = sqrt(
-		qmod(polyhedron->vertices[edge->v0] - polyhedron->vertices[edge->v1]));
+			edge->f0, edge->f1);
+	DEBUG_VARIABLE double dist = sqrt(qmod(polyhedron->vertices[edge->v0] -
+			polyhedron->vertices[edge->v1]));
 	DEBUG_PRINT("Distance between vertices = %lf", dist);
 
 	Plane pi0 = polyhedron->facets[edge->f0].plane;
 	Plane pi1 = polyhedron->facets[edge->f1].plane;
 
-	/* Searching for facet f2 which is clockwise after f0 and f1 in the
-	 * std::list of facets incident to the vertex edge->v0. */
+	/* Searching for facet f2 which is clockwise after f0 and f1 in the std::list
+	 * of facets incident to the vertex edge->v0. */
 	DEBUG_PRINT("Searching for facet f2.");
 	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
-	int *incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
+	int* incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
 	int f2 = INT_NOT_INITIALIZED;
 	int iFacetIteration = 0;
 	for (int iFacet = 0; iFacet < numIncidentFacets;)
 	{
 		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
-		DEBUG_PRINT("incidentFacets[%d] = %d, incidentFacets[%d] = %d", iFacet,
-					incidentFacets[iFacet], iFacetNext,
-					incidentFacets[iFacetNext]);
+		DEBUG_PRINT("incidentFacets[%d] = %d, incidentFacets[%d] = %d",
+						iFacet, incidentFacets[iFacet], iFacetNext,
+						incidentFacets[iFacetNext]);
 
-		if ((incidentFacets[iFacet] == edge->f0 &&
-			 incidentFacets[iFacetNext] == edge->f1) ||
-			(incidentFacets[iFacet] == edge->f1 &&
-			 incidentFacets[iFacetNext] == edge->f0))
+		if ( (incidentFacets[iFacet] == edge->f0 &&
+				incidentFacets[iFacetNext] == edge->f1) ||
+				(incidentFacets[iFacet] == edge->f1 &&
+				incidentFacets[iFacetNext] == edge->f0) )
 		{
-			f2 = incidentFacets[(numIncidentFacets + iFacetNext + 1) %
-								numIncidentFacets];
+			f2 = incidentFacets[(numIncidentFacets + iFacetNext + 1)
+			                    % numIncidentFacets];
 			break;
 		}
 		iFacet = iFacetNext;
@@ -637,8 +644,8 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	DEBUG_PRINT("Succeeded to find f2 = %d", f2);
 	Plane pi2 = polyhedron->facets[f2].plane;
 
-	/* Searching for facet f3 which is clockwise after f0 and f1 in the
-	 * std::list of facets incident to the vertex edge->v1. */
+	/* Searching for facet f3 which is clockwise after f0 and f1 in the std::list
+	 * of facets incident to the vertex edge->v1. */
 	DEBUG_PRINT("Searching for facet f3.");
 	numIncidentFacets = polyhedron->vertexInfos[edge->v1].numFacets;
 	incidentFacets = polyhedron->vertexInfos[edge->v1].indFacets;
@@ -647,17 +654,17 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	for (int iFacet = 0; iFacet < numIncidentFacets;)
 	{
 		int iFacetNext = (numIncidentFacets + iFacet + 1) % numIncidentFacets;
-		DEBUG_PRINT("incidentFacets[%d] = %d, incidentFacets[%d] = %d", iFacet,
-					incidentFacets[iFacet], iFacetNext,
-					incidentFacets[iFacetNext]);
+		DEBUG_PRINT("incidentFacets[%d] = %d, incidentFacets[%d] = %d",
+				iFacet, incidentFacets[iFacet], iFacetNext,
+				incidentFacets[iFacetNext]);
 
-		if ((incidentFacets[iFacet] == edge->f0 &&
-			 incidentFacets[iFacetNext] == edge->f1) ||
-			(incidentFacets[iFacet] == edge->f1 &&
-			 incidentFacets[iFacetNext] == edge->f0))
+		if ( (incidentFacets[iFacet] == edge->f0 &&
+				incidentFacets[iFacetNext] == edge->f1) ||
+				(incidentFacets[iFacet] == edge->f1 &&
+				incidentFacets[iFacetNext] == edge->f0) )
 		{
-			f3 = incidentFacets[(numIncidentFacets + iFacetNext + 1) %
-								numIncidentFacets];
+			f3 = incidentFacets[(numIncidentFacets + iFacetNext + 1)
+			                    % numIncidentFacets];
 			break;
 		}
 		iFacet = iFacetNext;
@@ -691,43 +698,45 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	if (!if_A2_under_pi3)
 	{
 		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
-					" is higher than facet %d ",
-					edge->v0, edge->f0, edge->f1, f2, f3);
+				" is higher than facet %d ",
+				edge->v0, edge->f0, edge->f1, f2, f3);
 	}
 	else
 	{
 		DEBUG_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
-					" is lower than facet %d ",
-					edge->v0, edge->f0, edge->f1, f2, f3);
+				" is lower than facet %d ",
+				edge->v0, edge->f0, edge->f1, f2, f3);
 	}
 
 	if (!if_A3_under_pi2)
 	{
 		ERROR_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
-					" is higher than facet %d ",
-					edge->v1, edge->f0, edge->f1, f3, f2);
+				" is higher than facet %d ",
+				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
 	else
 	{
 		DEBUG_PRINT("Vertex %d (as intersection of facets %d, %d, %d)"
-					" is lower than facet %d ",
-					edge->v1, edge->f0, edge->f1, f3, f2);
+				" is lower than facet %d ",
+				edge->v1, edge->f0, edge->f1, f3, f2);
 	}
 
 #ifndef NDEBUG
-	double DEBUG_VARIABLE distance = sqrt(
-		qmod(polyhedron->vertices[edge->v0] - polyhedron->vertices[edge->v1]));
-	DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1, distance);
+	double DEBUG_VARIABLE distance
+		= sqrt(qmod(polyhedron->vertices[edge->v0] -
+			polyhedron->vertices[edge->v1]));
+	DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
+			distance);
 
-	double DEBUG_VARIABLE movement0 =
-		sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
+	double DEBUG_VARIABLE movement0
+		= sqrt(qmod(polyhedron->vertices[edge->v0] - A2));
 	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v0, edge->v0,
-				movement0);
+			movement0);
 
-	double DEBUG_VARIABLE movement1 =
-		sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
+	double DEBUG_VARIABLE movement1
+		= sqrt(qmod(polyhedron->vertices[edge->v1] - A3));
 	DEBUG_PRINT("\t dist (v_%d, v_%d^{'}) = %le", edge->v1, edge->v1,
-				movement1);
+			movement1);
 #endif
 
 #ifdef DO_EDGES_REDUCTION
@@ -751,7 +760,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 bool Verifier::reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 {
 	DEBUG_START;
-	EdgeReducer *edgeReducer = new EdgeReducer(polyhedron);
+	EdgeReducer* edgeReducer = new EdgeReducer(polyhedron);
 	bool returnValue = edgeReducer->run(edge, edgeData, edgesWS);
 	delete edgeReducer;
 	DEBUG_END;

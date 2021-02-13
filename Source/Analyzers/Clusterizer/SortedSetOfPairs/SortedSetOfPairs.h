@@ -28,8 +28,8 @@ public:
 	int num;
 	int len;
 
-	int *ii;
-	int *jj;
+	int* ii;
+	int* jj;
 
 	SortedSetOfPairs(int Len);
 	~SortedSetOfPairs();

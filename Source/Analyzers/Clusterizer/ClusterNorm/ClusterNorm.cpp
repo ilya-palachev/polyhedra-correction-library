@@ -19,15 +19,19 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
 #include "Polyhedron/Facet/Facet.h"
 
-double distCluster(ClusterNorm &cluster0, ClusterNorm &cluster1);
+double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
 
 ClusterNorm::ClusterNorm() :
-	num(0), numMax(0), P(), indexFacet(NULL), poly(NULL)
+				num(0),
+				numMax(0),
+				P(),
+				indexFacet(NULL),
+				poly(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -42,20 +46,21 @@ double ClusterNorm::area()
 	for (int i = 0; i < num; i++)
 	{
 		areaOneFacet = poly->areaOfFacet(indexFacet[i]);
-		DEBUG_PRINT("areaOneFacet = %lf\n", areaOneFacet);
+        DEBUG_PRINT("areaOneFacet = %lf\n", areaOneFacet);
 		cluster_area += areaOneFacet;
+
 	}
 	DEBUG_END;
 	return cluster_area;
 }
 
-ClusterNorm::ClusterNorm(const ClusterNorm &orig) :
+ClusterNorm::ClusterNorm(const ClusterNorm& orig) :
 
-	num(orig.num),
-	numMax(orig.numMax),
-	P(orig.P),
-	indexFacet(new int[orig.numMax]),
-	poly(orig.poly)
+				num(orig.num),
+				numMax(orig.numMax),
+				P(orig.P),
+				indexFacet(new int[orig.numMax]),
+				poly(orig.poly)
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
@@ -66,24 +71,24 @@ ClusterNorm::ClusterNorm(const ClusterNorm &orig) :
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-						 PolyhedronPtr poly_orig) :
-	num(num_orig),
-	numMax(numMax_orig),
-	P(P_orig),
-	indexFacet(new int[numMax_orig]),
-	poly(poly_orig)
+		PolyhedronPtr poly_orig) :
+				num(num_orig),
+				numMax(numMax_orig),
+				P(P_orig),
+				indexFacet(new int[numMax_orig]),
+				poly(poly_orig)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-						 int *indexFacet_orig, PolyhedronPtr poly_orig) :
-	num(num_orig),
-	numMax(numMax_orig),
-	P(P_orig),
-	indexFacet(new int[numMax_orig]),
-	poly(poly_orig)
+		int* indexFacet_orig, PolyhedronPtr poly_orig) :
+				num(num_orig),
+				numMax(numMax_orig),
+				P(P_orig),
+				indexFacet(new int[numMax_orig]),
+				poly(poly_orig)
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
@@ -104,7 +109,7 @@ ClusterNorm::~ClusterNorm()
 	DEBUG_END;
 }
 
-ClusterNorm &ClusterNorm::operator+=(ClusterNorm &cluster1)
+ClusterNorm& ClusterNorm::operator +=(ClusterNorm& cluster1)
 {
 	DEBUG_START;
 	int i, j;
@@ -112,7 +117,7 @@ ClusterNorm &ClusterNorm::operator+=(ClusterNorm &cluster1)
 
 	SpherePoint newSpherePoint;
 
-	int *newIndexFacet;
+	int* newIndexFacet;
 
 	REGULAR_PRINT(stderr, "cluster0 = {");
 
@@ -141,25 +146,24 @@ ClusterNorm &ClusterNorm::operator+=(ClusterNorm &cluster1)
 	}
 
 	REGULAR_PRINT(stderr, "newIndexFacet = {");
-	for (i = 0; i < newNum - 1; ++i)
-	{
-		DEBUG_PRINT("%d, ", newIndexFacet[i]);
-	}
-	REGULAR_PRINT(stderr, "%d}\n", newIndexFacet[newNum - 1]);
+    for (i = 0; i < newNum - 1; ++i) {
+        DEBUG_PRINT("%d, ", newIndexFacet[i]);
+    }
+    REGULAR_PRINT(stderr, "%d}\n", newIndexFacet[newNum - 1]);
 
 	newSpherePoint = MassCentre(newNum, newIndexFacet, poly);
 
 	*this = ClusterNorm(newNum, newNumMax, newSpherePoint, newIndexFacet, poly);
 
 	REGULAR_PRINT(stderr, "newCluster: = {");
-	this->fprint(stdout);
-	REGULAR_PRINT(stderr, "}\n");
+    this->fprint(stdout);
+    REGULAR_PRINT(stderr, "}\n");
 
-	DEBUG_END;
+    DEBUG_END;
 	return *this;
 }
 
-ClusterNorm &ClusterNorm::operator=(const ClusterNorm &orig)
+ClusterNorm& ClusterNorm::operator =(const ClusterNorm& orig)
 {
 	DEBUG_START;
 	num = orig.num;
@@ -182,18 +186,17 @@ ClusterNorm &ClusterNorm::operator=(const ClusterNorm &orig)
 	return *this;
 }
 
-double distCluster(ClusterNorm &cluster0, ClusterNorm &cluster1)
+double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1)
 {
 	DEBUG_START;
 	DEBUG_END;
 	return distSpherePoint(cluster0.P, cluster1.P);
 }
 
-void ClusterNorm::fprint(FILE *file)
+void ClusterNorm::fprint(FILE* file)
 {
 	DEBUG_START;
-	REGULAR_PRINT(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y,
-				  P.vector.z);
+    REGULAR_PRINT(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y, P.vector.z);
 
 	if (num < 1)
 		return;

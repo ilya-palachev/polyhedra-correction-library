@@ -40,8 +40,8 @@
  * @param suffix		The suffix of output file.
  */
 void printColouredIntersection(std::vector<Plane_3> planes,
-							   std::vector<std::vector<int>> clustersIndices,
-							   const char *suffix);
+		std::vector<std::vector<int>> clustersIndices,
+		const char *suffix);
 
 /**
  * Prints the intersection of subspaces that correspond to the given planes
@@ -54,8 +54,8 @@ void printColouredIntersection(std::vector<Plane_3> planes,
  * @param suffix		The suffix of output file.
  */
 void printColouredIntersection(std::vector<Plane_3> planes,
-							   std::vector<std::set<int>> clustersIndices,
-							   const char *suffix);
+		std::vector<std::set<int>> clustersIndices,
+		const char *suffix);
 
 /**
  * Prints the polyhedron in such manner that facets that are contained in the
@@ -67,8 +67,8 @@ void printColouredIntersection(std::vector<Plane_3> planes,
  * @param suffix		The suffix of output file.
  */
 void printColouredPolyhedron(Polyhedron_3 polyhedron,
-							 std::vector<std::set<int>> clustersIndices,
-							 const char *suffix);
+		std::vector<std::set<int>> clustersIndices,
+		const char *suffix);
 
 /**
  * Prints the polyhedron in such manner that facets that are contained in the
@@ -79,12 +79,13 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
  * @param suffix		The suffix of output file.
  */
 void printColouredPolyhedron(Polyhedron_3 polyhedron,
-							 std::set<int> clusterIndices, const char *suffix);
+		std::set<int> clusterIndices,
+		const char *suffix);
 
 void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
-											std::set<int> clusterIndices);
+		std::set<int> clusterIndices);
 
 void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
-											std::set<int> clusterIndices);
+		std::set<int> clusterIndices);
 
 #endif /* COLOURING_H_ */

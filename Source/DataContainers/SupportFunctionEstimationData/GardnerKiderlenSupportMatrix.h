@@ -33,8 +33,8 @@
 #ifndef GARDNER_KIDERLEN_SUPPORT_MATRIX_H
 #define GARDNER_KIDERLEN_SUPPORT_MATRIX_H
 
-#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "DataContainers/SupportFunctionEstimationData/SupportMatrix.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 
 /**
  * Support matrix based on the approach described by Gardner and
@@ -67,8 +67,8 @@ public:
  *
  * @return	Gardner-Kiderlen support matrix.
  */
-GardnerKiderlenSupportMatrix *
-constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data);
+GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data);
 
 /**
  * Constructs reduced Gardner-Kiderlen support matrix (i. e. in which redundant
@@ -80,6 +80,7 @@ constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data);
  * @return	Reduced Gardner-Kiderlen support matrix.
  */
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-	SupportFunctionDataPtr data, double epsilon, bool ifShadowHeuristics);
+		SupportFunctionDataPtr data, double epsilon,
+		bool ifShadowHeuristics);
 
 #endif /* GARDNER_KIDERLEN_SUPPORT_MATRIX_H */

@@ -24,13 +24,13 @@
  * - implementation.
  */
 
-#include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
-#include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
+#include "DataConstructors/SupportFunctionEstimationDataConstructor/SupportFunctionEstimationDataConstructor.h"
+#include "SparseMatrixEigen.h"
 #include "PCLDumper.h"
 #include "Polyhedron/Polyhedron.h"
-#include "SparseMatrixEigen.h"
 
 #define UNUSED __attribute__((unused))
 
@@ -46,10 +46,8 @@
  * @return	Support matrix.
  */
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-										 SupportMatrixType type,
-										 VectorXd startingVector,
-										 double startingEpsilon,
-										 bool ifShadowHeuristics);
+	SupportMatrixType type, VectorXd startingVector,
+	double startingEpsilon, bool ifShadowHeuristics);
 
 /**
  * Builds starting vector for the estimation process.
@@ -59,9 +57,8 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
  *
  * @return			Starting vector.
  */
-static VectorXd
-buildStartingVector(SupportFunctionDataPtr data,
-					SupportFunctionEstimationStartingBodyType startingBodyType);
+static VectorXd buildStartingVector(SupportFunctionDataPtr data,
+		SupportFunctionEstimationStartingBodyType startingBodyType);
 
 /**
  * Checks starting vector.
@@ -72,19 +69,16 @@ buildStartingVector(SupportFunctionDataPtr data,
  * @return		Number of incorrect (negative) elements in product.
  */
 static long int checkStartingVector(VectorXd startingVector,
-									SupportMatrix *matrix,
-									SupportFunctionDataPtr data) UNUSED;
+		SupportMatrix *matrix, SupportFunctionDataPtr data) UNUSED;
 
-SupportFunctionEstimationDataConstructor::
-	SupportFunctionEstimationDataConstructor() :
+SupportFunctionEstimationDataConstructor::SupportFunctionEstimationDataConstructor() :
 	ifScaleMatrix(false), ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SupportFunctionEstimationDataConstructor::
-	~SupportFunctionEstimationDataConstructor()
+SupportFunctionEstimationDataConstructor::~SupportFunctionEstimationDataConstructor()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -105,8 +99,7 @@ void SupportFunctionEstimationDataConstructor::enableShadowHeuristics()
 }
 
 static bool supportVectorAlreadyConsistent(VectorXd supportVector,
-										   SupportMatrix *supportMatrix,
-										   SupportFunctionDataPtr data)
+		SupportMatrix *supportMatrix, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	if (!supportMatrix)
@@ -118,20 +111,21 @@ static bool supportVectorAlreadyConsistent(VectorXd supportVector,
 	VectorXd startingFromSupportVector(3 * directions.size());
 	for (unsigned int i = 0; i < directions.size(); ++i)
 	{
-		startingFromSupportVector(3 * i) = directions[i].x * supportVector(i);
-		startingFromSupportVector(3 * i + 1) =
-			directions[i].y * supportVector(i);
-		startingFromSupportVector(3 * i + 2) =
-			directions[i].z * supportVector(i);
+		startingFromSupportVector(3 * i) = directions[i].x
+			* supportVector(i);
+		startingFromSupportVector(3 * i + 1) = directions[i].y
+			* supportVector(i);
+		startingFromSupportVector(3 * i + 2) = directions[i].z
+			* supportVector(i);
 	}
-	int numNegative =
-		checkStartingVector(startingFromSupportVector, supportMatrix, data);
+	int numNegative = checkStartingVector(startingFromSupportVector,
+			supportMatrix, data);
 	DEBUG_END;
 	return numNegative == 0;
 }
 
 static double calculateEpsilon(SupportFunctionDataPtr data,
-							   VectorXd startingVector)
+		VectorXd startingVector)
 {
 	DEBUG_START;
 	auto directions = data->supportDirections<Vector3d>();
@@ -141,8 +135,9 @@ static double calculateEpsilon(SupportFunctionDataPtr data,
 	for (int i = 0; i < numDirections; ++i)
 	{
 		Vector3d point(startingVector(3 * i), startingVector(3 * i + 1),
-					   startingVector(3 * i + 2));
-		double difference = fabs(supportVector(i) - point * directions[i]);
+				startingVector(3 * i + 2));
+		double difference = fabs(supportVector(i)
+				- point * directions[i]);
 		if (difference > max)
 		{
 			max = difference;
@@ -175,34 +170,30 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 
 	/** Build support matrix. */
 	std::cerr << "Building support matrix..." << std::endl;
-	SupportMatrix *supportMatrix =
-		buildSupportMatrix(data, supportMatrixType, startingVector,
-						   startingEpsilon, ifShadowHeuristics_);
+	SupportMatrix *supportMatrix = buildSupportMatrix(data,
+		supportMatrixType, startingVector, startingEpsilon,
+		ifShadowHeuristics_);
 
 	/* Build support vector. */
 	VectorXd supportVector = data->supportValues();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "support-vector-original.mat")
-		<< supportVector;
-	if (supportMatrix)
-	{
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"support-vector-original.mat") << supportVector;
+	if (supportMatrix) {
 		std::cerr << "Checking whether the support vector already "
-					 "satisfies consistency conditions..."
-				  << std::endl;
-		if (supportVectorAlreadyConsistent(supportVector, supportMatrix, data))
+			"satisfies consistency conditions..." << std::endl;
+		if (supportVectorAlreadyConsistent(
+			supportVector, supportMatrix, data))
 		{
 			std::cerr << "Original support vector satisfies "
-						 "consistency conditions!"
-					  << std::endl;
+				"consistency conditions!" << std::endl;
 		}
 	}
 
 	/* Check starting vector. */
 #ifndef NDEBUG
 	std::cerr << "Checking whether the starting vector already satisfies "
-				 "consistency conditions..."
-			  << std::endl;
-	int numViolations =
-		checkStartingVector(startingVector, supportMatrix, data);
+		"consistency conditions..." << std::endl;
+	int numViolations = checkStartingVector(startingVector, supportMatrix, data);
 	ASSERT(numViolations == 0 && "Starting point is infeasible");
 #endif
 
@@ -215,24 +206,22 @@ SupportFunctionEstimationDataPtr SupportFunctionEstimationDataConstructor::run(
 	{
 		supportMatrix = new SupportMatrix();
 	}
-	SupportFunctionEstimationDataPtr estimationData(
-		new SupportFunctionEstimationData(
-			*supportMatrix, supportVector, startingVector, supportDirections,
-			startingEpsilon, data, ifShadowHeuristics_));
+	SupportFunctionEstimationDataPtr estimationData(new
+		SupportFunctionEstimationData(*supportMatrix, supportVector,
+				startingVector, supportDirections,
+				startingEpsilon, data, ifShadowHeuristics_));
 	delete supportMatrix;
 	DEBUG_END;
 	return estimationData;
 }
 
 static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
-										 SupportMatrixType type,
-										 VectorXd startingVector,
-										 double startingEpsilon,
-										 bool ifShadowHeuristics)
+	SupportMatrixType type, VectorXd startingVector, double startingEpsilon,
+	bool ifShadowHeuristics)
 {
 	DEBUG_START;
 	SupportMatrix *matrix = NULL;
-
+	
 	switch (type)
 	{
 	case SUPPORT_MATRIX_TYPE_KKVW:
@@ -240,8 +229,8 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
 		ASSERT(0 && "Not implemented yet!");
 		break;
 	case SUPPORT_MATRIX_TYPE_GK_OPT:
-		matrix = constructReducedGardnerKiderlenSupportMatrix(
-			data, startingEpsilon, ifShadowHeuristics);
+		matrix = constructReducedGardnerKiderlenSupportMatrix(data,
+				startingEpsilon, ifShadowHeuristics);
 		break;
 	case SUPPORT_MATRIX_TYPE_GK:
 		matrix = constructGardnerKiderlenSupportMatrix(data);
@@ -263,18 +252,19 @@ static SupportMatrix *buildSupportMatrix(SupportFunctionDataPtr data,
  * @return		Support values
  */
 static VectorXd calculateSupportValues(std::vector<Point_3> directions,
-									   std::vector<Vector_3> vertices)
+	std::vector<Vector_3> vertices)
 {
 	DEBUG_START;
 	std::vector<Vector_3> points;
 
 	for (auto direction = directions.begin(); direction != directions.end();
-		 ++direction)
+			++direction)
 	{
 		Vector_3 vDirection = *direction - CGAL::ORIGIN;
 		double scalarProductMax = 0.;
 		Vector_3 supportPoint;
-		for (auto vertex = vertices.begin(); vertex != vertices.end(); ++vertex)
+		for (auto vertex = vertices.begin();
+			vertex != vertices.end(); ++vertex)
 		{
 			double scalarProduct = vDirection * *vertex;
 			if (scalarProduct > scalarProductMax)
@@ -301,8 +291,8 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Plane_3> planes)
 {
 	DEBUG_START;
 	for (auto plane = planes.begin(); plane != planes.end(); ++plane)
-		stream << plane->a() << " " << plane->b() << " " << plane->c() << " "
-			   << plane->d() << std::endl;
+		stream << plane->a() << " " << plane->b() << " " << plane->c()
+			<< " " << plane->d() << std::endl;
 	DEBUG_END;
 	return stream;
 }
@@ -314,8 +304,7 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 	/* Construct intersection of support halfspaces represented by planes */
 	std::vector<Plane_3> planes = data->supportPlanes();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-					"support-planes-for-halfspaces_intersection.txt")
-		<< planes;
+		"support-planes-for-halfspaces_intersection.txt") << planes;
 
 	if (planes.empty())
 	{
@@ -327,8 +316,8 @@ static VectorXd buildCylindersIntersection(SupportFunctionDataPtr data)
 	ASSERT(planes.size() > 3);
 	Polyhedron_3 intersection(planes);
 
-	startingVector = calculateSupportValues(data->supportDirections<Point_3>(),
-											intersection.getVertices());
+	startingVector = calculateSupportValues(
+		data->supportDirections<Point_3>(), intersection.getVertices());
 	DEBUG_END;
 	return startingVector;
 }
@@ -356,8 +345,8 @@ static VectorXd buildPointsHull(SupportFunctionDataPtr data)
 
 	CGAL::convex_hull_3(points.begin(), points.end(), hull);
 	ASSERT(is_strongly_convex_3(hull));
-	startingVector = calculateSupportValues(data->supportDirections<Point_3>(),
-											hull.getVertices());
+	startingVector = calculateSupportValues(
+		data->supportDirections<Point_3>(), hull.getVertices());
 	DEBUG_END;
 	return startingVector;
 }
@@ -384,27 +373,26 @@ static VectorXd buildVectorFromCube(SupportFunctionDataPtr data)
 
 	std::vector<Point_3> points;
 	points.push_back(Point_3(-1., -1., -1.));
-	points.push_back(Point_3(-1., -1., 1.));
-	points.push_back(Point_3(-1., 1., -1.));
-	points.push_back(Point_3(-1., 1., 1.));
-	points.push_back(Point_3(1., -1., -1.));
-	points.push_back(Point_3(1., -1., 1.));
-	points.push_back(Point_3(1., 1., -1.));
-	points.push_back(Point_3(1., 1., 1.));
+	points.push_back(Point_3(-1., -1.,  1.));
+	points.push_back(Point_3(-1.,  1., -1.));
+	points.push_back(Point_3(-1.,  1.,  1.));
+	points.push_back(Point_3( 1., -1., -1.));
+	points.push_back(Point_3( 1., -1.,  1.));
+	points.push_back(Point_3( 1.,  1., -1.));
+	points.push_back(Point_3( 1.,  1.,  1.));
 	Polyhedron_3 cube;
 	CGAL::convex_hull_3(points.begin(), points.end(), cube);
 	ASSERT(is_strongly_convex_3(cube));
 
-	startingVector = calculateSupportValues(data->supportDirections<Point_3>(),
-											cube.getVertices());
+	startingVector = calculateSupportValues(
+		data->supportDirections<Point_3>(), cube.getVertices());
 
 	DEBUG_END;
 	return startingVector;
 }
 
-static VectorXd
-buildStartingVector(SupportFunctionDataPtr data,
-					SupportFunctionEstimationStartingBodyType startingBodyType)
+static VectorXd buildStartingVector(SupportFunctionDataPtr data,
+		SupportFunctionEstimationStartingBodyType startingBodyType)
 {
 	DEBUG_START;
 	VectorXd startingVector(data->size());
@@ -427,12 +415,12 @@ buildStartingVector(SupportFunctionDataPtr data,
 	case SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM:
 	default:
 		ERROR_PRINT("This type of starting body is not implemented "
-					"yet!");
+				"yet!");
 		exit(EXIT_FAILURE);
 	}
 
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "starting-vector.mat")
-		<< startingVector;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
+		"starting-vector.mat") << startingVector;
 	DEBUG_END;
 	return startingVector;
 }
@@ -442,11 +430,13 @@ static std::set<int> findNonZeroElementsInRow(SupportMatrix &matrix, int idRow)
 	std::set<int> idColNonZero;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
-		for (Eigen::SparseMatrix<double>::InnerIterator it(matrix, k); it; ++it)
+		for (Eigen::SparseMatrix<double>::InnerIterator
+			it(matrix, k); it; ++it)
 		{
 			if (it.row() == idRow)
 			{
-				DEBUG_PRINT("Nonzero element [%ld][%ld]", it.row(), it.col());
+				DEBUG_PRINT("Nonzero element [%ld][%ld]",
+						it.row(), it.col());
 				idColNonZero.insert(it.col());
 			}
 		}
@@ -457,8 +447,7 @@ static std::set<int> findNonZeroElementsInRow(SupportMatrix &matrix, int idRow)
 const double EPS_SUPPORT_CONSISTENCY_LIMIT = 1e-15;
 
 static long int checkStartingVector(VectorXd startingVector,
-									SupportMatrix *matrix,
-									SupportFunctionDataPtr data)
+		SupportMatrix *matrix, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	if (!matrix)
@@ -470,23 +459,26 @@ static long int checkStartingVector(VectorXd startingVector,
 	long int numNegative = 0;
 
 	auto directions = data->supportDirections<Vector3d>();
-	ASSERT(directions.size() * 3 == (unsigned)matrix->cols());
-	ASSERT(directions.size() * 3 == (unsigned)startingVector.rows());
+	ASSERT(directions.size() * 3 == (unsigned) matrix->cols());
+	ASSERT(directions.size() * 3 == (unsigned) startingVector.rows());
 	product = (*matrix) * startingVector;
 	for (unsigned int i = 0; i < product.rows(); ++i)
 	{
 		if (product(i) < -EPS_SUPPORT_CONSISTENCY_LIMIT)
 		{
-			DEBUG_PRINT(COLOUR_RED "product(%d) = %le" COLOUR_NORM, i,
-						product(i));
+			DEBUG_PRINT(COLOUR_RED "product(%d) = %le" COLOUR_NORM,
+					i, product(i));
 			DEBUG_PRINT("matrix row #%d:", i);
-			std::set<int> idColNonZero = findNonZeroElementsInRow(*matrix, i);
+			std::set<int> idColNonZero =
+				findNonZeroElementsInRow(*matrix, i);
 #ifndef NDEBUG
-			for (auto &iCol : idColNonZero)
+			for (auto &iCol: idColNonZero)
 			{
 				DEBUG_PRINT("(%.16le) * (%.16le) = (%.16le)",
-							matrix->coeffRef(i, iCol), startingVector(iCol),
-							matrix->coeffRef(i, iCol) * startingVector(iCol));
+						matrix->coeffRef(i, iCol),
+						startingVector(iCol),
+						matrix->coeffRef(i, iCol)
+						* startingVector(iCol));
 			}
 #if 0
 			std::cerr << std::setprecision(16)
@@ -495,18 +487,20 @@ static long int checkStartingVector(VectorXd startingVector,
 #endif
 			++numNegative;
 #ifdef NDEBUG
-			std::cout << "Stop check after 1st fail for release run."
-					  << std::endl;
+			std::cout
+				<< "Stop check after 1st fail for release run."
+				<< std::endl;
 			return numNegative;
 #endif
 		}
 	}
 
-	DEBUG_PRINT("(%ld x %ld) * (%ld x %ld) = (%ld x %ld)", matrix->rows(),
-				matrix->cols(), startingVector.rows(), startingVector.cols(),
-				product.rows(), product.cols());
-	DEBUG_PRINT("Check: %ld of %ld product elements are negative", numNegative,
-				product.rows());
+	DEBUG_PRINT("(%ld x %ld) * (%ld x %ld) = (%ld x %ld)",
+			matrix->rows(), matrix->cols(),
+			startingVector.rows(), startingVector.cols(),
+			product.rows(), product.cols());
+	DEBUG_PRINT("Check: %ld of %ld product elements are negative",
+			numNegative, product.rows());
 	DEBUG_END;
 	return numNegative;
 }
@@ -514,12 +508,12 @@ static long int checkStartingVector(VectorXd startingVector,
 const double EPSILON_MAX_VIOLATION = 1e-7;
 
 bool SupportFunctionEstimationDataConstructor::checkResult(
-	SupportFunctionEstimationDataPtr data, SupportMatrixType supportMatrixType,
-	VectorXd estimate)
+		SupportFunctionEstimationDataPtr data,
+		SupportMatrixType supportMatrixType, VectorXd estimate)
 {
 	DEBUG_START;
-	if (supportMatrixType != SUPPORT_MATRIX_TYPE_GK &&
-		supportMatrixType != SUPPORT_MATRIX_TYPE_GK_OPT)
+	if (supportMatrixType != SUPPORT_MATRIX_TYPE_GK
+			&& supportMatrixType != SUPPORT_MATRIX_TYPE_GK_OPT)
 	{
 		ERROR_PRINT("Not implemented yet!");
 		DEBUG_END;
@@ -529,9 +523,9 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	int numDirections = directions.size();
 	std::cout << "Number of directions: " << numDirections << std::endl;
 	std::cout << "Size of the estimate vector: " << estimate.size()
-			  << std::endl;
-	ASSERT(3 * numDirections == estimate.size() ||
-		   numDirections == estimate.size());
+		<< std::endl;
+	ASSERT(3 * numDirections == estimate.size()
+			|| numDirections == estimate.size());
 
 #ifndef NDEBUG
 	for (int i = 0; i < estimate.rows(); ++i)
@@ -544,7 +538,7 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	for (int i = 0; i < numDirections; ++i)
 	{
 		points.push_back(Vector3d(estimate(3 * i), estimate(3 * i + 1),
-								  estimate(3 * i + 2)));
+					estimate(3 * i + 2)));
 	}
 
 	int numViolations = 0;
@@ -555,27 +549,28 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 		{
 			if (j == i)
 				continue;
-			double violation =
-				directions[i] * points[i] - directions[i] * points[j];
+			double violation = directions[i] * points[i]
+				- directions[i] * points[j];
 			if (violation < 0. && violation < minViolation)
 				minViolation = violation;
 			if (violation < -EPSILON_MAX_VIOLATION)
 			{
 #ifndef NDEBUG
-				std::cerr << "directions[" << i << "] = " << directions[i]
-						  << std::endl;
-				std::cerr << "point[" << i << "] = " << points[i] << std::endl;
-				std::cerr << "point[" << j << "] = " << points[j] << std::endl;
+				std::cerr << "directions[" << i << "] = "
+					<< directions[i] << std::endl;
+				std::cerr << "point[" << i << "] = "
+					<< points[i] << std::endl;
+				std::cerr << "point[" << j << "] = "
+					<< points[j] << std::endl;
 #endif /* NDEBUG */
 				DEBUG_PRINT("directions[%d] * "
-							"points[%d] = %lf ; ",
-							i, i, directions[i] * points[i]);
+						"points[%d] = %lf ; ", i, i,
+						directions[i] * points[i]);
 				DEBUG_PRINT("directions[%d] * "
-							"points[%d] = %lf ; ",
-							i, j, directions[i] * points[j]);
+						"points[%d] = %lf ; ", i, j,
+						directions[i] * points[j]);
 				DEBUG_PRINT("Violation in (%d, %d) "
-							"= %.16lf\n",
-							i, j, violation);
+						"= %.16lf\n", i, j, violation);
 				++numViolations;
 				if (violation < minViolation)
 					minViolation = violation;
@@ -584,7 +579,7 @@ bool SupportFunctionEstimationDataConstructor::checkResult(
 	}
 
 	ALWAYS_PRINT(stdout, "Number of violations = %d, min = %.16lf\n",
-				 numViolations, minViolation);
+			numViolations, minViolation);
 	DEBUG_END;
 	return numViolations == 0;
 }

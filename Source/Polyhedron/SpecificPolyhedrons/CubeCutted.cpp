@@ -18,12 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
 #include "Polyhedron/Facet/Facet.h"
 
-CubeCutted::CubeCutted() : Polyhedron()
+CubeCutted::CubeCutted() :
+		Polyhedron()
 {
 	DEBUG_START;
 	init();

@@ -29,22 +29,22 @@
 class TreeClusterNormNode
 {
 public:
-	ClusterNorm *cluster;
+	ClusterNorm* cluster;
 
-	TreeClusterNormNode *parent;
+	TreeClusterNormNode* parent;
 
-	TreeClusterNormNode *child0;
-	TreeClusterNormNode *child1;
+	TreeClusterNormNode* child0;
+	TreeClusterNormNode* child1;
 
 	TreeClusterNormNode();
-	TreeClusterNormNode(const TreeClusterNormNode &orig);
+	TreeClusterNormNode(const TreeClusterNormNode& orig);
 	virtual ~TreeClusterNormNode();
 
-	void fprint(FILE *file, int level);
-	//    void fprint_dendrogramma(FILE* file, int level);
-	void fprint_dendrogramma_lev(FILE *file, int level, int fix);
-
+	void fprint(FILE* file, int level);
+//    void fprint_dendrogramma(FILE* file, int level);
+	void fprint_dendrogramma_lev(FILE* file, int level, int fix);
 private:
+
 };
 
 #endif /* TREECLUSTERNORMNODE_H */

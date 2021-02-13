@@ -18,15 +18,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cstdio>
 #include <cstdlib>
+#include <cstdio>
 
-#include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
 #include "array_operations.h"
+#include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 
-SortedDouble::SortedDouble(int Len) : len(Len), num(0)
+SortedDouble::SortedDouble(int Len) :
+				len(Len),
+				num(0)
 {
 	DEBUG_START;
 	array = new double[len];
@@ -53,7 +55,7 @@ void SortedDouble::add(double x)
 		return;
 	}
 
-	first = 0;	// Первый элемент в массиве
+	first = 0; // Первый элемент в массиве
 	last = num; // Последний элемент в массиве
 
 	while (first < last)

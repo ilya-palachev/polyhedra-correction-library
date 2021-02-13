@@ -26,12 +26,12 @@
 
 #ifdef USE_GLPK
 
-#include "Recoverer/GlpkSupportFunctionEstimator.h"
 #include "DebugPrint.h"
+#include "Recoverer/GlpkSupportFunctionEstimator.h"
 #include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
-	SupportFunctionEstimationDataPtr data) :
+		SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;

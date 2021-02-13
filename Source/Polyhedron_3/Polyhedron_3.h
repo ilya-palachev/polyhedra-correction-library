@@ -36,15 +36,16 @@
 typedef Point_3 PCLPoint_3;
 typedef Plane_3 PCLPlane_3;
 
-#include <CGAL/Polyhedron_3.h>
+#include <CGAL/point_generators_3.h>
 #include <CGAL/algorithm.h>
 #include <CGAL/convex_hull_3.h>
-#include <CGAL/point_generators_3.h>
+#include <CGAL/Polyhedron_3.h>
 
-#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "KernelCGAL/ItemsIndexed.h"
-#include "Polyhedron/Polyhedron.h"
 #include "SparseMatrixEigen.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "Polyhedron/Polyhedron.h"
+
 
 typedef struct
 {
@@ -72,9 +73,7 @@ public:
 	/**
 	 * Constructs empty CGAL polyhedron from nothing.
 	 */
-	BasePolyhedron_3() : CGAL::Polyhedron_3<KernelT, ItemsIndexedT>()
-	{
-	}
+	BasePolyhedron_3(): CGAL::Polyhedron_3<KernelT, ItemsIndexedT>() {}
 
 	/**
 	 * Constructs CGAL polyhedron from PCL polyhedron.
@@ -102,8 +101,7 @@ public:
 	 */
 	BasePolyhedron_3(std::vector<PCLPlane_3> planes) :
 		BasePolyhedron_3(planes.begin(), planes.end())
-	{
-	}
+	{}
 
 	/**
 	 * Shifts all vertices of the polyhedron on the given vector
@@ -127,7 +125,8 @@ public:
 	 * @return Support values constructed for given polyhedron and
 	 * directions.
 	 */
-	VectorXd calculateSupportValues(std::vector<PCLPoint_3> directions);
+	VectorXd calculateSupportValues(
+			std::vector<PCLPoint_3> directions);
 
 	/**
 	 * Generates the support points corresponding to the given support
@@ -138,8 +137,9 @@ public:
 	 * @return Support points constructed for given polyhedron and
 	 * directions.
 	 */
-	std::vector<Vector3d>
-	calculateSupportPoints(std::vector<PCLPoint_3> directions);
+	std::vector<Vector3d> calculateSupportPoints(
+			std::vector<PCLPoint_3> directions);
+
 
 	/**
 	 * Generates the support data corresponding to the given support
@@ -150,8 +150,8 @@ public:
 	 * @return Support data constructed for given polyhedron and
 	 * directions.
 	 */
-	SupportFunctionDataPtr
-	calculateSupportData(std::vector<PCLPoint_3> directions);
+	SupportFunctionDataPtr calculateSupportData(
+			std::vector<PCLPoint_3> directions);
 
 	/**
 	 * Initializes the indices of the polyhedron.
@@ -166,7 +166,8 @@ public:
 	 * @return		The pair tangient point and direction.
 	 */
 	template <class VertexIteratorT>
-	std::pair<VertexIteratorT, double> findTangientVertex(PCLPoint_3 direction);
+	std::pair<VertexIteratorT, double>
+	findTangientVertex(PCLPoint_3 direction);
 
 	/**
 	 * Calculates the concatenation of tangient points coordinates for
@@ -175,7 +176,8 @@ public:
 	 * @param directions	The 3D directions.
 	 * @return		The support values.
 	 */
-	VectorXd findTangientPointsConcatenated(std::vector<PCLPoint_3> directions);
+	VectorXd findTangientPointsConcatenated(
+			std::vector<PCLPoint_3> directions);
 
 	/**
 	 * The indices of planes in the given polyhedron.
@@ -192,7 +194,9 @@ public:
 	 * 			planes container.
 	 */
 	template <class PlaneIterator>
-	void initialize_indices(PlaneIterator planesBegin, PlaneIterator planesEnd);
+	void initialize_indices(
+			PlaneIterator planesBegin,
+			PlaneIterator planesEnd);
 
 	/**
 	 * Initializes the indices of the polyhedron by the indices of given
@@ -213,15 +217,12 @@ public:
  * @param facet			The facet.
  * @param planesOriginal	The vector of original planes.
  */
-int findBestPlaneOriginal(BasePolyhedron_3<Kernel, ItemsIndexed>::Facet &facet,
-						  std::vector<PCLPlane_3> planesOriginal);
+int findBestPlaneOriginal(BasePolyhedron_3<Kernel, ItemsIndexed>::Facet& facet,
+		std::vector<PCLPlane_3> planesOriginal);
 
-#define CGAL_GRAPH_TRAITS_INHERITANCE_TEMPLATE_PARAMS                          \
-	typename KernelT, typename ItemsIndexedT
-#define CGAL_GRAPH_TRAITS_INHERITANCE_CLASS_NAME                               \
-	BasePolyhedron_3<KernelT, ItemsIndexedT>
-#define CGAL_GRAPH_TRAITS_INHERITANCE_BASE_CLASS_NAME                          \
-	CGAL::Polyhedron_3<KernelT, ItemsIndexedT>
+#define CGAL_GRAPH_TRAITS_INHERITANCE_TEMPLATE_PARAMS typename KernelT, typename ItemsIndexedT
+#define CGAL_GRAPH_TRAITS_INHERITANCE_CLASS_NAME BasePolyhedron_3<KernelT, ItemsIndexedT>
+#define CGAL_GRAPH_TRAITS_INHERITANCE_BASE_CLASS_NAME CGAL::Polyhedron_3<KernelT, ItemsIndexedT>
 #include <CGAL/boost/graph/graph_traits_inheritance_macros.h>
 typedef BasePolyhedron_3<Kernel, ItemsIndexed> Polyhedron_3;
 

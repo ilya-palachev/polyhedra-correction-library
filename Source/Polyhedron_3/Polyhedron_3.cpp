@@ -24,12 +24,12 @@
  */
 
 #include "Polyhedron_3/Polyhedron_3.h"
-#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
-#include "Polyhedron/Facet/Facet.h"
-#include "Polyhedron/Polyhedron.h"
+#include "DebugAssert.h"
 #include "halfspaces_intersection.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Polyhedron/Facet/Facet.h"
 
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 
@@ -38,12 +38,11 @@
  */
 struct Plane_from_facet
 {
-	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet &f)
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
 		return Polyhedron_3::Plane_3(h->vertex()->point(),
-									 h->next()->vertex()->point(),
-									 h->opposite()->vertex()->point());
+				h->next()->vertex()->point(), h->opposite()->vertex()->point());
 	}
 };
 
@@ -54,7 +53,7 @@ struct Plane_from_facet
  * http://doc.cgal.org/latest/Polyhedron/classCGAL_1_1Polyhedron__incremental__builder__3.html
  */
 template <class HDS>
-class BuilderFromPCLPolyhedron : public CGAL::Modifier_base<HDS>
+class BuilderFromPCLPolyhedron: public CGAL::Modifier_base<HDS>
 {
 public:
 	/** The PCL polyhedron-> */
@@ -65,7 +64,7 @@ public:
 	 *
 	 * @param p	The PCL polyhedron
 	 */
-	BuilderFromPCLPolyhedron(Polyhedron *p) : polyhedron(p)
+	BuilderFromPCLPolyhedron(Polyhedron *p): polyhedron(p)
 	{
 		DEBUG_START;
 		DEBUG_END;
@@ -76,7 +75,7 @@ public:
 	 *
 	 * @param hds	TODO: I don't understand what it means...
 	 */
-	void operator()(HDS &hds)
+	void operator()(HDS& hds)
 	{
 		DEBUG_START;
 		CGAL::Polyhedron_incremental_builder_3<HDS> builder(hds, true);
@@ -89,25 +88,26 @@ public:
 		for (int i = 0; i < polyhedron->numFacets; ++i)
 			numHalfedges += polyhedron->facets[i].numVertices;
 		ASSERT(numHalfedges > 0);
-
+		
 		/* TODO: Add assertion of Euler's rule. */
 
-		builder.begin_surface(polyhedron->numVertices, polyhedron->numFacets,
-							  numHalfedges);
+		builder.begin_surface(polyhedron->numVertices,
+				polyhedron->numFacets, numHalfedges);
 		typedef typename HDS::Vertex Vertex;
 		typedef typename Vertex::Point Point;
 
 		for (int i = 0; i < polyhedron->numVertices; ++i)
 		{
 			Vector3d vertice = polyhedron->vertices[i];
-			builder.add_vertex(Point(vertice.x, vertice.y, vertice.z));
+			builder.add_vertex(Point(vertice.x, vertice.y,
+						vertice.z));
 		}
 
 		for (int i = 0; i < polyhedron->numFacets; ++i)
 		{
 			Facet *facet = &polyhedron->facets[i];
 			DEBUG_PRINT("Constructing facet #%d, number = %d", i,
-						facet->numVertices);
+					facet->numVertices);
 			if (facet->numVertices <= 0)
 				continue;
 			builder.begin_facet();
@@ -126,39 +126,42 @@ public:
 	}
 };
 
-template <> Polyhedron_3::BasePolyhedron_3(Polyhedron p)
+template<>
+Polyhedron_3::BasePolyhedron_3(Polyhedron p)
 {
 	DEBUG_START;
 
 	Polyhedron *copy = new Polyhedron(p);
 	BuilderFromPCLPolyhedron<HalfedgeDS> builder(copy);
 	this->delegate(builder);
-
+	
 	/*
 	 * assign a plane equation to each polyhedron facet using functor
 	 * Plane_from_facet
 	 */
 	std::transform(facets_begin(), facets_end(), planes_begin(),
-				   Plane_from_facet());
+		Plane_from_facet());
 
-	ASSERT(size_of_vertices() == (unsigned)p.numVertices);
-	ASSERT(size_of_facets() == (unsigned)p.numFacets);
+	ASSERT(size_of_vertices() == (unsigned) p.numVertices);
+	ASSERT(size_of_facets() == (unsigned) p.numFacets);
 	ASSERT(size_of_vertices() > 0);
 	ASSERT(size_of_facets() > 0);
 	DEBUG_END;
 }
 
-template <> void Polyhedron_3::shift(Vector_3 vector)
+template<>
+void Polyhedron_3::shift(Vector_3 vector)
 {
 	for (auto v = vertices_begin(); v != vertices_end(); ++v)
 	{
 		v->point() = v->point() + vector;
 	}
 	std::transform(facets_begin(), facets_end(), planes_begin(),
-				   Plane_from_facet());
+		Plane_from_facet());
 }
 
-template <> std::vector<Vector_3> Polyhedron_3::getVertices()
+template<>
+std::vector<Vector_3> Polyhedron_3::getVertices()
 {
 	DEBUG_START;
 	std::vector<Vector_3> vertices;
@@ -170,9 +173,9 @@ template <> std::vector<Vector_3> Polyhedron_3::getVertices()
 	return vertices;
 }
 
-template <>
-VectorXd
-Polyhedron_3::calculateSupportValues(std::vector<PCLPoint_3> directions)
+template<>
+VectorXd Polyhedron_3::calculateSupportValues(
+	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr data = calculateSupportData(directions);
@@ -181,9 +184,9 @@ Polyhedron_3::calculateSupportValues(std::vector<PCLPoint_3> directions)
 	return values;
 }
 
-template <>
-std::vector<Vector3d>
-Polyhedron_3::calculateSupportPoints(std::vector<PCLPoint_3> directions)
+template<>
+std::vector<Vector3d> Polyhedron_3::calculateSupportPoints(
+	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	SupportFunctionDataPtr data = calculateSupportData(directions);
@@ -193,8 +196,7 @@ Polyhedron_3::calculateSupportPoints(std::vector<PCLPoint_3> directions)
 }
 
 template <class KernelT, class ItemsIndexedT>
-SupportFunctionDataPtr
-BasePolyhedron_3<KernelT, ItemsIndexedT>::calculateSupportData(
+SupportFunctionDataPtr BasePolyhedron_3<KernelT, ItemsIndexedT>::calculateSupportData(
 	std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
@@ -207,8 +209,8 @@ BasePolyhedron_3<KernelT, ItemsIndexedT>::calculateSupportData(
 std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 {
 	DEBUG_START;
-	if (p.facetColours.size() != p.size_of_facets() ||
-		p.halfedgeColours.size() != p.size_of_halfedges())
+	if (p.facetColours.size() != p.size_of_facets()
+		|| p.halfedgeColours.size() != p.size_of_halfedges())
 	{
 		p.initialize_indices();
 	}
@@ -222,7 +224,8 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 
 	stream << "ply" << std::endl;
 	stream << "format ascii 1.0" << std::endl;
-	stream << "comment generated by Polyhedra Correction Library" << std::endl;
+	stream << "comment generated by Polyhedra Correction Library"
+		<< std::endl;
 	stream << "element vertex " << numVertices << std::endl;
 	stream << "property float x" << std::endl;
 	stream << "property float y" << std::endl;
@@ -236,20 +239,21 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 	int iVertex = 0;
 	double scale = 1e+6;
 	double factor = 1.05;
-	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end(); ++vertex)
+	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end();
+			++vertex)
 	{
 		auto point = vertex->point();
-		stream << (int)std::floor(scale * point.x()) << " "
-			   << (int)std::floor(scale * point.y()) << " "
-			   << (int)std::floor(scale * point.z());
+		stream << (int) std::floor(scale * point.x()) << " "
+			<< (int) std::floor(scale * point.y()) << " "
+			<< (int) std::floor(scale * point.z());
 		stream << std::endl;
 		if (p.whetherPrintEdgeColouringFacets)
 		{
 			point = Point_3(point.x() * factor, point.y() * factor,
-							point.z() * factor);
-			stream << (int)std::floor(scale * point.x()) << " "
-				   << (int)std::floor(scale * point.y()) << " "
-				   << (int)std::floor(scale * point.z());
+					point.z() * factor);
+			stream << (int) std::floor(scale * point.x()) << " "
+				<< (int) std::floor(scale * point.y()) << " "
+				<< (int) std::floor(scale * point.z());
 			stream << std::endl;
 		}
 		++iVertex;
@@ -264,32 +268,34 @@ std::ostream &operator<<(std::ostream &stream, Polyhedron_3 &p)
 		{
 			int iVertex = halfedge->vertex()->id;
 			if (p.whetherPrintEdgeColouringFacets)
-				iVertex *= 2;
-			;
+				iVertex *= 2;;
 			stream << " " << iVertex;
 			++halfedge;
 		} while (halfedge != facet->facet_begin());
-		stream << " " << static_cast<int>(colour.red) << " "
-			   << static_cast<int>(colour.green) << " "
-			   << static_cast<int>(colour.blue) << std::endl;
+		stream << " " << static_cast<int>(colour.red)
+			<< " " << static_cast<int>(colour.green)
+			<< " " << static_cast<int>(colour.blue) << std::endl;
 		++iFacet;
 	}
 	if (p.whetherPrintEdgeColouringFacets)
 	{
 		int iHalfedge = 0;
-		for (auto halfedge = p.halfedges_begin(); halfedge != p.halfedges_end();
-			 ++halfedge)
+		for (auto halfedge = p.halfedges_begin();
+				halfedge != p.halfedges_end(); ++halfedge)
 		{
 			int iVertex1 = halfedge->vertex()->id;
 			int iVertex2 = halfedge->opposite()->vertex()->id;
 			if (iVertex1 < iVertex2)
 			{
 				auto colour = p.halfedgeColours[iHalfedge];
-				stream << 4 << " " << 2 * iVertex1 << " " << 2 * iVertex1 + 1
-					   << " " << 2 * iVertex2 + 1 << " " << 2 * iVertex2;
-				stream << " " << static_cast<int>(colour.red) << " "
-					   << static_cast<int>(colour.green) << " "
-					   << static_cast<int>(colour.blue) << std::endl;
+				stream << 4 << " " << 2 * iVertex1 << " "
+					<< 2 * iVertex1 + 1
+					<< " " << 2 * iVertex2 + 1 << " "
+					<< 2 * iVertex2;
+				stream << " " << static_cast<int>(colour.red)
+					<< " " << static_cast<int>(colour.green)
+					<< " " << static_cast<int>(colour.blue)
+					<< std::endl;
 			}
 			++iHalfedge;
 		}
@@ -311,14 +317,14 @@ void BasePolyhedron_3<KernelT, ItemsIndexedT>::initialize_indices()
 	grey.blue = 100;
 
 	auto vertex = this->vertices_begin();
-	for (int i = 0; i < (int)this->size_of_vertices(); ++i)
+	for (int i = 0; i < (int) this->size_of_vertices(); ++i)
 	{
 		vertex->id = i;
 		++vertex;
 	}
 
 	auto facet = this->facets_begin();
-	for (int i = 0; i < (int)this->size_of_facets(); ++i)
+	for (int i = 0; i < (int) this->size_of_facets(); ++i)
 	{
 		facet->id = i;
 		facetColours[i] = grey;
@@ -326,7 +332,7 @@ void BasePolyhedron_3<KernelT, ItemsIndexedT>::initialize_indices()
 	}
 
 	auto halfedge = this->halfedges_begin();
-	for (int i = 0; i < (int)this->size_of_halfedges(); ++i)
+	for (int i = 0; i < (int) this->size_of_halfedges(); ++i)
 	{
 		halfedge->id = i;
 		halfedgeColours[i] = grey;
@@ -341,14 +347,14 @@ std::pair<Polyhedron_3::Vertex_iterator, double>
 Polyhedron_3::findTangientVertex(PCLPoint_3 direction)
 {
 	DEBUG_START;
-	double maximum = -1e100;
+	double maximum  = -1e100;
 	auto tangient = vertices_end();
 	for (auto vertex = vertices_begin(); vertex != vertices_end(); ++vertex)
 	{
 		if (vertex->degree() < 3)
 		{
-			std::cerr << "warning degree of " << vertex->id << " is "
-					  << vertex->degree() << std::endl;
+			std::cerr << "warning degree of " << vertex->id
+				<< " is " << vertex->degree() << std::endl;
 			continue;
 		}
 		auto point = vertex->point();
@@ -365,21 +371,20 @@ Polyhedron_3::findTangientVertex(PCLPoint_3 direction)
 }
 
 template <>
-VectorXd
-Polyhedron_3::findTangientPointsConcatenated(std::vector<PCLPoint_3> directions)
+VectorXd Polyhedron_3::findTangientPointsConcatenated(
+		std::vector<PCLPoint_3> directions)
 {
 	DEBUG_START;
 	VectorXd solution(3 * directions.size());
-	for (int i = 0; i < (int)directions.size(); ++i)
+	for (int i = 0; i < (int) directions.size(); ++i)
 	{
-		auto direction = directions[i];
-		auto pair =
-			findTangientVertex<Polyhedron_3::Vertex_iterator>(direction);
-		auto vertex = pair.first;
-		auto point = vertex->point();
-		solution(3 * i) = point.x();
-		solution(3 * i + 1) = point.y();
-		solution(3 * i + 2) = point.z();
+		 auto direction = directions[i];
+		 auto pair = findTangientVertex<Polyhedron_3::Vertex_iterator>(direction);
+		 auto vertex = pair.first;
+		 auto point = vertex->point();
+		 solution(3 * i) = point.x();
+		 solution(3 * i + 1) = point.y();
+		 solution(3 * i + 2) = point.z();
 	}
 
 	DEBUG_END;
@@ -404,13 +409,13 @@ double distance(PCLPoint_3 point, PCLPlane_3 planeGiven)
 {
 	DEBUG_START;
 	PCLPlane_3 plane = normalize(planeGiven);
-	double value = plane.a() * point.x() + plane.b() * point.y() +
-				   plane.c() * point.z() + plane.d();
+	double value = plane.a() * point.x() + plane.b() * point.y()
+		+ plane.c() * point.z() + plane.d();
 	DEBUG_END;
 	return sqrt(value * value);
 }
 
-double distanceSum(Polyhedron_3::Facet &facet, PCLPlane_3 plane)
+double distanceSum(Polyhedron_3::Facet& facet, PCLPlane_3 plane)
 {
 	DEBUG_START;
 	auto halfedgeBegin = facet.facet_begin();
@@ -422,16 +427,18 @@ double distanceSum(Polyhedron_3::Facet &facet, PCLPlane_3 plane)
 		double error = distance(point, plane);
 		errorSum += error;
 		++halfedge;
-	} while (halfedge != halfedgeBegin);
+	}
+	while (halfedge != halfedgeBegin);
 
 	DEBUG_END;
 	return errorSum;
 }
 
 template <class PlaneIterator>
-std::pair<int, PCLPlane_3> findBestPlaneOriginal(Polyhedron_3::Facet &facet,
-												 PlaneIterator planesBegin,
-												 PlaneIterator planesEnd)
+std::pair<int, PCLPlane_3> findBestPlaneOriginal(
+		Polyhedron_3::Facet& facet,
+		PlaneIterator planesBegin,
+		PlaneIterator planesEnd)
 {
 	DEBUG_START;
 	double minimum = 1e100;
@@ -453,20 +460,23 @@ std::pair<int, PCLPlane_3> findBestPlaneOriginal(Polyhedron_3::Facet &facet,
 	return std::make_pair(iPlaneBest, planeBest);
 }
 
-template <class PlaneIterator> struct Plane_from_planes
+template <class PlaneIterator>
+struct Plane_from_planes
 {
 	PlaneIterator planesBegin_;
 	PlaneIterator planesEnd_;
 
-	Plane_from_planes(PlaneIterator planesBegin, PlaneIterator planesEnd) :
-		planesBegin_(planesBegin), planesEnd_(planesEnd)
+	Plane_from_planes(PlaneIterator planesBegin,
+			PlaneIterator planesEnd):
+		planesBegin_(planesBegin),
+		planesEnd_(planesEnd)
 	{
 	}
 
-	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet &facet)
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& facet)
 	{
-		Plane_3 planeBest =
-			findBestPlaneOriginal(facet, planesBegin_, planesEnd_).second;
+		Plane_3 planeBest = findBestPlaneOriginal(facet, planesBegin_,
+				planesEnd_).second;
 		return planeBest;
 	}
 };
@@ -490,7 +500,7 @@ PCLPlane_3 nearestPlane(PCLPlane_3 alpha, std::vector<PCLPlane_3> planes)
 	DEBUG_START;
 	double minimum = 1e100;
 	PCLPlane_3 planeBest;
-	for (PCLPlane_3 plane : planes)
+	for (PCLPlane_3 plane: planes)
 	{
 		double error = distance(alpha, plane);
 		if (error < minimum)
@@ -505,17 +515,18 @@ PCLPlane_3 nearestPlane(PCLPlane_3 alpha, std::vector<PCLPlane_3> planes)
 
 template <>
 template <class PlaneIterator>
-void Polyhedron_3::initialize_indices(PlaneIterator planesBegin,
-									  PlaneIterator planesEnd)
+void Polyhedron_3::initialize_indices(
+		PlaneIterator planesBegin,
+		PlaneIterator planesEnd)
 {
 	DEBUG_START;
 	int iFacet = 0;
-	std::vector<int> index(size_of_facets());
+ 	std::vector<int> index(size_of_facets());
 	std::set<int> usedIndices;
 	for (auto facet = facets_begin(); facet != facets_end(); ++facet)
 	{
-		int iBestPlane =
-			findBestPlaneOriginal(*facet, planesBegin, planesEnd).first;
+		int iBestPlane = findBestPlaneOriginal(*facet,
+				planesBegin, planesEnd).first;
 		index[iFacet] = iBestPlane;
 		facet->id = iFacet;
 		usedIndices.insert(iBestPlane);
@@ -524,7 +535,7 @@ void Polyhedron_3::initialize_indices(PlaneIterator planesBegin,
 	if (usedIndices.size() < index.size())
 	{
 		std::cerr << "Equal indices: " << usedIndices.size() << " < "
-				  << index.size() << std::endl;
+			<< index.size() << std::endl;
 		// ASSERT(0 && "Equal indices found");
 	}
 	indexPlanes_ = index;
@@ -533,34 +544,40 @@ void Polyhedron_3::initialize_indices(PlaneIterator planesBegin,
 
 template <>
 template <class PlaneIterator>
-Polyhedron_3::BasePolyhedron_3(PlaneIterator planesBegin,
-							   PlaneIterator planesEnd)
+Polyhedron_3::BasePolyhedron_3(PlaneIterator planesBegin, PlaneIterator planesEnd)
 {
 	DEBUG_START;
-	CGAL::internal::halfspaces_intersection(planesBegin, planesEnd, *this,
-											Kernel());
+	CGAL::internal::halfspaces_intersection(planesBegin, planesEnd,
+			*this, Kernel());
 	std::transform(facets_begin(), facets_end(), planes_begin(),
-				   Plane_from_planes<PlaneIterator>(planesBegin, planesEnd));
+			Plane_from_planes<PlaneIterator>(planesBegin,
+				planesEnd));
 	initialize_indices();
 	DEBUG_END;
 }
 
 typedef std::vector<PCLPlane_3>::iterator PlaneVectorIterator;
 template Polyhedron_3::BasePolyhedron_3<PlaneVectorIterator>(
-	PlaneVectorIterator, PlaneVectorIterator);
+		PlaneVectorIterator,
+		PlaneVectorIterator);
 template std::pair<int, PCLPlane_3>
-findBestPlaneOriginal<PlaneVectorIterator>(Polyhedron_3::Facet &facet,
-										   PlaneVectorIterator planesBegin,
-										   PlaneVectorIterator planesEnd);
+findBestPlaneOriginal<PlaneVectorIterator>(
+		Polyhedron_3::Facet& facet,
+		PlaneVectorIterator planesBegin,
+		PlaneVectorIterator planesEnd);
 template void Polyhedron_3::initialize_indices<PlaneVectorIterator>(
-	PlaneVectorIterator planesBegin, PlaneVectorIterator planesEnd);
+		PlaneVectorIterator planesBegin,
+		PlaneVectorIterator planesEnd);
 
 typedef std::list<PCLPlane_3>::iterator PlaneListIterator;
-template Polyhedron_3::BasePolyhedron_3<PlaneListIterator>(PlaneListIterator,
-														   PlaneListIterator);
+template Polyhedron_3::BasePolyhedron_3<PlaneListIterator>(
+		PlaneListIterator,
+		PlaneListIterator);
 template std::pair<int, PCLPlane_3>
-findBestPlaneOriginal<PlaneListIterator>(Polyhedron_3::Facet &facet,
-										 PlaneListIterator planesBegin,
-										 PlaneListIterator planesEnd);
+findBestPlaneOriginal<PlaneListIterator>(
+		Polyhedron_3::Facet& facet,
+		PlaneListIterator planesBegin,
+		PlaneListIterator planesEnd);
 template void Polyhedron_3::initialize_indices<PlaneListIterator>(
-	PlaneListIterator planesBegin, PlaneListIterator planesEnd);
+		PlaneListIterator planesBegin,
+		PlaneListIterator planesEnd);

@@ -20,10 +20,10 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-void get_statistics_deform_linear(const char *name, int type);
-void get_statistics_deform_linear_test(const char *name, int type);
+void get_statistics_deform_linear(const char* name, int type);
+void get_statistics_deform_linear_test(const char* name, int type);
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	DEBUG_START;
 	get_statistics_deform_linear_test("poly-small", 0);
@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 #define step_len 10
 #define num_rand 100
 
-void get_statistics_deform_linear(const char *name, int type)
+void get_statistics_deform_linear(const char* name, int type)
 {
 	DEBUG_START;
 
@@ -48,7 +48,7 @@ void get_statistics_deform_linear(const char *name, int type)
 	double dist, norm, a, b, c, d, part, norm0;
 	Vector3d delta;
 
-	srand((unsigned)time(NULL));
+	srand((unsigned) time(NULL));
 
 	Polyhedron poly;
 	Polyhedron poly1;
@@ -97,7 +97,7 @@ void get_statistics_deform_linear(const char *name, int type)
 
 		for (i = 0; i < num_rand; ++i)
 		{
-			i_vertex = (int)(rand() / (RAND_MAX + 1.) * numv);
+			i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);
 			//            printf("%d ", i_vertex);
 			dist = poly.distToNearestNeighbour(i_vertex);
 			norm = dist * norm0;
@@ -119,8 +119,7 @@ void get_statistics_deform_linear(const char *name, int type)
 			}
 			poly.copyCoordinates(poly1);
 		}
-		//        for (i_vertex = 0; i_vertex < 50 && i_vertex < numv;
-		//        ++i_vertex) {
+		//        for (i_vertex = 0; i_vertex < 50 && i_vertex < numv; ++i_vertex) {
 		//            dist = poly.min_dist(i_vertex);
 		//            norm = dist * norm0;
 		//
@@ -142,7 +141,7 @@ void get_statistics_deform_linear(const char *name, int type)
 		//                poly.import_coordinates(poly1);
 		//            }
 		//        }
-		part = (double)count;
+		part = (double) count;
 		//        part /= numv;
 		part /= num_rand;
 		printf("\\hline\n\t%lf &\t%lf\\\\\n", norm0, part);
@@ -152,7 +151,7 @@ void get_statistics_deform_linear(const char *name, int type)
 	DEBUG_END;
 }
 
-void get_statistics_deform_linear_test(const char *name, int type)
+void get_statistics_deform_linear_test(const char* name, int type)
 {
 	DEBUG_START;
 
@@ -163,7 +162,7 @@ void get_statistics_deform_linear_test(const char *name, int type)
 	int num_steps0, num_steps1;
 	double norm_sum0, norm_sum1;
 
-	srand((unsigned)time(NULL));
+	srand((unsigned) time(NULL));
 
 	Polyhedron poly;
 	Polyhedron poly1;
@@ -200,7 +199,7 @@ void get_statistics_deform_linear_test(const char *name, int type)
 
 	for (i = 0; i < num_rand; ++i)
 	{
-		i_vertex = (int)(rand() / (RAND_MAX + 1.) * numv);
+		i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);
 		//            printf("%d ", i_vertex);
 		dist = poly.distToNearestNeighbour(i_vertex);
 		norm = dist * 0.0001;
@@ -221,11 +220,12 @@ void get_statistics_deform_linear_test(const char *name, int type)
 		poly.copyCoordinates(poly1);
 		if (num_steps1 != -1)
 		{
-			printf("\\hline\n%d &\t(%.2le, %.2le, %.2le) &\t%d &\t%le &\t%d "
-				   "&\t%le \\\\\n",
-				   i_vertex, delta.x, delta.y, delta.z, num_steps0, norm_sum0,
-				   num_steps1, norm_sum1);
+			printf(
+					"\\hline\n%d &\t(%.2le, %.2le, %.2le) &\t%d &\t%le &\t%d &\t%le \\\\\n",
+					i_vertex, delta.x, delta.y, delta.z, num_steps0, norm_sum0,
+					num_steps1, norm_sum1);
 		}
+
 	}
 	DEBUG_END;
 }

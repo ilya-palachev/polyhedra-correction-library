@@ -31,34 +31,29 @@
 /**
  * CGAL Plane_3 class with PCL extensions
  */
-class Plane_3 : public Kernel::Plane_3
+class Plane_3: public Kernel::Plane_3
 {
 public:
 	/**
 	 * Constructs the empty plane (default empty constructor).
 	 */
-	Plane_3() : Kernel::Plane_3(0., 0., 0., 0.)
-	{
-	}
+	Plane_3(): Kernel::Plane_3(0., 0., 0., 0.) {}
 
 	/**
 	 * Constructs CGAL plane from PCL plane.
 	 *
 	 * @param p	The PCL plane.
 	 */
-	Plane_3(const Plane &p) :
-		Kernel::Plane_3(p.norm.x, p.norm.y, p.norm.z, p.dist)
-	{
-	}
+	Plane_3(const Plane &p):
+		Kernel::Plane_3(p.norm.x, p.norm.y, p.norm.z, p.dist) {}
 
 	/**
 	 * Constructs the plane from general CGAL plane.
 	 *
 	 * @param p	The CGAL plane
 	 */
-	Plane_3(const Kernel::Plane_3 &p) : Kernel::Plane_3(p)
-	{
-	}
+	Plane_3(const Kernel::Plane_3 &p):
+		Kernel::Plane_3(p) {}
 
 	/**
 	 * Constructs CGAL plane from 4 values.
@@ -69,10 +64,8 @@ public:
 	 * @param c	The C coefficient
 	 * @param d	The D coefficient
 	 */
-	Plane_3(double a, double b, double c, double d) :
-		Kernel::Plane_3(a, b, c, d)
-	{
-	}
+	Plane_3(double a, double b, double c, double d):
+		Kernel::Plane_3(a, b, c, d) {}
 
 	/**
 	 * Constructs CGAL plane from three points.
@@ -82,10 +75,8 @@ public:
 	 * @param c	The 3rd point
 	 */
 	Plane_3(const Kernel::Point_3 &a, const Kernel::Point_3 &b,
-			const Kernel::Point_3 &c) :
-		Kernel::Plane_3(a, b, c)
-	{
-	}
+			const Kernel::Point_3 &c):
+		Kernel::Plane_3(a, b, c) {}
 };
 
 #endif /* KERNELCGAL_PLANE_3_H_ */

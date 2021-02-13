@@ -26,8 +26,8 @@
 
 #ifdef USE_IPOPT
 
-#include "Recoverer/SupportFunctionEstimator.h"
 #include <coin/IpTNLP.hpp>
+#include "Recoverer/SupportFunctionEstimator.h"
 
 using namespace Ipopt;
 
@@ -38,8 +38,9 @@ using namespace Ipopt;
  * Iptopt-based non-linear optimizer in case of support
  * function estimation.
  */
-class IpoptSupportFunctionEstimator : public TNLP,
-									  public SupportFunctionEstimator
+class IpoptSupportFunctionEstimator:
+	public TNLP,
+	public SupportFunctionEstimator
 {
 private:
 	/** Number of regular variables: */
@@ -58,7 +59,6 @@ private:
 	VectorXd solution;
 
 	const char *linearSolver_;
-
 public:
 	/**
 	 * Default constructor
@@ -66,7 +66,7 @@ public:
 	 * @param data	Support function estimation data (input)
 	 */
 	IpoptSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
-								  const char *linearSolver);
+			const char *linearSolver);
 
 	/** Default destructor. */
 	~IpoptSupportFunctionEstimator();
@@ -96,8 +96,8 @@ public:
 	 *
 	 * @return Always true.
 	 */
-	virtual bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g,
-							  Index &nnz_h_lag, IndexStyleEnum &index_style);
+	virtual bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
+			Index& nnz_h_lag, IndexStyleEnum& index_style);
 
 	/**
 	 * Gives Ipopt the value of the bounds on the variables and constraints.
@@ -113,8 +113,8 @@ public:
 	 *
 	 * @return		Always true.
 	 */
-	virtual bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
-								 Number *g_l, Number *g_u);
+	virtual bool get_bounds_info(Index n, Number* x_l, Number* x_u, Index m,
+			Number* g_l, Number* g_u);
 
 	/**
 	 * Gives Ipopt the starting point before it begins iterating.
@@ -141,9 +141,9 @@ public:
 	 *
 	 * @return		Always true.
 	 */
-	virtual bool get_starting_point(Index n, bool init_x, Number *x,
-									bool init_z, Number *z_L, Number *z_U,
-									Index m, bool init_lambda, Number *lambda);
+	virtual bool get_starting_point(Index n, bool init_x, Number* x,
+			bool init_z, Number* z_L, Number* z_U, Index m,
+			bool init_lambda, Number* lambda);
 
 	/**
 	 * Returns the value of the objective function at the point x.
@@ -159,8 +159,8 @@ public:
 	 *
 	 * @return		Always true.
 	 */
-	virtual bool eval_f(Index n, const Number *x, bool new_x,
-						Number &obj_value);
+	virtual bool eval_f(Index n, const Number* x, bool new_x,
+			Number& obj_value);
 
 	/**
 	 * Returns the gradient of the objective function at the point x.
@@ -177,8 +177,8 @@ public:
 	 *
 	 * @return		Always true.
 	 */
-	virtual bool eval_grad_f(Index n, const Number *x, bool new_x,
-							 Number *grad_f);
+	virtual bool eval_grad_f(Index n, const Number* x, bool new_x,
+			Number* grad_f);
 
 	/**
 	 * Returns the value of the constraint function at the point x.
@@ -198,8 +198,8 @@ public:
 	 *
 	 * @return		Always true.
 	 */
-	virtual bool eval_g(Index n, const Number *x, bool new_x, Index m,
-						Number *g);
+	virtual bool eval_g(Index n, const Number* x, bool new_x, Index m,
+			Number* g);
 
 	/**
 	 * Returns either the sparsity structure of the Jacobian of the
@@ -227,9 +227,9 @@ public:
 	 *
 	 * @return 		Always true.
 	 */
-	virtual bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
-							Index n_ele_jac, Index *iRow, Index *jCol,
-							Number *values);
+	virtual bool eval_jac_g(Index n, const Number* x, bool new_x, Index m,
+			Index n_ele_jac, Index* iRow, Index *jCol,
+			Number* values);
 
 	/**
 	 * Returns either the sparsity structure of the Hessian of the
@@ -262,10 +262,10 @@ public:
 	 *
 	 * @return 		Always true.
 	 */
-	virtual bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
-						Index m, const Number *lambda, bool new_lambda,
-						Index n_ele_hess, Index *iRow, Index *jCol,
-						Number *values);
+	virtual bool eval_h(Index n, const Number* x, bool new_x,
+			Number obj_factor, Index m, const Number* lambda,
+			bool new_lambda, Index n_ele_hess, Index* iRow,
+			Index* jCol, Number* values);
 
 	/**
 	 * This method is called by Ipopt after the algorithm has finished
@@ -292,11 +292,10 @@ public:
 	 * @return		Always true.
 	 */
 	virtual void finalize_solution(SolverReturn status, Index n,
-								   const Number *x, const Number *z_L,
-								   const Number *z_U, Index m, const Number *g,
-								   const Number *lambda, Number obj_value,
-								   const IpoptData *ip_data,
-								   IpoptCalculatedQuantities *ip_cq);
+			const Number* x, const Number* z_L, const Number* z_U,
+			Index m, const Number* g, const Number* lambda,
+			Number obj_value, const IpoptData* ip_data,
+			IpoptCalculatedQuantities* ip_cq);
 
 	/**
 	 * Runs the Ipopt algorithm.
@@ -308,3 +307,4 @@ public:
 
 #endif /* IPOPTSUPPORTFUNCTIONESTIMATOR_H_ */
 #endif /* USE_IPOPT */
+

@@ -24,12 +24,12 @@
  * Kiderlen (implementation).
  */
 
-#include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
-#include "DebugAssert.h"
 #include "DebugPrint.h"
+#include "DebugAssert.h"
+#include "DataContainers/SupportFunctionEstimationData/GardnerKiderlenSupportMatrix.h"
 
-GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(
-	long int numRows, long int numColumns) :
+GardnerKiderlenSupportMatrix::GardnerKiderlenSupportMatrix(long int numRows,
+		long int numColumns) :
 	SupportMatrix(numRows, numColumns)
 {
 	DEBUG_START;
@@ -43,7 +43,7 @@ GardnerKiderlenSupportMatrix::~GardnerKiderlenSupportMatrix()
 }
 
 static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
-						 int &iCondition, int i, int j, Vector3d direction)
+		int &iCondition, int i, int j, Vector3d direction)
 {
 	DEBUG_START;
 	if (i == j)
@@ -53,29 +53,32 @@ static void addCondition(std::vector<Eigen::Triplet<double>> &triplets,
 	}
 	DEBUG_PRINT("Adding condition (%d, %d)", i, j);
 
-	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i, direction.x));
-	triplets.push_back(
-		Eigen::Triplet<double>(iCondition, 3 * i + 1, direction.y));
-	triplets.push_back(
-		Eigen::Triplet<double>(iCondition, 3 * i + 2, direction.z));
-	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j, -direction.x));
-	triplets.push_back(
-		Eigen::Triplet<double>(iCondition, 3 * j + 1, -direction.y));
-	triplets.push_back(
-		Eigen::Triplet<double>(iCondition, 3 * j + 2, -direction.z));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i,
+				direction.x));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i + 1,
+				direction.y));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * i + 2,
+				direction.z));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j,
+				-direction.x));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j + 1,
+				-direction.y));
+	triplets.push_back(Eigen::Triplet<double>(iCondition, 3 * j + 2,
+				-direction.z));
 	++iCondition;
 	DEBUG_END;
 }
 
-GardnerKiderlenSupportMatrix *
-constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data)
+
+GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(
+		SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	long int numDirections = data->size();
 	long int numValues = 3 * numDirections;
 	long int numConditions = numDirections * numDirections - numDirections;
-	GardnerKiderlenSupportMatrix *matrix =
-		new GardnerKiderlenSupportMatrix(numConditions, numValues);
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			numConditions, numValues);
 
 	auto directions = data->supportDirections<Vector3d>();
 
@@ -90,7 +93,7 @@ constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data)
 	}
 	DEBUG_PRINT("triplets.size() = %ld", triplets.size());
 	DEBUG_PRINT("numConditions = %ld", numConditions);
-	ASSERT(triplets.size() == 6 * (unsigned)numConditions);
+	ASSERT(triplets.size() == 6 * (unsigned) numConditions);
 	matrix->setFromTriplets(triplets.begin(), triplets.end());
 	DEBUG_END;
 	return matrix;
@@ -99,7 +102,8 @@ constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data)
 double GardnerKiderlenSupportMatrix::epsilonFactor = 1.;
 
 GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-	SupportFunctionDataPtr data, double epsilon, bool ifShadowHeuristics)
+		SupportFunctionDataPtr data, double epsilon,
+		bool ifShadowHeuristics)
 {
 	DEBUG_START;
 	std::cout << "epsilon = " << epsilon << std::endl;
@@ -131,17 +135,20 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 			Segment query(pointsLower[i], pointsLower[j]);
 
 			bool success = false;
-			if (ifShadowHeuristics)
-			{
+			if (ifShadowHeuristics) {
 				int iNext = (*data)[i].info->iNext;
 				int jNext = (*data)[j].info->iNext;
 				Segment query0(pointsLower[i], pointsLower[j]);
-				Segment query1(pointsLower[i], pointsLower[jNext]);
-				Segment query2(pointsLower[iNext], pointsLower[j]);
-				Segment query3(pointsLower[iNext], pointsLower[jNext]);
-				success =
-					!tree.do_intersect(query0) && !tree.do_intersect(query1) &&
-					!tree.do_intersect(query2) && !tree.do_intersect(query3);
+				Segment query1(pointsLower[i],
+						pointsLower[jNext]);
+				Segment query2(pointsLower[iNext],
+						pointsLower[j]);
+				Segment query3(pointsLower[iNext],
+						pointsLower[jNext]);
+				success = !tree.do_intersect(query0)
+					&& !tree.do_intersect(query1)
+					&& !tree.do_intersect(query2)
+					&& !tree.do_intersect(query3);
 				if (success)
 				{
 					flags.push_back(iNext == j);
@@ -157,8 +164,10 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 			if (success)
 			{
 
-				addCondition(triplets, iCondition, i, j, directions[i]);
-				addCondition(triplets, iCondition, j, i, directions[j]);
+				addCondition(triplets, iCondition, i, j,
+						directions[i]);
+				addCondition(triplets, iCondition, j, i,
+						directions[j]);
 				++numConditionsForOne;
 			}
 			else
@@ -166,20 +175,19 @@ GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
 				++numSkipped;
 			}
 		}
-		DEBUG_PRINT("Conditions for %d-th point: %d\n", i, numConditionsForOne);
+		DEBUG_PRINT("Conditions for %d-th point: %d\n", i,
+				numConditionsForOne);
 	}
 	long int numValues = 3 * numDirections;
 	long int numConditions = triplets.size() / 6;
-	ALWAYS_PRINT(stdout,
-				 "Number of skipped constraints: %d (%lf from "
-				 "total %ld)\n",
-				 numSkipped,
-				 ((double)numSkipped) / (numSkipped + numConditions),
-				 numSkipped + numConditions);
+	ALWAYS_PRINT(stdout, "Number of skipped constraints: %d (%lf from "
+			"total %ld)\n", numSkipped,
+			((double) numSkipped) / (numSkipped + numConditions),
+			numSkipped + numConditions);
 	ALWAYS_PRINT(stdout, "Number of conditions: %ld\n", numConditions);
 
-	GardnerKiderlenSupportMatrix *matrix =
-		new GardnerKiderlenSupportMatrix(numConditions, numValues);
+	GardnerKiderlenSupportMatrix *matrix = new GardnerKiderlenSupportMatrix(
+			numConditions, numValues);
 	if (ifShadowHeuristics)
 		matrix->setFlags(flags);
 
