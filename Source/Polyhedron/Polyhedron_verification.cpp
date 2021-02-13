@@ -18,11 +18,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Verifier/Verifier.h"
-#include "Polyhedron/Facet/Facet.h"
 
 int Polyhedron::test_structure()
 {
@@ -43,7 +43,7 @@ int Polyhedron::test_structure()
 int Polyhedron::countConsections(bool ifPrint)
 {
 	DEBUG_START;
-	Verifier* verifier = new Verifier(get_ptr(), ifPrint);
+	Verifier *verifier = new Verifier(get_ptr(), ifPrint);
 	int numConsections = verifier->countConsections();
 	delete verifier;
 	DEBUG_END;
@@ -53,7 +53,7 @@ int Polyhedron::countConsections(bool ifPrint)
 int Polyhedron::checkEdges(EdgeDataPtr edgeData)
 {
 	DEBUG_START;
-	Verifier* verifier = new Verifier(get_ptr());
+	Verifier *verifier = new Verifier(get_ptr());
 	int numEdgesDestructed = verifier->checkEdges(edgeData);
 	delete verifier;
 	DEBUG_END;

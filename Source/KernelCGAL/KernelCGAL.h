@@ -29,9 +29,9 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 typedef CGAL::Exact_predicates_inexact_constructions_kernel Kernel;
 
-#include "KernelCGAL/Vector_3.h"
-#include "KernelCGAL/Point_3.h"
 #include "KernelCGAL/Plane_3.h"
+#include "KernelCGAL/Point_3.h"
+#include "KernelCGAL/Vector_3.h"
 
 typedef Kernel::Segment_3 Segment_3;
 typedef Kernel::Line_3 Line_3;

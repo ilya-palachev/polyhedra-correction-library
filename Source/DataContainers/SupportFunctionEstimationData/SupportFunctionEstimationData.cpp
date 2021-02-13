@@ -25,9 +25,9 @@
  * - implementation.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
 #include "DataContainers/SupportFunctionEstimationData/SupportFunctionEstimationData.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
 /** The theory works only when number of measurements is >= 5 */
 #define MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS 5
@@ -78,13 +78,12 @@ SupportFunctionEstimationData::SupportFunctionEstimationData(
 	DEBUG_START;
 	if (supportMatrix.nonZeros() > 0)
 	{
-		ASSERT(numValues_
-			>= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
+		ASSERT(numValues_ >= MINIMAL_NUMBER_OF_SUPPORT_FUNCTION_MEASUREMENTS);
 		ASSERT(supportMatrix_.rows() == numConditions_);
 		ASSERT(supportMatrix_.cols() == numValues_);
 		ASSERT(numValues_ == 3 * supportVector_.rows());
 		ASSERT(numValues_ == startingVector_.rows());
-		ASSERT(numValues_ == 3 * (int) supportDirections_.size());
+		ASSERT(numValues_ == 3 * (int)supportDirections_.size());
 	}
 	/*
 	 * TODO: Check also that number of conditions (i. e. number of edges in the

@@ -1,35 +1,36 @@
 #ifndef MYPOINTC2_IOSTREAM_H
 #define MYPOINTC2_IOSTREAM_H
 
-#include <iostream>
 #include "PCLKernel/PCLPoint_2.h"
+#include <iostream>
 
-std::ostream &
-operator<<(std::ostream &os, const PCLPoint_2 &p)
+std::ostream &operator<<(std::ostream &os, const PCLPoint_2 &p)
 {
-	switch(os.iword(CGAL::get_mode(os))) {
-	case CGAL::IO::ASCII :
+	switch (os.iword(CGAL::get_mode(os)))
+	{
+	case CGAL::IO::ASCII:
 		return os << p.x() << ' ' << p.y() << ' ' << p.id();
-	case CGAL::IO::BINARY :
+	case CGAL::IO::BINARY:
 		CGAL::write(os, p.x());
 		CGAL::write(os, p.y());
 		CGAL::write(os, p.id());
 		return os;
 	default:
-		return os << "PCLPoint_2(" << p.x() << ", " << p.y() << ", " << p.id() << ')';
+		return os << "PCLPoint_2(" << p.x() << ", " << p.y() << ", " << p.id()
+				  << ')';
 	}
 }
 
-std::istream &
-operator>>(std::istream &is, PCLPoint_2 &p)
+std::istream &operator>>(std::istream &is, PCLPoint_2 &p)
 {
 	double x, y;
 	int id;
-	switch(is.iword(CGAL::get_mode(is))) {
-	case CGAL::IO::ASCII :
+	switch (is.iword(CGAL::get_mode(is)))
+	{
+	case CGAL::IO::ASCII:
 		is >> x >> y >> id;
 		break;
-	case CGAL::IO::BINARY :
+	case CGAL::IO::BINARY:
 		CGAL::read(is, x);
 		CGAL::read(is, y);
 		CGAL::read(is, id);
@@ -39,10 +40,11 @@ operator>>(std::istream &is, PCLPoint_2 &p)
 		std::cerr << "Stream must be in ascii or binary mode" << std::endl;
 		break;
 	}
-	if (is) {
+	if (is)
+	{
 		p = PCLPoint_2(x, y, id);
 	}
 	return is;
 }
 
-#endif //MYPOINTC2_IOSTREAM_H
+#endif // MYPOINTC2_IOSTREAM_H

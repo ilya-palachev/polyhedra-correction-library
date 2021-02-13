@@ -26,8 +26,8 @@
 
 #ifdef USE_GLPK
 
-#include <glpk.h>
 #include "Recoverer/SupportFunctionEstimator.h"
+#include <glpk.h>
 
 #ifndef GLPKSUPPORTFUNCTIONESTIMATOR_H_
 #define GLPKSUPPORTFUNCTIONESTIMATOR_H_
@@ -35,8 +35,7 @@
 /**
  * Glpk-based linear programming solver used for support function estimation.
  */
-class GlpkSupportFunctionEstimator:
-	public SupportFunctionEstimator
+class GlpkSupportFunctionEstimator : public SupportFunctionEstimator
 {
 public:
 	/**
@@ -59,4 +58,3 @@ public:
 
 #endif /* GLPKSUPPORTFUNCTIONESTIMATOR_H_ */
 #endif /* USE_GLPK*/
-

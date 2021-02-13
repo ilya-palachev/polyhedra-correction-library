@@ -29,8 +29,8 @@
 #define PCL_DUMPER
 
 #include <fstream>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <string>
 
 #include "DebugPrint.h"
@@ -39,8 +39,8 @@
 enum PCLDumperLevel
 {
 	PCL_DUMPER_LEVEL_ZERO,	/**< Dumping is not set. */
-	PCL_DUMPER_LEVEL_DEBUG,	/**< Debug level. */
-	PCL_DUMPER_LEVEL_OUTPUT	/**< Output level, always dumped. */
+	PCL_DUMPER_LEVEL_DEBUG, /**< Debug level. */
+	PCL_DUMPER_LEVEL_OUTPUT /**< Output level, always dumped. */
 };
 
 /**
@@ -80,17 +80,15 @@ public:
 	 *
 	 * @return 		The dumper is not ready for printing.
 	 */
-	template<typename TPrintable>
-	friend PCLDumper &operator<<(PCLDumper &dumper,
-		TPrintable object)
+	template <typename TPrintable>
+	friend PCLDumper &operator<<(PCLDumper &dumper, TPrintable object)
 	{
 		DEBUG_START;
 		std::ofstream stream;
 		std::stringstream count;
-		count << std::setfill('0') << std::setw(3)
-			<< dumper.iCurrentDumpCount_;
-		std::string filename = dumper.nameBase_ + "."
-			+ count.str() + "." + dumper.nameSuffix_;
+		count << std::setfill('0') << std::setw(3) << dumper.iCurrentDumpCount_;
+		std::string filename =
+			dumper.nameBase_ + "." + count.str() + "." + dumper.nameSuffix_;
 		DEBUG_PRINT("file name = %s", filename.c_str());
 		stream.open(filename, std::ofstream::out);
 
@@ -104,16 +102,14 @@ public:
 			DEBUG_PRINT("PCL_DUMPER_LEVEL_DEBUG");
 			if (dumper.ifVerbose_)
 			{
-				std::cerr << "Dumping to file " << filename
-					<< std::endl;
+				std::cerr << "Dumping to file " << filename << std::endl;
 				stream << object;
 				std::cerr << "...dumping done" << std::endl;
 			}
 			break;
 		case PCL_DUMPER_LEVEL_OUTPUT:
 			DEBUG_PRINT("PCL_DUMPER_LEVEL_OUTPUT");
-			std::cerr << "Dumping to file " << filename
-				<< std::endl;
+			std::cerr << "Dumping to file " << filename << std::endl;
 			stream << object;
 			std::cerr << "...dumping done" << std::endl;
 			break;

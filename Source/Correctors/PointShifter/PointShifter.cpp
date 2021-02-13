@@ -18,57 +18,30 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "Gauss_string.h"
 #include "Correctors/PointShifter/PointShifter.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "Gauss_string.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 
 PointShifter::PointShifter() :
-		PCorrector(),
-		x(),
-		x1(),
-		fx(),
-		A(),
-		sum(),
-		tmp0(),
-		tmp1(),
-		tmp2(),
-		tmp3()
+	PCorrector(), x(), x1(), fx(), A(), sum(), tmp0(), tmp1(), tmp2(), tmp3()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 PointShifter::PointShifter(PolyhedronPtr p) :
-		PCorrector(p),
-		x(),
-		x1(),
-		fx(),
-		A(),
-		sum(),
-		tmp0(),
-		tmp1(),
-		tmp2(),
-		tmp3()
+	PCorrector(p), x(), x1(), fx(), A(), sum(), tmp0(), tmp1(), tmp2(), tmp3()
 {
 	DEBUG_START;
 	init();
 	DEBUG_END;
 }
 
-PointShifter::PointShifter(Polyhedron* p) :
-		PCorrector(p),
-		x(),
-		x1(),
-		fx(),
-		A(),
-		sum(),
-		tmp0(),
-		tmp1(),
-		tmp2(),
-		tmp3()
+PointShifter::PointShifter(Polyhedron *p) :
+	PCorrector(p), x(), x1(), fx(), A(), sum(), tmp0(), tmp1(), tmp2(), tmp3()
 {
 	DEBUG_START;
 	init();
@@ -172,7 +145,8 @@ PointShifter::~PointShifter()
 #define ny(i) (4 * polyhedron->numFacets + 3 * (i - (i > id)) + 1)
 #define nz(i) (4 * polyhedron->numFacets + 3 * (i - (i > id)) + 2)
 
-#define nl(i) (4 * polyhedron->numFacets + 3  * (polyhedron->numVertices - 1) + (i))
+#define nl(i)                                                                  \
+	(4 * polyhedron->numFacets + 3 * (polyhedron->numVertices - 1) + (i))
 
 #define a(i) x[na(i)]
 #define b(i) x[nb(i)]
@@ -183,13 +157,13 @@ PointShifter::~PointShifter()
 #define z(i) x[nz(i)]
 #define l(i) x[nl(i)]
 
-double norm_vector(int n, double* a);
+double norm_vector(int n, double *a);
 
-void print_matrix(FILE* file, int n, int m, double* A);
+void print_matrix(FILE *file, int n, int m, double *A);
 
-void print_matrix_bool(FILE* file, int n, int m, bool* A);
+void print_matrix_bool(FILE *file, int n, int m, bool *A);
 
-void print_vector(int n, double* v);
+void print_vector(int n, double *v);
 
 void PointShifter::run(int id, Vector3d delta)
 {
@@ -202,14 +176,14 @@ void PointShifter::run(int id, Vector3d delta)
 	DEBUG_VARIABLE double xx, yy, zz;
 	DEBUG_VARIABLE double a, b, c, d;
 	DEBUG_VARIABLE int step = 0;
-	
+
 	for (int j = 0; j < polyhedron->numFacets; ++j)
 	{
 		a = polyhedron->facets[j].plane.norm.x;
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		int* index = polyhedron->facets[j].indVertices;
+		int *index = polyhedron->facets[j].indVertices;
 		int nv = polyhedron->facets[j].numVertices;
 		for (int i = 0; i < nv; ++i)
 		{
@@ -217,7 +191,7 @@ void PointShifter::run(int id, Vector3d delta)
 			yy = polyhedron->vertices[index[i]].y;
 			zz = polyhedron->vertices[index[i]].z;
 			DEBUG_PRINT("v%d -> f%d : %lf", index[i], j,
-					a * xx + b * yy + c * zz + d);
+						a * xx + b * yy + c * zz + d);
 		}
 	}
 
@@ -297,7 +271,7 @@ void PointShifter::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		int* index = polyhedron->facets[j].indVertices;
+		int *index = polyhedron->facets[j].indVertices;
 		int nv = polyhedron->facets[j].numVertices;
 		for (int i = 0; i < nv; ++i)
 		{
@@ -305,13 +279,13 @@ void PointShifter::run(int id, Vector3d delta)
 			yy = polyhedron->vertices[index[i]].y;
 			zz = polyhedron->vertices[index[i]].z;
 			DEBUG_PRINT("v%d -> f%d : %lf", index[i], j,
-					a * xx + b * yy + c * zz + d);
+						a * xx + b * yy + c * zz + d);
 		}
 	}
 	DEBUG_END;
 }
 
-double norm_vector(int n, double* a)
+double norm_vector(int n, double *a)
 {
 	DEBUG_START;
 	int i;
@@ -327,7 +301,7 @@ double norm_vector(int n, double* a)
 	return max;
 }
 
-void print_matrix(FILE* file, int n, int m, double* A)
+void print_matrix(FILE *file, int n, int m, double *A)
 {
 	DEBUG_START;
 	int i, j;
@@ -365,7 +339,7 @@ void print_matrix(FILE* file, int n, int m, double* A)
 	DEBUG_END;
 }
 
-void print_matrix_bool(FILE* file, int n, int m, bool* A)
+void print_matrix_bool(FILE *file, int n, int m, bool *A)
 {
 	DEBUG_START;
 	int i, j;
@@ -396,7 +370,7 @@ void print_matrix_bool(FILE* file, int n, int m, bool* A)
 	DEBUG_END;
 }
 
-void print_vector(int n, double* v)
+void print_vector(int n, double *v)
 {
 	DEBUG_START;
 	int i;
@@ -404,7 +378,6 @@ void print_vector(int n, double* v)
 		DEBUG_PRINT("\t%lf", v[i]);
 	DEBUG_END;
 }
-
 
 void PointShifter::calculateFunctional()
 {
@@ -424,21 +397,27 @@ void PointShifter::calculateFunctional()
 		{
 			if (index[i] == id)
 			{
-				fx[k] = (polyhedron->vertices[index[i]].x) * (plane.norm.x + a(j));
-				fx[k] += (polyhedron->vertices[index[i]].y) * (plane.norm.y + b(j));
-				fx[k] += (polyhedron->vertices[index[i]].z) * (plane.norm.z + c(j));
+				fx[k] =
+					(polyhedron->vertices[index[i]].x) * (plane.norm.x + a(j));
+				fx[k] +=
+					(polyhedron->vertices[index[i]].y) * (plane.norm.y + b(j));
+				fx[k] +=
+					(polyhedron->vertices[index[i]].z) * (plane.norm.z + c(j));
 				fx[k] += plane.dist + d(j);
-					}
-					else
-					{
-						fx[k] = (polyhedron->vertices[index[i]].x + x(index[i])) * (plane.norm.x + a(j));
-                fx[k] += (polyhedron->vertices[index[i]].y + y(index[i])) * (plane.norm.y + b(j));
-                fx[k] += (polyhedron->vertices[index[i]].z + z(index[i])) * (plane.norm.z + c(j));
-                fx[k] += plane.dist + d(j);
-            }
-				++k;
 			}
+			else
+			{
+				fx[k] = (polyhedron->vertices[index[i]].x + x(index[i])) *
+						(plane.norm.x + a(j));
+				fx[k] += (polyhedron->vertices[index[i]].y + y(index[i])) *
+						 (plane.norm.y + b(j));
+				fx[k] += (polyhedron->vertices[index[i]].z + z(index[i])) *
+						 (plane.norm.z + c(j));
+				fx[k] += plane.dist + d(j);
+			}
+			++k;
 		}
+	}
 
 	for (i = 0; i < polyhedron->numVertices; ++i)
 	{
@@ -457,9 +436,12 @@ void PointShifter::calculateFunctional()
 		{
 			p = index[j];
 			m = polyhedron->facets[p].find_vertex(i);
-			fx[k] -= l(m + sum[p])* (polyhedron->facets[p].plane.norm.x + a(p));
-			fx[k + 1] -= l(m + sum[p])* (polyhedron->facets[p].plane.norm.y + b(p));
-			fx[k + 2] -= l(m + sum[p])* (polyhedron->facets[p].plane.norm.z + c(p));
+			fx[k] -=
+				l(m + sum[p]) * (polyhedron->facets[p].plane.norm.x + a(p));
+			fx[k + 1] -=
+				l(m + sum[p]) * (polyhedron->facets[p].plane.norm.y + b(p));
+			fx[k + 2] -=
+				l(m + sum[p]) * (polyhedron->facets[p].plane.norm.z + c(p));
 		}
 		k += 3;
 	}
@@ -479,16 +461,19 @@ void PointShifter::calculateFunctional()
 		{
 			if (index[i] == id)
 			{
-				fx[k ] -= l(sum[j] + i) * polyhedron->vertices[index[i]].x;
+				fx[k] -= l(sum[j] + i) * polyhedron->vertices[index[i]].x;
 				fx[k + 1] -= l(sum[j] + i) * polyhedron->vertices[index[i]].y;
 				fx[k + 2] -= l(sum[j] + i) * polyhedron->vertices[index[i]].z;
 				fx[k + 3] -= l(sum[j] + i);
 			}
 			else
 			{
-				fx[k ] -= l(sum[j] + i) * (polyhedron->vertices[index[i]].x + x(index[i]));
-				fx[k + 1] -= l(sum[j] + i) * (polyhedron->vertices[index[i]].y + y(index[i]));
-				fx[k + 2] -= l(sum[j] + i) * (polyhedron->vertices[index[i]].z + z(index[i]));
+				fx[k] -= l(sum[j] + i) *
+						 (polyhedron->vertices[index[i]].x + x(index[i]));
+				fx[k + 1] -= l(sum[j] + i) *
+							 (polyhedron->vertices[index[i]].y + y(index[i]));
+				fx[k + 2] -= l(sum[j] + i) *
+							 (polyhedron->vertices[index[i]].z + z(index[i]));
 				fx[k + 3] -= l(sum[j] + i);
 			}
 		}
@@ -530,9 +515,12 @@ void PointShifter::calculateFunctionalDerivative()
 			}
 			else
 			{
-				A[k * n + na(j)] = polyhedron->vertices[index[i]].x + x(index[i]);
-				A[k * n + nb(j)] = polyhedron->vertices[index[i]].y + y(index[i]);
-				A[k * n + nc(j)] = polyhedron->vertices[index[i]].z + z(index[i]);
+				A[k * n + na(j)] =
+					polyhedron->vertices[index[i]].x + x(index[i]);
+				A[k * n + nb(j)] =
+					polyhedron->vertices[index[i]].y + y(index[i]);
+				A[k * n + nc(j)] =
+					polyhedron->vertices[index[i]].z + z(index[i]);
 				A[k * n + nd(j)] = 1.;
 				A[k * n + nx(index[i])] = plane.norm.x + a(j);
 				A[k * n + ny(index[i])] = plane.norm.y + b(j);
@@ -559,7 +547,7 @@ void PointShifter::calculateFunctionalDerivative()
 		{
 			p = index[j];
 			m = polyhedron->facets[p].find_vertex(i) + sum[p];
-//            m = index[2 * j + 1] + sum[p];
+			//            m = index[2 * j + 1] + sum[p];
 			A[k * n + na(p)] = -l(m);
 			A[k * n + nl(m)] = -polyhedron->facets[p].plane.norm.x - a(p);
 			A[(k + 1) * n + nb(p)] = -l(m);
@@ -586,18 +574,23 @@ void PointShifter::calculateFunctionalDerivative()
 			if (index[i] == id)
 			{
 				A[k * n + nl(sum[j] + i)] = -polyhedron->vertices[index[i]].x;
-				A[(k + 1) * n + nl(sum[j] + i)] = -polyhedron->vertices[index[i]].y;
-				A[(k + 2) * n + nl(sum[j] + i)] = -polyhedron->vertices[index[i]].z;
+				A[(k + 1) * n + nl(sum[j] + i)] =
+					-polyhedron->vertices[index[i]].y;
+				A[(k + 2) * n + nl(sum[j] + i)] =
+					-polyhedron->vertices[index[i]].z;
 				A[(k + 3) * n + nl(sum[j] + i)] = -1.;
 			}
 			else
 			{
 				A[k * n + nx(index[i])] = -l(sum[j] + i);
-				A[k * n + nl(sum[j] + i)] = - (polyhedron->vertices[index[i]].x + x(index[i]));
-				A[(k + 1) * n + ny(index[i])] = - l(sum[j] + i);
-				A[(k + 1) * n + nl(sum[j] + i)] = - (polyhedron->vertices[index[i]].y + y(index[i]));
-				A[(k + 2) * n + nz(index[i])] = - l(sum[j] + i);
-				A[(k + 2) * n + nl(sum[j] + i)] = - (polyhedron->vertices[index[i]].z + z(index[i]));
+				A[k * n + nl(sum[j] + i)] =
+					-(polyhedron->vertices[index[i]].x + x(index[i]));
+				A[(k + 1) * n + ny(index[i])] = -l(sum[j] + i);
+				A[(k + 1) * n + nl(sum[j] + i)] =
+					-(polyhedron->vertices[index[i]].y + y(index[i]));
+				A[(k + 2) * n + nz(index[i])] = -l(sum[j] + i);
+				A[(k + 2) * n + nl(sum[j] + i)] =
+					-(polyhedron->vertices[index[i]].z + z(index[i]));
 				A[(k + 3) * n + nl(sum[j] + i)] = -1.;
 			}
 		}

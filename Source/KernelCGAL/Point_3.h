@@ -31,20 +31,24 @@
 /**
  * CGAL Point_3 class with PCL extensions
  */
-class Point_3: public Kernel::Point_3
+class Point_3 : public Kernel::Point_3
 {
 public:
 	/**
 	 * Constructs zero CGAL point from nothing.
 	 */
-	Point_3(): Kernel::Point_3() {}
+	Point_3() : Kernel::Point_3()
+	{
+	}
 
 	/**
 	 * Constructs CGAL point from PCL vector.
 	 *
 	 * @param v	The PCL vector.
 	 */
-	Point_3(const Vector3d &v): Kernel::Point_3(v.x, v.y, v.z) {}
+	Point_3(const Vector3d &v) : Kernel::Point_3(v.x, v.y, v.z)
+	{
+	}
 
 	/**
 	 * Constructs CGAL point from 3 coordinates.
@@ -53,16 +57,18 @@ public:
 	 * @param y	The Y coordinate
 	 * @param z	The Z coordinate
 	 */
-	Point_3(double x, double y, double z):
-		Kernel::Point_3(x, y, z) {}
+	Point_3(double x, double y, double z) : Kernel::Point_3(x, y, z)
+	{
+	}
 
 	/**
 	 * Constructs point from another point.
 	 *
 	 * @param p	The original point
 	 */
-	Point_3(const Kernel::Point_3 &p):
-		Kernel::Point_3(p) {}
+	Point_3(const Kernel::Point_3 &p) : Kernel::Point_3(p)
+	{
+	}
 
 	/**
 	 * Calculates the squared length of the vector with source at the origin

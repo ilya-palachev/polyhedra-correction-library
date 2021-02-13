@@ -21,23 +21,21 @@
 #include <cmath>
 #include <set>
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "Constants.h"
-#include "LeastSquaresMethod.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
+#include "Constants.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "LeastSquaresMethod.h"
 #include "Polyhedron/Facet/Facet.h"
 
-SizeCalculator::SizeCalculator() :
-		PAnalyzer()
+SizeCalculator::SizeCalculator() : PAnalyzer()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SizeCalculator::SizeCalculator(PolyhedronPtr p) :
-		PAnalyzer(p)
+SizeCalculator::SizeCalculator(PolyhedronPtr p) : PAnalyzer(p)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -189,8 +187,8 @@ double SizeCalculator::areaOfFacet(int iFacet)
 	return polyhedron->facets[iFacet].area();
 }
 
-void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
-		double& Jyz, double& Jxz)
+void SizeCalculator::J(double &Jxx, double &Jyy, double &Jzz, double &Jxy,
+					   double &Jyz, double &Jxz)
 {
 	DEBUG_START;
 	int i, j, *index, nv;
@@ -325,13 +323,12 @@ void SizeCalculator::J(double& Jxx, double& Jyy, double& Jzz, double& Jxy,
 			Jxy += Jxy_loc;
 			Jyz += Jyz_loc;
 			Jxz += Jxz_loc;
-
 		}
 	}
 	DEBUG_END;
 }
 
-void SizeCalculator::get_center(double& xc, double& yc, double& zc)
+void SizeCalculator::get_center(double &xc, double &yc, double &zc)
 {
 	DEBUG_START;
 
@@ -410,19 +407,19 @@ void SizeCalculator::get_center(double& xc, double& yc, double& zc)
 	DEBUG_END;
 }
 
-void SizeCalculator::inertia(double& l0, double& l1, double& l2, Vector3d& v0,
-		Vector3d& v1, Vector3d& v2)
+void SizeCalculator::inertia(double &l0, double &l1, double &l2, Vector3d &v0,
+							 Vector3d &v1, Vector3d &v2)
 {
 	DEBUG_START;
 
 	double **JJ, **v, *l;
 
-	JJ = new double*[3];
+	JJ = new double *[3];
 	JJ[0] = new double[3];
 	JJ[1] = new double[3];
 	JJ[2] = new double[3];
 
-	v = new double*[3];
+	v = new double *[3];
 	v[0] = new double[3];
 	v[1] = new double[3];
 	v[2] = new double[3];
@@ -469,39 +466,37 @@ void SizeCalculator::printSortedByAreaFacets(void)
 {
 	DEBUG_START;
 
-	std::list< FacetWithArea > listFacetsSorted = getSortedByAreaFacets();
-	for (auto itFacet = listFacetsSorted.begin(); itFacet !=
-		listFacetsSorted.end(); ++itFacet)
+	std::list<FacetWithArea> listFacetsSorted = getSortedByAreaFacets();
+	for (auto itFacet = listFacetsSorted.begin();
+		 itFacet != listFacetsSorted.end(); ++itFacet)
 	{
 		PRINT("area of facet #%d = %lf", itFacet->facet->get_id(),
-			itFacet->area);
+			  itFacet->area);
 	}
-	
+
 	DEBUG_END;
 }
 
-std::list< FacetWithArea > SizeCalculator::getSortedByAreaFacets (void)
+std::list<FacetWithArea> SizeCalculator::getSortedByAreaFacets(void)
 {
 	DEBUG_START;
-	auto comparer = [](struct FacetWithArea f0, struct FacetWithArea f1)
-	{
+	auto comparer = [](struct FacetWithArea f0, struct FacetWithArea f1) {
 		return f0.area < f1.area;
 	};
 	std::set<FacetWithArea, decltype(comparer)> facetsSorted(comparer);
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		facetsSorted.insert({&polyhedron->facets[iFacet],
-			areaOfFacet(iFacet)});
+		facetsSorted.insert({&polyhedron->facets[iFacet], areaOfFacet(iFacet)});
 	}
 
-	std::list< FacetWithArea > listFacetsSorted;
+	std::list<FacetWithArea> listFacetsSorted;
 	for (auto itFacet = facetsSorted.begin(); itFacet != facetsSorted.end();
 		 ++itFacet)
 	{
 		listFacetsSorted.push_back(*itFacet);
 	}
-	
+
 	DEBUG_END;
 	return listFacetsSorted;
 }
@@ -511,7 +506,7 @@ Vector3d SizeCalculator::calculateFacetCenter(int iFacet)
 	DEBUG_START;
 	Vector3d center;
 	DEBUG_VARIABLE double area =
-			polyhedron->facets[iFacet].calculateAreaAndCenter(center);
+		polyhedron->facets[iFacet].calculateAreaAndCenter(center);
 	DEBUG_END;
 	return center;
 }

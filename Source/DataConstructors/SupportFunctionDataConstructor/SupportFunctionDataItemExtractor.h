@@ -28,8 +28,8 @@
 #define SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_H
 
 #include "Constants.h"
-#include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 #include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 
 /** Extractor of support function data item from given contour side. */
 class SupportFunctionDataItemExtractor

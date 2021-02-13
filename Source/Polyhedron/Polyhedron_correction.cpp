@@ -18,18 +18,19 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "Polyhedron/Polyhedron.h"
 #include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "Polyhedron/Polyhedron.h"
 
 void Polyhedron::correctGlobal(ShadowContourDataPtr contourData,
-		GSCorrectorParameters* parameters, std::list<int>* facetsCorrected)
+							   GSCorrectorParameters *parameters,
+							   std::list<int> *facetsCorrected)
 {
 	DEBUG_START;
 	preprocessAdjacency();
-	GlobalShadowCorrector* gsCorrector = new GlobalShadowCorrector(get_ptr(),
-			contourData, parameters);
+	GlobalShadowCorrector *gsCorrector =
+		new GlobalShadowCorrector(get_ptr(), contourData, parameters);
 	if (facetsCorrected)
 	{
 		gsCorrector->setFacetsCorrected(*facetsCorrected);
@@ -38,4 +39,3 @@ void Polyhedron::correctGlobal(ShadowContourDataPtr contourData,
 	delete gsCorrector;
 	DEBUG_END;
 }
-

@@ -29,11 +29,11 @@
 
 #include <memory>
 #define CGAL_LINKED_WITH_TBB 1
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/AABB_tree.h>
-#include <CGAL/AABB_traits.h>
-#include <CGAL/Polyhedron_3.h>
 #include <CGAL/AABB_face_graph_triangle_primitive.h>
+#include <CGAL/AABB_traits.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/Simple_cartesian.h>
 typedef CGAL::Simple_cartesian<double> K;
 typedef K::Point_3 Point;
 typedef K::Vector_3 Vector;
@@ -60,7 +60,6 @@ typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
 #include "DataContainers/SupportFunctionData/SupportFunctionDataItem.h"
 #include "KernelCGAL/KernelCGAL.h"
 #include "SparseMatrixEigen.h"
-
 
 /** Minimal limit under which support firections are considered to be equal. */
 const double EPS_SUPPORT_DIRECTION_EQUALITY = 1e-15;
@@ -102,8 +101,7 @@ public:
 	 *
 	 * @param itemsGiven	Support function data items.
 	 */
-	SupportFunctionData(
-			const std::vector<SupportFunctionDataItem> itemsGiven);
+	SupportFunctionData(const std::vector<SupportFunctionDataItem> itemsGiven);
 
 	/**
 	 * Reads support support function data from input stream.
@@ -118,7 +116,7 @@ public:
 	 * @param data	The original data.
 	 * @return The assigned data.
 	 */
-	SupportFunctionData &operator= (const SupportFunctionData &data);
+	SupportFunctionData &operator=(const SupportFunctionData &data);
 
 	/** Destructor. */
 	virtual ~SupportFunctionData();
@@ -129,7 +127,7 @@ public:
 	 * @param iPosition	The ID of item that is demanded.
 	 * @return The reference to the demanded item.
 	 */
-	SupportFunctionDataItem &operator[] (const int iPosition);
+	SupportFunctionDataItem &operator[](const int iPosition);
 	/**
 	 * Gets the size of vector fo items.
 	 *
@@ -230,8 +228,7 @@ public:
 	 *
 	 * @return		Duals of shifted support planes.
 	 */
-	std::vector<Point_3> getShiftedDualPoints_3(
-			std::vector<double> epsilons);
+	std::vector<Point_3> getShiftedDualPoints_3(std::vector<double> epsilons);
 
 	/**
 	 * Searches trusted edges that are depicted by support data.

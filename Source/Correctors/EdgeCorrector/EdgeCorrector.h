@@ -25,16 +25,16 @@
 
 #ifndef EDGE_CORRECTOR_H
 #define EDGE_CORRECTOR_H
-#include <coin/IpTNLP.hpp>
-#include "Polyhedron_3/Polyhedron_3.h"
 #include "DataContainers/EdgeInfo/EdgeInfo.h"
+#include "Polyhedron_3/Polyhedron_3.h"
+#include <coin/IpTNLP.hpp>
 
-using Ipopt::TNLP;
 using Ipopt::Index;
+using Ipopt::IpoptCalculatedQuantities;
+using Ipopt::IpoptData;
 using Ipopt::Number;
 using Ipopt::SolverReturn;
-using Ipopt::IpoptData;
-using Ipopt::IpoptCalculatedQuantities;
+using Ipopt::TNLP;
 
 class EdgeCorrector : public TNLP
 {
@@ -43,12 +43,13 @@ class EdgeCorrector : public TNLP
 	const std::vector<EdgeInfo> &edges;
 	std::vector<Segment_3> resultingSegments;
 	std::vector<Plane_3> resultingPlanes;
+
 public:
-	EdgeCorrector(bool doEdgeLengthScaling,
-			const std::vector<Plane_3> &planes,
-			const std::vector<EdgeInfo> &edges):
-		doEdgeLengthScaling(doEdgeLengthScaling), planes(planes),
-		edges(edges) {}
+	EdgeCorrector(bool doEdgeLengthScaling, const std::vector<Plane_3> &planes,
+				  const std::vector<EdgeInfo> &edges) :
+		doEdgeLengthScaling(doEdgeLengthScaling), planes(planes), edges(edges)
+	{
+	}
 
 	std::vector<Segment_3> getResultingSegments()
 	{
@@ -60,37 +61,35 @@ public:
 		return resultingPlanes;
 	}
 
-	bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
-			Index& nnz_h_lag, IndexStyleEnum& index_style);
+	bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag,
+					  IndexStyleEnum &index_style);
 
 	bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
-			Number *g_l, Number *g_u);
+						 Number *g_l, Number *g_u);
 
-	bool get_starting_point(Index n, bool init_x,
-		Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
-		bool init_lambda, Number *lambda);
+	bool get_starting_point(Index n, bool init_x, Number *x, bool init_z,
+							Number *z_L, Number *z_U, Index m, bool init_lambda,
+							Number *lambda);
 
 	bool eval_f(Index n, const Number *x, bool new_x, Number &obj_value);
-
 
 	bool eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f);
 
 	bool eval_g(Index n, const Number *x, bool new_x, Index m, Number *g);
 
 	bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
-			Index nnz_jac_g, Index *iRow, Index *jCol,
-			Number *jacValues);
+					Index nnz_jac_g, Index *iRow, Index *jCol,
+					Number *jacValues);
 
 	bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
-			Index m, const Number *lambda, bool new_lambda,
-			Index nnz_h_lag, Index *iRow, Index *jCol,
-			Number *hValues);
-	
+				Index m, const Number *lambda, bool new_lambda, Index nnz_h_lag,
+				Index *iRow, Index *jCol, Number *hValues);
+
 	void finalize_solution(SolverReturn status, Index n, const Number *x,
-			const Number *z_L, const Number *z_U, Index m,
-			const Number *g, const Number *lambda, Number obj_value,
-			const IpoptData *ip_data,
-			IpoptCalculatedQuantities *ip_cq);
+						   const Number *z_L, const Number *z_U, Index m,
+						   const Number *g, const Number *lambda,
+						   Number obj_value, const IpoptData *ip_data,
+						   IpoptCalculatedQuantities *ip_cq);
 };
 
 #endif /* EDGE_CORRECTOR_H */

@@ -18,18 +18,18 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
 #include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
 FutureFacet::FutureFacet() :
-				id(-1),
-				len(0),
-				nv(0),
-				edge0(NULL),
-				edge1(NULL),
-				src_facet(NULL),
-				id_v_new(NULL)
+	id(-1),
+	len(0),
+	nv(0),
+	edge0(NULL),
+	edge1(NULL),
+	src_facet(NULL),
+	id_v_new(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -62,22 +62,20 @@ FutureFacet::~FutureFacet()
 }
 
 FutureFacet::FutureFacet(int len_orig) :
-				id(-1),
-				len(len_orig),
-				nv(0),
-				edge0(new int[len]),
-				edge1(new int[len]),
-				src_facet(new int[len]),
-				id_v_new(new int[len])
+	id(-1),
+	len(len_orig),
+	nv(0),
+	edge0(new int[len]),
+	edge1(new int[len]),
+	src_facet(new int[len]),
+	id_v_new(new int[len])
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-FutureFacet::FutureFacet(const FutureFacet& orig) :
-				id(orig.id),
-				len(orig.len),
-				nv(orig.nv)
+FutureFacet::FutureFacet(const FutureFacet &orig) :
+	id(orig.id), len(orig.len), nv(orig.nv)
 {
 	DEBUG_START;
 	int i;
@@ -122,7 +120,7 @@ void FutureFacet::add_edge(int v0, int v1, int src_f)
 	DEBUG_END;
 }
 
-FutureFacet& FutureFacet::operator =(const FutureFacet& orig)
+FutureFacet &FutureFacet::operator=(const FutureFacet &orig)
 {
 	DEBUG_START;
 	int i;
@@ -154,7 +152,7 @@ FutureFacet& FutureFacet::operator =(const FutureFacet& orig)
 	return *this;
 }
 
-FutureFacet& FutureFacet::operator +=(const FutureFacet& v)
+FutureFacet &FutureFacet::operator+=(const FutureFacet &v)
 {
 	DEBUG_START;
 	int i, *edge0_new, *edge1_new, *src_facet_new, *id_v_new_new;
@@ -226,7 +224,7 @@ int FutureFacet::get_nv()
 	return nv;
 }
 
-void FutureFacet::get_edge(int pos, int& v0, int& v1, int& src_f, int& id_v)
+void FutureFacet::get_edge(int pos, int &v0, int &v1, int &src_f, int &id_v)
 {
 	DEBUG_START;
 	if (pos < 0 || pos >= nv)

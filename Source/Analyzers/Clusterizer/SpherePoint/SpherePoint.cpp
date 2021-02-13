@@ -21,21 +21,18 @@
 
 #include <cmath>
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
 #include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 #include "Polyhedron/Facet/Facet.h"
 
-SpherePoint::SpherePoint() :
-				vector(Vector3d(0., 0., 0.)),
-				phi(0.),
-				psi(0.)
+SpherePoint::SpherePoint() : vector(Vector3d(0., 0., 0.)), phi(0.), psi(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SpherePoint::SpherePoint(const Vector3d& vector_orig)
+SpherePoint::SpherePoint(const Vector3d &vector_orig)
 {
 	DEBUG_START;
 	double x = vector_orig.x;
@@ -48,11 +45,9 @@ SpherePoint::SpherePoint(const Vector3d& vector_orig)
 	DEBUG_END;
 }
 
-SpherePoint::SpherePoint(const Vector3d& vector_orig, const double phi_orig,
-		const double psi_orig) :
-				vector(vector_orig),
-				phi(phi_orig),
-				psi(psi_orig)
+SpherePoint::SpherePoint(const Vector3d &vector_orig, const double phi_orig,
+						 const double psi_orig) :
+	vector(vector_orig), phi(phi_orig), psi(psi_orig)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -68,10 +63,8 @@ SpherePoint::SpherePoint(const double phi_orig, const double psi_orig)
 	DEBUG_END;
 }
 
-SpherePoint::SpherePoint(const SpherePoint& orig) :
-				vector(orig.vector),
-				phi(orig.phi),
-				psi(orig.psi)
+SpherePoint::SpherePoint(const SpherePoint &orig) :
+	vector(orig.vector), phi(orig.phi), psi(orig.psi)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -83,7 +76,7 @@ SpherePoint::~SpherePoint()
 	DEBUG_END;
 }
 
-SpherePoint& SpherePoint::operator =(const SpherePoint& orig)
+SpherePoint &SpherePoint::operator=(const SpherePoint &orig)
 {
 	DEBUG_START;
 	vector = orig.vector;
@@ -93,17 +86,17 @@ SpherePoint& SpherePoint::operator =(const SpherePoint& orig)
 	return *this;
 }
 
-double distSpherePoint(SpherePoint& point0, SpherePoint& point1)
+double distSpherePoint(SpherePoint &point0, SpherePoint &point1)
 {
 	DEBUG_START;
 	double sinus = sqrt(qmod(point0.vector % point1.vector));
-	double cosinus = (point0.vector * point1.vector)
-			/ (sqrt(qmod(point0.vector)) * sqrt(qmod(point1.vector)));
+	double cosinus = (point0.vector * point1.vector) /
+					 (sqrt(qmod(point0.vector)) * sqrt(qmod(point1.vector)));
 	DEBUG_END;
 	return atan2(sinus, cosinus);
 }
 
-SpherePoint& MassCentre(int n, SpherePoint* points, SpherePoint& newSpherePoint)
+SpherePoint &MassCentre(int n, SpherePoint *points, SpherePoint &newSpherePoint)
 {
 	DEBUG_START;
 	double sum_phi = 0.;
@@ -121,7 +114,7 @@ SpherePoint& MassCentre(int n, SpherePoint* points, SpherePoint& newSpherePoint)
 	return newSpherePoint;
 }
 
-SpherePoint& MassCentre(int n, int* indexFacet, PolyhedronPtr poly)
+SpherePoint &MassCentre(int n, int *indexFacet, PolyhedronPtr poly)
 {
 	DEBUG_START;
 	SpherePoint newSpherePoint;
@@ -147,7 +140,7 @@ SpherePoint& MassCentre(int n, int* indexFacet, PolyhedronPtr poly)
 	}
 	sum_phi /= areaTotal;
 	sum_psi /= areaTotal;
-	SpherePoint* newSpherePoint_returned = new SpherePoint(sum_phi, sum_psi);
+	SpherePoint *newSpherePoint_returned = new SpherePoint(sum_phi, sum_psi);
 	DEBUG_END;
 	return *newSpherePoint_returned;
 }

@@ -18,37 +18,30 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "DataContainers/ShadowContourData/ShadowContourData.h"
-#include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
+#include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include "DataContainers/ShadowContourData/ShadowContourData.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
-ShadowContourData::ShadowContourData() :
-	PData(),
-	numContours(0),
-	contours(NULL)
+ShadowContourData::ShadowContourData() : PData(), numContours(0), contours(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 ShadowContourData::ShadowContourData(PolyhedronPtr p) :
-				PData(p),
-				numContours(0),
-				contours(NULL)
+	PData(p), numContours(0), contours(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-ShadowContourData::ShadowContourData(const ShadowContourData& data) :
-				PData(),
-				numContours(data.numContours),
-				contours(NULL)
+ShadowContourData::ShadowContourData(const ShadowContourData &data) :
+	PData(), numContours(data.numContours), contours(NULL)
 {
 	DEBUG_START;
 	contours = new SContour[numContours];
@@ -60,9 +53,7 @@ ShadowContourData::ShadowContourData(const ShadowContourData& data) :
 }
 
 ShadowContourData::ShadowContourData(const ShadowContourDataPtr data) :
-				PData(),
-				numContours(data->numContours),
-				contours(NULL)
+	PData(), numContours(data->numContours), contours(NULL)
 {
 	DEBUG_START;
 	contours = new SContour[numContours];
@@ -95,10 +86,10 @@ ShadowContourData::~ShadowContourData()
 	DEBUG_END;
 }
 
-bool ShadowContourData::fscanDefault(const char* fileNameContours)
+bool ShadowContourData::fscanDefault(const char *fileNameContours)
 {
 	DEBUG_START;
-	FILE* fd = (FILE*) fopen(fileNameContours, "r");
+	FILE *fd = (FILE *)fopen(fileNameContours, "r");
 
 	if (!fd)
 	{
@@ -116,11 +107,11 @@ bool ShadowContourData::fscanDefault(const char* fileNameContours)
 #define STD_SC_FORMAT_HEADER_SIZE_1 2
 #define STD_SC_FORMAT_HEADER_SIZE_2 31
 
-bool ShadowContourData::fscanDefault(FILE* fd)
+bool ShadowContourData::fscanDefault(FILE *fd)
 {
 	DEBUG_START;
 
-	char* scannedString = new char[255];
+	char *scannedString = new char[255];
 	for (int i = 0; i < STD_SC_FORMAT_HEADER_SIZE_1; ++i)
 	{
 		if (fscanf(fd, "%s", scannedString) != 1)
@@ -153,24 +144,24 @@ bool ShadowContourData::fscanDefault(FILE* fd)
 	contours = new SContour[numContours];
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
-		SContour* currContour = &contours[iContour];
+		SContour *currContour = &contours[iContour];
 		currContour->id = iContour;
 
 		if (fscanf(fd, "%d", &currContour->ns) != 1)
 		{
 			ERROR_PRINT("Wrong file format, number of sides for contour #%d",
-					iContour);
+						iContour);
 			DEBUG_END;
 			return false;
 		}
 
-		if (fscanf(fd, "%lf", &currContour->plane.norm.x) != 1
-				|| fscanf(fd, "%lf", &currContour->plane.norm.y) != 1
-				|| fscanf(fd, "%lf", &currContour->plane.norm.z) != 1)
+		if (fscanf(fd, "%lf", &currContour->plane.norm.x) != 1 ||
+			fscanf(fd, "%lf", &currContour->plane.norm.y) != 1 ||
+			fscanf(fd, "%lf", &currContour->plane.norm.z) != 1)
 		{
 			ERROR_PRINT("Wrong file format, "
-					"in normal to plane for contour #%d",
-					iContour);
+						"in normal to plane for contour #%d",
+						iContour);
 			DEBUG_END;
 			return false;
 		}
@@ -181,44 +172,44 @@ bool ShadowContourData::fscanDefault(FILE* fd)
 
 		for (int iSide = 0; iSide < currContour->ns; ++iSide)
 		{
-			SideOfContour* currSide = &currContour->sides[iSide];
+			SideOfContour *currSide = &currContour->sides[iSide];
 
 			if (fscanf(fd, "%lf", &currSide->confidence) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
-						"in confidence of side #%d of contour #%d",
-						iSide, iContour);
+							"in confidence of side #%d of contour #%d",
+							iSide, iContour);
 				DEBUG_END;
 				return false;
 			}
 
-			if (fscanf(fd, "%d", (int*)&currSide->type) != 1)
+			if (fscanf(fd, "%d", (int *)&currSide->type) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
-						"in type of side #%d of contour #%d",
-						iSide, iContour);
+							"in type of side #%d of contour #%d",
+							iSide, iContour);
 				DEBUG_END;
 				return false;
 			}
 
-			if (fscanf(fd, "%lf", &currSide->A1.x) != 1
-					|| fscanf(fd, "%lf", &currSide->A1.y) != 1
-					|| fscanf(fd, "%lf", &currSide->A1.z) != 1)
+			if (fscanf(fd, "%lf", &currSide->A1.x) != 1 ||
+				fscanf(fd, "%lf", &currSide->A1.y) != 1 ||
+				fscanf(fd, "%lf", &currSide->A1.z) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
-						"in A1 for side #%d of contour #%d",
-						iSide, iContour);
+							"in A1 for side #%d of contour #%d",
+							iSide, iContour);
 				DEBUG_END;
 				return false;
 			}
 
-			if (fscanf(fd, "%lf", &currSide->A2.x) != 1
-					|| fscanf(fd, "%lf", &currSide->A2.y) != 1
-					|| fscanf(fd, "%lf", &currSide->A2.z) != 1)
+			if (fscanf(fd, "%lf", &currSide->A2.x) != 1 ||
+				fscanf(fd, "%lf", &currSide->A2.y) != 1 ||
+				fscanf(fd, "%lf", &currSide->A2.z) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
-						"in A1 for side #%d of contour #%d",
-						iSide, iContour);
+							"in A1 for side #%d of contour #%d",
+							iSide, iContour);
 				DEBUG_END;
 				return false;
 			}
@@ -239,11 +230,11 @@ bool ShadowContourData::fscanDefault(FILE* fd)
 #undef STD_SC_FORMAT_HEADER_SIZE_1
 #undef STD_SC_FORMAT_HEADER_SIZE_2
 
-void ShadowContourData::fprint(FILE* file)
+void ShadowContourData::fprint(FILE *file)
 {
 	DEBUG_START;
 	REGULAR_PRINT(file, "Dumping shadow contour data. Number of contours: %d\n",
-			numContours);
+				  numContours);
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		contours[iContour].my_fprint(file);
@@ -251,15 +242,19 @@ void ShadowContourData::fprint(FILE* file)
 	DEBUG_END;
 }
 
-void ShadowContourData::fprintDefault(FILE* file)
+void ShadowContourData::fprintDefault(FILE *file)
 {
 	DEBUG_START;
 	ALWAYS_PRINT(file, "# num_shadow_contours\n");
 	ALWAYS_PRINT(file, "%d\n", numContours);
 	ALWAYS_PRINT(file, "# contour:  num_sides   normal_to_plane\n");
 	ALWAYS_PRINT(file, "#           confidence   type\n");
-	ALWAYS_PRINT(file, "#           x y z coordinates of point 1 in plane of projection\n");
-	ALWAYS_PRINT(file, "#           x y z coordinates of point 2 in plane of projection\n");
+	ALWAYS_PRINT(
+		file,
+		"#           x y z coordinates of point 1 in plane of projection\n");
+	ALWAYS_PRINT(
+		file,
+		"#           x y z coordinates of point 2 in plane of projection\n");
 
 	for (int i = 0; i < numContours; ++i)
 	{
@@ -269,10 +264,10 @@ void ShadowContourData::fprintDefault(FILE* file)
 	DEBUG_END;
 }
 
-void ShadowContourData::fprintDefault(const char* fileName)
+void ShadowContourData::fprintDefault(const char *fileName)
 {
 	DEBUG_START;
-	FILE* fd = (FILE*) fopen(fileName, "w");
+	FILE *fd = (FILE *)fopen(fileName, "w");
 
 	if (!fd)
 	{
@@ -299,7 +294,7 @@ std::ostream &operator<<(std::ostream &stream, ShadowContourData &data)
 	return stream;
 }
 
-bool ShadowContourData::operator ==(const ShadowContourData& contourData) const
+bool ShadowContourData::operator==(const ShadowContourData &contourData) const
 {
 	DEBUG_START;
 	if (numContours != contourData.numContours)
@@ -320,7 +315,7 @@ bool ShadowContourData::operator ==(const ShadowContourData& contourData) const
 	return true;
 }
 
-bool ShadowContourData::operator !=(const ShadowContourData& contourData) const
+bool ShadowContourData::operator!=(const ShadowContourData &contourData) const
 {
 	DEBUG_START;
 	bool returnValue = !(*this == contourData);
@@ -328,13 +323,12 @@ bool ShadowContourData::operator !=(const ShadowContourData& contourData) const
 	return returnValue;
 }
 
-
 SupportFunctionDataPtr ShadowContourData::calculateSupportData()
 {
 	DEBUG_START;
 	SupportFunctionDataConstructor constructor;
-	auto data = constructor.run(this->shared_from_this(),
-			IF_ANALYZE_ALL_CONTOURS);
+	auto data =
+		constructor.run(this->shared_from_this(), IF_ANALYZE_ALL_CONTOURS);
 	DEBUG_END;
 	return data;
 }

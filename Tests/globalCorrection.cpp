@@ -43,19 +43,18 @@ struct TestParameters
 
 void printUsage();
 
-NameFigure parse_figureName(char* figureNameInput);
+NameFigure parse_figureName(char *figureNameInput);
 
-MethodCorrector parse_methodName(char* methodNameInput);
+MethodCorrector parse_methodName(char *methodNameInput);
 
-int parse_commandLine(int argc, char** argv, TestParameters& parameters);
+int parse_commandLine(int argc, char **argv, TestParameters &parameters);
 
 PolyhedronPtr makePolyhedron(NameFigure figureParsed);
 
-inline void moveFacetRandom(PolyhedronPtr polyhedron,
-		double maxMoveDelta, int ifacet);
+inline void moveFacetRandom(PolyhedronPtr polyhedron, double maxMoveDelta,
+							int ifacet);
 
-
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 	TestParameters parameters;
@@ -64,32 +63,30 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 
 	PolyhedronPtr polyhedron(makePolyhedron(parameters.figure));
-	
+
 	polyhedron->set_parent_polyhedron_in_facets();
 
-	polyhedron->fprint_ply_scale(1000.,
-			"poly-data-out/globalCorrection-before.ply",
-			"globalCorrection");
-	
+	polyhedron->fprint_ply_scale(
+		1000., "poly-data-out/globalCorrection-before.ply", "globalCorrection");
+
 	polyhedron->printSortedByAreaFacets();
 
 	ShadowContourDataPtr contourData(new ShadowContourData(polyhedron));
 	ShadowContourConstructor scConstructor(polyhedron, contourData);
 	scConstructor.run(parameters.numContours, parameters.shiftAngleFirst);
-	moveFacetRandom(polyhedron, parameters.maxMoveDelta, parameters.indFacetMoved);
+	moveFacetRandom(polyhedron, parameters.maxMoveDelta,
+					parameters.indFacetMoved);
 
-	polyhedron->fprint_ply_scale(1000.,
-				"poly-data-out/globalCorrection-moved.ply",
-				"globalCorrection");
+	polyhedron->fprint_ply_scale(
+		1000., "poly-data-out/globalCorrection-moved.ply", "globalCorrection");
 
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
-			parameters.deltaGardientStep};
+					parameters.deltaGardientStep};
 	polyhedron->correctGlobal(contourData, &gsParameters, NULL);
 
-	polyhedron->fprint_ply_scale(1000.,
-			"poly-data-out/globalCorrection-after.ply",
-			"globalCorrection");
+	polyhedron->fprint_ply_scale(
+		1000., "poly-data-out/globalCorrection-after.ply", "globalCorrection");
 
 	DEBUG_PRINT("Polyhedron's use count: %ld", polyhedron.use_count());
 
@@ -100,19 +97,18 @@ int main(int argc, char** argv)
 void printUsage()
 {
 	DEBUG_START;
-	printf(
-			"Usage: \n"
-					"./globalCorrection <figure name> <method> <number_of_contours> "
-					"<index of facet to be moved> <max_move_delta> <first angle shift> "
-					"<eps max loop> <delta gradient descend>\n");
+	printf("Usage: \n"
+		   "./globalCorrection <figure name> <method> <number_of_contours> "
+		   "<index of facet to be moved> <max_move_delta> <first angle shift> "
+		   "<eps max loop> <delta gradient descend>\n");
 	printf("\nPossible figures: cube pyramid prism cube-cutted\n");
 	printf("\nPossible methods: gd (gradient descent), "
-				"gdf (gradient descent - fast),"
-				"cg (conjugate gradient).\n");
+		   "gdf (gradient descent - fast),"
+		   "cg (conjugate gradient).\n");
 	DEBUG_END;
 }
 
-int parse_commandLine(int argc, char** argv, TestParameters& parameters)
+int parse_commandLine(int argc, char **argv, TestParameters &parameters)
 {
 	DEBUG_START;
 
@@ -123,17 +119,17 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 		return EXIT_FAILURE;
 	}
 
-	char* figure = new char[255];
-	char* method = new char[255];
+	char *figure = new char[255];
+	char *method = new char[255];
 
-	bool ifCorrectInput = sscanf(argv[1], "%s", figure)
-			&& sscanf(argv[2], "%s", method)
-			&& sscanf(argv[3], "%d", &parameters.numContours)
-			&& sscanf(argv[4], "%d", &parameters.indFacetMoved)
-			&& sscanf(argv[5], "%lf", &parameters.maxMoveDelta)
-			&& sscanf(argv[6], "%lf", &parameters.shiftAngleFirst)
-			&& sscanf(argv[7], "%lf", &parameters.epsLoopStop)
-			&& sscanf(argv[8], "%lf", &parameters.deltaGardientStep);
+	bool ifCorrectInput = sscanf(argv[1], "%s", figure) &&
+						  sscanf(argv[2], "%s", method) &&
+						  sscanf(argv[3], "%d", &parameters.numContours) &&
+						  sscanf(argv[4], "%d", &parameters.indFacetMoved) &&
+						  sscanf(argv[5], "%lf", &parameters.maxMoveDelta) &&
+						  sscanf(argv[6], "%lf", &parameters.shiftAngleFirst) &&
+						  sscanf(argv[7], "%lf", &parameters.epsLoopStop) &&
+						  sscanf(argv[8], "%lf", &parameters.deltaGardientStep);
 
 	parameters.figure = parse_figureName(figure);
 	parameters.method = parse_methodName(method);
@@ -162,7 +158,7 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	return EXIT_SUCCESS;
 }
 
-NameFigure parse_figureName(char* figureNameInput)
+NameFigure parse_figureName(char *figureNameInput)
 {
 	DEBUG_START;
 	NameFigure ret;
@@ -191,7 +187,7 @@ NameFigure parse_figureName(char* figureNameInput)
 	return ret;
 }
 
-MethodCorrector parse_methodName(char* methodNameInput)
+MethodCorrector parse_methodName(char *methodNameInput)
 {
 	DEBUG_START;
 	MethodCorrector ret;
@@ -231,28 +227,28 @@ PolyhedronPtr makePolyhedron(NameFigure figureParsed)
 		DEBUG_END;
 		return ret;
 	}
-		break;
+	break;
 	case FIGURE_PYRAMID:
 	{
 		PolyhedronPtr ret = std::make_shared<Pyramid>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
-		break;
+	break;
 	case FIGURE_PRISM:
 	{
 		PolyhedronPtr ret = std::make_shared<Prism>(3, 1., 1.);
 		DEBUG_END;
 		return ret;
 	}
-		break;
+	break;
 	case FIGURE_CUBE_CUTTED:
 	{
 		PolyhedronPtr ret = std::make_shared<CubeCutted>();
 		DEBUG_END;
 		return ret;
 	}
-		break;
+	break;
 	default:
 		ERROR_PRINT("Unknown figure name!");
 		printUsage();
@@ -265,7 +261,7 @@ PolyhedronPtr makePolyhedron(NameFigure figureParsed)
 static double genRandomDouble(double maxDelta)
 {
 	DEBUG_START;
-	srand((unsigned) time(0));
+	srand((unsigned)time(0));
 	int randomInteger = rand();
 	double randomDouble = randomInteger;
 	const double halfRandMax = RAND_MAX * 0.5;
@@ -279,10 +275,10 @@ static double genRandomDouble(double maxDelta)
 }
 
 inline void moveFacetRandom(PolyhedronPtr polyhedron, double maxMoveDelta,
-		int ifacet)
+							int ifacet)
 {
 	DEBUG_START;
-	Plane& plane = polyhedron->facets[ifacet].plane;
+	Plane &plane = polyhedron->facets[ifacet].plane;
 	plane.norm.x += genRandomDouble(maxMoveDelta);
 	plane.norm.y += genRandomDouble(maxMoveDelta);
 	plane.norm.z += genRandomDouble(maxMoveDelta);

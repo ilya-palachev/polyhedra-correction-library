@@ -23,11 +23,11 @@
  * @brief CGAL-based support function estimation (definition).
  */
 
-#include <iostream>
-#include <cassert>
-#include <CGAL/basic.h>
-#include <CGAL/QP_models.h>
 #include <CGAL/QP_functions.h>
+#include <CGAL/QP_models.h>
+#include <CGAL/basic.h>
+#include <cassert>
+#include <iostream>
 /* choose exact integral type */
 #ifdef CGAL_USE_GMP
 #include <CGAL/Gmpz.h>
@@ -40,13 +40,13 @@ typedef CGAL::MP_Float ET;
 typedef CGAL::Quadratic_program<double> Program;
 typedef CGAL::Quadratic_program_solution<ET> Solution;
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
 #include "CGALSupportFunctionEstimator.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
 CGALSupportFunctionEstimator::CGALSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data) :
-		SupportFunctionEstimator(data)
+	SupportFunctionEstimationDataPtr data) :
+	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -65,7 +65,7 @@ VectorXd CGALSupportFunctionEstimator::runLP(void)
 	 * Create LP problem with constraints Ax >= b and no variables lower/upper
 	 * bounds.
 	 */
-	Program lp (CGAL::LARGER, false, 0., false, 0.);
+	Program lp(CGAL::LARGER, false, 0., false, 0.);
 
 	int iEpsilon = data->numValues();
 	int numVariables = data->numValues();
@@ -110,12 +110,14 @@ VectorXd CGALSupportFunctionEstimator::runLP(void)
 
 	/* solve the program, using ET as the exact type */
 	Solution s = CGAL::solve_linear_program(lp, ET());
-	assert (s.solves_linear_program(lp));
+	assert(s.solves_linear_program(lp));
 
 	/* output solution */
 	std::cout << s;
-	VectorXd estimation(data->numValues()); int i = 0;
-	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
+	VectorXd estimation(data->numValues());
+	int i = 0;
+	for (auto d = s.variable_numerators_begin();
+		 d != s.variable_numerators_end(); ++d)
 	{
 		estimation(i++) = d->to_double();
 	}
@@ -131,7 +133,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 	 * Create QP problem with constraints Ax >= b and no variables lower/upper
 	 * bounds.
 	 */
-	Program qp (CGAL::LARGER, false, 0., false, 0.);
+	Program qp(CGAL::LARGER, false, 0., false, 0.);
 	int numVariables = data->numValues();
 
 	/* Set matrix D to identity matrix. */
@@ -166,8 +168,10 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 
 	/* output solution */
 	std::cout << s;
-	VectorXd estimation(data->numValues()); int i = 0;
-	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
+	VectorXd estimation(data->numValues());
+	int i = 0;
+	for (auto d = s.variable_numerators_begin();
+		 d != s.variable_numerators_end(); ++d)
 	{
 		estimation(i++) = d->to_double();
 	}
@@ -179,7 +183,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 VectorXd CGALSupportFunctionEstimator::run(void)
 {
 	DEBUG_START;
-	switch(problemType_)
+	switch (problemType_)
 	{
 	case ESTIMATION_PROBLEM_NORM_L_INF:
 		return runLP();
@@ -187,7 +191,7 @@ VectorXd CGALSupportFunctionEstimator::run(void)
 	case ESTIMATION_PROBLEM_NORM_L_1:
 		ASSERT(0 && "Not implemented yet!");
 		ERROR_PRINT("L1 problem is not implemented yet for this type of"
-			" recoverer");
+					" recoverer");
 		exit(EXIT_FAILURE);
 		break;
 	case ESTIMATION_PROBLEM_NORM_L_2:

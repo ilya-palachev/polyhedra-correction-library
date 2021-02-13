@@ -28,27 +28,27 @@
 
 #include <CGAL/Polyhedron_items_3.h>
 
-#include "KernelCGAL/VertexIndexed.h"
 #include "KernelCGAL/FaceIndexed.h"
 #include "KernelCGAL/HalfedgeIndexed.h"
+#include "KernelCGAL/VertexIndexed.h"
 
 /** An items type using VertexIndexed, FaceIndexed, HalfedgeIndexed. */
 struct ItemsIndexed : public CGAL::Polyhedron_items_3
 {
 
-	template <class Refs, class Traits>
-	struct Vertex_wrapper {
+	template <class Refs, class Traits> struct Vertex_wrapper
+	{
 		typedef typename Traits::Point_3 Point;
 		typedef VertexIndexed<Refs, Point> Vertex;
 	};
 
-	template < class Refs, class Traits>
-	struct Halfedge_wrapper {
+	template <class Refs, class Traits> struct Halfedge_wrapper
+	{
 		typedef HalfedgeIndexed<Refs> Halfedge;
 	};
 
-	template <class Refs, class Traits>
-	struct Face_wrapper {
+	template <class Refs, class Traits> struct Face_wrapper
+	{
 		typedef typename Traits::Plane_3 Plane;
 		typedef FaceIndexed<Refs, Plane> Face;
 	};

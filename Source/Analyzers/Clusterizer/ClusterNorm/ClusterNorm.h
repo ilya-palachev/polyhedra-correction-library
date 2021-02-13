@@ -24,8 +24,8 @@
 
 #include <memory>
 
-#include "Polyhedron/Polyhedron.h"
 #include "Analyzers/Clusterizer/SpherePoint/SpherePoint.h"
+#include "Polyhedron/Polyhedron.h"
 
 class ClusterNorm
 {
@@ -33,29 +33,28 @@ public:
 	int num;
 	int numMax;
 	SpherePoint P;
-	int* indexFacet;
+	int *indexFacet;
 	PolyhedronPtr poly;
 
-	ClusterNorm& operator+=(ClusterNorm& cluster0);
-	ClusterNorm& operator=(const ClusterNorm& orig);
+	ClusterNorm &operator+=(ClusterNorm &cluster0);
+	ClusterNorm &operator=(const ClusterNorm &orig);
 
 	ClusterNorm();
 	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-			PolyhedronPtr poly_orig);
+				PolyhedronPtr poly_orig);
 	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-			int* indexFacet_orig, PolyhedronPtr poly_orig);
-	ClusterNorm(const ClusterNorm& orig);
+				int *indexFacet_orig, PolyhedronPtr poly_orig);
+	ClusterNorm(const ClusterNorm &orig);
 
 	double area();
 	~ClusterNorm();
 
-	void fprint(FILE* file);
+	void fprint(FILE *file);
 	void setColor(unsigned char red, char green, char blue);
 
 private:
-
 };
 
-double distCluster(ClusterNorm& cluster0, ClusterNorm& cluster1);
+double distCluster(ClusterNorm &cluster0, ClusterNorm &cluster1);
 
 #endif /* CLUSTERNORM_H */

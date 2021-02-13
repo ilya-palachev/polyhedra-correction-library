@@ -23,10 +23,10 @@
 
 #include <memory>
 
-#include "Vector3d.h"
-#include "Polyhedron/Polyhedron.h"
-#include "DataContainers/EdgeData/EdgeData.h"
 #include "Correctors/EdgeReducer/EdgeReducer.h"
+#include "DataContainers/EdgeData/EdgeData.h"
+#include "Polyhedron/Polyhedron.h"
+#include "Vector3d.h"
 
 class Verifier
 {
@@ -36,10 +36,10 @@ private:
 	EdgesWorkingSets edgesWS;
 
 	int countInnerConsections();
-	int countInnerConsectionsFacet(int fid, double* A,
-			double* b, Vector3d* vertex_old);
-	int countInnerConsectionsPair(int fid, int id0, int id1,
-			int id2, int id3, double* A, double* b);
+	int countInnerConsectionsFacet(int fid, double *A, double *b,
+								   Vector3d *vertex_old);
+	int countInnerConsectionsPair(int fid, int id0, int id1, int id2, int id3,
+								  double *A, double *b);
 	int countOuterConsections();
 	int countOuterConsectionsFacet(int fid);
 	int countOuterConsectionsEdge(int id0, int id1);
@@ -53,12 +53,13 @@ private:
 	 * We need to verify following structures: VertexInfo,
 	 * Facet, EdgeData, Edge for correctness. */
 	bool reduceEdge(EdgeSetIterator edge, EdgeDataPtr edgeData);
+
 public:
 	Verifier();
 	Verifier(PolyhedronPtr p);
-	Verifier(Polyhedron* p);
+	Verifier(Polyhedron *p);
 	Verifier(PolyhedronPtr p, bool _ifPrint);
-	Verifier(Polyhedron* p, bool _ifPrint);
+	Verifier(Polyhedron *p, bool _ifPrint);
 
 	~Verifier();
 
@@ -67,7 +68,6 @@ public:
 
 	/* Count the number of destructed edges of the polyhedron. */
 	int checkEdges(EdgeDataPtr edgeData);
-
 };
 
 #endif /* VERIFIER_H_ */

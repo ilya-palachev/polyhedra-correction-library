@@ -26,9 +26,9 @@ const int NUM_CONTOURS = 100;
 /* Shifting first angle helps to avoid non-regular positions of projection. */
 const double SHIFT_ANGLE_FIRST = 1e-3;
 
-const char* nameFileOriginal = "./Tests/shadowContoursConstuctedForCube.txt";
+const char *nameFileOriginal = "./Tests/shadowContoursConstuctedForCube.txt";
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 
@@ -42,34 +42,33 @@ int main(int argc, char** argv)
 	/* In case when environmental variable
 	 * "SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN" is defined, do printing of
 	 * contour data instead of reading it. */
-	char* firstRun = getenv("SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN");
-	if ( firstRun != NULL && sizeof(firstRun) > 0)
+	char *firstRun = getenv("SHADOW_CONTOURS_CONSTRUCTION_FIRST_RUN");
+	if (firstRun != NULL && sizeof(firstRun) > 0)
 	{
 		DEBUG_PRINT("firstRun = %s", firstRun);
-		FILE* fileOriginal = (FILE*) fopen(nameFileOriginal, "w");
+		FILE *fileOriginal = (FILE *)fopen(nameFileOriginal, "w");
 		contourData->fprintDefault(fileOriginal);
 	}
 	else
 	{
 		DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 
-		ShadowContourDataPtr contourDataOriginal(new
-				ShadowContourData(cube));
+		ShadowContourDataPtr contourDataOriginal(new ShadowContourData(cube));
 		bool ifScanSucceeded =
-				contourDataOriginal->fscanDefault(nameFileOriginal);
+			contourDataOriginal->fscanDefault(nameFileOriginal);
 		if (!ifScanSucceeded)
 		{
 			ERROR_PRINT("Failed to scan contour data from file %s",
-					nameFileOriginal);
+						nameFileOriginal);
 			DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 			DEBUG_END;
 			return EXIT_FAILURE;
 		}
 
-		if(*contourData != *contourDataOriginal)
+		if (*contourData != *contourDataOriginal)
 		{
 			ERROR_PRINT("Inequality found during comparison of obtained "
-					"contour data with original one.");
+						"contour data with original one.");
 			DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 			DEBUG_END;
 			return EXIT_FAILURE;
@@ -80,5 +79,3 @@ int main(int argc, char** argv)
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }
-
-

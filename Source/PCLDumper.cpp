@@ -49,7 +49,7 @@ PCLDumper::~PCLDumper()
 }
 
 PCLDumper &PCLDumper::operator()(PCLDumperLevel level,
-	const std::string nameSuffix)
+								 const std::string nameSuffix)
 {
 	DEBUG_START;
 	level_ = level;

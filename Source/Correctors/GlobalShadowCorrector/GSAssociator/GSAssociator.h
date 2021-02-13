@@ -23,17 +23,18 @@
 
 #include <memory>
 
-#include "Vector3d.h"
+#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
 #include "DataContainers/EdgeData/EdgeData.h"
 #include "Polyhedron/Polyhedron.h"
-#include "Correctors/GlobalShadowCorrector/GlobalShadowCorrector.h"
+#include "Vector3d.h"
 
 enum Orientation
 {
-	ORIENTATION_LEFT, ORIENTATION_RIGHT
+	ORIENTATION_LEFT,
+	ORIENTATION_RIGHT
 };
 
-class GSAssociator: public GlobalShadowCorrector
+class GSAssociator : public GlobalShadowCorrector
 {
 private:
 	int iContour;
@@ -42,7 +43,7 @@ private:
 	EdgeSetIterator edge;
 
 	PolyhedronPtr polyhedronTmp;
-	double* bufDouble;
+	double *bufDouble;
 
 	Vector3d v0_projected;
 	Vector3d v1_projected;
@@ -53,7 +54,6 @@ private:
 	int iSideDistMin0;
 	int iSideDistMin1;
 
-
 	int init();
 	int checkVisibility();
 	double calculateVisibility();
@@ -61,25 +61,23 @@ private:
 	void projectEdge();
 	int checkExtinction();
 
-	int findNearestPoint(Vector3d v_projected, Vector3d& v_nearest,
-			double& distMin);
+	int findNearestPoint(Vector3d v_projected, Vector3d &v_nearest,
+						 double &distMin);
 
 	double calculateArea(Orientation orientation);
 
 	void add(Orientation orientation);
-	void findBounds(Orientation orientation, int& iResultBegin,
-			int& iResultEnd);
+	void findBounds(Orientation orientation, int &iResultBegin,
+					int &iResultEnd);
 
 	double calculateWeight();
 
 public:
-	GSAssociator(GlobalShadowCorrector* corrector);
+	GSAssociator(GlobalShadowCorrector *corrector);
 	~GSAssociator();
 
 	void preinit();
 	void run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn);
-
 };
-
 
 #endif /* GSASSOCIATOR_H_ */

@@ -21,10 +21,10 @@
 
 #include <cstdlib>
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "array_operations.h"
 #include "Analyzers/Clusterizer/SortedSetOfPairs/SortedSetOfPairs.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "array_operations.h"
 
 SortedSetOfPairs::SortedSetOfPairs(int Len)
 {
@@ -58,7 +58,7 @@ void SortedSetOfPairs::add(int i, int j)
 		return;
 	}
 
-	int first = 0; // Первый элемент в массиве
+	int first = 0;	// Первый элемент в массиве
 	int last = num; // Последний элемент в массиве
 
 	while (first < last)
@@ -74,10 +74,10 @@ void SortedSetOfPairs::add(int i, int j)
 		}
 	}
 
-//    if (ii[last] == i && jj[last] == j)
-//        return;
-//    if (ii[last + 1] == i && jj[last + 1] == j)
-//        return;
+	//    if (ii[last] == i && jj[last] == j)
+	//        return;
+	//    if (ii[last + 1] == i && jj[last + 1] == j)
+	//        return;
 	if (last > 0 && ii[last - 1] == i && jj[last - 1] == j)
 	{
 		DEBUG_END;
@@ -99,6 +99,3 @@ void SortedSetOfPairs::print()
 	}
 	DEBUG_END;
 }
-
-
-

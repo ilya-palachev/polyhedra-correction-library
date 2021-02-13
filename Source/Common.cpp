@@ -23,8 +23,8 @@
  * @brief Common functions used in PCL (implementation)
  */
 
-#include <cstdlib>
 #include "DebugPrint.h"
+#include <cstdlib>
 
 bool tryGetenvDouble(const char *envName, double &value)
 {

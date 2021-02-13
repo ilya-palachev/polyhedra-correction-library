@@ -21,23 +21,23 @@
 #ifndef VERTEXGROUPER_H_
 #define VERTEXGROUPER_H_
 
-#include "Vector3d.h"
 #include "Correctors/PCorrector/PCorrector.h"
+#include "Vector3d.h"
 
-class VertexGrouper: public PCorrector
+class VertexGrouper : public PCorrector
 {
 private:
 	int idSavedVertex;
 
 	int groupInner();
-	int groupInnerFacet(int fid, double* A, double* b,
-			Vector3d* vertex_old);
-	int grouptInnerPair(int fid, int id0, int id1, int id2,
-			int id3, double* A, double* b);
+	int groupInnerFacet(int fid, double *A, double *b, Vector3d *vertex_old);
+	int grouptInnerPair(int fid, int id0, int id1, int id2, int id3, double *A,
+						double *b);
+
 public:
 	VertexGrouper();
 	VertexGrouper(PolyhedronPtr p);
-	VertexGrouper(Polyhedron* p);
+	VertexGrouper(Polyhedron *p);
 	~VertexGrouper();
 	int run(int _id);
 };

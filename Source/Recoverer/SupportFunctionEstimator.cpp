@@ -23,12 +23,12 @@
  * @brief Generic support function estimator (definition).
  */
 
-#include "DebugPrint.h"
 #include "Recoverer/SupportFunctionEstimator.h"
+#include "DebugPrint.h"
 
 SupportFunctionEstimator::SupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr dataOrig) :
-		data(dataOrig), ifShadowHeuristics_(false)
+	SupportFunctionEstimationDataPtr dataOrig) :
+	data(dataOrig), ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	DEBUG_END;

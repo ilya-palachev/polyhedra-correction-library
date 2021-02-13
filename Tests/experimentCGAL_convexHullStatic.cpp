@@ -28,21 +28,20 @@
  * http://doc.cgal.org/latest/Convex_hull_3/index.html#Chapter_3D_Convex_Hulls
  */
 
-#include <sys/time.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/point_generators_3.h>
-#include <CGAL/algorithm.h>
 #include <CGAL/Polyhedron_3.h>
+#include <CGAL/algorithm.h>
 #include <CGAL/convex_hull_3.h>
+#include <CGAL/point_generators_3.h>
 #include <vector>
 
-#include "TimeMeasurer/TimeMeasurer.h"
 #include "DebugPrint.h"
-
+#include "TimeMeasurer/TimeMeasurer.h"
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Polyhedron_3<K> Polyhedron_3;
@@ -57,19 +56,19 @@ typedef CGAL::Creator_uniform_3<double, Point_3> PointCreator;
  */
 struct Plane_from_facet
 {
-	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet& f)
+	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet &f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
 		return Polyhedron_3::Plane_3(h->vertex()->point(),
-				h->next()->vertex()->point(),
-				h->opposite()->vertex()->point());
+									 h->next()->vertex()->point(),
+									 h->opposite()->vertex()->point());
 	}
 };
 
 /**
  * Prints the usage of this test.
  */
-static void print_usage(int argc, char** argv)
+static void print_usage(int argc, char **argv)
 {
 	printf("Usage: %s <num_of_points>\n", argv[0]);
 }
@@ -80,11 +79,10 @@ static void print_usage(int argc, char** argv)
  */
 #define FACTOR_OF_VERTICES_REDUCTION 10
 
-
 /**
  * Performs the testing of static convex hull of CGAL.
  */
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 
@@ -121,8 +119,8 @@ int main(int argc, char** argv)
 		DEBUG_VARIABLE double y = it_point->y();
 		DEBUG_VARIABLE double z = it_point->z();
 		DEBUG_VARIABLE double norm = sqrt(x * x + y * y + z * z);
-		DEBUG_PRINT("points[%d] = (%lf, %lf, %lf), norm = %lf\n",
-				i_point, x, y, z, norm);
+		DEBUG_PRINT("points[%d] = (%lf, %lf, %lf), norm = %lf\n", i_point, x, y,
+					z, norm);
 		++i_point;
 	}
 
@@ -139,7 +137,7 @@ int main(int argc, char** argv)
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
 
 	std::cout << "The convex hull contains " << poly.size_of_vertices()
-			<< " vertices" << std::endl;
+			  << " vertices" << std::endl;
 
 	/* end time measurement */
 	double timeFirst = timer.popTimer();
@@ -149,11 +147,10 @@ int main(int argc, char** argv)
 	timer.pushTimer();
 
 	for (int i_point = 0;
-			i_point < num_points - num_points /
-						FACTOR_OF_VERTICES_REDUCTION;
-			++i_point)
+		 i_point < num_points - num_points / FACTOR_OF_VERTICES_REDUCTION;
+		 ++i_point)
 	{
-		srand((unsigned) time(0));
+		srand((unsigned)time(0));
 		int random_integer = rand();
 		auto it_point = points.begin();
 		for (int i_incr = 0; i_incr < random_integer; ++i_incr)
@@ -167,15 +164,14 @@ int main(int argc, char** argv)
 	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
 
 	std::cout << "The convex hull contains " << poly.size_of_vertices()
-			<< " vertices" << std::endl;
+			  << " vertices" << std::endl;
 
 	/*
 	 * assign a plane equation to each polyhedron facet using functor
 	 * Plane_from_facet
 	 */
 	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
-			Plane_from_facet());
+				   Plane_from_facet());
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }
-

@@ -39,8 +39,6 @@
  * In future we will need to have an alternative dumper.
  * */
 
-
-
 class GraphDumperGEXF
 {
 private:
@@ -52,10 +50,9 @@ private:
 
 	/* Test whether the edge has already been added to the graph and add it if
 	 * not. It's assumed that edge->v0 < edge->v1 .*/
-	void addEdge(Edge* edge);
+	void addEdge(Edge *edge);
 
 public:
-
 	/* Constructor that initializes gexf and created undirected graph for
 	 * storing edges. */
 	GraphDumperGEXF();
@@ -65,13 +62,12 @@ public:
 
 	/* Traverse through all the edges inside the facet and add all them to the
 	 * graph. */
-	void collect(Facet* facet);
+	void collect(Facet *facet);
 
 	/* Dump already collected graph data to the file. */
-	void dump(const char* fileName);
+	void dump(const char *fileName);
 };
 
 #endif /* USE_GRAPH_DUMPER */
 
 #endif /* GRAPHDUMPERGEXF_H_ */
-

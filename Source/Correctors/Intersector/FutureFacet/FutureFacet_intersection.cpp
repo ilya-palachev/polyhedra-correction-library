@@ -18,13 +18,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
 #include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
+#include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
-void FutureFacet::generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
-		EdgeSetIntersected* es)
+void FutureFacet::generate_facet(Facet &facet, int fid, Plane &iplane, int numv,
+								 EdgeSetIntersected *es)
 {
 	DEBUG_START;
 	int i, v0, v1, res_id;

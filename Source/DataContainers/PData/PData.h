@@ -43,17 +43,23 @@ public:
 	PolyhedronPtr polyhedron;
 
 	/** Empty constructor. */
-	PData() : polyhedron(NULL) {}
+	PData() : polyhedron(NULL)
+	{
+	}
 
 	/**
 	 * Constructor by pointer to polyhedron.
 	 *
 	 * @param p	The pointer to polyhedron.
 	 */
-	PData(PolyhedronPtr p) {}
+	PData(PolyhedronPtr p)
+	{
+	}
 
 	/** The destructor. */
-	virtual ~PData() {}
+	virtual ~PData()
+	{
+	}
 };
 
 #endif /* PDATA_H_ */

@@ -30,7 +30,7 @@ public:
 
 	PCorrector();
 	PCorrector(PolyhedronPtr p);
-	PCorrector(Polyhedron* p);
+	PCorrector(Polyhedron *p);
 	virtual ~PCorrector();
 };
 

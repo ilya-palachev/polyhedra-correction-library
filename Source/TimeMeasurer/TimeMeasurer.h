@@ -24,7 +24,6 @@
  * (implementation).
  */
 
-
 #ifndef TIMEMEASURER_H
 #define TIMEMEASURER_H
 
@@ -41,57 +40,55 @@
 class TimeMeasurer
 {
 private:
-
 	/**
 	 * Stack of started timers
 	 */
 	std::list<Timer> timers;
 
 public:
-
 	/**
-	* Creates empty time measurer
-	*/
+	 * Creates empty time measurer
+	 */
 	TimeMeasurer();
 
 	/**
-	* Copies exisiting time measurer to existing one
-	*
-	* @param other time measurer to be copied.
-	*/	
-	TimeMeasurer(const TimeMeasurer& other);
+	 * Copies exisiting time measurer to existing one
+	 *
+	 * @param other time measurer to be copied.
+	 */
+	TimeMeasurer(const TimeMeasurer &other);
 
 	/**
-	* Frees time measurer.
-	*/
+	 * Frees time measurer.
+	 */
 	~TimeMeasurer();
 
 	/**
-	* Assigns one time measurer to another.
-	*
-	* @param other the measurer to be assigned to
-	*/	
-	TimeMeasurer& operator=(const TimeMeasurer& other);
+	 * Assigns one time measurer to another.
+	 *
+	 * @param other the measurer to be assigned to
+	 */
+	TimeMeasurer &operator=(const TimeMeasurer &other);
 
 	/**
-	* Compares two TimeMeasurers.
-	*
-	* @param other timer measurer to be compared with
-	*
-	* @retval true if equal
-	* @retval false if unequal
-	*/	
-	bool operator==(const TimeMeasurer& other) const;
+	 * Compares two TimeMeasurers.
+	 *
+	 * @param other timer measurer to be compared with
+	 *
+	 * @retval true if equal
+	 * @retval false if unequal
+	 */
+	bool operator==(const TimeMeasurer &other) const;
 
 	/**
-	* Compares two TimeMeasurers.
-	*
-	* @param other timer measurer to be compared with
-	*
-	* @retval true if equal
-	* @retval false if unequal
-	*/
-	bool operator!=(const TimeMeasurer& other) const;
+	 * Compares two TimeMeasurers.
+	 *
+	 * @param other timer measurer to be compared with
+	 *
+	 * @retval true if equal
+	 * @retval false if unequal
+	 */
+	bool operator!=(const TimeMeasurer &other) const;
 
 	/**
 	 * Start new timer and push it to the std::list of timers
@@ -99,10 +96,10 @@ public:
 	void pushTimer();
 
 	/**
-	* Stop the last timer in the std::list and print calculated time for it.
-	*
-	* @return time of last timer (in seconds, precision is microsecond)
-	*/
+	 * Stop the last timer in the std::list and print calculated time for it.
+	 *
+	 * @return time of last timer (in seconds, precision is microsecond)
+	 */
 	double popTimer();
 };
 

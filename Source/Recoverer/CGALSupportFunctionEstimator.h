@@ -38,6 +38,7 @@ class CGALSupportFunctionEstimator : public SupportFunctionEstimator
 
 	/** Runs QP problem solver. */
 	VectorXd runQP(void);
+
 public:
 	/**
 	 * Default constructor

@@ -26,8 +26,8 @@
 
 #ifdef USE_GLPK
 
-#include <glpk.h>
 #include "Recoverer/SupportFunctionEstimator.h"
+#include <glpk.h>
 
 #ifndef GLPKSFELINEARPROGRAMBUILDER_H_
 #define GLPKSFELINEARPROGRAMBUILDER_H_
@@ -68,4 +68,3 @@ public:
 
 #endif /* GLPKSFELINEARPROGRAMBUILDER_H_ */
 #endif /* USE_GLPK */
-

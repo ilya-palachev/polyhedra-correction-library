@@ -29,6 +29,7 @@ class PAnalyzer
 {
 protected:
 	PolyhedronPtr polyhedron;
+
 public:
 	PAnalyzer();
 	PAnalyzer(PolyhedronPtr p);

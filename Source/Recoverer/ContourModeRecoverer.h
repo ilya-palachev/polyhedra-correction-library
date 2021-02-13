@@ -31,8 +31,11 @@
 class ContourModeRecoverer
 {
 	SupportFunctionDataPtr data;
+
 public:
-	ContourModeRecoverer(SupportFunctionDataPtr data) : data(data) {}
+	ContourModeRecoverer(SupportFunctionDataPtr data) : data(data)
+	{
+	}
 	void run();
 };
 

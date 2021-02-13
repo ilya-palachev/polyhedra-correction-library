@@ -36,8 +36,7 @@
  * 9374610/bad-weak-ptr-when-calling-shared-from-this-in-base-class
  * on http://stackoverflow.com/questions/
  */
-template<class Derived>
-class enable_shared_from_This
+template <class Derived> class enable_shared_from_This
 {
 public:
 	/**
@@ -51,7 +50,7 @@ public:
 	Ptr shared_from_This()
 	{
 		return static_pointer_cast<Derived>(
-				static_cast<Derived *>(this)->shared_from_this());
+			static_cast<Derived *>(this)->shared_from_this());
 	}
 
 	/**
@@ -60,9 +59,8 @@ public:
 	Ptr shared_from_This() const
 	{
 		return static_pointer_cast<Derived>(
-				static_cast<Derived *>(this)->shared_from_this());
+			static_cast<Derived *>(this)->shared_from_this());
 	}
 };
-
 
 #endif /* SHAREDFROMTHIS_H_ */

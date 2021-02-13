@@ -24,19 +24,19 @@
  * edge heuristics (implementation).
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "PCLDumper.h"
-#include "Common.h"
 #include "EdgeCorrector.h"
 #include "Colouring.h"
+#include "Common.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 #include "IpoptTopologicalCorrector.h"
+#include "PCLDumper.h"
 
 #define UNINITIALIZED_MAP_VALUE -1
 
 EdgeCorrector::EdgeCorrector(Polyhedron_3 initialP,
-		SupportFunctionDataPtr SData) :
+							 SupportFunctionDataPtr SData) :
 	initialP(initialP), SData(SData)
 {
 	DEBUG_START;
@@ -44,14 +44,14 @@ EdgeCorrector::EdgeCorrector(Polyhedron_3 initialP,
 }
 
 static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P,
-		std::map<int, int> &map)
+										  std::map<int, int> &map)
 {
 	DEBUG_START;
 	std::vector<bool> visited(P.size_of_halfedges());
-	for (unsigned i = 0 ; i < visited.size(); ++i)
+	for (unsigned i = 0; i < visited.size(); ++i)
 		visited[i] = false;
 	std::cout << "getEdges: number of halfedges: " << P.size_of_halfedges()
-		<< std::endl;
+			  << std::endl;
 
 	std::vector<SimpleEdge_3> edges;
 	P.initialize_indices();
@@ -83,7 +83,7 @@ static std::vector<SimpleEdge_3> getEdges(Polyhedron_3 P,
 }
 
 void associateEdges(std::vector<SimpleEdge_3> &edges,
-		SupportFunctionDataPtr data)
+					SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	std::vector<Vector_3> directions = data->supportDirections<Vector_3>();
@@ -98,16 +98,15 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 		double productMax = 0.;
 		double productMaxVice = 0.;
 		unsigned jBest = edges.size();
-		
+
 		for (unsigned j = 0; j < edges.size(); ++j)
 		{
 			Vector_3 A = edges[j].A;
 			Vector_3 B = edges[j].B;
 			double product = std::max(A * u, B * u);
 			double productVice = std::min(A * u, B * u);
-			if (product >= productMax
-				|| (product == productMax
-					&& productVice >= productMaxVice))
+			if (product >= productMax ||
+				(product == productMax && productVice >= productMaxVice))
 			{
 				productMax = product;
 				productMaxVice = productVice;
@@ -133,21 +132,23 @@ void associateEdges(std::vector<SimpleEdge_3> &edges,
 			++numNonAssociatedEdges;
 	}
 	std::cout << "Minimal number of tangients: " << numTangientsMin
-		<< std::endl;
+			  << std::endl;
 	std::cout << "Maximal number of tangients: " << numTangientsMax
-		<< std::endl;
+			  << std::endl;
 	std::cout << "Number of non-associated edges: " << numNonAssociatedEdges
-		<< std::endl;
+			  << std::endl;
 
 	DEBUG_END;
 }
 
 static void printAssociatedEdges(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges,
-		std::map<int, int> &halfedgesMap)
+								 std::vector<SimpleEdge_3> &edges,
+								 std::map<int, int> &halfedgesMap)
 {
 	Colour red;
-	red.red = 255; red.green = 0; red.blue = 0;
+	red.red = 255;
+	red.green = 0;
+	red.blue = 0;
 
 	unsigned numColouredHalfedges = 0;
 	for (auto &i : halfedgesMap)
@@ -158,12 +159,12 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 			++numColouredHalfedges;
 		}
 	}
-	std::cout << "The number of coloured halfedges: "
-		<< numColouredHalfedges << std::endl;
-	
+	std::cout << "The number of coloured halfedges: " << numColouredHalfedges
+			  << std::endl;
+
 	polyhedron.whetherPrintEdgeColouringFacets = true;
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			"edge-corrector-associated-edges-coloured.ply")
+					"edge-corrector-associated-edges-coloured.ply")
 		<< polyhedron;
 	polyhedron.whetherPrintEdgeColouringFacets = false;
 
@@ -182,8 +183,7 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 		if (edge.tangients.empty())
 		{
 			++numNonAssociatedEdges;
-			double length = sqrt((edge.A
-						- edge.B).squared_length());
+			double length = sqrt((edge.A - edge.B).squared_length());
 			if (length >= CRITICAL_LENGTH)
 				++numCriticalNonAssociatedEdges;
 			if (length > lengthMax)
@@ -200,16 +200,15 @@ static void printAssociatedEdges(Polyhedron_3 polyhedron,
 			clusters.push_back(cluster);
 		}
 	}
-	printColouredIntersection(allTangients, clusters,
-			"tangient-clusters.ply");
+	printColouredIntersection(allTangients, clusters, "tangient-clusters.ply");
 
 	std::cout << "Number of extracted non-associated edges: "
-		<< numNonAssociatedEdges << std::endl;
+			  << numNonAssociatedEdges << std::endl;
 	std::cout << "Number of critical extracted non-associated edges: "
-		<< numCriticalNonAssociatedEdges << std::endl;
+			  << numCriticalNonAssociatedEdges << std::endl;
 	std::cout << "Maximal edge length for critical non-associated edges: "
-		<< lengthMax << std::endl;
-	//ASSERT(numCriticalNonAssociatedEdges == 0
+			  << lengthMax << std::endl;
+	// ASSERT(numCriticalNonAssociatedEdges == 0
 	//		&& "Some critical edges have no tangients!");
 }
 
@@ -218,8 +217,8 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 	DEBUG_START;
 	std::vector<SimpleEdge_3> extractedEdges;
 	double zLower = 0., zUpper = 0.;
-	if (!tryGetenvDouble("Z_LOWER", zLower)
-			|| !tryGetenvDouble("Z_UPPER", zUpper))
+	if (!tryGetenvDouble("Z_LOWER", zLower) ||
+		!tryGetenvDouble("Z_UPPER", zUpper))
 	{
 		DEBUG_END;
 		return extractedEdges;
@@ -228,7 +227,7 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 	std::cout << "Z upper: " << zUpper << std::endl;
 	double zMin = 1e10, zMax = 0.;
 	unsigned numAssociated = 0;
-	for (const SimpleEdge_3 &edge: edges)
+	for (const SimpleEdge_3 &edge : edges)
 	{
 		double zA = edge.A.z();
 		zMin = zA < zMin ? zA : zMin;
@@ -236,8 +235,7 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 		double zB = edge.B.z();
 		zMin = zB < zMin ? zB : zMin;
 		zMax = zB > zMax ? zB : zMax;
-		if ((zA >= zLower && zA <= zUpper)
-				|| (zB >= zLower && zB <= zUpper))
+		if ((zA >= zLower && zA <= zUpper) || (zB >= zLower && zB <= zUpper))
 		{
 			extractedEdges.push_back(edge);
 			if (edge.tangients.size() > 0)
@@ -248,14 +246,14 @@ std::vector<SimpleEdge_3> extractEdges(std::vector<SimpleEdge_3> edges)
 	std::cout << "Z maximal: " << zMax << std::endl;
 
 	std::cout << "From " << extractedEdges.size() << " extracted edges "
-		<< numAssociated << " have tangients" << std::endl;
+			  << numAssociated << " have tangients" << std::endl;
 
 	DEBUG_END;
 	return extractedEdges;
 }
 
 void printColouredExtractedPolyhedron(Polyhedron_3 polyhedron,
-		const std::vector<SimpleEdge_3> &edges)
+									  const std::vector<SimpleEdge_3> &edges)
 {
 	DEBUG_START;
 	std::set<int> cluster;
@@ -267,21 +265,22 @@ void printColouredExtractedPolyhedron(Polyhedron_3 polyhedron,
 	std::vector<std::set<int>> clusters;
 	clusters.push_back(cluster);
 	printColouredPolyhedron(polyhedron, clusters,
-			"edge-corrector-extracted-edges.ply");
+							"edge-corrector-extracted-edges.ply");
 	DEBUG_END;
 }
 
 std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges, std::map<int, int> &indices)
+									  std::vector<SimpleEdge_3> &edges,
+									  std::map<int, int> &indices)
 {
 	DEBUG_START;
 	std::vector<Plane_3> planes;
 	for (const SimpleEdge_3 &edge : edges)
 	{
-		indices.insert(std::pair<int, int>(edge.iForward,
-					UNINITIALIZED_MAP_VALUE));
-		indices.insert(std::pair<int, int>(edge.iBackward,
-					UNINITIALIZED_MAP_VALUE));
+		indices.insert(
+			std::pair<int, int>(edge.iForward, UNINITIALIZED_MAP_VALUE));
+		indices.insert(
+			std::pair<int, int>(edge.iBackward, UNINITIALIZED_MAP_VALUE));
 	}
 
 	int i = 0;
@@ -292,7 +291,7 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 
 	i = 0;
 	for (auto facet = polyhedron.facets_begin();
-			facet < polyhedron.facets_end(); ++facet)
+		 facet < polyhedron.facets_end(); ++facet)
 	{
 		ASSERT(facet->id == i);
 		if (indices.find(i) != indices.end())
@@ -304,8 +303,7 @@ std::vector<Plane_3> renumerateFacets(Polyhedron_3 polyhedron,
 	for (auto &pair : indices)
 	{
 		std::cout << "map[" << pair.first << "] = " << pair.second
-			<< ", plane: " << planes[pair.second]
-			<< std::endl;
+				  << ", plane: " << planes[pair.second] << std::endl;
 	}
 
 	for (SimpleEdge_3 &edge : edges)
@@ -332,14 +330,12 @@ void printSetVector(std::vector<std::set<int>> &v)
 	DEBUG_END;
 }
 
-void buildFacets(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges,
-		std::vector<Vector_3> &U, std::vector<double> &H,
-		std::map<int, int> &indices)
+void buildFacets(Polyhedron_3 polyhedron, std::vector<SimpleEdge_3> &edges,
+				 std::vector<Vector_3> &U, std::vector<double> &H,
+				 std::map<int, int> &indices)
 {
 	DEBUG_START;
-	std::vector<Plane_3> planes = renumerateFacets(polyhedron, edges,
-			indices);
+	std::vector<Plane_3> planes = renumerateFacets(polyhedron, edges, indices);
 	for (const Plane_3 &plane : planes)
 	{
 		Vector_3 norm = plane.orthogonal_vector();
@@ -354,9 +350,8 @@ void buildFacets(Polyhedron_3 polyhedron,
 }
 
 void buildMainTopology(std::vector<SimpleEdge_3> &edges,
-		std::vector<Vector_3> &u,
-		std::vector<double> &h, std::vector<Vector_3> &points,
-		FixedTopology *FT)
+					   std::vector<Vector_3> &u, std::vector<double> &h,
+					   std::vector<Vector_3> &points, FixedTopology *FT)
 {
 	DEBUG_START;
 	unsigned iTangient = 0;
@@ -419,7 +414,7 @@ void buildInfluents(std::vector<SimpleEdge_3> &edges, FixedTopology *FT)
 }
 
 void buildNeighbors(std::vector<SimpleEdge_3> &edges,
-		std::vector<Vector_3> points, FixedTopology *FT)
+					std::vector<Vector_3> points, FixedTopology *FT)
 {
 	DEBUG_START;
 	unsigned numOppositeEqual = 0;
@@ -440,8 +435,7 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 			ASSERT(i != jOpposite);
 			Vector_3 Bop = points[jOpposite];
 			double distance = (A - B).squared_length();
-			double distanceOp =
-				(Aop - Bop).squared_length();
+			double distanceOp = (Aop - Bop).squared_length();
 			if (!allNeighbors && distance < 1e-16)
 			{
 				FT->neighbors[i].insert(jOpposite);
@@ -455,22 +449,20 @@ void buildNeighbors(std::vector<SimpleEdge_3> &edges,
 
 			if (distance < 1e-16 && distanceOp < 1e-16)
 			{
-				std::cout << "Opposite are equal: "
-					<< distanceOp << std::endl;
+				std::cout << "Opposite are equal: " << distanceOp << std::endl;
 				++numOppositeEqual;
 			}
 		}
 	}
-	std::cout << "Number of equal opposites: " << numOppositeEqual
-		<< std::endl;
+	std::cout << "Number of equal opposites: " << numOppositeEqual << std::endl;
 	ASSERT(numOppositeEqual == 0 && "To small distance...");
 	DEBUG_END;
 }
 
 void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
-		std::vector<Vector_3> U, std::vector<double> H,
-		std::vector<Vector_3> points, FixedTopology *FT,
-		bool Strict)
+								 std::vector<Vector_3> U, std::vector<double> H,
+								 std::vector<Vector_3> points,
+								 FixedTopology *FT, bool Strict)
 {
 	DEBUG_START;
 	std::cout << "Checking consistency constraints..." << std::endl;
@@ -494,18 +486,14 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 				{
 					violationFound = true;
 					falseNeighbors.insert(k);
-					std::cout << "  consistency violation: "
-						<< std::endl;
-					std::cout << "    major point: " << i
-						<< " "
-						<< points[i] << std::endl;
-					std::cout << "    minor point: " << j
-						<< " "
-						<< points[j] << std::endl;
-					std::cout << "    on direction: " <<
-						k << " " << u[j] << std::endl;
-					std::cout << "    value: "
-						<< value << std::endl;
+					std::cout << "  consistency violation: " << std::endl;
+					std::cout << "    major point: " << i << " " << points[i]
+							  << std::endl;
+					std::cout << "    minor point: " << j << " " << points[j]
+							  << std::endl;
+					std::cout << "    on direction: " << k << " " << u[j]
+							  << std::endl;
+					std::cout << "    value: " << value << std::endl;
 					++numViolations;
 				}
 			}
@@ -514,8 +502,8 @@ void checkConsistencyConstraints(std::vector<Vector_3> u, std::vector<double> h,
 		}
 	}
 	std::cout << "Number of violations: " << numViolations << " from "
-		<< numConsistencyConstraints << " consistency constraints..."
-		<< std::endl;
+			  << numConsistencyConstraints << " consistency constraints..."
+			  << std::endl;
 	ASSERT((!Strict || numViolations == 0) && "Bad starting point");
 	DEBUG_END;
 }
@@ -551,10 +539,11 @@ void printFixedTopology(FixedTopology *FT)
 }
 
 FixedTopology *buildTopology(Polyhedron_3 polyhedron,
-		std::vector<SimpleEdge_3> &edges, std::vector<Vector_3> &u,
-		std::vector<Vector_3> &U, std::vector<Vector_3> &points,
-		std::vector<double> &h, std::vector<double> &H,
-		std::map<int, int> &indices)
+							 std::vector<SimpleEdge_3> &edges,
+							 std::vector<Vector_3> &u, std::vector<Vector_3> &U,
+							 std::vector<Vector_3> &points,
+							 std::vector<double> &h, std::vector<double> &H,
+							 std::map<int, int> &indices)
 {
 	DEBUG_START;
 	buildFacets(polyhedron, edges, U, H, indices);
@@ -569,27 +558,27 @@ FixedTopology *buildTopology(Polyhedron_3 polyhedron,
 	buildInfluents(edges, FT);
 	buildNeighbors(edges, points, FT);
 
-	//shortenEdges(points);
+	// shortenEdges(points);
 	if (getenv("CHECK_STARTING_POINT"))
 	{
-		//checkConsistencyConstraints(u, h, U, H, points, FT, false);
+		// checkConsistencyConstraints(u, h, U, H, points, FT, false);
 		checkConsistencyConstraints(u, h, U, H, points, FT, true);
 	}
-	//printFixedTopology(FT);
+	// printFixedTopology(FT);
 	DEBUG_END;
 	return FT;
 }
 
 Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
-		IpoptTopologicalCorrector *FTNLP)
+							  IpoptTopologicalCorrector *FTNLP)
 {
 	DEBUG_START;
 	std::vector<Vector_3> directions = FTNLP->getDirections();
 	std::vector<double> values = FTNLP->getValues();
 	std::vector<Plane_3> planes(initialP.size_of_facets());
 	unsigned iFacet = 0;
-	for (auto I = initialP.facets_begin(), E = initialP.facets_end();
-			I != E; ++I)
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E;
+		 ++I)
 	{
 		auto it = map.find(iFacet);
 		if (it != map.end())
@@ -599,9 +588,8 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 			double h = values[i];
 			ASSERT(h > 0);
 			planes[iFacet] = Plane_3(-u.x(), -u.y(), -u.z(), h);
-			std::cout << "Changing plane #" << iFacet << ": "
-				<< I->plane() << " |--> " << planes[iFacet]
-				<< std::endl;
+			std::cout << "Changing plane #" << iFacet << ": " << I->plane()
+					  << " |--> " << planes[iFacet] << std::endl;
 		}
 		else
 		{
@@ -612,10 +600,10 @@ Polyhedron_3 obtainPolyhedron(Polyhedron_3 initialP, std::map<int, int> map,
 
 	Polyhedron_3 intersection(planes);
 	std::cout << "Change in facets number: " << initialP.size_of_facets()
-		<< " -> " << intersection.size_of_facets() << std::endl;
-	ASSERT(initialP.size_of_facets() - intersection.size_of_facets()
-			< map.size() &&
-			"It seems that all extracted facets have gone");
+			  << " -> " << intersection.size_of_facets() << std::endl;
+	ASSERT(initialP.size_of_facets() - intersection.size_of_facets() <
+			   map.size() &&
+		   "It seems that all extracted facets have gone");
 	DEBUG_END;
 	return intersection;
 }
@@ -630,8 +618,7 @@ Polyhedron_3 EdgeCorrector::run()
 	printAssociatedEdges(initialP, edges, halfedgesMap);
 
 	std::vector<SimpleEdge_3> mainEdges = extractEdges(edges);
-	std::cout << "Number of extracted edges: " << mainEdges.size()
-		<< std::endl;
+	std::cout << "Number of extracted edges: " << mainEdges.size() << std::endl;
 	if (mainEdges.size() == 0)
 	{
 		DEBUG_END;
@@ -643,10 +630,10 @@ Polyhedron_3 EdgeCorrector::run()
 	std::vector<Vector_3> u, U, points;
 	std::vector<double> h, H;
 	std::map<int, int> map;
-	FixedTopology *FT = buildTopology(initialP, mainEdges, u, U, points, h,
-			H, map);
-	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(
-			u, h, U, H, points, FT);
+	FixedTopology *FT =
+		buildTopology(initialP, mainEdges, u, U, points, h, H, map);
+	IpoptTopologicalCorrector *FTNLP =
+		new IpoptTopologicalCorrector(u, h, U, H, points, FT);
 	FTNLP->enableModeZfixed();
 
 	IpoptApplication *app = IpoptApplicationFactory();
@@ -666,7 +653,8 @@ Polyhedron_3 EdgeCorrector::run()
 	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
 		app->Options()->SetStringValue("derivative_test", "only-second-order");
 	if (getenv("HESSIAN_APPROX"))
-		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
+		app->Options()->SetStringValue("hessian_approximation",
+									   "limited-memory");
 
 	/* Ask Ipopt to solve the problem */
 	auto status = app->OptimizeTNLP(FTNLP);
@@ -678,9 +666,11 @@ Polyhedron_3 EdgeCorrector::run()
 	}
 
 	MAIN_PRINT("*** The problem solved!");
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply") << initialP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply")
+		<< initialP;
 	Polyhedron_3 correctedP = obtainPolyhedron(initialP, map, FTNLP);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-from-planes.ply") << correctedP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-from-planes.ply")
+		<< correctedP;
 
 	delete FTNLP;
 	DEBUG_END;

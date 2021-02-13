@@ -19,12 +19,12 @@
  */
 
 #ifndef FUTUREFACET_H
-#define	FUTUREFACET_H
+#define FUTUREFACET_H
 
 #include <cstdio>
 
-#include "Vector3d.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Vector3d.h"
 
 class EdgeSetIntersected;
 
@@ -34,18 +34,19 @@ private:
 	int id;
 	int len;
 	int nv;
-	int* edge0;
-	int* edge1;
-	int* src_facet;
-	int* id_v_new;
+	int *edge0;
+	int *edge1;
+	int *src_facet;
+	int *id_v_new;
+
 public:
-	//FutureFacet.cpp
+	// FutureFacet.cpp
 	FutureFacet();
 	~FutureFacet();
 	FutureFacet(int nv_orig);
-	FutureFacet(const FutureFacet& orig);
-	FutureFacet& operator =(const FutureFacet& orig);
-	FutureFacet& operator +=(const FutureFacet& v);
+	FutureFacet(const FutureFacet &orig);
+	FutureFacet &operator=(const FutureFacet &orig);
+	FutureFacet &operator+=(const FutureFacet &v);
 	void free();
 
 	int get_nv();
@@ -53,15 +54,14 @@ public:
 	void set_id(int val);
 
 	void add_edge(int v0, int v1, int src_f);
-	void get_edge(int pos, int& v0, int& v1, int& src_f, int& id_v);
+	void get_edge(int pos, int &v0, int &v1, int &src_f, int &id_v);
 
-	//FutureFacet_io.cpp
-	void my_fprint(FILE* file);
+	// FutureFacet_io.cpp
+	void my_fprint(FILE *file);
 
-	//FutureFacet_intersection.cpp
-	void generate_facet(Facet& facet, int fid, Plane& iplane, int numv,
-			EdgeSetIntersected* es);
+	// FutureFacet_intersection.cpp
+	void generate_facet(Facet &facet, int fid, Plane &iplane, int numv,
+						EdgeSetIntersected *es);
 };
 
-#endif	/* FUTUREFACET_H */
-
+#endif /* FUTUREFACET_H */

@@ -21,25 +21,25 @@
 #ifndef FACETINTERSECTOR_H_
 #define FACETINTERSECTOR_H_
 
-#include "Correctors/Intersector/Intersector.h"
 #include "Correctors/Intersector/FutureFacet/FutureFacet.h"
+#include "Correctors/Intersector/Intersector.h"
 
 class Facet;
 
-class FacetIntersector: public Intersector
+class FacetIntersector : public Intersector
 {
 private:
-	Facet* facet;
+	Facet *facet;
 
 	int signum(int i, Plane plane);
 
 public:
 	FacetIntersector();
-	FacetIntersector(PolyhedronPtr p, Facet* f);
-	FacetIntersector(Intersector* i, Facet* f);
+	FacetIntersector(PolyhedronPtr p, Facet *f);
+	FacetIntersector(Intersector *i, Facet *f);
 	~FacetIntersector();
 
-	bool run(Plane iplane, FutureFacet& ff, int& n_components);
+	bool run(Plane iplane, FutureFacet &ff, int &n_components);
 };
 
 #endif /* FACETINTERSECTOR_H_ */

@@ -26,9 +26,9 @@
 
 #ifndef IPOPTTOPOLOGICALCORRECTOR_H
 #define IPOPTTOPOLOGICALCORRECTOR_H
-#include <coin/IpTNLP.hpp>
-#include <coin/IpIpoptApplication.hpp>
 #include "Polyhedron_3/Polyhedron_3.h"
+#include <coin/IpIpoptApplication.hpp>
+#include <coin/IpTNLP.hpp>
 
 using namespace Ipopt;
 
@@ -61,7 +61,6 @@ struct FixedTopology
 	 */
 	std::vector<std::set<int>> neighbors;
 };
-
 
 class IpoptTopologicalCorrector : public TNLP
 {
@@ -112,16 +111,15 @@ class IpoptTopologicalCorrector : public TNLP
 public:
 	/** Simple by-value constructor. */
 	IpoptTopologicalCorrector(const std::vector<Vector_3> &u,
-			const std::vector<double> &h,
-			const std::vector<Vector_3> &U,
-			const std::vector<double> &H,
-			const std::vector<Vector_3> &pointsInitial,
-			const FixedTopology *FT);
+							  const std::vector<double> &h,
+							  const std::vector<Vector_3> &U,
+							  const std::vector<double> &H,
+							  const std::vector<Vector_3> &pointsInitial,
+							  const FixedTopology *FT);
 
 	void enableModeZfixed()
 	{
-		std::cout << "Mode with fixed Z coordinate is enabled!"
-			<< std::endl;
+		std::cout << "Mode with fixed Z coordinate is enabled!" << std::endl;
 		modeZfixed = true;
 	}
 
@@ -131,40 +129,37 @@ public:
 
 	std::vector<Vector_3> getPoints();
 
-	bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
-			Index& nnz_h_lag, IndexStyleEnum& index_style);
+	bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag,
+					  IndexStyleEnum &index_style);
 
 	bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
-			Number *g_l, Number *g_u);
+						 Number *g_l, Number *g_u);
 
-	bool get_starting_point(Index n, bool init_x,
-		Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
-		bool init_lambda, Number *lambda);
+	bool get_starting_point(Index n, bool init_x, Number *x, bool init_z,
+							Number *z_L, Number *z_U, Index m, bool init_lambda,
+							Number *lambda);
 
 	void getVariables(const Number *x);
 
-	bool eval_f(Index n, const Number *x, bool new_x, Number& obj_value);
-
+	bool eval_f(Index n, const Number *x, bool new_x, Number &obj_value);
 
 	bool eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f);
 
 	bool eval_g(Index n, const Number *x, bool new_x, Index m, Number *g);
 
 	bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
-			Index nnz_jac_g, Index *iRow, Index *jCol,
-			Number *jacValues);
-
+					Index nnz_jac_g, Index *iRow, Index *jCol,
+					Number *jacValues);
 
 	bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
-			Index m, const Number *lambda, bool new_lambda,
-			Index nnz_h_lag, Index *iRow, Index *jCol,
-			Number *hValues);
-	
+				Index m, const Number *lambda, bool new_lambda, Index nnz_h_lag,
+				Index *iRow, Index *jCol, Number *hValues);
+
 	void finalize_solution(SolverReturn status, Index n, const Number *x,
-			const Number *z_L, const Number *z_U, Index m,
-			const Number *g, const Number *lambda, Number obj_value,
-			const IpoptData *ip_data,
-			IpoptCalculatedQuantities *ip_cq);
+						   const Number *z_L, const Number *z_U, Index m,
+						   const Number *g, const Number *lambda,
+						   Number obj_value, const IpoptData *ip_data,
+						   IpoptCalculatedQuantities *ip_cq);
 };
 
 #endif /* IPOPTTOPOLOGICALCORRECTOR_H */

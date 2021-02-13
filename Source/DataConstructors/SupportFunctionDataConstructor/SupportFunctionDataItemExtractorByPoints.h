@@ -28,15 +28,15 @@
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_POINTS_H
 #define SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_POINTS_H
 
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.h"
 #include "DebugPrint.h"
 #include "Vector3d.h"
-#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.h"
 
 const double EXTRACTOR_BY_POINTS_GUARANTEED_PRECISION = 1e-14;
 
 /** Extractor of support function data item from given contour side. */
-class SupportFunctionDataItemExtractorByPoints :
-	public SupportFunctionDataItemExtractor
+class SupportFunctionDataItemExtractorByPoints
+	: public SupportFunctionDataItemExtractor
 {
 public:
 	/** Empty constructor. */

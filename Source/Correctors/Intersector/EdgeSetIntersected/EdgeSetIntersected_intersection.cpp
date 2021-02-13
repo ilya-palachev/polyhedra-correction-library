@@ -18,12 +18,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "array_operations.h"
 #include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "array_operations.h"
 
-void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
+void EdgeSetIntersected::get_edge(int id, int &v0, int &v1)
 {
 	DEBUG_START;
 	if (id < 0 || id > num - 1)
@@ -38,8 +38,9 @@ void EdgeSetIntersected::get_edge(int id, int& v0, int& v1)
 	DEBUG_END;
 }
 
-void EdgeSetIntersected::get_edge(int id, int& v0, int& v1, int& id_el0, int& pos_el0,
-		int& id_el1, int& pos_el1, int& id_ff, int& pos_ff)
+void EdgeSetIntersected::get_edge(int id, int &v0, int &v1, int &id_el0,
+								  int &pos_el0, int &id_el1, int &pos_el1,
+								  int &id_ff, int &pos_ff)
 {
 	DEBUG_START;
 	if (id < 0 || id > num - 1)
@@ -73,7 +74,7 @@ int EdgeSetIntersected::search_edge(int v0, int v1)
 		v1 = tmp;
 	}
 
-	first = 0; // Первый элемент в массиве
+	first = 0;	// Первый элемент в массиве
 	last = num; // Последний элемент в массиве
 
 	while (first < last)
@@ -101,8 +102,8 @@ int EdgeSetIntersected::search_edge(int v0, int v1)
 	}
 }
 
-void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_ff,
-		int pos_ff)
+void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el,
+								  int id_ff, int pos_ff)
 {
 	DEBUG_START;
 
@@ -122,7 +123,7 @@ void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_
 		v1 = tmp;
 	}
 
-	first = 0; // Первый элемент в массиве
+	first = 0;	// Первый элемент в массиве
 	last = num; // Последний элемент в массиве
 
 	while (first < last)
@@ -174,9 +175,9 @@ void EdgeSetIntersected::test_info()
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
 	{
-		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1
-				|| id_edge_list1[i] == -1 || pos_edge_list1[i] == -1
-				|| id_future_facet[i] == -1 || pos_future_facet[i] == -1)
+		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1 ||
+			id_edge_list1[i] == -1 || pos_edge_list1[i] == -1 ||
+			id_future_facet[i] == -1 || pos_future_facet[i] == -1)
 		{
 
 			ERROR_PRINT("Error at i = %d.\n", i);

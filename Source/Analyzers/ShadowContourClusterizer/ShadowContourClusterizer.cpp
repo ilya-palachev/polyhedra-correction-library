@@ -28,23 +28,22 @@
 #undef __STRICT_ANSI__
 #include <cmath>
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "ShadowContourClusterizer.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "ShadowContourClusterizer.h"
 
-ShadowContourClusterizer::ShadowContourClusterizer() :
-		PAnalyzer()
+ShadowContourClusterizer::ShadowContourClusterizer() : PAnalyzer()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 ShadowContourClusterizer::ShadowContourClusterizer(PolyhedronPtr p) :
-		PAnalyzer(p)
+	PAnalyzer(p)
 {
 	DEBUG_START;
-	DEBUG_END;	
+	DEBUG_END;
 }
 
 ShadowContourClusterizer::~ShadowContourClusterizer()
@@ -69,11 +68,11 @@ static double angleModulo2PI(double angle)
 }
 
 void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
-										 const char* fileNamePlot)
+										 const char *fileNamePlot)
 {
 	DEBUG_START;
 
-	FILE* file = fopen(fileNamePlot, "w");
+	FILE *file = fopen(fileNamePlot, "w");
 
 	if (!file)
 	{
@@ -81,7 +80,7 @@ void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
 		DEBUG_END;
 		return;
 	}
-	
+
 	Vector3d ex(1., 0., 0.);
 	Vector3d ey(0., 1., 0.);
 
@@ -91,11 +90,11 @@ void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
 	/* Iterate via the array of contours. */
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
-		SContour* contourCurr = &contourData->contours[iContour];
+		SContour *contourCurr = &contourData->contours[iContour];
 		Vector3d normal = contourCurr->plane.norm;
 		normal.norm(1.);
 		double angle = atan2(normal * ey, normal * ex);
-		
+
 		/* Iterate via the array of sides of the current contour. */
 		for (int iSide = 0; iSide < contourCurr->ns; ++iSide)
 		{

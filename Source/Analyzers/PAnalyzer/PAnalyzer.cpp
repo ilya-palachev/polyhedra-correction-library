@@ -18,19 +18,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
-PAnalyzer::PAnalyzer() :
-		polyhedron()
+PAnalyzer::PAnalyzer() : polyhedron()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-PAnalyzer::PAnalyzer(PolyhedronPtr p) :
-		polyhedron(p)
+PAnalyzer::PAnalyzer(PolyhedronPtr p) : polyhedron(p)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -41,4 +39,3 @@ PAnalyzer::~PAnalyzer()
 	DEBUG_START;
 	DEBUG_END;
 }
-

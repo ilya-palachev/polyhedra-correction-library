@@ -20,16 +20,16 @@
 
 #include "PolyhedraCorrectionLibrary.h"
 
-void test_join_facets(const char* name, int type, int fid0, int fid1);
+void test_join_facets(const char *name, int type, int fid0, int fid1);
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 	test_join_facets("polyhedron-2010-11-25", 2, 37, 249);
 	DEBUG_END;
 }
 
-void test_join_facets(const char* name, int type, int fid0, int fid1)
+void test_join_facets(const char *name, int type, int fid0, int fid1)
 {
 	DEBUG_START;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
@@ -72,7 +72,7 @@ void test_join_facets(const char* name, int type, int fid0, int fid1)
 	}
 
 	poly.fprint_ply_scale(1000., file_name_out0,
-			"made-by-Polyhedron_join_facets_2");
+						  "made-by-Polyhedron_join_facets_2");
 
 	poly.get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	fprintf(stdout, "boundary : \n");
@@ -85,7 +85,7 @@ void test_join_facets(const char* name, int type, int fid0, int fid1)
 	//	poly.join_create_first_facet(fid0, fid1);
 
 	time_t seconds = time(NULL);
-	tm* timeinfo = localtime(&seconds);
+	tm *timeinfo = localtime(&seconds);
 
 	sprintf(file_name_out,
 			"../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d - %d.ply", name,
@@ -93,7 +93,7 @@ void test_join_facets(const char* name, int type, int fid0, int fid1)
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, fid0, fid1);
 
 	poly.fprint_ply_scale(1000., file_name_out,
-			"made-by-Polyhedron_join_facets_2");
+						  "made-by-Polyhedron_join_facets_2");
 
 	if (file_name_in != NULL)
 		delete[] file_name_in;

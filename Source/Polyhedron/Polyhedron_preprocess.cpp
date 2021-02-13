@@ -18,10 +18,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
 #include "DebugAssert.h"
-#include "Polyhedron/Polyhedron.h"
+#include "DebugPrint.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 
 void Polyhedron::preprocessAdjacency()

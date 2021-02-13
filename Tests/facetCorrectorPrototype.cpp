@@ -1,31 +1,33 @@
-#include <sys/time.h>
 #include <fstream>
+#include <sys/time.h>
 
-#include <CGAL/Simple_cartesian.h>
 #include <CGAL/Polyhedron_incremental_builder_3.h>
+#include <CGAL/Simple_cartesian.h>
 #include <CGAL/squared_distance_3.h>
-#include <coin/IpTNLP.hpp>
 #include <coin/IpIpoptApplication.hpp>
+#include <coin/IpTNLP.hpp>
 using namespace Ipopt;
 
-#include "Polyhedron_3/Polyhedron_3.h"
 #include "DataConstructors/ShadowContourConstructor/ShadowContourConstructor.h"
+#include "Polyhedron_3/Polyhedron_3.h"
 
 // A modifier creating a pyramid with the incremental builder.
-template <class HDS>
-class BuildPyramid: public CGAL::Modifier_base<HDS>
+template <class HDS> class BuildPyramid : public CGAL::Modifier_base<HDS>
 {
 private:
 	int numSideFacets_;
-public:
-	BuildPyramid(int numSideFacets): numSideFacets_(numSideFacets) {}
 
-	void operator()(HDS& hds)
+public:
+	BuildPyramid(int numSideFacets) : numSideFacets_(numSideFacets)
+	{
+	}
+
+	void operator()(HDS &hds)
 	{
 		// Postcondition: hds is a valid polyhedral surface.
 		CGAL::Polyhedron_incremental_builder_3<HDS> B(hds, true);
 		B.begin_surface(numSideFacets_ + 1, numSideFacets_ + 1,
-				4 * numSideFacets_);
+						4 * numSideFacets_);
 		for (int i = 0; i < numSideFacets_; ++i)
 		{
 			double angle = 2. * M_PI * i / numSideFacets_;
@@ -66,11 +68,11 @@ public:
 static double genRandomDouble(double maxDelta)
 {
 	DEBUG_START;
-	//srand((unsigned) time(0));
+	// srand((unsigned) time(0));
 	struct timeval t1;
 	gettimeofday(&t1, NULL);
 	srand(t1.tv_usec * t1.tv_sec);
-	
+
 	int randomInteger = rand();
 	double randomDouble = randomInteger;
 	const double halfRandMax = RAND_MAX * 0.5;
@@ -101,8 +103,8 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 	std::vector<Plane_3> planes(pyramid.size_of_facets() + 1);
 	int iPlane = 0;
-	for (auto facet = pyramid.facets_begin();
-			facet != pyramid.facets_end(); ++facet)
+	for (auto facet = pyramid.facets_begin(); facet != pyramid.facets_end();
+		 ++facet)
 	{
 		planes[iPlane++] = facet->plane();
 	}
@@ -112,7 +114,7 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 	int iPlaneCutting = intersection.size_of_facets();
 	iPlane = 0;
 	for (auto facet = intersection.facets_begin();
-			facet != intersection.facets_end(); ++facet)
+		 facet != intersection.facets_end(); ++facet)
 	{
 		if (facet->plane() == planeCutting)
 		{
@@ -121,12 +123,12 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 		}
 		++iPlane;
 	}
-	if (iPlaneCutting == (int) intersection.size_of_facets())
+	if (iPlaneCutting == (int)intersection.size_of_facets())
 		std::cerr << "Failed to find cutting plane in intersection"
-			<< std::endl;
+				  << std::endl;
 	else
 		std::cout << "Found cutting plane as the " << iPlaneCutting
-			<< "-th plane in the intersection." << std::endl;
+				  << "-th plane in the intersection." << std::endl;
 
 	return std::make_pair(intersection, iPlaneCutting);
 }
@@ -158,47 +160,42 @@ struct ProblemPointDescription
 	Point_3 initialPosition;
 };
 
-static
-std::set<int>
-buildFacetIndices(
-		Polyhedron_3 polyhedron,
-		int iFacetCutting)
+static std::set<int> buildFacetIndices(Polyhedron_3 polyhedron,
+									   int iFacetCutting)
 {
 	polyhedron.initialize_indices();
 	auto facet = polyhedron.facets_begin();
-	for (int i = 0; i < iFacetCutting; ++i, ++facet);
+	for (int i = 0; i < iFacetCutting; ++i, ++facet)
+		;
 	std::set<int> indicesCutting;
 	auto circulator = facet->facet_begin();
 	do
 	{
 		indicesCutting.insert(circulator->vertex()->id);
 		++circulator;
-	}
-	while (circulator != facet->facet_begin());
+	} while (circulator != facet->facet_begin());
 	std::cout << "Cutting facet contains " << facet->facet_degree()
-		<< " vertices:";
-	for (int i: indicesCutting)
+			  << " vertices:";
+	for (int i : indicesCutting)
 		std::cout << " " << i;
 	std::cout << std::endl;
 	return indicesCutting;
 }
 
-static
-std::vector<ProblemPointDescription>
-buildPlanesDescriptions(
-		Polyhedron_3 polyhedron,
-		int iFacetCutting,
-		std::set<int> indicesCutting)
+static std::vector<ProblemPointDescription>
+buildPlanesDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
+						std::set<int> indicesCutting)
 {
 	std::vector<ProblemPointDescription> descriptions;
 
 	/* Build planes descriptions. */
-	for (int iVertex: indicesCutting)
+	for (int iVertex : indicesCutting)
 	{
 		ProblemPointDescription description;
 		description.iVertex = iVertex;
 		auto vertex = polyhedron.vertices_begin();
-		for (int i = 0; i < iVertex; ++i, ++vertex);
+		for (int i = 0; i < iVertex; ++i, ++vertex)
+			;
 		description.initialPosition = vertex->point();
 		auto circulator = vertex->vertex_begin();
 		bool ifVertexCorrect = false;
@@ -206,54 +203,47 @@ buildPlanesDescriptions(
 		{
 			auto facet = circulator->facet();
 			int iFacet = facet->id;
-			std::cout << "Vertex " << iVertex
-				<< " is incident to facet " << iFacet
-				<< std::endl;
+			std::cout << "Vertex " << iVertex << " is incident to facet "
+					  << iFacet << std::endl;
 			Plane_3 plane = facet->plane();
-			double distance = CGAL::squared_distance<Kernel>(plane,
-					vertex->point());
+			double distance =
+				CGAL::squared_distance<Kernel>(plane, vertex->point());
 			if (iFacet != iFacetCutting)
 			{
 				description.planes.push_back(plane);
-				std::cout << "Plane: " << plane	<< std::endl;
-				std::cout << "Distance: " << distance
-					<< std::endl;
+				std::cout << "Plane: " << plane << std::endl;
+				std::cout << "Distance: " << distance << std::endl;
 				std::cout << "Adding it to vector, so now it "
-					<< "contains "
-					<< description.planes.size()
-					<< " planes." << std::endl;
+						  << "contains " << description.planes.size()
+						  << " planes." << std::endl;
 			}
 			else
 				ifVertexCorrect = true;
 			++circulator;
-		}
-		while (circulator != vertex->vertex_begin());
+		} while (circulator != vertex->vertex_begin());
 		if (!ifVertexCorrect)
 		{
 			std::cerr << "Vertex #" << iVertex
-				<< " is incorrect, doesn't belong to cutting "
-				<< "facet!" << std::endl;
-		       exit(EXIT_FAILURE);
+					  << " is incorrect, doesn't belong to cutting "
+					  << "facet!" << std::endl;
+			exit(EXIT_FAILURE);
 		}
 		descriptions.push_back(description);
 	}
 	return descriptions;
 }
 
-static
-std::vector<ProblemPointDescription>
-buildProblemPointDescriptions(
-		Polyhedron_3 polyhedron,
-		int iFacetCutting,
-		int numContours)
+static std::vector<ProblemPointDescription>
+buildProblemPointDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
+							  int numContours)
 {
 	auto indicesCutting = buildFacetIndices(polyhedron, iFacetCutting);
-	auto descriptions = buildPlanesDescriptions(polyhedron, iFacetCutting,
-			indicesCutting);
+	auto descriptions =
+		buildPlanesDescriptions(polyhedron, iFacetCutting, indicesCutting);
 
 	double angleFirst = genRandomDouble(0.1);
 	/* Generate contours and build lines description by them. */
-	for (int iContour = 0 ; iContour < numContours; ++iContour)
+	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		double angle = angleFirst + 2 * M_PI * iContour / numContours;
 		Vector_3 normal(cos(angle), sin(angle), 0.);
@@ -261,14 +251,14 @@ buildProblemPointDescriptions(
 		auto contour = result.first;
 		auto indices = result.second;
 		std::cout << "Generated contour #" << iContour << ":";
-		for (int iVertex: indices)
+		for (int iVertex : indices)
 			std::cout << " " << iVertex;
 		std::cout << std::endl;
-		for (int i = 0; i < (int) indices.size(); ++i)
+		for (int i = 0; i < (int)indices.size(); ++i)
 		{
 			int iVertex = indices[i];
 			int iDescription = descriptions.size();
-			for (int j = 0; j < (int) descriptions.size(); ++j)
+			for (int j = 0; j < (int)descriptions.size(); ++j)
 			{
 				if (descriptions[j].iVertex == iVertex)
 				{
@@ -276,7 +266,7 @@ buildProblemPointDescriptions(
 					break;
 				}
 			}
-			if (iDescription == (int) descriptions.size())
+			if (iDescription == (int)descriptions.size())
 				continue;
 			Point_3 point = contour[i];
 			Line_3 line(point, point + normal);
@@ -289,8 +279,8 @@ buildProblemPointDescriptions(
 
 void dumpBody(Polyhedron_3 body, const char *comment)
 {
-	std::string output_name = "polyhedron." + std::to_string(getpid())
-		+ "." + comment + ".ply";
+	std::string output_name =
+		"polyhedron." + std::to_string(getpid()) + "." + comment + ".ply";
 	std::cout << "Dumping to file " << output_name << "... ";
 	std::ofstream output;
 	output.open(output_name, std::ostream::out);
@@ -301,28 +291,27 @@ void dumpBody(Polyhedron_3 body, const char *comment)
 
 void dumpDescriptions(std::vector<ProblemPointDescription> descriptions)
 {
-	for (auto description: descriptions)
+	for (auto description : descriptions)
 	{
 		int iVertex = description.iVertex;
-		std::cout << "Target lines for vertex #" << iVertex << ":"
-			<< std::endl;
-		for (Line_3 line: description.lines)
+		std::cout << "Target lines for vertex #" << iVertex << ":" << std::endl;
+		for (Line_3 line : description.lines)
 			std::cout << "    " << line << std::endl;
 		std::cout << "    " << description.lines.size() << " in total"
-			<< std::endl;
+				  << std::endl;
 		std::cout << "Target planes for vertex #" << iVertex << ":"
-			<< std::endl;
-		for (Plane_3 plane: description.planes)
+				  << std::endl;
+		for (Plane_3 plane : description.planes)
 			std::cout << "        " << plane << std::endl;
-		std::cout << "         " << description.planes.size()
-			<< " in total" << std::endl;
+		std::cout << "         " << description.planes.size() << " in total"
+				  << std::endl;
 	}
 }
 
 /** The final position of plane. */
 static Plane_3 planeFinal_;
 
-class FacetCorrectionNLP: public TNLP
+class FacetCorrectionNLP : public TNLP
 {
 private:
 	/** The descriptions of the problem objects. */
@@ -334,34 +323,35 @@ private:
 public:
 	/** default constructor */
 	FacetCorrectionNLP(std::vector<ProblemPointDescription> descriptions,
-			Plane_3 planeInitial):
-		descriptions_(descriptions),
-		planeInitial_(planeInitial)
-	{}
+					   Plane_3 planeInitial) :
+		descriptions_(descriptions), planeInitial_(planeInitial)
+	{
+	}
 
 	/** default destructor */
-	virtual ~FacetCorrectionNLP() {}
-
+	virtual ~FacetCorrectionNLP()
+	{
+	}
 
 	/**@name Overloaded from TNLP */
 	//@{
 	/** Method to return some info about the nlp */
-	virtual bool get_nlp_info(Index& n, Index& m, Index& nnz_jac_g,
-		Index& nnz_h_lag, IndexStyleEnum& index_style)
+	virtual bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g,
+							  Index &nnz_h_lag, IndexStyleEnum &index_style)
 	{
-		n = 4 +                            /* u, h */
-			3 * descriptions_.size();  /* A_i */
+		n = 4 +						  /* u, h */
+			3 * descriptions_.size(); /* A_i */
 
 		int numPlanesConstraints = 0;
-		for (auto description: descriptions_)
+		for (auto description : descriptions_)
 			numPlanesConstraints += description.planes.size();
-		m = 1 +                             /* (u, u) = 1 */
-			descriptions_.size() +      /* (u,   A_i) = h   */
-			numPlanesConstraints;       /* (u_k, A_i) = h_k */
+		m = 1 +					   /* (u, u) = 1 */
+			descriptions_.size() + /* (u,   A_i) = h   */
+			numPlanesConstraints;  /* (u_k, A_i) = h_k */
 
-		nnz_jac_g = 3 +                     /* (u, u) = 1 */
-			7 * descriptions_.size() +  /* (u,   A_i) = h   */
-			3 * numPlanesConstraints;   /* (u_k, A_i) = h_k */
+		nnz_jac_g = 3 +						   /* (u, u) = 1 */
+					7 * descriptions_.size() + /* (u,   A_i) = h   */
+					3 * numPlanesConstraints;  /* (u_k, A_i) = h_k */
 
 		nnz_h_lag = 3 + 15 * descriptions_.size();
 
@@ -371,8 +361,8 @@ public:
 
 #define IPOPT_INFINITY 2e19
 	/** Method to return the bounds for my problem */
-	virtual bool get_bounds_info(Index n, Number* x_l, Number* x_u,
-		Index m, Number* g_l, Number* g_u)
+	virtual bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
+								 Number *g_l, Number *g_u)
 	{
 		for (Index i = 0; i < n; ++i)
 		{
@@ -389,10 +379,9 @@ public:
 	}
 
 	/** Method to return the starting point for the algorithm */
-	virtual bool get_starting_point(Index n, bool init_x, Number* x,
-		bool init_z, Number* z_L, Number* z_U,
-		Index m, bool init_lambda,
-		Number* lambda)
+	virtual bool get_starting_point(Index n, bool init_x, Number *x,
+									bool init_z, Number *z_L, Number *z_U,
+									Index m, bool init_lambda, Number *lambda)
 	{
 		assert(init_x == true);
 		assert(init_z == false);
@@ -402,7 +391,7 @@ public:
 		x[2] = planeInitial_.c();
 		x[3] = planeInitial_.d();
 		Index i = 4;
-		for (auto description: descriptions_)
+		for (auto description : descriptions_)
 		{
 			x[i + 0] = description.initialPosition.x();
 			x[i + 1] = description.initialPosition.y();
@@ -413,54 +402,52 @@ public:
 	}
 
 	/** Method to return the objective value */
-	virtual bool eval_f(Index n, const Number* x, bool new_x,
-			Number& obj_value)
+	virtual bool eval_f(Index n, const Number *x, bool new_x, Number &obj_value)
 	{
 		Index i = 4;
 		obj_value = 0.;
-		for (auto description: descriptions_)
+		for (auto description : descriptions_)
 		{
 			Point_3 point(x[i], x[i + 1], x[i + 2]);
-			for (Line_3 line: description.lines)
-				obj_value += CGAL::squared_distance(point,
-						line);
+			for (Line_3 line : description.lines)
+				obj_value += CGAL::squared_distance(point, line);
 			i += 3;
 		}
 		return true;
 	}
 
 	/** Method to return the gradient of the objective */
-	virtual bool eval_grad_f(Index n, const Number* x, bool new_x,
-			Number* grad_f)
+	virtual bool eval_grad_f(Index n, const Number *x, bool new_x,
+							 Number *grad_f)
 	{
 		for (Index i = 0; i < n; ++i)
 			grad_f[i] = 0.;
 		Index i = 4;
-		for (auto description: descriptions_)
+		for (auto description : descriptions_)
 		{
 			Point_3 point(x[i], x[i + 1], x[i + 2]);
-			for (Line_3 line: description.lines)
+			for (Line_3 line : description.lines)
 			{
 				Vector_3 direction = line.to_vector();
 				Point_3 projection = line.projection(point);
 				grad_f[i + 0] += (projection.x() - point.x()) *
-					(direction.x() * direction.x() - 1.);
+								 (direction.x() * direction.x() - 1.);
 				grad_f[i + 0] += (projection.y() - point.y()) *
-					(direction.y() * direction.x());
+								 (direction.y() * direction.x());
 				grad_f[i + 0] += (projection.z() - point.z()) *
-					(direction.z() * direction.x());
+								 (direction.z() * direction.x());
 				grad_f[i + 1] += (projection.x() - point.x()) *
-					(direction.x() * direction.y());
+								 (direction.x() * direction.y());
 				grad_f[i + 1] += (projection.y() - point.y()) *
-					(direction.y() * direction.y() - 1.);
+								 (direction.y() * direction.y() - 1.);
 				grad_f[i + 1] += (projection.z() - point.z()) *
-					(direction.z() * direction.y());
+								 (direction.z() * direction.y());
 				grad_f[i + 2] += (projection.x() - point.x()) *
-					(direction.x() * direction.z());
+								 (direction.x() * direction.z());
 				grad_f[i + 2] += (projection.y() - point.y()) *
-					(direction.y() * direction.z());
+								 (direction.y() * direction.z());
 				grad_f[i + 2] += (projection.z() - point.z()) *
-					(direction.z() * direction.z() - 1.);
+								 (direction.z() * direction.z() - 1.);
 			}
 			grad_f[i + 0] *= 2.;
 			grad_f[i + 1] *= 2.;
@@ -471,29 +458,26 @@ public:
 	}
 
 	/** Method to return the constraint residuals */
-	virtual bool eval_g(Index n, const Number* x, bool new_x, Index m,
-			Number* g)
+	virtual bool eval_g(Index n, const Number *x, bool new_x, Index m,
+						Number *g)
 	{
 		Vector_3 normalMoved(x[0], x[1], x[2]);
 		Plane_3 planeMoved(x[0], x[1], x[2], x[3]);
 		Index iConstraint = 0;
 		g[iConstraint++] = normalMoved.squared_length();
-		for (int iPoint = 0; iPoint < (int) descriptions_.size();
-				++iPoint)
+		for (int iPoint = 0; iPoint < (int)descriptions_.size(); ++iPoint)
 		{
 			Index i = 4 + 3 * iPoint;
 			Vector_3 point(x[i], x[i + 1], x[i + 2]);
 			g[iConstraint++] = normalMoved * point + planeMoved.d();
 		}
-		for (int iPoint = 0; iPoint < (int) descriptions_.size();
-				++iPoint)
+		for (int iPoint = 0; iPoint < (int)descriptions_.size(); ++iPoint)
 		{
 			Index i = 4 + 3 * iPoint;
 			Vector_3 point(x[i], x[i + 1], x[i + 2]);
-			for (Plane_3 plane: descriptions_[iPoint].planes)
+			for (Plane_3 plane : descriptions_[iPoint].planes)
 			{
-				Vector_3 normal(plane.a(), plane.b(),
-						plane.c());
+				Vector_3 normal(plane.a(), plane.b(), plane.c());
 				g[iConstraint++] = normal * point + plane.d();
 			}
 		}
@@ -501,12 +485,12 @@ public:
 	}
 
 	/** Method to return:
-	*   1) The structure of the jacobian (if "values" is NULL)
-	*   2) The values of the jacobian (if "values" is not NULL)
-	*/
-	virtual bool eval_jac_g(Index n, const Number* x, bool new_x,
-		Index m, Index nele_jac, Index* iRow, Index *jCol,
-		Number* values)
+	 *   1) The structure of the jacobian (if "values" is NULL)
+	 *   2) The values of the jacobian (if "values" is not NULL)
+	 */
+	virtual bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
+							Index nele_jac, Index *iRow, Index *jCol,
+							Number *values)
 	{
 		Index *iRow_ = new Index[nele_jac];
 		Index *jCol_ = new Index[nele_jac];
@@ -541,20 +525,17 @@ public:
 			Index iVariableFirst = 4 + 3 * iPoint;
 			Number point[4];
 			for (Index iVariable = 0; iVariable < 3; ++iVariable)
-				point[iVariable] =
-					x_[iVariableFirst + iVariable];
+				point[iVariable] = x_[iVariableFirst + iVariable];
 			point[3] = 1.;
 
-			for (Index iVariable = 0; iVariable < 4;
-					++iVariable)
+			for (Index iVariable = 0; iVariable < 4; ++iVariable)
 			{
 				iRow_[iNonzero] = iConstraint;
 				jCol_[iNonzero] = iVariable;
 				values_[iNonzero] = point[iVariable];
 				++iNonzero;
 			}
-			for (Index iVariable = 0; iVariable < 3;
-					++iVariable)
+			for (Index iVariable = 0; iVariable < 3; ++iVariable)
 			{
 				iRow_[iNonzero] = iConstraint;
 				jCol_[iNonzero] = iVariableFirst + iVariable;
@@ -566,8 +547,7 @@ public:
 
 		for (Index iPoint = 0; iPoint < numPoints; ++iPoint)
 		{
-			for (Plane_3 plane:
-					descriptions_[iPoint].planes)
+			for (Plane_3 plane : descriptions_[iPoint].planes)
 			{
 				Number planeFixed[4];
 				planeFixed[0] = plane.a();
@@ -576,13 +556,11 @@ public:
 				planeFixed[3] = plane.d();
 				Index iVariableFirst = 4 + 3 * iPoint;
 				for (Index iVariable = iVariableFirst;
-						iVariable < iVariableFirst + 3;
-						++iVariable)
+					 iVariable < iVariableFirst + 3; ++iVariable)
 				{
 					iRow_[iNonzero] = iConstraint;
 					jCol_[iNonzero] = iVariable;
-					values_[iNonzero] = planeFixed[iVariable
-						- iVariableFirst];
+					values_[iNonzero] = planeFixed[iVariable - iVariableFirst];
 					++iNonzero;
 				}
 				++iConstraint;
@@ -611,13 +589,14 @@ public:
 	}
 
 	/** Method to return:
-	*   1) The structure of the hessian of the lagrangian (if "values" is NULL)
-	*   2) The values of the hessian of the lagrangian (if "values" is not NULL)
-	*/
-	virtual bool eval_h(Index n, const Number* x, bool new_x,
-		Number obj_factor, Index m, const Number* lambda,
-		bool new_lambda, Index nele_hess, Index* iRow,
-		Index* jCol, Number* values)
+	 *   1) The structure of the hessian of the lagrangian (if "values" is NULL)
+	 *   2) The values of the hessian of the lagrangian (if "values" is not
+	 * NULL)
+	 */
+	virtual bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
+						Index m, const Number *lambda, bool new_lambda,
+						Index nele_hess, Index *iRow, Index *jCol,
+						Number *values)
 	{
 		Index *iRow_ = new Index[nele_hess];
 		Index *jCol_ = new Index[nele_hess];
@@ -645,7 +624,6 @@ public:
 				values_[iNonzero] = lambda_[1 + iPoint];
 				++iNonzero;
 			}
-
 		}
 
 		for (int iPoint = 0; iPoint < numPoints; ++iPoint)
@@ -653,7 +631,7 @@ public:
 			std::vector<Number> d[3][3];
 			auto lines = descriptions_[iPoint].lines;
 			int numLines = lines.size();
-			for (auto line: lines)
+			for (auto line : lines)
 			{
 				auto vector = line.to_vector();
 				double x = vector.x();
@@ -677,7 +655,7 @@ public:
 				jCol_[iNonzero] = i;
 				values_[iNonzero] = lambda_[1 + iPoint];
 				++iNonzero;
-				
+
 				for (int j = 0; j < 3; ++j)
 				{
 					int col = 4 + 3 * iPoint + j;
@@ -686,12 +664,9 @@ public:
 					values_[iNonzero] = 0.;
 					for (int k = 0; k < 3; ++k)
 					{
-						for (int l = 0; l < numLines;
-								++l)
+						for (int l = 0; l < numLines; ++l)
 						{
-							values_[iNonzero] +=
-								d[k][i][l] *
-								d[k][j][l] * 2.;
+							values_[iNonzero] += d[k][i][l] * d[k][j][l] * 2.;
 						}
 					}
 					++iNonzero;
@@ -724,33 +699,34 @@ public:
 
 	/** @name Solution Methods */
 	//@{
-	/** This method is called when the algorithm is complete so the TNLP can store/write the solution */
-	virtual void finalize_solution(SolverReturn status,
-		Index n, const Number* x, const Number* z_L, const Number* z_U,
-		Index m, const Number* g, const Number* lambda,
-		Number obj_value,
-		const IpoptData* ip_data,
-		IpoptCalculatedQuantities* ip_cq)
+	/** This method is called when the algorithm is complete so the TNLP can
+	 * store/write the solution */
+	virtual void finalize_solution(SolverReturn status, Index n,
+								   const Number *x, const Number *z_L,
+								   const Number *z_U, Index m, const Number *g,
+								   const Number *lambda, Number obj_value,
+								   const IpoptData *ip_data,
+								   IpoptCalculatedQuantities *ip_cq)
 	{
 		planeFinal_ = Plane_3(x[0], x[1], x[2], x[3]);
 	}
 	//@}
 
-	private:
+private:
 	/**@name Methods to block default compiler methods.
-	* The compiler automatically generates the following three methods.
-	*  Since the default compiler implementation is generally not what
-	*  you want (for all but the most simple classes), we usually
-	*  put the declarations of these methods in the private section
-	*  and never implement them. This prevents the compiler from
-	*  implementing an incorrect "default" behavior without us
-	*  knowing. (See Scott Meyers book, "Effective C++")
-	*
-	*/
+	 * The compiler automatically generates the following three methods.
+	 *  Since the default compiler implementation is generally not what
+	 *  you want (for all but the most simple classes), we usually
+	 *  put the declarations of these methods in the private section
+	 *  and never implement them. This prevents the compiler from
+	 *  implementing an incorrect "default" behavior without us
+	 *  knowing. (See Scott Meyers book, "Effective C++")
+	 *
+	 */
 	//@{
 	//  HS071_NLP();
-	FacetCorrectionNLP(const FacetCorrectionNLP&);
-	FacetCorrectionNLP& operator=(const FacetCorrectionNLP&);
+	FacetCorrectionNLP(const FacetCorrectionNLP &);
+	FacetCorrectionNLP &operator=(const FacetCorrectionNLP &);
 	//@}
 };
 
@@ -759,14 +735,14 @@ int main(int argc, char **argv)
 	if (argc != 3)
 	{
 		std::cerr << "Usage: " << argv[0]
-			<< " <pyramid sides number> <shadow contours number>"
-			<< std::endl;
+				  << " <pyramid sides number> <shadow contours number>"
+				  << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	int numSidesPyramid = atoi(argv[1]);
 	int numShadowContours = atoi(argv[2]);
-	std::cout << "We will build " << numShadowContours
-		<< " shadow contours." << std::endl;
+	std::cout << "We will build " << numShadowContours << " shadow contours."
+			  << std::endl;
 
 	Polyhedron_3 pyramid;
 	BuildPyramid<HalfedgeDS> pyramidBuilder(numSidesPyramid);
@@ -775,13 +751,14 @@ int main(int argc, char **argv)
 	Polyhedron_3 pyramidCut = result.first;
 	int iFacetCutting = result.second;
 	dumpBody(pyramidCut, "initial");
-	
-	auto descriptions = buildProblemPointDescriptions(
-			pyramidCut, iFacetCutting, numShadowContours);
+
+	auto descriptions = buildProblemPointDescriptions(pyramidCut, iFacetCutting,
+													  numShadowContours);
 	dumpDescriptions(descriptions);
 
 	auto it = pyramidCut.facets_begin();
-	for (int i = 0; i < iFacetCutting; ++i, ++it);
+	for (int i = 0; i < iFacetCutting; ++i, ++it)
+		;
 	Plane_3 plane = it->plane();
 	Plane_3 planeTrue = plane;
 	char *maxDeltaStr = getenv("PLANE_SHIFT");
@@ -795,15 +772,12 @@ int main(int argc, char **argv)
 		plane = Plane_3(a, b, c, d);
 		if (!getenv("NO_POINT_SHIFT"))
 		{
-			for (auto &description: descriptions)
+			for (auto &description : descriptions)
 			{
 				Point_3 point = description.initialPosition;
-				double x = point.x() +
-					genRandomDouble(maxDelta);
-				double y = point.y() +
-					genRandomDouble(maxDelta);
-				double z = point.z() +
-					genRandomDouble(maxDelta);
+				double x = point.x() + genRandomDouble(maxDelta);
+				double y = point.y() + genRandomDouble(maxDelta);
+				double z = point.z() + genRandomDouble(maxDelta);
 				description.initialPosition = Point_3(x, y, z);
 			}
 		}
@@ -819,9 +793,10 @@ int main(int argc, char **argv)
 	status = app->Initialize();
 	if (status != Solve_Succeeded)
 	{
-		std::cout << std::endl << std::endl
-			<< "*** Error during initialization!" << std::endl;
-		return (int) status;
+		std::cout << std::endl
+				  << std::endl
+				  << "*** Error during initialization!" << std::endl;
+		return (int)status;
 	}
 	clock_t begin, end;
 	begin = clock();
@@ -831,16 +806,17 @@ int main(int argc, char **argv)
 	std::cout << "Time spent: " << time_spent << std::endl;
 	if (status == Solve_Succeeded)
 	{
-		std::cout << std::endl << std::endl << "*** The problem solved!"
-			<< std::endl;
+		std::cout << std::endl
+				  << std::endl
+				  << "*** The problem solved!" << std::endl;
 		std::cout << "True    plane: " << planeTrue << std::endl;
 		std::cout << "Initial plane: " << plane << "(maybe shifted)"
-			<< std::endl;
+				  << std::endl;
 		std::cout << "Final   plane: " << planeFinal_ << std::endl;
 		std::vector<Plane_3> planes;
 		int iFacet = 0;
 		for (auto facet = pyramidCut.facets_begin();
-				facet != pyramidCut.facets_end(); ++facet)
+			 facet != pyramidCut.facets_end(); ++facet)
 		{
 			if (iFacet == iFacetCutting)
 				planes.push_back(planeFinal_);
@@ -852,8 +828,9 @@ int main(int argc, char **argv)
 		dumpBody(pyramidFinal, "final");
 	}
 	else
-		std::cout << std::endl << std::endl << "*** The problem FAILED!"
-			<< std::endl;
+		std::cout << std::endl
+				  << std::endl
+				  << "*** The problem FAILED!" << std::endl;
 
-	return (int) status;
+	return (int)status;
 }

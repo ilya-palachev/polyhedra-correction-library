@@ -22,11 +22,11 @@
 #undef __STRICT_ANSI__
 #include <cmath>
 
-#include "DebugPrint.h"
 #include "DebugAssert.h"
+#include "DebugPrint.h"
 #include "Polyhedron/Facet/Facet.h"
 
-bool Facet::consect_x(double y, double z, double& x)
+bool Facet::consect_x(double y, double z, double &x)
 {
 	DEBUG_START;
 
@@ -34,8 +34,8 @@ bool Facet::consect_x(double y, double z, double& x)
 	double u, delta, alpha, sum;
 	Vector3d A, A0, A1, normal;
 	double a, b, c, d;
-	
-	Vector3d* vertices = NULL;
+
+	Vector3d *vertices = NULL;
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
 		vertices = polyhedron->vertices;
@@ -61,7 +61,7 @@ bool Facet::consect_x(double y, double z, double& x)
 	A = Vector3d(u, y, z);
 
 	normal.norm(1.);
-    DEBUG_PRINT("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
+	DEBUG_PRINT("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
 
 	sum = 0.;
 	for (i = 0; i < numVertices; ++i)
@@ -71,7 +71,7 @@ bool Facet::consect_x(double y, double z, double& x)
 		delta = (A0 % A1) * normal;
 		delta /= sqrt(qmod(A0) * qmod(A1));
 		alpha = asin(delta);
-        DEBUG_PRINT(" %lf ", alpha / M_PI * 180);
+		DEBUG_PRINT(" %lf ", alpha / M_PI * 180);
 		sum += alpha;
 	}
 
@@ -90,4 +90,3 @@ bool Facet::consect_x(double y, double z, double& x)
 
 	DEBUG_END;
 }
-

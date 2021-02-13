@@ -21,23 +21,23 @@
 #ifndef POINTSHIFTER_H_
 #define POINTSHIFTER_H_
 
-#include "Vector3d.h"
 #include "Correctors/PCorrector/PCorrector.h"
+#include "Vector3d.h"
 
-class PointShifter: public PCorrector
+class PointShifter : public PCorrector
 {
 private:
 	int n;
-	double* x;
-	double* x1;
-	double* fx;
-	double* A;
+	double *x;
+	double *x1;
+	double *fx;
+	double *A;
 	int id;
-	int* sum;
-	double* tmp0;
-	double* tmp1;
-	double* tmp2;
-	double* tmp3;
+	int *sum;
+	double *tmp0;
+	double *tmp1;
+	double *tmp2;
+	double *tmp3;
 
 	void calculateFunctional();
 	void calculateFunctionalDerivative();
@@ -48,7 +48,7 @@ private:
 public:
 	PointShifter();
 	PointShifter(PolyhedronPtr p);
-	PointShifter(Polyhedron* p);
+	PointShifter(Polyhedron *p);
 	~PointShifter();
 
 	void run(int id, Vector3d delta);

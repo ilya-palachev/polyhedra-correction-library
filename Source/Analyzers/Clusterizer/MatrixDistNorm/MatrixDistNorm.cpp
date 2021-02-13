@@ -19,21 +19,22 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
 #include "Analyzers/Clusterizer/MatrixDistNorm/MatrixDistNorm.h"
 #include "Analyzers/Clusterizer/ClusterNorm/ClusterNorm.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
 
-MatrixDistNorm::MatrixDistNorm() :
-		nMax(0), n(0), matrix(NULL), ifStay(NULL)
+MatrixDistNorm::MatrixDistNorm() : nMax(0), n(0), matrix(NULL), ifStay(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
-		nMax(nMax_orig), n(0), matrix(new double[nMax_orig * nMax_orig]),
-		ifStay(new bool[nMax_orig])
+	nMax(nMax_orig),
+	n(0),
+	matrix(new double[nMax_orig * nMax_orig]),
+	ifStay(new bool[nMax_orig])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax_orig; ++i)
@@ -41,9 +42,11 @@ MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
 	DEBUG_END;
 }
 
-MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm& orig) :
-		nMax(orig.nMax), n(orig.n), matrix(new double[orig.nMax * orig.nMax]),
-		ifStay(new bool[orig.nMax])
+MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm &orig) :
+	nMax(orig.nMax),
+	n(orig.n),
+	matrix(new double[orig.nMax * orig.nMax]),
+	ifStay(new bool[orig.nMax])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax * nMax; ++i)
@@ -73,7 +76,7 @@ MatrixDistNorm::~MatrixDistNorm()
 	DEBUG_END;
 }
 
-void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
+void MatrixDistNorm::build(int m, TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	if (m > nMax)
@@ -88,8 +91,8 @@ void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
 	{
 		for (int j = i + 1; j < n; ++j)
 		{
-			distance = distCluster(*(nodeArray[i].cluster),
-					*(nodeArray[j].cluster));
+			distance =
+				distCluster(*(nodeArray[i].cluster), *(nodeArray[j].cluster));
 			DEBUG_PRINT("distance (%d, %d) = %lf\n", i, j, distance);
 			matrix[i * m + j] = distance;
 			matrix[j * m + i] = distance;
@@ -102,7 +105,7 @@ void MatrixDistNorm::build(int m, TreeClusterNormNode* nodeArray)
 	DEBUG_END;
 }
 
-double MatrixDistNorm::findMin(int& imin, int& jmin)
+double MatrixDistNorm::findMin(int &imin, int &jmin)
 {
 	DEBUG_START;
 	double min = 0., distance = 0.;
@@ -128,7 +131,7 @@ double MatrixDistNorm::findMin(int& imin, int& jmin)
 	return min;
 }
 
-void MatrixDistNorm::rebuild(int imin, int jmin, TreeClusterNormNode* nodeArray)
+void MatrixDistNorm::rebuild(int imin, int jmin, TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	double distance;
@@ -148,7 +151,7 @@ void MatrixDistNorm::rebuild(int imin, int jmin, TreeClusterNormNode* nodeArray)
 	DEBUG_END;
 }
 
-void MatrixDistNorm::fprint_clusters(FILE* file, TreeClusterNormNode* nodeArray)
+void MatrixDistNorm::fprint_clusters(FILE *file, TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	for (int i = 0; i < n; ++i)
@@ -163,8 +166,8 @@ void MatrixDistNorm::fprint_clusters(FILE* file, TreeClusterNormNode* nodeArray)
 	DEBUG_END;
 }
 
-void MatrixDistNorm::fprint_clusters2(FILE* file,
-		TreeClusterNormNode* nodeArray)
+void MatrixDistNorm::fprint_clusters2(FILE *file,
+									  TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	int numcl = 0;
@@ -191,8 +194,8 @@ void MatrixDistNorm::fprint_clusters2(FILE* file,
 	DEBUG_END;
 }
 
-double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
-		TreeClusterNormNode* nodeArray2)
+double MatrixDistNorm::sqNorm(TreeClusterNormNode *nodeArray1,
+							  TreeClusterNormNode *nodeArray2)
 {
 	DEBUG_START;
 	int numcl = 0;
@@ -221,7 +224,7 @@ double MatrixDistNorm::sqNorm(TreeClusterNormNode* nodeArray1,
 	return norm / numcl;
 }
 
-void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
+void MatrixDistNorm::setColors(TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	int numcl = 0;
@@ -377,7 +380,7 @@ void MatrixDistNorm::setColors(TreeClusterNormNode* nodeArray)
 	DEBUG_END;
 }
 
-void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
+void MatrixDistNorm::setColors2(TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	int numcl = 0;
@@ -530,7 +533,7 @@ void MatrixDistNorm::setColors2(TreeClusterNormNode* nodeArray)
 	DEBUG_END;
 }
 
-void MatrixDistNorm::fprint(FILE* file)
+void MatrixDistNorm::fprint(FILE *file)
 {
 	DEBUG_START;
 	REGULAR_PRINT(file, "MatrixDistNorm : \n\n");
@@ -543,14 +546,14 @@ void MatrixDistNorm::fprint(FILE* file)
 	{
 		for (int j = i + 1; j < n; ++j)
 		{
-			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n",
-					i, j, matrix[i * n + j]);
+			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n", i, j,
+						  matrix[i * n + j]);
 		}
 	}
 	DEBUG_END;
 }
 
-void MatrixDistNorm::fprint_ifStay(FILE* file)
+void MatrixDistNorm::fprint_ifStay(FILE *file)
 {
 	DEBUG_START;
 	for (int i = 0; i < n; ++i)
@@ -573,4 +576,3 @@ void MatrixDistNorm::fprint_ifStay(FILE* file)
 	REGULAR_PRINT(file, "\n");
 	DEBUG_END;
 }
-

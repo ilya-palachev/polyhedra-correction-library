@@ -28,15 +28,15 @@
 #ifndef SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_PLANE_H
 #define SUPPORT_FUNCTION_DATA_ITEM_EXTRACTOR_BY_PLANE_H
 
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.h"
 #include "DebugPrint.h"
 #include "Vector3d.h"
-#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractor.h"
 
 const double EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION = 1e-14;
 
 /** Extractor of support function data item from given contour side. */
-class SupportFunctionDataItemExtractorByPlane :
-	public SupportFunctionDataItemExtractor
+class SupportFunctionDataItemExtractorByPlane
+	: public SupportFunctionDataItemExtractor
 {
 private:
 	/** The plane of the shadow contour. */

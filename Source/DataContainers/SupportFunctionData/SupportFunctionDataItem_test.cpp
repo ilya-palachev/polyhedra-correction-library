@@ -41,8 +41,7 @@ protected:
 	/** Initializes the test. */
 	void SetUp()
 	{
-		item.reset(new SupportFunctionDataItem(Vector3d(1., 2., 3.),
-			4.));
+		item.reset(new SupportFunctionDataItem(Vector3d(1., 2., 3.), 4.));
 	}
 
 	/** Finalizes the test. */

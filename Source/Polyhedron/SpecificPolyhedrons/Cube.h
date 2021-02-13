@@ -23,8 +23,8 @@
 
 #include <memory>
 
-#include "Vector3d.h"
 #include "Polyhedron/Polyhedron.h"
+#include "Vector3d.h"
 
 class Cube : public Polyhedron
 {
@@ -33,6 +33,7 @@ private:
 	Vector3d center;
 
 	void init();
+
 public:
 	Cube();
 	Cube(double h);
@@ -42,4 +43,3 @@ public:
 };
 
 #endif /* CUBE_H_ */
-

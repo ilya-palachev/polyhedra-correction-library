@@ -26,9 +26,9 @@
 
 #ifdef USE_CLP
 
-#include <glpk.h>
-#include <coin/ClpSimplex.hpp>
 #include "Recoverer/SupportFunctionEstimator.h"
+#include <coin/ClpSimplex.hpp>
+#include <glpk.h>
 
 #ifndef CLPSUPPORTFUNCTIONESTIMATOR_H_
 #define CLPSUPPORTFUNCTIONESTIMATOR_H_
@@ -36,11 +36,12 @@
 /**
  * Clp-based linear programming solver used for support function estimation.
  */
-class ClpSupportFunctionEstimator: public SupportFunctionEstimator
+class ClpSupportFunctionEstimator : public SupportFunctionEstimator
 {
 protected:
 	/** Whether to run the CLP as a sommand-line program. */
 	bool ifCommandlineMode;
+
 public:
 	/**
 	 * Default constructor
@@ -49,7 +50,7 @@ public:
 	 * @param ifCommandlineMode	Whether to run through the command line
 	 */
 	ClpSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
-			bool ifCommandlineMode = false);
+								bool ifCommandlineMode = false);
 
 	/** Default destructor. */
 	~ClpSupportFunctionEstimator();
@@ -63,7 +64,8 @@ public:
 };
 
 /** The same as above, but CLP is run through the command line. */
-class ClpCommandLineSupportFunctionEstimator: public ClpSupportFunctionEstimator
+class ClpCommandLineSupportFunctionEstimator
+	: public ClpSupportFunctionEstimator
 {
 public:
 	/**
@@ -72,7 +74,7 @@ public:
 	 * @param data			Support function estimation data (input)
 	 */
 	ClpCommandLineSupportFunctionEstimator(
-			SupportFunctionEstimationDataPtr data);
+		SupportFunctionEstimationDataPtr data);
 };
 
 #endif /* CLPSUPPORTFUNCTIONESTIMATOR_H_ */

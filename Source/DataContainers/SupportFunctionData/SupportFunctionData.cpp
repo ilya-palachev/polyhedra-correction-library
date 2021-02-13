@@ -28,17 +28,15 @@
 #if 0
 #include <Eigen/Dense>
 #endif
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "PCLDumper.h"
-#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
 #include "Analyzers/SizeCalculator/SizeCalculator.h"
+#include "DataContainers/SupportFunctionData/SupportFunctionData.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "PCLDumper.h"
 #include "Polyhedron_3/Polyhedron_3.h"
 #include "Recoverer/Colouring.h"
 
-
-SupportFunctionData::SupportFunctionData() :
-	items()
+SupportFunctionData::SupportFunctionData() : items()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -69,7 +67,7 @@ SupportFunctionData::SupportFunctionData(const SupportFunctionDataPtr data) :
 }
 
 SupportFunctionData::SupportFunctionData(
-		const std::vector<SupportFunctionDataItem> itemsGiven)
+	const std::vector<SupportFunctionDataItem> itemsGiven)
 {
 	DEBUG_START;
 	items = itemsGiven;
@@ -95,8 +93,8 @@ SupportFunctionData::~SupportFunctionData()
 	DEBUG_END;
 }
 
-SupportFunctionData &SupportFunctionData::operator=(const SupportFunctionData
-		&data)
+SupportFunctionData &
+SupportFunctionData::operator=(const SupportFunctionData &data)
 {
 	DEBUG_START;
 	items = data.items;
@@ -108,7 +106,7 @@ SupportFunctionDataItem &SupportFunctionData::operator[](const int iPosition)
 {
 	DEBUG_START;
 	ASSERT(iPosition >= 0);
-	ASSERT(items.size() > (unsigned) iPosition);
+	ASSERT(items.size() > (unsigned)iPosition);
 	DEBUG_END;
 	return items[iPosition];
 }
@@ -135,13 +133,13 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 		 * normalized here.
 		 */
 		itemOrig.direction.norm(1.);
-		
+
 		bool ifEqual = false;
 		for (auto itemPrev = itemsUnequal.begin();
-			itemPrev != itemsUnequal.end(); ++itemPrev)
+			 itemPrev != itemsUnequal.end(); ++itemPrev)
 		{
 			if (equal(itemOrig.direction, itemPrev->direction,
-				EPS_SUPPORT_DIRECTION_EQUALITY))
+					  EPS_SUPPORT_DIRECTION_EQUALITY))
 			{
 				std::cout << "Found equal items!" << std::endl;
 				ifEqual = true;
@@ -153,8 +151,7 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 			itemsUnequal.push_back(*item);
 		}
 	}
-	SupportFunctionDataPtr dataUnequal(new
-		SupportFunctionData(itemsUnequal));
+	SupportFunctionDataPtr dataUnequal(new SupportFunctionData(itemsUnequal));
 	DEBUG_END;
 	return dataUnequal;
 }
@@ -179,8 +176,8 @@ std::vector<Plane_3> SupportFunctionData::supportPlanes()
 	for (auto item = items.begin(); item != items.end(); ++item)
 	{
 		ASSERT(item->value > 0);
-		Plane_3 plane(item->direction.x, item->direction.y,
-				item->direction.z, -item->value);
+		Plane_3 plane(item->direction.x, item->direction.y, item->direction.z,
+					  -item->value);
 		ASSERT(equal(plane.a(), item->direction.x));
 		ASSERT(equal(plane.b(), item->direction.y));
 		ASSERT(equal(plane.c(), item->direction.z));
@@ -195,7 +192,7 @@ std::vector<Vector3d> SupportFunctionData::supportPoints()
 {
 	DEBUG_START;
 	std::vector<Vector3d> points;
-	for (auto &item: items)
+	for (auto &item : items)
 	{
 		ASSERT(item.info);
 		if (!item.info)
@@ -217,7 +214,7 @@ std::vector<Vector3d> SupportFunctionData::supportPoints()
 static double genRandomDouble(double maxDelta)
 {
 	DEBUG_START;
-	//srand((unsigned) time(0));
+	// srand((unsigned) time(0));
 	struct timeval t1;
 	gettimeofday(&t1, NULL);
 	srand(t1.tv_usec * t1.tv_sec);
@@ -234,26 +231,24 @@ static double genRandomDouble(double maxDelta)
 	return randomDouble;
 }
 
-
 void SupportFunctionData::shiftValues(double maxDelta)
 {
 	DEBUG_START;
 #ifndef NDEBUG
-	for (auto &item: items)
+	for (auto &item : items)
 	{
 		DEBUG_PRINT("old value: %lf", item.value);
 	}
 #endif /* NDEBUG */
-	for (auto &item: items)
+	for (auto &item : items)
 	{
 		double randomDouble = genRandomDouble(maxDelta);
 		double DEBUG_VARIABLE oldValue = item.value;
 		item.value += randomDouble;
-		DEBUG_PRINT("Changed value from %lf to %lf", oldValue,
-				item.value);
+		DEBUG_PRINT("Changed value from %lf to %lf", oldValue, item.value);
 	}
 #ifndef NDEBUG
-	for (auto &item: items)
+	for (auto &item : items)
 	{
 		DEBUG_PRINT("new value: %lf", item.value);
 	}
@@ -269,8 +264,8 @@ std::vector<Point> SupportFunctionData::getShiftedDualPoints(double epsilon)
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = items[i];
-		Plane_3 plane(item.direction.x, item.direction.y,
-				item.direction.z, -item.value - epsilon);
+		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z,
+					  -item.value - epsilon);
 		Point_3 point = dual(plane);
 		points.push_back(Point(point.x(), point.y(), point.z()));
 	}
@@ -286,8 +281,8 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = items[i];
-		Plane_3 plane(item.direction.x, item.direction.y,
-				item.direction.z, -item.value - epsilon);
+		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z,
+					  -item.value - epsilon);
 		Point_3 point = dual(plane);
 		points.push_back(point);
 	}
@@ -295,18 +290,18 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
 	return points;
 }
 
-std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
-		std::vector<double> epsilons)
+std::vector<Point_3>
+SupportFunctionData::getShiftedDualPoints_3(std::vector<double> epsilons)
 {
 	DEBUG_START;
-	ASSERT((int) epsilons.size() == size());
+	ASSERT((int)epsilons.size() == size());
 	std::vector<Point_3> points;
 	long int numDirections = size();
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = items[i];
-		Plane_3 plane(item.direction.x, item.direction.y,
-				item.direction.z, -item.value - epsilons[i]);
+		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z,
+					  -item.value - epsilons[i]);
 		Point_3 point = dual(plane);
 		points.push_back(point);
 	}
@@ -314,13 +309,13 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(
 	return points;
 }
 
-std::vector<std::vector<int>> getContoursIndices(
-		std::vector<SupportFunctionDataItem> items)
+std::vector<std::vector<int>>
+getContoursIndices(std::vector<SupportFunctionDataItem> items)
 {
 	DEBUG_START;
 	/* Find the number of contours. */
 	int iContourMax = 0;
-	for (auto item: items)
+	for (auto item : items)
 	{
 		int iContour = item.info->iContour;
 		if (iContour > iContourMax)
@@ -328,21 +323,21 @@ std::vector<std::vector<int>> getContoursIndices(
 	}
 	int numContours = iContourMax + 1;
 	std::cerr << "Found " << numContours << " contours in support "
-		<< "function data. " << std::endl;
+			  << "function data. " << std::endl;
 
 	/* Construct arrays of contours' item IDs. */
 	std::vector<std::vector<int>> contoursIndices(numContours);
 	int iItem = 0;
-	for (auto item: items)
+	for (auto item : items)
 	{
 		contoursIndices[item.info->iContour].push_back(iItem);
 		++iItem;
 	}
 	int iContour = 0;
-	for (auto contourIndices: contoursIndices)
+	for (auto contourIndices : contoursIndices)
 	{
 		std::cerr << "Contour #" << iContour << ": ";
-		for (auto iItem: contourIndices)
+		for (auto iItem : contourIndices)
 		{
 			std::cerr << iItem << " ";
 		}
@@ -512,8 +507,7 @@ std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 	DEBUG_START;
 	stream << "ply" << std::endl;
 	stream << "format ascii 1.0" << std::endl;
-	stream << "comment generated by Polyhedra Correction Library"
-		<< std::endl;
+	stream << "comment generated by Polyhedra Correction Library" << std::endl;
 	stream << "element vertex " << 4 * data->size() << std::endl;
 	stream << "property float x" << std::endl;
 	stream << "property float y" << std::endl;
@@ -526,7 +520,7 @@ std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 	stream << "end_header" << std::endl;
 	std::vector<Point_3> points;
 	std::vector<Colour> colours(data->size());
-	for (int i = 0; i < (int) data->size(); ++i)
+	for (int i = 0; i < (int)data->size(); ++i)
 	{
 		auto item = (*data)[i];
 		auto info = item.info;
@@ -544,21 +538,21 @@ std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 		points.push_back(info->segment.target() - normal);
 	}
 	double scale = 1e+6;
-	for (Point_3 point: points)
+	for (Point_3 point : points)
 	{
-		stream << (int) std::floor(scale * point.x()) << " "
-			<< (int) std::floor(scale * point.y()) << " "
-			<< (int) std::floor(scale * point.z()) << std::endl;
+		stream << (int)std::floor(scale * point.x()) << " "
+			   << (int)std::floor(scale * point.y()) << " "
+			   << (int)std::floor(scale * point.z()) << std::endl;
 	}
-	for (int i = 0; i < (int) data->size(); ++i)
+	for (int i = 0; i < (int)data->size(); ++i)
 	{
 		stream << "4";
 		Colour colour = colours[i];
 		for (int j = 0; j < 4; ++j)
 			stream << " " << 4 * i + j;
-		stream << " " << static_cast<int>(colour.red)
-			<< " " << static_cast<int>(colour.green)
-			<< " " << static_cast<int>(colour.blue) << std::endl;
+		stream << " " << static_cast<int>(colour.red) << " "
+			   << static_cast<int>(colour.green) << " "
+			   << static_cast<int>(colour.blue) << std::endl;
 	}
 	DEBUG_END;
 	return stream;

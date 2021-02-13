@@ -23,14 +23,14 @@
  * @brief Fitting tractable convex sets to support funciton evaluations.
  */
 
+#include <Eigen/LU>
 #include <iostream>
 #include <random>
-#include <Eigen/LU>
 
 #include "Common.h"
+#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "PolyhedraCorrectionLibrary.h"
 #include "Recoverer/SupportPolyhedronCorrector.h"
-#include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 
 using Eigen::MatrixXd;
 
@@ -134,7 +134,7 @@ std::vector<Vector3d> generateDodecahedron()
 
 std::pair<double, Vector3d>
 calculateSupportFunction(const std::vector<Vector3d> &vertices,
-			const Vector3d &direction)
+						 const Vector3d &direction)
 {
 	ASSERT(vertices.size() > 0);
 	double maxProduct = vertices[0] * direction;
@@ -153,7 +153,7 @@ calculateSupportFunction(const std::vector<Vector3d> &vertices,
 
 std::pair<double, VectorXd>
 calculateSupportFunction(const std::vector<VectorXd> &vertices,
-			const VectorXd &direction)
+						 const VectorXd &direction)
 {
 	double maxProduct = vertices[0].dot(direction);
 	VectorXd tangient = vertices[0];
@@ -181,7 +181,8 @@ static Eigen::Vector3d toEigenVector(Point_3 v)
 static Eigen::VectorXd matrixToVector(const Eigen::MatrixXd &m)
 {
 	MatrixXd copy = m;
-	VectorXd v(Eigen::Map<Eigen::VectorXd>(copy.data(), copy.cols() * copy.rows()));
+	VectorXd v(
+		Eigen::Map<Eigen::VectorXd>(copy.data(), copy.cols() * copy.rows()));
 	return v;
 }
 
@@ -192,7 +193,7 @@ static Point_3 toCGALPoint(const Eigen::VectorXd &v)
 }
 
 double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
-		const std::vector<VectorXd> &simplexVertices)
+				   const std::vector<VectorXd> &simplexVertices)
 {
 	double error = 0.;
 	Eigen::MatrixXd AT = A.transpose();
@@ -200,8 +201,10 @@ double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
 	{
 		auto item = (*data)[i];
 		MatrixXd direction = AT * toEigenVector(item.direction);
-		double diff = calculateSupportFunction(simplexVertices,
-				matrixToVector(direction)).first - item.value;
+		double diff =
+			calculateSupportFunction(simplexVertices, matrixToVector(direction))
+				.first -
+			item.value;
 		error += diff * diff;
 	}
 	return error;
@@ -231,10 +234,13 @@ class ConvexAffinePooling
 	MatrixXd AT;
 	std::vector<Point_3> points;
 	Polyhedron_3 P;
+
 public:
 	ConvexAffinePooling(const std::vector<VectorXd> &simplexVertices,
-			const MatrixXd &A, bool dualMode) :
-		simplexVertices(simplexVertices), A(A), dualMode(dualMode) {}
+						const MatrixXd &A, bool dualMode) :
+		simplexVertices(simplexVertices), A(A), dualMode(dualMode)
+	{
+	}
 
 	void init()
 	{
@@ -264,7 +270,7 @@ public:
 		if (!dualMode)
 		{
 			return calculateSupportFunction(simplexVertices,
-					matrixToVector(AT * u));
+											matrixToVector(AT * u));
 		}
 
 		std::vector<int> goodFacets;
@@ -287,8 +293,7 @@ public:
 				a.push_back(toEigenVector(points[id]));
 
 				++circulator;
-			} 
-			while (circulator != v->vertex_begin());
+			} while (circulator != v->vertex_begin());
 
 			MatrixXd M(3, 3);
 			for (unsigned i = 0; i < 3; ++i)
@@ -319,7 +324,9 @@ public:
 				else
 				{
 					std::vector<int> tmp = commonVertices;
-					auto it = std::set_intersection(commonVertices.begin(), commonVertices.end(), indices.begin(), indices.end(), tmp.begin());
+					auto it = std::set_intersection(
+						commonVertices.begin(), commonVertices.end(),
+						indices.begin(), indices.end(), tmp.begin());
 					tmp.resize(it - tmp.begin());
 					commonVertices = tmp;
 				}
@@ -335,9 +342,9 @@ public:
 
 		VectorXd result = VectorXd::Zero(simplexVertices.size());
 		double distance = 0.;
-		if ((commonVertices.size() == 3 && goodFacets.size() == 1)
-			|| (commonVertices.size() == 2 && goodFacets.size() == 2)
-			|| (commonVertices.size() == 1 && goodFacets.size() > 1))
+		if ((commonVertices.size() == 3 && goodFacets.size() == 1) ||
+			(commonVertices.size() == 2 && goodFacets.size() == 2) ||
+			(commonVertices.size() == 1 && goodFacets.size() > 1))
 		{
 			Eigen::Vector3d alpha = singleAlpha;
 			ASSERT(isFinite(alpha));
@@ -352,10 +359,9 @@ public:
 			for (unsigned i = 0; i < 3; ++i)
 			{
 				result(commonVertices[i]) = alpha(i);
-				//ASSERT(alpha(i) >= -1e-8 * factor);
+				// ASSERT(alpha(i) >= -1e-8 * factor);
 			}
 			++numImplemented;
-
 		}
 		else
 		{
@@ -364,27 +370,27 @@ public:
 		}
 
 		return std::make_pair(distance, result);
-
 	}
 };
 
 std::pair<Polyhedron_3, double>
 fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
-		SupportFunctionDataPtr data, std::vector<Vector3d> startingBody,
-		unsigned numLiftingDimensions, bool dualMode)
+					  SupportFunctionDataPtr data,
+					  std::vector<Vector3d> startingBody,
+					  unsigned numLiftingDimensions, bool dualMode)
 {
 	std::cout << "Starting to fit in " << (dualMode ? "dual" : "primal")
-		<< " mode." << std::endl;
+			  << " mode." << std::endl;
 
 	unsigned numOuterIterations = 100;
 	double numOuterIterationsEnv = -1.;
 	tryGetenvDouble("N_OUTER", numOuterIterationsEnv);
 	if (numOuterIterationsEnv > 0.)
 		numOuterIterations = static_cast<int>(numOuterIterationsEnv);
-    if (getenv("USE_STARTING_BODY"))
-    {
-        numOuterIterations = 1;
-    }
+	if (getenv("USE_STARTING_BODY"))
+	{
+		numOuterIterations = 1;
+	}
 
 	unsigned numInnerIterations = 100;
 	double numInnerIterationsEnv = -1;
@@ -392,7 +398,7 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	if (numInnerIterationsEnv > 0.)
 		numInnerIterations = static_cast<int>(numInnerIterationsEnv);
 
-    double regularizer = 0.5;
+	double regularizer = 0.5;
 	tryGetenvDouble("REGULARIZER", regularizer);
 
 	double eta = 1.;
@@ -402,8 +408,10 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	tryGetenvDouble("BETA", beta);
 
 	std::cout << "The following hyperparameters are used:" << std::endl;
-	std::cout << "  Number of outer iterations: " << numOuterIterations << std::endl;
-	std::cout << "  Number of inner iterations: " << numInnerIterations << std::endl;
+	std::cout << "  Number of outer iterations: " << numOuterIterations
+			  << std::endl;
+	std::cout << "  Number of inner iterations: " << numInnerIterations
+			  << std::endl;
 	if (getenv("GRADIENT_DESCENT"))
 	{
 		std::cout << "                         Eta: " << eta << std::endl;
@@ -411,7 +419,8 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 	}
 	else
 	{
-		std::cout << "                 Regularizer: " << regularizer << std::endl;
+		std::cout << "                 Regularizer: " << regularizer
+				  << std::endl;
 	}
 
 	double errorBest = -1.;
@@ -419,27 +428,27 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 	std::default_random_engine generator;
 	std::normal_distribution<double> distribution(0., 1.);
-	auto normal = [&] (int) {return distribution(generator);};
+	auto normal = [&](int) { return distribution(generator); };
 
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
 		MatrixXd A(3, numLiftingDimensions);
-        if (getenv("USE_STARTING_BODY"))
-        {
-            std::cout << A << std::endl;
-            ASSERT(!startingBody.empty());
-            int i = 0;
-            for (auto point : startingBody)
-                A.col(i++) = toEigenVector(point);
-            std::cout << A << std::endl;
-            std::cout << A.coeff(0, 0) << " " << startingBody[0].x << std::endl;
-            ASSERT(A.coeff(0, 0) == startingBody[0].x);
-        }
-        else
-        {
-            A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
-        }
-        std::cout << "Allocating Anew" << std::endl;
+		if (getenv("USE_STARTING_BODY"))
+		{
+			std::cout << A << std::endl;
+			ASSERT(!startingBody.empty());
+			int i = 0;
+			for (auto point : startingBody)
+				A.col(i++) = toEigenVector(point);
+			std::cout << A << std::endl;
+			std::cout << A.coeff(0, 0) << " " << startingBody[0].x << std::endl;
+			ASSERT(A.coeff(0, 0) == startingBody[0].x);
+		}
+		else
+		{
+			A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+		}
+		std::cout << "Allocating Anew" << std::endl;
 		MatrixXd Anew = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
@@ -449,9 +458,10 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
 			unsigned size = 3 * numLiftingDimensions;
-            std::cout << "Allocating " << size << "x" << size << " matrix" << std::endl;
+			std::cout << "Allocating " << size << "x" << size << " matrix"
+					  << std::endl;
 			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
-            std::cout << "Allocated";
+			std::cout << "Allocated";
 			ASSERT(isFinite(matrix));
 			VectorXd Alinearized = matrixToVector(A);
 			VectorXd vector = regularizer * Alinearized;
@@ -469,7 +479,8 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 					y = 1. / y;
 				}
 				VectorXd u = toEigenVector((*data)[k].direction);
-				std::pair<double, VectorXd> result = pool.calculateEandDistance(u);
+				std::pair<double, VectorXd> result =
+					pool.calculateEandDistance(u);
 				double diff = result.first - y;
 				error += diff * diff;
 				MatrixXd e = result.second;
@@ -508,7 +519,8 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 				{
 					n_iterations += 1;
 
-					Anew = Eigen::Map<MatrixXd>(A.data(), 3, numLiftingDimensions);
+					Anew =
+						Eigen::Map<MatrixXd>(A.data(), 3, numLiftingDimensions);
 					ASSERT(Anew.rows() == 3);
 					ASSERT(Anew.cols() == numLiftingDimensions);
 					Anew -= eta_current * vector;
@@ -520,14 +532,14 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 						std::cout << "    distance " << distance << std::endl;
 						std::cout << "    error " << error_new << std::endl;
 						std::cout << "    error first "
-							<< evaluateFit(A, data, simplexVertices) << std::endl; 
+								  << evaluateFit(A, data, simplexVertices)
+								  << std::endl;
 						std::cout << std::endl;
 					}
 					if (error_new <= error_first - 0.5 * eta_current * square)
 						break;
 					eta_current *= beta;
-				}
-				while (eta_current > 1e-16);
+				} while (eta_current > 1e-16);
 				error = error_new;
 				if (getenv("DEBUG_AM"))
 					std::cout << "  iterations:" << n_iterations << std::endl;
@@ -544,11 +556,12 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 			if (getenv("DEBUG_AM"))
 				std::cout << "  Outer " << iOuter << " inner " << iInner
-					<< ", error: " << error << std::endl;
+						  << ", error: " << error << std::endl;
 
 			if (error > 1000. * errorInitial)
 			{
-				std::cout << "Early stop, algorithm doesn't coverge" << std::endl;
+				std::cout << "Early stop, algorithm doesn't coverge"
+						  << std::endl;
 				break;
 			}
 			errorLast = error;
@@ -559,9 +572,8 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			Abest = A;
 			errorBest = errorLast;
 		}
-		std::cout << "Error on iteration #" << iOuter << ": "
-			<< errorBest << " (current is " << error << ")"
-			<< std::endl;
+		std::cout << "Error on iteration #" << iOuter << ": " << errorBest
+				  << " (current is " << error << ")" << std::endl;
 	}
 
 	std::vector<Point_3> points;
@@ -633,8 +645,8 @@ void printEstimationReport(Polyhedron_3 p, SupportFunctionDataPtr data)
 
 SupportFunctionDataPtr
 calculateProvisionalEstimate(std::vector<Vector3d> &directions,
-		SupportFunctionDataPtr noisyData,
-		const char *linearSolver)
+							 SupportFunctionDataPtr noisyData,
+							 const char *linearSolver)
 {
 	// Gardner & Kiderlen LSE algorithm for noisy primal data
 
@@ -652,17 +664,15 @@ calculateProvisionalEstimate(std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "recovered.ply") << polyhedron;
 
-	// Approximate support function evaluations in dual space from the dual image
-	// of the recovered body
-	std::vector<PCLPoint_3> directionsPCL(directions.begin(),
-			directions.end());
+	// Approximate support function evaluations in dual space from the dual
+	// image of the recovered body
+	std::vector<PCLPoint_3> directionsPCL(directions.begin(), directions.end());
 	return dual(polyhedron).calculateSupportData(directionsPCL);
 }
 
-SupportFunctionDataPtr
-generateSupportData(std::vector<Vector3d> &directions,
-		std::vector<Vector3d> &targetPoints,
-		double variance)
+SupportFunctionDataPtr generateSupportData(std::vector<Vector3d> &directions,
+										   std::vector<Vector3d> &targetPoints,
+										   double variance)
 {
 
 	std::default_random_engine generator;
@@ -673,7 +683,7 @@ generateSupportData(std::vector<Vector3d> &directions,
 	{
 		double value = calculateSupportFunction(targetPoints, direction).first;
 		ASSERT(value > 0.);
-		double noisyValue =  value + noise(generator);
+		double noisyValue = value + noise(generator);
 		ASSERT(noisyValue > 0.);
 		items.push_back(SupportFunctionDataItem(direction, noisyValue));
 	}
@@ -681,7 +691,8 @@ generateSupportData(std::vector<Vector3d> &directions,
 	return data;
 }
 
-std::vector<Vector3d> calculateDualTargetPoints(std::vector<Vector3d> &targetPoints)
+std::vector<Vector3d>
+calculateDualTargetPoints(std::vector<Vector3d> &targetPoints)
 {
 	std::vector<Plane_3> planes;
 	for (const auto &point : targetPoints)
@@ -708,11 +719,10 @@ double calculateError(SupportFunctionDataPtr a, SupportFunctionDataPtr b)
 }
 
 double fit(unsigned n, std::vector<Vector3d> &directions,
-		unsigned numLiftingDimensions,
-		unsigned numLiftingDimensionsDual,
-		std::vector<Vector3d> &targetPoints, const char *title,
-		const char *linearSolver, bool synthetic,
-		SupportFunctionDataPtr noisyData)
+		   unsigned numLiftingDimensions, unsigned numLiftingDimensionsDual,
+		   std::vector<Vector3d> &targetPoints, const char *title,
+		   const char *linearSolver, bool synthetic,
+		   SupportFunctionDataPtr noisyData)
 {
 	SupportFunctionDataPtr dualData;
 	SupportFunctionDataPtr dualDataNotNoisy;
@@ -725,43 +735,47 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	if (getenv("PRIMAL_MODE"))
 	{
 		ASSERT(synthetic);
-		SupportFunctionDataPtr data = generateSupportData(directions, targetPoints, variance);
+		SupportFunctionDataPtr data =
+			generateSupportData(directions, targetPoints, variance);
 
-		auto pair = fitSimplexAffineImage(
-				generateSimplex(numLiftingDimensions),
-				data, targetPoints, numLiftingDimensions, false);
+		auto pair =
+			fitSimplexAffineImage(generateSimplex(numLiftingDimensions), data,
+								  targetPoints, numLiftingDimensions, false);
 		auto polyhedronAM = pair.first;
 		double error = pair.second;
 		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
-		globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply") << polyhedronAM;
+		globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply")
+			<< polyhedronAM;
 		return error;
 	}
 	else if (getenv("GAUGE_MODE"))
 	{
 		ASSERT(synthetic);
-		// 1A. Calculate gauge function of primal body through support function of dual body
+		// 1A. Calculate gauge function of primal body through support function
+		// of dual body
 		auto dualTargetPoints = calculateDualTargetPoints(targetPoints);
 		dualData = generateSupportData(directions, dualTargetPoints, variance);
-		dualDataNotNoisy = generateSupportData(directions, dualTargetPoints, 0.);
+		dualDataNotNoisy =
+			generateSupportData(directions, dualTargetPoints, 0.);
 	}
 	else if (!synthetic)
 	{
-		dualData = calculateProvisionalEstimate(directions, noisyData,
-				linearSolver);
+		dualData =
+			calculateProvisionalEstimate(directions, noisyData, linearSolver);
 	}
 	else
 	{
 		// 1B. Provisional estimate for dual support function evaluations
 		noisyData = generateSupportData(directions, targetPoints, variance);
-		dualData = calculateProvisionalEstimate(directions, noisyData,
-				linearSolver);
+		dualData =
+			calculateProvisionalEstimate(directions, noisyData, linearSolver);
 	}
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
-	auto pair = fitSimplexAffineImage(
-			generateSimplex(numLiftingDimensionsDual),
-			dualData, targetPoints, numLiftingDimensionsDual, false);
+	auto pair = fitSimplexAffineImage(generateSimplex(numLiftingDimensionsDual),
+									  dualData, targetPoints,
+									  numLiftingDimensionsDual, false);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
@@ -775,8 +789,10 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	{
 		printEstimationReport(polyhedronAMdual2, dualData);
 		std::vector<PCLPoint_3> directionsPCL(directions.begin(),
-				                        directions.end());
-		return calculateError(dualDataNotNoisy, polyhedronAMdual2.calculateSupportData(directionsPCL));
+											  directions.end());
+		return calculateError(
+			dualDataNotNoisy,
+			polyhedronAMdual2.calculateSupportData(directionsPCL));
 	}
 	else
 		printEstimationReport(polyhedronAM2, noisyData);
@@ -791,7 +807,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	for (int i = 0; i < 2; ++i)
 	{
 		for (auto I = Pcurrent.facets_begin(), E = Pcurrent.facets_end();
-				                        I != E; ++I)
+			 I != E; ++I)
 		{
 			Plane_3 plane = I->plane();
 			std::cout << "plane: " << plane << std::endl;
@@ -805,7 +821,8 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	}
 
 	std::cout << "Number of implemented cases: " << numImplemented << std::endl;
-	std::cout << "Number of non-implemented cases: " << numNonImplemented << std::endl;
+	std::cout << "Number of non-implemented cases: " << numNonImplemented
+			  << std::endl;
 	return error;
 }
 
@@ -815,8 +832,7 @@ int runSyntheticCase(char **argv)
 
 	if (n <= 0)
 	{
-		std::cerr << "Expected positive number of measurements"
-			<< std::endl;
+		std::cerr << "Expected positive number of measurements" << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -860,9 +876,9 @@ int runSyntheticCase(char **argv)
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n);
 
-		double error = fit(n, directions, numLiftingDimensions,
-				numLiftingDimensionsDual, body, title,
-				linearSolver, true, nullptr);
+		double error =
+			fit(n, directions, numLiftingDimensions, numLiftingDimensionsDual,
+				body, title, linearSolver, true, nullptr);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -873,8 +889,8 @@ int runSyntheticCase(char **argv)
 		auto directions = generateDirections(n_current);
 
 		double error = fit(n_current, directions, numLiftingDimensions,
-				numLiftingDimensionsDual, body, title,
-				linearSolver, true, nullptr);
+						   numLiftingDimensionsDual, body, title, linearSolver,
+						   true, nullptr);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
 
@@ -887,31 +903,28 @@ int runRealCase(char **argv)
 	int numVertices = atoi(argv[2]);
 	if (numVertices <= 0)
 	{
-		std::cerr << "Expected positive number of vertices"
-			<< std::endl;
+		std::cerr << "Expected positive number of vertices" << std::endl;
 		return EXIT_FAILURE;
 	}
 	int numFacets = atoi(argv[3]);
 	if (numFacets <= 0)
 	{
-		std::cerr << "Expected positive number of facets"
-			<< std::endl;
+		std::cerr << "Expected positive number of facets" << std::endl;
 		return EXIT_FAILURE;
 	}
-
 
 	const char *linearSolver = argv[4];
 
 	const char *title = "diamond";
 
 	/* Create fake empty polyhedron. */
-        PolyhedronPtr p(new Polyhedron());
+	PolyhedronPtr p(new Polyhedron());
 
-        /* Create shadow contour data and associate p with it. */
-        ShadowContourDataPtr SCData(new ShadowContourData(p));
+	/* Create shadow contour data and associate p with it. */
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
 
-        /* Read shadow contours data from file. */
-        SCData->fscanDefault(path);
+	/* Read shadow contours data from file. */
+	SCData->fscanDefault(path);
 
 	SupportFunctionDataConstructor constructor;
 
@@ -922,9 +935,8 @@ int runRealCase(char **argv)
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> fake;
-	double error = fit(directions.size(), directions, numVertices,
-			numFacets, fake, title, linearSolver,
-			false, data);
+	double error = fit(directions.size(), directions, numVertices, numFacets,
+					   fake, title, linearSolver, false, data);
 	// FIXME: Shift the body back by this vector:
 	std::cout << "Balancing vector: " << balancingVector << std::endl;
 	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
@@ -940,7 +952,10 @@ int main(int argc, char **argv)
 		return runRealCase(argv);
 
 	std::cerr << "Expected 4 or 5 arguments:" << std::endl;
-	std::cerr << "\t" << argv[0] << " measurements_number body_name linear_solver" << std::endl;
-	std::cerr << "\t" << argv[0] << " shadow_contours_path n_vertices n_facets liner_solver" << std::endl;
+	std::cerr << "\t" << argv[0]
+			  << " measurements_number body_name linear_solver" << std::endl;
+	std::cerr << "\t" << argv[0]
+			  << " shadow_contours_path n_vertices n_facets liner_solver"
+			  << std::endl;
 	return EXIT_FAILURE;
 }

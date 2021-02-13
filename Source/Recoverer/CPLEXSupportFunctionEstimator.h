@@ -34,8 +34,7 @@
 /**
  * CPLEX-based linear programming solver used for support function estimation.
  */
-class CPLEXSupportFunctionEstimator:
-	public SupportFunctionEstimator
+class CPLEXSupportFunctionEstimator : public SupportFunctionEstimator
 {
 public:
 	/**
@@ -58,4 +57,3 @@ public:
 
 #endif /* CPLEXSUPPORTFUNCTIONESTIMATOR_H_ */
 #endif /* USE_CPLEX */
-

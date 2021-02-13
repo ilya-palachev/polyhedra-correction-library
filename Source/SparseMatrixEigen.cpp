@@ -24,13 +24,13 @@
  * - implementation of additional functions.
  */
 
-#include "DebugPrint.h"
-#include "DebugAssert.h"
-#include "Vector3d.h"
 #include "SparseMatrixEigen.h"
+#include "DebugAssert.h"
+#include "DebugPrint.h"
+#include "Vector3d.h"
 
 bool operator==(const Eigen::SparseMatrix<double> matrixLeft,
-	const Eigen::SparseMatrix<double> matrixRight)
+				const Eigen::SparseMatrix<double> matrixRight)
 {
 	DEBUG_START;
 	if (matrixLeft.outerSize() != matrixRight.outerSize())
@@ -45,9 +45,8 @@ bool operator==(const Eigen::SparseMatrix<double> matrixLeft,
 		SparseMatrix::InnerIterator itRight(matrixRight, k);
 		while (itLeft && itRight)
 		{
-			if (!equal(itLeft.value(), itRight.value())
-				|| itLeft.row() != itRight.row()
-				|| itLeft.col() != itRight.col())
+			if (!equal(itLeft.value(), itRight.value()) ||
+				itLeft.row() != itRight.row() || itLeft.col() != itRight.col())
 			{
 				DEBUG_END;
 				return false;

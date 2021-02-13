@@ -24,8 +24,8 @@
 #define TEST_PARAMETERS_NUMBER 6
 struct _TestParameters
 {
-	char* fileNamePolyhedron;
-	char* fileNameShadowContours;
+	char *fileNamePolyhedron;
+	char *fileNameShadowContours;
 	MethodCorrector method;
 	double epsLoopStop;
 	double deltaGardientStep;
@@ -34,10 +34,10 @@ struct _TestParameters
 typedef struct _TestParameters TestParameters;
 
 void printUsage();
-int parse_commandLine(int argc, char** argv, TestParameters& parameters);
-MethodCorrector parse_methodName(char* methodNameInput);
+int parse_commandLine(int argc, char **argv, TestParameters &parameters);
+MethodCorrector parse_methodName(char *methodNameInput);
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 	TestParameters parameters;
@@ -65,19 +65,19 @@ int main(int argc, char** argv)
 
 	GSCorrectorParameters gsParameters;
 	gsParameters = {parameters.method, parameters.epsLoopStop,
-			parameters.deltaGardientStep};
-	
+					parameters.deltaGardientStep};
+
 	std::list<FacetWithArea> listSortedFacets =
 		polyhedron->getSortedByAreaFacets();
-		
+
 	std::list<int> facetsCorrected;
 	auto itFacet = listSortedFacets.rend();
 	++itFacet;
-	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected; ++itFacet,
-		++iFacet)
+	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected;
+		 ++itFacet, ++iFacet)
 	{
 		DEBUG_PRINT("Adding facet %d with area %lf to be corrected",
-			itFacet->facet->id, itFacet->area);
+					itFacet->facet->id, itFacet->area);
 		facetsCorrected.push_back(itFacet->facet->id);
 	}
 
@@ -106,19 +106,18 @@ int main(int argc, char** argv)
 void printUsage()
 {
 	DEBUG_START;
-	printf(
-			"Usage: \n"
-					"./globalCorrectionReal <file with polyhedron> "
-					"<file with shadow contours> <method name>"
-					"<eps max loop> <delta gradient descend> <number of "
-					"corrected facets>\n");
+	printf("Usage: \n"
+		   "./globalCorrectionReal <file with polyhedron> "
+		   "<file with shadow contours> <method name>"
+		   "<eps max loop> <delta gradient descend> <number of "
+		   "corrected facets>\n");
 	printf("\nPossible methods: gd (gradient descent), "
-			"gdf (gradient descent - fast),"
-			"cg (conjugate gradient).\n");
+		   "gdf (gradient descent - fast),"
+		   "cg (conjugate gradient).\n");
 	DEBUG_END;
 }
 
-int parse_commandLine(int argc, char** argv, TestParameters& parameters)
+int parse_commandLine(int argc, char **argv, TestParameters &parameters)
 {
 	DEBUG_START;
 	if (argc != TEST_PARAMETERS_NUMBER + 1)
@@ -130,14 +129,15 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	}
 	parameters.fileNamePolyhedron = new char[255];
 	parameters.fileNameShadowContours = new char[255];
-	char* method = new char[255];
+	char *method = new char[255];
 
-	bool ifCorrectInput = sscanf(argv[1], "%s", parameters.fileNamePolyhedron)
-			&& sscanf(argv[2], "%s", parameters.fileNameShadowContours)
-			&& sscanf(argv[3], "%s", method)
-			&& sscanf(argv[4], "%lf", &parameters.epsLoopStop)
-			&& sscanf(argv[5], "%lf", &parameters.deltaGardientStep)
-			&& sscanf(argv[6], "%d", &parameters.numFacetsCorrected);
+	bool ifCorrectInput =
+		sscanf(argv[1], "%s", parameters.fileNamePolyhedron) &&
+		sscanf(argv[2], "%s", parameters.fileNameShadowContours) &&
+		sscanf(argv[3], "%s", method) &&
+		sscanf(argv[4], "%lf", &parameters.epsLoopStop) &&
+		sscanf(argv[5], "%lf", &parameters.deltaGardientStep) &&
+		sscanf(argv[6], "%d", &parameters.numFacetsCorrected);
 
 	parameters.method = parse_methodName(method);
 
@@ -158,7 +158,7 @@ int parse_commandLine(int argc, char** argv, TestParameters& parameters)
 	return EXIT_SUCCESS;
 }
 
-MethodCorrector parse_methodName(char* methodNameInput)
+MethodCorrector parse_methodName(char *methodNameInput)
 {
 	DEBUG_START;
 	if (strcmp(methodNameInput, "gd") == 0)
@@ -187,8 +187,3 @@ MethodCorrector parse_methodName(char* methodNameInput)
 		return METHOD_UNKNOWN;
 	}
 }
-
-
-
-
-

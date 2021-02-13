@@ -26,8 +26,7 @@
 #ifndef PCLCPNSTRUCT_POINT_2_H
 #define PCLCPNSTRUCT_POINT_2_H
 
-template <typename K, typename OldK>
-class PCLConstruct_point_2
+template <typename K, typename OldK> class PCLConstruct_point_2
 {
 	typedef typename K::RT RT;
 	typedef typename K::Point_2 Point_2;
@@ -51,47 +50,43 @@ public:
 	}
 
 	Rep /* Point_2 */
-	operator()(CGAL::Return_base_tag, const RT& x, const RT& y) const
+	operator()(CGAL::Return_base_tag, const RT &x, const RT &y) const
 	{
 		return Rep(x, y);
 	}
 
 	Rep /* Point_2 */
-	operator()(CGAL::Return_base_tag, const RT& x, const RT& y, const RT& w) const
+	operator()(CGAL::Return_base_tag, const RT &x, const RT &y,
+			   const RT &w) const
 	{
 		return Rep(x, y, w);
 	}
 
-	Point_2
-	operator()(const CGAL::Origin&) const
+	Point_2 operator()(const CGAL::Origin &) const
 	{
 		return PCLPoint_2(0, 0, 0);
 	}
 
-	Point_2
-	operator()(const RT& x, const RT& y) const
+	Point_2 operator()(const RT &x, const RT &y) const
 	{
 		return PCLPoint_2(x, y, 0);
 	}
 
-	Point_2
-	operator()(const Line_2& l) const
+	Point_2 operator()(const Line_2 &l) const
 	{
 		typename OldK::Construct_point_2 base_operator;
 		Point_2 p = base_operator(l);
 		return p;
 	}
 
-	Point_2
-	operator()(const Line_2& l, int i) const
+	Point_2 operator()(const Line_2 &l, int i) const
 	{
 		typename OldK::Construct_point_2 base_operator;
 		Point_2 p = base_operator(l, i);
 		return p;
 	}
 
-	Point_2
-	operator()(const RT& x, const RT& y, const RT& w) const
+	Point_2 operator()(const RT &x, const RT &y, const RT &w) const
 	{
 		if (w != 1)
 		{

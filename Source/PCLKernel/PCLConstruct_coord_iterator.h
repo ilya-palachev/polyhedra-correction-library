@@ -29,14 +29,14 @@
 class PCLConstruct_coord_iterator
 {
 public:
-	const double* operator()(const PCLPoint_2 &p)
+	const double *operator()(const PCLPoint_2 &p)
 	{
 		return &p.x();
 	}
 
-	const double * operator()(const PCLPoint_2 &p, int)
+	const double *operator()(const PCLPoint_2 &p, int)
 	{
-		const double* pyptr = &p.y();
+		const double *pyptr = &p.y();
 		pyptr++;
 		return pyptr;
 	}
