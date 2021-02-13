@@ -22,15 +22,13 @@
 #include "DebugAssert.h"
 #include "Analyzers/PAnalyzer/PAnalyzer.h"
 
-PAnalyzer::PAnalyzer() :
-		polyhedron()
+PAnalyzer::PAnalyzer() : polyhedron()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-PAnalyzer::PAnalyzer(PolyhedronPtr p) :
-		polyhedron(p)
+PAnalyzer::PAnalyzer(PolyhedronPtr p) : polyhedron(p)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -41,4 +39,3 @@ PAnalyzer::~PAnalyzer()
 	DEBUG_START;
 	DEBUG_END;
 }
-

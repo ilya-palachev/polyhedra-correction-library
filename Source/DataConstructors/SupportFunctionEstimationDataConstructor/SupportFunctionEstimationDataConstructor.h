@@ -56,7 +56,7 @@ typedef enum
 } SupportFunctionEstimationStartingBodyType;
 
 /** Default type of the starting body. */
-#define DEFAULT_STARTING_BODY_TYPE \
+#define DEFAULT_STARTING_BODY_TYPE                                             \
 	SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION
 
 /** Constructor of data used for support function estimation process */
@@ -67,6 +67,7 @@ private:
 	bool ifScaleMatrix;
 
 	bool ifShadowHeuristics_;
+
 public:
 	/** Empty constructor. */
 	SupportFunctionEstimationDataConstructor();
@@ -91,8 +92,8 @@ public:
 	 * @return			Support function estimation data ready
 	 * 				to be processed.
 	 */
-	SupportFunctionEstimationDataPtr run(SupportFunctionDataPtr data,
-		SupportMatrixType supportMatrixType,
+	SupportFunctionEstimationDataPtr
+	run(SupportFunctionDataPtr data, SupportMatrixType supportMatrixType,
 		SupportFunctionEstimationStartingBodyType startingBodyType);
 
 	/**
@@ -106,7 +107,7 @@ public:
 	 * @return			True, if the result is correct.
 	 */
 	bool checkResult(SupportFunctionEstimationDataPtr data,
-			SupportMatrixType supportMatrixType, VectorXd estimate);
+					 SupportMatrixType supportMatrixType, VectorXd estimate);
 };
 
 #endif /* SUPPORT_FUNCTION_ESTIMATION_DATA_CONSTRUCTOR_H */

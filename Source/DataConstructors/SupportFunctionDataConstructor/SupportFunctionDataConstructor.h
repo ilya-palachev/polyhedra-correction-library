@@ -97,7 +97,7 @@ public:
 	 * support direcitons.
 	 */
 	SupportFunctionDataPtr run(std::vector<Point_3> directions,
-		Polyhedron_3 polyhedron);
+							   Polyhedron_3 polyhedron);
 
 	/**
 	 * Gets IDs of tangient vertices that have been obtained during the

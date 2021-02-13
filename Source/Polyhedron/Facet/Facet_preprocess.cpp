@@ -65,7 +65,7 @@ void Facet::preprocess_edge(int v0, int v1, int v0_id)
 	DEBUG_START;
 	int pos = -1;
 	int numFacets = 0;
-	Facet* facets = NULL;
+	Facet *facets = NULL;
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
 		numFacets = polyhedron->numFacets;
@@ -118,7 +118,7 @@ int Facet::preprocess_search_edge(int v0, int v1)
 	}
 }
 
-int Facet::preprocess_search_vertex(int v, int& v_next)
+int Facet::preprocess_search_vertex(int v, int &v_next)
 {
 	DEBUG_START;
 	for (int i = 0; i < numVertices; ++i)
@@ -132,4 +132,3 @@ int Facet::preprocess_search_vertex(int v, int& v_next)
 	DEBUG_END;
 	return -1;
 }
-

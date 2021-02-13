@@ -26,7 +26,7 @@
 void Polyhedron::intersect(Plane iplane)
 {
 	DEBUG_START;
-	Intersector* intersector = new Intersector(get_ptr());
+	Intersector *intersector = new Intersector(get_ptr());
 	intersector->run(iplane);
 	delete intersector;
 	DEBUG_END;
@@ -35,7 +35,7 @@ void Polyhedron::intersect(Plane iplane)
 void Polyhedron::intersectCoalesceMode(Plane iplane, int jfid)
 {
 	DEBUG_START;
-	Intersector* intersector = new Intersector(get_ptr());
+	Intersector *intersector = new Intersector(get_ptr());
 	intersector->runCoalesceMode(iplane, jfid);
 	delete intersector;
 	DEBUG_END;

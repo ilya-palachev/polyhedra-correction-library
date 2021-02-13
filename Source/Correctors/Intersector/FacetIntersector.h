@@ -26,20 +26,20 @@
 
 class Facet;
 
-class FacetIntersector: public Intersector
+class FacetIntersector : public Intersector
 {
 private:
-	Facet* facet;
+	Facet *facet;
 
 	int signum(int i, Plane plane);
 
 public:
 	FacetIntersector();
-	FacetIntersector(PolyhedronPtr p, Facet* f);
-	FacetIntersector(Intersector* i, Facet* f);
+	FacetIntersector(PolyhedronPtr p, Facet *f);
+	FacetIntersector(Intersector *i, Facet *f);
 	~FacetIntersector();
 
-	bool run(Plane iplane, FutureFacet& ff, int& n_components);
+	bool run(Plane iplane, FutureFacet &ff, int &n_components);
 };
 
 #endif /* FACETINTERSECTOR_H_ */

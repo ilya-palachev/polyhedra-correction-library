@@ -35,8 +35,8 @@
 const double EXTRACTOR_BY_POINTS_GUARANTEED_PRECISION = 1e-14;
 
 /** Extractor of support function data item from given contour side. */
-class SupportFunctionDataItemExtractorByPoints :
-	public SupportFunctionDataItemExtractor
+class SupportFunctionDataItemExtractorByPoints
+	: public SupportFunctionDataItemExtractor
 {
 public:
 	/** Empty constructor. */

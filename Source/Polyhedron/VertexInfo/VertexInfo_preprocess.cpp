@@ -32,10 +32,10 @@ void VertexInfo::preprocess()
 	int fid_first = -1;
 	int fid_curr = -1;
 	int fid_next = -1;
-	
-	Facet* facets = NULL;
+
+	Facet *facets = NULL;
 	int numFacetsTotal = 0;
-	
+
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
 		facets = polyhedron->facets;
@@ -48,11 +48,10 @@ void VertexInfo::preprocess()
 		return;
 	}
 
-    DEBUG_PRINT("1. Searching first facet : ");
+	DEBUG_PRINT("1. Searching first facet : ");
 	for (int i = 0; i < numFacetsTotal; ++i)
 	{
-		pos_next = facets[i].preprocess_search_vertex(id,
-				v_curr);
+		pos_next = facets[i].preprocess_search_vertex(id, v_curr);
 		if (pos_next != -1)
 		{
 			fid_first = fid_next = i;
@@ -64,7 +63,7 @@ void VertexInfo::preprocess()
 		return;
 	}
 
-    DEBUG_PRINT("2. Counting the number of facets : ");
+	DEBUG_PRINT("2. Counting the number of facets : ");
 	numFacets = 0;
 	do
 	{
@@ -72,23 +71,21 @@ void VertexInfo::preprocess()
 		pos_curr = pos_next;
 		fid_curr = fid_next;
 
-		DEBUG_PRINT("\t Facet currently visited by preprocessor: %d",
-				fid_curr);
+		DEBUG_PRINT("\t Facet currently visited by preprocessor: %d", fid_curr);
 
 		DEBUG_PRINT("\t Jumping from facet #%d, position %d (vertex #%d)",
-				fid_curr, pos_curr, v_curr);
+					fid_curr, pos_curr, v_curr);
 
-		facets[fid_curr].get_next_facet(pos_curr, pos_next,
-				fid_next, v_curr);
+		facets[fid_curr].get_next_facet(pos_curr, pos_next, fid_next, v_curr);
 
 		/* This assertion has been added for debugging purposes, because
 		 * sometimes wrong transformations of polyhedron cause the
 		 * incorrectness of data inside facet arrays. */
 		ASSERT(facets[fid_curr].indVertices[pos_curr] ==
-				facets[fid_next].indVertices[pos_next]);
+			   facets[fid_next].indVertices[pos_next]);
 
 		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)",
-				fid_next, pos_next, v_curr);
+					fid_next, pos_next, v_curr);
 
 #ifndef NDEBUG
 		facets[fid_curr].my_fprint_all(stderr);
@@ -96,8 +93,7 @@ void VertexInfo::preprocess()
 
 		if (pos_next == -1 || fid_next == -1)
 		{
-			ERROR_PRINT("Error. Cannot find v%d in f%d\n",
-					v_curr, fid_curr);
+			ERROR_PRINT("Error. Cannot find v%d in f%d\n", v_curr, fid_curr);
 			DEBUG_END;
 			return;
 		}
@@ -112,26 +108,24 @@ void VertexInfo::preprocess()
 
 	} while (fid_next != fid_first);
 
-    DEBUG_PRINT("Total number of facets is %d\n", numFacets);
+	DEBUG_PRINT("Total number of facets is %d\n", numFacets);
 
-    if (indFacets != NULL)
-    {
-    	delete[] indFacets;
-    }
+	if (indFacets != NULL)
+	{
+		delete[] indFacets;
+	}
 
 	indFacets = new int[3 * numFacets + 1];
 
-    DEBUG_PRINT("3. Building the VECTOR :");
-	pos_next = facets[fid_first].preprocess_search_vertex(id,
-			v_curr);
+	DEBUG_PRINT("3. Building the VECTOR :");
+	pos_next = facets[fid_first].preprocess_search_vertex(id, v_curr);
 	fid_next = fid_first;
 	for (int i = 0; i < numFacets; ++i)
 	{
 		pos_curr = pos_next;
 		fid_curr = fid_next;
 
-		facets[fid_curr].get_next_facet(pos_curr, pos_next,
-				fid_next, v_curr);
+		facets[fid_curr].get_next_facet(pos_curr, pos_next, fid_next, v_curr);
 		indFacets[i] = fid_curr;
 		indFacets[i + numFacets + 1] = v_curr;
 		indFacets[i + 2 * numFacets + 1] = pos_curr;
@@ -162,4 +156,3 @@ void VertexInfo::find_and_replace_vertex(int from, int to)
 		}
 	DEBUG_END;
 }
-

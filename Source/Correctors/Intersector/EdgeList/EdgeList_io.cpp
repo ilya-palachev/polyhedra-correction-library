@@ -22,7 +22,7 @@
 #include "DebugAssert.h"
 #include "Correctors/Intersector/EdgeList/EdgeList.h"
 
-void EdgeList::my_fprint(FILE* file)
+void EdgeList::my_fprint(FILE *file)
 {
 	DEBUG_START;
 	int i;

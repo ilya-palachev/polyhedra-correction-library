@@ -29,8 +29,7 @@
 #include "Vector3d.h"
 #include "DataContainers/SupportFunctionEstimationData/SupportMatrix.h"
 
-SupportMatrix::SupportMatrix() :
-	SparseMatrix(1, 1)
+SupportMatrix::SupportMatrix() : SparseMatrix(1, 1)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -58,13 +57,13 @@ Polyhedron_3 buildDirectionsHull(std::vector<Point_3> directions)
 	ASSERT(hull.size_of_vertices() == directions.size());
 
 	/* Find correpondance between directions and vertices of polyhedron. */
-	for (auto vertex = hull.vertices_begin();
-		vertex != hull.vertices_end(); ++vertex)
+	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
+		 ++vertex)
 	{
 		auto point = vertex->point();
 		/* Find the direction that is nearest to the point. */
 		double distMin = 0.; /* Minimal distance. */
-		long int iMin = 0;   /* ID os nearest direction. */
+		long int iMin = 0;	 /* ID os nearest direction. */
 		for (unsigned int i = 0; i < directions.size(); ++i)
 		{
 			double dist = (directions[i] - point).squared_length();
@@ -90,10 +89,10 @@ bool checkDirectionsHull(Polyhedron_3 hull)
 	DEBUG_START;
 	/* Check that all vertices have different IDs. */
 	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
-			++vertex)
+		 ++vertex)
 	{
-		for (auto vertexPrev = hull.vertices_begin();
-				vertexPrev != vertex; ++vertexPrev)
+		for (auto vertexPrev = hull.vertices_begin(); vertexPrev != vertex;
+			 ++vertexPrev)
 			if (vertexPrev->id == vertex->id)
 			{
 				DEBUG_END;
@@ -102,8 +101,7 @@ bool checkDirectionsHull(Polyhedron_3 hull)
 	}
 
 	/* Check that all facets are triangles. */
-	for (auto facet = hull.facets_begin(); facet != hull.facets_end();
-			++facet)
+	for (auto facet = hull.facets_begin(); facet != hull.facets_end(); ++facet)
 		if (!facet->is_triangle())
 		{
 			DEBUG_END;

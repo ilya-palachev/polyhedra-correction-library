@@ -28,9 +28,9 @@ bool Facet::test_self_intersection()
 	int i, j;
 	double s;
 	Vector3d vi0, vi1, vj0, vj1, tmp0, tmp1;
-	
-	Vector3d* vertices = NULL;
-	
+
+	Vector3d *vertices = NULL;
+
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
 		vertices = polyhedron->vertices;
@@ -42,7 +42,7 @@ bool Facet::test_self_intersection()
 		DEBUG_END;
 		return false;
 	}
-	
+
 	for (i = 0; i < numVertices; ++i)
 	{
 		vi0 = vertices[indVertices[i]];

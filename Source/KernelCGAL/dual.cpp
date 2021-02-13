@@ -28,8 +28,7 @@
 Point_3 dual(const Plane_3 &p)
 {
 	double reciprocal = -1. / p.d();
-	return Point_3(p.a() * reciprocal, p.b() * reciprocal,
-			p.c() * reciprocal);
+	return Point_3(p.a() * reciprocal, p.b() * reciprocal, p.c() * reciprocal);
 }
 
 Plane_3 dual(const Point_3 &p)

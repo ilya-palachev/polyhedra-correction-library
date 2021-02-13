@@ -33,7 +33,7 @@ typedef std::shared_ptr<Polyhedron> PolyhedronPtr;
 #endif /* POLYHEDRON_H_FORWARD */
 
 #ifndef POLYHEDRON_H
-#define	 POLYHEDRON_H
+#define POLYHEDRON_H
 
 #include <memory>
 #include <list>
@@ -74,7 +74,6 @@ typedef std::shared_ptr<EdgeData> EdgeDataPtr;
 class Polyhedron : public std::enable_shared_from_this<Polyhedron>
 {
 public:
-
 	/**
 	 * Number of vertices in the polyhedron
 	 */
@@ -88,21 +87,20 @@ public:
 	/**
 	 * Array of vertices
 	 */
-	Vector3d* vertices;
+	Vector3d *vertices;
 
 	/**
 	 * Array of facets
 	 */
-	Facet* facets;
+	Facet *facets;
 
 	/**
 	 * Array of vertexinfos. Vertexinfo saves information about which facets
 	 * the vertex is contained in.
 	 */
-	VertexInfo* vertexInfos;
+	VertexInfo *vertexInfos;
 
 protected:
-
 	/**
 	 * Enables "shared from this" feature.
 	 */
@@ -112,7 +110,6 @@ protected:
 	}
 
 public:
-
 	/*
 	 * The member functions of Polyhedron class are divided onto groups and
 	 * each group of functions is implemented in a separate file. Declarations
@@ -151,8 +148,8 @@ public:
 	 * @param vertex_orig	The array of vertices
 	 * @param facet_orig	The array of facets
 	 */
-	Polyhedron(int numv_orig, int numf_orig, Vector3d* vertex_orig,
-			Facet* facet_orig);
+	Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig,
+			   Facet *facet_orig);
 
 	/**
 	 * Converts standard CGAL polyhedron to PCL polyhedron.
@@ -192,8 +189,8 @@ public:
 	 * @param zmin	A reference where the minimal z will be stored in.
 	 * @param zmax	A reference where the maximal z will be stored in.
 	 */
-	void get_boundary(double& xmin, double& xmax, double& ymin, double& ymax,
-			double& zmin, double& zmax);
+	void get_boundary(double &xmin, double &xmax, double &ymin, double &ymax,
+					  double &zmin, double &zmax);
 
 	/**
 	 * Deletes facets that contain zero number of vertices. Such situation can
@@ -207,7 +204,7 @@ public:
 	 * @param plane	The plane
 	 */
 	int signum(Vector3d point, Plane plane);
-	
+
 	/**
 	 * Sets the shared pointer to the parent polyhedron in all facetsof the
 	 * polyhedron.
@@ -236,7 +233,7 @@ public:
 	 *
 	 * @param filename	The name of file.
 	 */
-	void my_fprint(const char* filename);
+	void my_fprint(const char *filename);
 
 	/**
 	 * Writes the polyhedron to the file in internal format.
@@ -245,7 +242,7 @@ public:
 	 *
 	 * @param filename	Opened file descriptor
 	 */
-	void my_fprint(FILE* file);
+	void my_fprint(FILE *file);
 
 	/**
 	 * Reads the polyhedron from the file in default format.
@@ -260,7 +257,7 @@ public:
 	 *
 	 * nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
-	void fscan_default_0(const char* filename);
+	void fscan_default_0(const char *filename);
 
 	/**
 	 * Reads the polyhedron from the file in default format.
@@ -275,7 +272,7 @@ public:
 	 *
 	 * j nv_{j} a_{j} b_{j} c_{j} d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
-	void fscan_default_1(const char* filename);
+	void fscan_default_1(const char *filename);
 
 	/**
 	 * Reads the polyhedron from the file in default format.
@@ -293,7 +290,7 @@ public:
 	 * #facets
 	 * j nv_{j} a_{j} b_{j} c_{j} d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
-	void fscan_default_1_1(const char* filename);
+	void fscan_default_1_1(const char *filename);
 
 	/**
 	 * Reads the polyhedron from the file in default format.
@@ -304,7 +301,7 @@ public:
 	 *
 	 * TODO: describe the format here.
 	 */
-	bool fscan_default_1_2(const char* filename);
+	bool fscan_default_1_2(const char *filename);
 
 	/**
 	 * Reads the polyhedron from the file in internal format.
@@ -323,7 +320,7 @@ public:
 	 * The special feature of the format is that the incidence information is
 	 * also written to the file.
 	 */
-	void fscan_my_format(const char* filename);
+	void fscan_my_format(const char *filename);
 
 	/**
 	 * Reads the polyhedron from the file in Stanford PLY format.
@@ -341,7 +338,7 @@ public:
 	 * TODO: It will be much better to use some open-source library to parse
 	 * general PLY files (maybe RPLY).
 	 */
-	void fscan_ply(const char* filename);
+	void fscan_ply(const char *filename);
 
 	/**
 	 * Writes the polyhedron to the file in default format.
@@ -356,7 +353,7 @@ public:
 	 *
 	 * nv_{j} a_{j} b_{j} c_{j} d_{j}   k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
-	void fprint_default_0(const char* filename);
+	void fprint_default_0(const char *filename);
 
 	/**
 	 * Writes the polyhedron to the file in default format.
@@ -371,11 +368,10 @@ public:
 	 *
 	 * j nv_{j} a_{j} b_{j} c_{j} d_{j} k_{j_{1}} k_{j_{2}} ... k_{j_{nv_{j}}}
 	 */
-	void fprint_default_1(const char* filename);
+	void fprint_default_1(const char *filename);
 
 	/** The same, but with slight modifications */
 	void fprint_default_1_2(const char *filename);
-
 
 	/**
 	 * Writes the polyhedron to the file in internal format.
@@ -394,7 +390,7 @@ public:
 	 * The special feature of the format is that the incidence information is
 	 * also written to the file.
 	 */
-	void fprint_my_format(const char* filename);
+	void fprint_my_format(const char *filename);
 
 	/**
 	 * Writes the polyhedron to the file in Stanford PLY format.
@@ -429,7 +425,7 @@ public:
 	 * general PLY files (maybe RPLY).
 	 */
 	void fprint_ply_scale(double scale, const char *filename,
-			const char *comment);
+						  const char *comment);
 
 	/**
 	 * Writes the polyhedron to the file in Stanford PLY format.
@@ -442,7 +438,7 @@ public:
 	 * only one word.
 	 */
 	void fprint_ply_autoscale(double maxSize, const char *filename,
-			const char *comment);
+							  const char *comment);
 
 	/**
 	 * Writes polyhedron to stream in PLY format, using autoscaling.
@@ -557,15 +553,15 @@ public:
 	 * @param fid0	Number of facets
 	 * @param fid1	Array of IDs of facets
 	 */
-	void coalesceFacets(int n, int* fid);
+	void coalesceFacets(int n, int *fid);
 
 	/*
 	 * Vertex shifting
 	 * ========================================================================
 	 * Contained in source file Polyhedron_shift_point.cpp
 	 *
-	 * Functions for shifting one vertex on the std::vector displacement and then
-	 * reconstructing the planarity of all facets.
+	 * Functions for shifting one vertex on the std::vector displacement and
+	 * then reconstructing the planarity of all facets.
 	 *
 	 * Also the are 2 functions that are used outside the coalescer. Thus, they
 	 * are here.
@@ -627,8 +623,8 @@ public:
 	 *
 	 * TODO: mode should be enum, not integer!
 	 */
-	void shiftPointLinearTest(int id, Vector3d delta, int mode, int& num_steps,
-			double& norm_sum);
+	void shiftPointLinearTest(int id, Vector3d delta, int mode, int &num_steps,
+							  double &norm_sum);
 
 	/**
 	 * Runs global linear shifting sequentially with small steps.
@@ -655,7 +651,7 @@ public:
 	 *
 	 * @param orig	Reference to source polyhedron
 	 */
-	void copyCoordinates(Polyhedron& orig);
+	void copyCoordinates(Polyhedron &orig);
 
 	/*
 	 * Vertex coalescence
@@ -728,8 +724,8 @@ public:
 	 * @param Jxx	Reference to Jyz = Jzy
 	 * @param Jxx	Reference to Jxz = Jzx
 	 */
-	void J(double& Jxx, double& Jyy, double& Jzz, double& Jxy, double& Jyz,
-			double& Jxz);
+	void J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz,
+		   double &Jxz);
 
 	/**
 	 * Calculates the mass center of the polyhedron
@@ -740,7 +736,7 @@ public:
 	 *
 	 * TODO: Return Vector3d here.
 	 */
-	void get_center(double& xc, double& yc, double& zc);
+	void get_center(double &xc, double &yc, double &zc);
 
 	/**
 	 * Calculates the numbers of inertia and the axes of inertia of the
@@ -753,8 +749,8 @@ public:
 	 * @param v1	Reference to 2nd axis of inertia
 	 * @param v2	Reference to 3rd axis of inertia
 	 */
-	void inertia(double& l0, double& l1, double& l2, Vector3d& v0, Vector3d& v1,
-			Vector3d& v2);
+	void inertia(double &l0, double &l1, double &l2, Vector3d &v0, Vector3d &v1,
+				 Vector3d &v2);
 
 	/**
 	 * Prints the std::list of facets sorted by their area
@@ -771,9 +767,9 @@ public:
 	 * ========================================================================
 	 * Contained in source file Polyhedron_clusterize.cpp
 	 *
-	 * Functions for analyzing groups of facets that have close normal std::vectors.
-	 * This is done using standard algorithms of clusterization under the set
-	 * of points contained inside the surface of unit sphere.
+	 * Functions for analyzing groups of facets that have close normal
+	 * std::vectors. This is done using standard algorithms of clusterization
+	 * under the set of points contained inside the surface of unit sphere.
 	 * ========================================================================
 	 */
 
@@ -796,7 +792,7 @@ public:
 	/**
 	 * Builds hierarchical clusterization of the facets set.
 	 */
-	TreeClusterNorm& build_TreeClusterNorm();
+	TreeClusterNorm &build_TreeClusterNorm();
 
 	/**
 	 * Builds hierarchical clusterization of the facets set.
@@ -804,8 +800,8 @@ public:
 	 * @param nodeArray	Pointer to the root of hierarchical tree
 	 * @param matrix	Reference to the matrix of distances between facets
 	 */
-	void giveClusterNodeArray(TreeClusterNormNode* nodeArray,
-			MatrixDistNorm& matrix);
+	void giveClusterNodeArray(TreeClusterNormNode *nodeArray,
+							  MatrixDistNorm &matrix);
 
 	/**
 	 * Builds hierarchical clusterization of the facets set associated with
@@ -816,9 +812,10 @@ public:
 	 * @param nodeArray_out	Pointer to the root of input hierarchical tree
 	 * @param matrix_out	Reference to the output matrix of distances
 	 */
-	void reClusterNodeArray(TreeClusterNormNode* nodeArray_in,
-			MatrixDistNorm& matrix_in, TreeClusterNormNode* nodeArray_out,
-			MatrixDistNorm& matrix_out);
+	void reClusterNodeArray(TreeClusterNormNode *nodeArray_in,
+							MatrixDistNorm &matrix_in,
+							TreeClusterNormNode *nodeArray_out,
+							MatrixDistNorm &matrix_out);
 
 	/*
 	 * Global correction
@@ -835,12 +832,12 @@ public:
 	 *
 	 * @param contourData		Shadow contour data
 	 * @param parameters		The parameter set of the algorithm
-	 * @param facetsCorrected	The std::list of facets to be corrected (for partial
-	 * correction)
+	 * @param facetsCorrected	The std::list of facets to be corrected (for
+	 * partial correction)
 	 */
 	void correctGlobal(ShadowContourDataPtr contourData,
-			GSCorrectorParameters* parameters,
-			std::list<int>* facetsCorrected);
+					   GSCorrectorParameters *parameters,
+					   std::list<int> *facetsCorrected);
 
 	/*
 	 * Verification
@@ -898,5 +895,4 @@ public:
 	bool nonZeroPlanes();
 };
 
-#endif	/* POLYHEDRON_H */
-
+#endif /* POLYHEDRON_H */

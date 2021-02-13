@@ -36,49 +36,52 @@ private:
 	int id_;
 
 public:
-	PCLPoint_2()
-		: id_(0)
+	PCLPoint_2() : id_(0)
 	{
 		vec_[0] = 0.;
 		vec_[1] = 0.;
 	}
 
-	PCLPoint_2(const double x, const double y, int id = 0)
-		: id_(id)
+	PCLPoint_2(const double x, const double y, int id = 0) : id_(id)
 	{
 		vec_[0] = x;
 		vec_[1] = y;
 	}
 
-	const double& x() const {
+	const double &x() const
+	{
 		return vec_[0];
 	}
 
-	const double& y() const {
+	const double &y() const
+	{
 		return vec_[1];
 	}
 
-	double& x() {
+	double &x()
+	{
 		return vec_[0];
 	}
 
-	double& y() {
+	double &y()
+	{
 		return vec_[1];
 	}
 
-	int id() const {
+	int id() const
+	{
 		return id_;
 	}
 
-	int& id() {
+	int &id()
+	{
 		return id_;
 	}
 
 	bool operator==(const PCLPoint_2 &p) const
 	{
-		return (vec_[0] == p.vec_[0]) &&
-		       (vec_[1] == p.vec_[1]) &&
-		       (id_ == p.id_);
+		return (vec_[0] == p.vec_[0]) && (vec_[1] == p.vec_[1]) &&
+			   (id_ == p.id_);
 	}
 
 	bool operator!=(const PCLPoint_2 &p) const

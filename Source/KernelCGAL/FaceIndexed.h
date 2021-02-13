@@ -30,19 +30,21 @@
 
 /** A face type with an ID member variable. */
 template <class Refs, class Plane>
-class FaceIndexed : public CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true,
-	Plane>
+class FaceIndexed
+	: public CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>
 {
 public:
 	long int id;
 
 	FaceIndexed() :
-		CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>(),
-		id(-1) {}
+		CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>(), id(-1)
+	{
+	}
 
-	FaceIndexed(const Plane_3& plane) :
-		CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>(plane),
-		id(-1) {}
+	FaceIndexed(const Plane_3 &plane) :
+		CGAL::HalfedgeDS_face_base<Refs, CGAL::Tag_true, Plane>(plane), id(-1)
+	{
+	}
 };
 
 #endif /* FACEINDEXED_H_ */

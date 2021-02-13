@@ -102,7 +102,6 @@ class SortedSetOfPairs;
 
 class GraphDumperGEXF;
 
-
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"

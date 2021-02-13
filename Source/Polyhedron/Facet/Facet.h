@@ -19,7 +19,7 @@
  */
 
 #ifndef FACET_H
-#define	FACET_H
+#define FACET_H
 
 #include <memory>
 
@@ -28,37 +28,37 @@
 
 struct FacetWithArea
 {
-	Facet* facet;
+	Facet *facet;
 	double area;
 };
 
-class Facet {
+class Facet
+{
 public:
 	int id;
 	int numVertices;
 	Plane plane;
-	int* indVertices;
+	int *indVertices;
 	std::weak_ptr<Polyhedron> parentPolyhedron;
 	unsigned char rgb[3];
 
-	void init_full(const int* index_orig, const bool ifLong);
+	void init_full(const int *index_orig, const bool ifLong);
 	void init_empty();
 
-	double calculateAreaAndMaybeCenter(bool ifCalculateCenter, Vector3d& center);
+	double calculateAreaAndMaybeCenter(bool ifCalculateCenter,
+									   Vector3d &center);
 
 public:
 	// Facet.cpp
 	Facet();
 
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			const int* index_orig,
-			PolyhedronPtr poly_orig,
-			const bool ifLong);
+		  const int *index_orig, PolyhedronPtr poly_orig, const bool ifLong);
 
 	Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			PolyhedronPtr poly_orig);
+		  PolyhedronPtr poly_orig);
 
-	Facet& operator =(const Facet& facet1);
+	Facet &operator=(const Facet &facet1);
 	~Facet();
 	void clear();
 
@@ -70,8 +70,8 @@ public:
 	int get_index(int pos);
 	char get_rgb(int pos);
 
-	void get_next_facet(int pos_curr, int& pos_next, int& fid_next,
-			int& v_curr);
+	void get_next_facet(int pos_curr, int &pos_next, int &fid_next,
+						int &v_curr);
 
 	void set_id(int id1);
 	void set_poly(PolyhedronPtr poly_new);
@@ -84,47 +84,49 @@ public:
 
 	void delete_vertex(int v);
 
-	void find_next_facet(int v, int& fid_next);
+	void find_next_facet(int v, int &fid_next);
 	int find_vertex(int what);
 
 	void add(int what, int pos);
 	void remove(int pos);
 	void update_info();
 
-	Vector3d& find_mass_centre();
+	Vector3d &find_mass_centre();
 
 	// Facet_preprocess.cpp
 	void preprocess_free();
 	void preprocess();
 	void preprocess_edge(int v0, int v1, int v0_id);
-	int preprocess_search_edge(int v0, int v1); //Searches edge and returns position of v1
-	//if success, -1 if not found.
-	int preprocess_search_vertex(int v, int& v_next);
+	int
+	preprocess_search_edge(int v0,
+						   int v1); // Searches edge and returns position of v1
+	// if success, -1 if not found.
+	int preprocess_search_vertex(int v, int &v_next);
 
 	// Facet_io.cpp
-	void my_fprint(FILE* file);
-	void my_fprint_all(FILE* file);
+	void my_fprint(FILE *file);
+	void my_fprint_all(FILE *file);
 
-	void fprint_default_0(FILE* file);
-	void fprint_default_1(FILE* file);
-	void fprint_default_1_2(FILE* file);
-	void fprint_my_format(FILE* file);
+	void fprint_default_0(FILE *file);
+	void fprint_default_1(FILE *file);
+	void fprint_default_1_2(FILE *file);
+	void fprint_my_format(FILE *file);
 
-	void fprint_ply_vertex(FILE* file);
-	void fprint_ply_index(FILE* file);
-	void fprint_ply_scale(FILE* file);
+	void fprint_ply_vertex(FILE *file);
+	void fprint_ply_index(FILE *file);
+	void fprint_ply_scale(FILE *file);
 
-	void my_fprint_edge_list(FILE* file);
+	void my_fprint_edge_list(FILE *file);
 
 	// Facet_test.cpp
 	bool test_self_intersection();
 
 	// Facet_inertia.cpp
-	bool consect_x(double y, double z, double& x);
+	bool consect_x(double y, double z, double &x);
 
 	// Facet_area.cpp
 	double area();
-	double calculateAreaAndCenter(Vector3d& center);
+	double calculateAreaAndCenter(Vector3d &center);
 
 	// Facet_verification.cpp
 	bool verifyIncidenceStructure();
@@ -137,8 +139,6 @@ public:
 	 * @return true/false if the plane is correct or not.
 	 */
 	bool correctPlane();
-
 };
 
-#endif	/* FACET_H */
-
+#endif /* FACET_H */

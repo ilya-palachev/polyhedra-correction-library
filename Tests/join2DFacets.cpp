@@ -53,11 +53,11 @@ typedef CGAL::Vector_2<K> Vector_2;
 static double genRandomDouble(double maxDelta)
 {
 	DEBUG_START;
-	//srand((unsigned) time(0));
+	// srand((unsigned) time(0));
 	struct timeval t1;
 	gettimeofday(&t1, NULL);
 	srand(t1.tv_usec * t1.tv_sec);
-	
+
 	int randomInteger = rand();
 	double randomDouble = randomInteger;
 	const double halfRandMax = RAND_MAX * 0.5;
@@ -80,16 +80,15 @@ std::vector<Point_2> generateExtremePoints(int numPoints)
 		do
 		{
 			Point_2 point(genRandomDouble(MAX_DELTA),
-					genRandomDouble(MAX_DELTA));
+						  genRandomDouble(MAX_DELTA));
 			points.push_back(point);
 			std::vector<Point_2> hull;
 			convex_hull_2(points.begin(), points.end(),
-					std::back_inserter(hull));
+						  std::back_inserter(hull));
 			if (hull.size() == points.size())
 				break;
 			points.pop_back();
-		}
-		while (1);
+		} while (1);
 	}
 #if 0
 	double maxDelta = 2. / ((double) numPoints);
@@ -112,7 +111,7 @@ std::vector<Point_2> generateExtremePoints(int numPoints)
 void centerizeExtremePoints(std::vector<Point_2> &points)
 {
 	double centerX = 0., centerY = 0.;
-	for (auto point: points)
+	for (auto point : points)
 	{
 		centerX += point.x();
 		centerY += point.y();
@@ -120,7 +119,7 @@ void centerizeExtremePoints(std::vector<Point_2> &points)
 	centerX /= points.size();
 	centerY /= points.size();
 	Vector_2 center(centerX, centerY);
-	for (auto &point: points)
+	for (auto &point : points)
 	{
 		point = point - center;
 	}
@@ -172,10 +171,10 @@ void printClusters(std::vector<std::set<int>> clusters)
 }
 
 std::vector<std::set<int>> prepareInitialClusters(int numPoints,
-		int numClusters)
+												  int numClusters)
 {
 	std::vector<std::set<int>> clusters(numClusters);
-	double step = ((double) numPoints) / ((double) numClusters);
+	double step = ((double)numPoints) / ((double)numClusters);
 	double bound = 0.;
 	int iPoint = 0;
 	int iCluster = 0;
@@ -191,10 +190,10 @@ std::vector<std::set<int>> prepareInitialClusters(int numPoints,
 	return clusters;
 }
 
-std::pair<Point_2, double> calculateClusterErrorAndCenter(
-		const std::vector<Vector_2> &directions,
-		const std::vector<double> &values,
-		const std::set<int> &cluster)
+std::pair<Point_2, double>
+calculateClusterErrorAndCenter(const std::vector<Vector_2> &directions,
+							   const std::vector<double> &values,
+							   const std::set<int> &cluster)
 {
 	Eigen::Matrix2d A;
 	Eigen::Vector2d b;
@@ -222,7 +221,7 @@ std::pair<Point_2, double> calculateClusterErrorAndCenter(
 
 	Eigen::Matrix2d inverse = A.inverse();
 	Eigen::Vector2d x = inverse * b;
-	
+
 	double error = 0.;
 	for (const int &i : cluster)
 	{
@@ -237,14 +236,11 @@ std::pair<Point_2, double> calculateClusterErrorAndCenter(
 	return std::make_pair(center, error);
 }
 
-double calculateClusterError(
-		const std::vector<Vector_2> &directions,
-		const std::vector<double> &values,
-		const std::set<int> &cluster)
+double calculateClusterError(const std::vector<Vector_2> &directions,
+							 const std::vector<double> &values,
+							 const std::set<int> &cluster)
 {
-	return calculateClusterErrorAndCenter(
-			directions, values,
-			cluster).second;
+	return calculateClusterErrorAndCenter(directions, values, cluster).second;
 }
 
 void exchangeItemToRight(std::set<int> &cluster, std::set<int> &clusterNext)
@@ -276,30 +272,28 @@ void exchangeItemToLeft(std::vector<std::set<int>> &clusters, int iCluster)
 	exchangeItemToLeft(clusters[iCluster], clusters[iClusterNext]);
 }
 
-double calculateClusterErrorsRight(
-		const std::vector<Vector_2> &directions,
-		const std::vector<double> &values,
-		const std::set<int> &cluster,
-		const std::set<int> &clusterNext)
+double calculateClusterErrorsRight(const std::vector<Vector_2> &directions,
+								   const std::vector<double> &values,
+								   const std::set<int> &cluster,
+								   const std::set<int> &clusterNext)
 {
 	std::set<int> clusterChanged = cluster;
 	std::set<int> clusterNextChanged = clusterNext;
 	exchangeItemToRight(clusterChanged, clusterNextChanged);
 	return calculateClusterError(directions, values, clusterChanged) +
-		calculateClusterError(directions, values, clusterNextChanged);
+		   calculateClusterError(directions, values, clusterNextChanged);
 }
 
-double calculateClusterErrorsLeft(
-		const std::vector<Vector_2> &directions,
-		const std::vector<double> &values,
-		const std::set<int> &cluster,
-		const std::set<int> &clusterNext)
+double calculateClusterErrorsLeft(const std::vector<Vector_2> &directions,
+								  const std::vector<double> &values,
+								  const std::set<int> &cluster,
+								  const std::set<int> &clusterNext)
 {
 	std::set<int> clusterChanged = cluster;
 	std::set<int> clusterNextChanged = clusterNext;
 	exchangeItemToLeft(clusterChanged, clusterNextChanged);
 	return calculateClusterError(directions, values, clusterChanged) +
-		calculateClusterError(directions, values, clusterNextChanged);
+		   calculateClusterError(directions, values, clusterNextChanged);
 }
 
 struct EnhancementDescription
@@ -309,17 +303,16 @@ struct EnhancementDescription
 	bool ifRightDirection;
 
 	EnhancementDescription() :
-		iClusterBestChange(0),
-		bestChange(0.),
-		ifRightDirection(false) {}
-
+		iClusterBestChange(0), bestChange(0.), ifRightDirection(false)
+	{
+	}
 };
 
-EnhancementDescription findBestEnhancement(
-		const std::vector<std::set<int>> &clusters,
-		const std::vector<Vector_2> &directions,
-		const std::vector<double> &values,
-		const std::vector<double> &errors)
+EnhancementDescription
+findBestEnhancement(const std::vector<std::set<int>> &clusters,
+					const std::vector<Vector_2> &directions,
+					const std::vector<double> &values,
+					const std::vector<double> &errors)
 {
 	EnhancementDescription ED;
 	int iCluster = 0;
@@ -327,14 +320,12 @@ EnhancementDescription findBestEnhancement(
 	double bestChange = 0.;
 	for (const auto &cluster : clusters)
 	{
-		int iClusterNext = (numClusters + iCluster + 1)
-			% numClusters;
+		int iClusterNext = (numClusters + iCluster + 1) % numClusters;
 		const auto &clusterNext = clusters[iClusterNext];
-		double errorInitial = errors[iCluster]
-			+ errors[iClusterNext];
-		double change = errorInitial -
-			calculateClusterErrorsRight(directions,
-				values, cluster, clusterNext);
+		double errorInitial = errors[iCluster] + errors[iClusterNext];
+		double change =
+			errorInitial - calculateClusterErrorsRight(directions, values,
+													   cluster, clusterNext);
 		if (change > ED.bestChange)
 		{
 			ED.ifRightDirection = true;
@@ -343,8 +334,7 @@ EnhancementDescription findBestEnhancement(
 		}
 
 		change = errorInitial - calculateClusterErrorsLeft(
-				directions, values, cluster,
-				clusterNext);
+									directions, values, cluster, clusterNext);
 		if (change > bestChange)
 		{
 			ED.ifRightDirection = false;
@@ -357,10 +347,9 @@ EnhancementDescription findBestEnhancement(
 	return ED;
 }
 
-void constructBestClusters(
-		std::vector<std::set<int>> &clusters,
-		const std::vector<Vector_2> &directions,
-		const std::vector<double> &values)
+void constructBestClusters(std::vector<std::set<int>> &clusters,
+						   const std::vector<Vector_2> &directions,
+						   const std::vector<double> &values)
 {
 	int numClusters = clusters.size();
 	while (true)
@@ -369,23 +358,20 @@ void constructBestClusters(
 		int iCluster = 0;
 		for (const auto &cluster : clusters)
 		{
-			double error = calculateClusterError(directions,
-					values, cluster);
+			double error = calculateClusterError(directions, values, cluster);
 			errors[iCluster] = error;
 			++iCluster;
 		}
 
-		EnhancementDescription ED = findBestEnhancement(
-				clusters, directions, values, errors);
+		EnhancementDescription ED =
+			findBestEnhancement(clusters, directions, values, errors);
 
 		if (ED.bestChange > 0.)
 		{
 			if (ED.ifRightDirection)
-				exchangeItemToRight(clusters,
-						ED.iClusterBestChange);
+				exchangeItemToRight(clusters, ED.iClusterBestChange);
 			else
-				exchangeItemToLeft(clusters,
-						ED.iClusterBestChange);
+				exchangeItemToLeft(clusters, ED.iClusterBestChange);
 		}
 		else
 			break;
@@ -400,7 +386,7 @@ int main(int argc, char **argv)
 	int numClusters = atoi(argv[2]);
 
 	std::cout << "Convex hull of " << numPoints << " will be generated"
-		<< std::endl;
+			  << std::endl;
 	if (numPoints <= 0)
 		return EXIT_FAILURE;
 
@@ -408,10 +394,9 @@ int main(int argc, char **argv)
 	centerizeExtremePoints(points);
 
 	std::sort(points.begin(), points.end(),
-		[](const Point_2 &a, const Point_2 &b)
-		{
-			return atan2(a.y(), a.x()) > atan2(b.y(), b.x());
-		});
+			  [](const Point_2 &a, const Point_2 &b) {
+				  return atan2(a.y(), a.x()) > atan2(b.y(), b.x());
+			  });
 	std::vector<Vector_2> directions;
 	std::vector<double> values;
 	std::tie(directions, values) = prepareSupportData(points);

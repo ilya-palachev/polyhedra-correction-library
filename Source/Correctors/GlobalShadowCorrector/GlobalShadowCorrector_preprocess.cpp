@@ -32,8 +32,8 @@ void GlobalShadowCorrector::preprocess()
 {
 	DEBUG_START;
 	edgeData.reset(new EdgeData());
-	std::shared_ptr<EdgeConstructor> edgeConstructor(new
-			EdgeConstructor(polyhedron));
+	std::shared_ptr<EdgeConstructor> edgeConstructor(
+		new EdgeConstructor(polyhedron));
 	edgeConstructor->run(edgeData);
 	preprocessAssociations();
 	DEBUG_END;
@@ -48,34 +48,31 @@ void GlobalShadowCorrector::preprocessAssociations()
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
 		for (std::list<int>::iterator itFacet = facetsCorrected.begin();
-				itFacet != facetsCorrected.end(); ++itFacet)
+			 itFacet != facetsCorrected.end(); ++itFacet)
 		{
 			int iFacet = *itFacet;
 			int numVerticesFacet = polyhedron->facets[iFacet].numVertices;
-			int* indVertices = polyhedron->facets[iFacet].indVertices;
+			int *indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 			{
-				EdgeSetIterator edge =
-						edgeData->findEdge(indVertices[iVertex],
-						indVertices[iVertex + 1]);
+				EdgeSetIterator edge = edgeData->findEdge(
+					indVertices[iVertex], indVertices[iVertex + 1]);
 				associator->run(iContour, iFacet, edge);
 			}
 		}
 	}
-	
+
 	DEBUG_PRINT("Search of assocations is ended.");
-	
+
 #ifndef NDEBUG
 	/* Print found associations : */
 	for (EdgeSetIterator edge = edgeData->edges.begin();
-			edge != edgeData->edges.end(); ++edge)
+		 edge != edgeData->edges.end(); ++edge)
 	{
 		edge->my_fprint(stdout);
-		double DEBUG_VARIABLE distance
-			= sqrt(qmod(polyhedron->vertices[edge->v0] -
-				polyhedron->vertices[edge->v1]));
-		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1,
-				distance);
+		double DEBUG_VARIABLE distance = sqrt(qmod(
+			polyhedron->vertices[edge->v0] - polyhedron->vertices[edge->v1]));
+		DEBUG_PRINT("\t dist (v_%d, v_%d) = %le", edge->v0, edge->v1, distance);
 	}
 #endif /* NDEBUG */
 	DEBUG_END;

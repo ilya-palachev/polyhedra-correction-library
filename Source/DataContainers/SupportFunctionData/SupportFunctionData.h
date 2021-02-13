@@ -61,7 +61,6 @@ typedef std::shared_ptr<SupportFunctionData> SupportFunctionDataPtr;
 #include "KernelCGAL/KernelCGAL.h"
 #include "SparseMatrixEigen.h"
 
-
 /** Minimal limit under which support firections are considered to be equal. */
 const double EPS_SUPPORT_DIRECTION_EQUALITY = 1e-15;
 
@@ -102,8 +101,7 @@ public:
 	 *
 	 * @param itemsGiven	Support function data items.
 	 */
-	SupportFunctionData(
-			const std::vector<SupportFunctionDataItem> itemsGiven);
+	SupportFunctionData(const std::vector<SupportFunctionDataItem> itemsGiven);
 
 	/**
 	 * Reads support support function data from input stream.
@@ -118,7 +116,7 @@ public:
 	 * @param data	The original data.
 	 * @return The assigned data.
 	 */
-	SupportFunctionData &operator= (const SupportFunctionData &data);
+	SupportFunctionData &operator=(const SupportFunctionData &data);
 
 	/** Destructor. */
 	virtual ~SupportFunctionData();
@@ -129,7 +127,7 @@ public:
 	 * @param iPosition	The ID of item that is demanded.
 	 * @return The reference to the demanded item.
 	 */
-	SupportFunctionDataItem &operator[] (const int iPosition);
+	SupportFunctionDataItem &operator[](const int iPosition);
 	/**
 	 * Gets the size of vector fo items.
 	 *
@@ -230,8 +228,7 @@ public:
 	 *
 	 * @return		Duals of shifted support planes.
 	 */
-	std::vector<Point_3> getShiftedDualPoints_3(
-			std::vector<double> epsilons);
+	std::vector<Point_3> getShiftedDualPoints_3(std::vector<double> epsilons);
 
 	/**
 	 * Searches trusted edges that are depicted by support data.

@@ -29,21 +29,23 @@
 #include "DebugAssert.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPoints.h"
 
-SupportFunctionDataItemExtractorByPoints::SupportFunctionDataItemExtractorByPoints() :
+SupportFunctionDataItemExtractorByPoints::
+	SupportFunctionDataItemExtractorByPoints() :
 	SupportFunctionDataItemExtractor()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SupportFunctionDataItemExtractorByPoints::~SupportFunctionDataItemExtractorByPoints()
+SupportFunctionDataItemExtractorByPoints::
+	~SupportFunctionDataItemExtractorByPoints()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SupportFunctionDataItem SupportFunctionDataItemExtractorByPoints::run(
-		SideOfContour *side)
+SupportFunctionDataItem
+SupportFunctionDataItemExtractorByPoints::run(SideOfContour *side)
 {
 	DEBUG_START;
 	Vector3d A1 = side->A1;

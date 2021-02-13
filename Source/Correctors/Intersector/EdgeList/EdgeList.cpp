@@ -23,41 +23,40 @@
 #include "Correctors/Intersector/EdgeList/EdgeList.h"
 
 EdgeList::EdgeList() :
-				id(-1),
-				len(0),
-				num(0),
-				pointer(0),
-				edge0(NULL),
-				edge1(NULL),
-				ind0(NULL),
-				ind1(NULL),
-				next_facet(NULL),
-				next_direction(NULL),
-				scalar_mult(NULL),
-				id_v_new(NULL),
-				isUsed(NULL),
-				poly(NULL)
+	id(-1),
+	len(0),
+	num(0),
+	pointer(0),
+	edge0(NULL),
+	edge1(NULL),
+	ind0(NULL),
+	ind1(NULL),
+	next_facet(NULL),
+	next_direction(NULL),
+	scalar_mult(NULL),
+	id_v_new(NULL),
+	isUsed(NULL),
+	poly(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-EdgeList::EdgeList(int id_orig, int len_orig,
-		PolyhedronPtr poly_orig) :
-				id(id_orig),
-				len(len_orig),
-				num(0),
-				pointer(0),
-				edge0(new int[len]),
-				edge1(new int[len]),
-				ind0(new int[len]),
-				ind1(new int[len]),
-				next_facet(new int[len]),
-				next_direction(new int[len]),
-				scalar_mult(new double[len]),
-				id_v_new(new int[len]),
-				isUsed(new bool[len]),
-				poly(poly_orig)
+EdgeList::EdgeList(int id_orig, int len_orig, PolyhedronPtr poly_orig) :
+	id(id_orig),
+	len(len_orig),
+	num(0),
+	pointer(0),
+	edge0(new int[len]),
+	edge1(new int[len]),
+	ind0(new int[len]),
+	ind1(new int[len]),
+	next_facet(new int[len]),
+	next_direction(new int[len]),
+	scalar_mult(new double[len]),
+	id_v_new(new int[len]),
+	isUsed(new bool[len]),
+	poly(poly_orig)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -87,7 +86,7 @@ EdgeList::~EdgeList()
 	DEBUG_END;
 }
 
-EdgeList& EdgeList::operator =(const EdgeList& orig)
+EdgeList &EdgeList::operator=(const EdgeList &orig)
 {
 	DEBUG_START;
 	int i;
@@ -159,8 +158,7 @@ void EdgeList::set_id_v_new(int id_v)
 void EdgeList::set_isUsed(bool val)
 {
 	DEBUG_START;
-	DEBUG_PRINT("EdgeList[%d].isUsed[%d] = %d\n",
-			id, pointer, val);
+	DEBUG_PRINT("EdgeList[%d].isUsed[%d] = %d\n", id, pointer, val);
 	isUsed[pointer] = val;
 	DEBUG_END;
 }
@@ -173,8 +171,7 @@ void EdgeList::set_pointer(int val)
 		ERROR_PRINT("Error. num = %d, val = %d", num, val);
 		return;
 	}
-	DEBUG_PRINT("EdgeList[%d].set_pointer(%d)\n",
-			id, val);
+	DEBUG_PRINT("EdgeList[%d].set_pointer(%d)\n", id, val);
 	pointer = val;
 	DEBUG_END;
 }
@@ -192,4 +189,3 @@ void EdgeList::go_forward()
 	set_pointer(pointer + 1);
 	DEBUG_END;
 }
-

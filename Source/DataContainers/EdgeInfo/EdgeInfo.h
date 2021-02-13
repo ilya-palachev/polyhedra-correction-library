@@ -25,7 +25,7 @@
  */
 
 #ifndef EDGE_INFO_H
-#define	EDGE_INFO_H
+#define EDGE_INFO_H
 #include "Polyhedron_3/Polyhedron_3.h"
 
 struct EdgePlane_3 : public Plane_3
@@ -38,7 +38,7 @@ struct EdgePlane_3 : public Plane_3
 	} EdgePlaneType;
 
 	EdgePlaneType type; /* unused */
-	double weight;      /* unused */
+	double weight;		/* unused */
 
 	using Plane_3::Plane_3;
 };
@@ -52,7 +52,7 @@ struct EdgeInfo
 
 	unsigned facetID1;
 	unsigned facetID2;
-	Segment_3 initialEdge; /* not contained in std format */
+	Segment_3 initialEdge;	  /* not contained in std format */
 	Segment_3 correctingEdge; /* may be unused */
 	std::vector<EdgePlane_3> planes;
 };
@@ -60,4 +60,4 @@ struct EdgeInfo
 bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data);
 
 bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data);
-#endif	/* EDGE_INFO_H */
+#endif /* EDGE_INFO_H */

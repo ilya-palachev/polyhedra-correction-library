@@ -23,8 +23,7 @@
 #include "Polyhedron/SpecificPolyhedrons/CubeCutted.h"
 #include "Polyhedron/Facet/Facet.h"
 
-CubeCutted::CubeCutted() :
-		Polyhedron()
+CubeCutted::CubeCutted() : Polyhedron()
 {
 	DEBUG_START;
 	init();

@@ -42,7 +42,7 @@
 double distance(Segment_3 a, Segment_3 b);
 
 TrustedEdgesDetector::TrustedEdgesDetector(SupportFunctionDataPtr data,
-		double threshold) :
+										   double threshold) :
 	data_(data),
 	planes_(std::vector<Plane_3>(data->size())),
 	directions_(std::vector<Point_3>(data->size())),
@@ -54,13 +54,12 @@ TrustedEdgesDetector::TrustedEdgesDetector(SupportFunctionDataPtr data,
 	thresholdClusterError_(threshold)
 {
 	DEBUG_START;
-	for (int i = 0; i < (int) data->size(); ++i)
+	for (int i = 0; i < (int)data->size(); ++i)
 	{
 		auto item = (*data)[i];
 		Point_3 direction(item.direction);
 		double value = item.value;
-		Plane_3 plane(direction.x(), direction.y(), direction.z(),
-				-value);
+		Plane_3 plane(direction.x(), direction.y(), direction.z(), -value);
 		planes_[i] = plane;
 		directions_[i] = direction;
 		values_[i] = value;
@@ -82,25 +81,23 @@ void TrustedEdgesDetector::initialize()
 	CGAL::convex_hull_3(directions_.begin(), directions_.end(), hull);
 	if (hull.size_of_vertices() != directions_.size())
 	{
-		std::cerr << "Hull contains only " << hull.size_of_vertices()
-			<< " of " << directions_.size() << " verices!"
-			<< std::endl;
+		std::cerr << "Hull contains only " << hull.size_of_vertices() << " of "
+				  << directions_.size() << " verices!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	/* 2. Build vertices iterator access array: */
 	sphere_ = hull;
 	int iVertex = 0;
-	vertices_ = std::vector<Polyhedron_3::Vertex_iterator>(
-			directions_.size());
+	vertices_ = std::vector<Polyhedron_3::Vertex_iterator>(directions_.size());
 	auto O = CGAL::Origin();
 	for (auto vertex = sphere_.vertices_begin();
-			vertex != sphere_.vertices_end(); ++vertex)
+		 vertex != sphere_.vertices_end(); ++vertex)
 	{
 		double lengthMinimal = 1e100;
 		int iDirectionBest = 0;
 		Vector_3 vector = vertex->point() - O;
-		for (int i = 0; i < (int) directions_.size(); ++i)
+		for (int i = 0; i < (int)directions_.size(); ++i)
 		{
 			Vector_3 difference = vector - (directions_[i] - O);
 			double length = sqrt(difference.squared_length());
@@ -116,14 +113,14 @@ void TrustedEdgesDetector::initialize()
 	DEBUG_END;
 }
 
-std::vector<Segment_3> TrustedEdgesDetector::getSortedSegments(
-		Polyhedron_3 polyhedron)
+std::vector<Segment_3>
+TrustedEdgesDetector::getSortedSegments(Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 	std::vector<Point_3> points(polyhedron.size_of_vertices());
 	int iVertex = 0;
 	for (auto vertex = polyhedron.vertices_begin();
-			vertex != polyhedron.vertices_end(); ++vertex)
+		 vertex != polyhedron.vertices_end(); ++vertex)
 	{
 		points[iVertex] = vertex->point();
 		++iVertex;
@@ -132,21 +129,18 @@ std::vector<Segment_3> TrustedEdgesDetector::getSortedSegments(
 	std::vector<Segment_3> segments(polyhedron.size_of_halfedges() / 2);
 	int iSegment = 0;
 	for (auto halfedge = polyhedron.halfedges_begin();
-			halfedge != polyhedron.halfedges_end(); ++halfedge)
+		 halfedge != polyhedron.halfedges_end(); ++halfedge)
 	{
 		int iVertex = halfedge->vertex()->id;
 		int iVertexOpposite = halfedge->opposite()->vertex()->id;
 		if (iVertex < iVertexOpposite)
 		{
-			Segment_3 segment(points[iVertexOpposite],
-					points[iVertex]);
+			Segment_3 segment(points[iVertexOpposite], points[iVertex]);
 			segments[iSegment] = segment;
 			++iSegment;
 		}
 	}
-	std::sort(segments.begin(), segments.end(),
-			[](Segment_3 a, Segment_3 b)
-	{
+	std::sort(segments.begin(), segments.end(), [](Segment_3 a, Segment_3 b) {
 		return a.squared_length() < b.squared_length();
 	});
 	DEBUG_END;
@@ -259,10 +253,12 @@ double distance(Segment_3 segment, SupportFunctionDataItemInfo info)
 {
 	DEBUG_START;
 	auto O = CGAL::Origin();
-	Point_3 source = segment.source() - ((segment.source() - O)
-			* info.normalShadow) * info.normalShadow;
-	Point_3 target = segment.target() - ((segment.target() - O)
-			* info.normalShadow) * info.normalShadow;
+	Point_3 source =
+		segment.source() -
+		((segment.source() - O) * info.normalShadow) * info.normalShadow;
+	Point_3 target =
+		segment.target() -
+		((segment.target() - O) * info.normalShadow) * info.normalShadow;
 	Segment_3 segmentProjected(source, target);
 	double result = distance(segmentProjected, info.segment);
 	DEBUG_END;
@@ -273,19 +269,16 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 {
 	DEBUG_START;
 	std::vector<std::set<int>> clustersFirst(segments.size());
-	for (int iItem = 0; iItem < (int) data_->size(); ++iItem)
+	for (int iItem = 0; iItem < (int)data_->size(); ++iItem)
 	{
 		std::cerr << "Processing item " << iItem << std::endl;
 		auto item = (*data_)[iItem];
 		int iSegmentNearest = 0;
 		double distanceMinimal = ALPHA_PLANE_CLUSTER_INFINITY;
-		for (int iSegment = 0; iSegment < (int) segments.size();
-				++iSegment)
+		for (int iSegment = 0; iSegment < (int)segments.size(); ++iSegment)
 		{
-			double length = sqrt(
-					segments[iSegment].squared_length());
-			double distanceCurrent = distance(segments[iSegment],
-					*(item.info));
+			double length = sqrt(segments[iSegment].squared_length());
+			double distanceCurrent = distance(segments[iSegment], *(item.info));
 			if (distanceCurrent < distanceMinimal)
 			{
 				distanceMinimal = distanceCurrent;
@@ -293,10 +286,9 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 			}
 			if (distanceCurrent <= thresholdClusterError_)
 			{
-				std::cerr << "   For segment #" << iSegment <<
-					" of length " << length <<
-					" distance is " << distanceCurrent
-					<< std::endl;
+				std::cerr << "   For segment #" << iSegment << " of length "
+						  << length << " distance is " << distanceCurrent
+						  << std::endl;
 			}
 		}
 		if (distanceMinimal <= thresholdClusterError_)
@@ -305,14 +297,13 @@ void TrustedEdgesDetector::buildFirstClusters(std::vector<Segment_3> segments)
 		}
 	}
 	printColouredIntersection(planes_, clustersFirst,
-			"first-trusted-clusters.ply");
+							  "first-trusted-clusters.ply");
 
-	for (int iSegment = 0; iSegment < (int) segments.size(); ++iSegment)
+	for (int iSegment = 0; iSegment < (int)segments.size(); ++iSegment)
 	{
 		std::cerr << "Found " << clustersFirst[iSegment].size()
-			<< " items for segment #" << iSegment << " of length "
-			<< sqrt(segments[iSegment].squared_length())
-			<< std::endl;
+				  << " items for segment #" << iSegment << " of length "
+				  << sqrt(segments[iSegment].squared_length()) << std::endl;
 	}
 	DEBUG_END;
 }
@@ -322,8 +313,7 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Point_3> points)
 	DEBUG_START;
 	stream << "ply" << std::endl;
 	stream << "format ascii 1.0" << std::endl;
-	stream << "comment generated by Polyhedra Correction Library"
-		<< std::endl;
+	stream << "comment generated by Polyhedra Correction Library" << std::endl;
 	stream << "element vertex " << points.size() << std::endl;
 	stream << "property float x" << std::endl;
 	stream << "property float y" << std::endl;
@@ -333,15 +323,15 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Point_3> points)
 	stream << "end_header" << std::endl;
 	double scale = 1e+6;
 
-	for (Point_3 point: points)
+	for (Point_3 point : points)
 	{
-		stream << (int) std::floor(scale * point.x()) << " "
-			<< (int) std::floor(scale * point.y()) << " "
-			<< (int) std::floor(scale * point.z());
+		stream << (int)std::floor(scale * point.x()) << " "
+			   << (int)std::floor(scale * point.y()) << " "
+			   << (int)std::floor(scale * point.z());
 		stream << std::endl;
 	}
 	stream << points.size();
-	for (int i = 0; i < (int) points.size(); ++i)
+	for (int i = 0; i < (int)points.size(); ++i)
 	{
 		stream << " " << i;
 	}
@@ -352,10 +342,9 @@ std::ostream &operator<<(std::ostream &stream, std::vector<Point_3> points)
 
 inline std::string generateRandomString(const int length)
 {
-	static const char alphanum[] =
-		"0123456789"
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		"abcdefghijklmnopqrstuvwxyz";
+	static const char alphanum[] = "0123456789"
+								   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+								   "abcdefghijklmnopqrstuvwxyz";
 	std::string string;
 	for (int i = 0; i < length; ++i)
 	{
@@ -377,8 +366,7 @@ inline std::string generateRandomFileName(const char *prefix, int length)
 	do
 	{
 		name = prefix + generateRandomString(length);
-	}
-	while (checkFileExists(name));
+	} while (checkFileExists(name));
 	return name;
 }
 
@@ -390,18 +378,18 @@ typedef struct
 } ContourInfo;
 
 std::ostream &operator<<(std::ostream &stream,
-		std::vector<ContourInfo> contours)
+						 std::vector<ContourInfo> contours)
 {
 	DEBUG_START;
 	std::vector<std::string> paths;
-	for (auto contour: contours)
+	for (auto contour : contours)
 	{
 		std::ofstream temporary;
 		auto path = generateRandomFileName("contour_", 16);
 		paths.push_back(path);
 		temporary.open(path);
 		Vector_3 normal = contour.normal;
-		for (auto point: contour.points)
+		for (auto point : contour.points)
 		{
 			temporary << project(point, normal) << std::endl;
 		}
@@ -413,7 +401,7 @@ std::ostream &operator<<(std::ostream &stream,
 	gnuplotCommand += "set term pngcairo ; set output \'";
 	gnuplotCommand += imagePath;
 	gnuplotCommand += "\' ; plot";
-	for (int i = 0; i < (int) contours.size(); ++i)
+	for (int i = 0; i < (int)contours.size(); ++i)
 	{
 		if (i != 0)
 			gnuplotCommand += " , ";
@@ -430,7 +418,7 @@ std::ostream &operator<<(std::ostream &stream,
 	{
 		ERROR_PRINT("gnuplot failed!");
 	}
-	for (auto path: paths)
+	for (auto path : paths)
 		std::remove(path.c_str());
 	std::ifstream tmpstream;
 	tmpstream.open(imagePath, std::ifstream::in);
@@ -442,34 +430,30 @@ std::ostream &operator<<(std::ostream &stream,
 }
 
 void dumpContours(Polyhedron_3 polyhedron,
-		std::vector<std::vector<int>> indexContours,
-		std::vector<Vector_3> directionContours,
-		std::vector<std::vector<Point_3>> pointContours)
+				  std::vector<std::vector<int>> indexContours,
+				  std::vector<Vector_3> directionContours,
+				  std::vector<std::vector<Point_3>> pointContours)
 {
 	DEBUG_START;
-	for (int iContour = 0; iContour < (int) indexContours.size();
-			++iContour)
+	for (int iContour = 0; iContour < (int)indexContours.size(); ++iContour)
 	{
 		std::cerr << "Contour #" << iContour << ": ";
-		for (int i: indexContours[iContour])
+		for (int i : indexContours[iContour])
 		{
 			std::cerr << i << " ";
 		}
 		std::cerr << std::endl;
-		std::cerr << "   normal " << directionContours[iContour]
-			<< std::endl;
-		std::cerr << "   number of sides "
-			<< indexContours[iContour].size() << std::endl;
+		std::cerr << "   normal " << directionContours[iContour] << std::endl;
+		std::cerr << "   number of sides " << indexContours[iContour].size()
+				  << std::endl;
 		std::string name;
 		name += "contour-";
 		name += std::to_string(iContour);
 		name += ".ply";
 		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
 			<< pointContours[iContour];
-		
 	}
-	for (int iContour = 0; iContour < (int) indexContours.size();
-			++iContour)
+	for (int iContour = 0; iContour < (int)indexContours.size(); ++iContour)
 	{
 		std::string name;
 		name += "contours-comparative-view-";
@@ -484,11 +468,10 @@ void dumpContours(Polyhedron_3 polyhedron,
 		ContourInfo contourRude;
 		contourRude.comment = "rude";
 		contourRude.normal = directionContours[iContour];
-		contourRude.points = generateProjection(polyhedron,
-				directionContours[iContour]).first;
+		contourRude.points =
+			generateProjection(polyhedron, directionContours[iContour]).first;
 		contours.push_back(contourRude);
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str())
-			<< contours;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, name.c_str()) << contours;
 	}
 	DEBUG_END;
 }
@@ -497,7 +480,7 @@ void analyzeContours(Polyhedron_3 polyhedron, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
 	int iContourMax = 0;
-	for (int i = 0; i < (int) data->size(); ++i)
+	for (int i = 0; i < (int)data->size(); ++i)
 	{
 		auto item = (*data)[i];
 		int iContour = item.info->iContour;
@@ -509,7 +492,7 @@ void analyzeContours(Polyhedron_3 polyhedron, SupportFunctionDataPtr data)
 	std::vector<std::vector<int>> indexContours(iContourMax + 1);
 	std::vector<Vector_3> directionContours(iContourMax + 1);
 	std::vector<std::vector<Point_3>> pointContours(iContourMax + 1);
-	for (int i = 0; i < (int) data->size(); ++i)
+	for (int i = 0; i < (int)data->size(); ++i)
 	{
 		auto item = (*data)[i];
 		int iContour = item.info->iContour;
@@ -518,25 +501,22 @@ void analyzeContours(Polyhedron_3 polyhedron, SupportFunctionDataPtr data)
 		pointContours[iContour].push_back(item.info->segment.source());
 		pointContours[iContour].push_back(item.info->segment.target());
 	}
-	dumpContours(polyhedron, indexContours, directionContours,
-			pointContours);
+	dumpContours(polyhedron, indexContours, directionContours, pointContours);
 	DEBUG_END;
 }
 
 void dumpClustersRaw(std::vector<std::vector<int>> clusters,
-		std::vector<Plane_3> planes)
+					 std::vector<Plane_3> planes)
 {
 	DEBUG_START;
 	int numClusters = clusters.size();
 	for (int iCluster = 0; iCluster < numClusters; ++iCluster)
 	{
-		std::cerr << "Cluster #" << iCluster << ":"
-			<< std::endl;
-		for (int iFacet: clusters[iCluster])
+		std::cerr << "Cluster #" << iCluster << ":" << std::endl;
+		for (int iFacet : clusters[iCluster])
 		{
 			std::cerr << " " << iFacet << " -> ";
 			std::cerr << planes[iFacet] << std::endl;
-
 		}
 		std::cerr << std::endl;
 	}
@@ -544,36 +524,30 @@ void dumpClustersRaw(std::vector<std::vector<int>> clusters,
 }
 
 void dumpClusters(Polyhedron_3 polyhedron,
-		std::vector<std::vector<int>> clusters,
-		std::vector<Plane_3> planes)
+				  std::vector<std::vector<int>> clusters,
+				  std::vector<Plane_3> planes)
 {
 	DEBUG_START;
 	int iFacetCluster = 0;
 	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
+		 facet != polyhedron.facets_end(); ++facet)
 	{
-		std::cerr << "facet-cluster " << iFacetCluster
-			<< std::endl;
+		std::cerr << "facet-cluster " << iFacetCluster << std::endl;
 		std::cerr << "facet->id = " << facet->id << std::endl;
 		std::cerr << "polyhedron.indexPlanes_[" << facet->id
-			<< "] = " << polyhedron.indexPlanes_[facet->id]
-			<< std::endl;
+				  << "] = " << polyhedron.indexPlanes_[facet->id] << std::endl;
 		int iCluster = polyhedron.indexPlanes_[facet->id];
-		if (iCluster > (int) clusters.size())
+		if (iCluster > (int)clusters.size())
 		{
-			ERROR_PRINT("%d > %ld", iCluster,
-					clusters.size());
+			ERROR_PRINT("%d > %ld", iCluster, clusters.size());
 		}
-		std::cerr << "Cluster #" << iCluster << ":"
-			<< std::endl;
-		for (int iFacet: clusters[iCluster])
+		std::cerr << "Cluster #" << iCluster << ":" << std::endl;
+		for (int iFacet : clusters[iCluster])
 		{
 			std::cerr << " " << iFacet << " -> ";
 			std::cerr << planes[iFacet] << std::endl;
-
 		}
-		std::cerr << "   cluster plane: " << facet->plane()
-			<< std::endl;
+		std::cerr << "   cluster plane: " << facet->plane() << std::endl;
 		std::cerr << std::endl;
 		++iFacetCluster;
 	}
@@ -581,11 +555,8 @@ void dumpClusters(Polyhedron_3 polyhedron,
 }
 
 template <class PlaneIterator>
-double calculateFunctional(
-		PlaneIterator planesBegin,
-		PlaneIterator planesEnd,
-		std::vector<Point_3> directions,
-		VectorXd values)
+double calculateFunctional(PlaneIterator planesBegin, PlaneIterator planesEnd,
+						   std::vector<Point_3> directions, VectorXd values)
 {
 	DEBUG_START;
 	Polyhedron_3 intersection(planesBegin, planesEnd);
@@ -603,52 +574,50 @@ double calculateFunctional(
 }
 
 void analyzeClustersQuality(Polyhedron_3 polyhedron,
-		std::vector<std::vector<int>> clusters,
-		std::vector<Plane_3> planes,
-		std::vector<Point_3> directions,
-		VectorXd values)
+							std::vector<std::vector<int>> clusters,
+							std::vector<Plane_3> planes,
+							std::vector<Point_3> directions, VectorXd values)
 {
 	DEBUG_START;
 	std::list<Plane_3> planesBig;
 	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
+		 facet != polyhedron.facets_end(); ++facet)
 		planesBig.push_back(facet->plane());
 
 	int iIntersection = 0;
 	typedef std::pair<int, double> BadnessInfo;
-	auto comparator = [](BadnessInfo a, BadnessInfo b)
-	{
+	auto comparator = [](BadnessInfo a, BadnessInfo b) {
 		return a.second < b.second;
 	};
 	std::set<BadnessInfo, decltype(comparator)> badnesses(comparator);
-	double functionalInitial = calculateFunctional(planes.begin(),
-			planes.end(), directions, values);
-	double functionalJoined = calculateFunctional(planesBig.begin(),
-			planesBig.end(), directions, values);
+	double functionalInitial =
+		calculateFunctional(planes.begin(), planes.end(), directions, values);
+	double functionalJoined = calculateFunctional(
+		planesBig.begin(), planesBig.end(), directions, values);
 	double diff = functionalJoined - functionalInitial;
 	for (auto facet = polyhedron.facets_begin();
-			facet != polyhedron.facets_end(); ++facet)
+		 facet != polyhedron.facets_end(); ++facet)
 	{
 		int iCluster = polyhedron.indexPlanes_[facet->id];
 		auto first = planesBig.begin();
 		Plane_3 planeCurrent = *first;
 		planesBig.erase(first);
 		int numPlanes = 0;
-		for (int iFacet: clusters[iCluster])
+		for (int iFacet : clusters[iCluster])
 		{
 			planesBig.push_back(planes[iFacet]);
 			++numPlanes;
 		}
-		double functional = calculateFunctional(planesBig.begin(),
-				planesBig.end(), directions, values);
+		double functional = calculateFunctional(
+			planesBig.begin(), planesBig.end(), directions, values);
 		badnesses.insert(BadnessInfo(iIntersection, functional));
-		while(numPlanes--)
+		while (numPlanes--)
 			planesBig.pop_back();
 		planesBig.push_back(planeCurrent);
 		++iIntersection;
 	}
 	double diffMinimal = badnesses.begin()->second - functionalJoined;
-	for (auto badness: badnesses)
+	for (auto badness : badnesses)
 	{
 		int iIntersection = badness.first;
 		double functional = badness.second;
@@ -665,13 +634,11 @@ void analyzeClustersQuality(Polyhedron_3 polyhedron,
 		Colour colour;
 		if (ratio > 0)
 		{
-			unsigned char component = (unsigned char)
-				(255. * ratio);
+			unsigned char component = (unsigned char)(255. * ratio);
 			colour.red = component;
 			colour.green = component;
 			colour.blue = component;
-			std::cerr << "     component   : " << (int) component
-				<< std::endl;
+			std::cerr << "     component   : " << (int)component << std::endl;
 		}
 		else
 		{
@@ -681,14 +648,14 @@ void analyzeClustersQuality(Polyhedron_3 polyhedron,
 		}
 		polyhedron.facetColours[iIntersection] = colour;
 	}
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG,
-			"coloured-badness.ply") << polyhedron;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "coloured-badness.ply")
+		<< polyhedron;
 	DEBUG_END;
 }
 
-std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
-		Polyhedron_3 polyhedron,
-		std::vector<std::vector<int>> clusters)
+std::vector<TrustedEdgeInformation>
+TrustedEdgesDetector::run(Polyhedron_3 polyhedron,
+						  std::vector<std::vector<int>> clusters)
 {
 	DEBUG_START;
 	initialize();
@@ -699,8 +666,8 @@ std::vector<TrustedEdgeInformation> TrustedEdgesDetector::run(
 	if (getenv("DUMP_CLUSTERS"))
 		dumpClusters(polyhedron, clusters, planes_);
 	if (getenv("ANALYZE_CLUSTERS_QUALITY"))
-		analyzeClustersQuality(polyhedron, clusters, planes_,
-				directions_, values_);
+		analyzeClustersQuality(polyhedron, clusters, planes_, directions_,
+							   values_);
 
 	std::vector<TrustedEdgeInformation> nothing;
 	DEBUG_END;

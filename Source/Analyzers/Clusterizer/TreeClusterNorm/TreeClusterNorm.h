@@ -29,19 +29,18 @@
 class TreeClusterNorm
 {
 public:
-	TreeClusterNormNode* root;
+	TreeClusterNormNode *root;
 
 	TreeClusterNorm();
-	TreeClusterNorm(TreeClusterNormNode* root_orig);
-	TreeClusterNorm(const TreeClusterNorm& orig);
+	TreeClusterNorm(TreeClusterNormNode *root_orig);
+	TreeClusterNorm(const TreeClusterNorm &orig);
 	virtual ~TreeClusterNorm();
 
-	void fprint(FILE* file);
-//    void fprint_dendrogamma(FILE* file);
-	void fprint_dendrogamma_lev(FILE* file);
+	void fprint(FILE *file);
+	//    void fprint_dendrogamma(FILE* file);
+	void fprint_dendrogamma_lev(FILE *file);
 
 private:
-
 };
 
 #endif /* TREECLUSTERNORM_H */

@@ -48,20 +48,20 @@ protected:
 		if (constructor)
 			delete constructor;
 	}
-
 };
 
 TEST_F(SupportFunctionDataConstructorTest, FailsForNullData)
 {
-	EXPECT_DEATH({constructor->run(NULL);}, ".*");
+	EXPECT_DEATH({ constructor->run(NULL); }, ".*");
 }
 
 TEST_F(SupportFunctionDataConstructorTest, FailsForEmptyData)
 {
 	EXPECT_DEATH(
-	{
-		data.reset(new ShadowContourData());
-		EXPECT_TRUE(data->numContours == 0);
-		constructor->run(data);
-	}, ".*");	
+		{
+			data.reset(new ShadowContourData());
+			EXPECT_TRUE(data->numContours == 0);
+			constructor->run(data);
+		},
+		".*");
 }

@@ -35,7 +35,7 @@ public:
 	std::set<std::pair<int, int>> edgesEdited;
 };
 
-class EdgeReducer: public PCorrector
+class EdgeReducer : public PCorrector
 {
 private:
 	EdgeDataPtr edgeData;
@@ -43,8 +43,8 @@ private:
 
 	int iVertexReduced;
 	int iVertexStayed;
-	VertexInfo* vertexInfoReduced;
-	VertexInfo* vertexInfoStayed;
+	VertexInfo *vertexInfoReduced;
+	VertexInfo *vertexInfoStayed;
 	std::set<int> facetsUpdated;
 
 	EdgesWorkingSets edgesWS;
@@ -55,7 +55,7 @@ private:
 	bool rePreprocessFacets();
 	bool updateEdges();
 	bool updateVertexInfos();
-	void cutDegeneratedVertex(int iVertex, std::queue<int>& facetsQueue);
+	void cutDegeneratedVertex(int iVertex, std::queue<int> &facetsQueue);
 
 	bool verifyEdgeData();
 
@@ -65,7 +65,7 @@ public:
 	~EdgeReducer();
 
 	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
-			EdgesWorkingSets& _edgesWS);
+			 EdgesWorkingSets &_edgesWS);
 };
 
 #endif /* EDGEREDUCER_H_ */

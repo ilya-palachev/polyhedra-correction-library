@@ -35,12 +35,13 @@ class SupportFunctionEstimator
 protected:
 	/* Data used for estimation. */
 	SupportFunctionEstimationDataPtr data;
-	
+
 	/** Type of problem. */
 	EstimationProblemNorm problemType_;
 
 	/** Whether the estimator is run in shadow heuristics mode. */
 	bool ifShadowHeuristics_;
+
 public:
 	/**
 	 * Constructs the estimator and sets its data.

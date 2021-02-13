@@ -34,12 +34,9 @@ static unsigned counter;
 
 /** Simple by-value constructor. */
 IpoptTopologicalCorrector::IpoptTopologicalCorrector(
-		const std::vector<Vector_3> &u,
-		const std::vector<double> &h,
-		const std::vector<Vector_3> &U,
-		const std::vector<double> &H,
-		const std::vector<Vector_3> &pointsInitial,
-		const FixedTopology *FT) :
+	const std::vector<Vector_3> &u, const std::vector<double> &h,
+	const std::vector<Vector_3> &U, const std::vector<double> &H,
+	const std::vector<Vector_3> &pointsInitial, const FixedTopology *FT) :
 	u(u),
 	h(h),
 	U(U),
@@ -54,27 +51,27 @@ IpoptTopologicalCorrector::IpoptTopologicalCorrector(
 	DEBUG_START;
 	numConsistencyConstraints = 0;
 	for (unsigned i = 0; i < pointsInitial.size(); ++i)
-		numConsistencyConstraints += FT->tangient[i].size()
-			* FT->neighbors[i].size();
+		numConsistencyConstraints +=
+			FT->tangient[i].size() * FT->neighbors[i].size();
 	std::cout << "Number of consistency constraints: "
-		<< numConsistencyConstraints << std::endl;
+			  << numConsistencyConstraints << std::endl;
 
 	numPlanarityConstraints = 0;
 	for (unsigned i = 0; i < U.size(); ++i)
 		numPlanarityConstraints += FT->incident[i].size();
-	std::cout << "Number of planarity constraints: "
-		<< numPlanarityConstraints << std::endl;
+	std::cout << "Number of planarity constraints: " << numPlanarityConstraints
+			  << std::endl;
 
 	numConvexityConstraints = 0;
 	for (unsigned i = 0; i < U.size(); ++i)
-		numConvexityConstraints += FT->influent[i].size()
-			- FT->incident[i].size();
-	std::cout << "Number of convexity constraints: "
-		<< numConvexityConstraints << std::endl;
+		numConvexityConstraints +=
+			FT->influent[i].size() - FT->incident[i].size();
+	std::cout << "Number of convexity constraints: " << numConvexityConstraints
+			  << std::endl;
 
 	numNormalityConstraints = U.size();
-	std::cout << "Number of normality constraints: "
-		<< numNormalityConstraints << std::endl;
+	std::cout << "Number of normality constraints: " << numNormalityConstraints
+			  << std::endl;
 	DEBUG_END;
 }
 
@@ -99,26 +96,24 @@ std::vector<Vector_3> IpoptTopologicalCorrector::getPoints()
 	return points;
 }
 
-bool IpoptTopologicalCorrector::get_nlp_info(Index& n, Index& m,
-		Index& nnz_jac_g,
-		Index& nnz_h_lag, IndexStyleEnum& index_style)
+bool IpoptTopologicalCorrector::get_nlp_info(Index &n, Index &m,
+											 Index &nnz_jac_g, Index &nnz_h_lag,
+											 IndexStyleEnum &index_style)
 {
 	DEBUG_START;
 	ASSERT(U.size() == H.size());
 	n = m = nnz_jac_g = nnz_h_lag = 0;
 
-
 	/* ===================================== Number of variables: */
 	n = 3 * U.size() + H.size() + 3 * pointsInitial.size();
-	std::cout << "Number of vertices: " << pointsInitial.size()
-		<< std::endl;
+	std::cout << "Number of vertices: " << pointsInitial.size() << std::endl;
 	std::cout << "Number of facets: " << U.size() << std::endl;
 	std::cout << "Number of variables: " << n << std::endl;
 	ASSERT(m == 0 && nnz_jac_g == 0 && nnz_h_lag == 0);
 
 	/* =================================== Number of constraints: */
-	m = numConsistencyConstraints + numPlanarityConstraints
-		+ numConvexityConstraints + numNormalityConstraints;
+	m = numConsistencyConstraints + numPlanarityConstraints +
+		numConvexityConstraints + numNormalityConstraints;
 	std::cout << "Number of constraints: " << m << std::endl;
 	ASSERT(nnz_jac_g == 0 && nnz_h_lag == 0);
 
@@ -134,12 +129,11 @@ bool IpoptTopologicalCorrector::get_nlp_info(Index& n, Index& m,
 	 * 3. Each normality constraint contains 3 variables:
 	 *    (U_j, U_j) = 1
 	 */
-	nnz_jac_g = 6 * numConsistencyConstraints
-		+ 7 * (numPlanarityConstraints
-				+ numConvexityConstraints)
-		+ 3 * numNormalityConstraints;
-	std::cout << "Number of nonzeros in constraints Jacobian: "
-		<< nnz_jac_g << std::endl;
+	nnz_jac_g = 6 * numConsistencyConstraints +
+				7 * (numPlanarityConstraints + numConvexityConstraints) +
+				3 * numNormalityConstraints;
+	std::cout << "Number of nonzeros in constraints Jacobian: " << nnz_jac_g
+			  << std::endl;
 	ASSERT(nnz_h_lag == 0);
 
 	/* ==== Number of non-zeros in the Hessian of the Lagrangian: */
@@ -154,19 +148,18 @@ bool IpoptTopologicalCorrector::get_nlp_info(Index& n, Index& m,
 	 * (which are squares of U_i, so they each of them give only one
 	 * non-zero to the hessian):
 	 */
-	nnz_h_lag = 9 * pointsInitial.size()
-		+ 6 * (numPlanarityConstraints
-				+ numConvexityConstraints)
-		+ 3 * numNormalityConstraints;
-	std::cout << "Number of nonzeros in the Lagrangian Hessian: "
-		<< nnz_h_lag << std::endl;
+	nnz_h_lag = 9 * pointsInitial.size() +
+				6 * (numPlanarityConstraints + numConvexityConstraints) +
+				3 * numNormalityConstraints;
+	std::cout << "Number of nonzeros in the Lagrangian Hessian: " << nnz_h_lag
+			  << std::endl;
 	DEBUG_END;
 	return true;
 }
 
 bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
-		Number *x_u,
-		Index m, Number *g_l, Number *g_u)
+												Number *x_u, Index m,
+												Number *g_l, Number *g_u)
 {
 	DEBUG_START;
 	for (int i = 0; i < n; ++i)
@@ -205,8 +198,7 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 			++iCond;
 		}
 	}
-	ASSERT(iCond == numPlanarityConstraints
-			+ numConvexityConstraints);
+	ASSERT(iCond == numPlanarityConstraints + numConvexityConstraints);
 
 	for (unsigned i = 0; i < numConsistencyConstraints; ++i)
 	{
@@ -214,9 +206,8 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 		g_u[iCond] = +TNLP_INFINITY;
 		++iCond;
 	}
-	ASSERT(iCond == numPlanarityConstraints
-			+ numConvexityConstraints
-			+ numConsistencyConstraints);
+	ASSERT(iCond == numPlanarityConstraints + numConvexityConstraints +
+						numConsistencyConstraints);
 
 	for (unsigned i = 0; i < numNormalityConstraints; ++i)
 	{
@@ -230,7 +221,7 @@ bool IpoptTopologicalCorrector::get_bounds_info(Index n, Number *x_l,
 }
 
 void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
-		const double *x)
+												   const double *x)
 {
 	DEBUG_START;
 	double *g = new double[m];
@@ -246,20 +237,16 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 		if (g[i] < g_l[i] - tol || g[i] > g_u[i] + tol)
 		{
 			++numViolations;
-			std::cout << "g[" << i << "] = " << g[i]
-				<< " not in [" << g_l[i] << ", "
-				<< g_u[i] << "] -- it is ";
-			if (i < numPlanarityConstraints
-					+ numConvexityConstraints)
+			std::cout << "g[" << i << "] = " << g[i] << " not in [" << g_l[i]
+					  << ", " << g_u[i] << "] -- it is ";
+			if (i < numPlanarityConstraints + numConvexityConstraints)
 				std::cout << "planarity/convexity constraint";
-			else if (i < numPlanarityConstraints
-					+ numConvexityConstraints
-					+ numConsistencyConstraints)
+			else if (i < numPlanarityConstraints + numConvexityConstraints +
+							 numConsistencyConstraints)
 				std::cout << "consistency constraint";
-			else if (i < numPlanarityConstraints
-					+ numConvexityConstraints
-					+ numConsistencyConstraints
-					+ numNormalityConstraints)
+			else if (i < numPlanarityConstraints + numConvexityConstraints +
+							 numConsistencyConstraints +
+							 numNormalityConstraints)
 				std::cout << "planarity constraint";
 			else
 				ASSERT(0 && "Go and fix checking function");
@@ -270,9 +257,8 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 		if (x[i] < x_l[i] - tol || x[i] > x_u[i] + tol)
 		{
 			++numViolations;
-			std::cout << "x[" << i << "] = " << x[i]
-				<< " not in [" << x_l[i] << ", "
-				<< x_u[i] << "] -- it is ";
+			std::cout << "x[" << i << "] = " << x[i] << " not in [" << x_l[i]
+					  << ", " << x_u[i] << "] -- it is ";
 			if (i >= pointsInitial.size())
 			{
 				unsigned ii = i - 3 * pointsInitial.size();
@@ -296,8 +282,8 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 					ASSERT(0 && "Impossible happened");
 					break;
 				}
-				std::cout << "-violation in " << iPlane
-					<< "-th plane" << std::endl;
+				std::cout << "-violation in " << iPlane << "-th plane"
+						  << std::endl;
 			}
 			else
 			{
@@ -319,12 +305,12 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 					ASSERT(0 && "Impossible happened");
 					break;
 				}
-				std::cout << "-violation in " << iPoint
-					<< "-th point" << std::endl;
+				std::cout << "-violation in " << iPoint << "-th point"
+						  << std::endl;
 			}
 		}
-	std::cout << "Violation in " << numViolations
-		<< " constraints from total " << m << std::endl;
+	std::cout << "Violation in " << numViolations << " constraints from total "
+			  << m << std::endl;
 	ASSERT(numViolations == 0);
 	delete[] g;
 	delete[] g_l;
@@ -335,8 +321,10 @@ void IpoptTopologicalCorrector::checkStartingPoint(int n, int m,
 }
 
 bool IpoptTopologicalCorrector::get_starting_point(Index n, bool init_x,
-	Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
-	bool init_lambda, Number *lambda)
+												   Number *x, bool init_z,
+												   Number *z_L, Number *z_U,
+												   Index m, bool init_lambda,
+												   Number *lambda)
 {
 	DEBUG_START;
 	ASSERT(x && init_x && !init_z && !init_lambda);
@@ -387,20 +375,18 @@ void IpoptTopologicalCorrector::getVariables(const Number *x)
 	DEBUG_START;
 	ASSERT(x);
 	for (unsigned i = 0; i < pointsInitial.size(); ++i)
-		points[i] = Vector_3(x[3 * i], x[3 * i + 1],
-				x[3 * i + 2]);
+		points[i] = Vector_3(x[3 * i], x[3 * i + 1], x[3 * i + 2]);
 	x = x + 3 * pointsInitial.size();
 	for (unsigned i = 0; i < U.size(); ++i)
 	{
-		directions[i] = Vector_3(x[4 * i], x[4 * i + 1],
-				x[4 * i + 2]);
+		directions[i] = Vector_3(x[4 * i], x[4 * i + 1], x[4 * i + 2]);
 		values[i] = x[4 * i + 3];
 	}
 	DEBUG_END;
 }
 
 bool IpoptTopologicalCorrector::eval_f(Index n, const Number *x, bool new_x,
-		Number& obj_value)
+									   Number &obj_value)
 {
 	DEBUG_START;
 	ASSERT(x);
@@ -418,10 +404,8 @@ bool IpoptTopologicalCorrector::eval_f(Index n, const Number *x, bool new_x,
 	return true;
 }
 
-
 bool IpoptTopologicalCorrector::eval_grad_f(Index n, const Number *x,
-		bool new_x,
-		Number *grad_f)
+											bool new_x, Number *grad_f)
 {
 	DEBUG_START;
 	ASSERT(x && grad_f);
@@ -444,8 +428,7 @@ bool IpoptTopologicalCorrector::eval_grad_f(Index n, const Number *x,
 }
 
 bool IpoptTopologicalCorrector::eval_g(Index n, const Number *x, bool new_x,
-		Index m,
-		Number *g)
+									   Index m, Number *g)
 {
 	DEBUG_START;
 	ASSERT(x && g);
@@ -453,21 +436,17 @@ bool IpoptTopologicalCorrector::eval_g(Index n, const Number *x, bool new_x,
 	unsigned iCond = 0;
 	for (unsigned j = 0; j < U.size(); ++j)
 		for (int i : FT->influent[j])
-			g[iCond++] = directions[j] * points[i]
-				- values[j];
-	ASSERT(iCond == numPlanarityConstraints
-			+ numConvexityConstraints);
+			g[iCond++] = directions[j] * points[i] - values[j];
+	ASSERT(iCond == numPlanarityConstraints + numConvexityConstraints);
 
 	for (unsigned i = 0; i < pointsInitial.size(); ++i)
 		for (int j : FT->tangient[i])
 			for (int k : FT->neighbors[i])
 			{
-				g[iCond++] = u[j] * (points[i]
-						- points[k]);
+				g[iCond++] = u[j] * (points[i] - points[k]);
 			}
-	ASSERT(iCond == numPlanarityConstraints
-			+ numConvexityConstraints
-			+ numConsistencyConstraints);
+	ASSERT(iCond == numPlanarityConstraints + numConvexityConstraints +
+						numConsistencyConstraints);
 
 	for (const Vector_3 &direction : directions)
 	{
@@ -479,9 +458,9 @@ bool IpoptTopologicalCorrector::eval_g(Index n, const Number *x, bool new_x,
 }
 
 bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
-		Index m,
-		Index nnz_jac_g, Index *iRow, Index *jCol,
-		Number *jacValues)
+										   Index m, Index nnz_jac_g,
+										   Index *iRow, Index *jCol,
+										   Number *jacValues)
 {
 	DEBUG_START;
 	ASSERT((iRow && jCol) || jacValues);
@@ -505,9 +484,7 @@ bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
 				for (int k = 0; k < 4; ++k)
 				{
 					iRow[iElem] = iCond;
-					jCol[iElem] =
-						3 * pointsInitial.size()
-						+ 4 * i + k;
+					jCol[iElem] = 3 * pointsInitial.size() + 4 * i + k;
 					++iElem;
 				}
 			}
@@ -525,10 +502,8 @@ bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
 			++iCond;
 		}
 	}
-	ASSERT(iCond == numPlanarityConstraints
-			+ numConvexityConstraints);
-	ASSERT(iElem == 7 * (numPlanarityConstraints
-				+ numConvexityConstraints));
+	ASSERT(iCond == numPlanarityConstraints + numConvexityConstraints);
+	ASSERT(iElem == 7 * (numPlanarityConstraints + numConvexityConstraints));
 
 	for (unsigned i = 0; i < points.size(); ++i)
 		for (int j : FT->tangient[i])
@@ -562,12 +537,10 @@ bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
 				ASSERT(iElem == counter + 6);
 				++iCond;
 			}
-	ASSERT(iCond == numPlanarityConstraints
-			+ numConvexityConstraints
-			+ numConsistencyConstraints);
-	ASSERT(iElem == 7 * (numPlanarityConstraints
-				+ numConvexityConstraints)
-			+ 6 * numConsistencyConstraints);
+	ASSERT(iCond == numPlanarityConstraints + numConvexityConstraints +
+						numConsistencyConstraints);
+	ASSERT(iElem == 7 * (numPlanarityConstraints + numConvexityConstraints) +
+						6 * numConsistencyConstraints);
 
 	for (unsigned i = 0; i < directions.size(); ++i)
 	{
@@ -577,8 +550,7 @@ bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
 			for (int k = 0; k < 3; ++k)
 			{
 				iRow[iElem] = iCond;
-				jCol[iElem] = 3 * pointsInitial.size()
-					+ 4 * i + k;
+				jCol[iElem] = 3 * pointsInitial.size() + 4 * i + k;
 				++iElem;
 			}
 		}
@@ -597,12 +569,11 @@ bool IpoptTopologicalCorrector::eval_jac_g(Index n, const Number *x, bool new_x,
 	return true;
 }
 
-
 bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
-		Number obj_factor,
-		Index m, const Number *lambda, bool new_lambda,
-		Index nnz_h_lag, Index *iRow, Index *jCol,
-		Number *hValues)
+									   Number obj_factor, Index m,
+									   const Number *lambda, bool new_lambda,
+									   Index nnz_h_lag, Index *iRow,
+									   Index *jCol, Number *hValues)
 {
 	DEBUG_START;
 	unsigned iElem = 0;
@@ -625,12 +596,10 @@ bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
 				{
 					double sum = 0.;
 					for (int k : FT->tangient[i])
-						sum += u[k].cartesian(p)
-						* u[k].cartesian(q);
+						sum += u[k].cartesian(p) * u[k].cartesian(q);
 					if (p == q)
 						sum *= 2.;
-					hValues[iElem] = obj_factor
-						* sum;
+					hValues[iElem] = obj_factor * sum;
 				}
 				++iElem;
 			}
@@ -645,14 +614,12 @@ bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
 						if (!hValues)
 						{
 							iRow[iElem] = 3 * i + p;
-							jCol[iElem] = 3 * points.size()
-								+ 4 * j + p;
+							jCol[iElem] = 3 * points.size() + 4 * j + p;
 							++iElem;
 						}
 						else
 						{
-							hValues[iElem++] =
-								0.5 * lambda[iCond];
+							hValues[iElem++] = 0.5 * lambda[iCond];
 						}
 					}
 					++iCond;
@@ -681,8 +648,7 @@ bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
 				}
 				else
 				{
-					hValues[iElem++] =
-						0.5 * lambda[iCond];
+					hValues[iElem++] = 0.5 * lambda[iCond];
 				}
 				++iCond;
 			}
@@ -695,9 +661,9 @@ bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
 			}
 			else
 			{
-				int iCondNorm = numPlanarityConstraints
-					+ numConvexityConstraints
-					+ numConsistencyConstraints + j;
+				int iCondNorm = numPlanarityConstraints +
+								numConvexityConstraints +
+								numConsistencyConstraints + j;
 				hValues[iElem++] = 2. * lambda[iCondNorm];
 			}
 		}
@@ -707,13 +673,11 @@ bool IpoptTopologicalCorrector::eval_h(Index n, const Number *x, bool new_x,
 	return true;
 }
 
-	
-void IpoptTopologicalCorrector::finalize_solution(SolverReturn status, Index n,
-		const Number *x,
-		const Number *z_L, const Number *z_U, Index m,
-		const Number *g, const Number *lambda, Number obj_value,
-		const IpoptData *ip_data,
-		IpoptCalculatedQuantities *ip_cq)
+void IpoptTopologicalCorrector::finalize_solution(
+	SolverReturn status, Index n, const Number *x, const Number *z_L,
+	const Number *z_U, Index m, const Number *g, const Number *lambda,
+	Number obj_value, const IpoptData *ip_data,
+	IpoptCalculatedQuantities *ip_cq)
 {
 	DEBUG_START;
 	getVariables(x);
@@ -722,18 +686,17 @@ void IpoptTopologicalCorrector::finalize_solution(SolverReturn status, Index n,
 	std::cout << "========== finalize_solution ==========" << std::endl;
 	for (unsigned i = 0; i < pointsInitial.size(); ++i)
 	{
-		std::cout << "Changing point #" << i << ": "
-			<< pointsInitial[i] << " |--> " << points[i]
-			<< std::endl;
+		std::cout << "Changing point #" << i << ": " << pointsInitial[i]
+				  << " |--> " << points[i] << std::endl;
 	}
-	
+
 	for (unsigned i = 0; i < U.size(); ++i)
 	{
 		Plane_3 planeInitial(U[i].x(), U[i].y(), U[i].z(), -H[i]);
-		Plane_3 plane(directions[i].x(), directions[i].y(),
-				directions[i].z(), -values[i]);
-		std::cout << "Changing plane #" << i << ": "
-			<< planeInitial << " |--> " << plane << std::endl;
+		Plane_3 plane(directions[i].x(), directions[i].y(), directions[i].z(),
+					  -values[i]);
+		std::cout << "Changing plane #" << i << ": " << planeInitial << " |--> "
+				  << plane << std::endl;
 	}
 
 	std::cout << "========== end ==========" << std::endl;

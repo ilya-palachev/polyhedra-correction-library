@@ -19,7 +19,7 @@
  */
 
 #ifndef SIDEOFCONTOUR_H
-#define	SIDEOFCONTOUR_H
+#define SIDEOFCONTOUR_H
 
 #include "cstdio"
 #include "Vector3d.h"
@@ -28,15 +28,15 @@
 
 enum EEdgeType
 {
-	EEdgeUnknown = -1,       // Unknown / not calculated
-	EEdgeRegular = 0,        // Regular edges, regular confidence
-	EEdgeDummy = 1,        // Dummy edge, not existing in reality
-						   // (originating e.g. from a picture crop)
-	EEdgeDust = 2,       // Low confidence because of dust on stone surface
-	EEdgeCavern = 3,     // Low confidence because of cavern in the stone
-	EEdgeMaxPointErr = 4,    // The edge erroneously is lower than other edges,
-							 // which define a vertex (e.g. in the culet)
-	EEdgeGlare = 5      // Low confidence because of photo glare
+	EEdgeUnknown = -1,	  // Unknown / not calculated
+	EEdgeRegular = 0,	  // Regular edges, regular confidence
+	EEdgeDummy = 1,		  // Dummy edge, not existing in reality
+						  // (originating e.g. from a picture crop)
+	EEdgeDust = 2,		  // Low confidence because of dust on stone surface
+	EEdgeCavern = 3,	  // Low confidence because of cavern in the stone
+	EEdgeMaxPointErr = 4, // The edge erroneously is lower than other edges,
+						  // which define a vertex (e.g. in the culet)
+	EEdgeGlare = 5		  // Low confidence because of photo glare
 };
 
 class SideOfContour
@@ -49,18 +49,16 @@ public:
 
 	// SideOfContour.cpp :
 	SideOfContour();
-	SideOfContour(const SideOfContour& orig);
+	SideOfContour(const SideOfContour &orig);
 	virtual ~SideOfContour();
 
-	bool operator ==(const SideOfContour& side) const;
-	bool operator !=(const SideOfContour& side) const;
+	bool operator==(const SideOfContour &side) const;
+	bool operator!=(const SideOfContour &side) const;
 
 	// SideOfContour_io.cpp :
-	void my_fprint(FILE* file);
-	void my_fprint_short(FILE* file);
-	void fprintDefault(FILE* file);
-
+	void my_fprint(FILE *file);
+	void my_fprint_short(FILE *file);
+	void fprintDefault(FILE *file);
 };
 
-#endif	/* SIDEOFCONTOUR_H */
-
+#endif /* SIDEOFCONTOUR_H */

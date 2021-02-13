@@ -32,10 +32,8 @@
 #include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 ClpSupportFunctionEstimator::ClpSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data,
-		bool ifCommandlineMode) :
-	SupportFunctionEstimator(data),
-	ifCommandlineMode(ifCommandlineMode)
+	SupportFunctionEstimationDataPtr data, bool ifCommandlineMode) :
+	SupportFunctionEstimator(data), ifCommandlineMode(ifCommandlineMode)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -48,7 +46,7 @@ ClpSupportFunctionEstimator::~ClpSupportFunctionEstimator()
 }
 
 ClpCommandLineSupportFunctionEstimator::ClpCommandLineSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data) :
+	SupportFunctionEstimationDataPtr data) :
 	ClpSupportFunctionEstimator(data, true)
 {
 	DEBUG_START;
@@ -89,22 +87,21 @@ VectorXd ClpSupportFunctionEstimator::run(void)
 
 	if (ifCommandlineMode)
 	{
-		char *command = (char*) malloc(1024 * sizeof(char));
+		char *command = (char *)malloc(1024 * sizeof(char));
 		char *solution_file_name = strdup("/tmp/solution.txt");
 		char *temporary_solution_file_name =
 			strdup("/tmp/temporary-solution.txt");
 		unlink(solution_file_name);
 		unlink(temporary_solution_file_name);
-		sprintf(command,
-			"%s/Scripts/run_clp_solver.sh %s %s %s",
-			SOURCE_DIR, mps_file_name, temporary_solution_file_name,
-			solution_file_name);
+		sprintf(command, "%s/Scripts/run_clp_solver.sh %s %s %s", SOURCE_DIR,
+				mps_file_name, temporary_solution_file_name,
+				solution_file_name);
 		int result = system(command);
 		std::cerr << "CLP solver wrapper script returned " << result
-			<< std::endl;
-	
+				  << std::endl;
+
 		FILE *file = fopen(solution_file_name, "r");
-	
+
 		for (int i = 0; i < data->numValues(); ++i)
 		{
 			double current = 0.;

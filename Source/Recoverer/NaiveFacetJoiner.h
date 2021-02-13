@@ -105,7 +105,7 @@ private:
 	 * @return			Cluster candidates.
 	 */
 	std::vector<std::pair<std::set<int>, double>>
-		findFirstClusterCandidates(std::set<int> indicesBigFacets);
+	findFirstClusterCandidates(std::set<int> indicesBigFacets);
 
 	/**
 	 * Builds first clusters from cluster candidates depending on whether
@@ -114,8 +114,8 @@ private:
 	 * @param clusterCandidates	The information about caluster
 	 * 				candidates.
 	 */
-	void buildFirstClusters(std::vector<std::pair<std::set<int>, double>>
-			clusterCandidates);
+	void buildFirstClusters(
+		std::vector<std::pair<std::set<int>, double>> clusterCandidates);
 
 	/**
 	 * Merges two clusters if it is possible (i. e. when the error of sum
@@ -174,7 +174,6 @@ private:
 	 */
 	bool finalizeClusters();
 
-
 public:
 	/**
 	 * The default constructor.
@@ -195,7 +194,7 @@ public:
 	 * @return		The processed polyhedron and the IDs of facets
 	 * 			that were added to clusters.
 	 */
-	std::pair<Polyhedron_3, std::vector<std::vector<int>>>run();
+	std::pair<Polyhedron_3, std::vector<std::vector<int>>> run();
 };
 
 #endif /* NAIVEFACETJOINER_H_ */

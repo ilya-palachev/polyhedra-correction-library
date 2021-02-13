@@ -27,8 +27,8 @@
 #include "Recoverer/SupportFunctionEstimator.h"
 
 SupportFunctionEstimator::SupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr dataOrig) :
-		data(dataOrig), ifShadowHeuristics_(false)
+	SupportFunctionEstimationDataPtr dataOrig) :
+	data(dataOrig), ifShadowHeuristics_(false)
 {
 	DEBUG_START;
 	DEBUG_END;

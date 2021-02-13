@@ -23,9 +23,7 @@
 #include "DebugAssert.h"
 #include "DataContainers/EdgeData/EdgeData.h"
 
-EdgeData::EdgeData() :
-				edges(),
-				numEdges(0)
+EdgeData::EdgeData() : edges(), numEdges(0)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -34,13 +32,13 @@ EdgeData::EdgeData() :
 EdgeData::~EdgeData()
 {
 	DEBUG_START;
-	DEBUG_PRINT(COLOUR_RED "Attention!!! edgeData is being deleted now!"
-			COLOUR_NORM);
+	DEBUG_PRINT(COLOUR_RED
+				"Attention!!! edgeData is being deleted now!" COLOUR_NORM);
 	edges.clear();
 	DEBUG_END;
 }
 
-bool EdgeData::operator ==(EdgeData& e)
+bool EdgeData::operator==(EdgeData &e)
 {
 	DEBUG_START;
 	if (numEdges != e.numEdges)
@@ -67,13 +65,12 @@ bool EdgeData::operator ==(EdgeData& e)
 	return true;
 }
 
-bool EdgeData::operator !=(EdgeData& e)
+bool EdgeData::operator!=(EdgeData &e)
 {
 	DEBUG_START;
 	DEBUG_END;
 	return !(*this == e);
 }
-
 
 std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 {
@@ -83,10 +80,10 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 
 	if (v0 < 0 || v1 < 0 || f0 < 0)
 	{
-		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d",
-				v0, v1, f0);
+		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d", v0, v1,
+					f0);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0));
-		returnValue = std::pair<EdgeSetIterator, bool> (edges.end(), false);
+		returnValue = std::pair<EdgeSetIterator, bool>(edges.end(), false);
 		DEBUG_END;
 		return returnValue;
 	}
@@ -100,18 +97,20 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 	EdgeSetIterator edgeFound = findEdge(v0, v1);
 	if (edgeFound != edges.end())
 	{
-		if (edgeFound->f0 == INT_NOT_INITIALIZED
-				&& edgeFound->f1 == INT_NOT_INITIALIZED)
+		if (edgeFound->f0 == INT_NOT_INITIALIZED &&
+			edgeFound->f1 == INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge [%d, %d] already presents in the std::list,"
-					"facet values are empty, initializing value #0", v0, v1);
+						"facet values are empty, initializing value #0",
+						v0, v1);
 			edgeFound->f0 = f0;
 		}
-		else if (edgeFound->f0 != INT_NOT_INITIALIZED
-				&& edgeFound->f1 == INT_NOT_INITIALIZED)
+		else if (edgeFound->f0 != INT_NOT_INITIALIZED &&
+				 edgeFound->f1 == INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge [%d, %d] already presents in the std::list,"
-					"facet value #1 is empty, initializing value #1", v0, v1);
+						"facet value #1 is empty, initializing value #1",
+						v0, v1);
 			if (edgeFound->f0 < f0)
 			{
 				edgeFound->f1 = f0;
@@ -122,11 +121,12 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 				edgeFound->f0 = f0;
 			}
 		}
-		else if (edgeFound->f0 == INT_NOT_INITIALIZED
-				&& edgeFound->f1 != INT_NOT_INITIALIZED)
+		else if (edgeFound->f0 == INT_NOT_INITIALIZED &&
+				 edgeFound->f1 != INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge [%d, %d] already presents in the std::list,"
-					"facet value #0 is empty, initializing value #0", v0, v1);
+						"facet value #0 is empty, initializing value #0",
+						v0, v1);
 			if (edgeFound->f1 < f0)
 			{
 				edgeFound->f0 = edgeFound->f1;
@@ -137,20 +137,21 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 				edgeFound->f0 = f0;
 			}
 		}
-		else if (edgeFound->f0 != INT_NOT_INITIALIZED
-				&& edgeFound->f1 != INT_NOT_INITIALIZED)
+		else if (edgeFound->f0 != INT_NOT_INITIALIZED &&
+				 edgeFound->f1 != INT_NOT_INITIALIZED)
 		{
 			DEBUG_PRINT("Edge [%d, %d] already presents in the std::list,"
-					"facet values are non-empty, skipping...", v0, v1);
+						"facet values are non-empty, skipping...",
+						v0, v1);
 		}
-		returnValue = std::pair<EdgeSetIterator, bool> (edgeFound, false);
+		returnValue = std::pair<EdgeSetIterator, bool>(edgeFound, false);
 	}
 	else
 	{
 		returnValue = edges.insert(Edge(v0, v1, f0, INT_NOT_INITIALIZED));
 
-		/* If we have added new edge to the set, set its id to the number of edges
-		 * in the edge data. */
+		/* If we have added new edge to the set, set its id to the number of
+		 * edges in the edge data. */
 		if (returnValue.second)
 		{
 			returnValue.first->id = numEdges;
@@ -158,13 +159,15 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0)
 	}
 	numEdges = edges.size();
 
-	DEBUG_PRINT("Edge [%d, %d] has been successfully added to the edgeFound std::list",
-			v0, v1);
+	DEBUG_PRINT(
+		"Edge [%d, %d] has been successfully added to the edgeFound std::list",
+		v0, v1);
 	DEBUG_END;
 	return returnValue;
 }
 
-std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f1)
+std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0,
+												   int f1)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Trying to add edge [%d, %d] to the edge std::list", v0, v1);
@@ -174,9 +177,9 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f
 	if (v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0)
 	{
 		ERROR_PRINT("Negative parameter: v0 = %d, v1 = %d, f0 = %d, f1 = %d",
-				v0, v1, f0, f1);
+					v0, v1, f0, f1);
 		ASSERT(!(v0 < 0 || v1 < 0 || f0 < 0 || f1 < 0));
-		returnValue = std::pair<EdgeSetIterator, bool> (edges.end(), false);
+		returnValue = std::pair<EdgeSetIterator, bool>(edges.end(), false);
 		return returnValue;
 	}
 
@@ -196,7 +199,8 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f
 
 	returnValue = edges.insert(Edge(v0, v1, f0, f1));
 	DEBUG_PRINT("Edge [%d, %d] has been successfully added to "
-					"the edge std::list", v0, v1);
+				"the edge std::list",
+				v0, v1);
 	numEdges = edges.size();
 
 	/* If we have added new edge to the set, set its id to the number of edges
@@ -210,16 +214,16 @@ std::pair<EdgeSetIterator, bool> EdgeData::addEdge(int v0, int v1, int f0, int f
 	return returnValue;
 }
 
-std::pair<EdgeSetIterator, bool> EdgeData::addEdge(Edge& edge)
+std::pair<EdgeSetIterator, bool> EdgeData::addEdge(Edge &edge)
 {
 	DEBUG_START;
-	std::pair<EdgeSetIterator, bool> returnValue = addEdge(edge.v0, edge.v1,
-			edge.f0, edge.f1);
+	std::pair<EdgeSetIterator, bool> returnValue =
+		addEdge(edge.v0, edge.v1, edge.f0, edge.f1);
 
 	/* Append associations to the edge in set. */
 	EdgeSetIterator edgeInSet = returnValue.first;
 	edgeInSet->assocList.insert(edgeInSet->assocList.end(),
-			edge.assocList.begin(), edge.assocList.end());
+								edge.assocList.begin(), edge.assocList.end());
 
 	return returnValue;
 	DEBUG_END;
@@ -235,7 +239,7 @@ EdgeSetIterator EdgeData::findEdge(int v0, int v1)
 		v1 = tmp;
 	}
 
-	Edge* edgeTmp = new Edge(v0, v1);
+	Edge *edgeTmp = new Edge(v0, v1);
 	EdgeSetIterator itEdge = edges.find(*edgeTmp);
 	DEBUG_PRINT("Found edge: [%d, %d]", itEdge->v0, itEdge->v1);
 	delete edgeTmp;
@@ -243,4 +247,3 @@ EdgeSetIterator EdgeData::findEdge(int v0, int v1)
 	DEBUG_END;
 	return itEdge;
 }
-

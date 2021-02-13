@@ -35,8 +35,8 @@
 const double EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION = 1e-14;
 
 /** Extractor of support function data item from given contour side. */
-class SupportFunctionDataItemExtractorByPlane :
-	public SupportFunctionDataItemExtractor
+class SupportFunctionDataItemExtractorByPlane
+	: public SupportFunctionDataItemExtractor
 {
 private:
 	/** The plane of the shadow contour. */

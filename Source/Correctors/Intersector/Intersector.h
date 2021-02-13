@@ -28,20 +28,21 @@
 class Facet;
 class EdgeList;
 
-class Intersector: public PCorrector
+class Intersector : public PCorrector
 {
 protected:
-	EdgeList* edgeLists;
+	EdgeList *edgeLists;
 
 private:
 	void set_isUsed(int v0, int v1, bool val);
-	bool intersectFacet(Facet* facet, Plane iplane, FutureFacet& ff,
-			int& n_components);
-	int prepareEdgeList(Facet* facet, Plane iplane);
+	bool intersectFacet(Facet *facet, Plane iplane, FutureFacet &ff,
+						int &n_components);
+	int prepareEdgeList(Facet *facet, Plane iplane);
+
 public:
 	Intersector();
 	Intersector(PolyhedronPtr p);
-	Intersector(Polyhedron* p);
+	Intersector(Polyhedron *p);
 	~Intersector();
 	void run(Plane iplane);
 	void runCoalesceMode(Plane iplane, int jfid);

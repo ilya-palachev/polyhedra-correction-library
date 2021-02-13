@@ -22,7 +22,7 @@
 
 void test_figures();
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 	test_figures();
@@ -37,11 +37,11 @@ void test_figures()
 	file_name = new char[255];
 
 	time_t seconds = time(NULL);
-	tm* timeinfo = localtime(&seconds);
+	tm *timeinfo = localtime(&seconds);
 
-	Polyhedron* poly;
+	Polyhedron *poly;
 
-/////// Pyramid /////////
+	/////// Pyramid /////////
 	sprintf(file_name, "../poly-data-out/pyramid - %d-%d-%d %d:%d:%d.ply",
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
@@ -63,7 +63,7 @@ void test_figures()
 	poly->my_fprint(stdout);
 	delete poly;
 
-/////// Prism /////////
+	/////// Prism /////////
 	sprintf(file_name, "../poly-data-out/prism - %d-%d-%d %d:%d:%d.ply",
 			timeinfo->tm_year + 1900, timeinfo->tm_mon + 1, timeinfo->tm_mday,
 			timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
@@ -84,4 +84,3 @@ void test_figures()
 
 	DEBUG_END;
 }
-

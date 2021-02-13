@@ -36,7 +36,7 @@
 #include "Recoverer/GlpProbWrappers.h"
 
 GlpkSFELinearProgramBuilder::GlpkSFELinearProgramBuilder(
-		SupportFunctionEstimationDataPtr dataOrig) :
+	SupportFunctionEstimationDataPtr dataOrig) :
 	data(dataOrig)
 {
 	DEBUG_START;
@@ -49,8 +49,8 @@ GlpkSFELinearProgramBuilder::~GlpkSFELinearProgramBuilder()
 	DEBUG_END;
 }
 
-static void declareRows(glp_prob *problem, SupportFunctionEstimationDataPtr
-		data)
+static void declareRows(glp_prob *problem,
+						SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
 	SparseMatrix matrix = data->supportMatrix();
@@ -75,15 +75,15 @@ static void declareRows(glp_prob *problem, SupportFunctionEstimationDataPtr
 		std::string nameLower = "eps-lower-" + std::to_string(i);
 		std::string nameUpper = "eps-upper-" + std::to_string(i);
 		glp_set_row_name(problem, numConsistencyConstraints + 2 * i + 1,
-				nameLower.c_str());
+						 nameLower.c_str());
 		glp_set_row_name(problem, numConsistencyConstraints + 2 * i + 2,
-				nameUpper.c_str());
+						 nameUpper.c_str());
 		/*  (u_i, x_i) + \varepsilon > h_i */
-		glp_set_row_bnds(problem, numConsistencyConstraints + 2 * i + 1,
-				GLP_LO, h(i), 0.0);
+		glp_set_row_bnds(problem, numConsistencyConstraints + 2 * i + 1, GLP_LO,
+						 h(i), 0.0);
 		/* -(u_i, x_i) + \varepsilon > -h_i */
-		glp_set_row_bnds(problem, numConsistencyConstraints + 2 * i + 2,
-				GLP_LO, -h(i), 0.0);
+		glp_set_row_bnds(problem, numConsistencyConstraints + 2 * i + 2, GLP_LO,
+						 -h(i), 0.0);
 	}
 	DEBUG_END;
 }
@@ -93,8 +93,8 @@ static void declareTangientPoints(glp_prob *problem, int numValues)
 	DEBUG_START;
 	for (int i = 0; i < numValues; ++i)
 	{
-		std::string name = "x_" + std::to_string(i / 3) + "_"
-			+ std::to_string(i % 3);
+		std::string name =
+			"x_" + std::to_string(i / 3) + "_" + std::to_string(i % 3);
 		glp_set_col_name(problem, i + 1, name.c_str());
 		glp_set_col_bnds(problem, i + 1, GLP_FR, 0.0, 0.0);
 #if 0
@@ -106,8 +106,9 @@ static void declareTangientPoints(glp_prob *problem, int numValues)
 	DEBUG_END;
 }
 
-static void declareLinfColumnsAndObjective(glp_prob *problem,
-		SupportFunctionEstimationDataPtr data)
+static void
+declareLinfColumnsAndObjective(glp_prob *problem,
+							   SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
 	int iEpsilon = data->numValues() + 1;
@@ -125,7 +126,7 @@ static void declareLinfColumnsAndObjective(glp_prob *problem,
 }
 
 static void declareL1ColumnsAndObjective(glp_prob *problem,
-		SupportFunctionEstimationDataPtr data)
+										 SupportFunctionEstimationDataPtr data)
 {
 	DEBUG_START;
 	/* Add columns. */
@@ -144,29 +145,27 @@ static void declareL1ColumnsAndObjective(glp_prob *problem,
 	for (int i = 0; i < data->numValues() / 3; ++i)
 	{
 		std::string name = "epsilon_" + std::to_string(i);
-		glp_set_col_name(problem, data->numValues() + i + 1,
-				name.c_str());
+		glp_set_col_name(problem, data->numValues() + i + 1, name.c_str());
 		/*
 		 * \varepsilnon_{i} should be positive and not grater than
 		 * starting speilon.
 		 */
-		glp_set_col_bnds(problem, data->numValues() + i + 1, GLP_DB,
-				0.0, data->startingEpsilon());
+		glp_set_col_bnds(problem, data->numValues() + i + 1, GLP_DB, 0.0,
+						 data->startingEpsilon());
 		glp_set_obj_coef(problem, data->numValues() + i + 1, 1.0);
 	}
 	DEBUG_END;
 }
 
 static void constructMatrixUpper(SparseMatrix matrix, int *iRows, int *iCols,
-		double *values)
+								 double *values)
 {
 	DEBUG_START;
 	/* Translate Eigen matrix to triple-form. */
 	int i = 0;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
-		for (SparseMatrix::InnerIterator it(matrix, k); it;
-				++it)
+		for (SparseMatrix::InnerIterator it(matrix, k); it; ++it)
 		{
 			iRows[i + 1] = it.row() + 1;
 			ASSERT(iRows[i + 1] > 0);
@@ -180,8 +179,8 @@ static void constructMatrixUpper(SparseMatrix matrix, int *iRows, int *iCols,
 }
 
 static void constructMatrixLowerRow(Vector3d direction, int iRow,
-		int iDirection, int iEpsilon,
-		int *iRows, int *iCols, double *values)
+									int iDirection, int iEpsilon, int *iRows,
+									int *iCols, double *values)
 {
 	DEBUG_START;
 	iRows[0] = iRow;
@@ -200,32 +199,31 @@ static void constructMatrixLowerRow(Vector3d direction, int iRow,
 }
 
 static void constructMatrixLower(std::vector<Vector3d> directions,
-		int numConsistencyConstraints, bool ifLinfProblem,
-		int *iRows, int *iCols, double *values)
+								 int numConsistencyConstraints,
+								 bool ifLinfProblem, int *iRows, int *iCols,
+								 double *values)
 {
 	DEBUG_START;
 	int numDirections = directions.size();
 	for (int i = 0; i < numDirections; ++i)
 	{
-		int iEpsilon = ifLinfProblem
-			? 3 * numDirections + 1
-			: 3 * numDirections + i + 1;
+		int iEpsilon =
+			ifLinfProblem ? 3 * numDirections + 1 : 3 * numDirections + i + 1;
 		/*  (u_i, x_i) + \varepsilon > h_i */
-		constructMatrixLowerRow(directions[i],
-				numConsistencyConstraints + 2 * i + 1, i,
-				iEpsilon, iRows + 8 * i + 1,
-				iCols + 8 * i + 1, values + 8 * i + 1);
+		constructMatrixLowerRow(
+			directions[i], numConsistencyConstraints + 2 * i + 1, i, iEpsilon,
+			iRows + 8 * i + 1, iCols + 8 * i + 1, values + 8 * i + 1);
 		/* -(u_i, x_i) + \varepsilon > -h_i */
-		constructMatrixLowerRow(-directions[i],
-				numConsistencyConstraints + 2 * i + 2, i,
-				iEpsilon, iRows + 8 * i + 5,
-				iCols + 8 * i + 5, values + 8 * i + 5);
+		constructMatrixLowerRow(
+			-directions[i], numConsistencyConstraints + 2 * i + 2, i, iEpsilon,
+			iRows + 8 * i + 5, iCols + 8 * i + 5, values + 8 * i + 5);
 	}
 	DEBUG_END;
 }
 
 static void constructMatrix(glp_prob *problem,
-		SupportFunctionEstimationDataPtr data, bool ifLinfProblem)
+							SupportFunctionEstimationDataPtr data,
+							bool ifLinfProblem)
 {
 	DEBUG_START;
 	SparseMatrix matrix = data->supportMatrix();
@@ -238,16 +236,16 @@ static void constructMatrix(glp_prob *problem,
 	int *iCols = new int[numNonZerosTotal + 1];
 	double *values = new double[numNonZerosTotal + 1];
 	DEBUG_PRINT("Allocated iRows, iCols, values arrays of length %d",
-			numNonZerosTotal + 1);
+				numNonZerosTotal + 1);
 
 	constructMatrixUpper(matrix, iRows, iCols, values);
 
 	/* Fill the bottom part of the matrix. */
 	auto directions = data->supportDirections();
 	int numTopPart = matrix.nonZeros();
-	constructMatrixLower(directions, numConsistencyConstraints,
-			ifLinfProblem, iRows + numTopPart, iCols + numTopPart,
-			values + numTopPart);
+	constructMatrixLower(directions, numConsistencyConstraints, ifLinfProblem,
+						 iRows + numTopPart, iCols + numTopPart,
+						 values + numTopPart);
 
 	glp_load_matrix(problem, numNonZerosTotal, iRows, iCols, values);
 	DEBUG_END;
@@ -259,7 +257,7 @@ glp_prob *GlpkSFELinearProgramBuilder::buildLinfProblem(void)
 	/* Create the problem. */
 	glp_prob *problem = glp_create_prob();
 	glp_set_prob_name(problem, "Support function estimation from PCL in "
-			"L-inf norm.");
+							   "L-inf norm.");
 
 	/* Set the direction of optimization - to minimum. */
 	glp_set_obj_dir(problem, GLP_MIN);
@@ -286,7 +284,7 @@ glp_prob *GlpkSFELinearProgramBuilder::buildL1Problem(void)
 	/* Create the problem. */
 	glp_prob *problem = glp_create_prob();
 	glp_set_prob_name(problem, "Support function estimation from PCL in "
-			"L-1 norm.");
+							   "L-1 norm.");
 
 	/* Set the direction of optimization - to minimum. */
 	glp_set_obj_dir(problem, GLP_MIN);

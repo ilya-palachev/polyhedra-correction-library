@@ -31,7 +31,7 @@
 #include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 GlpkSupportFunctionEstimator::GlpkSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data) :
+	SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;

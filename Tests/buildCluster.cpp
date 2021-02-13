@@ -23,65 +23,70 @@
 
 using namespace std;
 
-void test_J11(const char* name, int type);
-void test_Jtwo(const char* name1, const char* name2, int type);
+void test_J11(const char *name, int type);
+void test_Jtwo(const char *name1, const char *name2, int type);
 
-void test_cluster(const char* name, int type);
-void test_viev(const char* name, int type);
+void test_cluster(const char *name, int type);
+void test_viev(const char *name, int type);
 double norm_J(double Jxx1, double Jyy1, double Jzz1, double Jxy1, double Jyz1,
-		double Jxz1);
+			  double Jxz1);
 
-void test_BuildTreeNorm(const char* name, int type);
+void test_BuildTreeNorm(const char *name, int type);
 void test_BuildCluster();
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 
-//    test_J11("poly-small", 0);
+	//    test_J11("poly-small", 0);
 	//  test_BuildTreeNorm("poly-small", 0);
 	//
-//    test_BuildTreeNorm("2009_08_06_round_0_76ct_Lexus_Radius_no_1_no_5_missing_RBC_2", 1);
+	//    test_BuildTreeNorm("2009_08_06_round_0_76ct_Lexus_Radius_no_1_no_5_missing_RBC_2",
+	//    1);
 
-//    test_BuildTreeNorm("2009_08_06_round_0_76ct_Lexus_Radius_no_1_no_5_missing_RBC_2", 1);
-//    test_BuildTreeNorm("2009_08_06_round_0_93ct_Lexus_Radius_no_1_no_5_missing_RBC_1", 1);
-//    test_BuildTreeNorm("2009_08_06_round_1_01ct_Lexus_Radius_no_1_no_5_missing_RBC_3", 1);
-//    test_BuildTreeNorm("2009_08_06_round_1_04ct_Lexus_Radius_no_1_no_5_missing_RBC_4", 1);
+	//    test_BuildTreeNorm("2009_08_06_round_0_76ct_Lexus_Radius_no_1_no_5_missing_RBC_2",
+	//    1);
+	//    test_BuildTreeNorm("2009_08_06_round_0_93ct_Lexus_Radius_no_1_no_5_missing_RBC_1",
+	//    1);
+	//    test_BuildTreeNorm("2009_08_06_round_1_01ct_Lexus_Radius_no_1_no_5_missing_RBC_3",
+	//    1);
+	//    test_BuildTreeNorm("2009_08_06_round_1_04ct_Lexus_Radius_no_1_no_5_missing_RBC_4",
+	//    1);
 	//   test_J11("2009_08_17_brilliant_1.27ct_lexus_400c_wol_2", 1);
 	//   test_BuildTreeNorm("2009_08_17_brilliant_1.27ct_lexus_400c_wol_2", 1);
-//    test_J11("2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
-//    test_BuildTreeNorm("2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
-//    test_J11("2009_08_17_brilliant_1.27ct_lexus_400c_Wol_1", 1);
-//    test_BuildTreeNorm("2009_08_17_brilliant_1.27ct_lexus_400c_Wol_1", 1);
+	//    test_J11("2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
+	//    test_BuildTreeNorm("2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
+	//    test_J11("2009_08_17_brilliant_1.27ct_lexus_400c_Wol_1", 1);
+	//    test_BuildTreeNorm("2009_08_17_brilliant_1.27ct_lexus_400c_Wol_1", 1);
 
 	test_BuildCluster();
 
-//    test_J11("poly-cube x 3", 0);
-//   test_BuildTreeNorm("poly-cube x 3", 0);
+	//    test_J11("poly-cube x 3", 0);
+	//   test_BuildTreeNorm("poly-cube x 3", 0);
 	//   test_J11("H-cube", 0);
-//    test_BuildTreeNorm("H-cube", 0);
-//    test_J11("poly-cube", 0);
-//    test_BuildTreeNorm("poly-cube", 0);
+	//    test_BuildTreeNorm("H-cube", 0);
+	//    test_J11("poly-cube", 0);
+	//    test_BuildTreeNorm("poly-cube", 0);
 	//     test_J11("Pi-cube", 0);
 
-//      test_Jtwo("Pi-cube", "H-cube", 0);
-//      test_Jtwo("2009_08_17_brilliant_1.27ct_lexus_400c_wol_2"
-//                , "2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
-//      test_BuildTreeNorm("Pi-cube", 0);
+	//      test_Jtwo("Pi-cube", "H-cube", 0);
+	//      test_Jtwo("2009_08_17_brilliant_1.27ct_lexus_400c_wol_2"
+	//                , "2009_08_17_brilliant_1.27ct_lexus_400c_wol_3", 1);
+	//      test_BuildTreeNorm("Pi-cube", 0);
 	//   test_cluster("poly-cube", 0);
-	//test_viev("poly-cube", 0);
+	// test_viev("poly-cube", 0);
 
-//    Polyhedron s;
-//
-//    double g;
-//    s.poly_cube(2,0,0,0);
-//    g = s.volume();
-//    cout<<g<<endl;
+	//    Polyhedron s;
+	//
+	//    double g;
+	//    s.poly_cube(2,0,0,0);
+	//    g = s.volume();
+	//    cout<<g<<endl;
 	DEBUG_END;
 	return 0;
 }
 
-void test_Jtwo(const char* name1, const char* name2, int type)
+void test_Jtwo(const char *name1, const char *name2, int type)
 {
 	DEBUG_START;
 
@@ -96,8 +101,8 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 	sprintf(file_name1, "./poly-data-in/%s.dat", name1);
 	sprintf(file_name2, "./poly-data-in/%s.dat", name2);
 
-//    poly1.fscan_default_0(file_name1);
-//    poly2.fscan_default_0(file_name2);
+	//    poly1.fscan_default_0(file_name1);
+	//    poly2.fscan_default_0(file_name2);
 
 	switch (type)
 	{
@@ -163,9 +168,9 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 	printf("J =\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxy1, Jyy1, Jyz1);
 	printf("\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxz1, Jyz1, Jzz1);
 
-//    printf("v0 = (%lf, %lf, %lf)\n", v01.x, v01.y, v01.z);
-//    printf("v1 = (%lf, %lf, %lf)\n", v11.x, v11.y, v11.z);
-//    printf("v2 = (%lf, %lf, %lf)\n\n", v21.x, v21.y, v21.z);
+	//    printf("v0 = (%lf, %lf, %lf)\n", v01.x, v01.y, v01.z);
+	//    printf("v1 = (%lf, %lf, %lf)\n", v11.x, v11.y, v11.z);
+	//    printf("v2 = (%lf, %lf, %lf)\n\n", v21.x, v21.y, v21.z);
 
 	printf("%s\n", name2);
 
@@ -176,10 +181,10 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 	printf("J =\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxy2, Jyy2, Jyz2);
 	printf("\t||\t%.16lf\t%.16lf\t%.16lf\t||\n", Jxz2, Jyz2, Jzz2);
 
-//    printf("v0 = (%lf, %lf, %lf)\n", v02.x, v02.y, v02.z);
-//    printf("v1 = (%lf, %lf, %lf)\n", v12.x, v12.y, v12.z);
-//    printf("v2 = (%lf, %lf, %lf)\n\n", v22.x, v22.y, v22.z);
-//
+	//    printf("v0 = (%lf, %lf, %lf)\n", v02.x, v02.y, v02.z);
+	//    printf("v1 = (%lf, %lf, %lf)\n", v12.x, v12.y, v12.z);
+	//    printf("v2 = (%lf, %lf, %lf)\n\n", v22.x, v22.y, v22.z);
+	//
 
 	Jxx1 -= Jxx2;
 	Jyy1 -= Jyy2;
@@ -204,7 +209,7 @@ void test_Jtwo(const char* name1, const char* name2, int type)
 	DEBUG_END;
 }
 
-void test_J11(const char* name, int type)
+void test_J11(const char *name, int type)
 {
 	DEBUG_START;
 	DEBUG_VARIABLE double vol;
@@ -239,7 +244,7 @@ void test_J11(const char* name, int type)
 		break;
 	}
 	poly.preprocessAdjacency();
-//    vol = poly.volume();
+	//    vol = poly.volume();
 
 	double Jxx, Jyy, Jzz, Jxy, Jyz, Jxz;
 	poly.J(Jxx, Jyy, Jzz, Jxy, Jyz, Jxz);
@@ -260,20 +265,20 @@ void test_J11(const char* name, int type)
 
 	poly.preprocessAdjacency();
 	poly.fprint_ply_scale(1000., file_name_out, "J11");
-//
-//    double xc, yc, zc;
+	//
+	//    double xc, yc, zc;
 
-//    poly.get_center(xc, yc, zc);
-//    printf("||\t%lf\t%lf\t%lf||\n", Jxx, Jxy, Jxz);
-//    printf("||\t%lf\t%lf\t%lf||\n", Jxy, Jyy, Jyz);
-//    printf("||\t%lf\t%lf\t%lf||\n", Jxz, Jyz, Jzz);
+	//    poly.get_center(xc, yc, zc);
+	//    printf("||\t%lf\t%lf\t%lf||\n", Jxx, Jxy, Jxz);
+	//    printf("||\t%lf\t%lf\t%lf||\n", Jxy, Jyy, Jyz);
+	//    printf("||\t%lf\t%lf\t%lf||\n", Jxz, Jyz, Jzz);
 
-//    printf("center = (%lf,%lf,%lf) for %s.dat\n", xc, yc, zc,name);
-//    printf("vol = %lf\n", vol);
-	//double s =
-	//poly.clusterisation2(0.03);// .volume();
-	//poly.clusterisation2(0.001);
-	//printf("%10.50lf\n", s);
+	//    printf("center = (%lf,%lf,%lf) for %s.dat\n", xc, yc, zc,name);
+	//    printf("vol = %lf\n", vol);
+	// double s =
+	// poly.clusterisation2(0.03);// .volume();
+	// poly.clusterisation2(0.001);
+	// printf("%10.50lf\n", s);
 
 	if (file_name_in != NULL)
 		delete[] file_name_in;
@@ -283,7 +288,7 @@ void test_J11(const char* name, int type)
 	DEBUG_END;
 }
 
-void test_cluster(const char* name, int type)
+void test_cluster(const char *name, int type)
 {
 	DEBUG_START;
 	DEBUG_VARIABLE double vol;
@@ -317,11 +322,11 @@ void test_cluster(const char* name, int type)
 	poly.preprocessAdjacency();
 
 	double p = EPSILON;
-//    for (int i = 0; i < 20; ++i) {
-//        int ncluster = poly.clusterisation(p);
-//        DEBUG_PRINT("p = %le, \tncalster = %d\n", p, ncluster);
-//        p *= 10.;
-//    }
+	//    for (int i = 0; i < 20; ++i) {
+	//        int ncluster = poly.clusterisation(p);
+	//        DEBUG_PRINT("p = %le, \tncalster = %d\n", p, ncluster);
+	//        p *= 10.;
+	//    }
 
 	poly.clusterize2(p);
 	if (file_name_in != NULL)
@@ -330,7 +335,7 @@ void test_cluster(const char* name, int type)
 	DEBUG_END;
 }
 
-void test_viev(const char* name, int type)
+void test_viev(const char *name, int type)
 {
 	DEBUG_START;
 	DEBUG_VARIABLE double vol;
@@ -376,7 +381,7 @@ void test_viev(const char* name, int type)
 #define step_len 10
 #define num_rand 100
 
-void get_statistics_deform_linear(const char* name, int type)
+void get_statistics_deform_linear(const char *name, int type)
 {
 	DEBUG_START;
 
@@ -384,7 +389,7 @@ void get_statistics_deform_linear(const char* name, int type)
 	double dist, norm, a, b, c, d, part, norm0;
 	Vector3d delta;
 
-	srand((unsigned) time(NULL));
+	srand((unsigned)time(NULL));
 
 	Polyhedron poly;
 	Polyhedron poly1;
@@ -433,8 +438,8 @@ void get_statistics_deform_linear(const char* name, int type)
 
 		for (i = 0; i < num_rand; ++i)
 		{
-			i_vertex = (int) (rand() / (RAND_MAX + 1.) * numv);
-//            printf("%d ", i_vertex);
+			i_vertex = (int)(rand() / (RAND_MAX + 1.) * numv);
+			//            printf("%d ", i_vertex);
 			dist = poly.distToNearestNeighbour(i_vertex);
 			norm = dist * norm0;
 
@@ -455,7 +460,8 @@ void get_statistics_deform_linear(const char* name, int type)
 			}
 			poly.copyCoordinates(poly1);
 		}
-		//        for (i_vertex = 0; i_vertex < 50 && i_vertex < numv; ++i_vertex) {
+		//        for (i_vertex = 0; i_vertex < 50 && i_vertex < numv;
+		//        ++i_vertex) {
 		//            dist = poly.min_dist(i_vertex);
 		//            norm = dist * norm0;
 		//
@@ -477,17 +483,17 @@ void get_statistics_deform_linear(const char* name, int type)
 		//                poly.import_coordinates(poly1);
 		//            }
 		//        }
-		part = (double) count;
-//        part /= numv;
+		part = (double)count;
+		//        part /= numv;
 		part /= num_rand;
 		printf("\\hline\n\t%lf &\t%lf\\\\\n", norm0, part);
-//        poly1.preprocess_polyhedron();
+		//        poly1.preprocess_polyhedron();
 	}
 
 	DEBUG_END;
 }
 
-void test_deform(const char* name, int type, int id, Vector3d delta)
+void test_deform(const char *name, int type, int id, Vector3d delta)
 {
 	DEBUG_START;
 
@@ -533,7 +539,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	}
 
 	poly.fprint_ply_scale(1000., file_name_out0,
-			"made-by-Polyhedron_join_facets_2");
+						  "made-by-Polyhedron_join_facets_2");
 
 	poly.get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	fprintf(stdout, "boundary : \n");
@@ -545,7 +551,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	poly.shiftPointWeighted(id, delta);
 
 	time_t seconds = time(NULL);
-	tm* timeinfo = localtime(&seconds);
+	tm *timeinfo = localtime(&seconds);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
 			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
@@ -553,7 +559,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 			timeinfo->tm_sec, id);
 
 	poly.fprint_ply_scale(1000., file_name_out,
-			"made-by-Polyhedron_join_facets_2");
+						  "made-by-Polyhedron_join_facets_2");
 
 	if (file_name_in != NULL)
 		delete[] file_name_in;
@@ -565,7 +571,7 @@ void test_deform(const char* name, int type, int id, Vector3d delta)
 	DEBUG_END;
 }
 
-void test_deform_linear(const char* name, int type, int id, Vector3d delta)
+void test_deform_linear(const char *name, int type, int id, Vector3d delta)
 {
 	DEBUG_START;
 
@@ -612,7 +618,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	}
 
 	poly.fprint_ply_scale(1000., file_name_out0,
-			"made-by-Polyhedron_join_facets_2");
+						  "made-by-Polyhedron_join_facets_2");
 
 	poly.get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	fprintf(stdout, "boundary : \n");
@@ -626,7 +632,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 	poly.countConsections(true);
 
 	time_t seconds = time(NULL);
-	tm* timeinfo = localtime(&seconds);
+	tm *timeinfo = localtime(&seconds);
 
 	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
 			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
@@ -634,7 +640,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 			timeinfo->tm_sec, id);
 
 	poly.fprint_ply_scale(1000., file_name_out,
-			"made-by-Polyhedron_join_facets_2");
+						  "made-by-Polyhedron_join_facets_2");
 
 	if (file_name_in != NULL)
 		delete[] file_name_in;
@@ -647,7 +653,7 @@ void test_deform_linear(const char* name, int type, int id, Vector3d delta)
 }
 
 double norm_J(double Jxx, double Jyy, double Jzz, double Jxy, double Jyz,
-		double Jxz)
+			  double Jxz)
 {
 	DEBUG_START;
 	double st, nd, rd;
@@ -709,20 +715,21 @@ void test_BuildCluster()
 	double s = poly1.areaOfSurface();
 	printf("volume = %10.50lf, area = %10.50lf\n", v, s);
 
-	TreeClusterNormNode *nodeArray;        // = new TreeClusterNormNode;
+	TreeClusterNormNode *nodeArray; // = new TreeClusterNormNode;
 	nodeArray = new TreeClusterNormNode[poly1.numFacets];
 	MatrixDistNorm matrix(poly1.numFacets);
-	poly1.giveClusterNodeArray(nodeArray, matrix); //.fprint_dendrogamma_lev(stdout);
+	poly1.giveClusterNodeArray(nodeArray,
+							   matrix); //.fprint_dendrogamma_lev(stdout);
 
-	TreeClusterNormNode *nodeArray1;        // = new TreeClusterNormNode;
+	TreeClusterNormNode *nodeArray1; // = new TreeClusterNormNode;
 	nodeArray1 = new TreeClusterNormNode[poly1.numFacets];
 	MatrixDistNorm matrix1(poly1.numFacets);
 
-	TreeClusterNormNode *nodeArray2;        // = new TreeClusterNormNode;
+	TreeClusterNormNode *nodeArray2; // = new TreeClusterNormNode;
 	nodeArray2 = new TreeClusterNormNode[poly2.numFacets];
 	MatrixDistNorm matrix2(poly2.numFacets);
 
-	TreeClusterNormNode *nodeArray3;        // = new TreeClusterNormNode;
+	TreeClusterNormNode *nodeArray3; // = new TreeClusterNormNode;
 	nodeArray3 = new TreeClusterNormNode[poly3.numFacets];
 	MatrixDistNorm matrix3(poly3.numFacets);
 
@@ -730,9 +737,9 @@ void test_BuildCluster()
 	poly2.reClusterNodeArray(nodeArray, matrix, nodeArray2, matrix2);
 	poly3.reClusterNodeArray(nodeArray, matrix, nodeArray3, matrix3);
 
-//    MatrixDistNorm matrix(poly1.numf);
+	//    MatrixDistNorm matrix(poly1.numf);
 
-//    matrix.build(poly1.numf, nodeArray);
+	//    matrix.build(poly1.numf, nodeArray);
 
 	printf("==========  Clusterization for 1 ==============\n");
 	matrix.fprint_clusters2(stdout, nodeArray1);
@@ -774,7 +781,7 @@ void test_BuildCluster()
 	DEBUG_END;
 }
 
-void test_BuildTreeNorm(const char* name, int type)
+void test_BuildTreeNorm(const char *name, int type)
 {
 	DEBUG_START;
 	Polyhedron poly;
@@ -812,7 +819,7 @@ void test_BuildTreeNorm(const char* name, int type)
 	double s = poly.areaOfSurface();
 	printf("volume = %10.50lf, area = %10.50lf\n", v, s);
 
-	poly.build_TreeClusterNorm();        //.fprint_dendrogamma_lev(stdout);
+	poly.build_TreeClusterNorm(); //.fprint_dendrogamma_lev(stdout);
 
 	poly.fprint_ply_scale(1000., file_name_out, "cluster");
 
@@ -822,4 +829,3 @@ void test_BuildTreeNorm(const char* name, int type)
 		delete[] file_name_out;
 	DEBUG_END;
 }
-

@@ -68,4 +68,3 @@ public:
 
 #endif /* GLPKSFELINEARPROGRAMBUILDER_H_ */
 #endif /* USE_GLPK */
-

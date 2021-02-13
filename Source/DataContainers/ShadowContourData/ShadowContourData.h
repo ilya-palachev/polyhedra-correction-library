@@ -50,9 +50,9 @@ class Polyhedron;
  * Usually this data is obtained from experimental measurements or from
  * synthetic generation from simple models.
  */
-class ShadowContourData :
-	public std::enable_shared_from_this<ShadowContourData>,
-	public PData
+class ShadowContourData
+	: public std::enable_shared_from_this<ShadowContourData>,
+	  public PData
 {
 public:
 	/**
@@ -63,7 +63,7 @@ public:
 	/**
 	 * The array that contains shadow contours.
 	 */
-	SContour* contours;
+	SContour *contours;
 
 	/** Empty constructor. */
 	ShadowContourData();
@@ -90,7 +90,7 @@ public:
 	 *
 	 * @param data	The data to be copied
 	 */
-	ShadowContourData(const ShadowContourData& data);
+	ShadowContourData(const ShadowContourData &data);
 
 	/**
 	 * Constructor of empty data set by the number of contours.
@@ -110,7 +110,7 @@ public:
 	 * @param fileNameContours	The name of file with shadow contour data to be
 	 * read in.
 	 */
-	bool fscanDefault(const char* fileNameContours);
+	bool fscanDefault(const char *fileNameContours);
 
 	/**
 	 * Scans shadow contour data from the file descriptor
@@ -118,7 +118,7 @@ public:
 	 * @param file	File descriptor of file with shadow contour data to be read
 	 * in.
 	 */
-	bool fscanDefault(FILE* file);
+	bool fscanDefault(FILE *file);
 
 	/**
 	 * Dumps internal structures specifying shadow contour data to the given
@@ -126,14 +126,14 @@ public:
 	 *
 	 * @param file	File descriptor to be written to.
 	 */
-	void fprint(FILE* file);
+	void fprint(FILE *file);
 
 	/**
 	 * Writes shadow contour data to the file in standard format.
 	 *
 	 * @param file	File descriptor to be written to.
 	 */
-	void fprintDefault(FILE* file);
+	void fprintDefault(FILE *file);
 
 	/**
 	 * Writes shadow contour data to the file in standard format.
@@ -151,21 +151,21 @@ public:
 	 * @return		The stream ready for further outputs.
 	 */
 	friend std::ostream &operator<<(std::ostream &stream,
-			ShadowContourData &data);
+									ShadowContourData &data);
 
 	/**
 	 * Overloaded operator "==" for comparing of shadow contour data.
 	 *
 	 * @param contourData	Shadow contour data to be compared with.
 	 */
-	bool operator ==(const ShadowContourData& contourData) const;
+	bool operator==(const ShadowContourData &contourData) const;
 
 	/**
 	 * Overloaded operator "!=" for comparing of shadow contour data.
 	 *
 	 * @param contourData	Shadow contour data to be compared with.
 	 */
-	bool operator !=(const ShadowContourData& contourData) const;
+	bool operator!=(const ShadowContourData &contourData) const;
 
 	/**
 	 * Calculates support function data based on contours that are

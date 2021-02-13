@@ -89,7 +89,6 @@ typedef enum
 class Recoverer
 {
 private:
-
 	/** Type of estimator to be used. */
 	RecovererEstimatorType estimatorType;
 
@@ -134,8 +133,8 @@ private:
 	bool ifContourMode_;
 
 	const char *linearSolver_;
-public:
 
+public:
 	/**
 	 * Empty constructor.
 	 */
@@ -185,8 +184,7 @@ public:
 	 *
 	 * @param type	The type of starting body that is to be used.
 	 */
-	void setStartingBodyType(
-			SupportFunctionEstimationStartingBodyType type);
+	void setStartingBodyType(SupportFunctionEstimationStartingBodyType type);
 
 	/**
 	 * Sets the type of problem.
@@ -266,7 +264,7 @@ public:
 	 * 				data.
 	 */
 	Polyhedron_3 buildConsistentBody(VectorXd consistentValues,
-		SupportFunctionEstimationDataPtr SEData);
+									 SupportFunctionEstimationDataPtr SEData);
 
 	/**
 	 * Runs the recovering procedure for support function data.

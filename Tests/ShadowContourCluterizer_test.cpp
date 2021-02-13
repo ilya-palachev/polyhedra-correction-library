@@ -37,7 +37,7 @@ void printUsage(void)
 	DEBUG_END;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
 	DEBUG_START;
 	if (argc != NUM_ARGS_EXPECTED)
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 		DEBUG_END;
 		return EXIT_FAILURE;
 	}
-	
+
 	/* TODO: Here should be a good command-line parser function. */
 
 	PolyhedronPtr p(new Polyhedron());
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 	SCData->fscanDefault(argv[1]);
 	ShadowContourClusterizerPtr clusterizer(new ShadowContourClusterizer(p));
 	clusterizer->buildPlot(SCData, argv[2]);
-	
+
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }

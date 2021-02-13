@@ -23,48 +23,48 @@
 #include "Correctors/Intersector/EdgeSetIntersected/EdgeSetIntersected.h"
 
 EdgeSetIntersected::EdgeSetIntersected() :
-				len(0),
-				num(0),
-				edge0(NULL),
-				edge1(NULL),
-				id_edge_list0(NULL),
-				pos_edge_list0(NULL),
-				id_edge_list1(NULL),
-				pos_edge_list1(NULL),
-				id_future_facet(NULL),
-				pos_future_facet(NULL)
+	len(0),
+	num(0),
+	edge0(NULL),
+	edge1(NULL),
+	id_edge_list0(NULL),
+	pos_edge_list0(NULL),
+	id_edge_list1(NULL),
+	pos_edge_list1(NULL),
+	id_future_facet(NULL),
+	pos_future_facet(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
 EdgeSetIntersected::EdgeSetIntersected(int len_orig) :
-				len(len_orig),
-				num(0),
-				edge0(new int[len]),
-				edge1(new int[len]),
-				id_edge_list0(new int[len]),
-				pos_edge_list0(new int[len]),
-				id_edge_list1(new int[len]),
-				pos_edge_list1(new int[len]),
-				id_future_facet(new int[len]),
-				pos_future_facet(new int[len])
+	len(len_orig),
+	num(0),
+	edge0(new int[len]),
+	edge1(new int[len]),
+	id_edge_list0(new int[len]),
+	pos_edge_list0(new int[len]),
+	id_edge_list1(new int[len]),
+	pos_edge_list1(new int[len]),
+	id_future_facet(new int[len]),
+	pos_future_facet(new int[len])
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected& orig) :
-				len(orig.len),
-				num(orig.num),
-				edge0(new int[len]),
-				edge1(new int[len]),
-				id_edge_list0(new int[len]),
-				pos_edge_list0(new int[len]),
-				id_edge_list1(new int[len]),
-				pos_edge_list1(new int[len]),
-				id_future_facet(new int[len]),
-				pos_future_facet(new int[len])
+EdgeSetIntersected::EdgeSetIntersected(const EdgeSetIntersected &orig) :
+	len(orig.len),
+	num(orig.num),
+	edge0(new int[len]),
+	edge1(new int[len]),
+	id_edge_list0(new int[len]),
+	pos_edge_list0(new int[len]),
+	id_edge_list1(new int[len]),
+	pos_edge_list1(new int[len]),
+	id_future_facet(new int[len]),
+	pos_future_facet(new int[len])
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
@@ -103,7 +103,8 @@ EdgeSetIntersected::~EdgeSetIntersected()
 	DEBUG_END;
 }
 
-EdgeSetIntersected& EdgeSetIntersected::operator =(const EdgeSetIntersected& orig)
+EdgeSetIntersected &
+EdgeSetIntersected::operator=(const EdgeSetIntersected &orig)
 {
 	DEBUG_START;
 	len = orig.len;
@@ -163,4 +164,3 @@ int EdgeSetIntersected::get_num()
 	DEBUG_END;
 	return num;
 }
-

@@ -42,8 +42,8 @@ SupportFunctionDataItemInfo::SupportFunctionDataItemInfo() :
 	DEBUG_END;
 }
 
-SupportFunctionDataItemInfo &SupportFunctionDataItemInfo::operator=(
-			const SupportFunctionDataItemInfo &info)
+SupportFunctionDataItemInfo &
+SupportFunctionDataItemInfo::operator=(const SupportFunctionDataItemInfo &info)
 {
 	DEBUG_START;
 	point = info.point;

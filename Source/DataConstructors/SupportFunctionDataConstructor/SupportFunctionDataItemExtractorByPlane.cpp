@@ -29,7 +29,8 @@
 #include "DebugAssert.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.h"
 
-SupportFunctionDataItemExtractorByPlane::SupportFunctionDataItemExtractorByPlane() :
+SupportFunctionDataItemExtractorByPlane::
+	SupportFunctionDataItemExtractorByPlane() :
 	SupportFunctionDataItemExtractor(),
 	plane(Plane()),
 	ifPlaneInitialized(false)
@@ -38,14 +39,15 @@ SupportFunctionDataItemExtractorByPlane::SupportFunctionDataItemExtractorByPlane
 	DEBUG_END;
 }
 
-SupportFunctionDataItemExtractorByPlane::~SupportFunctionDataItemExtractorByPlane()
+SupportFunctionDataItemExtractorByPlane::
+	~SupportFunctionDataItemExtractorByPlane()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SupportFunctionDataItem SupportFunctionDataItemExtractorByPlane::run(
-		SideOfContour *side)
+SupportFunctionDataItem
+SupportFunctionDataItemExtractorByPlane::run(SideOfContour *side)
 {
 	DEBUG_START;
 	ASSERT(ifPlaneInitialized);
@@ -56,8 +58,8 @@ SupportFunctionDataItem SupportFunctionDataItemExtractorByPlane::run(
 	ASSERT(ifPointLiesInPlane(A2, plane));
 
 	/*
-	 * Calculate the std::vector that is orthogonal both to the normal of contour
-	 * plane and the contour side.
+	 * Calculate the std::vector that is orthogonal both to the normal of
+	 * contour plane and the contour side.
 	 */
 	Vector3d normal = (A1 - A2) % plane.norm;
 	ASSERT(!!normal && qmod(normal) > 0.);

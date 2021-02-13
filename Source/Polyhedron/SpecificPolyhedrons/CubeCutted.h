@@ -25,9 +25,11 @@
 
 #include "Polyhedron/Polyhedron.h"
 
-class CubeCutted: public Polyhedron {
+class CubeCutted : public Polyhedron
+{
 private:
 	void init();
+
 public:
 	CubeCutted();
 	virtual ~CubeCutted();

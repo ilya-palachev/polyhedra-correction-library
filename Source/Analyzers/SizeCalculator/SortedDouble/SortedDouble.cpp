@@ -26,9 +26,7 @@
 #include "array_operations.h"
 #include "Analyzers/SizeCalculator/SortedDouble/SortedDouble.h"
 
-SortedDouble::SortedDouble(int Len) :
-				len(Len),
-				num(0)
+SortedDouble::SortedDouble(int Len) : len(Len), num(0)
 {
 	DEBUG_START;
 	array = new double[len];
@@ -55,7 +53,7 @@ void SortedDouble::add(double x)
 		return;
 	}
 
-	first = 0; // Первый элемент в массиве
+	first = 0;	// Первый элемент в массиве
 	last = num; // Последний элемент в массиве
 
 	while (first < last)

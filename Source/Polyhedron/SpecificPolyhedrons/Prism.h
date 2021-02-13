@@ -25,13 +25,15 @@
 
 #include "Polyhedron/Polyhedron.h"
 
-class Prism: public Polyhedron {
+class Prism : public Polyhedron
+{
 private:
 	int numVerticesBase;
 	double height;
 	double radius;
 
 	void init();
+
 public:
 	Prism();
 	Prism(int nv, double h, double r);

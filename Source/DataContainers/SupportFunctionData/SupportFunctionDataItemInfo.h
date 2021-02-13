@@ -61,8 +61,8 @@ public:
 	SupportFunctionDataItemInfo();
 
 	/** Assignment operator. */
-	SupportFunctionDataItemInfo &operator=(
-			const SupportFunctionDataItemInfo &i);
+	SupportFunctionDataItemInfo &
+	operator=(const SupportFunctionDataItemInfo &i);
 
 	/** Virtual destructor. */
 	virtual ~SupportFunctionDataItemInfo();

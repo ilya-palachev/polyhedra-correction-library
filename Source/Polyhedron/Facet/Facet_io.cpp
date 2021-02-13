@@ -22,7 +22,7 @@
 #include "DebugAssert.h"
 #include "Polyhedron/Facet/Facet.h"
 
-void Facet::my_fprint(FILE* file)
+void Facet::my_fprint(FILE *file)
 {
 	DEBUG_START;
 	int i;
@@ -39,17 +39,18 @@ void Facet::my_fprint(FILE* file)
 	DEBUG_END;
 }
 
-void Facet::my_fprint_all(FILE* file)
+void Facet::my_fprint_all(FILE *file)
 {
 	DEBUG_START;
 	int i;
 	REGULAR_PRINT(file, "\n------------ Facet %d: ------------\n", id);
 	REGULAR_PRINT(file, "id = %d\n nv = %d\n", id, numVertices);
 	REGULAR_PRINT(file, "a = %lf, b = %lf, c = %lf, d = %lf\n", plane.norm.x,
-			plane.norm.y, plane.norm.z, plane.dist);
-	REGULAR_PRINT(file,
-			"plane : (%.2lf) * x + (%.2lf) * y + (%.2lf) * z + (%.2lf) = 0.)\n",
-			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+				  plane.norm.y, plane.norm.z, plane.dist);
+	REGULAR_PRINT(
+		file,
+		"plane : (%.2lf) * x + (%.2lf) * y + (%.2lf) * z + (%.2lf) = 0.)\n",
+		plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 
 	if (indVertices == NULL && numVertices > 0)
 	{
@@ -101,10 +102,9 @@ void Facet::my_fprint_all(FILE* file)
 				DEBUG_END;
 				return;
 			}
-			DEBUG_VARIABLE Vector3d vector
-				= polyhedron->vertices[ind];
-			REGULAR_PRINT(file, "vertices[%d] = (%lf, %lf, %lf)\n",
-					ind, vector.x, vector.y, vector.z);
+			DEBUG_VARIABLE Vector3d vector = polyhedron->vertices[ind];
+			REGULAR_PRINT(file, "vertices[%d] = (%lf, %lf, %lf)\n", ind,
+						  vector.x, vector.y, vector.z);
 		}
 		test_pair_neighbours();
 	}
@@ -115,60 +115,61 @@ void Facet::my_fprint_all(FILE* file)
 		DEBUG_END;
 		return;
 	}
-	
+
 	DEBUG_END;
 }
 
-void Facet::fprint_default_0(FILE* file)
+void Facet::fprint_default_0(FILE *file)
 {
 	DEBUG_START;
-	ALWAYS_PRINT(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices, plane.norm.x,
-			plane.norm.y, plane.norm.z, plane.dist);
+	ALWAYS_PRINT(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices,
+				 plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
 	DEBUG_END;
 }
 
-void Facet::fprint_default_1(FILE* file)
+void Facet::fprint_default_1(FILE *file)
 {
 	DEBUG_START;
 	ALWAYS_PRINT(file, "%d %d %.16lf %.16lf %.16lf %.16lf", id, numVertices,
-			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+				 plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
 	DEBUG_END;
 }
 
-void Facet::fprint_default_1_2(FILE* file)
+void Facet::fprint_default_1_2(FILE *file)
 {
 	DEBUG_START;
-	ALWAYS_PRINT(file, "\t%d\t%d\t%.16lf\t%.16lf\t%.16lf\t%.16lf\n\t", id, numVertices,
-			plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	ALWAYS_PRINT(file, "\t%d\t%d\t%.16lf\t%.16lf\t%.16lf\t%.16lf\n\t", id,
+				 numVertices, plane.norm.x, plane.norm.y, plane.norm.z,
+				 plane.dist);
 	for (int j = 0; j < numVertices; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
 	DEBUG_END;
 }
 
-void Facet::fprint_my_format(FILE* file)
+void Facet::fprint_my_format(FILE *file)
 {
 	DEBUG_START;
-	ALWAYS_PRINT(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices, plane.norm.x,
-			plane.norm.y, plane.norm.z, plane.dist);
+	ALWAYS_PRINT(file, "%d %.16lf %.16lf %.16lf %.16lf", numVertices,
+				 plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	for (int j = 0; j < 3 * numVertices + 1; ++j)
 		ALWAYS_PRINT(file, " %d", indVertices[j]);
 	ALWAYS_PRINT(file, "\n");
 	DEBUG_END;
 }
 
-void Facet::fprint_ply_vertex(FILE* file)
+void Facet::fprint_ply_vertex(FILE *file)
 {
 	DEBUG_START;
 	int v_id;
-	Vector3d* vertices = NULL;
-	
+	Vector3d *vertices = NULL;
+
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
 		vertices = polyhedron->vertices;
@@ -180,20 +181,18 @@ void Facet::fprint_ply_vertex(FILE* file)
 		DEBUG_END;
 		return;
 	}
-	
+
 	for (int j = 0; j < numVertices; ++j)
 	{
 		v_id = indVertices[j];
 		ALWAYS_PRINT(file, "%.16lf %.16lf %.16lf %.16lf %.16lf %.16lf\n",
-				vertices[v_id].x,
-				vertices[v_id].y,
-				vertices[v_id].z, plane.norm.x, plane.norm.y,
-				plane.norm.z);
+					 vertices[v_id].x, vertices[v_id].y, vertices[v_id].z,
+					 plane.norm.x, plane.norm.y, plane.norm.z);
 	}
 	DEBUG_END;
 }
 
-void Facet::fprint_ply_index(FILE* file)
+void Facet::fprint_ply_index(FILE *file)
 {
 	DEBUG_START;
 	ALWAYS_PRINT(file, "%d", numVertices);
@@ -203,7 +202,7 @@ void Facet::fprint_ply_index(FILE* file)
 	DEBUG_END;
 }
 
-void Facet::fprint_ply_scale(FILE* file)
+void Facet::fprint_ply_scale(FILE *file)
 {
 	DEBUG_START;
 	ALWAYS_PRINT(file, "%d", numVertices);

@@ -40,11 +40,11 @@ public:
 	 * @param data	Support function data
 	 */
 	NativeQuadraticEstimator(
-			SupportFunctionEstimationDataPtr supportFunctionData);
+		SupportFunctionEstimationDataPtr supportFunctionData);
 
 	/** Default destructor. */
 	~NativeQuadraticEstimator();
-	
+
 	/** Runs the estimation process. */
 	virtual VectorXd run(void);
 };

@@ -22,22 +22,19 @@
 #include "DebugAssert.h"
 #include "Correctors/PCorrector/PCorrector.h"
 
-PCorrector::PCorrector() :
-				polyhedron(NULL)
+PCorrector::PCorrector() : polyhedron(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-PCorrector::PCorrector(PolyhedronPtr p) :
-				polyhedron(p)
+PCorrector::PCorrector(PolyhedronPtr p) : polyhedron(p)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-PCorrector::PCorrector(Polyhedron* p) :
-				polyhedron()
+PCorrector::PCorrector(Polyhedron *p) : polyhedron()
 {
 	DEBUG_START;
 	polyhedron.reset(p);
@@ -49,4 +46,3 @@ PCorrector::~PCorrector()
 	DEBUG_START;
 	DEBUG_END;
 }
-

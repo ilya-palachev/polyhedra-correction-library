@@ -32,7 +32,7 @@
 #include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
 CPLEXSupportFunctionEstimator::CPLEXSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data) :
+	SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
@@ -63,13 +63,15 @@ static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 	std::vector<double> values;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
-		for (Eigen::SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(matrix, k); it; ++it)
+		for (Eigen::SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(
+				 matrix, k);
+			 it; ++it)
 		{
 			rows.push_back(it.row());
 			cols.push_back(it.col());
 			values.push_back(it.value());
 		}
-	}	
+	}
 
 	int iConstraint = 0;
 	auto itRow = rows.begin();
@@ -86,16 +88,17 @@ static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 			int iCol = *itCol;
 			ASSERT(iCol % 3 == 0);
 			int iVariable = iCol / 3;
-			for (int iDimension = 0; iDimension < 3;
-					++iDimension)
+			for (int iDimension = 0; iDimension < 3; ++iDimension)
 			{
 				ASSERT(*itRow == iRow);
 				ASSERT(*itCol == iCol + iDimension);
 				printSignedValue(*itValue, file);
-				fprintf(file, "x_%d_%d ", iVariable,
-						iDimension);
-				++itCol; ++itRow; ++itValue;
-				DEBUG_PRINT("*itRow = %d, *itCol = %d, *itValue = %lf", *itRow, *itCol, *itValue);
+				fprintf(file, "x_%d_%d ", iVariable, iDimension);
+				++itCol;
+				++itRow;
+				++itValue;
+				DEBUG_PRINT("*itRow = %d, *itCol = %d, *itValue = %lf", *itRow,
+							*itCol, *itValue);
 				if (itValue == values.end())
 					break;
 			}
@@ -107,7 +110,7 @@ static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 }
 
 void printLocalityConstraint(FILE *file, const char *name, Vector3d direction,
-		int iVariable, double bound, bool ifLinfProblem)
+							 int iVariable, double bound, bool ifLinfProblem)
 {
 	fprintf(file, " %s%i: ", name, iVariable);
 	printSignedValue(direction.x, file);
@@ -122,8 +125,8 @@ void printLocalityConstraint(FILE *file, const char *name, Vector3d direction,
 	fprintf(file, " >= %.16lf\n", bound);
 }
 
-void printLinfLocalityConstraints(std::vector<Vector3d> directions,
-		VectorXd h, FILE *file)
+void printLinfLocalityConstraints(std::vector<Vector3d> directions, VectorXd h,
+								  FILE *file)
 {
 	DEBUG_START;
 	int numDirections = directions.size();
@@ -136,8 +139,8 @@ void printLinfLocalityConstraints(std::vector<Vector3d> directions,
 	DEBUG_END;
 }
 
-void printL1L2LocalityConstraints(std::vector<Vector3d> directions,
-		VectorXd h, FILE *file)
+void printL1L2LocalityConstraints(std::vector<Vector3d> directions, VectorXd h,
+								  FILE *file)
 {
 	DEBUG_START;
 	int numDirections = directions.size();
@@ -162,17 +165,17 @@ static void printVariableBounds(int numDirections, FILE *file)
 }
 
 static void printLinfProblem(SupportFunctionEstimationDataPtr data,
-		char *file_name)
+							 char *file_name)
 {
 	DEBUG_START;
-	FILE *file = (FILE*) fopen(file_name, "w");
+	FILE *file = (FILE *)fopen(file_name, "w");
 	fprintf(file, "\\Problem name: cplex-problem.lp\n\n");
 	fprintf(file, "Minimize\n");
 	fprintf(file, " obj: v\n");
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printLinfLocalityConstraints(data->supportDirections(),
-			data->supportVector(), file);
+								 data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	printVariableBounds(data->numValues() / 3, file);
 	fprintf(file, " 0 <= v <= %.16lf\n", data->startingEpsilon());
@@ -182,7 +185,7 @@ static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 }
 
 static void printL1L2EpsilonBounds(double epsilon, int numDirections,
-	FILE *file)
+								   FILE *file)
 {
 	DEBUG_START;
 	for (int i = 0; i < numDirections; ++i)
@@ -193,10 +196,10 @@ static void printL1L2EpsilonBounds(double epsilon, int numDirections,
 }
 
 static void printL1Problem(SupportFunctionEstimationDataPtr data,
-		char *file_name)
+						   char *file_name)
 {
 	DEBUG_START;
-	FILE *file = (FILE*) fopen(file_name, "w");
+	FILE *file = (FILE *)fopen(file_name, "w");
 	fprintf(file, "\\Problem name: cplex-problem.lp\n\n");
 	fprintf(file, "Minimize\n");
 	fprintf(file, " obj: ");
@@ -209,7 +212,7 @@ static void printL1Problem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printL1L2LocalityConstraints(data->supportDirections(),
-			data->supportVector(), file);
+								 data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	printVariableBounds(numDirections, file);
 	printL1L2EpsilonBounds(data->startingEpsilon(), numDirections, file);
@@ -219,10 +222,10 @@ static void printL1Problem(SupportFunctionEstimationDataPtr data,
 }
 
 static void printL2Problem(SupportFunctionEstimationDataPtr data,
-		char *file_name)
+						   char *file_name)
 {
 	DEBUG_START;
-	FILE *file = (FILE*) fopen(file_name, "w");
+	FILE *file = (FILE *)fopen(file_name, "w");
 	fprintf(file, "\\Problem name: cplex-problem.lp\n\n");
 	fprintf(file, "Minimize\n");
 	fprintf(file, " obj: [ ");
@@ -235,7 +238,7 @@ static void printL2Problem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
 	printL1L2LocalityConstraints(data->supportDirections(),
-			data->supportVector(), file);
+								 data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	printVariableBounds(numDirections, file);
 	printL1L2EpsilonBounds(data->startingEpsilon(), numDirections, file);
@@ -267,17 +270,14 @@ VectorXd CPLEXSupportFunctionEstimator::run(void)
 	}
 
 	/* TODO: it's too hard-code solution! */
-	char *command = (char*) malloc(1024 * sizeof(char));
+	char *command = (char *)malloc(1024 * sizeof(char));
 	char *solution_file_name = strdup("/tmp/solution.txt");
 	unlink(solution_file_name);
 	unlink("/tmp/solution.xml");
-	sprintf(command,
-		"%s/Scripts/run_cplex_solver.sh %s %s %s",
-		SOURCE_DIR, problem_file_name, "/tmp/solution.xml",
-		solution_file_name);
+	sprintf(command, "%s/Scripts/run_cplex_solver.sh %s %s %s", SOURCE_DIR,
+			problem_file_name, "/tmp/solution.xml", solution_file_name);
 	int result = system(command);
-	std::cerr << "CPLEX solver wrapper script returned " << result
-		<< std::endl;
+	std::cerr << "CPLEX solver wrapper script returned " << result << std::endl;
 
 	FILE *file = fopen(solution_file_name, "r");
 

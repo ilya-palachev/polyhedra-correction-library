@@ -45,28 +45,27 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 		ERROR_PRINT("Failed to read the number of edges");
 		return false;
 	}
-	std::cout << "Edge infos number: " << numEdges << std::endl; 
+	std::cout << "Edge infos number: " << numEdges << std::endl;
 
 	for (unsigned iEdge = 0; iEdge < numEdges; ++iEdge)
 	{
 		EdgeInfo info;
 		line = scaner.getline();
 		unsigned isReady = 0;
-		if (!line || sscanf(line, "%u %u %u %lf", &info.id, &isReady,
-			&info.type, &info.weight) != 4 || info.id != iEdge)
+		if (!line ||
+			sscanf(line, "%u %u %u %lf", &info.id, &isReady, &info.type,
+				   &info.weight) != 4 ||
+			info.id != iEdge)
 		{
 			ERROR_PRINT("Wrong format, edge header #%d", iEdge);
 			std::cout << "Line: " << line << std::endl;
-			std::cout << "Length of line: " << strlen(line)
-				<< std::endl;
+			std::cout << "Length of line: " << strlen(line) << std::endl;
 			return false;
 		}
 		info.isReady = (isReady != 0);
 
 		line = scaner.getline();
-		if (!line || sscanf(line, "%u %u", &info.facetID1,
-					&info.facetID2)
-			!= 2)
+		if (!line || sscanf(line, "%u %u", &info.facetID1, &info.facetID2) != 2)
 		{
 			ERROR_PRINT("Wrong format, edge facet IDs #%d", iEdge);
 			return false;
@@ -77,7 +76,8 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 		if (!line || sscanf(line, "%lf %lf %lf", &x, &y, &z) != 3)
 		{
 			ERROR_PRINT("Wrong format, edge #%d's 1st correcting "
-				"vertex", iEdge);
+						"vertex",
+						iEdge);
 			return false;
 		}
 		Point_3 source(x, y, z);
@@ -86,7 +86,8 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 		if (!line || sscanf(line, "%lf %lf %lf", &x, &y, &z) != 3)
 		{
 			ERROR_PRINT("Wrong format, edge #%d's 2st correcting "
-				"vertex", iEdge);
+						"vertex",
+						iEdge);
 			return false;
 		}
 		Point_3 destination(x, y, z);
@@ -97,8 +98,7 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 		unsigned numPlanes = 0;
 		if (!line || sscanf(line, "%u", &numPlanes) != 1)
 		{
-			ERROR_PRINT("Wrong format, edge #%d's planes number",
-					iEdge);
+			ERROR_PRINT("Wrong format, edge #%d's planes number", iEdge);
 			return false;
 		}
 
@@ -108,16 +108,14 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 			double a, b, c, d;
 			unsigned type = 0;
 			double weight = 0.;
-			if (!line || sscanf(line, "%u %lf %lf %lf %lf %lf",
-				&type, &weight, &a, &b, &c, &d) != 6)
+			if (!line || sscanf(line, "%u %lf %lf %lf %lf %lf", &type, &weight,
+								&a, &b, &c, &d) != 6)
 			{
-				ERROR_PRINT("Wrong format, edge %d, plane %d",
-						iEdge, iPlane);
+				ERROR_PRINT("Wrong format, edge %d, plane %d", iEdge, iPlane);
 				return false;
 			}
 			EdgePlane_3 plane(a, b, c, d);
-			plane.type = static_cast<EdgePlane_3::EdgePlaneType>(
-					type);
+			plane.type = static_cast<EdgePlane_3::EdgePlaneType>(type);
 			plane.weight = weight;
 			info.planes.push_back(plane);
 		}
@@ -151,12 +149,12 @@ bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data)
 
 			++circulator;
 
-		} while(circulator != finish);
+		} while (circulator != finish);
 
 		if (!found)
 		{
-			std::cerr << "Failed to find initial edge for info #"
-				<< iInfo << std::endl;
+			std::cerr << "Failed to find initial edge for info #" << iInfo
+					  << std::endl;
 			return false;
 		}
 
@@ -170,4 +168,3 @@ bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data)
 
 	return true;
 }
-

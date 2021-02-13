@@ -24,7 +24,7 @@
  */
 
 #ifndef SCONTOUR_H
-#define	SCONTOUR_H
+#define SCONTOUR_H
 
 #include <cstdio>
 #include <memory>
@@ -67,7 +67,7 @@ public:
 	PolyhedronPtr poly;
 
 	/** The array of contour sides. */
-	SideOfContour* sides;
+	SideOfContour *sides;
 
 	/* Implemented in file SContour.cpp:*/
 
@@ -79,7 +79,7 @@ public:
 	 *
 	 * @param orig	The original contour.
 	 */
-	SContour(const SContour& orig);
+	SContour(const SContour &orig);
 
 	/**
 	 * Creates shadow contour from the std::vector of its points and from its
@@ -95,21 +95,21 @@ public:
 	 *
 	 * @param scontour  The original contour.
 	 */
-	SContour& operator =(const SContour& scontour);
+	SContour &operator=(const SContour &scontour);
 
 	/**
 	 * The equality operator.
 	 *
 	 * @param scontour  The second contour.
 	 */
-	bool operator ==(const SContour& scontour) const;
+	bool operator==(const SContour &scontour) const;
 
 	/**
 	 * The inequality operator.
 	 *
 	 * @param scontour  The second contour.
 	 */
-	bool operator !=(const SContour& scontour) const;
+	bool operator!=(const SContour &scontour) const;
 
 	/**
 	 * Convexifies the contour and returns the convexified version of it.
@@ -123,14 +123,14 @@ public:
 	 *
 	 * @param file	The file descriptor
 	 */
-	void my_fprint(FILE* file);
+	void my_fprint(FILE *file);
 
 	/**
 	 * Dumps standard output form of contour to the file descriptor.
 	 *
 	 * @param file	The file descriptor
 	 */
-	void fprintDefault(FILE* file);
+	void fprintDefault(FILE *file);
 
 	/**
 	 * Gets the std::vector of all points of the contour (all non-equal
@@ -139,5 +139,4 @@ public:
 	std::vector<Vector3d> getPoints();
 };
 
-#endif	/* SCONTOUR_H */
-
+#endif /* SCONTOUR_H */
