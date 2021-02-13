@@ -423,14 +423,23 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
-		MatrixXd A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+		MatrixXd A(3, numLiftingDimensions);
         if (getenv("USE_STARTING_BODY"))
         {
+            std::cout << A << std::endl;
             ASSERT(!startingBody.empty());
+            int i = 0;
             for (auto point : startingBody)
-                A << toEigenVector(point);
+                A.col(i++) = toEigenVector(point);
+            std::cout << A << std::endl;
+            std::cout << A.coeff(0, 0) << " " << startingBody[0].x << std::endl;
             ASSERT(A.coeff(0, 0) == startingBody[0].x);
         }
+        else
+        {
+            A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+        }
+        std::cout << "Allocating Anew" << std::endl;
 		MatrixXd Anew = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
@@ -440,7 +449,9 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
 			unsigned size = 3 * numLiftingDimensions;
+            std::cout << "Allocating " << size << "x" << size << " matrix" << std::endl;
 			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
+            std::cout << "Allocated";
 			ASSERT(isFinite(matrix));
 			VectorXd Alinearized = matrixToVector(A);
 			VectorXd vector = regularizer * Alinearized;

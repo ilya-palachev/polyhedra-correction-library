@@ -188,6 +188,7 @@ set(COMMON_FLAGS "${COMMON_FLAGS} -Wall")
 # Enable rounding math option (required by CGAL):
 # TODO: For ICC we need to set -fp-model here.
 set(COMMON_FLAGS "${COMMON_FLAGS} -frounding-math")
+set(COMMON_FLAGS "${COMMON_FLAGS} -g")
 
 message("Compiler is ${CMAKE_C_COMPILER}")
 if (${CMAKE_C_COMPILER} MATCHES ".*clang")
