@@ -435,20 +435,23 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		MatrixXd A(3, numLiftingDimensions);
 		if (getenv("USE_STARTING_BODY"))
 		{
-			std::cout << A << std::endl;
 			ASSERT(!startingBody.empty());
 			int i = 0;
+			std::cout << startingBody.size() << " " << A.cols() << std::endl;
+			ASSERT(startingBody.size() == static_cast<unsigned long>(A.cols()));
 			for (auto point : startingBody)
-				A.col(i++) = toEigenVector(point);
-			std::cout << A << std::endl;
-			std::cout << A.coeff(0, 0) << " " << startingBody[0].x << std::endl;
+			{
+				auto p = toEigenVector(point);
+				for (int j = 0; j < 3; ++j)
+					A(i, j) = p(j);
+				++i;
+			}
 			ASSERT(A.coeff(0, 0) == startingBody[0].x);
 		}
 		else
 		{
 			A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		}
-		std::cout << "Allocating Anew" << std::endl;
 		MatrixXd Anew = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
@@ -458,10 +461,7 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
 		{
 			unsigned size = 3 * numLiftingDimensions;
-			std::cout << "Allocating " << size << "x" << size << " matrix"
-					  << std::endl;
 			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
-			std::cout << "Allocated";
 			ASSERT(isFinite(matrix));
 			VectorXd Alinearized = matrixToVector(A);
 			VectorXd vector = regularizer * Alinearized;
@@ -575,7 +575,6 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 		std::cout << "Error on iteration #" << iOuter << ": " << errorBest
 				  << " (current is " << error << ")" << std::endl;
 	}
-
 	std::vector<Point_3> points;
 	for (unsigned i = 0; i < numLiftingDimensions; ++i)
 	{
@@ -718,6 +717,39 @@ double calculateError(SupportFunctionDataPtr a, SupportFunctionDataPtr b)
 	return diff.squaredNorm();
 }
 
+static std::vector<Vector3d>
+makeTrueStartingBody(std::vector<Vector3d> &targetPoints)
+{
+	CGAL::Origin O;
+	Polyhedron_3 hull;
+	std::vector<Point_3> targetPointsCGAL;
+	std::cout << "True points:" << std::endl;
+	for (auto point : targetPoints)
+	{
+		targetPointsCGAL.push_back(O + Vector_3(point));
+		std::cout << point << std::endl;
+	}
+
+	CGAL::convex_hull_3(targetPointsCGAL.begin(), targetPointsCGAL.end(), hull);
+	auto dualHull = dual(hull);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "true-dual.ply") << dualHull;
+	std::set<Vector3d> trueDualPlanes;
+	for (auto I = dualHull.vertices_begin(), E = dualHull.vertices_end();
+		 I != E; ++I)
+	{
+		auto truePoint = Vector3d::fromCGAL(I->point() - O);
+		trueDualPlanes.insert(truePoint);
+	}
+
+	std::cout << "True dual planes:" << std::endl;
+	for (auto truePoint : trueDualPlanes)
+	{
+		std::cout << truePoint << std::endl;
+	}
+
+	return std::vector<Vector3d>(trueDualPlanes.begin(), trueDualPlanes.end());
+}
+
 double fit(unsigned n, std::vector<Vector3d> &directions,
 		   unsigned numLiftingDimensions, unsigned numLiftingDimensionsDual,
 		   std::vector<Vector3d> &targetPoints, const char *title,
@@ -732,15 +764,17 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
+	auto trueStartingBody = makeTrueStartingBody(targetPoints);
+
 	if (getenv("PRIMAL_MODE"))
 	{
 		ASSERT(synthetic);
 		SupportFunctionDataPtr data =
 			generateSupportData(directions, targetPoints, variance);
 
-		auto pair =
-			fitSimplexAffineImage(generateSimplex(numLiftingDimensions), data,
-								  targetPoints, numLiftingDimensions, false);
+		auto pair = fitSimplexAffineImage(generateSimplex(numLiftingDimensions),
+										  data, trueStartingBody,
+										  numLiftingDimensions, false);
 		auto polyhedronAM = pair.first;
 		double error = pair.second;
 		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
@@ -774,7 +808,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
 	auto pair = fitSimplexAffineImage(generateSimplex(numLiftingDimensionsDual),
-									  dualData, targetPoints,
+									  dualData, trueStartingBody,
 									  numLiftingDimensionsDual, false);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
