@@ -201,10 +201,9 @@ double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
 	{
 		auto item = (*data)[i];
 		MatrixXd direction = AT * toEigenVector(item.direction);
-		double diff =
-			calculateSupportFunction(simplexVertices, matrixToVector(direction))
-				.first -
-			item.value;
+		auto vector = matrixToVector(direction);
+		double diff = calculateSupportFunction(simplexVertices, vector).first -
+					  item.value;
 		error += diff * diff;
 	}
 	return error;
@@ -274,10 +273,11 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 			{
 				auto p = toEigenVector(point);
 				for (int j = 0; j < 3; ++j)
-					A(i, j) = p(j);
+					A(j, i) = p(j);
 				++i;
 			}
 			ASSERT(A.coeff(0, 0) == startingBody[0].x);
+			std::cout << "Initial matrix A: " << A << std::endl;
 		}
 		else
 		{
@@ -287,6 +287,8 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
 		double errorInitial = evaluateFit(A, data, simplexVertices);
+		std::cout << "Initial error on outer " << iOuter << ": " << errorInitial
+				  << std::endl;
 		double errorLast = 0.;
 
 		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
@@ -354,10 +356,22 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 
 	Polyhedron_3 result;
 
-	Polyhedron_3 hull;
-	// FIXME: CGAL has a bug: all planes in the hull are the same.
-	CGAL::convex_hull_3(points.begin(), points.end(), hull);
-	result = hull;
+    std::cout << "Making a hull from " << points.size()
+              << " points:" << std::endl;
+    for (auto point : points)
+    {
+        std::cout << "  " << point << std::endl;
+    }
+    Polyhedron_3 hull;
+    // FIXME: CGAL has a bug: all planes in the hull are the same.
+    CGAL::convex_hull_3(points.begin(), points.end(), hull);
+    result = hull;
+    std::cout << "Hull vertices: " << std::endl;
+    for (auto I = hull.vertices_begin(), E = hull.vertices_end(); I != E;
+         ++I)
+    {
+        std::cout << "  " << I->point() << std::endl;
+    }
 
 	return std::make_pair(result, errorBest);
 }
@@ -571,6 +585,8 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
+	std::cout << "Dual polyhedron has " << polyhedronAMdual2.size_of_vertices()
+			  << " vertice vertices" << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual2-recovered.ply")
 		<< polyhedronAMdual2;
 	auto polyhedronAM2 = dual(polyhedronAMdual2);
