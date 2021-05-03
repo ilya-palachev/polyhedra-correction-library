@@ -682,6 +682,30 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 	return error;
 }
 
+struct BodyDescription
+{
+	std::vector<Vector3d> vertices;
+	unsigned numVertices;
+	unsigned numFacets;
+};
+
+BodyDescription makeBody(const char *title)
+{
+	if (!strcmp("cube", title))
+		return {generateLInfinityBall(), 8, 6};
+	else if (!strcmp("cubecut", title))
+		return {generateCubeCut(), 10, 7};
+	else if (!strcmp("octahedron", title))
+		return {generateL1Ball(), 6, 8};
+	else if (!strcmp("dodecahedron", title))
+		return {generateDodecahedron(), 20, 12};
+	else
+	{
+		std::cerr << "Unknown body name: " << title << std::endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
 int runSyntheticCase(char **argv)
 {
 	int n = atoi(argv[1]);
@@ -692,38 +716,8 @@ int runSyntheticCase(char **argv)
 		return EXIT_FAILURE;
 	}
 
-	std::vector<Vector3d> body;
-	unsigned numLiftingDimensions = 0, numLiftingDimensionsDual = 0;
 	const char *title = argv[2];
-	if (!strcmp("cube", title))
-	{
-		body = generateLInfinityBall();
-		numLiftingDimensions = 8;
-		numLiftingDimensionsDual = 6;
-	}
-	else if (!strcmp("cubecut", title))
-	{
-		body = generateCubeCut();
-		numLiftingDimensions = 10;
-		numLiftingDimensionsDual = 7;
-	}
-	else if (!strcmp("octahedron", title))
-	{
-		body = generateL1Ball();
-		numLiftingDimensions = 6;
-		numLiftingDimensionsDual = 8;
-	}
-	else if (!strcmp("dodecahedron", title))
-	{
-		body = generateDodecahedron();
-		numLiftingDimensions = 20;
-		numLiftingDimensionsDual = 12;
-	}
-	else
-	{
-		std::cerr << "Unknown body" << std::endl;
-		return EXIT_FAILURE;
-	}
+	BodyDescription body = makeBody(title);
 
 	const char *linearSolver = argv[3];
 
@@ -733,8 +727,8 @@ int runSyntheticCase(char **argv)
 		auto directions = generateDirections(n);
 
 		double error =
-			fit(n, directions, numLiftingDimensions, numLiftingDimensionsDual,
-				body, title, linearSolver, true, nullptr);
+			fit(n, directions, body.numVertices, body.numFacets,
+				body.vertices, title, linearSolver, true, nullptr);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -744,8 +738,8 @@ int runSyntheticCase(char **argv)
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n_current);
 
-		double error = fit(n_current, directions, numLiftingDimensions,
-						   numLiftingDimensionsDual, body, title, linearSolver,
+		double error = fit(n_current, directions, body.numVertices,
+						   body.numFacets, body.vertices, title, linearSolver,
 						   true, nullptr);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
