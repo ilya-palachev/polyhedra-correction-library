@@ -1,3 +1,3 @@
 #!/bin/bash
 
-clang-format -i $(find {Source,Tests,UnitTests} -regex ".*\.\(cpp\|c\|h\)")
+clang-format-9 -i $(find {Source,Tests,UnitTests} -regex ".*\.\(cpp\|c\|h\)")

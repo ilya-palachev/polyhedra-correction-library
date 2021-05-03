@@ -446,8 +446,8 @@ double GlobalShadowCorrector::calculateFunctional()
 	for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 	{
 		//    	DEBUG_PRINT("Processing edge #%d (%d) = [%d, %d] with info f0 =
-		//    %d, " 			"f1 = %d", iEdge, edge->id, edge->v0, edge->v1, edge->f0,
-		//    			edge->f1);
+		//    %d, " 			"f1 = %d", iEdge, edge->id, edge->v0, edge->v1,
+		//    edge->f0, 			edge->f1);
 		int f0 = edge->f0;
 		int f1 = edge->f1;
 
@@ -495,9 +495,9 @@ double GlobalShadowCorrector::calculateFunctional()
 			double enumerator = -planePrev1.norm * planeOfProjection.norm;
 			double denominator =
 				(planePrev0.norm - planePrev1.norm) * planeOfProjection.norm;
-			//			DEBUG_PRINT("iEdge = %d (%d, %d), iContour = %d | enu = %lf,
-			//den = %lf", 					iEdge, edges[iEdge].v0, edges[iEdge].v1,
-			//itCont->indContour, enumerator, denominator);
+			//			DEBUG_PRINT("iEdge = %d (%d, %d), iContour = %d | enu =
+			//%lf, den = %lf", 					iEdge, edges[iEdge].v0,
+			// edges[iEdge].v1, itCont->indContour, enumerator, denominator);
 
 			//			ASSERT(fabs(denominator) > 1e-10);
 			double gamma_ij = enumerator / denominator;

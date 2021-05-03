@@ -137,7 +137,7 @@ PCLSegment_2<R>::point(int i) const
 
 template <class R>
 inline const typename PCLSegment_2<R>::Point_2 &
-PCLSegment_2<R>::operator[](int i) const
+	PCLSegment_2<R>::operator[](int i) const
 {
 	return vertex(i);
 }

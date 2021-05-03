@@ -304,8 +304,7 @@ typedef struct
 	ModeOfRecovererTesting mode;
 
 	/** The string with intput data location. */
-	union
-	{
+	union {
 		struct
 		{
 			/**
