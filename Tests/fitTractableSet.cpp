@@ -221,166 +221,12 @@ bool isFinite(const MatrixXd &M)
 
 unsigned numImplemented = 0;
 unsigned numNonImplemented = 0;
-bool negativeMode = false;
 
-class ConvexAffinePooling
+std::pair<Polyhedron_3, double> fitSimplexAffineImage(
+	const std::vector<VectorXd> &simplexVertices, SupportFunctionDataPtr data,
+	std::vector<Vector3d> startingBody, unsigned numLiftingDimensions)
 {
-	// Input structures:
-	std::vector<VectorXd> simplexVertices;
-	MatrixXd A;
-	bool dualMode;
-
-	// Auxiliary structures:
-	MatrixXd AT;
-	std::vector<Point_3> points;
-	Polyhedron_3 P;
-
-public:
-	ConvexAffinePooling(const std::vector<VectorXd> &simplexVertices,
-						const MatrixXd &A, bool dualMode) :
-		simplexVertices(simplexVertices), A(A), dualMode(dualMode)
-	{
-	}
-
-	void init()
-	{
-		ASSERT(simplexVertices.size() == unsigned(A.cols()));
-		AT = A.transpose();
-
-		if (!dualMode)
-			return;
-
-		for (unsigned i = 0; i < simplexVertices.size(); ++i)
-		{
-			auto point = toCGALPoint(A.col(i));
-			points.push_back(point);
-		}
-		std::vector<Plane_3> planes;
-		for (const auto &point : points)
-		{
-			auto plane = dual(point);
-			planes.push_back(plane);
-		}
-		Polyhedron_3 intersection(planes.begin(), planes.end());
-		P = intersection;
-	}
-
-	std::pair<double, VectorXd> calculateEandDistance(const VectorXd &u)
-	{
-		if (!dualMode)
-		{
-			return calculateSupportFunction(simplexVertices,
-											matrixToVector(AT * u));
-		}
-
-		std::vector<int> goodFacets;
-		std::vector<int> commonVertices;
-		bool initialized = false;
-		Eigen::Vector3d singleAlpha;
-		auto vBest = P.vertices_begin();
-		for (auto v = P.vertices_begin(); v != P.vertices_end(); ++v)
-		{
-			std::vector<int> indices;
-			std::vector<VectorXd> a;
-			auto circulator = v->vertex_begin();
-			do
-			{
-				int id = circulator->facet()->id;
-				ASSERT(id >= 0);
-				ASSERT(unsigned(id) < points.size());
-
-				indices.push_back(id);
-				a.push_back(toEigenVector(points[id]));
-
-				++circulator;
-			} while (circulator != v->vertex_begin());
-
-			MatrixXd M(3, 3);
-			for (unsigned i = 0; i < 3; ++i)
-			{
-				VectorXd column = a[i];
-				for (unsigned j = 0; j < 3; ++j)
-				{
-					M(j, i) = column(j);
-				}
-			}
-			ASSERT(isFinite(M));
-			Eigen::Vector3d alpha = M.inverse() * u;
-			ASSERT(isFinite(alpha));
-
-			bool positive = true;
-			for (unsigned i = 0; i < 3; ++i)
-				if (alpha[i] <= -1e-8)
-					positive = false;
-
-			if (positive)
-			{
-				goodFacets.push_back(v->id);
-				if (!initialized)
-				{
-					commonVertices = indices;
-					initialized = true;
-				}
-				else
-				{
-					std::vector<int> tmp = commonVertices;
-					auto it = std::set_intersection(
-						commonVertices.begin(), commonVertices.end(),
-						indices.begin(), indices.end(), tmp.begin());
-					tmp.resize(it - tmp.begin());
-					commonVertices = tmp;
-				}
-				singleAlpha = alpha;
-				vBest = v;
-			}
-		}
-
-#if 0
-		std::cout << "Number of good facets: " << goodFacets.size()
-			<< ", common vertices: " << commonVertices.size() << std::endl;
-#endif
-
-		VectorXd result = VectorXd::Zero(simplexVertices.size());
-		double distance = 0.;
-		if ((commonVertices.size() == 3 && goodFacets.size() == 1) ||
-			(commonVertices.size() == 2 && goodFacets.size() == 2) ||
-			(commonVertices.size() == 1 && goodFacets.size() > 1))
-		{
-			Eigen::Vector3d alpha = singleAlpha;
-			ASSERT(isFinite(alpha));
-			Plane_3 p = dual(vBest->point());
-			Point_3 norm(p.a(), p.b(), p.c());
-			ASSERT(isFinite(toEigenVector(norm)));
-			double product = toEigenVector(norm).dot(u);
-			distance = -p.d() / product;
-			alpha *= distance;
-			ASSERT(isFinite(alpha));
-
-			for (unsigned i = 0; i < 3; ++i)
-			{
-				result(commonVertices[i]) = alpha(i);
-				// ASSERT(alpha(i) >= -1e-8 * factor);
-			}
-			++numImplemented;
-		}
-		else
-		{
-			// Not implemented yet!
-			++numNonImplemented;
-		}
-
-		return std::make_pair(distance, result);
-	}
-};
-
-std::pair<Polyhedron_3, double>
-fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
-					  SupportFunctionDataPtr data,
-					  std::vector<Vector3d> startingBody,
-					  unsigned numLiftingDimensions, bool dualMode)
-{
-	std::cout << "Starting to fit in " << (dualMode ? "dual" : "primal")
-			  << " mode." << std::endl;
+	std::cout << "Starting to fit in primal mode." << std::endl;
 
 	unsigned numOuterIterations = 100;
 	double numOuterIterationsEnv = -1.;
@@ -466,21 +312,16 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 			VectorXd Alinearized = matrixToVector(A);
 			VectorXd vector = regularizer * Alinearized;
 
-			ConvexAffinePooling pool(simplexVertices, A, dualMode);
-			pool.init();
+			MatrixXd AT = A.transpose();
 			double error = 0.;
 
 			for (unsigned k = 0; k < data->size(); ++k)
 			{
 				double y = (*data)[k].value;
 
-				if (dualMode)
-				{
-					y = 1. / y;
-				}
 				VectorXd u = toEigenVector((*data)[k].direction);
-				std::pair<double, VectorXd> result =
-					pool.calculateEandDistance(u);
+				std::pair<double, VectorXd> result = calculateSupportFunction(
+					simplexVertices, matrixToVector(AT * u));
 				double diff = result.first - y;
 				error += diff * diff;
 				MatrixXd e = result.second;
@@ -583,23 +424,10 @@ fitSimplexAffineImage(const std::vector<VectorXd> &simplexVertices,
 
 	Polyhedron_3 result;
 
-	if (dualMode)
-	{
-		std::vector<Plane_3> planes;
-		for (const auto &point : points)
-		{
-			planes.push_back(dual(point));
-		}
-		Polyhedron_3 intersection(planes.begin(), planes.end());
-		result = intersection;
-	}
-	else
-	{
-		Polyhedron_3 hull;
-		// FIXME: CGAL has a bug: all planes in the hull are the same.
-		CGAL::convex_hull_3(points.begin(), points.end(), hull);
-		result = hull;
-	}
+	Polyhedron_3 hull;
+	// FIXME: CGAL has a bug: all planes in the hull are the same.
+	CGAL::convex_hull_3(points.begin(), points.end(), hull);
+	result = hull;
 
 	return std::make_pair(result, errorBest);
 }
@@ -772,9 +600,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 		SupportFunctionDataPtr data =
 			generateSupportData(directions, targetPoints, variance);
 
-		auto pair = fitSimplexAffineImage(generateSimplex(numLiftingDimensions),
-										  data, trueStartingBody,
-										  numLiftingDimensions, false);
+		auto pair =
+			fitSimplexAffineImage(generateSimplex(numLiftingDimensions), data,
+								  trueStartingBody, numLiftingDimensions);
 		auto polyhedronAM = pair.first;
 		double error = pair.second;
 		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
@@ -809,7 +637,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 	auto pair = fitSimplexAffineImage(generateSimplex(numLiftingDimensionsDual),
 									  dualData, trueStartingBody,
-									  numLiftingDimensionsDual, false);
+									  numLiftingDimensionsDual);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
