@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sys/time.h>
 
 #include "DebugPrint.h"
 #include "DebugAssert.h"
@@ -355,3 +356,65 @@ bool ShadowContourData::empty()
 	DEBUG_END;
 	return result;
 }
+
+/**
+ * Generates random number d such that |d| <= maxDelta
+ *
+ * @param maxDelta	maximum absolute limit of generated number
+ */
+static double genRandomDouble(double maxDelta)
+{
+	DEBUG_START;
+	// srand((unsigned) time(0));
+	struct timeval t1;
+	gettimeofday(&t1, NULL);
+	srand(t1.tv_usec * t1.tv_sec);
+
+	int randomInteger = rand();
+	double randomDouble = randomInteger;
+	const double halfRandMax = RAND_MAX * 0.5;
+	randomDouble -= halfRandMax;
+	randomDouble /= halfRandMax;
+
+	randomDouble *= maxDelta;
+
+	DEBUG_END;
+	return randomDouble;
+}
+
+/**
+ * Shifts all points of contours on random double vectors
+ *
+ * @param maxDelta	Maximum delta in shift vectors' coordinates
+ */
+void ShadowContourData::shiftRandomly(double maxDelta)
+{
+	DEBUG_START;
+	for (int iContour = 0; iContour < numContours; ++iContour)
+	{
+		SContour *contour = &contours[iContour];
+		if (contour->ns <= 0)
+			continue;
+
+		for (int iSide = 0; iSide < contour->ns; ++iSide)
+		{
+			SideOfContour *side = &contour->sides[iSide];
+			Vector3d A1_backup DEBUG_VARIABLE = side->A1;
+			side->A1 +=
+				Vector3d(genRandomDouble(maxDelta), genRandomDouble(maxDelta),
+						 genRandomDouble(maxDelta));
+			DEBUG_PRINT("shift: (%lf, %lf, %lf) -> "
+						"(%lf, %lf, %lf)",
+						A1_backup.x, A1_backup.y, A1_backup.z, side->A1.x,
+						side->A1.y, side->A1.z);
+			side->A1 = contour->plane.project(side->A1);
+		}
+		for (int iSide = 0; iSide < contour->ns - 1; ++iSide)
+		{
+			contour->sides[iSide].A2 = contour->sides[iSide + 1].A1;
+		}
+		contour->sides[contour->ns - 1].A2 = contour->sides[0].A1;
+	}
+	DEBUG_END;
+}
+

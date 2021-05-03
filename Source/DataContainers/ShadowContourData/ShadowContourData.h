@@ -181,6 +181,13 @@ public:
 	 * @return true/false if data is empty or not.
 	 */
 	bool empty();
+
+	/**
+	 * Shifts all points of contours on random double vectors
+	 *
+	 * @param maxDelta	Maximum delta in shift vectors' coordinates
+	 */
+	void shiftRandomly(double maxDelta);
 };
 
 #endif /* SHADECONTOURDATA_H_ */
