@@ -247,27 +247,12 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 	double regularizer = 0.5;
 	tryGetenvDouble("REGULARIZER", regularizer);
 
-	double eta = 1.;
-	tryGetenvDouble("ETA", eta);
-
-	double beta = 0.8;
-	tryGetenvDouble("BETA", beta);
-
 	std::cout << "The following hyperparameters are used:" << std::endl;
 	std::cout << "  Number of outer iterations: " << numOuterIterations
 			  << std::endl;
 	std::cout << "  Number of inner iterations: " << numInnerIterations
 			  << std::endl;
-	if (getenv("GRADIENT_DESCENT"))
-	{
-		std::cout << "                         Eta: " << eta << std::endl;
-		std::cout << "                        Beta: " << beta << std::endl;
-	}
-	else
-	{
-		std::cout << "                 Regularizer: " << regularizer
-				  << std::endl;
-	}
+	std::cout << "                 Regularizer: " << regularizer << std::endl;
 
 	double errorBest = -1.;
 	MatrixXd Abest;
@@ -327,68 +312,13 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 				MatrixXd e = result.second;
 				ASSERT(isFinite(e));
 				VectorXd V = matrixToVector(u * e.transpose());
-				if (getenv("GRADIENT_DESCENT"))
-				{
-					vector += V * diff;
-				}
-				else
-				{
-					MatrixXd VT = V.transpose();
-					ASSERT(isFinite(VT));
-					vector += V * y;
-					matrix += V * VT;
-				}
+				MatrixXd VT = V.transpose();
+				ASSERT(isFinite(VT));
+				vector += V * y;
+				matrix += V * VT;
 			}
 
-			if (getenv("GRADIENT_DESCENT"))
-			{
-				double eta_current = eta;
-				double square = vector.norm();
-				square *= square;
-				double error_first = evaluateFit(A, data, simplexVertices);
-				double error_new = error_first;
-				int n_iterations = 0;
-
-				if (getenv("DEBUG_AM"))
-				{
-					std::cout << "  error initial " << error << std::endl;
-					std::cout << "  error first " << error_first << std::endl;
-					std::cout << "  square " << square << std::endl;
-				}
-
-				do
-				{
-					n_iterations += 1;
-
-					Anew =
-						Eigen::Map<MatrixXd>(A.data(), 3, numLiftingDimensions);
-					ASSERT(Anew.rows() == 3);
-					ASSERT(Anew.cols() == numLiftingDimensions);
-					Anew -= eta_current * vector;
-
-					error_new = evaluateFit(Anew, data, simplexVertices);
-					if (getenv("DEBUG_AM"))
-					{
-						double distance = (A - Anew).norm();
-						std::cout << "    distance " << distance << std::endl;
-						std::cout << "    error " << error_new << std::endl;
-						std::cout << "    error first "
-								  << evaluateFit(A, data, simplexVertices)
-								  << std::endl;
-						std::cout << std::endl;
-					}
-					if (error_new <= error_first - 0.5 * eta_current * square)
-						break;
-					eta_current *= beta;
-				} while (eta_current > 1e-16);
-				error = error_new;
-				if (getenv("DEBUG_AM"))
-					std::cout << "  iterations:" << n_iterations << std::endl;
-			}
-			else
-			{
-				Anew = matrix.inverse() * vector;
-			}
+			Anew = matrix.inverse() * vector;
 			ASSERT(isFinite(Anew));
 
 			A = Eigen::Map<MatrixXd>(Anew.data(), 3, numLiftingDimensions);
