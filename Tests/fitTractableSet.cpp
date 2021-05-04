@@ -748,6 +748,50 @@ int runSyntheticCase(char **argv)
 	return EXIT_SUCCESS;
 }
 
+ShadowContourDataPtr generateSyntheticSCData(int n,
+											 std::vector<Vector3d> points)
+{
+	Polyhedron_3 hull;
+	// FIXME: CGAL has a bug: all planes in the hull are the same.
+	std::vector<Point_3> pointsCGAL;
+	for (auto point : points)
+		pointsCGAL.push_back(point);
+	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), hull);
+
+	PolyhedronPtr p(new Polyhedron(hull));
+	ASSERT(p->nonZeroPlanes());
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
+	ASSERT(p->nonZeroPlanes());
+	ShadowContourConstructorPtr constructor(
+		new ShadowContourConstructor(p, SCData));
+	constructor->run(n, 0.);
+	ASSERT(!SCData->empty());
+
+	double variance = 0.01;
+	tryGetenvDouble("NOISE_VARIANCE", variance);
+
+	SCData->shiftRandomly(variance);
+	ASSERT(!SCData->empty());
+	return SCData;
+}
+
+int runSyntheticContourCase(char **argv)
+{
+	int n = atoi(argv[1]);
+
+	if (n <= 0)
+	{
+		std::cerr << "Expected positive number of measurements" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	const char *title = argv[2];
+	BodyDescription body = makeBody(title);
+	auto contourData = generateSyntheticSCData(n, body.vertices);
+
+	return EXIT_SUCCESS;
+}
+
 int runRealCase(char **argv)
 {
 	const char *path = argv[1];
@@ -797,6 +841,8 @@ int runRealCase(char **argv)
 
 int main(int argc, char **argv)
 {
+	if (argc == 3)
+		return runSyntheticContourCase(argv);
 	if (argc == 4)
 		return runSyntheticCase(argv);
 	if (argc == 5)
