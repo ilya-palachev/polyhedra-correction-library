@@ -748,33 +748,6 @@ int runSyntheticCase(char **argv)
 	return EXIT_SUCCESS;
 }
 
-ShadowContourDataPtr generateSyntheticSCData(int n,
-											 std::vector<Vector3d> points)
-{
-	Polyhedron_3 hull;
-	// FIXME: CGAL has a bug: all planes in the hull are the same.
-	std::vector<Point_3> pointsCGAL;
-	for (auto point : points)
-		pointsCGAL.push_back(point);
-	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), hull);
-
-	PolyhedronPtr p(new Polyhedron(hull));
-	ASSERT(p->nonZeroPlanes());
-	ShadowContourDataPtr SCData(new ShadowContourData(p));
-	ASSERT(p->nonZeroPlanes());
-	ShadowContourConstructorPtr constructor(
-		new ShadowContourConstructor(p, SCData));
-	constructor->run(n, 0.);
-	ASSERT(!SCData->empty());
-
-	double variance = 0.01;
-	tryGetenvDouble("NOISE_VARIANCE", variance);
-
-	SCData->shiftRandomly(variance);
-	ASSERT(!SCData->empty());
-	return SCData;
-}
-
 int runSyntheticContourCase(char **argv)
 {
 	int n = atoi(argv[1]);
@@ -787,13 +760,35 @@ int runSyntheticContourCase(char **argv)
 
 	const char *title = argv[2];
 	BodyDescription body = makeBody(title);
-	auto contourData = generateSyntheticSCData(n, body.vertices);
+
+	Polyhedron_3 hull;
+	// FIXME: CGAL has a bug: all planes in the hull are the same.
+	std::vector<Point_3> pointsCGAL;
+	for (auto point : body.vertices)
+		pointsCGAL.push_back(point);
+	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), hull);
+
+	PolyhedronPtr p(new Polyhedron(hull));
+	p->set_parent_polyhedron_in_facets();
+	ASSERT(p->nonZeroPlanes());
+	ShadowContourDataPtr SCData(new ShadowContourData(p));
+	ASSERT(p->nonZeroPlanes());
+	ShadowContourConstructorPtr shadowConstructor(
+		new ShadowContourConstructor(p, SCData));
+	shadowConstructor->run(n, 0.);
+	ASSERT(!SCData->empty());
+
+	double variance = 0.01;
+	tryGetenvDouble("NOISE_VARIANCE", variance);
+
+	SCData->shiftRandomly(variance);
+	ASSERT(!SCData->empty());
 
 	SupportFunctionDataConstructor constructor;
 
 	constructor.enableBalanceShadowContours();
 	constructor.enableConvexifyShadowContour();
-	SupportFunctionDataPtr data = constructor.run(contourData, contourData->numContours);
+	SupportFunctionDataPtr data = constructor.run(SCData, SCData->numContours);
 	Vector3d balancingVector = constructor.balancingVector();
 
 	auto directions = data->supportDirections<Vector3d>();
