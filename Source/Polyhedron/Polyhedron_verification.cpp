@@ -64,14 +64,17 @@ bool Polyhedron::nonZeroPlanes()
 {
 	DEBUG_START;
 	bool zeroExists = false;
+	std::cerr << "Checking that all planes are non-zero..." << std::endl;
 	for (int i = 0; i < numFacets; ++i)
 	{
+		std::cerr << facets[i].plane << std::endl;
 		if (!facets[i].correctPlane())
 		{
 			DEBUG_PRINT("Plane in facet #%d is zero.", i);
 			zeroExists = true;
 		}
 	}
+	std::cerr << "There are " << (zeroExists ? "some" : "no") << " zero planes" << std::endl;
 	DEBUG_END;
 	return !zeroExists;
 }

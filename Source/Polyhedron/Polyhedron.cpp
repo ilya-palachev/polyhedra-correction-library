@@ -23,6 +23,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Vector3d.h"
+#include "LeastSquaresMethod.h"
 #include "KernelCGAL/KernelCGAL.h"
 #include "KernelCGAL/ItemsIndexed.h"
 #include "Polyhedron/Polyhedron.h"
@@ -129,16 +130,12 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 	 * manual. See example Polyhedron/polyhedron_prog_off.cpp
 	 */
 	int iFacet = 0;
-	auto plane = p.planes_begin();
 	auto facet = p.facets_begin();
 	/* Iterate through the std::lists of planes and facets. */
 	do
 	{
 		facets[iFacet].id = iFacet;
 
-		/* Transform current plane. */
-		facets[iFacet].plane =
-			Plane(Vector3d(plane->a(), plane->b(), plane->c()), plane->d());
 
 		/*
 		 * Iterate through the std::list of halfedges incident to the curent
@@ -160,22 +157,59 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 		 */
 
 		int iFacetVertex = 0;
+		std::vector<Point_3> points;
 		do
 		{
 			facets[iFacet].indVertices[iFacetVertex++] =
 				std::distance(p.vertices_begin(), halfedge->vertex());
+			points.push_back(halfedge->vertex()->point());
 		} while (++halfedge != facet->facet_begin());
 
 		/* Add cycling vertex to avoid assertion during printing. */
 		facets[iFacet].indVertices[facets[iFacet].numVertices] =
 			facets[iFacet].indVertices[0];
 
+		/* Transform current plane. */
+		auto plane = facet->plane();
+		facets[iFacet].plane =
+			Plane(Vector3d(plane.a(), plane.b(), plane.c()), plane.d());
+
+		// FIXME: Extract this common method
+		if (!facets[iFacet].correctPlane())
+		{
+			ASSERT(points.size() >= 3);
+
+			unsigned nv = points.size();
+			double *x = new double[nv];
+			double *y = new double[nv];
+			double *z = new double[nv];
+
+			for (unsigned i = 0; i < nv; ++i)
+			{
+				x[i] = points[i].x();
+				y[i] = points[i].y();
+				z[i] = points[i].z();
+			}
+
+			double a = 0., b = 0., c = 0., d = 0.;
+			runListSquaresMethod(nv, x, y, z, a, b, c, d);
+
+			facets[iFacet].plane = Plane(Vector3d(a, b, c), d);
+
+			if (x != NULL)
+				delete[] x;
+			if (y != NULL)
+				delete[] y;
+			if (z != NULL)
+				delete[] z;
+		}
 		ASSERT(facets[iFacet].correctPlane());
+		std::cerr << facets[iFacet].plane << std::endl;
 
 		/* Increment the ID of facet. */
 		++iFacet;
 
-	} while (++plane != p.planes_end() && ++facet != p.facets_end());
+	} while (++facet != p.facets_end());
 
 	DEBUG_END;
 }
