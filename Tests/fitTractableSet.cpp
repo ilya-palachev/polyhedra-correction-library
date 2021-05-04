@@ -789,6 +789,25 @@ int runSyntheticContourCase(char **argv)
 	BodyDescription body = makeBody(title);
 	auto contourData = generateSyntheticSCData(n, body.vertices);
 
+	SupportFunctionDataConstructor constructor;
+
+	constructor.enableBalanceShadowContours();
+	constructor.enableConvexifyShadowContour();
+	SupportFunctionDataPtr data = constructor.run(contourData, contourData->numContours);
+	Vector3d balancingVector = constructor.balancingVector();
+
+	auto directions = data->supportDirections<Vector3d>();
+	auto pair = fitSimplexAffineImage(generateSimplex(body.numVertices), data,
+									  body.vertices, body.numVertices);
+	auto polyhedronAM = pair.first;
+	double error = pair.second;
+	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-internediate-recovered.ply")
+		<< polyhedronAM;
+
+	// FIXME: Shift the body back by this vector:
+	std::cout << "Balancing vector: " << balancingVector << std::endl;
+	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
 	return EXIT_SUCCESS;
 }
 
