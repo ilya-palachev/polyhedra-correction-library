@@ -356,22 +356,21 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 
 	Polyhedron_3 result;
 
-    std::cout << "Making a hull from " << points.size()
-              << " points:" << std::endl;
-    for (auto point : points)
-    {
-        std::cout << "  " << point << std::endl;
-    }
-    Polyhedron_3 hull;
-    // FIXME: CGAL has a bug: all planes in the hull are the same.
-    CGAL::convex_hull_3(points.begin(), points.end(), hull);
-    result = hull;
-    std::cout << "Hull vertices: " << std::endl;
-    for (auto I = hull.vertices_begin(), E = hull.vertices_end(); I != E;
-         ++I)
-    {
-        std::cout << "  " << I->point() << std::endl;
-    }
+	std::cout << "Making a hull from " << points.size()
+			  << " points:" << std::endl;
+	for (auto point : points)
+	{
+		std::cout << "  " << point << std::endl;
+	}
+	Polyhedron_3 hull;
+	// FIXME: CGAL has a bug: all planes in the hull are the same.
+	CGAL::convex_hull_3(points.begin(), points.end(), hull);
+	result = hull;
+	std::cout << "Hull vertices: " << std::endl;
+	for (auto I = hull.vertices_begin(), E = hull.vertices_end(); I != E; ++I)
+	{
+		std::cout << "  " << I->point() << std::endl;
+	}
 
 	return std::make_pair(result, errorBest);
 }
@@ -438,18 +437,20 @@ static std::vector<Vector3d> makeInitialBody(std::vector<Vector3d> &directions,
 	auto polyhedron = recoverer->run(noisyData);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "initial-body.ply") << polyhedron;
 
-    auto dualP = dual(polyhedron);
-    std::set<Vector3d> points;
-    CGAL::Origin O;
+	auto dualP = dual(polyhedron);
+	std::set<Vector3d> points;
+	CGAL::Origin O;
 	for (auto I = dualP.vertices_begin(), E = dualP.vertices_end(); I != E; ++I)
 	{
 		auto truePoint = Vector3d::fromCGAL(I->point() - O);
 		points.insert(truePoint);
 	}
-    auto pointsWithoutRepeats = std::vector<Vector3d>(points.begin(), points.end());
-    auto last = std::unique(pointsWithoutRepeats.begin(), pointsWithoutRepeats.end(),
-				[](Vector3d a, Vector3d b) { return length(a - b) < 1e-6; });
-    pointsWithoutRepeats.erase(last, pointsWithoutRepeats.end());
+	auto pointsWithoutRepeats =
+		std::vector<Vector3d>(points.begin(), points.end());
+	auto last = std::unique(
+		pointsWithoutRepeats.begin(), pointsWithoutRepeats.end(),
+		[](Vector3d a, Vector3d b) { return length(a - b) < 1e-6; });
+	pointsWithoutRepeats.erase(last, pointsWithoutRepeats.end());
 
 	for (auto p : pointsWithoutRepeats)
 		std::cout << "Initial point: " << p << std::endl;
@@ -476,7 +477,8 @@ calculateProvisionalEstimate(std::vector<Vector3d> &directions,
 
 	std::cout << "Running Ipopt estimator..." << std::endl;
 	auto polyhedron = recoverer->run(noisyData);
-	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "provisional-estimate.ply") << polyhedron;
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "provisional-estimate.ply")
+		<< polyhedron;
 
 	// Approximate support function evaluations in dual space from the dual
 	// image of the recovered body
@@ -620,10 +622,10 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 			calculateProvisionalEstimate(directions, noisyData, linearSolver);
 	}
 
-    if (getenv("USE_STARTING_BODY") && !getenv("USE_TRUE_STARTING_BODY"))
-    {
-        trueStartingBody = makeInitialBody(directions, noisyData, linearSolver);
-    }
+	if (getenv("USE_STARTING_BODY") && !getenv("USE_TRUE_STARTING_BODY"))
+	{
+		trueStartingBody = makeInitialBody(directions, noisyData, linearSolver);
+	}
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
@@ -726,9 +728,8 @@ int runSyntheticCase(char **argv)
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n);
 
-		double error =
-			fit(n, directions, body.numVertices, body.numFacets,
-				body.vertices, title, linearSolver, true, nullptr);
+		double error = fit(n, directions, body.numVertices, body.numFacets,
+						   body.vertices, title, linearSolver, true, nullptr);
 		std::cout << "RESULT " << n << " " << error << std::endl;
 		return EXIT_SUCCESS;
 	}
@@ -738,9 +739,9 @@ int runSyntheticCase(char **argv)
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections(n_current);
 
-		double error = fit(n_current, directions, body.numVertices,
-						   body.numFacets, body.vertices, title, linearSolver,
-						   true, nullptr);
+		double error =
+			fit(n_current, directions, body.numVertices, body.numFacets,
+				body.vertices, title, linearSolver, true, nullptr);
 		std::cout << "RESULT " << n_current << " " << error << std::endl;
 	}
 
