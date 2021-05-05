@@ -417,4 +417,3 @@ void ShadowContourData::shiftRandomly(double maxDelta)
 	}
 	DEBUG_END;
 }
-
