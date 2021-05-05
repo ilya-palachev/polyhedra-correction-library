@@ -123,8 +123,9 @@ void ShadowContourConstructor::analyzeEdgeVisibility(
 				++numVisible;
 		}
 		std::cout << "Edge [" << edge.v0 << ", " << edge.v1
-				  << "] is visible on " << numVisible << " contours"
-				  << std::endl;
+				  << "] is visible on " << numVisible << " contours; it is "
+				  << "[" << polyhedron->vertices[edge.v0] << ", "
+				  << polyhedron->vertices[edge.v1] << "]" << std::endl;
 	}
 	DEBUG_END;
 }
