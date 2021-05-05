@@ -769,6 +769,9 @@ int runSyntheticContourCase(char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+	globalPCLDumper.setNameBase(title);
+	globalPCLDumper.enableVerboseMode();
+
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
 	ASSERT(p->nonZeroPlanes());
@@ -789,9 +792,6 @@ int runSyntheticContourCase(char **argv)
 	constructor.enableConvexifyShadowContour();
 	SupportFunctionDataPtr data = constructor.run(SCData, SCData->numContours);
 	Vector3d balancingVector = constructor.balancingVector();
-
-	globalPCLDumper.setNameBase(title);
-	globalPCLDumper.enableVerboseMode();
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
