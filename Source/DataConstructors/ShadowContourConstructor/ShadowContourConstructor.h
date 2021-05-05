@@ -53,8 +53,7 @@ private:
 							 Plane planeOfProjection, int ifacet);
 
 public:
-	ShadowContourConstructor(PolyhedronPtr p,
-							 std::shared_ptr<ShadowContourData> d);
+	ShadowContourConstructor(PolyhedronPtr p, ShadowContourDataPtr d);
 	~ShadowContourConstructor();
 	void createContour(int idOfContour, Plane planeOfProjection,
 					   SContour *outputContour);
