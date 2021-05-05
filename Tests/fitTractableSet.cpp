@@ -806,6 +806,14 @@ int runSyntheticContourCase(char **argv)
 	// FIXME: Shift the body back by this vector:
 	std::cout << "Balancing vector: " << balancingVector << std::endl;
 	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
+
+	PolyhedronPtr intermediateP(new Polyhedron(polyhedronAM));
+	intermediateP->set_parent_polyhedron_in_facets();
+	ShadowContourDataPtr fakeData(new ShadowContourData());
+	ShadowContourConstructorPtr visibilityConstructor(
+		new ShadowContourConstructor(intermediateP, fakeData));
+	visibilityConstructor->analyzeEdgeVisibility(SCData);
+
 	return EXIT_SUCCESS;
 }
 
