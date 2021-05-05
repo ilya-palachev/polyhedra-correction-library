@@ -600,108 +600,80 @@ void Polyhedron::fscan_my_format(const char *filename)
 void Polyhedron::fscan_ply(const char *filename)
 {
 	DEBUG_START;
-	int i, j, numv, numf, nv, *index;
-	double xx, yy, zz;
-	char *tmp;
-	Plane plane;
+	std::ifstream infile(filename);
 
-	FILE *file;
-	file = (FILE *)fopen(filename, "rt");
-	if (!file)
+	std::string line;
+	std::getline(infile, line);
+	ASSERT(line == "ply" && "PLY file should start from \"ply\" line");
+
+	std::getline(infile, line);
+	ASSERT(line == "format ascii 1.0" && "Second line should be \"format ascii "
+										 "1.0\", we support only this format");
+
+	while (std::getline(infile, line))
 	{
-		ERROR_PRINT("Error. Cannot open file %s\n", filename);
-		DEBUG_END;
-		return;
-	}
+		std::string keyword;
+		std::istringstream stream(line);
+		stream >> keyword;
+		if (keyword == "comment")
+			continue;
 
-	tmp = new char[255];
-	for (i = 0; i < 11; ++i)
-		if (fscanf(file, "%s", tmp) != 1)
+		if (keyword == "element")
 		{
-			ERROR_PRINT("Error. Invalid file\n");
-			fclose(file);
-			DEBUG_END;
-			return;
+			std::string item;
+			int number = 0;
+			stream >> item >> number;
+			ASSERT(number > 0);
+			if (item == "vertex")
+				numVertices = number;
+			else if (item == "face")
+				numFacets = number;
+			else
+				ASSERT(false && "unknown item");
+			continue;
 		}
 
-	if (fscanf(file, "%d", &nv) != 1)
-	{
-		ERROR_PRINT("Error. Invalid file\n");
-		fclose(file);
-		delete[] tmp;
-		DEBUG_END;
-		return;
+		// TODO: Support variative properties
+		if (keyword == "property")
+			continue;
+
+		if (keyword == "end_header")
+			break;
 	}
-	numv = nv;
+	vertices = new Vector3d[numVertices];
+	facets = new Facet[numFacets];
 
-	for (i = 0; i < 11; ++i)
-		if (fscanf(file, "%s", tmp) != 1)
-		{
-			ERROR_PRINT("Error. Invalid file\n");
-			fclose(file);
-			delete[] tmp;
-			DEBUG_END;
-			return;
-		}
-
-	if (fscanf(file, "%d", &nv) != 1)
+	for (int i = 0; i < numVertices; ++i)
 	{
-		ERROR_PRINT("Error. Invalid file\n");
-		fclose(file);
-		delete[] tmp;
-		DEBUG_END;
-		return;
-	}
-	numf = nv;
-
-	vertices = new Vector3d[2 * numf]; // MORE MEMORY!!!
-	facets = new Facet[numf];
-
-	for (i = 0; i < numv; ++i)
-	{
-		if (fscanf(file, "%lf", &xx) != 1 || fscanf(file, "%lf", &yy) != 1 ||
-			fscanf(file, "%lf", &zz) != 1)
-		{
-			ERROR_PRINT("Error. Invalid file\n");
-			fclose(file);
-			delete[] tmp;
-			DEBUG_END;
-			return;
-		}
+		double xx, yy, zz;
+		std::getline(infile, line);
+		std::istringstream stream(line);
+		stream >> xx >> yy >> zz;
 		vertices[i].x = xx;
 		vertices[i].y = yy;
 		vertices[i].z = zz;
 	}
-	for (i = 0; i < numf; ++i)
+
+	for (int i = 0; i < numFacets; ++i)
 	{
-		if (fscanf(file, "%d", &nv) != 1 || nv < 3)
+		std::getline(infile, line);
+		int number;
+		std::istringstream stream(line);
+		stream >> number;
+		ASSERT(number >= 3);
+
+		int *index = new int[3 * number + 1];
+		for (int j = 0; j < number; ++j)
 		{
-			ERROR_PRINT("Error. Invalid file\n");
-			fclose(file);
-			delete[] tmp;
-			DEBUG_END;
-			return;
+			stream >> index[j];
 		}
-		index = new int[3 * nv + 1];
-		for (j = 0; j < nv; ++j)
-		{
-			if (fscanf(file, "%d", index + j) != 1)
-			{
-				ERROR_PRINT("Error. Invalid file\n");
-				fclose(file);
-				delete[] tmp;
-				delete[] index;
-				DEBUG_END;
-				return;
-			}
-		}
-		plane =
+		index[number] = index[0];
+		// TODO: Read color if any
+		Plane plane =
 			Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
-		facets[i] = Facet(i, nv, plane, index, get_ptr(), false);
+		facets[i] = Facet(i, number, plane, index, get_ptr(), false);
 		delete[] index;
 	}
-	fclose(file);
-	delete[] tmp;
 	DEBUG_END;
 }
 
