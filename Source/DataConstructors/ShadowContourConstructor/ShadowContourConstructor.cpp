@@ -116,6 +116,10 @@ void ShadowContourConstructor::createContour(int idOfContour,
 	DEBUG_PRINT("numEdges = %d", edgeData->numEdges);
 
 	EdgeSet edgesVisible;
+	for (int i = 0; i < polyhedron->numVertices; ++i)
+	{
+		std::cout << polyhedron->vertices[i] << std::endl;
+	}
 
 	int iEdge = 0;
 	for (EdgeSetIterator edge = edgeData->edges.begin();
@@ -152,6 +156,13 @@ void ShadowContourConstructor::createContour(int idOfContour,
 		DEBUG_END;
 		return;
 	}
+
+#ifndef NDEBUG
+	for (auto &edge : edgesVisible)
+	{
+		DEBUG_PRINT("Visible edge: [%ld, %ld]", edge.v0, edge.v1);
+	}
+#endif
 
 	EdgeSetIterator edgeCurr = edgesVisible.begin();
 	int iVertexCurr = edgeCurr->v1;
@@ -233,7 +244,7 @@ bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 	ASSERT(!equal(pi1.norm, Vector3d(0., 0., 0.), EPS_MIN_DOUBLE));
 
 	if ((sign0 > EPS_COLLINEARITY && sign1 > EPS_COLLINEARITY) ||
-		(sign0 < EPS_COLLINEARITY && sign1 < EPS_COLLINEARITY))
+		(sign0 < -EPS_COLLINEARITY && sign1 < -EPS_COLLINEARITY))
 	{
 		DEBUG_PRINT("Edge is invisible: it's covered by facets, "
 					"sign0 = %le, sign1 = %le",
@@ -267,7 +278,8 @@ bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		DEBUG_PRINT("\t\tOnly the first facet is orthogonal "
 					"to the plane of projection");
 		DEBUG_END;
-		return collinearVisibility(v0, v1, planeOfProjection, f0);
+		return collinearVisibility(v0, v1, planeOfProjection, f0) ||
+			   collinearVisibility(v1, v0, planeOfProjection, f0);
 	}
 
 	else // ifOrthogonalTo2ndFacet
@@ -276,7 +288,8 @@ bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		DEBUG_PRINT("\t\tOnly the second facets is orthogonal "
 					"to the plane of projection");
 		DEBUG_END;
-		return collinearVisibility(v0, v1, planeOfProjection, f1);
+		return collinearVisibility(v0, v1, planeOfProjection, f1) ||
+			   collinearVisibility(v1, v0, planeOfProjection, f1);
 	}
 }
 
@@ -286,6 +299,7 @@ bool ShadowContourConstructor::collinearVisibility(int v0processed,
 												   int ifacet)
 {
 	DEBUG_START;
+	polyhedron->facets[ifacet].my_fprint(stdout);
 	int nv = polyhedron->facets[ifacet].numVertices;
 	int *index = polyhedron->facets[ifacet].indVertices;
 	Vector3d nu = planeOfProjection.norm;
