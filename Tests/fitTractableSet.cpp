@@ -759,23 +759,22 @@ int runSyntheticContourCase(char **argv)
 	}
 
 	const char *title = argv[2];
-	BodyDescription body = makeBody(title);
+	PolyhedronPtr p(new Polyhedron());
+	std::string path = "poly-data-in/";
+	path += title;
+	path += ".ply";
+	p->fscan_ply(path.c_str());
+	if (p->numVertices == 0)
+	{
+		exit(EXIT_FAILURE);
+	}
 
-	Polyhedron_3 hull;
-	// FIXME: CGAL has a bug: all planes in the hull are the same.
-	std::vector<Point_3> pointsCGAL;
-	for (auto point : body.vertices)
-		pointsCGAL.push_back(point);
-	CGAL::convex_hull_3(pointsCGAL.begin(), pointsCGAL.end(), hull);
-
-	PolyhedronPtr p(new Polyhedron(hull));
-	p->set_parent_polyhedron_in_facets();
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourConstructorPtr shadowConstructor(
 		new ShadowContourConstructor(p, SCData));
-	shadowConstructor->run(n, 0.);
+	shadowConstructor->run(n, 0.01);
 	ASSERT(!SCData->empty());
 
 	double variance = 0.01;
@@ -792,8 +791,9 @@ int runSyntheticContourCase(char **argv)
 	Vector3d balancingVector = constructor.balancingVector();
 
 	auto directions = data->supportDirections<Vector3d>();
-	auto pair = fitSimplexAffineImage(generateSimplex(body.numVertices), data,
-									  body.vertices, body.numVertices);
+	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
+	auto pair = fitSimplexAffineImage(generateSimplex(p->numVertices), data,
+									  vertices, p->numVertices);
 	auto polyhedronAM = pair.first;
 	double error = pair.second;
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
