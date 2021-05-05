@@ -59,6 +59,7 @@ public:
 	void createContour(int idOfContour, Plane planeOfProjection,
 					   SContour *outputContour);
 	void run(int numContoursNeeded, double firstAngle);
+	void analyzeEdgeVisibility(ShadowContourDataPtr SCData);
 };
 
 typedef std::shared_ptr<ShadowContourConstructor> ShadowContourConstructorPtr;

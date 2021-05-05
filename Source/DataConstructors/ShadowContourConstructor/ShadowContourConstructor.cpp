@@ -103,6 +103,32 @@ void ShadowContourConstructor::run(int numContoursNeeded, double firstAngle)
 	DEBUG_END;
 }
 
+void ShadowContourConstructor::analyzeEdgeVisibility(
+	ShadowContourDataPtr SCData)
+{
+	DEBUG_START;
+	polyhedron->preprocessAdjacency();
+	EdgeConstructor *edgeConstructor = new EdgeConstructor(polyhedron);
+	edgeConstructor->run(edgeData);
+
+	for (const auto &edge : edgeData->edges)
+	{
+		int numVisible = 0;
+		for (int i = 0; i < SCData->numContours; ++i)
+		{
+			SContour contour = SCData->contours[i];
+			Plane plane = contour.plane;
+
+			if (edgeIsVisibleOnPlane(edge, plane))
+				++numVisible;
+		}
+		std::cout << "Edge [" << edge.v0 << ", " << edge.v1
+				  << "] is visible on " << numVisible << " contours"
+				  << std::endl;
+	}
+	DEBUG_END;
+}
+
 void ShadowContourConstructor::createContour(int idOfContour,
 											 Plane planeOfProjection,
 											 SContour *outputContour)
