@@ -136,7 +136,6 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 	{
 		facets[iFacet].id = iFacet;
 
-
 		/*
 		 * Iterate through the std::list of halfedges incident to the curent
 		 * CGAL facet.
@@ -194,6 +193,21 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 			double a = 0., b = 0., c = 0., d = 0.;
 			runListSquaresMethod(nv, x, y, z, a, b, c, d);
 
+			double length = sqrt(a * a + b * b + c * c);
+			a /= length;
+			b /= length;
+			c /= length;
+			d /= length;
+			// FIXME: This is done to keep correct orientation of normals.
+			// However, this is not a correct heuristic in case when origin is
+			// not contained in the interior of the polyhedron.
+			if (d > 0.)
+			{
+				a = -a;
+				b = -b;
+				c = -c;
+				d = -d;
+			}
 			facets[iFacet].plane = Plane(Vector3d(a, b, c), d);
 
 			if (x != NULL)
