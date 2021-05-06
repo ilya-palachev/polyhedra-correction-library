@@ -34,12 +34,12 @@
 
 using Eigen::MatrixXd;
 
-std::vector<Vector3d> generateDirections(int n)
+template <typename VectorT> std::vector<VectorT> generateDirections(int n)
 {
 	std::default_random_engine generator;
 	std::normal_distribution<double> distribution(0., 1.);
 
-	std::vector<Vector3d> directions;
+	std::vector<VectorT> directions;
 	for (int i = 0; i < n; ++i)
 	{
 		double x = 0., y = 0., z = 0., lambda = 0.;
@@ -56,7 +56,7 @@ std::vector<Vector3d> generateDirections(int n)
 		z /= lambda;
 		// Now (x, y, z) is uniformly distributed on the sphere
 
-		Vector3d v(x, y, z);
+		VectorT v(x, y, z);
 		directions.push_back(v);
 	}
 
@@ -754,7 +754,7 @@ int runSyntheticCase(char **argv)
 	if (!getenv("RANGE_MODE"))
 	{
 		std::cout << "Preparing data..." << std::endl;
-		auto directions = generateDirections(n);
+		auto directions = generateDirections<Vector3d>(n);
 
 		double error = fit(n, directions, body.numVertices, body.numFacets,
 						   body.vertices, title, linearSolver, true, nullptr);
@@ -765,7 +765,7 @@ int runSyntheticCase(char **argv)
 	for (int n_current = 10; n_current <= n; n_current += 10)
 	{
 		std::cout << "Preparing data..." << std::endl;
-		auto directions = generateDirections(n_current);
+		auto directions = generateDirections<Vector3d>(n_current);
 
 		double error =
 			fit(n_current, directions, body.numVertices, body.numFacets,
@@ -895,7 +895,9 @@ int runSyntheticContourCase(char **argv)
 	std::string path = "poly-data-in/";
 	path += title;
 	path += ".ply";
+	std::cout << "Scanning PLY file format..." << std::endl;
 	p->fscan_ply(path.c_str());
+	std::cout << "Scanning PLY file format... done" << std::endl;
 	if (p->numVertices == 0)
 	{
 		exit(EXIT_FAILURE);
@@ -909,7 +911,9 @@ int runSyntheticContourCase(char **argv)
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourConstructorPtr shadowConstructor(
 		new ShadowContourConstructor(p, SCData));
+	std::cout << "Constructing contours..." << std::endl;
 	shadowConstructor->run(n, 0.01);
+	std::cout << "Constructing contours... done" << std::endl;
 	ASSERT(!SCData->empty());
 
 	double variance = 0.01;
@@ -936,8 +940,8 @@ int runSyntheticContourCase(char **argv)
 	std::cout << "RESULT on first step: " << directions.size() << " " << error
 			  << std::endl;
 
-	auto segments = collectSharpSegments(polyhedronAM);
-	SupportFunctionDataPtr dualData = makeGaugeFunctionMeasurements(segments);
+	auto otherDirections = generateDirections<Point_3>(data->size());
+	auto dualData = dual(polyhedronAM).calculateSupportData(otherDirections);
 	std::vector<Vector3d> fakeVertices;
 	auto [polyhedronDualAM, errorDual] = fitSimplexAffineImage(
 		generateSimplex(p->numFacets), dualData, fakeVertices, p->numFacets);
