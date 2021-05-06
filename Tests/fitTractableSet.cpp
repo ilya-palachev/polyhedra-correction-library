@@ -776,6 +776,27 @@ int runSyntheticCase(char **argv)
 	return EXIT_SUCCESS;
 }
 
+SupportFunctionDataPtr generateEvenDataFromContours(ShadowContourDataPtr SCData,
+													int n)
+{
+	std::vector<SupportFunctionDataItem> items;
+	for (int i = 0; i < SCData->numContours; ++i)
+	{
+		SContour contour = SCData->contours[i];
+		Plane_3 plane(contour.plane);
+		auto directions = generateCollinearDirections(n, plane);
+		auto points = contour.getPoints();
+		for (Vector3d direction : directions)
+		{
+			double value = calculateSupportFunction(points, direction).first;
+			items.emplace_back(direction, value);
+		}
+	}
+
+	SupportFunctionDataPtr data(new SupportFunctionData(items));
+	return data;
+}
+
 int runSyntheticContourCase(char **argv)
 {
 	int n = atoi(argv[1]);
@@ -814,12 +835,12 @@ int runSyntheticContourCase(char **argv)
 	SCData->shiftRandomly(variance);
 	ASSERT(!SCData->empty());
 
-	SupportFunctionDataConstructor constructor;
-
-	constructor.enableBalanceShadowContours();
-	constructor.enableConvexifyShadowContour();
-	SupportFunctionDataPtr data = constructor.run(SCData, SCData->numContours);
-	Vector3d balancingVector = constructor.balancingVector();
+	unsigned numItemsPerContour = 10;
+	double numItemsPerContourEnv = -1;
+	tryGetenvDouble("N_ITEMS_PER_CONTOUR", numItemsPerContourEnv);
+	if (numItemsPerContourEnv > 0.)
+		numItemsPerContour = static_cast<int>(numItemsPerContourEnv);
+	auto data = generateEvenDataFromContours(SCData, numItemsPerContour);
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
@@ -831,8 +852,6 @@ int runSyntheticContourCase(char **argv)
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-intermediate-recovered.ply")
 		<< polyhedronAM;
 
-	// FIXME: Shift the body back by this vector:
-	std::cout << "Balancing vector: " << balancingVector << std::endl;
 	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
 
 	PolyhedronPtr intermediateP(new Polyhedron(polyhedronAM));
