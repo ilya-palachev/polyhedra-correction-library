@@ -63,6 +63,34 @@ std::vector<Vector3d> generateDirections(int n)
 	return directions;
 }
 
+std::vector<Vector3d> generateCollinearDirections(int n, Plane_3 plane)
+{
+	std::default_random_engine generator;
+	std::normal_distribution<double> distribution(0., 1.);
+
+	std::vector<Vector3d> directions;
+	for (int i = 0; i < n; ++i)
+	{
+		double x = 0., y = 0., lambda = 0.;
+		do
+		{
+			x = distribution(generator);
+			y = distribution(generator);
+			lambda = sqrt(x * x + y * y);
+		} while (lambda < 1e-16);
+
+		x /= lambda;
+		y /= lambda;
+		// Now (x, y) is uniformly distributed on the 2D circle
+
+		Vector_3 v = plane.base1() * x + plane.base2() * y;
+		v /= sqrt(v.squared_length());
+		directions.push_back(Vector3d::fromCGAL(v));
+	}
+
+	return directions;
+}
+
 std::vector<Vector3d> generateL1Ball()
 {
 	std::vector<Vector3d> l1ball;
