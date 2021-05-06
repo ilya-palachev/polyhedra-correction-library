@@ -797,6 +797,89 @@ SupportFunctionDataPtr generateEvenDataFromContours(ShadowContourDataPtr SCData,
 	return data;
 }
 
+struct Plane_equation
+{
+	template <class Facet> typename Facet::Plane_3 operator()(Facet &f)
+	{
+		typename Facet::Halfedge_handle h = f.halfedge();
+		typedef typename Facet::Plane_3 Plane;
+		return Plane(h->vertex()->point(), h->next()->vertex()->point(),
+					 h->next()->next()->vertex()->point());
+	}
+};
+
+void setPlanes(Polyhedron_3 &P)
+{
+	std::transform(P.facets_begin(), P.facets_end(), P.planes_begin(),
+				   Plane_equation());
+}
+
+std::vector<Segment_3> collectSharpSegments(Polyhedron_3 &P)
+{
+	std::vector<Segment_3> segments;
+
+	setPlanes(P);
+	double edgeAngleCosineLimit = 0.99;
+	tryGetenvDouble("EDGE_ANGLE_COSINE_LIMIT", edgeAngleCosineLimit);
+	unsigned numSharp = 0, numSkipped = 0;
+	CGAL::Origin O;
+	for (auto I = P.halfedges_begin(), E = P.halfedges_end(); I != E; ++I)
+	{
+		Vector_3 u = I->facet()->plane().orthogonal_vector();
+		Vector_3 v = I->opposite()->facet()->plane().orthogonal_vector();
+		double cosine = u * v / (sqrt(u * u) * sqrt(v * v));
+		int i = std::distance(P.vertices_begin(), I->vertex());
+		int j = std::distance(P.vertices_begin(), I->opposite()->vertex());
+		bool skip = cosine >= edgeAngleCosineLimit;
+		if (i < j)
+		{
+			std::cout << "Cosine of angle on edge [" << i << ", " << j
+					  << "] is " << cosine << (skip ? " --> skipping" : "")
+					  << std::endl;
+			if (!skip)
+			{
+				segments.emplace_back(O + u, O + v);
+				++numSharp;
+			}
+			else
+			{
+				++numSkipped;
+			}
+		}
+	}
+	std::cout << numSharp << " segments are sharp, other " << numSkipped
+			  << " segments are skipped" << std::endl;
+	return segments;
+}
+
+SupportFunctionDataPtr
+makeGaugeFunctionMeasurements(std::vector<Segment_3> segments)
+{
+	std::vector<SupportFunctionDataItem> items;
+
+	unsigned numMeasurementsPerSegment = 10;
+	double numMeasurementsPerSegmentEnv = -1;
+	tryGetenvDouble("N_MEASUREMENTS_PER_SEGMENT", numMeasurementsPerSegmentEnv);
+	if (numMeasurementsPerSegmentEnv > 0.)
+		numMeasurementsPerSegment =
+			static_cast<int>(numMeasurementsPerSegmentEnv);
+	CGAL::Origin O;
+	for (unsigned i = 0; i < numMeasurementsPerSegment; ++i)
+	{
+		Segment_3 segment = segments[i];
+		Vector_3 source = segment.source() - O;
+		Vector_3 target = segment.target() - O;
+		double alpha = static_cast<double>(i) /
+					   (static_cast<double>(numMeasurementsPerSegment) - 1.);
+		Vector_3 probe = source + alpha * (target - source);
+		double length = sqrt(probe.squared_length());
+		Vector3d direction = Vector3d::fromCGAL(probe / length);
+		items.emplace_back(direction, 1. / length);
+	}
+	SupportFunctionDataPtr data(new SupportFunctionData(items));
+	return data;
+}
+
 int runSyntheticContourCase(char **argv)
 {
 	int n = atoi(argv[1]);
@@ -844,22 +927,27 @@ int runSyntheticContourCase(char **argv)
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
-	auto pair = fitSimplexAffineImage(generateSimplex(p->numVertices), data,
-									  vertices, p->numVertices);
-	auto polyhedronAM = pair.first;
-	double error = pair.second;
+	auto [polyhedronAM, error] = fitSimplexAffineImage(
+		generateSimplex(p->numVertices), data, vertices, p->numVertices);
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-intermediate-recovered.ply")
 		<< polyhedronAM;
 
-	std::cout << "RESULT " << directions.size() << " " << error << std::endl;
+	std::cout << "RESULT on first step: " << directions.size() << " " << error
+			  << std::endl;
 
-	PolyhedronPtr intermediateP(new Polyhedron(polyhedronAM));
-	intermediateP->set_parent_polyhedron_in_facets();
-	ShadowContourDataPtr fakeData(new ShadowContourData());
-	ShadowContourConstructorPtr visibilityConstructor(
-		new ShadowContourConstructor(intermediateP, fakeData));
-	visibilityConstructor->analyzeEdgeVisibility(SCData);
+	auto segments = collectSharpSegments(polyhedronAM);
+	SupportFunctionDataPtr dualData = makeGaugeFunctionMeasurements(segments);
+	std::vector<Vector3d> fakeVertices;
+	auto [polyhedronDualAM, errorDual] = fitSimplexAffineImage(
+		generateSimplex(p->numFacets), dualData, fakeVertices, p->numFacets);
+	std::cout << "Algorithm error (sum of squares): " << errorDual << std::endl;
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply")
+		<< polyhedronDualAM;
+
+	Polyhedron_3 polyhedronTopologyAM = dual(polyhedronDualAM);
+	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-topology-recovered.ply")
+		<< polyhedronTopologyAM;
 
 	return EXIT_SUCCESS;
 }
