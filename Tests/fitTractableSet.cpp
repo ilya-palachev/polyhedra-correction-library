@@ -890,6 +890,8 @@ int runSyntheticContourCase(char **argv)
 		return EXIT_FAILURE;
 	}
 
+    // 1. Read the model of 3D polyhedron from the PLY file
+
 	const char *title = argv[2];
 	PolyhedronPtr p(new Polyhedron());
 	std::string path = "poly-data-in/";
@@ -906,13 +908,15 @@ int runSyntheticContourCase(char **argv)
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
+    // 2. Generate shadow contours from the polyhedron with error `variance`
+
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourConstructorPtr shadowConstructor(
 		new ShadowContourConstructor(p, SCData));
 	std::cout << "Constructing contours..." << std::endl;
-	shadowConstructor->run(n, 0.01);
+	shadowConstructor->run(n, 0.01);  // this is angle, not error
 	std::cout << "Constructing contours... done" << std::endl;
 	ASSERT(!SCData->empty());
 
@@ -922,12 +926,16 @@ int runSyntheticContourCase(char **argv)
 	SCData->shiftRandomly(variance);
 	ASSERT(!SCData->empty());
 
+    // 3. Generate EVEN support function measurements from the shadow contours
+
 	unsigned numItemsPerContour = 10;
 	double numItemsPerContourEnv = -1;
 	tryGetenvDouble("N_ITEMS_PER_CONTOUR", numItemsPerContourEnv);
 	if (numItemsPerContourEnv > 0.)
 		numItemsPerContour = static_cast<int>(numItemsPerContourEnv);
 	auto data = generateEvenDataFromContours(SCData, numItemsPerContour);
+
+    // 4. Run the AM algorithm in the primal space, considering the number of vertices to be known
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
@@ -940,14 +948,26 @@ int runSyntheticContourCase(char **argv)
 	std::cout << "RESULT on first step: " << directions.size() << " " << error
 			  << std::endl;
 
-	auto otherDirections = generateDirections<Point_3>(data->size());
+    // 5. Produce the gauge function data from the primal-AM-recovered body
+
+	// NOTA BENE: These are new directions!!! It is very crucial for the quality
+	// of results produced by the AM algorithm
+	auto otherDirections = generateDirections<Point_3>(
+		data->size());
 	auto dualData = dual(polyhedronAM).calculateSupportData(otherDirections);
+
+	// 6. Run the AM algorithm in the dual space, using the produced gauge
+	// function measurements
+
 	std::vector<Vector3d> fakeVertices;
 	auto [polyhedronDualAM, errorDual] = fitSimplexAffineImage(
 		generateSimplex(p->numFacets), dualData, fakeVertices, p->numFacets);
 	std::cout << "Algorithm error (sum of squares): " << errorDual << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply")
 		<< polyhedronDualAM;
+
+	// 7. Convert the body form the dual space back to the primal space to
+	// obtain the body with the proper topology of spaces and vertices
 
 	Polyhedron_3 polyhedronTopologyAM = dual(polyhedronDualAM);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-topology-recovered.ply")
