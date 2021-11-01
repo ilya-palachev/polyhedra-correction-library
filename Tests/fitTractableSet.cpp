@@ -249,9 +249,22 @@ bool isFinite(const MatrixXd &M)
 unsigned numImplemented = 0;
 unsigned numNonImplemented = 0;
 
-std::pair<Polyhedron_3, double> fitSimplexAffineImage(
-	const std::vector<VectorXd> &simplexVertices, SupportFunctionDataPtr data,
-	std::vector<Vector3d> startingBody, unsigned numLiftingDimensions)
+static std::vector<VectorXd> generateSimplex(unsigned n)
+{
+	std::vector<VectorXd> vertices;
+	for (unsigned i = 0; i < n; ++i)
+	{
+		VectorXd v = VectorXd::Zero(n);
+		v(i) = 1.;
+		vertices.push_back(v);
+	}
+	return vertices;
+}
+
+std::pair<Polyhedron_3, double>
+fitSimplexAffineImage(SupportFunctionDataPtr data,
+					  std::vector<Vector3d> startingBody,
+					  unsigned numLiftingDimensions)
 {
 	std::cout << "Starting to fit in primal mode." << std::endl;
 
@@ -287,6 +300,8 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 	std::default_random_engine generator;
 	std::normal_distribution<double> distribution(0., 1.);
 	auto normal = [&](int) { return distribution(generator); };
+
+    auto simplexVertices = generateSimplex(numLiftingDimensions);
 
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
@@ -401,18 +416,6 @@ std::pair<Polyhedron_3, double> fitSimplexAffineImage(
 	}
 
 	return std::make_pair(result, errorBest);
-}
-
-static std::vector<VectorXd> generateSimplex(unsigned n)
-{
-	std::vector<VectorXd> vertices;
-	for (unsigned i = 0; i < n; ++i)
-	{
-		VectorXd v = VectorXd::Zero(n);
-		v(i) = 1.;
-		vertices.push_back(v);
-	}
-	return vertices;
 }
 
 static Polyhedron_3 dual(Polyhedron_3 p)
@@ -618,8 +621,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 			generateSupportData(directions, targetPoints, variance);
 
 		auto pair =
-			fitSimplexAffineImage(generateSimplex(numLiftingDimensions), data,
-								  trueStartingBody, numLiftingDimensions);
+			fitSimplexAffineImage(data, trueStartingBody, numLiftingDimensions);
 		auto polyhedronAM = pair.first;
 		double error = pair.second;
 		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
@@ -657,8 +659,7 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
-	auto pair = fitSimplexAffineImage(generateSimplex(numLiftingDimensionsDual),
-									  dualData, trueStartingBody,
+	auto pair = fitSimplexAffineImage(dualData, trueStartingBody,
 									  numLiftingDimensionsDual);
 	auto polyhedronAMdual2 = pair.first;
 	double error = pair.second;
@@ -856,8 +857,8 @@ int runSyntheticContourCase(char **argv)
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
-	auto [polyhedronAM, error] = fitSimplexAffineImage(
-		generateSimplex(p->numVertices), data, vertices, p->numVertices);
+	auto [polyhedronAM, error] =
+		fitSimplexAffineImage(data, vertices, p->numVertices);
 	std::cout << "Algorithm error (sum of squares): " << error << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-intermediate-recovered.ply")
 		<< polyhedronAM;
@@ -877,8 +878,8 @@ int runSyntheticContourCase(char **argv)
 	// function measurements
 
 	std::vector<Vector3d> fakeVertices;
-	auto [polyhedronDualAM, errorDual] = fitSimplexAffineImage(
-		generateSimplex(p->numFacets), dualData, fakeVertices, p->numFacets);
+	auto [polyhedronDualAM, errorDual] =
+		fitSimplexAffineImage(dualData, fakeVertices, p->numFacets);
 	std::cout << "Algorithm error (sum of squares): " << errorDual << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply")
 		<< polyhedronDualAM;
