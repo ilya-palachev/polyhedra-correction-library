@@ -183,7 +183,7 @@ set (INCLUDE_DIRS_all
 
 # Common compiler flags used for build:
 set(COMMON_FLAGS "-g")
-# Enable C++11:
+# Enable C++17:
 set(COMMON_FLAGS "${COMMON_FLAGS} -std=c++17 -fext-numeric-literals")
 set(COMMON_FLAGS "${COMMON_FLAGS} -Wall")
 # Enable rounding math option (required by CGAL):
