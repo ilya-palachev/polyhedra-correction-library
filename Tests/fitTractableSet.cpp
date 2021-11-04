@@ -159,7 +159,6 @@ std::vector<Vector3d> generateDodecahedron()
 	return body;
 }
 
-
 static Polyhedron_3 dual(Polyhedron_3 p)
 {
 	std::vector<Plane_3> planes;
@@ -362,8 +361,9 @@ double fit(unsigned n, std::vector<Vector3d> &directions,
 		SupportFunctionDataPtr data =
 			generateSupportData(directions, targetPoints, variance);
 
-        AlternatingMinimization AMalgorithm;
-		auto pair = AMalgorithm.run(data, trueStartingBody, numLiftingDimensions);
+		AlternatingMinimization AMalgorithm;
+		auto pair =
+			AMalgorithm.run(data, trueStartingBody, numLiftingDimensions);
 		auto polyhedronAM = pair.first;
 		double error = pair.second;
 		std::cout << "Algorithm error (sum of squares): " << error << std::endl;
@@ -548,7 +548,7 @@ int runSyntheticContourCase(char **argv)
 		return EXIT_FAILURE;
 	}
 
-    // 1. Read the model of 3D polyhedron from the PLY file
+	// 1. Read the model of 3D polyhedron from the PLY file
 
 	const char *title = argv[2];
 	PolyhedronPtr p(new Polyhedron());
@@ -566,7 +566,7 @@ int runSyntheticContourCase(char **argv)
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
-    // 2. Generate shadow contours from the polyhedron with error `variance`
+	// 2. Generate shadow contours from the polyhedron with error `variance`
 
 	ASSERT(p->nonZeroPlanes());
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
@@ -574,7 +574,7 @@ int runSyntheticContourCase(char **argv)
 	ShadowContourConstructorPtr shadowConstructor(
 		new ShadowContourConstructor(p, SCData));
 	std::cout << "Constructing contours..." << std::endl;
-	shadowConstructor->run(n, 0.01);  // this is angle, not error
+	shadowConstructor->run(n, 0.01); // this is angle, not error
 	std::cout << "Constructing contours... done" << std::endl;
 	ASSERT(!SCData->empty());
 
@@ -584,7 +584,7 @@ int runSyntheticContourCase(char **argv)
 	SCData->shiftRandomly(variance);
 	ASSERT(!SCData->empty());
 
-    // 3. Generate EVEN support function measurements from the shadow contours
+	// 3. Generate EVEN support function measurements from the shadow contours
 
 	unsigned numItemsPerContour = 10;
 	double numItemsPerContourEnv = -1;
@@ -593,7 +593,8 @@ int runSyntheticContourCase(char **argv)
 		numItemsPerContour = static_cast<int>(numItemsPerContourEnv);
 	auto data = generateEvenDataFromContours(SCData, numItemsPerContour);
 
-    // 4. Run the AM algorithm in the primal space, considering the number of vertices to be known
+	// 4. Run the AM algorithm in the primal space, considering the number of
+	// vertices to be known
 
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
@@ -607,12 +608,11 @@ int runSyntheticContourCase(char **argv)
 	std::cout << "RESULT on first step: " << directions.size() << " " << error
 			  << std::endl;
 
-    // 5. Produce the gauge function data from the primal-AM-recovered body
+	// 5. Produce the gauge function data from the primal-AM-recovered body
 
 	// NOTA BENE: These are new directions!!! It is very crucial for the quality
 	// of results produced by the AM algorithm
-	auto otherDirections = generateDirections<Point_3>(
-		data->size());
+	auto otherDirections = generateDirections<Point_3>(data->size());
 	auto dualData = dual(polyhedronAM).calculateSupportData(otherDirections);
 
 	// 6. Run the AM algorithm in the dual space, using the produced gauge

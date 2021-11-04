@@ -143,7 +143,7 @@ AlternatingMinimization::run(SupportFunctionDataPtr data,
 	std::normal_distribution<double> distribution(0., 1.);
 	auto normal = [&](int) { return distribution(generator); };
 
-    auto simplexVertices = generateSimplex(numLiftingDimensions);
+	auto simplexVertices = generateSimplex(numLiftingDimensions);
 
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
@@ -193,9 +193,9 @@ AlternatingMinimization::run(SupportFunctionDataPtr data,
 
 				VectorXd u = toEigenVector((*data)[k].direction);
 
-                VectorXd direction = matrixToVector(AT * u);
-				VectorXd e = selectExtremePointByDirection(
-					simplexVertices, direction);
+				VectorXd direction = matrixToVector(AT * u);
+				VectorXd e =
+					selectExtremePointByDirection(simplexVertices, direction);
 
 				double diff = e.dot(direction) - y;
 				error += diff * diff;
