@@ -141,6 +141,7 @@ set (SOURCE_pcl
 	Source/SparseMatrixEigen.cpp
 	Source/TimeMeasurer/TimeMeasurer.cpp
 	Source/TimeMeasurer/Timer.cpp
+    Source/TractableFitter/AlternatingMinimization.cpp
 )
 
 set (SOURCE_tests
