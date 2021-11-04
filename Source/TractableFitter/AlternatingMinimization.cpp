@@ -33,49 +33,11 @@
 
 #include "Common.h"
 #include "DebugAssert.h"
+#include "SupportFunction.h"
 
 #include "TractableFitter/AlternatingMinimization.h"
 
 using Eigen::MatrixXd;
-
-// TODO: Make unified version using templates
-
-std::pair<double, Vector3d>
-calculateSupportFunction(const std::vector<Vector3d> &vertices,
-						 const Vector3d &direction)
-{
-	ASSERT(vertices.size() > 0);
-	double maxProduct = vertices[0] * direction;
-	Vector3d tangient = vertices[0];
-	for (const Vector3d &vertex : vertices)
-	{
-		double product = vertex * direction;
-		if (product > maxProduct)
-		{
-			maxProduct = product;
-			tangient = vertex;
-		}
-	}
-	return std::make_pair(maxProduct, tangient);
-}
-
-std::pair<double, VectorXd>
-calculateSupportFunction(const std::vector<VectorXd> &vertices,
-						 const VectorXd &direction)
-{
-	double maxProduct = vertices[0].dot(direction);
-	VectorXd tangient = vertices[0];
-	for (const VectorXd &vertex : vertices)
-	{
-		double product = vertex.dot(direction);
-		if (product > maxProduct)
-		{
-			maxProduct = product;
-			tangient = vertex;
-		}
-	}
-	return std::make_pair(maxProduct, tangient);
-}
 
 static Eigen::Vector3d toEigenVector(Point_3 v)
 {
@@ -110,8 +72,8 @@ double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
 		auto item = (*data)[i];
 		MatrixXd direction = AT * toEigenVector(item.direction);
 		auto vector = matrixToVector(direction);
-		double diff = calculateSupportFunction(simplexVertices, vector).first -
-					  item.value;
+		double diff =
+			calculateSupportFunction(simplexVertices, vector) - item.value;
 		error += diff * diff;
 	}
 	return error;
@@ -230,11 +192,13 @@ AlternatingMinimization::run(SupportFunctionDataPtr data,
 				double y = (*data)[k].value;
 
 				VectorXd u = toEigenVector((*data)[k].direction);
-				std::pair<double, VectorXd> result = calculateSupportFunction(
-					simplexVertices, matrixToVector(AT * u));
-				double diff = result.first - y;
+
+                VectorXd direction = matrixToVector(AT * u);
+				VectorXd e = selectExtremePointByDirection(
+					simplexVertices, direction);
+
+				double diff = e.dot(direction) - y;
 				error += diff * diff;
-				MatrixXd e = result.second;
 				ASSERT(isFinite(e));
 				VectorXd V = matrixToVector(u * e.transpose());
 				MatrixXd VT = V.transpose();

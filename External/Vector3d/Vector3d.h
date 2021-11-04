@@ -203,6 +203,10 @@ public:
 		return *this;
 	}
 
+    double dot(const Vector3d &other) const {
+        return x * other.x + y * other.y + z * other.z;
+    }
+
 	Vector3d &operator /=(const double d)
 	{
 		x /= d;

@@ -30,6 +30,7 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "PolyhedraCorrectionLibrary.h"
 #include "Recoverer/SupportPolyhedronCorrector.h"
+#include "SupportFunction.h"
 #include "TractableFitter/AlternatingMinimization.h"
 
 template <typename VectorT> std::vector<VectorT> generateDirections(int n)
@@ -269,7 +270,7 @@ SupportFunctionDataPtr generateSupportData(std::vector<Vector3d> &directions,
 
 	for (const auto &direction : directions)
 	{
-		double value = calculateSupportFunction(targetPoints, direction).first;
+		double value = calculateSupportFunction(targetPoints, direction);
 		ASSERT(value > 0.);
 		double noisyValue = value + noise(generator);
 		ASSERT(noisyValue > 0.);
@@ -528,7 +529,7 @@ SupportFunctionDataPtr generateEvenDataFromContours(ShadowContourDataPtr SCData,
 		auto points = contour.getPoints();
 		for (Vector3d direction : directions)
 		{
-			double value = calculateSupportFunction(points, direction).first;
+			double value = calculateSupportFunction(points, direction);
 			items.emplace_back(direction, value);
 		}
 	}

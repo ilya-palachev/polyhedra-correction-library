@@ -38,16 +38,8 @@
 
 #include "Polyhedron_3/Polyhedron_3.h"
 
-// TODO: Make unified version using templates
-// TODO: Extract below two functions into a proper header
-std::pair<double, Vector3d>
-calculateSupportFunction(const std::vector<Vector3d> &vertices,
-						 const Vector3d &direction);
-std::pair<double, VectorXd>
-calculateSupportFunction(const std::vector<VectorXd> &vertices,
-						 const VectorXd &direction);
-
-class AlternatingMinimization {
+class AlternatingMinimization
+{
 public:
 	std::pair<Polyhedron_3, double> run(SupportFunctionDataPtr data,
 										std::vector<Vector3d> startingBody,
