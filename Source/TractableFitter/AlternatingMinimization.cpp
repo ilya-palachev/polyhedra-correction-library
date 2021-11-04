@@ -88,9 +88,6 @@ bool isFinite(const MatrixXd &M)
 	return true;
 }
 
-unsigned numImplemented = 0;
-unsigned numNonImplemented = 0;
-
 static std::vector<VectorXd> generateSimplex(unsigned n)
 {
 	std::vector<VectorXd> vertices;
@@ -103,10 +100,9 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 	return vertices;
 }
 
-std::pair<Polyhedron_3, double>
-AlternatingMinimization::run(SupportFunctionDataPtr data,
-							 std::vector<Vector3d> startingBody,
-							 unsigned numLiftingDimensions)
+Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
+										  std::vector<Vector3d> startingBody,
+										  unsigned numLiftingDimensions)
 {
 	std::cout << "Starting to fit in primal mode." << std::endl;
 
@@ -241,26 +237,22 @@ AlternatingMinimization::run(SupportFunctionDataPtr data,
 		points.push_back(toCGALPoint(Abest.col(i)));
 	}
 
-	Polyhedron_3 result;
-
 	std::cout << "Making a hull from " << points.size()
 			  << " points:" << std::endl;
 	for (auto point : points)
 	{
 		std::cout << "  " << point << std::endl;
 	}
+
 	Polyhedron_3 hull;
 	// FIXME: CGAL has a bug: all planes in the hull are the same.
 	CGAL::convex_hull_3(points.begin(), points.end(), hull);
-	result = hull;
 	std::cout << "Hull vertices: " << std::endl;
 	for (auto I = hull.vertices_begin(), E = hull.vertices_end(); I != E; ++I)
 	{
 		std::cout << "  " << I->point() << std::endl;
 	}
 
-	std::cout << "Number of implemented cases: " << numImplemented << std::endl;
-	std::cout << "Number of non-implemented cases: " << numNonImplemented
-			  << std::endl;
-	return std::make_pair(result, errorBest);
+	std::cout << "Algorithm error (sum of squares): " << errorBest << std::endl;
+	return hull;
 }

@@ -41,9 +41,9 @@
 class AlternatingMinimization
 {
 public:
-	std::pair<Polyhedron_3, double> run(SupportFunctionDataPtr data,
-										std::vector<Vector3d> startingBody,
-										unsigned numLiftingDimensions);
+	Polyhedron_3 run(SupportFunctionDataPtr data,
+					 std::vector<Vector3d> startingBody,
+					 unsigned numLiftingDimensions);
 };
 
 #endif /* ALTERNATING_MINIMIZATION_H */
