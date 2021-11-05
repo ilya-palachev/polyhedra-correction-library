@@ -37,8 +37,6 @@
 
 #include "TractableFitter/AlternatingMinimization.h"
 
-using Eigen::MatrixXd;
-
 static Eigen::Vector3d toEigenVector(Point_3 v)
 {
 	Eigen::Vector3d u;
@@ -100,6 +98,42 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 	return vertices;
 }
 
+namespace
+{
+MatrixXd generateRandomMatrix(unsigned numLiftingDimensions)
+{
+	static std::default_random_engine generator;
+	static std::normal_distribution<double> distribution(0., 1.);
+	auto normal = [](int) { return distribution(generator); };
+	return MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+}
+} // namespace
+
+MatrixXd AlternatingMinimization::makeOuterInitialization(
+	unsigned numLiftingDimensions) const
+{
+	if (!useStartingBody_)
+	{
+		return generateRandomMatrix(numLiftingDimensions);
+	}
+
+	MatrixXd A(3, numLiftingDimensions);
+	ASSERT(!startingBody_.empty());
+	int i = 0;
+	std::cout << startingBody_.size() << " " << A.cols() << std::endl;
+	ASSERT(startingBody_.size() == static_cast<unsigned long>(A.cols()));
+	for (auto point : startingBody_)
+	{
+		auto p = toEigenVector(point);
+		for (int j = 0; j < 3; ++j)
+			A(j, i) = p(j);
+		++i;
+	}
+	ASSERT(A.coeff(0, 0) == startingBody_[0].x);
+	std::cout << "Initial matrix A: " << A << std::endl;
+	return A;
+}
+
 Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 										  unsigned numLiftingDimensions) const
 {
@@ -115,38 +149,13 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 	double errorBest = -1.;
 	MatrixXd Abest;
 
-	std::default_random_engine generator;
-	std::normal_distribution<double> distribution(0., 1.);
-	auto normal = [&](int) { return distribution(generator); };
-
 	auto simplexVertices = generateSimplex(numLiftingDimensions);
 
 	for (unsigned iOuter = 0;
 		 iOuter < (useStartingBody_ ? 1 : numOuterIterations_); ++iOuter)
 	{
-		MatrixXd A(3, numLiftingDimensions);
-		if (useStartingBody_)
-		{
-			ASSERT(!startingBody_.empty());
-			int i = 0;
-			std::cout << startingBody_.size() << " " << A.cols() << std::endl;
-			ASSERT(startingBody_.size() ==
-				   static_cast<unsigned long>(A.cols()));
-			for (auto point : startingBody_)
-			{
-				auto p = toEigenVector(point);
-				for (int j = 0; j < 3; ++j)
-					A(j, i) = p(j);
-				++i;
-			}
-			ASSERT(A.coeff(0, 0) == startingBody_[0].x);
-			std::cout << "Initial matrix A: " << A << std::endl;
-		}
-		else
-		{
-			A = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
-		}
-		MatrixXd Anew = MatrixXd::NullaryExpr(3, numLiftingDimensions, normal);
+		auto A = makeOuterInitialization(numLiftingDimensions);
+		MatrixXd Anew = generateRandomMatrix(numLiftingDimensions);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
 		double errorInitial = evaluateFit(A, data, simplexVertices);

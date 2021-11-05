@@ -38,6 +38,8 @@
 
 #include "Polyhedron_3/Polyhedron_3.h"
 
+using Eigen::MatrixXd;
+
 class AlternatingMinimization
 {
 public:
@@ -68,6 +70,8 @@ private:
 	double regularizer_ = 0.5;
 
 	unsigned verboseLevel_ = 1;
+
+	MatrixXd makeOuterInitialization(unsigned numLiftingDimensions) const;
 };
 
 #endif /* ALTERNATING_MINIMIZATION_H */
