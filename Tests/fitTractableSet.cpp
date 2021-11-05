@@ -279,25 +279,6 @@ SupportFunctionDataPtr generateSupportData(std::vector<Vector3d> &directions,
 	return data;
 }
 
-std::vector<Vector3d>
-calculateDualTargetPoints(std::vector<Vector3d> &targetPoints)
-{
-	std::vector<Plane_3> planes;
-	for (const auto &point : targetPoints)
-	{
-		planes.push_back(dual(point));
-	}
-	Polyhedron_3 dualBody(planes.begin(), planes.end());
-
-	std::vector<Vector3d> dualTargetPoints;
-	for (auto v = dualBody.vertices_begin(); v != dualBody.vertices_end(); ++v)
-	{
-		dualTargetPoints.push_back(Vector3d::fromCGAL(v->point()));
-	}
-
-	return dualTargetPoints;
-}
-
 double calculateError(SupportFunctionDataPtr a, SupportFunctionDataPtr b)
 {
 	auto valuesA = a->supportValues();
@@ -342,83 +323,39 @@ makeTrueStartingBody(std::vector<Vector3d> &targetPoints)
 void fit(unsigned n, std::vector<Vector3d> &directions,
 		 unsigned numLiftingDimensions, unsigned numLiftingDimensionsDual,
 		 std::vector<Vector3d> &targetPoints, const char *title,
-		 const char *linearSolver, bool synthetic,
-		 SupportFunctionDataPtr noisyData)
+		 const char *linearSolver, SupportFunctionDataPtr noisyData)
 {
 	SupportFunctionDataPtr dualData;
 	SupportFunctionDataPtr dualDataNotNoisy;
-	double variance = 0.01;
-	tryGetenvDouble("NOISE_VARIANCE", variance);
 
 	globalPCLDumper.setNameBase(title);
 	globalPCLDumper.enableVerboseMode();
 
-	auto trueStartingBody = makeTrueStartingBody(targetPoints);
-
-	if (getenv("PRIMAL_MODE"))
-	{
-		ASSERT(synthetic);
-		SupportFunctionDataPtr data =
-			generateSupportData(directions, targetPoints, variance);
-
-		auto polyhedronAM = AlternatingMinimization().run(
-			data, trueStartingBody, numLiftingDimensions);
-		globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-recovered.ply")
-			<< polyhedronAM;
-		return;
-	}
-	else if (getenv("GAUGE_MODE"))
-	{
-		ASSERT(synthetic);
-		// 1A. Calculate gauge function of primal body through support function
-		// of dual body
-		auto dualTargetPoints = calculateDualTargetPoints(targetPoints);
-		dualData = generateSupportData(directions, dualTargetPoints, variance);
-		dualDataNotNoisy =
-			generateSupportData(directions, dualTargetPoints, 0.);
-	}
-	else if (!synthetic)
-	{
-		dualData =
-			calculateProvisionalEstimate(directions, noisyData, linearSolver);
-	}
-	else
-	{
-		// 1B. Provisional estimate for dual support function evaluations
-		noisyData = generateSupportData(directions, targetPoints, variance);
-		dualData =
-			calculateProvisionalEstimate(directions, noisyData, linearSolver);
-	}
-
-	if (getenv("USE_STARTING_BODY") && !getenv("USE_TRUE_STARTING_BODY"))
-	{
-		trueStartingBody = makeInitialBody(directions, noisyData, linearSolver);
-	}
+	// 1. Provisional estimate for dual support function evaluations
+	dualData =
+		calculateProvisionalEstimate(directions, noisyData, linearSolver);
 
 	// 2. Soh & Chandrasekaran algorithm is used for estimating the body's shape
 
-	auto polyhedronAMdual2 = AlternatingMinimization().run(
-		dualData, trueStartingBody, numLiftingDimensionsDual);
+	auto minimization =
+		getenv("USE_TRUE_STARTING_BODY")
+			? AlternatingMinimization(makeTrueStartingBody(targetPoints))
+			: getenv("USE_STARTING_BODY")
+				  ? AlternatingMinimization(
+						makeInitialBody(directions, noisyData, linearSolver))
+				  : AlternatingMinimization();
+	auto polyhedronAMdual2 =
+		minimization.run(dualData, numLiftingDimensionsDual);
 	std::cout << "Dual polyhedron has " << polyhedronAMdual2.size_of_vertices()
 			  << " vertice vertices" << std::endl;
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual2-recovered.ply")
 		<< polyhedronAMdual2;
+
 	auto polyhedronAM2 = dual(polyhedronAMdual2);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am2-recovered.ply")
 		<< polyhedronAM2;
 
-	if (getenv("GAUGE_MODE"))
-	{
-		printEstimationReport(polyhedronAMdual2, dualData);
-		std::vector<PCLPoint_3> directionsPCL(directions.begin(),
-											  directions.end());
-		std::cout << "Error in GAUGE_MODE: "
-				  << calculateError(
-						 dualDataNotNoisy,
-						 polyhedronAMdual2.calculateSupportData(directionsPCL));
-	}
-	else
-		printEstimationReport(polyhedronAM2, noisyData);
+	printEstimationReport(polyhedronAM2, noisyData);
 
 	if (getenv("EARLY_STOP"))
 		return;
@@ -485,13 +422,18 @@ int runSyntheticCase(char **argv)
 
 	const char *linearSolver = argv[3];
 
+	double variance = 0.01;
+	tryGetenvDouble("NOISE_VARIANCE", variance);
+
 	if (!getenv("RANGE_MODE"))
 	{
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections<Vector3d>(n);
 
+		auto noisyData =
+			generateSupportData(directions, body.vertices, variance);
 		fit(n, directions, body.numVertices, body.numFacets, body.vertices,
-			title, linearSolver, true, nullptr);
+			title, linearSolver, noisyData);
 		return EXIT_SUCCESS;
 	}
 
@@ -500,8 +442,10 @@ int runSyntheticCase(char **argv)
 		std::cout << "Preparing data..." << std::endl;
 		auto directions = generateDirections<Vector3d>(n_current);
 
+		auto noisyData =
+			generateSupportData(directions, body.vertices, variance);
 		fit(n_current, directions, body.numVertices, body.numFacets,
-			body.vertices, title, linearSolver, true, nullptr);
+			body.vertices, title, linearSolver, noisyData);
 	}
 
 	return EXIT_SUCCESS;
@@ -587,9 +531,7 @@ int runSyntheticContourCase(char **argv)
 	// vertices to be known
 
 	auto directions = data->supportDirections<Vector3d>();
-	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
-	auto polyhedronAM =
-		AlternatingMinimization().run(data, vertices, p->numVertices);
+	auto polyhedronAM = AlternatingMinimization().run(data, p->numVertices);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-intermediate-recovered.ply")
 		<< polyhedronAM;
 
@@ -603,9 +545,8 @@ int runSyntheticContourCase(char **argv)
 	// 6. Run the AM algorithm in the dual space, using the produced gauge
 	// function measurements
 
-	std::vector<Vector3d> fakeVertices;
 	auto polyhedronDualAM =
-		AlternatingMinimization().run(dualData, fakeVertices, p->numFacets);
+		AlternatingMinimization().run(dualData, p->numFacets);
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "am-dual-recovered.ply")
 		<< polyhedronDualAM;
 
@@ -658,7 +599,7 @@ int runRealCase(char **argv)
 	auto directions = data->supportDirections<Vector3d>();
 	std::vector<Vector3d> fake;
 	fit(directions.size(), directions, numVertices, numFacets, fake, title,
-		linearSolver, false, data);
+		linearSolver, data);
 	// FIXME: Shift the body back by this vector:
 	std::cout << "Balancing vector: " << balancingVector << std::endl;
 

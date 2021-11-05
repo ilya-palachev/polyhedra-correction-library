@@ -101,8 +101,7 @@ static std::vector<VectorXd> generateSimplex(unsigned n)
 }
 
 Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
-										  std::vector<Vector3d> startingBody,
-										  unsigned numLiftingDimensions)
+										  unsigned numLiftingDimensions) const
 {
 	std::cout << "Starting to fit in primal mode." << std::endl;
 
@@ -144,20 +143,21 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
 	{
 		MatrixXd A(3, numLiftingDimensions);
-		if (getenv("USE_STARTING_BODY"))
+		if (useStartingBody_)
 		{
-			ASSERT(!startingBody.empty());
+			ASSERT(!startingBody_.empty());
 			int i = 0;
-			std::cout << startingBody.size() << " " << A.cols() << std::endl;
-			ASSERT(startingBody.size() == static_cast<unsigned long>(A.cols()));
-			for (auto point : startingBody)
+			std::cout << startingBody_.size() << " " << A.cols() << std::endl;
+			ASSERT(startingBody_.size() ==
+				   static_cast<unsigned long>(A.cols()));
+			for (auto point : startingBody_)
 			{
 				auto p = toEigenVector(point);
 				for (int j = 0; j < 3; ++j)
 					A(j, i) = p(j);
 				++i;
 			}
-			ASSERT(A.coeff(0, 0) == startingBody[0].x);
+			ASSERT(A.coeff(0, 0) == startingBody_[0].x);
 			std::cout << "Initial matrix A: " << A << std::endl;
 		}
 		else
@@ -254,5 +254,9 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 	}
 
 	std::cout << "Algorithm error (sum of squares): " << errorBest << std::endl;
+    if (useStartingBody_)
+	{
+		std::cout << "  NOTA BENE: Starting body was used!!!" << std::endl;
+	}
 	return hull;
 }

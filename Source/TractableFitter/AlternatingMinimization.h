@@ -41,9 +41,25 @@
 class AlternatingMinimization
 {
 public:
+	AlternatingMinimization() :
+		useStartingBody_(false), startingBody_(emptyFakeStartingBody)
+	{
+	}
+
+	explicit AlternatingMinimization(
+		const std::vector<Vector3d> &startingBody) :
+		useStartingBody_(true), startingBody_(startingBody)
+	{
+	}
+
 	Polyhedron_3 run(SupportFunctionDataPtr data,
-					 std::vector<Vector3d> startingBody,
-					 unsigned numLiftingDimensions);
+					 unsigned numLiftingDimensions) const;
+
+private:
+	inline static std::vector<Vector3d> emptyFakeStartingBody = {};
+
+	bool useStartingBody_ = false;
+	const std::vector<Vector3d> &startingBody_;
 };
 
 #endif /* ALTERNATING_MINIMIZATION_H */
