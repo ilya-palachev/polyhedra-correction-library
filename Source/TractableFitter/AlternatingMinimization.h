@@ -60,6 +60,14 @@ private:
 
 	bool useStartingBody_ = false;
 	const std::vector<Vector3d> &startingBody_;
+
+	// Default values from the initial implementation by Y.S. Soh
+	// TODO: Make getters and setters for these values
+	unsigned numOuterIterations_ = 100;
+	unsigned numInnerIterations_ = 100;
+	double regularizer_ = 0.5;
+
+	unsigned verboseLevel_ = 1;
 };
 
 #endif /* ALTERNATING_MINIMIZATION_H */

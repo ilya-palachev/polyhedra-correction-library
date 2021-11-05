@@ -105,31 +105,12 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 {
 	std::cout << "Starting to fit in primal mode." << std::endl;
 
-	unsigned numOuterIterations = 100;
-	double numOuterIterationsEnv = -1.;
-	tryGetenvDouble("N_OUTER", numOuterIterationsEnv);
-	if (numOuterIterationsEnv > 0.)
-		numOuterIterations = static_cast<int>(numOuterIterationsEnv);
-	if (getenv("USE_STARTING_BODY"))
-	{
-		numOuterIterations = 1;
-	}
-
-	unsigned numInnerIterations = 100;
-	double numInnerIterationsEnv = -1;
-	tryGetenvDouble("N_INNER", numInnerIterationsEnv);
-	if (numInnerIterationsEnv > 0.)
-		numInnerIterations = static_cast<int>(numInnerIterationsEnv);
-
-	double regularizer = 0.5;
-	tryGetenvDouble("REGULARIZER", regularizer);
-
 	std::cout << "The following hyperparameters are used:" << std::endl;
-	std::cout << "  Number of outer iterations: " << numOuterIterations
+	std::cout << "  Number of outer iterations: " << numOuterIterations_
 			  << std::endl;
-	std::cout << "  Number of inner iterations: " << numInnerIterations
+	std::cout << "  Number of inner iterations: " << numInnerIterations_
 			  << std::endl;
-	std::cout << "                 Regularizer: " << regularizer << std::endl;
+	std::cout << "                 Regularizer: " << regularizer_ << std::endl;
 
 	double errorBest = -1.;
 	MatrixXd Abest;
@@ -140,7 +121,8 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 
 	auto simplexVertices = generateSimplex(numLiftingDimensions);
 
-	for (unsigned iOuter = 0; iOuter < numOuterIterations; ++iOuter)
+	for (unsigned iOuter = 0;
+		 iOuter < (useStartingBody_ ? 1 : numOuterIterations_); ++iOuter)
 	{
 		MatrixXd A(3, numLiftingDimensions);
 		if (useStartingBody_)
@@ -172,13 +154,13 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 				  << std::endl;
 		double errorLast = 0.;
 
-		for (unsigned iInner = 0; iInner < numInnerIterations; ++iInner)
+		for (unsigned iInner = 0; iInner < numInnerIterations_; ++iInner)
 		{
 			unsigned size = 3 * numLiftingDimensions;
-			MatrixXd matrix = regularizer * MatrixXd::Identity(size, size);
+			MatrixXd matrix = regularizer_ * MatrixXd::Identity(size, size);
 			ASSERT(isFinite(matrix));
 			VectorXd Alinearized = matrixToVector(A);
-			VectorXd vector = regularizer * Alinearized;
+			VectorXd vector = regularizer_ * Alinearized;
 
 			MatrixXd AT = A.transpose();
 			double error = 0.;
@@ -210,9 +192,11 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 			ASSERT(A.rows() == 3);
 			ASSERT(A.cols() == numLiftingDimensions);
 
-			if (getenv("DEBUG_AM"))
+			if (verboseLevel_ > 1)
+			{
 				std::cout << "  Outer " << iOuter << " inner " << iInner
 						  << ", error: " << error << std::endl;
+			}
 
 			if (error > 1000. * errorInitial)
 			{
@@ -254,7 +238,7 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 	}
 
 	std::cout << "Algorithm error (sum of squares): " << errorBest << std::endl;
-    if (useStartingBody_)
+	if (useStartingBody_)
 	{
 		std::cout << "  NOTA BENE: Starting body was used!!!" << std::endl;
 	}
