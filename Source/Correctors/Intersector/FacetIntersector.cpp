@@ -32,15 +32,13 @@ FacetIntersector::FacetIntersector() : Intersector(), facet(NULL)
 	DEBUG_END;
 }
 
-FacetIntersector::FacetIntersector(PolyhedronPtr p, Facet *f) :
-	Intersector(p), facet(f)
+FacetIntersector::FacetIntersector(PolyhedronPtr p, Facet *f) : Intersector(p), facet(f)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-FacetIntersector::FacetIntersector(Intersector *i, Facet *f) :
-	Intersector(*i), facet(f)
+FacetIntersector::FacetIntersector(Intersector *i, Facet *f) : Intersector(*i), facet(f)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -58,8 +56,7 @@ int FacetIntersector::signum(int i, Plane plane)
 	if (auto polyhedron = facet->parentPolyhedron.lock())
 	{
 		DEBUG_END;
-		return polyhedron->signum(polyhedron->vertices[facet->indVertices[i]],
-								  plane);
+		return polyhedron->signum(polyhedron->vertices[facet->indVertices[i]], plane);
 	}
 	else
 	{
@@ -88,13 +85,11 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 	DEBUG_PRINT("**************Пересечение грани %d*************", facet->id);
 
 	double err;
-	err = qmod(facet->plane.norm - iplane.norm) +
-		  (facet->plane.dist - iplane.dist) * (facet->plane.dist - iplane.dist);
+	err = qmod(facet->plane.norm - iplane.norm) + (facet->plane.dist - iplane.dist) * (facet->plane.dist - iplane.dist);
 	if (fabs(err) > 1e-16)
 	{
 		err = qmod(facet->plane.norm + iplane.norm) +
-			  (facet->plane.dist + iplane.dist) *
-				  (facet->plane.dist + iplane.dist);
+			  (facet->plane.dist + iplane.dist) * (facet->plane.dist + iplane.dist);
 	}
 	if (fabs(err) < 1e-16)
 	{
@@ -160,8 +155,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 				if (i0 != i1)
 					break;
 				i_next = (i0 + 1) % polyhedron->numVertices;
-				i_prev = (polyhedron->numVertices + i0 - 1) %
-						 polyhedron->numVertices;
+				i_prev = (polyhedron->numVertices + i0 - 1) % polyhedron->numVertices;
 				sign_next = signum(i_next, iplane);
 				sign_prev = signum(i_prev, iplane);
 			} while (sign_prev == 0 && sign_next == 0);
@@ -171,8 +165,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 			if (i0 == i1)
 			{
 				i_next = (i0 + 1) % polyhedron->numVertices;
-				i_prev = (polyhedron->numVertices + i0 - 1) %
-						 polyhedron->numVertices;
+				i_prev = (polyhedron->numVertices + i0 - 1) % polyhedron->numVertices;
 				sign_next = signum(i_next, iplane);
 				sign_prev = signum(i_prev, iplane);
 				//Утверждение. sign_next != 0 || sign_prev != 0
@@ -187,8 +180,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 				//Утверждение. sign_next == 1 || sign_prev == 1
 				//Утверждение. sign_next == 1 && sign_prev == 1 не может быть
 				i_step = sign_next == 1 ? 1 : -1;
-				i_curr = (i0 + i_step + polyhedron->numVertices) %
-						 polyhedron->numVertices;
+				i_curr = (i0 + i_step + polyhedron->numVertices) % polyhedron->numVertices;
 				sign_curr = signum(i_curr, iplane);
 			}
 			else
@@ -211,13 +203,9 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 
 			do
 			{
-				curr_component.add_edge(facet->indVertices[i_curr],
-										facet->indVertices[i_curr], facet->id);
-				DEBUG_PRINT("\tДобавлено ребро : %d %d",
-							facet->indVertices[i_curr],
-							facet->indVertices[i_curr]);
-				i_curr = (i_curr + i_step + polyhedron->numVertices) %
-						 polyhedron->numVertices;
+				curr_component.add_edge(facet->indVertices[i_curr], facet->indVertices[i_curr], facet->id);
+				DEBUG_PRINT("\tДобавлено ребро : %d %d", facet->indVertices[i_curr], facet->indVertices[i_curr]);
+				i_curr = (i_curr + i_step + polyhedron->numVertices) % polyhedron->numVertices;
 				sign_curr = signum(i_curr, iplane);
 			} while (sign_curr == 1);
 			//Утверждение. sign_curr == 0 || sign_curr == -1
@@ -225,9 +213,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 				v0 = v1 = facet->indVertices[i_curr];
 			else
 			{
-				v0 = facet->indVertices[(i_curr - i_step +
-										 polyhedron->numVertices) %
-										polyhedron->numVertices];
+				v0 = facet->indVertices[(i_curr - i_step + polyhedron->numVertices) % polyhedron->numVertices];
 				v1 = facet->indVertices[i_curr];
 				if (v0 > v1)
 				{

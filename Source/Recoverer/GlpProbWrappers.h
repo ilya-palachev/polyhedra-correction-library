@@ -57,8 +57,7 @@ struct glp_prob_wrapper_mps
 	{
 	}
 
-	friend std::ostream &operator<<(std::ostream &stream,
-									glp_prob_wrapper_mps &p)
+	friend std::ostream &operator<<(std::ostream &stream, glp_prob_wrapper_mps &p)
 	{
 		DEBUG_START;
 		char *name = tmpnam(NULL);

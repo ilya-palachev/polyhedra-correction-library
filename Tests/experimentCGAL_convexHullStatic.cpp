@@ -59,8 +59,7 @@ struct Plane_from_facet
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet &f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
-		return Polyhedron_3::Plane_3(h->vertex()->point(),
-									 h->next()->vertex()->point(),
+		return Polyhedron_3::Plane_3(h->vertex()->point(), h->next()->vertex()->point(),
 									 h->opposite()->vertex()->point());
 	}
 };
@@ -119,8 +118,7 @@ int main(int argc, char **argv)
 		DEBUG_VARIABLE double y = it_point->y();
 		DEBUG_VARIABLE double z = it_point->z();
 		DEBUG_VARIABLE double norm = sqrt(x * x + y * y + z * z);
-		DEBUG_PRINT("points[%d] = (%lf, %lf, %lf), norm = %lf\n", i_point, x, y,
-					z, norm);
+		DEBUG_PRINT("points[%d] = (%lf, %lf, %lf), norm = %lf\n", i_point, x, y, z, norm);
 		++i_point;
 	}
 
@@ -136,8 +134,7 @@ int main(int argc, char **argv)
 	DEBUG_PRINT("3. Constructing convex hull:");
 	CGAL::convex_hull_3(points.begin(), points.end(), poly);
 
-	std::cout << "The convex hull contains " << poly.size_of_vertices()
-			  << " vertices" << std::endl;
+	std::cout << "The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
 
 	/* end time measurement */
 	double timeFirst = timer.popTimer();
@@ -146,9 +143,7 @@ int main(int argc, char **argv)
 	/* begin time measurement */
 	timer.pushTimer();
 
-	for (int i_point = 0;
-		 i_point < num_points - num_points / FACTOR_OF_VERTICES_REDUCTION;
-		 ++i_point)
+	for (int i_point = 0; i_point < num_points - num_points / FACTOR_OF_VERTICES_REDUCTION; ++i_point)
 	{
 		srand((unsigned)time(0));
 		int random_integer = rand();
@@ -163,15 +158,13 @@ int main(int argc, char **argv)
 	double timeSecond = timer.popTimer();
 	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
 
-	std::cout << "The convex hull contains " << poly.size_of_vertices()
-			  << " vertices" << std::endl;
+	std::cout << "The convex hull contains " << poly.size_of_vertices() << " vertices" << std::endl;
 
 	/*
 	 * assign a plane equation to each polyhedron facet using functor
 	 * Plane_from_facet
 	 */
-	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(),
-				   Plane_from_facet());
+	std::transform(poly.facets_begin(), poly.facets_end(), poly.planes_begin(), Plane_from_facet());
 	DEBUG_END;
 	return EXIT_SUCCESS;
 }

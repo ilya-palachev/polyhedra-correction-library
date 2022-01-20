@@ -80,15 +80,13 @@ public:
 	 *
 	 * @return 		The dumper is not ready for printing.
 	 */
-	template <typename TPrintable>
-	friend PCLDumper &operator<<(PCLDumper &dumper, TPrintable object)
+	template <typename TPrintable> friend PCLDumper &operator<<(PCLDumper &dumper, TPrintable object)
 	{
 		DEBUG_START;
 		std::ofstream stream;
 		std::stringstream count;
 		count << std::setfill('0') << std::setw(3) << dumper.iCurrentDumpCount_;
-		std::string filename =
-			dumper.nameBase_ + "." + count.str() + "." + dumper.nameSuffix_;
+		std::string filename = dumper.nameBase_ + "." + count.str() + "." + dumper.nameSuffix_;
 		DEBUG_PRINT("file name = %s", filename.c_str());
 		stream.open(filename, std::ofstream::out);
 

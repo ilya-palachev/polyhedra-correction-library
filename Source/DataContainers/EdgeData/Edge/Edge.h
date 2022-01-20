@@ -49,8 +49,7 @@ public:
 	Edge(int id_orig, int v0_orig, int v1_orig, int f0_orig, int f1_orig,
 		 std::list<EdgeContourAssociation> accocList_orig);
 
-	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig,
-		 std::list<EdgeContourAssociation> accocList_orig);
+	Edge(int v0_orig, int v1_orig, int f0_orig, int f1_orig, std::list<EdgeContourAssociation> accocList_orig);
 
 	Edge(const Edge &orig);
 	~Edge();
@@ -71,8 +70,7 @@ class EdgeComparison
 public:
 	inline bool operator()(const Edge &edge0, const Edge &edge1) const
 	{
-		return edge0.v0 < edge1.v0 ||
-			   (edge0.v0 == edge1.v0 && edge0.v1 < edge1.v1);
+		return edge0.v0 < edge1.v0 || (edge0.v0 == edge1.v0 && edge0.v1 < edge1.v1);
 	}
 };
 

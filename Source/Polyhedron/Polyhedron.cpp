@@ -31,12 +31,7 @@
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 
-Polyhedron::Polyhedron() :
-	numVertices(0),
-	numFacets(0),
-	vertices(NULL),
-	facets(NULL),
-	vertexInfos(NULL)
+Polyhedron::Polyhedron() : numVertices(0), numFacets(0), vertices(NULL), facets(NULL), vertexInfos(NULL)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Creating empty polyhedron...\n");
@@ -44,11 +39,7 @@ Polyhedron::Polyhedron() :
 }
 
 Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
-	numVertices(numv_orig),
-	numFacets(numf_orig),
-	vertices(),
-	facets(),
-	vertexInfos(NULL)
+	numVertices(numv_orig), numFacets(numf_orig), vertices(), facets(), vertexInfos(NULL)
 {
 	DEBUG_START;
 
@@ -64,18 +55,12 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
 	}
 	facets = new Facet[numf_orig];
 
-	DEBUG_PRINT("Creating polyhedron with numv = %d, numf = %d...\n",
-				numVertices, numFacets);
+	DEBUG_PRINT("Creating polyhedron with numv = %d, numf = %d...\n", numVertices, numFacets);
 	DEBUG_END;
 }
 
-Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig,
-					   Facet *facet_orig) :
-	numVertices(numv_orig),
-	numFacets(numf_orig),
-	vertices(),
-	facets(),
-	vertexInfos(NULL)
+Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig, Facet *facet_orig) :
+	numVertices(numv_orig), numFacets(numf_orig), vertices(), facets(), vertexInfos(NULL)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Creating polyhedron by coping...\n");
@@ -99,8 +84,7 @@ Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig,
 	DEBUG_END;
 }
 
-template <class KernelT, class ItemsIndexedT>
-Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
+template <class KernelT, class ItemsIndexedT> Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 {
 	DEBUG_START;
 
@@ -120,8 +104,7 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 	int iVertex = 0;
 	for (auto vertex = p.vertices_begin(); vertex != p.vertices_end(); ++vertex)
 	{
-		vertices[iVertex++] = Vector3d(vertex->point().x(), vertex->point().y(),
-									   vertex->point().z());
+		vertices[iVertex++] = Vector3d(vertex->point().x(), vertex->point().y(), vertex->point().z());
 	}
 
 	/*
@@ -146,8 +129,7 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 		CGAL_assertion(CGAL::circulator_size(halfedge) >= 3);
 
 		facets[iFacet].numVertices = CGAL::circulator_size(halfedge);
-		facets[iFacet].indVertices =
-			new int[3 * facets[iFacet].numVertices + 1];
+		facets[iFacet].indVertices = new int[3 * facets[iFacet].numVertices + 1];
 		/*
 		 * TODO: It's too unsafe architecture if we do such things as setting
 		 * the size of internal array outside the API functions. Moreover, it
@@ -159,19 +141,16 @@ Polyhedron::Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p)
 		std::vector<Point_3> points;
 		do
 		{
-			facets[iFacet].indVertices[iFacetVertex++] =
-				std::distance(p.vertices_begin(), halfedge->vertex());
+			facets[iFacet].indVertices[iFacetVertex++] = std::distance(p.vertices_begin(), halfedge->vertex());
 			points.push_back(halfedge->vertex()->point());
 		} while (++halfedge != facet->facet_begin());
 
 		/* Add cycling vertex to avoid assertion during printing. */
-		facets[iFacet].indVertices[facets[iFacet].numVertices] =
-			facets[iFacet].indVertices[0];
+		facets[iFacet].indVertices[facets[iFacet].numVertices] = facets[iFacet].indVertices[0];
 
 		/* Transform current plane. */
 		auto plane = facet->plane();
-		facets[iFacet].plane =
-			Plane(Vector3d(plane.a(), plane.b(), plane.c()), plane.d());
+		facets[iFacet].plane = Plane(Vector3d(plane.a(), plane.b(), plane.c()), plane.d());
 
 		// FIXME: Extract this common method
 		if (!facets[iFacet].correctPlane())
@@ -255,8 +234,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 		facet->numVertices = verticesPortion.size();
 		facet->plane = contour->plane;
 		facet->indVertices = new int[3 * facet->numVertices + 1];
-		for (int iVertexLocal = 0;
-			 (unsigned)iVertexLocal < verticesPortion.size(); ++iVertexLocal)
+		for (int iVertexLocal = 0; (unsigned)iVertexLocal < verticesPortion.size(); ++iVertexLocal)
 		{
 			facet->indVertices[iVertexLocal] = iVertex++;
 		}
@@ -265,8 +243,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 
 		numVertices += verticesPortion.size();
 
-		verticesAll.insert(verticesAll.end(), verticesPortion.begin(),
-						   verticesPortion.end());
+		verticesAll.insert(verticesAll.end(), verticesPortion.begin(), verticesPortion.end());
 	}
 
 	vertices = new Vector3d[numVertices];
@@ -282,11 +259,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 }
 
 Polyhedron::Polyhedron(PolyhedronPtr p) :
-	numVertices(p->numVertices),
-	numFacets(p->numFacets),
-	vertices(NULL),
-	facets(NULL),
-	vertexInfos(NULL)
+	numVertices(p->numVertices), numFacets(p->numFacets), vertices(NULL), facets(NULL), vertexInfos(NULL)
 
 {
 	DEBUG_START;
@@ -336,8 +309,7 @@ int Polyhedron::signum(Vector3d point, Plane plane)
 	return d > 0 ? 1 : (d < 0 ? -1 : 0);
 }
 
-void Polyhedron::get_boundary(double &xmin, double &xmax, double &ymin,
-							  double &ymax, double &zmin, double &zmax)
+void Polyhedron::get_boundary(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin, double &zmax)
 {
 	DEBUG_START;
 	int i;

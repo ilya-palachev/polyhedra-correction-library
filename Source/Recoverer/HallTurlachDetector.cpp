@@ -67,8 +67,7 @@ static double getC(int i, int j, int m, const ItemsVector &items, bool positive)
 	else if (!positive && i - m + 1 <= j && j <= i)
 		return getSine(j - 2 * m, j - m, items);
 
-	fprintf(stderr, "i = %d, j = %d, m = %d, positive = %d\n", i, j, m,
-			positive);
+	fprintf(stderr, "i = %d, j = %d, m = %d, positive = %d\n", i, j, m, positive);
 	ASSERT(0 && "Impossible happened");
 	return 0.;
 }
@@ -96,8 +95,7 @@ static double getTau(int i, int m, const ItemsVector &items, bool positive)
 	return sqrt(sum);
 }
 
-static double getDelta(int i, int m, const ItemsVector &items, bool positive,
-					   double sigma)
+static double getDelta(int i, int m, const ItemsVector &items, bool positive, double sigma)
 {
 	double denominator = sigma * getTau(i, m, items, positive);
 	return getDelta1(i, m, items, positive) / denominator;
@@ -126,16 +124,14 @@ static double getYEstimate(int i, int l, const ItemsVector &items)
 	return estimate;
 }
 
-static double getXEstimateAverage(int l, double lower, double upper,
-								  const ItemsVector &items, bool piCase)
+static double getXEstimateAverage(int l, double lower, double upper, const ItemsVector &items, bool piCase)
 {
 	int N = 0;
 	double average = 0.;
 	for (unsigned i = 0; i < items.size(); ++i)
 	{
 		double theta = getTheta(i, items);
-		if ((!piCase && theta > lower && theta < upper) ||
-			(piCase && (theta > lower || theta < upper)))
+		if ((!piCase && theta > lower && theta < upper) || (piCase && (theta > lower || theta < upper)))
 		{
 			++N;
 			average += getXEstimate(i, l, items);
@@ -145,16 +141,14 @@ static double getXEstimateAverage(int l, double lower, double upper,
 	return average;
 }
 
-static double getYEstimateAverage(int l, double lower, double upper,
-								  const ItemsVector &items, bool piCase)
+static double getYEstimateAverage(int l, double lower, double upper, const ItemsVector &items, bool piCase)
 {
 	int N = 0;
 	double average = 0.;
 	for (unsigned i = 0; i < items.size(); ++i)
 	{
 		double theta = getTheta(i, items);
-		if ((!piCase && theta > lower && theta < upper) ||
-			(piCase && (theta > lower || theta < upper)))
+		if ((!piCase && theta > lower && theta < upper) || (piCase && (theta > lower || theta < upper)))
 		{
 			++N;
 			average += getYEstimate(i, l, items);
@@ -164,8 +158,7 @@ static double getYEstimateAverage(int l, double lower, double upper,
 	return average;
 }
 
-static std::set<double> indicesToThetas(const std::set<unsigned> &cluster,
-										const ItemsVector &items)
+static std::set<double> indicesToThetas(const std::set<unsigned> &cluster, const ItemsVector &items)
 {
 	std::set<double> thetas;
 	for (unsigned i : cluster)
@@ -191,8 +184,7 @@ static double getSigma(const ItemsVector &items)
 	return sigma;
 }
 
-static ClustersVector getClusters(int m, double t, const ItemsVector &items,
-								  bool reverse)
+static ClustersVector getClusters(int m, double t, const ItemsVector &items, bool reverse)
 {
 	double sigma = getSigma(items);
 	ClustersVector clusters(items.size());
@@ -201,8 +193,7 @@ static ClustersVector getClusters(int m, double t, const ItemsVector &items,
 	{
 		double deltaPlus = getDelta(i, m, items, true, sigma);
 		double deltaMinus = getDelta(i, m, items, false, sigma);
-		fprintf(stdout, "Delta #%d: (+): %lf (-): %lf", i, deltaPlus,
-				deltaMinus);
+		fprintf(stdout, "Delta #%d: (+): %lf (-): %lf", i, deltaPlus, deltaMinus);
 		if (!reverse && (fabs(deltaPlus) < t || fabs(deltaMinus) < t))
 		{
 			fprintf(stdout, "  LOW !");
@@ -228,8 +219,7 @@ static ClustersVector getClusters(int m, double t, const ItemsVector &items,
 		unsigned iLast = *(--clusters[iCluster].end());
 		if (iFirst == 0 && iLast == items.size() - 1)
 		{
-			clusters[0].insert(clusters[iCluster].begin(),
-							   clusters[iCluster].end());
+			clusters[0].insert(clusters[iCluster].begin(), clusters[iCluster].end());
 			clusters[iCluster].clear();
 		}
 		fprintf(stdout, "First and last clusters has been united.\n");
@@ -242,9 +232,8 @@ static ClustersVector getClusters(int m, double t, const ItemsVector &items,
 	return clusters;
 }
 
-static std::pair<double, double>
-getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
-			   bool piCase)
+static std::pair<double, double> getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
+												bool piCase)
 {
 	double thetaMin = 0.;
 	double thetaMax = 0.;
@@ -272,10 +261,9 @@ getMinMaxTheta(const std::set<unsigned> &cluster, const ItemsVector &items,
 	return std::make_pair(thetaMin, thetaMax);
 }
 
-std::vector<std::pair<double, double>>
-estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
-				int lParameter, double qParameter, double sParameter,
-				bool reverse)
+std::vector<std::pair<double, double>> estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
+													   int lParameter, double qParameter, double sParameter,
+													   bool reverse)
 {
 	std::sort(items.begin(), items.end());
 	auto clusters = getClusters(mParameter, tParameter, items, reverse);
@@ -298,8 +286,7 @@ estimateCorners(ItemsVector items, unsigned mParameter, double tParameter,
 			fprintf(stdout, "  skipped\n");
 			continue;
 		}
-		bool piCase = cluster.find(0) != cluster.end() &&
-					  cluster.find(items.size() - 1) != cluster.end();
+		bool piCase = cluster.find(0) != cluster.end() && cluster.find(items.size() - 1) != cluster.end();
 		auto pair = getMinMaxTheta(cluster, items, piCase);
 		double thetaMin = pair.first;
 		double thetaMax = pair.second;

@@ -154,8 +154,7 @@ public:
 	 *
 	 * @return Vector of support directions.
 	 */
-	template <class TemplPoint>
-	std::vector<TemplPoint> supportDirections() const
+	template <class TemplPoint> std::vector<TemplPoint> supportDirections() const
 	{
 		DEBUG_START;
 		std::vector<TemplPoint> directions;

@@ -26,8 +26,7 @@
 #include "DebugPrint.h"
 #include "Recoverer/SupportFunctionEstimator.h"
 
-SupportFunctionEstimator::SupportFunctionEstimator(
-	SupportFunctionEstimationDataPtr dataOrig) :
+SupportFunctionEstimator::SupportFunctionEstimator(SupportFunctionEstimationDataPtr dataOrig) :
 	data(dataOrig), ifShadowHeuristics_(false)
 {
 	DEBUG_START;

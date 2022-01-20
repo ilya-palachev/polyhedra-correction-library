@@ -43,8 +43,7 @@ EdgeReducer::~EdgeReducer()
 	DEBUG_END;
 }
 
-bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
-					  EdgesWorkingSets &_edgesWS)
+bool EdgeReducer::run(EdgeSetIterator _edge, EdgeDataPtr _edgeData, EdgesWorkingSets &_edgesWS)
 {
 	DEBUG_START;
 
@@ -123,23 +122,19 @@ bool EdgeReducer::updateFacets()
 
 		facetsUpdated.insert(iFacetCurrent);
 
-		int iPositionReduced =
-			vertexInfoReduced
-				->indFacets[2 * vertexInfoReduced->numFacets + iFacet + 1];
+		int iPositionReduced = vertexInfoReduced->indFacets[2 * vertexInfoReduced->numFacets + iFacet + 1];
 		Facet *facetCurr = &polyhedron->facets[iFacetCurrent];
 
 		DEBUG_PRINT("\t before:");
 		facetCurr->my_fprint_all(stderr);
 
-		DEBUG_PRINT("facetCurr->indVertices[iPositionReduced = %d] = %d",
-					iPositionReduced, facetCurr->indVertices[iPositionReduced]);
+		DEBUG_PRINT("facetCurr->indVertices[iPositionReduced = %d] = %d", iPositionReduced,
+					facetCurr->indVertices[iPositionReduced]);
 		DEBUG_PRINT("iVertexReduced = %d", iVertexReduced);
 		ASSERT(facetCurr->indVertices[iPositionReduced] == iVertexReduced);
 
-		int iPositionPrev = (facetCurr->numVertices + iPositionReduced - 1) %
-							facetCurr->numVertices;
-		int iPositionNext = (facetCurr->numVertices + iPositionReduced + 1) %
-							facetCurr->numVertices;
+		int iPositionPrev = (facetCurr->numVertices + iPositionReduced - 1) % facetCurr->numVertices;
+		int iPositionNext = (facetCurr->numVertices + iPositionReduced + 1) % facetCurr->numVertices;
 
 		/* 2 cases: */
 
@@ -179,20 +174,18 @@ bool EdgeReducer::updateFacets()
 			 *             if v0 is "reduced"
 			 * */
 
-			for (int i = iPositionReduced;
-				 i < facetCurr->numVertices + iPositionPrev; ++i)
+			for (int i = iPositionReduced; i < facetCurr->numVertices + iPositionPrev; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 1];
 			}
 
-			for (int i = facetCurr->numVertices + iPositionPrev;
-				 i < 2 * facetCurr->numVertices + iPositionPrev - 1; ++i)
+			for (int i = facetCurr->numVertices + iPositionPrev; i < 2 * facetCurr->numVertices + iPositionPrev - 1;
+				 ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 2];
 			}
 
-			for (int i = 2 * facetCurr->numVertices + iPositionPrev - 1;
-				 i < 3 * facetCurr->numVertices - 2; ++i)
+			for (int i = 2 * facetCurr->numVertices + iPositionPrev - 1; i < 3 * facetCurr->numVertices - 2; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 3];
 			}
@@ -233,8 +226,7 @@ bool EdgeReducer::updateFacets()
 			 *             if v0 is "reduced"
 			 * */
 
-			for (int i = iPositionReduced;
-				 i < facetCurr->numVertices + iPositionReduced; ++i)
+			for (int i = iPositionReduced; i < facetCurr->numVertices + iPositionReduced; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 1];
 			}
@@ -245,8 +237,7 @@ bool EdgeReducer::updateFacets()
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 2];
 			}
 
-			for (int i = 2 * facetCurr->numVertices + iPositionReduced - 1;
-				 i < 3 * facetCurr->numVertices - 2; ++i)
+			for (int i = 2 * facetCurr->numVertices + iPositionReduced - 1; i < 3 * facetCurr->numVertices - 2; ++i)
 			{
 				facetCurr->indVertices[i] = facetCurr->indVertices[i + 3];
 			}
@@ -263,8 +254,7 @@ bool EdgeReducer::updateFacets()
 		}
 
 		/* Cycling vertex needs to be rewritten after the updating. */
-		facetCurr->indVertices[facetCurr->numVertices] =
-			facetCurr->indVertices[0];
+		facetCurr->indVertices[facetCurr->numVertices] = facetCurr->indVertices[0];
 
 		DEBUG_PRINT("\t after:");
 		facetCurr->my_fprint_all(stderr);
@@ -281,8 +271,7 @@ bool EdgeReducer::updateFacets()
 
 		if (facetCurr->numVertices < 3)
 		{
-			DEBUG_PRINT("Facet #%d is degenerated => will be reduced. ",
-						iFacetCurrent);
+			DEBUG_PRINT("Facet #%d is degenerated => will be reduced. ", iFacetCurrent);
 			cutDegeneratedFacet(iFacetCurrent);
 		}
 	}
@@ -342,8 +331,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	if (facet0->indVertices[iPosition0] != iVertex0)
 	{
-		ERROR_PRINT("facet0->indVertices[%d] = %d != %d", iPosition0,
-					facet0->indVertices[iPosition0], iVertex0);
+		ERROR_PRINT("facet0->indVertices[%d] = %d != %d", iPosition0, facet0->indVertices[iPosition0], iVertex0);
 		facet0->my_fprint_all(stderr);
 		ASSERT(0);
 		DEBUG_END;
@@ -352,8 +340,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	if (facet1->indVertices[iPosition1] != iVertex1)
 	{
-		ERROR_PRINT("facet1->indVertices[%d] = %d != %d", iPosition1,
-					facet1->indVertices[iPosition1], iVertex1);
+		ERROR_PRINT("facet1->indVertices[%d] = %d != %d", iPosition1, facet1->indVertices[iPosition1], iVertex1);
 		facet1->my_fprint_all(stderr);
 		ASSERT(0);
 		DEBUG_END;
@@ -361,42 +348,30 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	}
 
 	/* Transmit the information about "facet1" from "facet" to "facet0". */
-	int iPositionChanged0 =
-		(facet0->numVertices + iPosition0 - 1) % facet0->numVertices;
+	int iPositionChanged0 = (facet0->numVertices + iPosition0 - 1) % facet0->numVertices;
 
-	DEBUG_PRINT(
-		"facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet0,
-		facet0->numVertices + 1 + iPositionChanged0,
-		facet0->indVertices[facet0->numVertices + 1 + iPositionChanged0],
-		iFacet1);
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet0,
+				facet0->numVertices + 1 + iPositionChanged0,
+				facet0->indVertices[facet0->numVertices + 1 + iPositionChanged0], iFacet1);
 	facet0->indVertices[facet0->numVertices + 1 + iPositionChanged0] = iFacet1;
 
-	DEBUG_PRINT(
-		"facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet0,
-		2 * facet0->numVertices + 1 + iPositionChanged0,
-		facet0->indVertices[2 * facet0->numVertices + 1 + iPositionChanged0],
-		iPosition1);
-	facet0->indVertices[2 * facet0->numVertices + 1 + iPositionChanged0] =
-		iPosition1;
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet0,
+				2 * facet0->numVertices + 1 + iPositionChanged0,
+				facet0->indVertices[2 * facet0->numVertices + 1 + iPositionChanged0], iPosition1);
+	facet0->indVertices[2 * facet0->numVertices + 1 + iPositionChanged0] = iPosition1;
 
 	/* Transmit the information about "facet0" from "facet" to "facet1". */
-	int iPositionChanged1 =
-		(facet1->numVertices + iPosition1 - 1) % facet1->numVertices;
+	int iPositionChanged1 = (facet1->numVertices + iPosition1 - 1) % facet1->numVertices;
 
-	DEBUG_PRINT(
-		"facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet1,
-		facet1->numVertices + 1 + iPositionChanged1,
-		facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1],
-		iFacet0);
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet1,
+				facet1->numVertices + 1 + iPositionChanged1,
+				facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1], iFacet0);
 	facet1->indVertices[facet1->numVertices + 1 + iPositionChanged1] = iFacet0;
 
-	DEBUG_PRINT(
-		"facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet1,
-		2 * facet1->numVertices + 1 + iPositionChanged1,
-		facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1],
-		iPosition0);
-	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] =
-		iPosition0;
+	DEBUG_PRINT("facets[%d]->indVertices[%d] = %d -> %d (new value)", iFacet1,
+				2 * facet1->numVertices + 1 + iPositionChanged1,
+				facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1], iPosition0);
+	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] = iPosition0;
 
 	/* Clear current facet. */
 	facet->clear();
@@ -407,16 +382,14 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	if (edgeUpdated == edgeData->edges.end())
 	{
-		ERROR_PRINT("Failed to find edge [%d, %d] in edge data.", iVertex0,
-					iVertex1);
+		ERROR_PRINT("Failed to find edge [%d, %d] in edge data.", iVertex0, iVertex1);
 		ASSERT(0);
 		DEBUG_END;
 		return;
 	}
 
-	DEBUG_PRINT("Changing edge [%d, %d] facets from f0 = %d, f1 = %d",
-				edgeUpdated->v0, edgeUpdated->v1, edgeUpdated->f0,
-				edgeUpdated->f1);
+	DEBUG_PRINT("Changing edge [%d, %d] facets from f0 = %d, f1 = %d", edgeUpdated->v0, edgeUpdated->v1,
+				edgeUpdated->f0, edgeUpdated->f1);
 
 	if (iFacet0 < iFacet1)
 	{
@@ -429,9 +402,8 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 		edgeUpdated->f1 = iFacet0;
 	}
 
-	DEBUG_PRINT("Changing edge [%d, %d] facets to   f0 = %d, f1 = %d",
-				edgeUpdated->v0, edgeUpdated->v1, edgeUpdated->f0,
-				edgeUpdated->f1);
+	DEBUG_PRINT("Changing edge [%d, %d] facets to   f0 = %d, f1 = %d", edgeUpdated->v0, edgeUpdated->v1,
+				edgeUpdated->f0, edgeUpdated->f1);
 
 	DEBUG_END;
 }
@@ -451,24 +423,21 @@ bool EdgeReducer::rePreprocessFacets()
 
 	/* 2). Add neighbors of facets inside set "facetsUpdated" to set
 	 * "facetsPreprocessed". */
-	for (std::set<int>::iterator itFacetUpdated = facetsUpdated.begin();
-		 itFacetUpdated != facetsUpdated.end(); ++itFacetUpdated)
+	for (std::set<int>::iterator itFacetUpdated = facetsUpdated.begin(); itFacetUpdated != facetsUpdated.end();
+		 ++itFacetUpdated)
 	{
 		Facet *facetUpdated = &polyhedron->facets[*itFacetUpdated];
 		for (int i = 0; i < facetUpdated->numVertices; ++i)
 		{
-			facetsPreprocessed.insert(
-				facetUpdated->indVertices[facetUpdated->numVertices + 1 + i]);
+			facetsPreprocessed.insert(facetUpdated->indVertices[facetUpdated->numVertices + 1 + i]);
 		}
 	}
 
 	/* 3). Re-process all facets collected to the set "facetsPreprocessed". */
-	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
-		 itFacet != facetsPreprocessed.end(); ++itFacet)
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin(); itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("*itFacet = %d", *itFacet);
-		DEBUG_PRINT("polyhedron->facets[%d].id = %d", *itFacet,
-					polyhedron->facets[*itFacet].id);
+		DEBUG_PRINT("polyhedron->facets[%d].id = %d", *itFacet, polyhedron->facets[*itFacet].id);
 		ASSERT(polyhedron->facets[*itFacet].id == *itFacet);
 
 		polyhedron->facets[*itFacet].preprocess();
@@ -482,8 +451,7 @@ bool EdgeReducer::rePreprocessFacets()
 	GraphDumperGEXF *graphDumper = new GraphDumperGEXF();
 #endif /* USE_GRAPH_DUMPER */
 
-	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
-		 itFacet != facetsPreprocessed.end(); ++itFacet)
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin(); itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		Facet *facetCurr = &polyhedron->facets[*itFacet];
 		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
@@ -517,13 +485,9 @@ bool EdgeReducer::updateEdges()
 	DEBUG_PRINT("Stage 3. Updating structures \"Edge\".");
 	for (int iFacet = 0; iFacet < vertexInfoReduced->numFacets; ++iFacet)
 	{
-		int iVertexNeighbour =
-			vertexInfoReduced
-				->indFacets[vertexInfoReduced->numFacets + iFacet + 1];
-		DEBUG_PRINT("\tUpdating edge [%d, %d]", iVertexReduced,
-					iVertexNeighbour);
-		EdgeSetIterator edgeUpdated =
-			edgeData->findEdge(iVertexReduced, iVertexNeighbour);
+		int iVertexNeighbour = vertexInfoReduced->indFacets[vertexInfoReduced->numFacets + iFacet + 1];
+		DEBUG_PRINT("\tUpdating edge [%d, %d]", iVertexReduced, iVertexNeighbour);
+		EdgeSetIterator edgeUpdated = edgeData->findEdge(iVertexReduced, iVertexNeighbour);
 		if (edgeUpdated == edgeData->edges.end())
 		{
 			continue;
@@ -535,22 +499,19 @@ bool EdgeReducer::updateEdges()
 			{
 				edgeNew.v0 = iVertexStayed;
 			}
-			else if (edgeNew.v0 == iVertexNeighbour &&
-					 edgeNew.v1 == iVertexReduced)
+			else if (edgeNew.v0 == iVertexNeighbour && edgeNew.v1 == iVertexReduced)
 			{
 				edgeNew.v1 = iVertexStayed;
 			}
 			else
 			{
-				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.",
-							iVertexReduced, iVertexNeighbour);
+				ERROR_PRINT("Failed to find edge [%d, %d] in edge data.", iVertexReduced, iVertexNeighbour);
 
 				DEBUG_PRINT("Printing edge data:");
 				EdgeSetIterator edgePrinted = edgeData->edges.begin();
 				for (int iEdge = 0; iEdge < edgeData->numEdges; ++iEdge)
 				{
-					DEBUG_PRINT("Edge #%d: [%d, %d]", iEdge, edgePrinted->v0,
-								edgePrinted->v1);
+					DEBUG_PRINT("Edge #%d: [%d, %d]", iEdge, edgePrinted->v0, edgePrinted->v1);
 					++edgePrinted;
 				}
 				DEBUG_END;
@@ -559,27 +520,23 @@ bool EdgeReducer::updateEdges()
 
 			/* If succeeded to find the edge, add edge with proper values and
 			 * erase the old one. */
-			edgesWS.edgesEdited.insert(
-				std::pair<int, int>(edgeNew.v0, edgeNew.v1));
+			edgesWS.edgesEdited.insert(std::pair<int, int>(edgeNew.v0, edgeNew.v1));
 
-			DEBUG_PRINT("Erasing edge [%d, %d] and inserting edge [%d, %d]",
-						edgeUpdated->v0, edgeUpdated->v1, edgeNew.v0,
-						edgeNew.v1);
+			DEBUG_PRINT("Erasing edge [%d, %d] and inserting edge [%d, %d]", edgeUpdated->v0, edgeUpdated->v1,
+						edgeNew.v0, edgeNew.v1);
 			edgeData->edges.erase(edgeUpdated);
-			std::pair<EdgeSetIterator, bool> addResult =
-				edgeData->addEdge(edgeNew);
+			std::pair<EdgeSetIterator, bool> addResult = edgeData->addEdge(edgeNew);
 			EdgeSetIterator edgeAdded = addResult.first;
 
 			/* These 2 assertions are added to check the validity of
 			 * information about incident facets. */
 			if (edgeAdded->f0 < 0 || edgeAdded->f0 >= polyhedron->numFacets)
 			{
-				ERROR_PRINT(
-					"Facet id f0 = %d is out of bounds 0 <= i < %d. It "
-					"happened during processing the edge #%d = [%d, %d] "
-					"with info f0 = %d, f1 = %d",
-					edgeAdded->f0, polyhedron->numFacets, edgeAdded->id,
-					edgeAdded->v0, edgeAdded->v1, edgeAdded->f0, edgeAdded->f1);
+				ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
+							"happened during processing the edge #%d = [%d, %d] "
+							"with info f0 = %d, f1 = %d",
+							edgeAdded->f0, polyhedron->numFacets, edgeAdded->id, edgeAdded->v0, edgeAdded->v1,
+							edgeAdded->f0, edgeAdded->f1);
 				ASSERT(0);
 				DEBUG_END;
 				return false;
@@ -587,25 +544,22 @@ bool EdgeReducer::updateEdges()
 
 			if (edgeAdded->f1 < 0 || edgeAdded->f1 >= polyhedron->numFacets)
 			{
-				ERROR_PRINT(
-					"Facet id f1 = %d is out of bounds 0 <= i < %d. It "
-					"happened during processing the edge #%d = [%d, %d] "
-					"with info f0 = %d, f1 = %d",
-					edgeAdded->f1, polyhedron->numFacets, edgeAdded->id,
-					edgeAdded->v0, edgeAdded->v1, edgeAdded->f0, edgeAdded->f1);
+				ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
+							"happened during processing the edge #%d = [%d, %d] "
+							"with info f0 = %d, f1 = %d",
+							edgeAdded->f1, polyhedron->numFacets, edgeAdded->id, edgeAdded->v0, edgeAdded->v1,
+							edgeAdded->f0, edgeAdded->f1);
 				ASSERT(0);
 				DEBUG_END;
 				return false;
 			}
 
-			ASSERT(edgeData->findEdge(edgeNew.v0, edgeNew.v1) !=
-				   edgeData->edges.end());
+			ASSERT(edgeData->findEdge(edgeNew.v0, edgeNew.v1) != edgeData->edges.end());
 		}
 		else
 		{
 			DEBUG_PRINT("\tThis edge must be deleted at all.");
-			edgesWS.edgesErased.insert(
-				std::pair<int, int>(edgeUpdated->v0, edgeUpdated->v1));
+			edgesWS.edgesErased.insert(std::pair<int, int>(edgeUpdated->v0, edgeUpdated->v1));
 			edgeData->edges.erase(edgeUpdated);
 			--edgeData->numEdges;
 		}
@@ -613,15 +567,13 @@ bool EdgeReducer::updateEdges()
 
 	/* Ensure that the reduced edge has been actually removed from
 	 * the edge set. */
-	EdgeSetIterator edgeRemoved =
-		edgeData->findEdge(iVertexReduced, iVertexStayed);
+	EdgeSetIterator edgeRemoved = edgeData->findEdge(iVertexReduced, iVertexStayed);
 	if (edgeRemoved != edgeData->edges.end())
 	{
 		DEBUG_PRINT("The edge [%d, %d] has not been removed from the "
 					"set!",
 					edgeRemoved->v0, edgeRemoved->v1);
-		edgesWS.edgesErased.insert(
-			std::pair<int, int>(edgeRemoved->v0, edgeRemoved->v1));
+		edgesWS.edgesErased.insert(std::pair<int, int>(edgeRemoved->v0, edgeRemoved->v1));
 		edgeData->edges.erase(edgeRemoved);
 		--edgeData->numEdges;
 	}
@@ -673,8 +625,7 @@ bool EdgeReducer::updateVertexInfos()
 #ifndef NDEBUG
 			for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 			{
-				int iPositionFound =
-					polyhedron->facets[iFacet].find_vertex(iVertexCurrent);
+				int iPositionFound = polyhedron->facets[iFacet].find_vertex(iVertexCurrent);
 				if (iPositionFound != -1)
 				{
 					DEBUG_PRINT("Vertex #%d has been found in facet #%d at "
@@ -704,8 +655,7 @@ bool EdgeReducer::updateVertexInfos()
 }
 
 /* The routine for cutting degenerated vertices. */
-void EdgeReducer::cutDegeneratedVertex(int iVertex,
-									   std::queue<int> &facetsQueue)
+void EdgeReducer::cutDegeneratedVertex(int iVertex, std::queue<int> &facetsQueue)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Removing vetrexInfo #%d", iVertex);
@@ -730,12 +680,10 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 	/* 1). Remove cut vertex out from both facets. */
 	DEBUG_PRINT("iPosition0 = %d", iPosition0);
 	DEBUG_PRINT("iVertex0 = %d", iVertex0);
-	DEBUG_PRINT("facet0->indVertices[%d] = %d", iPosition0,
-				facet0->indVertices[iPosition0]);
+	DEBUG_PRINT("facet0->indVertices[%d] = %d", iPosition0, facet0->indVertices[iPosition0]);
 	DEBUG_PRINT("iPosition1 = %d", iPosition1);
 	DEBUG_PRINT("iVertex1 = %d", iVertex1);
-	DEBUG_PRINT("facet1->indVertices[%d] = %d", iPosition1,
-				facet1->indVertices[iPosition1]);
+	DEBUG_PRINT("facet1->indVertices[%d] = %d", iPosition1, facet1->indVertices[iPosition1]);
 
 	ASSERT(facet0->verifyIncidenceStructure());
 	ASSERT(facet1->verifyIncidenceStructure());
@@ -773,18 +721,15 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 
 	for (int i = 0; i < facet0->numVertices; ++i)
 	{
-		facetsPreprocessed.insert(
-			facet0->indVertices[facet0->numVertices + 1 + i]);
+		facetsPreprocessed.insert(facet0->indVertices[facet0->numVertices + 1 + i]);
 	}
 	for (int i = 0; i < facet1->numVertices; ++i)
 	{
-		facetsPreprocessed.insert(
-			facet1->indVertices[facet1->numVertices + 1 + i]);
+		facetsPreprocessed.insert(facet1->indVertices[facet1->numVertices + 1 + i]);
 	}
 
 	/* 3). Re-preprocess all the facets in the std::list. */
-	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
-		 itFacet != facetsPreprocessed.end(); ++itFacet)
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin(); itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("Re-preprocessing facet #%d", *itFacet);
 		polyhedron->facets[*itFacet].my_fprint_all(stderr);
@@ -792,8 +737,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 	}
 
 	/* Verify incidence structure after removal. */
-	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin();
-		 itFacet != facetsPreprocessed.end(); ++itFacet)
+	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin(); itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		ASSERT(polyhedron->facets[*itFacet].verifyIncidenceStructure());
 	}
@@ -806,8 +750,7 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 	EdgeSetIterator edge1 = edgeData->findEdge(iVertex, iVertex1);
 	ASSERT(edge1 != edgeData->edges.end());
 
-	std::pair<EdgeSetIterator, bool> returnValue =
-		edgeData->addEdge(iVertex0, iVertex1, iFacet0, iFacet1);
+	std::pair<EdgeSetIterator, bool> returnValue = edgeData->addEdge(iVertex0, iVertex1, iFacet0, iFacet1);
 	EdgeSetIterator edgeNew = returnValue.first;
 	ASSERT(edgeNew != edgeData->edges.end());
 	edgesWS.edgesAdded.insert(std::pair<int, int>(edgeNew->v0, edgeNew->v1));
@@ -819,8 +762,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 		ERROR_PRINT("Facet id f0 = %d is out of bounds 0 <= i < %d. It "
 					"happened during processing the edge #%d = [%d, %d] "
 					"with info f0 = %d, f1 = %d",
-					edgeNew->f0, polyhedron->numFacets, edgeNew->id,
-					edgeNew->v0, edgeNew->v1, edgeNew->f0, edgeNew->f1);
+					edgeNew->f0, polyhedron->numFacets, edgeNew->id, edgeNew->v0, edgeNew->v1, edgeNew->f0,
+					edgeNew->f1);
 		ASSERT(0);
 		DEBUG_END;
 		return;
@@ -831,8 +774,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 		ERROR_PRINT("Facet id f1 = %d is out of bounds 0 <= i < %d. It "
 					"happened during processing the edge #%d = [%d, %d] "
 					"with info f0 = %d, f1 = %d",
-					edgeNew->f1, polyhedron->numFacets, edgeNew->id,
-					edgeNew->v0, edgeNew->v1, edgeNew->f0, edgeNew->f1);
+					edgeNew->f1, polyhedron->numFacets, edgeNew->id, edgeNew->v0, edgeNew->v1, edgeNew->f0,
+					edgeNew->f1);
 		ASSERT(0);
 		DEBUG_END;
 		return;
@@ -848,13 +791,10 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex,
 	 */
 	DEBUG_VARIABLE int numAssociationsBefore = edgeNew->assocList.size();
 
-	edgeNew->assocList.insert(edgeNew->assocList.end(),
-							  edge0->assocList.begin(), edge0->assocList.end());
-	edgeNew->assocList.insert(edgeNew->assocList.end(),
-							  edge1->assocList.begin(), edge1->assocList.end());
-	ASSERT((unsigned)edgeNew->assocList.size() == numAssociationsBefore +
-													  edge0->assocList.size() +
-													  edge1->assocList.size());
+	edgeNew->assocList.insert(edgeNew->assocList.end(), edge0->assocList.begin(), edge0->assocList.end());
+	edgeNew->assocList.insert(edgeNew->assocList.end(), edge1->assocList.begin(), edge1->assocList.end());
+	ASSERT((unsigned)edgeNew->assocList.size() ==
+		   numAssociationsBefore + edge0->assocList.size() + edge1->assocList.size());
 
 	edgesWS.edgesErased.insert(std::pair<int, int>(edge0->v0, edge0->v1));
 	edgeData->edges.erase(edge0);
@@ -880,8 +820,7 @@ bool EdgeReducer::verifyEdgeData()
 			EdgeSetIterator edgeFound = edgeData->findEdge(v0, v1);
 			if (edgeFound == edgeData->edges.end())
 			{
-				ERROR_PRINT("Failed to find edge [%d, %d] in edge data", v0,
-							v1);
+				ERROR_PRINT("Failed to find edge [%d, %d] in edge data", v0, v1);
 				facet->my_fprint_all(stderr);
 				ASSERT(0);
 				return false;

@@ -155,18 +155,15 @@ private:
 	void derivativeTest_1();
 	double calculateFunctionalDerivative_1(int iFacet, int iCoefficient);
 
-	GSCorrectorStatus repairAndRun(MethodCorrector method,
-								   Plane *planesInitial);
+	GSCorrectorStatus repairAndRun(MethodCorrector method, Plane *planesInitial);
 	GSCorrectorStatus runCorrectionDo();
 
 	void init();
 
 public:
 	GlobalShadowCorrector();
-	GlobalShadowCorrector(PolyhedronPtr p, ShadowContourDataPtr scd,
-						  GSCorrectorParameters *_parameters);
-	GlobalShadowCorrector(Polyhedron *p, ShadowContourDataPtr scd,
-						  GSCorrectorParameters *_parameters);
+	GlobalShadowCorrector(PolyhedronPtr p, ShadowContourDataPtr scd, GSCorrectorParameters *_parameters);
+	GlobalShadowCorrector(Polyhedron *p, ShadowContourDataPtr scd, GSCorrectorParameters *_parameters);
 	virtual ~GlobalShadowCorrector();
 	void setFacetsCorrected(std::list<int> _facetsCorrected);
 

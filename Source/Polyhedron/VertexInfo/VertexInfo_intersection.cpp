@@ -28,13 +28,11 @@ int VertexInfo::intersection_find_next_facet(Plane iplane, int facet_id)
 
 	if (auto polyhedron = parentPolyhedron.lock())
 	{
-		int sgn_curr = polyhedron->signum(
-			polyhedron->vertices[indFacets[2 * numFacets]], iplane);
+		int sgn_curr = polyhedron->signum(polyhedron->vertices[indFacets[2 * numFacets]], iplane);
 		for (int i = 0; i < numFacets; ++i)
 		{
 			int sgn_prev = sgn_curr;
-			sgn_curr = polyhedron->signum(
-				polyhedron->vertices[indFacets[i + numFacets + 1]], iplane);
+			sgn_curr = polyhedron->signum(polyhedron->vertices[indFacets[i + numFacets + 1]], iplane);
 			if (sgn_curr != sgn_prev)
 			{
 				if (indFacets[i] != facet_id)

@@ -73,19 +73,16 @@ void VertexInfo::preprocess()
 
 		DEBUG_PRINT("\t Facet currently visited by preprocessor: %d", fid_curr);
 
-		DEBUG_PRINT("\t Jumping from facet #%d, position %d (vertex #%d)",
-					fid_curr, pos_curr, v_curr);
+		DEBUG_PRINT("\t Jumping from facet #%d, position %d (vertex #%d)", fid_curr, pos_curr, v_curr);
 
 		facets[fid_curr].get_next_facet(pos_curr, pos_next, fid_next, v_curr);
 
 		/* This assertion has been added for debugging purposes, because
 		 * sometimes wrong transformations of polyhedron cause the
 		 * incorrectness of data inside facet arrays. */
-		ASSERT(facets[fid_curr].indVertices[pos_curr] ==
-			   facets[fid_next].indVertices[pos_next]);
+		ASSERT(facets[fid_curr].indVertices[pos_curr] == facets[fid_next].indVertices[pos_next]);
 
-		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)",
-					fid_next, pos_next, v_curr);
+		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)", fid_next, pos_next, v_curr);
 
 #ifndef NDEBUG
 		facets[fid_curr].my_fprint_all(stderr);

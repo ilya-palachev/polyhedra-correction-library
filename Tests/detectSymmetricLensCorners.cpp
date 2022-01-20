@@ -116,8 +116,7 @@ int main(int argc, char **argv)
 	}
 
 	auto items = generateSymmetricLensItems(NParameter, noiseSigmaParameter);
-	auto corners = estimateCorners(items, mParameter, tParameter, lParameter,
-								   qParameter, sParameter, false);
+	auto corners = estimateCorners(items, mParameter, tParameter, lParameter, qParameter, sParameter, false);
 	fprintf(stdout, "%lu corners have been detected.\n", corners.size());
 	DEBUG_END;
 	return EXIT_SUCCESS;

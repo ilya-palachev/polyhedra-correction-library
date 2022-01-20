@@ -148,16 +148,14 @@ public:
 	 * @param vertex_orig	The array of vertices
 	 * @param facet_orig	The array of facets
 	 */
-	Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig,
-			   Facet *facet_orig);
+	Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig, Facet *facet_orig);
 
 	/**
 	 * Converts standard CGAL polyhedron to PCL polyhedron.
 	 *
 	 * @param p	Standard CGAL polyhedron
 	 */
-	template <class KernelT, class ItemsIndexedT>
-	Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p);
+	template <class KernelT, class ItemsIndexedT> Polyhedron(CGAL::Polyhedron_3<KernelT, ItemsIndexedT> p);
 
 	/**
 	 * Constructs polyhedron that consists of facets that are equal to given
@@ -189,8 +187,7 @@ public:
 	 * @param zmin	A reference where the minimal z will be stored in.
 	 * @param zmax	A reference where the maximal z will be stored in.
 	 */
-	void get_boundary(double &xmin, double &xmax, double &ymin, double &ymax,
-					  double &zmin, double &zmax);
+	void get_boundary(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin, double &zmax);
 
 	/**
 	 * Deletes facets that contain zero number of vertices. Such situation can
@@ -424,8 +421,7 @@ public:
 	 * TODO: It will be much better to use some open-source library to parse
 	 * general PLY files (maybe RPLY).
 	 */
-	void fprint_ply_scale(double scale, const char *filename,
-						  const char *comment);
+	void fprint_ply_scale(double scale, const char *filename, const char *comment);
 
 	/**
 	 * Writes the polyhedron to the file in Stanford PLY format.
@@ -437,8 +433,7 @@ public:
 	 * @param comment	The comment to be written to the file. It must contain
 	 * only one word.
 	 */
-	void fprint_ply_autoscale(double maxSize, const char *filename,
-							  const char *comment);
+	void fprint_ply_autoscale(double maxSize, const char *filename, const char *comment);
 
 	/**
 	 * Writes polyhedron to stream in PLY format, using autoscaling.
@@ -623,8 +618,7 @@ public:
 	 *
 	 * TODO: mode should be enum, not integer!
 	 */
-	void shiftPointLinearTest(int id, Vector3d delta, int mode, int &num_steps,
-							  double &norm_sum);
+	void shiftPointLinearTest(int id, Vector3d delta, int mode, int &num_steps, double &norm_sum);
 
 	/**
 	 * Runs global linear shifting sequentially with small steps.
@@ -724,8 +718,7 @@ public:
 	 * @param Jxx	Reference to Jyz = Jzy
 	 * @param Jxx	Reference to Jxz = Jzx
 	 */
-	void J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz,
-		   double &Jxz);
+	void J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz, double &Jxz);
 
 	/**
 	 * Calculates the mass center of the polyhedron
@@ -749,8 +742,7 @@ public:
 	 * @param v1	Reference to 2nd axis of inertia
 	 * @param v2	Reference to 3rd axis of inertia
 	 */
-	void inertia(double &l0, double &l1, double &l2, Vector3d &v0, Vector3d &v1,
-				 Vector3d &v2);
+	void inertia(double &l0, double &l1, double &l2, Vector3d &v0, Vector3d &v1, Vector3d &v2);
 
 	/**
 	 * Prints the std::list of facets sorted by their area
@@ -800,8 +792,7 @@ public:
 	 * @param nodeArray	Pointer to the root of hierarchical tree
 	 * @param matrix	Reference to the matrix of distances between facets
 	 */
-	void giveClusterNodeArray(TreeClusterNormNode *nodeArray,
-							  MatrixDistNorm &matrix);
+	void giveClusterNodeArray(TreeClusterNormNode *nodeArray, MatrixDistNorm &matrix);
 
 	/**
 	 * Builds hierarchical clusterization of the facets set associated with
@@ -812,10 +803,8 @@ public:
 	 * @param nodeArray_out	Pointer to the root of input hierarchical tree
 	 * @param matrix_out	Reference to the output matrix of distances
 	 */
-	void reClusterNodeArray(TreeClusterNormNode *nodeArray_in,
-							MatrixDistNorm &matrix_in,
-							TreeClusterNormNode *nodeArray_out,
-							MatrixDistNorm &matrix_out);
+	void reClusterNodeArray(TreeClusterNormNode *nodeArray_in, MatrixDistNorm &matrix_in,
+							TreeClusterNormNode *nodeArray_out, MatrixDistNorm &matrix_out);
 
 	/*
 	 * Global correction
@@ -835,8 +824,7 @@ public:
 	 * @param facetsCorrected	The std::list of facets to be corrected (for
 	 * partial correction)
 	 */
-	void correctGlobal(ShadowContourDataPtr contourData,
-					   GSCorrectorParameters *parameters,
+	void correctGlobal(ShadowContourDataPtr contourData, GSCorrectorParameters *parameters,
 					   std::list<int> *facetsCorrected);
 
 	/*

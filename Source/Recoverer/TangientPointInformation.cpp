@@ -58,8 +58,8 @@ Eigen::Matrix3d TangientPointInformation::calculateInverse(void)
 	return inverse;
 }
 
-TangientPointInformation::TangientPointInformation(
-	int iDirection, Vector_3 direction, Polyhedron_3::Vertex_iterator vertex)
+TangientPointInformation::TangientPointInformation(int iDirection, Vector_3 direction,
+												   Polyhedron_3::Vertex_iterator vertex)
 {
 	DEBUG_START;
 	iPoint_ = vertex->id;
@@ -78,8 +78,7 @@ TangientPointInformation::TangientPointInformation(
 		++iHalfedge;
 	} while (halfedge != halfedgeFirst);
 #ifndef NDEBUG
-	std::cerr << "... The best is #" << vertex->id << " : " << *this
-			  << std::endl;
+	std::cerr << "... The best is #" << vertex->id << " : " << *this << std::endl;
 #endif
 	supportValue_ = direction * (vertex->point() - CGAL::Origin());
 	inverse_ = calculateInverse();
@@ -90,15 +89,12 @@ std::ostream &operator<<(std::ostream &stream, TangientPointInformation &info)
 {
 	DEBUG_START;
 	stream << "information:" << std::endl;
-	stream << "   tangient point is #" << info.iPoint_ << ": " << info.point_
-		   << std::endl;
-	stream << "   support direction is #" << info.iDirection_ << ": "
-		   << info.direction_ << std::endl;
+	stream << "   tangient point is #" << info.iPoint_ << ": " << info.point_ << std::endl;
+	stream << "   support direction is #" << info.iDirection_ << ": " << info.direction_ << std::endl;
 	stream << "   facets:" << std::endl;
 	for (int i = 0; i < 3; ++i)
 	{
-		stream << "      " << info.indices_[i] << ": " << info.planes_[i]
-			   << std::endl;
+		stream << "      " << info.indices_[i] << ": " << info.planes_[i] << std::endl;
 	}
 	DEBUG_END;
 	return stream;
@@ -111,8 +107,7 @@ GradientSlice *TangientPointInformation::calculateFirstDerivative(void)
 	double products[3];
 	for (int i = 0; i < 3; ++i)
 	{
-		Vector_3 column =
-			Vector_3(inverse_(0, i), inverse_(1, i), inverse_(2, i));
+		Vector_3 column = Vector_3(inverse_(0, i), inverse_(1, i), inverse_(2, i));
 		products[i] = direction_ * column;
 	}
 
@@ -176,8 +171,7 @@ HessianSlice *TangientPointInformation::calculateSecondDerivative(void)
 			{
 				for (int j = 0; j < 3; ++j)
 				{
-					matrix = E[s][i] * inverse_ * E[t][j] +
-							 E[t][j] * inverse_ * E[s][i];
+					matrix = E[s][i] * inverse_ * E[t][j] + E[t][j] * inverse_ * E[s][i];
 					matrix = inverse_ * matrix;
 					auto v = matrix * tangient;
 					double value = -direction_ * Vector_3(v(0), v(1), v(2));

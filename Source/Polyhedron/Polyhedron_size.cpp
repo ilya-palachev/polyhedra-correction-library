@@ -63,8 +63,7 @@ double Polyhedron::areaOfFacet(int iFacet)
 	return ret;
 }
 
-void Polyhedron::J(double &Jxx, double &Jyy, double &Jzz, double &Jxy,
-				   double &Jyz, double &Jxz)
+void Polyhedron::J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz, double &Jxz)
 {
 	DEBUG_START;
 	SizeCalculator *sizeCalculator = new SizeCalculator(get_ptr());
@@ -82,8 +81,7 @@ void Polyhedron::get_center(double &xc, double &yc, double &zc)
 	DEBUG_END;
 }
 
-void Polyhedron::inertia(double &l0, double &l1, double &l2, Vector3d &v0,
-						 Vector3d &v1, Vector3d &v2)
+void Polyhedron::inertia(double &l0, double &l1, double &l2, Vector3d &v0, Vector3d &v1, Vector3d &v2)
 {
 	DEBUG_START;
 	SizeCalculator *sizeCalculator = new SizeCalculator(get_ptr());

@@ -106,8 +106,7 @@ int VertexGrouper::groupInner()
 	return count;
 }
 
-int VertexGrouper::groupInnerFacet(int fid, double *A, double *b,
-								   Vector3d *vertex_old)
+int VertexGrouper::groupInnerFacet(int fid, double *A, double *b, Vector3d *vertex_old)
 {
 	DEBUG_START;
 
@@ -135,12 +134,10 @@ int VertexGrouper::groupInnerFacet(int fid, double *A, double *b,
 	for (i = 0; i < nv; ++i)
 	{
 		count +=
-			grouptInnerPair(fid, index[i % nv], index[(i + 1) % nv],
-							index[(i + 2) % nv], index[(i + 3) % nv], A, b);
+			grouptInnerPair(fid, index[i % nv], index[(i + 1) % nv], index[(i + 2) % nv], index[(i + 3) % nv], A, b);
 	}
 	if (count > 0)
-		DEBUG_PRINT("\t\tIn facet %d: %d inner intersections found\n", fid,
-					count);
+		DEBUG_PRINT("\t\tIn facet %d: %d inner intersections found\n", fid, count);
 	for (i = 0; i < nv; ++i)
 	{
 		polyhedron->vertices[index[i]] = vertex_old[i];
@@ -149,8 +146,7 @@ int VertexGrouper::groupInnerFacet(int fid, double *A, double *b,
 	return count;
 }
 
-int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
-								   double *A, double *b)
+int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3, double *A, double *b)
 {
 	DEBUG_START;
 
@@ -163,8 +159,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
 	//    bool ifFind1, ifFind2;
 	int pos1, pos2;
 
-	if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 ||
-		id0 >= polyhedron->numVertices || id1 >= polyhedron->numVertices ||
+	if (id0 < 0 || id1 < 0 || id2 < 0 || id2 < 0 || id0 >= polyhedron->numVertices || id1 >= polyhedron->numVertices ||
 		id2 >= polyhedron->numVertices || id3 >= polyhedron->numVertices)
 	{
 		ERROR_PRINT("Error. incorrect input\n");
@@ -174,8 +169,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
 
 	if ((id0 == id3 && id1 == id2) || (id0 == id2 && id1 == id3))
 	{
-		ERROR_PRINT("(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2,
-					id3);
+		ERROR_PRINT("(%d, %d) and (%d, %d) are equal edges\n", id0, id1, id2, id3);
 		DEBUG_END;
 		return 2;
 	}
@@ -183,14 +177,12 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
 	if (id1 == id2)
 	{
 		if (qmod((polyhedron->vertices[id1] - polyhedron->vertices[id0]) %
-				 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) <
-				EPS_PARALLEL &&
+				 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL &&
 			(polyhedron->vertices[id1] - polyhedron->vertices[id0]) *
 					(polyhedron->vertices[id3] - polyhedron->vertices[id2]) <
 				0)
 		{
-			ERROR_PRINT("\t\t\t(%d, %d) and (%d, %d) intersect untrivially\n",
-						id0, id1, id2, id3);
+			ERROR_PRINT("\t\t\t(%d, %d) and (%d, %d) intersect untrivially\n", id0, id1, id2, id3);
 			DEBUG_END;
 			return 2;
 		}
@@ -203,14 +195,12 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
 	if (id0 == id3)
 	{
 		if (qmod((polyhedron->vertices[id1] - polyhedron->vertices[id0]) %
-				 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) <
-				EPS_PARALLEL &&
+				 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL &&
 			(polyhedron->vertices[id1] - polyhedron->vertices[id0]) *
 					(polyhedron->vertices[id3] - polyhedron->vertices[id2]) >
 				0)
 		{
-			ERROR_PRINT("\t\t\t(%d, %d) and (%d, %d) intersect untrivially\n",
-						id0, id1, id2, id3);
+			ERROR_PRINT("\t\t\t(%d, %d) and (%d, %d) intersect untrivially\n", id0, id1, id2, id3);
 			DEBUG_END;
 			return 2;
 		}
@@ -221,8 +211,7 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
 	}
 
 	if (qmod((polyhedron->vertices[id1] - polyhedron->vertices[id0]) %
-			 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) <
-		EPS_PARALLEL)
+			 (polyhedron->vertices[id3] - polyhedron->vertices[id2])) < EPS_PARALLEL)
 	{
 		DEBUG_END;
 		return 0;
@@ -289,12 +278,10 @@ int VertexGrouper::grouptInnerPair(int fid, int id0, int id1, int id2, int id3,
 
 	if (b[0] > 0. && b[0] < 1. && b[1] > 0. && b[1] < 1.)
 	{
-		DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1,
-					id2, id3);
+		DEBUG_PRINT("\t\t\tEdges (%d, %d) and (%d, %d) consect\n", id0, id1, id2, id3);
 
 		//В этом случае будем объединять вершины...
-		DEBUG_VARIABLE double dist =
-			sqrt(qmod(polyhedron->vertices[id1] - polyhedron->vertices[id2]));
+		DEBUG_VARIABLE double dist = sqrt(qmod(polyhedron->vertices[id1] - polyhedron->vertices[id2]));
 		DEBUG_PRINT("Принято решение сливать вершины %d и %d, расстояние между "
 					"которыми равно %lf\n",
 					id1, id2, dist);

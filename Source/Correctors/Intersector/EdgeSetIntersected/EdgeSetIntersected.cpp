@@ -103,8 +103,7 @@ EdgeSetIntersected::~EdgeSetIntersected()
 	DEBUG_END;
 }
 
-EdgeSetIntersected &
-EdgeSetIntersected::operator=(const EdgeSetIntersected &orig)
+EdgeSetIntersected &EdgeSetIntersected::operator=(const EdgeSetIntersected &orig)
 {
 	DEBUG_START;
 	len = orig.len;

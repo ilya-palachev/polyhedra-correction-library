@@ -31,8 +31,7 @@ private:
 
 	int groupInner();
 	int groupInnerFacet(int fid, double *A, double *b, Vector3d *vertex_old);
-	int grouptInnerPair(int fid, int id0, int id1, int id2, int id3, double *A,
-						double *b);
+	int grouptInnerPair(int fid, int id0, int id1, int id2, int id3, double *A, double *b);
 
 public:
 	VertexGrouper();

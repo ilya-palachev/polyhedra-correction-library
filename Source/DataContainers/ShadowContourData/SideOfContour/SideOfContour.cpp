@@ -25,11 +25,7 @@
 #include "Constants.h"
 #include "DataContainers/ShadowContourData/SideOfContour/SideOfContour.h"
 
-SideOfContour::SideOfContour() :
-	confidence(0),
-	type(EEdgeUnknown),
-	A1(Vector3d(0, 0, 0)),
-	A2(Vector3d(0, 0, 0))
+SideOfContour::SideOfContour() : confidence(0), type(EEdgeUnknown), A1(Vector3d(0, 0, 0)), A2(Vector3d(0, 0, 0))
 {
 	DEBUG_START;
 	DEBUG_END;

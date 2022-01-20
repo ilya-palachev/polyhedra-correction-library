@@ -64,20 +64,16 @@ int main(int argc, char **argv)
 	}
 
 	GSCorrectorParameters gsParameters;
-	gsParameters = {parameters.method, parameters.epsLoopStop,
-					parameters.deltaGardientStep};
+	gsParameters = {parameters.method, parameters.epsLoopStop, parameters.deltaGardientStep};
 
-	std::list<FacetWithArea> listSortedFacets =
-		polyhedron->getSortedByAreaFacets();
+	std::list<FacetWithArea> listSortedFacets = polyhedron->getSortedByAreaFacets();
 
 	std::list<int> facetsCorrected;
 	auto itFacet = listSortedFacets.rend();
 	++itFacet;
-	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected;
-		 ++itFacet, ++iFacet)
+	for (int iFacet = 0; iFacet < parameters.numFacetsCorrected; ++itFacet, ++iFacet)
 	{
-		DEBUG_PRINT("Adding facet %d with area %lf to be corrected",
-					itFacet->facet->id, itFacet->area);
+		DEBUG_PRINT("Adding facet %d with area %lf to be corrected", itFacet->facet->id, itFacet->area);
 		facetsCorrected.push_back(itFacet->facet->id);
 	}
 
@@ -131,13 +127,11 @@ int parse_commandLine(int argc, char **argv, TestParameters &parameters)
 	parameters.fileNameShadowContours = new char[255];
 	char *method = new char[255];
 
-	bool ifCorrectInput =
-		sscanf(argv[1], "%s", parameters.fileNamePolyhedron) &&
-		sscanf(argv[2], "%s", parameters.fileNameShadowContours) &&
-		sscanf(argv[3], "%s", method) &&
-		sscanf(argv[4], "%lf", &parameters.epsLoopStop) &&
-		sscanf(argv[5], "%lf", &parameters.deltaGardientStep) &&
-		sscanf(argv[6], "%d", &parameters.numFacetsCorrected);
+	bool ifCorrectInput = sscanf(argv[1], "%s", parameters.fileNamePolyhedron) &&
+						  sscanf(argv[2], "%s", parameters.fileNameShadowContours) && sscanf(argv[3], "%s", method) &&
+						  sscanf(argv[4], "%lf", &parameters.epsLoopStop) &&
+						  sscanf(argv[5], "%lf", &parameters.deltaGardientStep) &&
+						  sscanf(argv[6], "%d", &parameters.numFacetsCorrected);
 
 	parameters.method = parse_methodName(method);
 

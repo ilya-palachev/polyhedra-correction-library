@@ -48,11 +48,10 @@ void EdgeConstructor::run(EdgeDataPtr edgeData)
 		int *index = polyhedron->facets[i].indVertices;
 		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex)
 		{
-			edgeData->addEdge(
-				index[iVertex],							  // First vertices
-				index[iVertex + 1],						  // Second vertices
-				i,										  // Current facets id
-				index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
+			edgeData->addEdge(index[iVertex],							// First vertices
+							  index[iVertex + 1],						// Second vertices
+							  i,										// Current facets id
+							  index[numVerticesInFacet + 1 + iVertex]); // Id of its neighbor
 			DEBUG_PRINT("After iteration #%d we have the "
 						"following edge data:",
 						(int)edgeData->edges.size());

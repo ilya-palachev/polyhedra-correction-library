@@ -34,14 +34,10 @@ Facet::Facet() : id(-1), numVertices(0), plane(), indVertices(NULL)
 	DEBUG_END;
 }
 
-Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig,
-			 const int *index_orig, PolyhedronPtr poly_orig = NULL,
-			 const bool ifLong = false) :
+Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig, const int *index_orig,
+			 PolyhedronPtr poly_orig = NULL, const bool ifLong = false) :
 
-	id(id_orig),
-	numVertices(nv_orig),
-	plane(plane_orig),
-	parentPolyhedron(poly_orig)
+	id(id_orig), numVertices(nv_orig), plane(plane_orig), parentPolyhedron(poly_orig)
 {
 	DEBUG_START;
 	init_full(index_orig, ifLong);
@@ -80,12 +76,8 @@ void Facet::init_full(const int *index_orig, const bool ifLong)
 	DEBUG_END;
 }
 
-Facet::Facet(int id_orig, int nv_orig, Plane plane_orig,
-			 PolyhedronPtr poly_orig) :
-	id(id_orig),
-	numVertices(nv_orig),
-	plane(plane_orig),
-	parentPolyhedron(poly_orig)
+Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, PolyhedronPtr poly_orig) :
+	id(id_orig), numVertices(nv_orig), plane(plane_orig), parentPolyhedron(poly_orig)
 {
 	DEBUG_START;
 	init_empty();
@@ -242,8 +234,7 @@ void Facet::set_ind_vertex(int position, int value)
 	DEBUG_END;
 }
 
-void Facet::get_next_facet(int pos_curr, int &pos_next, int &fid_next,
-						   int &v_curr)
+void Facet::get_next_facet(int pos_curr, int &pos_next, int &fid_next, int &v_curr)
 {
 	DEBUG_START;
 	fid_next = indVertices[pos_curr + numVertices + 1];
@@ -301,11 +292,9 @@ void Facet::delete_vertex(int v)
 		{
 			found = 1;
 			for (j = i; j < numVertices - 1; ++j)
-				indVertices[2 * numVertices + 1 + j] =
-					indVertices[2 * numVertices + 2 + j];
+				indVertices[2 * numVertices + 1 + j] = indVertices[2 * numVertices + 2 + j];
 			for (j = i; j < 2 * numVertices - 2; ++j)
-				indVertices[numVertices + 1 + j] =
-					indVertices[numVertices + 2 + j];
+				indVertices[numVertices + 1 + j] = indVertices[numVertices + 2 + j];
 			for (j = i; j < 3 * numVertices - 2; ++j)
 				indVertices[j] = indVertices[j + 1];
 			--numVertices;
@@ -370,8 +359,7 @@ void Facet::add(int what, int pos)
 			index_new[i] = indVertices[i - 3];
 		}
 		index_new[2 * (numVertices + 1) + 1 + pos] = -1;
-		for (i = 2 * (numVertices + 1) + pos; i > numVertices + 1 + 1 + pos;
-			 --i)
+		for (i = 2 * (numVertices + 1) + pos; i > numVertices + 1 + 1 + pos; --i)
 		{
 			index_new[i] = indVertices[i - 2];
 		}
@@ -404,8 +392,7 @@ void Facet::remove(int pos)
 {
 	DEBUG_START;
 	int i;
-	DEBUG_PRINT("remove position %d (vertex %d) in facet %d", pos,
-				indVertices[pos], id);
+	DEBUG_PRINT("remove position %d (vertex %d) in facet %d", pos, indVertices[pos], id);
 	DEBUG_PRINT("{{{");
 	this->my_fprint_all(stdout);
 
@@ -445,8 +432,7 @@ void Facet::update_info()
 		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 		{
 			int iFacet = indVertices[numVertices + 1 + iVertex];
-			int pos =
-				polyhedron->facets[iFacet].find_vertex(indVertices[iVertex]);
+			int pos = polyhedron->facets[iFacet].find_vertex(indVertices[iVertex]);
 			if (pos == -1)
 			{
 				ERROR_PRINT("=======update_info: Error. Cannot find vertex %d "
@@ -462,10 +448,9 @@ void Facet::update_info()
 			pos = (pos + nnv - 1) % nnv;
 			if (polyhedron->facets[iFacet].indVertices[nnv + 1 + pos] != id)
 			{
-				ERROR_PRINT(
-					"=======update_info: Error. Wrong neighbor facet for vertex"
-					" %d in facet %d",
-					indVertices[iVertex], iFacet);
+				ERROR_PRINT("=======update_info: Error. Wrong neighbor facet for vertex"
+							" %d in facet %d",
+							indVertices[iVertex], iFacet);
 				polyhedron->facets[iFacet].my_fprint_all(stdout);
 				this->my_fprint_all(stdout);
 				DEBUG_END;
@@ -506,8 +491,7 @@ Vector3d &Facet::find_mass_centre()
 	{
 		a = vertices[indVertices[i]];
 		*v += a;
-		DEBUG_PRINT("facet[%d].index[%d] = (%lf, %lf, %lf)", id, i, a.x, a.y,
-					a.z);
+		DEBUG_PRINT("facet[%d].index[%d] = (%lf, %lf, %lf)", id, i, a.x, a.y, a.z);
 	}
 	*v *= c;
 	DEBUG_END;

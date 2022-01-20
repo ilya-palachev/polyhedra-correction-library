@@ -52,9 +52,7 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 		EdgeInfo info;
 		line = scaner.getline();
 		unsigned isReady = 0;
-		if (!line ||
-			sscanf(line, "%u %u %u %lf", &info.id, &isReady, &info.type,
-				   &info.weight) != 4 ||
+		if (!line || sscanf(line, "%u %u %u %lf", &info.id, &isReady, &info.type, &info.weight) != 4 ||
 			info.id != iEdge)
 		{
 			ERROR_PRINT("Wrong format, edge header #%d", iEdge);
@@ -108,8 +106,7 @@ bool readEdgeInfoFile(const char *path, std::vector<EdgeInfo> &data)
 			double a, b, c, d;
 			unsigned type = 0;
 			double weight = 0.;
-			if (!line || sscanf(line, "%u %lf %lf %lf %lf %lf", &type, &weight,
-								&a, &b, &c, &d) != 6)
+			if (!line || sscanf(line, "%u %lf %lf %lf %lf %lf", &type, &weight, &a, &b, &c, &d) != 6)
 			{
 				ERROR_PRINT("Wrong format, edge %d, plane %d", iEdge, iPlane);
 				return false;
@@ -153,8 +150,7 @@ bool getInitialPosition(Polyhedron_3 &p, std::vector<EdgeInfo> &data)
 
 		if (!found)
 		{
-			std::cerr << "Failed to find initial edge for info #" << iInfo
-					  << std::endl;
+			std::cerr << "Failed to find initial edge for info #" << iInfo << std::endl;
 			return false;
 		}
 

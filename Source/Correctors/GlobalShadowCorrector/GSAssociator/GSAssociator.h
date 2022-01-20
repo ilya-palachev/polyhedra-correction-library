@@ -61,14 +61,12 @@ private:
 	void projectEdge();
 	int checkExtinction();
 
-	int findNearestPoint(Vector3d v_projected, Vector3d &v_nearest,
-						 double &distMin);
+	int findNearestPoint(Vector3d v_projected, Vector3d &v_nearest, double &distMin);
 
 	double calculateArea(Orientation orientation);
 
 	void add(Orientation orientation);
-	void findBounds(Orientation orientation, int &iResultBegin,
-					int &iResultEnd);
+	void findBounds(Orientation orientation, int &iResultBegin, int &iResultEnd);
 
 	double calculateWeight();
 

@@ -40,8 +40,7 @@ class SupportPolyhedronCorrector
 
 public:
 	/** Creates the corector for given polyhedron and data. */
-	SupportPolyhedronCorrector(Polyhedron_3 initialP,
-							   SupportFunctionDataPtr SData);
+	SupportPolyhedronCorrector(Polyhedron_3 initialP, SupportFunctionDataPtr SData);
 
 	/** Runs the correction process and builds the polyhedron. */
 	Polyhedron_3 run();

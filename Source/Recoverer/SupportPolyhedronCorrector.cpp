@@ -31,8 +31,7 @@
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataConstructor.h"
 #include "IpoptTopologicalCorrector.h"
 
-SupportPolyhedronCorrector::SupportPolyhedronCorrector(
-	Polyhedron_3 initialP, SupportFunctionDataPtr SData) :
+SupportPolyhedronCorrector::SupportPolyhedronCorrector(Polyhedron_3 initialP, SupportFunctionDataPtr SData) :
 	initialP(initialP), SData(SData)
 {
 	DEBUG_START;
@@ -46,19 +45,16 @@ Polyhedron_3 obtainPolyhedron(IpoptTopologicalCorrector *FTNLP)
 	std::vector<double> values = FTNLP->getValues();
 	std::vector<Plane_3> planes(values.size());
 	for (unsigned i = 0; i < values.size(); ++i)
-		planes[i] = Plane_3(-directions[i].x(), -directions[i].y(),
-							-directions[i].z(), values[i]);
+		planes[i] = Plane_3(-directions[i].x(), -directions[i].y(), -directions[i].z(), values[i]);
 	Polyhedron_3 intersection(planes);
-	std::cout << "Intersection has " << intersection.size_of_vertices()
-			  << " vertices, " << intersection.size_of_facets() << " facets."
-			  << std::endl;
+	std::cout << "Intersection has " << intersection.size_of_vertices() << " vertices, "
+			  << intersection.size_of_facets() << " facets." << std::endl;
 
 	DEBUG_END;
 	return intersection;
 }
 
-FixedTopology *buildTopology(Polyhedron_3 initialP,
-							 SupportFunctionDataPtr SData)
+FixedTopology *buildTopology(Polyhedron_3 initialP, SupportFunctionDataPtr SData)
 {
 	DEBUG_START;
 	FixedTopology *FT = new FixedTopology();
@@ -78,8 +74,7 @@ FixedTopology *buildTopology(Polyhedron_3 initialP,
 	initialP.initialize_indices();
 
 	unsigned iVertex = 0;
-	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end();
-		 I != E; ++I)
+	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end(); I != E; ++I)
 	{
 		std::cout << "Constructing vertrex #" << iVertex << ": ";
 		auto C = I->vertex_begin();
@@ -94,8 +89,7 @@ FixedTopology *buildTopology(Polyhedron_3 initialP,
 	}
 
 	unsigned iFacet = 0;
-	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E;
-		 ++I)
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E; ++I)
 	{
 		auto C = I->facet_begin();
 		do
@@ -153,8 +147,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	else if (getenv("DERIVATIVE_TEST_ONLY_SECOND"))
 		app->Options()->SetStringValue("derivative_test", "only-second-order");
 	if (getenv("HESSIAN_APPROX"))
-		app->Options()->SetStringValue("hessian_approximation",
-									   "limited-memory");
+		app->Options()->SetStringValue("hessian_approximation", "limited-memory");
 
 	// app->Options()->SetStringValue("derivative_test_print_all", "yes");
 
@@ -167,8 +160,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		h[i] = values(i);
 	std::vector<Vector_3> U;
 	std::vector<double> H;
-	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E;
-		 ++I)
+	for (auto I = initialP.facets_begin(), E = initialP.facets_end(); I != E; ++I)
 	{
 		Plane_3 plane = I->plane();
 		std::cout << "plane: " << plane << std::endl;
@@ -181,8 +173,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 		H.push_back(value);
 	}
 	std::vector<Vector_3> points;
-	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end();
-		 I != E; ++I)
+	for (auto I = initialP.vertices_begin(), E = initialP.vertices_end(); I != E; ++I)
 	{
 		Point_3 point = I->point();
 		points.push_back(Vector_3(point.x(), point.y(), point.z()));
@@ -190,8 +181,7 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 
 	FixedTopology *FT = buildTopology(initialP, SData);
 
-	IpoptTopologicalCorrector *FTNLP =
-		new IpoptTopologicalCorrector(u, h, U, H, points, FT);
+	IpoptTopologicalCorrector *FTNLP = new IpoptTopologicalCorrector(u, h, U, H, points, FT);
 
 	/* Ask Ipopt to solve the problem */
 	if (app->OptimizeTNLP(FTNLP) != Solve_Succeeded)
@@ -202,11 +192,9 @@ Polyhedron_3 SupportPolyhedronCorrector::run()
 	}
 
 	MAIN_PRINT("*** The problem solved!");
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply")
-		<< initialP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-initial.ply") << initialP;
 	Polyhedron_3 correctedP = obtainPolyhedron(FTNLP);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-from-planes.ply")
-		<< correctedP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "INSIDE_FT_NLP-from-planes.ply") << correctedP;
 
 	delete FTNLP;
 	DEBUG_END;

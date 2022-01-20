@@ -64,8 +64,7 @@ public:
 	EdgeReducer(PolyhedronPtr p);
 	~EdgeReducer();
 
-	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData,
-			 EdgesWorkingSets &_edgesWS);
+	bool run(EdgeSetIterator _edge, EdgeDataPtr _edgeData, EdgesWorkingSets &_edgesWS);
 };
 
 #endif /* EDGEREDUCER_H_ */

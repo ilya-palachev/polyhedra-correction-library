@@ -58,8 +58,7 @@ void my_fprint_Vector3d(Vector3d &v, FILE *file)
 	DEBUG_END;
 }
 
-bool Intersector::intersectFacet(Facet *facet, Plane iplane, FutureFacet &ff,
-								 int &n_components)
+bool Intersector::intersectFacet(Facet *facet, Plane iplane, FutureFacet &ff, int &n_components)
 {
 	DEBUG_START;
 	FacetIntersector *facetIntersector = new FacetIntersector(this, facet);
@@ -69,8 +68,7 @@ bool Intersector::intersectFacet(Facet *facet, Plane iplane, FutureFacet &ff,
 	return ret;
 }
 
-static void min3scalar(double s, double &s0, double &s1, double &s2, int i,
-					   int &i0, int &i1, int &i2)
+static void min3scalar(double s, double &s0, double &s1, double &s2, int i, int &i0, int &i1, int &i2)
 {
 	DEBUG_START;
 
@@ -210,13 +208,11 @@ int Intersector::prepareEdgeList(Facet *facet, Plane iplane)
 			if (sign_curr == 0 && sign_next == -1)
 			{
 				el->add_edge(facet->indVertices[i], facet->indVertices[i], i, i,
-							 facet->indVertices[facet->numVertices + 1 + i], 1,
-							 (double)i);
+							 facet->indVertices[facet->numVertices + 1 + i], 1, (double)i);
 			}
 			else if (sign_curr == 0 && sign_next == 0)
 			{
-				el->add_edge(facet->indVertices[i], facet->indVertices[i], i, i,
-							 facet->id, 1, (double)i);
+				el->add_edge(facet->indVertices[i], facet->indVertices[i], i, i, facet->id, 1, (double)i);
 			}
 		}
 
@@ -249,8 +245,7 @@ int Intersector::prepareEdgeList(Facet *facet, Plane iplane)
 			v_intrsct = polyhedron->vertices[facet->indVertices[i]];
 			scalar = dir * (v_intrsct - point);
 			min3scalar(scalar, s0, s1, s2, i, i0, i1, i2);
-			el->add_edge(facet->indVertices[i], facet->indVertices[i], i, i,
-						 scalar);
+			el->add_edge(facet->indVertices[i], facet->indVertices[i], i, i, scalar);
 			++n_intrsct;
 		}
 
@@ -262,8 +257,7 @@ int Intersector::prepareEdgeList(Facet *facet, Plane iplane)
 			intersection(iplane, v_next - v_curr, v_curr, v_intrsct);
 			scalar = dir * (v_intrsct - point);
 			min3scalar(scalar, s0, s1, s2, i, i0, i1, i2);
-			el->add_edge(facet->indVertices[i], facet->indVertices[i_next], i,
-						 i_next, scalar);
+			el->add_edge(facet->indVertices[i], facet->indVertices[i_next], i, i_next, scalar);
 			++n_intrsct;
 		}
 	}
@@ -315,38 +309,30 @@ int Intersector::prepareEdgeList(Facet *facet, Plane iplane)
 
 		if (sign_curr == 0 || sign_curr * sign_next == -1)
 		{
-			if (sign_next == -up_down || (sign_curr == 0 && in_out == -1) ||
-				(sign_curr * sign_next == -1) // 2011-04-04
+			if (sign_next == -up_down || (sign_curr == 0 && in_out == -1) || (sign_curr * sign_next == -1) // 2011-04-04
 			)
 			{
 				in_out *= -1;
 				up_down *= -1;
 				next_d = in_out;
 				if (sign_curr == 0)
-					next_f =
-						polyhedron->vertexInfos[facet->indVertices[i_curr]]
-							.intersection_find_next_facet(iplane, facet->id);
+					next_f = polyhedron->vertexInfos[facet->indVertices[i_curr]].intersection_find_next_facet(
+						iplane, facet->id);
 				else
 				{
 					i_help = i_step == 1 ? i_curr : i_next;
-					next_f =
-						facet->indVertices[i_help + facet->numVertices + 1];
+					next_f = facet->indVertices[i_help + facet->numVertices + 1];
 				}
 			}
 			else
 			{
-				DEBUG_PRINT("-----For facet %d we have critical situation...",
-							facet->id);
+				DEBUG_PRINT("-----For facet %d we have critical situation...", facet->id);
 				break;
 			}
 			if (sign_curr * sign_next == -1)
-				el->search_and_set_info(facet->indVertices[i_curr],
-										facet->indVertices[i_next], next_d,
-										next_f);
+				el->search_and_set_info(facet->indVertices[i_curr], facet->indVertices[i_next], next_d, next_f);
 			else
-				el->search_and_set_info(facet->indVertices[i_curr],
-										facet->indVertices[i_curr], next_d,
-										next_f);
+				el->search_and_set_info(facet->indVertices[i_curr], facet->indVertices[i_curr], next_d, next_f);
 		}
 
 		i_curr = i_next;
@@ -372,40 +358,31 @@ int Intersector::prepareEdgeList(Facet *facet, Plane iplane)
 
 		if (sign_curr == 0 || sign_curr * sign_next == -1)
 		{
-			if (sign_next == -up_down || (sign_curr == 0 && in_out == -1) ||
-				(sign_curr * sign_next == -1) // 2011-04-04
+			if (sign_next == -up_down || (sign_curr == 0 && in_out == -1) || (sign_curr * sign_next == -1) // 2011-04-04
 			)
 			{
 				in_out *= -1;
 				up_down *= -1;
 				next_d = in_out;
 				if (sign_curr == 0)
-					next_f =
-						polyhedron->vertexInfos[facet->indVertices[i_curr]]
-							.intersection_find_next_facet(iplane, facet->id);
+					next_f = polyhedron->vertexInfos[facet->indVertices[i_curr]].intersection_find_next_facet(
+						iplane, facet->id);
 				else
 				{
 					i_help = i_step == 1 ? i_curr : i_next;
-					next_f =
-						facet->indVertices[i_help + facet->numVertices + 1];
+					next_f = facet->indVertices[i_help + facet->numVertices + 1];
 				}
 			}
 			else
 			{
-				DEBUG_PRINT(
-					"-----For facet %d we have critical situation AGAIN!!!...",
-					facet->id);
+				DEBUG_PRINT("-----For facet %d we have critical situation AGAIN!!!...", facet->id);
 				next_d = 0;
 				next_f = facet->id;
 			}
 			if (sign_curr * sign_next == -1)
-				el->search_and_set_info(facet->indVertices[i_curr],
-										facet->indVertices[i_next], next_d,
-										next_f);
+				el->search_and_set_info(facet->indVertices[i_curr], facet->indVertices[i_next], next_d, next_f);
 			else
-				el->search_and_set_info(facet->indVertices[i_curr],
-										facet->indVertices[i_curr], next_d,
-										next_f);
+				el->search_and_set_info(facet->indVertices[i_curr], facet->indVertices[i_curr], next_d, next_f);
 		}
 
 		i_curr = i_next;
@@ -454,8 +431,8 @@ void Intersector::run(Plane iplane)
 
 	DEBUG_PRINT("======================================================");
 	DEBUG_PRINT("Intersection the polyhedron by plane : ");
-	DEBUG_PRINT("(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0", iplane.norm.x,
-				iplane.norm.y, iplane.norm.z, iplane.dist);
+	DEBUG_PRINT("(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0", iplane.norm.x, iplane.norm.y, iplane.norm.z,
+				iplane.dist);
 
 	num_edges = new int[polyhedron->numFacets];
 	lenff = new int[polyhedron->numFacets];
@@ -561,8 +538,7 @@ void Intersector::run(Plane iplane)
 			v1_prev = v1;
 
 			edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
-			if ((v0_prev == v0 && v1_prev == v1) ||
-				(v0_prev == v1 && v1_prev == v0))
+			if ((v0_prev == v0 && v1_prev == v1) || (v0_prev == v1 && v1_prev == v0))
 			{
 				DEBUG_PRINT("Endless loop!!!!!");
 				flag = false;
@@ -611,8 +587,7 @@ void Intersector::run(Plane iplane)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 		DEBUG_PRINT("\tГрань %d", i);
-		ifSaveFacet[i] = intersectFacet(&(polyhedron->facets[i]), iplane,
-										buffer_old, num_components_local);
+		ifSaveFacet[i] = intersectFacet(&(polyhedron->facets[i]), iplane, buffer_old, num_components_local);
 		if (!ifSaveFacet[i])
 			DEBUG_PRINT("Facet %d is candidate for deleting", i);
 		if (polyhedron->facets[i].numVertices < 3)
@@ -675,17 +650,15 @@ void Intersector::run(Plane iplane)
 	facet_new = new Facet[numf_new];
 	for (i = 0; i < num_components_new; ++i)
 	{
-		future_facet_new[i].generate_facet(facet_new[i],
-										   polyhedron->numFacets + i, iplane,
-										   polyhedron->numVertices, &edge_set);
+		future_facet_new[i].generate_facet(facet_new[i], polyhedron->numFacets + i, iplane, polyhedron->numVertices,
+										   &edge_set);
 		facet_new[i].set_poly(polyhedron);
 		facet_new[i].set_rgb(255, 0, 0);
 	}
 	for (i = 0; i < num_components_old; ++i)
 	{
 		future_facet_old[i].generate_facet(facet_new[i + num_components_new],
-										   polyhedron->numFacets +
-											   num_components_new + i,
+										   polyhedron->numFacets + num_components_new + i,
 										   iplane, // TODO. Это неверно!!!
 										   polyhedron->numVertices, &edge_set);
 		facet_new[i + num_components_new].set_poly(polyhedron);
@@ -699,8 +672,7 @@ void Intersector::run(Plane iplane)
 	}
 
 #ifdef OUTPUT
-	DEBUG_PRINT("%d generated polyhedron->facets : ",
-				num_components_new + num_components_old);
+	DEBUG_PRINT("%d generated polyhedron->facets : ", num_components_new + num_components_old);
 	for (i = 0; i < numf_new; ++i)
 		facet_new[i].my_fprint(stdout);
 #endif
@@ -709,8 +681,7 @@ void Intersector::run(Plane iplane)
 	Facet *facet_res;
 
 	numf_res = num_saved_facets + numf_new;
-	DEBUG_PRINT("numf_res = %d = %d + %d = num_saved_facets + numf_new",
-				numf_res, num_saved_facets, numf_new);
+	DEBUG_PRINT("numf_res = %d = %d + %d = num_saved_facets + numf_new", numf_res, num_saved_facets, numf_new);
 	facet_res = new Facet[numf_res];
 
 	j = 0;
@@ -781,8 +752,7 @@ void Intersector::run(Plane iplane)
 	{
 		vertex_res[j] = vertex_new[i];
 		for (k = 0; k < numf_res; ++k)
-			facet_res[k].find_and_replace_vertex(polyhedron->numVertices + i,
-												 j);
+			facet_res[k].find_and_replace_vertex(polyhedron->numVertices + i, j);
 		++j;
 	}
 
@@ -806,8 +776,7 @@ void Intersector::run(Plane iplane)
 		}
 	}
 
-	DEBUG_PRINT("After test there are %d polyhedron->facets:",
-				polyhedron->numFacets);
+	DEBUG_PRINT("After test there are %d polyhedron->facets:", polyhedron->numFacets);
 	for (i = 0; i < polyhedron->numFacets; ++i)
 		polyhedron->facets[i].my_fprint(stdout);
 
@@ -873,8 +842,8 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 
 	DEBUG_PRINT("\n======================================================\n");
 	DEBUG_PRINT("Intersection the polyhedron by plane : \n");
-	DEBUG_PRINT("(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n",
-				iplane.norm.x, iplane.norm.y, iplane.norm.z, iplane.dist);
+	DEBUG_PRINT("(%lf) * x + (%lf) * y + (%lf) * z + (%lf) = 0\n", iplane.norm.x, iplane.norm.y, iplane.norm.z,
+				iplane.dist);
 
 	num_edges = new int[polyhedron->numFacets];
 	lenff = new int[polyhedron->numFacets];
@@ -944,8 +913,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 		}
 		else
 		{
-			if (fabs(iplane % polyhedron->vertices[v0_first]) >
-				fabs(iplane % polyhedron->vertices[v1_first]))
+			if (fabs(iplane % polyhedron->vertices[v0_first]) > fabs(iplane % polyhedron->vertices[v1_first]))
 			{
 				A0 = polyhedron->vertices[v1_first];
 			}
@@ -960,8 +928,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 		}
 		else
 		{
-			if (fabs(iplane % polyhedron->vertices[v0]) >
-				fabs(iplane % polyhedron->vertices[v1]))
+			if (fabs(iplane % polyhedron->vertices[v0]) > fabs(iplane % polyhedron->vertices[v1]))
 			{
 				A1 = polyhedron->vertices[v1];
 			}
@@ -999,9 +966,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 		lenff[num_components_new] = 0;
 		do
 		{
-			DEBUG_PRINT(
-				"\t\t\tfid_curr = %d, fid_next = %d, v0 = %d, v1 = %d\n",
-				fid_curr, fid_next, v0, v1);
+			DEBUG_PRINT("\t\t\tfid_curr = %d, fid_next = %d, v0 = %d, v1 = %d\n", fid_curr, fid_next, v0, v1);
 			//            edge_list[fid_curr].my_fprint(stdout);
 			//Начало написанного 2012-03-10
 			//            int i0, i1, nnv;
@@ -1053,8 +1018,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 			edgeLists[fid_curr].get_next_edge(iplane, v0, v1, fid_next, drctn);
 			DEBUG_PRINT("drctn = %d\n", drctn);
 
-			if ((v0_prev == v0 && v1_prev == v1) ||
-				(v0_prev == v1 && v1_prev == v0))
+			if ((v0_prev == v0 && v1_prev == v1) || (v0_prev == v1 && v1_prev == v0))
 			{
 				ERROR_PRINT("Endless loop!!!!!\n");
 				break;
@@ -1105,8 +1069,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	ifSaveFacet = new bool[polyhedron->numFacets];
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
-		ifSaveFacet[i] = intersectFacet(&(polyhedron->facets[i]), iplane,
-										buffer_old, num_components_local);
+		ifSaveFacet[i] = intersectFacet(&(polyhedron->facets[i]), iplane, buffer_old, num_components_local);
 		DEBUG_PRINT("\tГрань %d", i);
 		DEBUG_PRINT(" - %d компонент\n", num_components_local);
 		if (num_components_local > 1)
@@ -1173,17 +1136,15 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	facet_new = new Facet[numf_new];
 	for (i = 0; i < num_components_new; ++i)
 	{
-		future_facet_new[i].generate_facet(facet_new[i],
-										   polyhedron->numFacets + i, iplane,
-										   polyhedron->numVertices, &edge_set);
+		future_facet_new[i].generate_facet(facet_new[i], polyhedron->numFacets + i, iplane, polyhedron->numVertices,
+										   &edge_set);
 		facet_new[i].set_poly(polyhedron);
 		facet_new[i].set_rgb(255, 0, 0);
 	}
 	for (i = 0; i < num_components_old; ++i)
 	{
 		future_facet_old[i].generate_facet(facet_new[i + num_components_new],
-										   polyhedron->numFacets +
-											   num_components_new + i,
+										   polyhedron->numFacets + num_components_new + i,
 										   iplane, // TODO. Это неверно!!!
 										   polyhedron->numVertices, &edge_set);
 		facet_new[i + num_components_new].set_poly(polyhedron);
@@ -1197,8 +1158,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	}
 
 #ifdef OUTPUT
-	DEBUG_PRINT("%d generated facets : \n",
-				num_components_new + num_components_old);
+	DEBUG_PRINT("%d generated facets : \n", num_components_new + num_components_old);
 	for (i = 0; i < numf_new; ++i)
 		facet_new[i].my_fprint(stdout);
 #endif
@@ -1207,8 +1167,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	Facet *facet_res;
 
 	numf_res = num_saved_facets + numf_new;
-	DEBUG_PRINT("numf_res = %d = %d + %d = num_saved_facets + numf_new",
-				numf_res, num_saved_facets, numf_new);
+	DEBUG_PRINT("numf_res = %d = %d + %d = num_saved_facets + numf_new", numf_res, num_saved_facets, numf_new);
 	facet_res = new Facet[numf_res];
 
 	//    for (i = 0; i < numf; ++i) {
@@ -1285,8 +1244,7 @@ void Intersector::runCoalesceMode(Plane iplane, int jfid)
 	{
 		vertex_res[j] = vertex_new[i];
 		for (k = 0; k < numf_res; ++k)
-			facet_res[k].find_and_replace_vertex(polyhedron->numVertices + i,
-												 j);
+			facet_res[k].find_and_replace_vertex(polyhedron->numVertices + i, j);
 		++j;
 	}
 

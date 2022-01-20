@@ -22,14 +22,7 @@
 #include "DebugAssert.h"
 #include "Correctors/Intersector/FutureFacet/FutureFacet.h"
 
-FutureFacet::FutureFacet() :
-	id(-1),
-	len(0),
-	nv(0),
-	edge0(NULL),
-	edge1(NULL),
-	src_facet(NULL),
-	id_v_new(NULL)
+FutureFacet::FutureFacet() : id(-1), len(0), nv(0), edge0(NULL), edge1(NULL), src_facet(NULL), id_v_new(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -74,8 +67,7 @@ FutureFacet::FutureFacet(int len_orig) :
 	DEBUG_END;
 }
 
-FutureFacet::FutureFacet(const FutureFacet &orig) :
-	id(orig.id), len(orig.len), nv(orig.nv)
+FutureFacet::FutureFacet(const FutureFacet &orig) : id(orig.id), len(orig.len), nv(orig.nv)
 {
 	DEBUG_START;
 	int i;

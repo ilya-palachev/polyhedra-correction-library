@@ -31,10 +31,7 @@ MatrixDistNorm::MatrixDistNorm() : nMax(0), n(0), matrix(NULL), ifStay(NULL)
 }
 
 MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
-	nMax(nMax_orig),
-	n(0),
-	matrix(new double[nMax_orig * nMax_orig]),
-	ifStay(new bool[nMax_orig])
+	nMax(nMax_orig), n(0), matrix(new double[nMax_orig * nMax_orig]), ifStay(new bool[nMax_orig])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax_orig; ++i)
@@ -43,10 +40,7 @@ MatrixDistNorm::MatrixDistNorm(int nMax_orig) :
 }
 
 MatrixDistNorm::MatrixDistNorm(const MatrixDistNorm &orig) :
-	nMax(orig.nMax),
-	n(orig.n),
-	matrix(new double[orig.nMax * orig.nMax]),
-	ifStay(new bool[orig.nMax])
+	nMax(orig.nMax), n(orig.n), matrix(new double[orig.nMax * orig.nMax]), ifStay(new bool[orig.nMax])
 {
 	DEBUG_START;
 	for (int i = 0; i < nMax * nMax; ++i)
@@ -91,8 +85,7 @@ void MatrixDistNorm::build(int m, TreeClusterNormNode *nodeArray)
 	{
 		for (int j = i + 1; j < n; ++j)
 		{
-			distance =
-				distCluster(*(nodeArray[i].cluster), *(nodeArray[j].cluster));
+			distance = distCluster(*(nodeArray[i].cluster), *(nodeArray[j].cluster));
 			DEBUG_PRINT("distance (%d, %d) = %lf\n", i, j, distance);
 			matrix[i * m + j] = distance;
 			matrix[j * m + i] = distance;
@@ -166,8 +159,7 @@ void MatrixDistNorm::fprint_clusters(FILE *file, TreeClusterNormNode *nodeArray)
 	DEBUG_END;
 }
 
-void MatrixDistNorm::fprint_clusters2(FILE *file,
-									  TreeClusterNormNode *nodeArray)
+void MatrixDistNorm::fprint_clusters2(FILE *file, TreeClusterNormNode *nodeArray)
 {
 	DEBUG_START;
 	int numcl = 0;
@@ -194,8 +186,7 @@ void MatrixDistNorm::fprint_clusters2(FILE *file,
 	DEBUG_END;
 }
 
-double MatrixDistNorm::sqNorm(TreeClusterNormNode *nodeArray1,
-							  TreeClusterNormNode *nodeArray2)
+double MatrixDistNorm::sqNorm(TreeClusterNormNode *nodeArray1, TreeClusterNormNode *nodeArray2)
 {
 	DEBUG_START;
 	int numcl = 0;
@@ -546,8 +537,7 @@ void MatrixDistNorm::fprint(FILE *file)
 	{
 		for (int j = i + 1; j < n; ++j)
 		{
-			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n", i, j,
-						  matrix[i * n + j]);
+			REGULAR_PRINT(file, "matrix[%d][%d] = %lf\n", i, j, matrix[i * n + j]);
 		}
 	}
 	DEBUG_END;

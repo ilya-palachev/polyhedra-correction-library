@@ -110,8 +110,7 @@ void setParameters(Ipopt::SmartPtr<Ipopt::OptionsList> options)
 		options->SetStringValue("hessian_approximation", "limited-memory");
 }
 
-std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
-								   const std::vector<EdgeInfo> &data)
+std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes, const std::vector<EdgeInfo> &data)
 {
 	bool doEdgeScaling = (getenv("DISABLE_EDGE_SCALING") == nullptr);
 	EdgeCorrector *EC = new EdgeCorrector(doEdgeScaling, planes, data);
@@ -127,8 +126,7 @@ std::vector<Plane_3> correctPlanes(const std::vector<Plane_3> &planes,
 	setParameters(app->Options());
 	/* Ask Ipopt to solve the problem */
 	auto status = app->OptimizeTNLP(EC);
-	if (status != Ipopt::Solve_Succeeded &&
-		status != Ipopt::Solved_To_Acceptable_Level)
+	if (status != Ipopt::Solve_Succeeded && status != Ipopt::Solved_To_Acceptable_Level)
 	{
 		MAIN_PRINT("** The problem FAILED!");
 		exit(EXIT_FAILURE);
@@ -164,8 +162,7 @@ static double signedDist(const Plane_3 &p, const Point_3 &C)
 
 static Plane_3 centerizePlane(const Plane_3 &p, const Point_3 &C, double sign)
 {
-	Plane_3 pp(p.a(), p.b(), p.c(),
-			   p.d() + p.a() * C.x() + p.b() * C.y() + p.c() * C.z());
+	Plane_3 pp(p.a(), p.b(), p.c(), p.d() + p.a() * C.x() + p.b() * C.y() + p.c() * C.z());
 
 	double a = pp.a();
 	double b = pp.b();
@@ -184,8 +181,7 @@ static Plane_3 centerizePlane(const Plane_3 &p, const Point_3 &C, double sign)
 	return pp;
 }
 
-static std::vector<Plane_3> centerizePlanes(const std::vector<Plane_3> &planes,
-											const Point_3 &C)
+static std::vector<Plane_3> centerizePlanes(const std::vector<Plane_3> &planes, const Point_3 &C)
 {
 	std::vector<Plane_3> centeredPlanes;
 	for (const Plane_3 &p : planes)
@@ -200,9 +196,8 @@ std::ostream &operator<<(std::ostream &stream, std::shared_ptr<Polyhedron> p)
 }
 
 /* FIXME: Copied from Polyhedron_io.cpp with slight modifications. */
-static std::shared_ptr<Polyhedron>
-convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
-					   const std::vector<Plane_3> &initPlanes)
+static std::shared_ptr<Polyhedron> convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
+														  const std::vector<Plane_3> &initPlanes)
 {
 	/* Check for non-emptiness. */
 	ASSERT(p.size_of_vertices());
@@ -240,8 +235,7 @@ convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
 		facets[id].id = id;
 
 		/* Transform current plane. */
-		Plane_3 pi = centerizePlane(*plane, Point_3(-C.x(), -C.y(), -C.z()),
-									signedDist(initPlanes[id], C));
+		Plane_3 pi = centerizePlane(*plane, Point_3(-C.x(), -C.y(), -C.z()), signedDist(initPlanes[id], C));
 		facets[id].plane = Plane(Vector3d(pi.a(), pi.b(), pi.c()), pi.d());
 
 		/*
@@ -265,13 +259,11 @@ convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
 		int iFacetVertex = 0;
 		do
 		{
-			facets[id].indVertices[iFacetVertex++] =
-				std::distance(p.vertices_begin(), halfedge->vertex());
+			facets[id].indVertices[iFacetVertex++] = std::distance(p.vertices_begin(), halfedge->vertex());
 		} while (++halfedge != facet->facet_begin());
 
 		/* Add cycling vertex to avoid assertion during printing. */
-		facets[id].indVertices[facets[id].numVertices] =
-			facets[id].indVertices[0];
+		facets[id].indVertices[facets[id].numVertices] = facets[id].indVertices[0];
 
 		ASSERT(facets[id].correctPlane());
 
@@ -280,16 +272,13 @@ convertWithAssociation(Polyhedron_3 p, const Point_3 &C,
 
 	} while (++plane != p.planes_end() && ++facet != p.facets_end());
 
-	return std::make_shared<Polyhedron>(numVertices, numFacets, vertices,
-										facets);
+	return std::make_shared<Polyhedron>(numVertices, numFacets, vertices, facets);
 }
-static void dumpResult(const std::vector<Plane_3> &planes,
-					   const std::vector<Plane_3> &resultingPlanes,
+static void dumpResult(const std::vector<Plane_3> &planes, const std::vector<Plane_3> &resultingPlanes,
 					   const Point_3 &C)
 {
 	std::cout << "Number of initial planes: " << planes.size() << std::endl;
-	std::cout << "Number of resulting planes: " << resultingPlanes.size()
-			  << std::endl;
+	std::cout << "Number of resulting planes: " << resultingPlanes.size() << std::endl;
 	std::cout << "Center: " << C << std::endl;
 	ASSERT(planes.size() == resultingPlanes.size());
 
@@ -300,8 +289,7 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 		Plane_3 p = resultingPlanes[i];
 		double distance = planeDist(p0, p);
 		if (distance > 1e-6)
-			std::cout << "Plane #" << i << ": " << p0 << " -> " << p
-					  << " # distance: " << distance << std::endl;
+			std::cout << "Plane #" << i << ": " << p0 << " -> " << p << " # distance: " << distance << std::endl;
 		maxDistance = std::max(distance, maxDistance);
 	}
 
@@ -309,8 +297,7 @@ static void dumpResult(const std::vector<Plane_3> &planes,
 
 	/* To compare with the result: */
 	Polyhedron_3 initCenterizedP(centerizePlanes(planes, C));
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron-centerized.ply")
-		<< initCenterizedP;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "init-polyhedron-centerized.ply") << initCenterizedP;
 
 	auto centerizedPlanes = centerizePlanes(resultingPlanes, C);
 	Polyhedron_3 resultingP(centerizedPlanes);

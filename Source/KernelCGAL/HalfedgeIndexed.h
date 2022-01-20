@@ -29,8 +29,7 @@
 #include <CGAL/HalfedgeDS_halfedge_base.h>
 
 /** A halfedge type with an ID member variable. */
-template <class Refs>
-class HalfedgeIndexed : public CGAL::HalfedgeDS_halfedge_base<Refs>
+template <class Refs> class HalfedgeIndexed : public CGAL::HalfedgeDS_halfedge_base<Refs>
 {
 public:
 	long int id;

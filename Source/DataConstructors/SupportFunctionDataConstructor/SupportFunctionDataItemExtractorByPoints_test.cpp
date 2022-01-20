@@ -75,14 +75,11 @@ TEST_F(SupportFunctionDataItemExtractorByPointsTest, Adequate)
 	SupportFunctionDataItem item = extractor->run(side);
 
 	Vector3d directionExpected(0., sqrt(0.5), sqrt(0.5));
-	EXPECT_TRUE(equal(directionExpected, item.direction,
-					  EXTRACTOR_BY_POINTS_GUARANTEED_PRECISION))
-		<< "Result of extracting is support direction " << item.direction
-		<< ", while expected is " << directionExpected;
+	EXPECT_TRUE(equal(directionExpected, item.direction, EXTRACTOR_BY_POINTS_GUARANTEED_PRECISION))
+		<< "Result of extracting is support direction " << item.direction << ", while expected is "
+		<< directionExpected;
 
 	double valueExpected = sqrt(0.5);
-	EXPECT_TRUE(equal(valueExpected, item.value,
-					  EXTRACTOR_BY_POINTS_GUARANTEED_PRECISION))
-		<< "Result of extracting is support value " << item.value
-		<< ", while expected is " << valueExpected;
+	EXPECT_TRUE(equal(valueExpected, item.value, EXTRACTOR_BY_POINTS_GUARANTEED_PRECISION))
+		<< "Result of extracting is support value " << item.value << ", while expected is " << valueExpected;
 }

@@ -60,8 +60,7 @@ public:
 	void my_fprint(FILE *file);
 
 	// FutureFacet_intersection.cpp
-	void generate_facet(Facet &facet, int fid, Plane &iplane, int numv,
-						EdgeSetIntersected *es);
+	void generate_facet(Facet &facet, int fid, Plane &iplane, int numv, EdgeSetIntersected *es);
 };
 
 #endif /* FUTUREFACET_H */

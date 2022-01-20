@@ -59,8 +59,7 @@ protected:
 		supportDirections.push_back(Vector3d(1., 1., 0.));
 		supportDirections.push_back(Vector3d(1., 1., 1.));
 
-		data.reset(new SupportFunctionEstimationData(
-			matrix, supportVector, startingVector, supportDirections));
+		data.reset(new SupportFunctionEstimationData(matrix, supportVector, startingVector, supportDirections));
 	}
 
 	/** Finalizes the test. */

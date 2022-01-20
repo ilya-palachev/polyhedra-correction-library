@@ -39,8 +39,7 @@ public:
 	 *
 	 * @param data	Support function data
 	 */
-	NativeQuadraticEstimator(
-		SupportFunctionEstimationDataPtr supportFunctionData);
+	NativeQuadraticEstimator(SupportFunctionEstimationDataPtr supportFunctionData);
 
 	/** Default destructor. */
 	~NativeQuadraticEstimator();

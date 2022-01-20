@@ -29,10 +29,8 @@ EdgeContourAssociation::EdgeContourAssociation() :
 	DEBUG_END;
 }
 
-EdgeContourAssociation::EdgeContourAssociation(int indContour_orig,
-											   int indNearestSide_orig,
-											   bool ifProperDirection_orig,
-											   double weight_orig) :
+EdgeContourAssociation::EdgeContourAssociation(int indContour_orig, int indNearestSide_orig,
+											   bool ifProperDirection_orig, double weight_orig) :
 	indContour(indContour_orig),
 	indNearestSide(indNearestSide_orig),
 	ifProperDirection(ifProperDirection_orig),
@@ -43,17 +41,13 @@ EdgeContourAssociation::EdgeContourAssociation(int indContour_orig,
 }
 
 EdgeContourAssociation::EdgeContourAssociation(int indContour_orig) :
-	indContour(indContour_orig),
-	indNearestSide(-1),
-	ifProperDirection(false),
-	weight(0.)
+	indContour(indContour_orig), indNearestSide(-1), ifProperDirection(false), weight(0.)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-EdgeContourAssociation::EdgeContourAssociation(
-	const EdgeContourAssociation &orig) :
+EdgeContourAssociation::EdgeContourAssociation(const EdgeContourAssociation &orig) :
 	indContour(orig.indContour),
 	indNearestSide(orig.indNearestSide),
 	ifProperDirection(orig.ifProperDirection),

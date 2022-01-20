@@ -160,8 +160,7 @@
 /**
  * Definition of the option set for recoverer test.
  */
-#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION                                   \
-	"a:Abc:Cd:e:f:hi:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
+#define RECOVERER_OPTIONS_GETOPT_DESCRIPTION "a:Abc:Cd:e:f:hi:l:m:M:n:N:o:p:r:sS:t:T:vxz:"
 
 struct PCLOption : public option
 {
@@ -187,59 +186,43 @@ public:
 static PCLOption optionsLong[] = {
 	{option{"file-name", required_argument, 0, OPTION_FILE_NAME},
 	 "The name of file with shadow contours to be processed"},
-	{option{"model-name", required_argument, 0, OPTION_MODEL_NAME},
-	 "The name of synthetic model to be tested on"},
+	{option{"model-name", required_argument, 0, OPTION_MODEL_NAME}, "The name of synthetic model to be tested on"},
 	{option{"contours-number", required_argument, 0, OPTION_CONTOURS_NUMBER},
 	 "The number of contours to be generated from the synthetic "
 	 "model"},
-	{option{"max-contours-number", required_argument, 0,
-			OPTION_MAX_CONTOUR_NUMBER},
+	{option{"max-contours-number", required_argument, 0, OPTION_MAX_CONTOUR_NUMBER},
 	 "The maximum number of contours to be analyzed"},
 	{option{"first-angle", required_argument, 0, OPTION_FIRST_ANGLE},
 	 "The fist angle from which the first shadow contour is obtained"},
-	{option{"balance-data", no_argument, 0, OPTION_BALANCE_DATA},
-	 "Balance contour data before processing"},
+	{option{"balance-data", no_argument, 0, OPTION_BALANCE_DATA}, "Balance contour data before processing"},
 	{option{"limit-random", required_argument, 0, OPTION_LIMIT_RANDOM},
 	 "The absolute limit of random shift of modeled contour"},
-	{option{"output-name", required_argument, 0, OPTION_OUTPUT_NAME},
-	 "The name of output file(s)"},
+	{option{"output-name", required_argument, 0, OPTION_OUTPUT_NAME}, "The name of output file(s)"},
 	{option{"problem-type", required_argument, 0, OPTION_PROBLEM_TYPE},
 	 "The type of oprimization problem (not for all estimators!)"},
-	{option{"recover", required_argument, 0, OPTION_RECOVER},
-	 "Recover polyhedron using some estimator"},
-	{option{"scale-matrix", no_argument, 0, OPTION_SCALE_MATRIX},
-	 "Enable matrix scaling"},
-	{option{"support-matrix-type", required_argument, 0,
-			OPTION_SUPPORT_MATRIX_TYPE},
-	 "Set type of support matrix"},
+	{option{"recover", required_argument, 0, OPTION_RECOVER}, "Recover polyhedron using some estimator"},
+	{option{"scale-matrix", no_argument, 0, OPTION_SCALE_MATRIX}, "Enable matrix scaling"},
+	{option{"support-matrix-type", required_argument, 0, OPTION_SUPPORT_MATRIX_TYPE}, "Set type of support matrix"},
 	{option{"verbose", no_argument, 0, OPTION_VERBOSE}, "Enable verbose mode"},
-	{option{"convexify-contours", no_argument, 0, OPTION_CONVEXIFY_CONTOURS},
-	 "Enable contours convexification"},
-	{option{"shadow-heuristics", no_argument, 0, OPTION_SHADOW_HEURISTICS},
-	 "Enable shadow heuristics"},
+	{option{"convexify-contours", no_argument, 0, OPTION_CONVEXIFY_CONTOURS}, "Enable contours convexification"},
+	{option{"shadow-heuristics", no_argument, 0, OPTION_SHADOW_HEURISTICS}, "Enable shadow heuristics"},
 	{option{"starting-body", required_argument, 0, OPTION_STARTING_BODY},
 	 "Type of starting body of the estimation process"},
-	{option{"directions", required_argument, 0, OPTION_FILE_DIRECTIONS},
-	 "The name of file with support directions"},
+	{option{"directions", required_argument, 0, OPTION_FILE_DIRECTIONS}, "The name of file with support directions"},
 	{option{"file-model", required_argument, 0, OPTION_FILE_MODEL},
 	 "The name of file with model for synthetic data construction"},
-	{option{"axial", no_argument, 0, OPTION_AXIAL_TESTING},
-	 "Axial testing: move support values, non points"},
+	{option{"axial", no_argument, 0, OPTION_AXIAL_TESTING}, "Axial testing: move support values, non points"},
 	{option{"epsilon-factor", required_argument, 0, OPTION_EPSILON_FACTOR},
 	 "Epsilon factor for reduced Gardner-Kiderlen matrix"},
 	{option{"compare", required_argument, 0, OPTION_COMPARE_WITH_FILE},
 	 "The name of file that contains the polyhedron constructed "
 	 "with some third-party software."},
-	{option{"contour-mode", no_argument, 0, OPTION_CONTOUR_MODE},
-	 "Enable contour mode"},
-	{option{"threshold", required_argument, 0,
-			OPTION_THRESHOLD_ADJACENT_FACETS},
+	{option{"contour-mode", no_argument, 0, OPTION_CONTOUR_MODE}, "Enable contour mode"},
+	{option{"threshold", required_argument, 0, OPTION_THRESHOLD_ADJACENT_FACETS},
 	 "The value of threshold of angle between adjacent facets."},
-	{option{"support-function-data", required_argument, 0,
-			OPTION_SUPPORT_FUNCTION_DATA_FILE},
+	{option{"support-function-data", required_argument, 0, OPTION_SUPPORT_FUNCTION_DATA_FILE},
 	 "Support function data file."},
-	{option{"z-minimal-norm", required_argument, 0, OPTION_Z_MINIMAL_NORM},
-	 "The Z minimal norm."},
+	{option{"z-minimal-norm", required_argument, 0, OPTION_Z_MINIMAL_NORM}, "The Z minimal norm."},
 	{option{0, 0, 0, 0}, 0}};
 
 /** Error return value of getopt function. */
@@ -385,12 +368,9 @@ typedef struct
 
 RecovererTestModel recovererTestModels[] = {
 	{MODEL_CUBE, "cube", "Simple cube with coordinates of points +1 / -1."},
-	{MODEL_PYRAMID, "pyramid",
-	 "Triangled pyramid with ideal triangle in bottom."},
-	{MODEL_PRISM, "prism",
-	 "Triangled prism with ideal triangles in top and bottom."},
-	{MODEL_CUBE_CUTTED, "cube_cutted",
-	 "The cube with a whole cutted out from it"}};
+	{MODEL_PYRAMID, "pyramid", "Triangled pyramid with ideal triangle in bottom."},
+	{MODEL_PRISM, "prism", "Triangled prism with ideal triangles in top and bottom."},
+	{MODEL_CUBE_CUTTED, "cube_cutted", "The cube with a whole cutted out from it"}};
 
 /** Structure describing starting body of the estimation process. */
 typedef struct
@@ -401,19 +381,14 @@ typedef struct
 } RecovererStartingBody;
 
 RecovererStartingBody recovererStartingBodies[] = {
-	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION,
-	 "intersection",
+	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CYLINDERS_INTERSECTION, "intersection",
 	 "Body is intersection of halfspaces formed by shadow cylinders."},
 	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_POINTS_HULL, "hull",
 	 "Body is convex hull of support points (u_i * h_i)."},
-	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_SPHERE, "sphere",
-	 "Body is sphere (each support value is = 1)."},
-	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CUBE, "cube",
-	 "Body is cube."},
-	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PYRAMID, "pyramid",
-	 "Body is pyramid."},
-	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM, "prism",
-	 "Body is prism."}};
+	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_SPHERE, "sphere", "Body is sphere (each support value is = 1)."},
+	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_CUBE, "cube", "Body is cube."},
+	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PYRAMID, "pyramid", "Body is pyramid."},
+	{SUPPORT_FUNCTION_ESTIMATION_STARTING_BODY_TYPE_PRISM, "prism", "Body is prism."}};
 
 /** Structure describing given estimator. */
 typedef struct
@@ -427,20 +402,17 @@ RecovererEstimatorTypeDescription estimatorDescriptions[] = {
 	{ZERO_ESTIMATOR, "zero", "Estimator that does nothing"},
 	{NATIVE_ESTIMATOR, "native", "Built-in native estimator"},
 #ifdef USE_TSNNLS
-	{TSNNLS_ESTIMATOR, "tsnnls",
-	 "TSNNLS nonnegative least squares solver (not working)"},
+	{TSNNLS_ESTIMATOR, "tsnnls", "TSNNLS nonnegative least squares solver (not working)"},
 #endif /* USE_TSNNLS */
 #ifdef USE_IPOPT
-	{IPOPT_ESTIMATOR, "ipopt",
-	 "Ipopt interior-point method for quadratic programming"},
+	{IPOPT_ESTIMATOR, "ipopt", "Ipopt interior-point method for quadratic programming"},
 #endif /* USE_IPOPT */
 #ifdef USE_GLPK
 	{GLPK_ESTIMATOR, "glpk", "Glpk linear programming solver"},
 #endif /* USE_GLPK */
 #ifdef USE_CLP
 	{CLP_ESTIMATOR, "clp", "Clp linear programming solver"},
-	{CLP_COMMAND_ESTIMATOR, "clp-cmd",
-	 "Clp linear programming solver (invoked from command-line)"},
+	{CLP_COMMAND_ESTIMATOR, "clp-cmd", "Clp linear programming solver (invoked from command-line)"},
 #endif /* USE_CLP */
 #ifdef USE_CPLEX
 	{CPLEX_ESTIMATOR, "cplex", "CPLEX linear programming solver"},
@@ -456,13 +428,10 @@ typedef struct
 } SupportMatrixTypeDescription;
 
 SupportMatrixTypeDescription supportMatrixTypeDescriptions[] = {
-	{SUPPORT_MATRIX_TYPE_KKVW, "kkvw",
-	 "Karl-Kulkarni-Verhese-Willsky conditions"},
-	{SUPPORT_MATRIX_TYPE_KKVW_OPT, "kkvw-opt",
-	 "Optimized Karl-Kulkarni-Verhese-Willsky conditions"},
+	{SUPPORT_MATRIX_TYPE_KKVW, "kkvw", "Karl-Kulkarni-Verhese-Willsky conditions"},
+	{SUPPORT_MATRIX_TYPE_KKVW_OPT, "kkvw-opt", "Optimized Karl-Kulkarni-Verhese-Willsky conditions"},
 	{SUPPORT_MATRIX_TYPE_GK, "gk", "Gardner-Kiderlen conditions"},
-	{SUPPORT_MATRIX_TYPE_GK_OPT, "gk-opt",
-	 "Optimized Gardner-Kiderlen conditions"}};
+	{SUPPORT_MATRIX_TYPE_GK_OPT, "gk-opt", "Optimized Gardner-Kiderlen conditions"}};
 
 /** Sreucture describing problem type. */
 typedef struct
@@ -472,13 +441,11 @@ typedef struct
 	const char *description;  /**< Description */
 } ProblemType;
 
-ProblemType problemTypes[] = {
-	{ESTIMATION_PROBLEM_NORM_L_INF, "linf", "L-infinity norm problem"},
-	{ESTIMATION_PROBLEM_NORM_L_1, "l1", "L-1 norm problem"},
-	{ESTIMATION_PROBLEM_NORM_L_2, "l2", "L-2 norm problem"}};
+ProblemType problemTypes[] = {{ESTIMATION_PROBLEM_NORM_L_INF, "linf", "L-infinity norm problem"},
+							  {ESTIMATION_PROBLEM_NORM_L_1, "l1", "L-1 norm problem"},
+							  {ESTIMATION_PROBLEM_NORM_L_2, "l2", "L-2 norm problem"}};
 
-static void printUsageOption(char option, const char *longOptionName,
-							 const char *comment)
+static void printUsageOption(char option, const char *longOptionName, const char *comment)
 {
 	DEBUG_START;
 	char longOption[256];
@@ -497,13 +464,11 @@ static void printUsageOption(char option, const char *longOptionName,
 static void printUsage(int argc, char **argv)
 {
 	DEBUG_START;
-	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.\n\n",
-				 argv[0]);
+	STDERR_PRINT("%s - Unit tests for Recoverer of the polyhedron.\n\n", argv[0]);
 	STDERR_PRINT("Usage:\n");
 	STDERR_PRINT("%s [-%c <input file name>] [-%c <model name> -%c <number"
 				 " of contours>]\n",
-				 argv[0], OPTION_FILE_NAME, OPTION_MODEL_NAME,
-				 OPTION_CONTOURS_NUMBER);
+				 argv[0], OPTION_FILE_NAME, OPTION_MODEL_NAME, OPTION_CONTOURS_NUMBER);
 	STDERR_PRINT("Options:\n");
 	PCLOption *option = optionsLong;
 	while (option->name)
@@ -516,31 +481,24 @@ static void printUsage(int argc, char **argv)
 	for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 	{
 		RecovererTestModel *model = &recovererTestModels[iModel];
-		STDERR_PRINT("\t%d. %*s - %s\n", model->id, 12, model->name,
-					 model->description);
+		STDERR_PRINT("\t%d. %*s - %s\n", model->id, 12, model->name, model->description);
 	}
 	STDERR_PRINT("\nPossible estimators are:\n");
-	int numEstimators = sizeof(estimatorDescriptions) /
-						sizeof(RecovererEstimatorTypeDescription);
+	int numEstimators = sizeof(estimatorDescriptions) / sizeof(RecovererEstimatorTypeDescription);
 	DEBUG_PRINT("Number of estimators: %d", numEstimators);
 	for (int iEstimator = 0; iEstimator < numEstimators; ++iEstimator)
 	{
-		RecovererEstimatorTypeDescription *desc =
-			&estimatorDescriptions[iEstimator];
-		STDERR_PRINT("\t%d. %*s - %s\n", desc->id, 12, desc->name,
-					 desc->description);
+		RecovererEstimatorTypeDescription *desc = &estimatorDescriptions[iEstimator];
+		STDERR_PRINT("\t%d. %*s - %s\n", desc->id, 12, desc->name, desc->description);
 	}
 
 	STDERR_PRINT("\nPossible types of support matrix are:\n");
-	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions) /
-								sizeof(SupportMatrixTypeDescription);
+	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions) / sizeof(SupportMatrixTypeDescription);
 	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
 	for (int iType = 0; iType < numSupportMatrixTypes; ++iType)
 	{
-		SupportMatrixTypeDescription *desc =
-			&supportMatrixTypeDescriptions[iType];
-		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name,
-					 desc->description);
+		SupportMatrixTypeDescription *desc = &supportMatrixTypeDescriptions[iType];
+		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name, desc->description);
 		if (desc->id == DEFAULT_SUPPORT_MATRIX_TYPE)
 			STDERR_PRINT(" (default)");
 		STDERR_PRINT("\n");
@@ -548,16 +506,14 @@ static void printUsage(int argc, char **argv)
 
 	STDERR_PRINT("\nPossible types of starting body of the estimation "
 				 "process are:\n");
-	int numStartingPointTypes =
-		sizeof(recovererStartingBodies) / sizeof(RecovererStartingBody);
+	int numStartingPointTypes = sizeof(recovererStartingBodies) / sizeof(RecovererStartingBody);
 	DEBUG_PRINT("Number of types of starting body of the estimation "
 				"process: %d",
 				numStartingPointTypes);
 	for (int iType = 0; iType < numStartingPointTypes; ++iType)
 	{
 		RecovererStartingBody *desc = &recovererStartingBodies[iType];
-		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name,
-					 desc->description);
+		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name, desc->description);
 		if (desc->id == DEFAULT_STARTING_BODY_TYPE)
 			STDERR_PRINT(" (default)");
 		STDERR_PRINT("\n");
@@ -569,8 +525,7 @@ static void printUsage(int argc, char **argv)
 	for (int iType = 0; iType < numProblemTypes; ++iType)
 	{
 		ProblemType *desc = &problemTypes[iType];
-		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name,
-					 desc->description);
+		STDERR_PRINT("\t%d. %*s - %s", desc->id, 12, desc->name, desc->description);
 		if (desc->id == DEFAULT_ESTIMATION_PROBLEM_NORM)
 			STDERR_PRINT(" (default)");
 		STDERR_PRINT("\n");
@@ -631,16 +586,13 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 	char *modelName = NULL;
 	opterr = 0;
 
-	int numEstimators = sizeof(estimatorDescriptions) /
-						sizeof(RecovererEstimatorTypeDescription);
+	int numEstimators = sizeof(estimatorDescriptions) / sizeof(RecovererEstimatorTypeDescription);
 	DEBUG_PRINT("Number of estimators: %d", numEstimators);
 
-	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions) /
-								sizeof(SupportMatrixTypeDescription);
+	int numSupportMatrixTypes = sizeof(supportMatrixTypeDescriptions) / sizeof(SupportMatrixTypeDescription);
 	DEBUG_PRINT("Number of support matrix types: %d", numSupportMatrixTypes);
 
-	int numStartingPointTypes =
-		sizeof(recovererStartingBodies) / sizeof(RecovererStartingBody);
+	int numStartingPointTypes = sizeof(recovererStartingBodies) / sizeof(RecovererStartingBody);
 	DEBUG_PRINT("Number of types of starting body of the estimation "
 				"process: %d",
 				numStartingPointTypes);
@@ -667,9 +619,8 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 	options->shadowHeuristics = false;
 	options->contourMode = false;
 	int optionIndex = 0;
-	while ((charCurr =
-				getopt_long(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION,
-							optionsLong, &optionIndex)) != GETOPT_FAILURE)
+	while ((charCurr = getopt_long(argc, argv, RECOVERER_OPTIONS_GETOPT_DESCRIPTION, optionsLong, &optionIndex)) !=
+		   GETOPT_FAILURE)
 	{
 		char *charMistaken = NULL;
 
@@ -700,8 +651,7 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 			}
 
 			options->mode = RECOVERER_SYNTHETIC_TESTING;
-			for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER;
-				 ++iModel)
+			for (int iModel = 0; iModel < RECOVERER_TEST_MODELS_NUMBER; ++iModel)
 			{
 				if (strcmp(optarg, recovererTestModels[iModel].name) == 0)
 				{
@@ -726,8 +676,7 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 			}
 
 			/* Parse digital number from input argument. */
-			options->input.model.numContours =
-				strtol(optarg, &charMistaken, 10);
+			options->input.model.numContours = strtol(optarg, &charMistaken, 10);
 
 			/*
 			 *  If user gives invalid character, the charMistaken is
@@ -797,8 +746,7 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 				errorOptionTwice(argc, argv, OPTION_FIRST_ANGLE);
 			}
 			/* Parse floating-point number from input argument. */
-			options->input.model.shiftAngleFirst =
-				strtod(optarg, &charMistaken);
+			options->input.model.shiftAngleFirst = strtod(optarg, &charMistaken);
 
 			/*
 			 * If user gives invalid character, the charMistaken is
@@ -918,8 +866,7 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 			{
 				if (!strcmp(optarg, supportMatrixTypeDescriptions[iType].name))
 				{
-					options->supportMatrixType =
-						supportMatrixTypeDescriptions[iType].id;
+					options->supportMatrixType = supportMatrixTypeDescriptions[iType].id;
 					ifOptionSupportMatrixType = true;
 					break;
 				}
@@ -950,8 +897,7 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 			{
 				if (!strcmp(optarg, recovererStartingBodies[iType].name))
 				{
-					options->startingBodyType =
-						recovererStartingBodies[iType].id;
+					options->startingBodyType = recovererStartingBodies[iType].id;
 					ifOptionStartingBodyType = true;
 					break;
 				}
@@ -1075,10 +1021,8 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 		}
 	}
 
-	bool ifAnyOptionSynthetic = ifOptionModelName || ifOptionNumContours ||
-								ifOptionFirstAngle || ifOptionLimitRandom ||
-								ifOptionFileModel || ifOptionFileDirections ||
-								options->input.model.ifAxialTesting;
+	bool ifAnyOptionSynthetic = ifOptionModelName || ifOptionNumContours || ifOptionFirstAngle || ifOptionLimitRandom ||
+								ifOptionFileModel || ifOptionFileDirections || options->input.model.ifAxialTesting;
 
 	if (ifOptionFileName && ifAnyOptionSynthetic)
 	{
@@ -1092,8 +1036,7 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 
 	if (ifOptionModelName && ifOptionFileModel)
 	{
-		STDERR_PRINT("Options \"-%c\" and \"-%c\" are conflicting.",
-					 OPTION_MODEL_NAME, OPTION_FILE_MODEL);
+		STDERR_PRINT("Options \"-%c\" and \"-%c\" are conflicting.", OPTION_MODEL_NAME, OPTION_FILE_MODEL);
 		printUsage(argc, argv);
 		DEBUG_END;
 		exit(EXIT_FAILURE);
@@ -1111,11 +1054,9 @@ static CommandLineOptions *parseCommandLine(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	bool ifValidSyntheticOptions =
-		(ifOptionModelName || ifOptionFileModel) &&
-		(ifOptionFileDirections ||
-		 (ifOptionNumContours && ifOptionFirstAngle)) &&
-		ifOptionLimitRandom;
+	bool ifValidSyntheticOptions = (ifOptionModelName || ifOptionFileModel) &&
+								   (ifOptionFileDirections || (ifOptionNumContours && ifOptionFirstAngle)) &&
+								   ifOptionLimitRandom;
 
 	if (!ifValidSyntheticOptions && ifAnyOptionSynthetic)
 	{
@@ -1303,8 +1244,7 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 
 	/* Set the pointer to the parent polyhedron in facets. */
 	p->set_parent_polyhedron_in_facets();
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-polyhedron.ply")
-		<< *pCopy;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-polyhedron.ply") << *pCopy;
 
 	/* Create shadow contour data and associate p with it. */
 	ShadowContourDataPtr SCData(new ShadowContourData(p));
@@ -1314,19 +1254,15 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	 * them.
 	 */
 	ASSERT(p->nonZeroPlanes());
-	ShadowContourConstructorPtr constructor(
-		new ShadowContourConstructor(p, SCData));
+	ShadowContourConstructorPtr constructor(new ShadowContourConstructor(p, SCData));
 
 	/* Generate shadow contours data for given model. */
-	constructor->run(options->input.model.numContours,
-					 options->input.model.shiftAngleFirst);
+	constructor->run(options->input.model.numContours, options->input.model.shiftAngleFirst);
 	ASSERT(!SCData->empty());
 
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-unshifted-contours.dat")
-		<< SCData;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-unshifted-contours.dat") << SCData;
 	ASSERT(!SCData->empty());
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-unshifted-contours.ply")
-		<< Polyhedron(SCData);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-unshifted-contours.ply") << Polyhedron(SCData);
 	ASSERT(!SCData->empty());
 
 	/* Shift points contours on random std::vectors. */
@@ -1392,8 +1328,7 @@ static std::vector<Point_3> readDirections(char *fileName)
 static SupportFunctionDataPtr makeSupportData(CommandLineOptions *options)
 {
 	DEBUG_START;
-	if (options->mode == RECOVERER_REAL_TESTING &&
-		options->input.file.ifSupportFunctionData)
+	if (options->mode == RECOVERER_REAL_TESTING && options->input.file.ifSupportFunctionData)
 	{
 		std::filebuf fb;
 		if (fb.open(options->input.file.name, std::ios::in))
@@ -1418,8 +1353,7 @@ static SupportFunctionDataPtr makeSupportData(CommandLineOptions *options)
 
 	if (options->input.model.directionsFileName)
 	{
-		auto directions =
-			readDirections(options->input.model.directionsFileName);
+		auto directions = readDirections(options->input.model.directionsFileName);
 		auto data = p.calculateSupportData(directions);
 		data->shiftValues(options->input.model.limitRandom);
 		DEBUG_END;
@@ -1500,9 +1434,8 @@ struct Plane_from_facet
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet &f)
 	{
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
-		auto plane = Polyhedron_3::Plane_3(h->vertex()->point(),
-										   h->next()->vertex()->point(),
-										   h->opposite()->vertex()->point());
+		auto plane =
+			Polyhedron_3::Plane_3(h->vertex()->point(), h->next()->vertex()->point(), h->opposite()->vertex()->point());
 		double a = plane.a();
 		double b = plane.b();
 		double c = plane.c();
@@ -1531,9 +1464,7 @@ struct Plane_from_facet
  * @param recoverer	The recoverer to be used
  * @param data		The data
  */
-template <typename DataPtr>
-static void runRecovery(CommandLineOptions *options, RecovererPtr recoverer,
-						DataPtr data)
+template <typename DataPtr> static void runRecovery(CommandLineOptions *options, RecovererPtr recoverer, DataPtr data)
 {
 	DEBUG_START;
 	/* In verbose mode we dump all output. */
@@ -1549,12 +1480,10 @@ static void runRecovery(CommandLineOptions *options, RecovererPtr recoverer,
 
 	/* Run the recoverer. */
 	Polyhedron_3 polyhedron = recoverer->run(data);
-	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(),
-				   polyhedron.planes_begin(), Plane_from_facet());
+	std::transform(polyhedron.facets_begin(), polyhedron.facets_end(), polyhedron.planes_begin(), Plane_from_facet());
 #ifndef NDEBUG
 	int iFacet = 0;
-	for (auto facet = polyhedron.facets_begin();
-		 facet != polyhedron.facets_end(); ++facet)
+	for (auto facet = polyhedron.facets_begin(); facet != polyhedron.facets_end(); ++facet)
 	{
 		std::cerr << "facet " << iFacet << ": " << facet->plane() << std::endl;
 		++iFacet;
@@ -1581,10 +1510,8 @@ int main(int argc, char **argv)
 	/* Create the recoverer with requested properties. */
 	RecovererPtr recoverer = makeRecoverer(options);
 
-	if ((options->mode == RECOVERER_REAL_TESTING &&
-		 !options->input.file.ifSupportFunctionData) ||
-		(options->mode == RECOVERER_SYNTHETIC_TESTING &&
-		 options->input.model.numContours))
+	if ((options->mode == RECOVERER_REAL_TESTING && !options->input.file.ifSupportFunctionData) ||
+		(options->mode == RECOVERER_SYNTHETIC_TESTING && options->input.model.numContours))
 	{
 		/*
 		 * Read or generate shadow contour data depending on requested

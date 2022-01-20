@@ -61,8 +61,7 @@ public:
 
 	void runGlobal(int id, Vector3d delta);
 	void runLocal(int id, Vector3d delta);
-	void runTest(int id, Vector3d delta, int mode, int &num_steps,
-				 double &norm_sum);
+	void runTest(int id, Vector3d delta, int mode, int &num_steps, double &norm_sum);
 	void runPartial(int id, Vector3d delta, int num);
 };
 

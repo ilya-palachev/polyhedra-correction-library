@@ -25,8 +25,7 @@
 #include "Constants.h"
 #include "TsnnlsSupportFunctionEstimator.h"
 
-TsnnlsSupportFunctionEstimator::TsnnlsSupportFunctionEstimator(
-	SupportFunctionEstimationData *data) :
+TsnnlsSupportFunctionEstimator::TsnnlsSupportFunctionEstimator(SupportFunctionEstimationData *data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
@@ -42,8 +41,7 @@ TsnnlsSupportFunctionEstimator::~TsnnlsSupportFunctionEstimator()
 static taucs_ccs_matrix *convertEigenToTaucs(SparseMatrix matrix)
 {
 	DEBUG_START;
-	auto matrixTaucs =
-		taucs_ccs_new(matrix.rows(), matrix.cols(), matrix.nonZeros());
+	auto matrixTaucs = taucs_ccs_new(matrix.rows(), matrix.cols(), matrix.nonZeros());
 
 	ASSERT(0 && "Not implemented yet.");
 	/*
@@ -67,22 +65,19 @@ static void analyzeTaucsMatrix(taucs_ccs_matrix *Q, bool ifAnalyzeExpect)
 		{
 			for (int iRow = Q->colptr[iCol]; iRow < Q->colptr[iCol + 1]; ++iRow)
 			{
-				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol,
-							Q->values.d[iRow]);
+				DEBUG_PRINT("Q[%d][%d] = %.16lf", Q->rowind[iRow], iCol, Q->values.d[iRow]);
 				numElemRow[Q->rowind[iRow]]++;
 			}
 		}
 	}
-	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0,
-				Q->colptr[Q->n] - Q->colptr[0]);
+	DEBUG_PRINT("Q->colptr[%d] - Q->colptr[%d] = %d", Q->n, 0, Q->colptr[Q->n] - Q->colptr[0]);
 
 	if (ifAnalyzeExpect)
 	{
 		int numUnexcpectedNonzeros = 0;
 		for (int iRow = 0; iRow < Q->m; ++iRow)
 		{
-			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow,
-						numElemRow[iRow]);
+			DEBUG_PRINT("%d-th row of Q has %d elements.", iRow, numElemRow[iRow]);
 			if (numElemRow[iRow] != NUM_NONZERO_COEFFICIENTS_IN_CONDITION)
 			{
 				DEBUG_PRINT("Warning: unexpected number of nonzero elements in "
@@ -218,8 +213,7 @@ void TsnnlsSupportFunctionEstimator::run()
 	 */
 
 	double *Qtvals = taucs_convert_ccs_to_doubles(Qt);
-	taucs_ccs_matrix *fixed =
-		taucs_construct_sorted_ccs_matrix(Qtvals, Qt->n, Qt->m);
+	taucs_ccs_matrix *fixed = taucs_construct_sorted_ccs_matrix(Qtvals, Qt->n, Qt->m);
 	free(Qtvals);
 	taucs_ccs_free(Qt);
 	Qt = fixed;
@@ -228,15 +222,13 @@ void TsnnlsSupportFunctionEstimator::run()
 	double conditionNumberQ = taucs_rcond(Q);
 	DEBUG_PRINT("rcond(Q) = %.16lf", conditionNumberQ);
 
-	double inRelErrTolerance =
-		conditionNumberQ * conditionNumberQ * EPS_MIN_DOUBLE;
+	double inRelErrTolerance = conditionNumberQ * conditionNumberQ * EPS_MIN_DOUBLE;
 	DEBUG_PRINT("inRelErrTolerance = %.16lf", inRelErrTolerance);
 
 	double outResidualNorm;
 
 	/* 3. Run the main TSNNLS algorithm of minimization. */
-	double *h =
-		t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100., 1);
+	double *h = t_snnls(Qt, hvalues, &outResidualNorm, inRelErrTolerance + 100., 1);
 	DEBUG_PRINT("Function t_snnls has returned pointer %p.", (void *)h);
 
 	char *errorTsnnls;
@@ -245,12 +237,9 @@ void TsnnlsSupportFunctionEstimator::run()
 
 	DEBUG_PRINT("outResidualNorm = %.16lf", outResidualNorm);
 
-	ALWAYS_PRINT(stdout, "||h - h0||_{1} = %.16lf",
-				 l1_distance(numHvalues, hvalues, h));
-	ALWAYS_PRINT(stdout, "||h - h0||_{2} = %.16lf",
-				 l2_distance(numHvalues, hvalues, h));
-	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf",
-				 linf_distance(numHvalues, hvalues, h));
+	ALWAYS_PRINT(stdout, "||h - h0||_{1} = %.16lf", l1_distance(numHvalues, hvalues, h));
+	ALWAYS_PRINT(stdout, "||h - h0||_{2} = %.16lf", l2_distance(numHvalues, hvalues, h));
+	ALWAYS_PRINT(stdout, "||h - h0||_{inf} = %.16lf", linf_distance(numHvalues, hvalues, h));
 
 	VectorXd estimation(numHvalues);
 	for (int i = 0; i < numHvalues; ++i)

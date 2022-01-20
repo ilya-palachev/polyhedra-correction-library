@@ -26,8 +26,7 @@
 
 double distCluster(ClusterNorm &cluster0, ClusterNorm &cluster1);
 
-ClusterNorm::ClusterNorm() :
-	num(0), numMax(0), P(), indexFacet(NULL), poly(NULL)
+ClusterNorm::ClusterNorm() : num(0), numMax(0), P(), indexFacet(NULL), poly(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -51,11 +50,7 @@ double ClusterNorm::area()
 
 ClusterNorm::ClusterNorm(const ClusterNorm &orig) :
 
-	num(orig.num),
-	numMax(orig.numMax),
-	P(orig.P),
-	indexFacet(new int[orig.numMax]),
-	poly(orig.poly)
+	num(orig.num), numMax(orig.numMax), P(orig.P), indexFacet(new int[orig.numMax]), poly(orig.poly)
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
@@ -65,25 +60,16 @@ ClusterNorm::ClusterNorm(const ClusterNorm &orig) :
 	DEBUG_END;
 }
 
-ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-						 PolyhedronPtr poly_orig) :
-	num(num_orig),
-	numMax(numMax_orig),
-	P(P_orig),
-	indexFacet(new int[numMax_orig]),
-	poly(poly_orig)
+ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig, PolyhedronPtr poly_orig) :
+	num(num_orig), numMax(numMax_orig), P(P_orig), indexFacet(new int[numMax_orig]), poly(poly_orig)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-						 int *indexFacet_orig, PolyhedronPtr poly_orig) :
-	num(num_orig),
-	numMax(numMax_orig),
-	P(P_orig),
-	indexFacet(new int[numMax_orig]),
-	poly(poly_orig)
+ClusterNorm::ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig, int *indexFacet_orig,
+						 PolyhedronPtr poly_orig) :
+	num(num_orig), numMax(numMax_orig), P(P_orig), indexFacet(new int[numMax_orig]), poly(poly_orig)
 {
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
@@ -192,8 +178,7 @@ double distCluster(ClusterNorm &cluster0, ClusterNorm &cluster1)
 void ClusterNorm::fprint(FILE *file)
 {
 	DEBUG_START;
-	REGULAR_PRINT(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y,
-				  P.vector.z);
+	REGULAR_PRINT(file, "P = (%lf, %lf, %lf)  ", P.vector.x, P.vector.y, P.vector.z);
 
 	if (num < 1)
 		return;

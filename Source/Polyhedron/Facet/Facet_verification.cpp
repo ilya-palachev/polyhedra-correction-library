@@ -33,13 +33,11 @@ void Facet::test_pair_neighbours()
 	{
 		for (j = 0; j < i; ++j)
 		{
-			if (indVertices[numVertices + 1 + i] ==
-				indVertices[numVertices + 1 + j])
+			if (indVertices[numVertices + 1 + i] == indVertices[numVertices + 1 + j])
 			{
 				DEBUG_PRINT("WARNING!!! test_pair_neighbours in facet %d. "
 							"neighbour[%d] = %d and neighbour[%d] = %d",
-							id, j, indVertices[numVertices + 1 + j], i,
-							indVertices[numVertices + 1 + i]);
+							id, j, indVertices[numVertices + 1 + j], i, indVertices[numVertices + 1 + i]);
 			}
 		}
 	}
@@ -72,8 +70,7 @@ bool Facet::verifyIncidenceStructure()
 			int iVertexShared = indVertices[iVertex];
 			if (iVertexShared == INT_NOT_INITIALIZED)
 			{
-				DEBUG_PRINT("Vertex at position %d is not initialized.",
-							iVertex);
+				DEBUG_PRINT("Vertex at position %d is not initialized.", iVertex);
 				DEBUG_END;
 				return true;
 			}
@@ -91,10 +88,9 @@ bool Facet::verifyIncidenceStructure()
 			int iPosition = indVertices[2 * numVertices + 1 + iVertex];
 			if (iFacetNeighbor == INT_NOT_INITIALIZED)
 			{
-				DEBUG_PRINT(
-					"Info about shared vertex position at position %d is "
-					"not initialized.",
-					iVertex);
+				DEBUG_PRINT("Info about shared vertex position at position %d is "
+							"not initialized.",
+							iVertex);
 				DEBUG_END;
 				return true;
 			}
@@ -114,12 +110,10 @@ bool Facet::verifyIncidenceStructure()
 
 			if (facetNeighbor->indVertices[iPosition] != iVertexShared)
 			{
-				ERROR_PRINT(
-					"Info about shared vertex #%d position is wrong. "
-					"Facet #%d thinks that it at position %d in facet #%d,"
-					"but actually there is a vertex %d at that position.",
-					iVertexShared, id, iPosition, iFacetNeighbor,
-					facetNeighbor->indVertices[iPosition]);
+				ERROR_PRINT("Info about shared vertex #%d position is wrong. "
+							"Facet #%d thinks that it at position %d in facet #%d,"
+							"but actually there is a vertex %d at that position.",
+							iVertexShared, id, iPosition, iFacetNeighbor, facetNeighbor->indVertices[iPosition]);
 				ASSERT(0);
 				DEBUG_END;
 				return false;
@@ -147,8 +141,7 @@ bool Facet::verifyUniqueValues(void)
 	}
 
 	DEBUG_END;
-	return (vertices.size() == (unsigned)numVertices) &&
-		   (facets.size() == (unsigned)numVertices);
+	return (vertices.size() == (unsigned)numVertices) && (facets.size() == (unsigned)numVertices);
 }
 
 bool Facet::correctPlane()

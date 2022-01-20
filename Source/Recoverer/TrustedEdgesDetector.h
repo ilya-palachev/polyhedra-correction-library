@@ -124,8 +124,7 @@ public:
 	 * 			clusterization.
 	 * @return		The information about detected planes clusters.
 	 */
-	std::vector<TrustedEdgeInformation>
-	run(Polyhedron_3 polyhedron, std::vector<std::vector<int>> clusters);
+	std::vector<TrustedEdgeInformation> run(Polyhedron_3 polyhedron, std::vector<std::vector<int>> clusters);
 };
 
 #endif /* TRUSTEDEDGESDETECTOR_H_ */

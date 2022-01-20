@@ -16,8 +16,7 @@ std::ostream &operator<<(std::ostream &os, const PCLPoint_2 &p)
 		CGAL::write(os, p.id());
 		return os;
 	default:
-		return os << "PCLPoint_2(" << p.x() << ", " << p.y() << ", " << p.id()
-				  << ')';
+		return os << "PCLPoint_2(" << p.x() << ", " << p.y() << ", " << p.id() << ')';
 	}
 }
 

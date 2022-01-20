@@ -68,8 +68,7 @@ public:
 	void set_isUsed(int v0, int v1, bool val);
 
 	// EdgeList_intersection.cpp
-	void add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d,
-				  double sm);
+	void add_edge(int v0, int v1, int i0, int i1, int next_f, int next_d, double sm);
 	void add_edge(int v0, int v1, int i0, int i1, double sm);
 	void set_curr_info(int next_d, int next_f);
 
@@ -77,10 +76,8 @@ public:
 	void null_isUsed();
 	void get_first_edge(int &v0, int &v1, int &next_f, int &next_d);
 	void get_first_edge(int &v0, int &v1);
-	void get_next_edge(Plane iplane, int &v0, int &v1, int &next_f,
-					   int &next_d);
-	void get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1,
-					   int &next_f, int &next_d);
+	void get_next_edge(Plane iplane, int &v0, int &v1, int &next_f, int &next_d);
+	void get_next_edge(Plane iplane, int &v0, int &v1, int &i0, int &i1, int &next_f, int &next_d);
 
 	void send(EdgeSetIntersected *edge_set);
 	void send_edges(EdgeSetIntersected *edge_set);

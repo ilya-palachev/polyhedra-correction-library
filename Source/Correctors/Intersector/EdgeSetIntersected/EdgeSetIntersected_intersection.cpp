@@ -38,8 +38,7 @@ void EdgeSetIntersected::get_edge(int id, int &v0, int &v1)
 	DEBUG_END;
 }
 
-void EdgeSetIntersected::get_edge(int id, int &v0, int &v1, int &id_el0,
-								  int &pos_el0, int &id_el1, int &pos_el1,
+void EdgeSetIntersected::get_edge(int id, int &v0, int &v1, int &id_el0, int &pos_el0, int &id_el1, int &pos_el1,
 								  int &id_ff, int &pos_ff)
 {
 	DEBUG_START;
@@ -102,8 +101,7 @@ int EdgeSetIntersected::search_edge(int v0, int v1)
 	}
 }
 
-void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el,
-								  int id_ff, int pos_ff)
+void EdgeSetIntersected::add_edge(int v0, int v1, int id_el, int pos_el, int id_ff, int pos_ff)
 {
 	DEBUG_START;
 
@@ -175,8 +173,7 @@ void EdgeSetIntersected::test_info()
 	DEBUG_START;
 	for (int i = 0; i < num; ++i)
 	{
-		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1 ||
-			id_edge_list1[i] == -1 || pos_edge_list1[i] == -1 ||
+		if (id_edge_list0[i] == -1 || pos_edge_list0[i] == -1 || id_edge_list1[i] == -1 || pos_edge_list1[i] == -1 ||
 			id_future_facet[i] == -1 || pos_future_facet[i] == -1)
 		{
 

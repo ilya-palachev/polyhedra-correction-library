@@ -34,8 +34,7 @@
 #include "PCLKernel/PCLConstruct_point_2.h"
 
 /* K_ is the new kernel, and K_base is the old kernel. */
-template <typename K_, typename K_Base>
-class PCLCartesian_base : public K_Base::template Base<K_>::Type
+template <typename K_, typename K_Base> class PCLCartesian_base : public K_Base::template Base<K_>::Type
 {
 	typedef typename K_Base::template Base<K_>::Type OldK;
 
@@ -46,8 +45,7 @@ public:
 	typedef PCLConstruct_point_2<Kernel, OldK> Construct_point_2;
 	typedef const double *Cartesian_const_iterator_2;
 	typedef PCLConstruct_coord_iterator Construct_cartesian_const_iterator_2;
-	typedef PCLConstruct_bbox_2<typename OldK::Construct_bbox_2>
-		Construct_bbox_2;
+	typedef PCLConstruct_bbox_2<typename OldK::Construct_bbox_2> Construct_bbox_2;
 
 	Construct_point_2 construct_point_2_object() const
 	{
@@ -59,8 +57,7 @@ public:
 		return Construct_bbox_2();
 	}
 
-	Construct_cartesian_const_iterator_2
-	construct_cartesian_const_iterator_object() const
+	Construct_cartesian_const_iterator_2 construct_cartesian_const_iterator_object() const
 	{
 		return Construct_cartesian_const_iterator_2();
 	}
@@ -72,9 +69,8 @@ public:
 };
 
 template <typename FT_>
-struct PCLKernel : public CGAL::Type_equality_wrapper<
-					   PCLCartesian_base<PCLKernel<FT_>, CGAL::Cartesian<FT_>>,
-					   PCLKernel<FT_>>
+struct PCLKernel
+	: public CGAL::Type_equality_wrapper<PCLCartesian_base<PCLKernel<FT_>, CGAL::Cartesian<FT_>>, PCLKernel<FT_>>
 {
 };
 #endif /* PCLKERNEL_H */

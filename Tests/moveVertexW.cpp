@@ -39,10 +39,8 @@ void test_deform(const char *name, int type, int id, Vector3d delta)
 
 	fprintf(stdout, "******************************************************\n");
 	fprintf(stdout, "********************   Deformation    ****************\n");
-	fprintf(stdout, "********************     [%d]        *****************\n",
-			id);
-	fprintf(stdout, "*********** (%lf, %lf, %lf) *****************\n", delta.x,
-			delta.y, delta.z);
+	fprintf(stdout, "********************     [%d]        *****************\n", id);
+	fprintf(stdout, "*********** (%lf, %lf, %lf) *****************\n", delta.x, delta.y, delta.z);
 	fprintf(stdout, "******************************************************\n");
 
 	file_name_in = new char[255];
@@ -72,8 +70,7 @@ void test_deform(const char *name, int type, int id, Vector3d delta)
 		return;
 	}
 
-	poly.fprint_ply_scale(1000., file_name_out0,
-						  "made-by-Polyhedron_join_facets_2");
+	poly.fprint_ply_scale(1000., file_name_out0, "made-by-Polyhedron_join_facets_2");
 
 	poly.get_boundary(xmin, xmax, ymin, ymax, zmin, zmax);
 	fprintf(stdout, "boundary : \n");
@@ -87,13 +84,10 @@ void test_deform(const char *name, int type, int id, Vector3d delta)
 	time_t seconds = time(NULL);
 	tm *timeinfo = localtime(&seconds);
 
-	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply",
-			name, timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
-			timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min,
-			timeinfo->tm_sec, id);
+	sprintf(file_name_out, "../poly-data-out/%s - %d-%d-%d %d:%d:%d - %d.ply", name, timeinfo->tm_year + 1900,
+			timeinfo->tm_mon + 1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, id);
 
-	poly.fprint_ply_scale(1000., file_name_out,
-						  "made-by-Polyhedron_join_facets_2");
+	poly.fprint_ply_scale(1000., file_name_out, "made-by-Polyhedron_join_facets_2");
 
 	if (file_name_in != NULL)
 		delete[] file_name_in;

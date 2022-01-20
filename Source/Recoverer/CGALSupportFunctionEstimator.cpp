@@ -44,8 +44,7 @@ typedef CGAL::Quadratic_program_solution<ET> Solution;
 #include "DebugAssert.h"
 #include "CGALSupportFunctionEstimator.h"
 
-CGALSupportFunctionEstimator::CGALSupportFunctionEstimator(
-	SupportFunctionEstimationDataPtr data) :
+CGALSupportFunctionEstimator::CGALSupportFunctionEstimator(SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
@@ -116,8 +115,7 @@ VectorXd CGALSupportFunctionEstimator::runLP(void)
 	std::cout << s;
 	VectorXd estimation(data->numValues());
 	int i = 0;
-	for (auto d = s.variable_numerators_begin();
-		 d != s.variable_numerators_end(); ++d)
+	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
 	{
 		estimation(i++) = d->to_double();
 	}
@@ -170,8 +168,7 @@ VectorXd CGALSupportFunctionEstimator::runQP(void)
 	std::cout << s;
 	VectorXd estimation(data->numValues());
 	int i = 0;
-	for (auto d = s.variable_numerators_begin();
-		 d != s.variable_numerators_end(); ++d)
+	for (auto d = s.variable_numerators_begin(); d != s.variable_numerators_end(); ++d)
 	{
 		estimation(i++) = d->to_double();
 	}

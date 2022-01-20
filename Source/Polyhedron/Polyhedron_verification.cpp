@@ -74,8 +74,7 @@ bool Polyhedron::nonZeroPlanes()
 			zeroExists = true;
 		}
 	}
-	std::cerr << "There are " << (zeroExists ? "some" : "no") << " zero planes"
-			  << std::endl;
+	std::cerr << "There are " << (zeroExists ? "some" : "no") << " zero planes" << std::endl;
 	DEBUG_END;
 	return !zeroExists;
 }

@@ -31,14 +31,8 @@
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 #include "Polyhedron/Facet/Facet.h"
 
-ShadowContourConstructor::ShadowContourConstructor(PolyhedronPtr p,
-												   ShadowContourDataPtr d) :
-	PDataConstructor(p),
-	data(d),
-	bufferBool(NULL),
-	bufferInt0(NULL),
-	bufferInt1(NULL),
-	edgeData(new EdgeData())
+ShadowContourConstructor::ShadowContourConstructor(PolyhedronPtr p, ShadowContourDataPtr d) :
+	PDataConstructor(p), data(d), bufferBool(NULL), bufferInt0(NULL), bufferInt1(NULL), edgeData(new EdgeData())
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -103,8 +97,7 @@ void ShadowContourConstructor::run(int numContoursNeeded, double firstAngle)
 	DEBUG_END;
 }
 
-void ShadowContourConstructor::analyzeEdgeVisibility(
-	ShadowContourDataPtr SCData)
+void ShadowContourConstructor::analyzeEdgeVisibility(ShadowContourDataPtr SCData)
 {
 	DEBUG_START;
 	polyhedron->preprocessAdjacency();
@@ -122,24 +115,19 @@ void ShadowContourConstructor::analyzeEdgeVisibility(
 			if (edgeIsVisibleOnPlane(edge, plane))
 				++numVisible;
 		}
-		std::cout << "Edge [" << edge.v0 << ", " << edge.v1
-				  << "] is visible on " << numVisible << " contours; it is "
-				  << "[" << polyhedron->vertices[edge.v0] << ", "
-				  << polyhedron->vertices[edge.v1] << "]" << std::endl;
+		std::cout << "Edge [" << edge.v0 << ", " << edge.v1 << "] is visible on " << numVisible << " contours; it is "
+				  << "[" << polyhedron->vertices[edge.v0] << ", " << polyhedron->vertices[edge.v1] << "]" << std::endl;
 	}
 	DEBUG_END;
 }
 
-void ShadowContourConstructor::createContour(int idOfContour,
-											 Plane planeOfProjection,
-											 SContour *outputContour)
+void ShadowContourConstructor::createContour(int idOfContour, Plane planeOfProjection, SContour *outputContour)
 {
 	DEBUG_START;
 
 	DEBUG_VARIABLE Vector3d nu = planeOfProjection.norm;
 
-	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n",
-				idOfContour, nu.x, nu.y, nu.z);
+	DEBUG_PRINT("Creating contour #%d. Direction = (%lf, %lf, %lf)\n", idOfContour, nu.x, nu.y, nu.z);
 	DEBUG_PRINT("numEdges = %d", edgeData->numEdges);
 
 	EdgeSet edgesVisible;
@@ -149,8 +137,7 @@ void ShadowContourConstructor::createContour(int idOfContour,
 	}
 
 	int iEdge = 0;
-	for (EdgeSetIterator edge = edgeData->edges.begin();
-		 edge != edgeData->edges.end(); ++edge)
+	for (EdgeSetIterator edge = edgeData->edges.begin(); edge != edgeData->edges.end(); ++edge)
 	{
 		if (edgeIsVisibleOnPlane(*edge, planeOfProjection))
 		{
@@ -175,8 +162,7 @@ void ShadowContourConstructor::createContour(int idOfContour,
 	outputContour->poly = polyhedron;
 	SideOfContour *sides = outputContour->sides;
 
-	DEBUG_PRINT("Number of visible edges = %ld",
-				(long unsigned int)edgesVisible.size());
+	DEBUG_PRINT("Number of visible edges = %ld", (long unsigned int)edgesVisible.size());
 
 	if (edgesVisible.empty())
 	{
@@ -197,16 +183,12 @@ void ShadowContourConstructor::createContour(int idOfContour,
 	{
 		bool ifEdgeNextFound = false;
 
-		for (EdgeSetIterator edgeNext = edgesVisible.begin();
-			 edgeNext != edgesVisible.end(); ++edgeNext)
+		for (EdgeSetIterator edgeNext = edgesVisible.begin(); edgeNext != edgesVisible.end(); ++edgeNext)
 		{
-			DEBUG_PRINT("edgeCurr = edge #%d (i. e. [%d, %d])", edgeCurr->id,
-						edgeCurr->v0, edgeCurr->v1);
-			DEBUG_PRINT("edgeNext = edge #%d (i. e. [%d, %d])", edgeNext->id,
-						edgeNext->v0, edgeNext->v1);
+			DEBUG_PRINT("edgeCurr = edge #%d (i. e. [%d, %d])", edgeCurr->id, edgeCurr->v0, edgeCurr->v1);
+			DEBUG_PRINT("edgeNext = edge #%d (i. e. [%d, %d])", edgeNext->id, edgeNext->v0, edgeNext->v1);
 			if ((edgeNext->v0 != iVertexCurr && edgeNext->v1 != iVertexCurr) ||
-				(edgeCurr->v0 == edgeNext->v0 &&
-				 edgeCurr->v1 == edgeNext->v1) ||
+				(edgeCurr->v0 == edgeNext->v0 && edgeCurr->v1 == edgeNext->v1) ||
 				(edgeCurr->v0 == edgeNext->v1 && edgeCurr->v1 == edgeNext->v0))
 			{
 				DEBUG_PRINT("Continuing...");
@@ -250,8 +232,7 @@ void ShadowContourConstructor::createContour(int idOfContour,
 	DEBUG_END;
 }
 
-bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
-													Plane planeOfProjection)
+bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge, Plane planeOfProjection)
 {
 	DEBUG_START;
 	int v0 = edge.v0;
@@ -305,8 +286,7 @@ bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		DEBUG_PRINT("\t\tOnly the first facet is orthogonal "
 					"to the plane of projection");
 		DEBUG_END;
-		return collinearVisibility(v0, v1, planeOfProjection, f0) ||
-			   collinearVisibility(v1, v0, planeOfProjection, f0);
+		return collinearVisibility(v0, v1, planeOfProjection, f0) || collinearVisibility(v1, v0, planeOfProjection, f0);
 	}
 
 	else // ifOrthogonalTo2ndFacet
@@ -315,14 +295,11 @@ bool ShadowContourConstructor::edgeIsVisibleOnPlane(Edge edge,
 		DEBUG_PRINT("\t\tOnly the second facets is orthogonal "
 					"to the plane of projection");
 		DEBUG_END;
-		return collinearVisibility(v0, v1, planeOfProjection, f1) ||
-			   collinearVisibility(v1, v0, planeOfProjection, f1);
+		return collinearVisibility(v0, v1, planeOfProjection, f1) || collinearVisibility(v1, v0, planeOfProjection, f1);
 	}
 }
 
-bool ShadowContourConstructor::collinearVisibility(int v0processed,
-												   int v1processed,
-												   Plane planeOfProjection,
+bool ShadowContourConstructor::collinearVisibility(int v0processed, int v1processed, Plane planeOfProjection,
 												   int ifacet)
 {
 	DEBUG_START;
@@ -348,10 +325,8 @@ bool ShadowContourConstructor::collinearVisibility(int v0processed,
 
 	int v0Max = index[ivertexMax];
 	int v1Max = index[ivertexMax + 1];
-	Vector3d vector0Max =
-		planeOfProjection.project(polyhedron->vertices[v0Max]);
-	Vector3d vector1Max =
-		planeOfProjection.project(polyhedron->vertices[v1Max]);
+	Vector3d vector0Max = planeOfProjection.project(polyhedron->vertices[v0Max]);
+	Vector3d vector1Max = planeOfProjection.project(polyhedron->vertices[v1Max]);
 	Vector3d mainEdge = vector1Max - vector0Max;
 
 	// 1.1. If mainEdge is orthogonal to the plane of projection,
@@ -359,11 +334,8 @@ bool ShadowContourConstructor::collinearVisibility(int v0processed,
 
 	if (qmod(mainEdge % nu) < EPS_COLLINEARITY)
 	{
-		DEBUG_PRINT(
-			"mainEdge (%d, %d) is orthogonal to the plane of projection, ",
-			v0Max, v1Max);
-		DEBUG_PRINT("so we are taking another edge including ivertexMax (%d)",
-					ivertexMax);
+		DEBUG_PRINT("mainEdge (%d, %d) is orthogonal to the plane of projection, ", v0Max, v1Max);
+		DEBUG_PRINT("so we are taking another edge including ivertexMax (%d)", ivertexMax);
 		v0Max = index[(ivertexMax - 1 + nv) % nv];
 		v1Max = index[ivertexMax];
 		vector0Max = planeOfProjection.project(polyhedron->vertices[v0Max]);
@@ -378,19 +350,16 @@ bool ShadowContourConstructor::collinearVisibility(int v0processed,
 		int v1 = index[ivertex + 1];
 		Vector3d curEdge = polyhedron->vertices[v1] - polyhedron->vertices[v0];
 
-		if ((v0 == v0processed && v1 == v1processed) ||
-			(v0 == v1processed && v1 == v0processed))
+		if ((v0 == v0processed && v1 == v1processed) || (v0 == v1processed && v1 == v0processed))
 		{
 			// 3. In case of non-positive scalar product
 			// -- eliminate the edge from the buffer
-			DEBUG_PRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max,
-						v1Max, v0, v1);
+			DEBUG_PRINT("main edge = (%d, %d) ; proc edge = (%d, %d)", v0Max, v1Max, v0, v1);
 			DEBUG_END;
 			return curEdge * mainEdge > 0;
 		}
 	}
-	ERROR_PRINT("Error. Edge (%d, %d) cannot be found in facets %d",
-				v0processed, v1processed, ifacet);
+	ERROR_PRINT("Error. Edge (%d, %d) cannot be found in facets %d", v0processed, v1processed, ifacet);
 	DEBUG_END;
 	return false;
 }
@@ -414,20 +383,17 @@ Point_3 unproject(Point_2 projection, Vector_3 normal)
 	return origin + projection.x() * tau + projection.y() * ez;
 }
 
-std::pair<std::vector<Point_3>, std::vector<int>>
-generateProjection(Polyhedron_3 polyhedron, Vector_3 normal)
+std::pair<std::vector<Point_3>, std::vector<int>> generateProjection(Polyhedron_3 polyhedron, Vector_3 normal)
 {
 	DEBUG_START;
 	std::vector<Point_2> points;
-	for (auto vertex = polyhedron.vertices_begin();
-		 vertex != polyhedron.vertices_end(); ++vertex)
+	for (auto vertex = polyhedron.vertices_begin(); vertex != polyhedron.vertices_end(); ++vertex)
 	{
 		points.push_back(project(vertex->point(), normal));
 	}
 	std::vector<Point_2> hull;
 	convex_hull_2(points.begin(), points.end(), std::back_inserter(hull));
-	std::cout << "   Hull contains " << hull.size() << " vetrices."
-			  << std::endl;
+	std::cout << "   Hull contains " << hull.size() << " vetrices." << std::endl;
 	std::vector<int> indices(hull.size());
 	for (int &i : indices)
 		i = INT_NOT_INITIALIZED;
@@ -439,13 +405,11 @@ generateProjection(Polyhedron_3 polyhedron, Vector_3 normal)
 		for (auto it = hull.begin(); it != hull.end(); ++it)
 		{
 			Point_2 pointExtreme = *it;
-			if (equal(point.x(), pointExtreme.x()) &&
-				equal(point.y(), pointExtreme.y()))
+			if (equal(point.x(), pointExtreme.x()) && equal(point.y(), pointExtreme.y()))
 			{
 				if (indices[iCurrent] != INT_NOT_INITIALIZED)
 				{
-					std::cerr << "Conflicting " << indices[iCurrent] << " and "
-							  << i << " for hull vertex #" << iCurrent
+					std::cerr << "Conflicting " << indices[iCurrent] << " and " << i << " for hull vertex #" << iCurrent
 							  << std::endl;
 					ifConflicts = true;
 				}

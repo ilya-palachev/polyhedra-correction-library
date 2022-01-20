@@ -76,8 +76,7 @@ void Polyhedron::shiftPointLinearLocal(int id, Vector3d delta)
 	DEBUG_END;
 }
 
-void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode,
-									  int &num_steps, double &norm_sum)
+void Polyhedron::shiftPointLinearTest(int id, Vector3d delta, int mode, int &num_steps, double &norm_sum)
 {
 	DEBUG_START;
 	PointShifterLinear *pShifter = new PointShifterLinear(get_ptr());

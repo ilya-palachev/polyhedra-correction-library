@@ -30,17 +30,15 @@
 #include <CGAL/Delaunay_triangulation_3.h>
 #include "NativeEstimatorCommonFunctions.h"
 
-typedef CGAL::Triangulation_data_structure_3<
-	CGAL::Triangulation_vertex_base_3<Kernel>,
-	CGAL::Triangulation_cell_base_3<Kernel>, CGAL::Parallel_tag>
+typedef CGAL::Triangulation_data_structure_3<CGAL::Triangulation_vertex_base_3<Kernel>,
+											 CGAL::Triangulation_cell_base_3<Kernel>, CGAL::Parallel_tag>
 	Tds;
 typedef CGAL::Delaunay_triangulation_3<Kernel, Tds> Delaunay;
 
 std::vector<int> collectInnerPointsIDs(std::vector<Point_3> points)
 {
 	DEBUG_START;
-	Delaunay::Lock_data_structure locking_ds(
-		CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000., 1000.), 50);
+	Delaunay::Lock_data_structure locking_ds(CGAL::Bbox_3(-1000., -1000., -1000., 1000., 1000., 1000.), 50);
 	Delaunay triangulation(points.begin(), points.end(), &locking_ds);
 	auto infinity = triangulation.infinite_vertex();
 
@@ -64,8 +62,7 @@ std::vector<int> collectInnerPointsIDs(std::vector<Point_3> points)
 	return outerPlanesIDs;
 }
 
-std::set<int> findTangientPointPlanesIDs(Polyhedron_3 *polyhedron,
-										 Polyhedron_3::Vertex_iterator vertex,
+std::set<int> findTangientPointPlanesIDs(Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
 										 std::vector<int> index)
 {
 	DEBUG_START;
@@ -93,8 +90,7 @@ std::set<int> findTangientPointPlanesIDs(Polyhedron_3 *polyhedron,
 		for (int i : planesIDsVector)
 			std::cerr << " " << i;
 		std::cerr << std::endl;
-		std::cerr << "degree of vertex " << vertex->id << " is "
-				  << vertex->degree() << std::endl;
+		std::cerr << "degree of vertex " << vertex->id << " is " << vertex->degree() << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	DEBUG_END;
@@ -124,8 +120,7 @@ VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values)
 		planes.push_back(plane);
 	}
 	Polyhedron_3 polyhedron(planes);
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "recovered-by-native-estimator.ply")
-		<< polyhedron;
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "recovered-by-native-estimator.ply") << polyhedron;
 
 	VectorXd solution = polyhedron.findTangientPointsConcatenated(directions);
 	DEBUG_END;

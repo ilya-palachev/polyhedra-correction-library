@@ -147,8 +147,7 @@ double TimeMeasurer::popTimer()
 	Timer timerBegin = timers.back();
 
 	long int usecondsDiff =
-		MILLION * (timerEnd.getSeconds() - timerBegin.getSeconds()) +
-		timerEnd.getUSeconds() - timerBegin.getUSeconds();
+		MILLION * (timerEnd.getSeconds() - timerBegin.getSeconds()) + timerEnd.getUSeconds() - timerBegin.getUSeconds();
 
 	DEBUG_END;
 	return usecondsDiff / (double)MILLION;

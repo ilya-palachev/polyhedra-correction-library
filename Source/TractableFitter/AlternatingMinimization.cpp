@@ -49,8 +49,7 @@ static Eigen::Vector3d toEigenVector(Point_3 v)
 static Eigen::VectorXd matrixToVector(const Eigen::MatrixXd &m)
 {
 	MatrixXd copy = m;
-	VectorXd v(
-		Eigen::Map<Eigen::VectorXd>(copy.data(), copy.cols() * copy.rows()));
+	VectorXd v(Eigen::Map<Eigen::VectorXd>(copy.data(), copy.cols() * copy.rows()));
 	return v;
 }
 
@@ -60,19 +59,17 @@ static Point_3 toCGALPoint(const Eigen::VectorXd &v)
 	return p;
 }
 
-double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
-				   const std::vector<VectorXd> &simplexVertices)
+double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data, const std::vector<VectorXd> &simplexVertices)
 {
 	double error = 0.;
-    ASSERT(!simplexVertices.empty());
+	ASSERT(!simplexVertices.empty());
 	Eigen::MatrixXd AT = A.transpose();
 	for (unsigned i = 0; i < data->size(); ++i)
 	{
 		auto item = (*data)[i];
 		MatrixXd direction = AT * toEigenVector(item.direction);
 		auto vector = matrixToVector(direction);
-		double diff =
-			calculateSupportFunction(simplexVertices, vector) - item.value;
+		double diff = calculateSupportFunction(simplexVertices, vector) - item.value;
 		error += diff * diff;
 	}
 	return error;
@@ -110,8 +107,7 @@ MatrixXd generateRandomMatrix(unsigned numLiftingDimensions)
 }
 } // namespace
 
-MatrixXd AlternatingMinimization::makeOuterInitialization(
-	unsigned numLiftingDimensions) const
+MatrixXd AlternatingMinimization::makeOuterInitialization(unsigned numLiftingDimensions) const
 {
 	if (!useStartingBody_)
 	{
@@ -135,35 +131,30 @@ MatrixXd AlternatingMinimization::makeOuterInitialization(
 	return A;
 }
 
-Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
-										  unsigned numLiftingDimensions) const
+Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data, unsigned numLiftingDimensions) const
 {
 	std::cout << "Starting to fit in primal mode." << std::endl;
 
 	std::cout << "The following hyperparameters are used:" << std::endl;
-	std::cout << "  Number of outer iterations: " << numOuterIterations_
-			  << std::endl;
-	std::cout << "  Number of inner iterations: " << numInnerIterations_
-			  << std::endl;
+	std::cout << "  Number of outer iterations: " << numOuterIterations_ << std::endl;
+	std::cout << "  Number of inner iterations: " << numInnerIterations_ << std::endl;
 	std::cout << "                 Regularizer: " << regularizer_ << std::endl;
 
 	double errorBest = -1.;
 	MatrixXd Abest;
 
-    ASSERT(numLiftingDimensions > 0);
+	ASSERT(numLiftingDimensions > 0);
 	auto simplexVertices = generateSimplex(numLiftingDimensions);
-    ASSERT(!simplexVertices.empty());
+	ASSERT(!simplexVertices.empty());
 
-	for (unsigned iOuter = 0;
-		 iOuter < (useStartingBody_ ? 1 : numOuterIterations_); ++iOuter)
+	for (unsigned iOuter = 0; iOuter < (useStartingBody_ ? 1 : numOuterIterations_); ++iOuter)
 	{
 		auto A = makeOuterInitialization(numLiftingDimensions);
 		MatrixXd Anew = generateRandomMatrix(numLiftingDimensions);
 		ASSERT(A.rows() == 3);
 		ASSERT(A.cols() == numLiftingDimensions);
 		double errorInitial = evaluateFit(A, data, simplexVertices);
-		std::cout << "Initial error on outer " << iOuter << ": " << errorInitial
-				  << std::endl;
+		std::cout << "Initial error on outer " << iOuter << ": " << errorInitial << std::endl;
 		double errorLast = 0.;
 
 		for (unsigned iInner = 0; iInner < numInnerIterations_; ++iInner)
@@ -184,8 +175,7 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 				VectorXd u = toEigenVector((*data)[k].direction);
 
 				VectorXd direction = matrixToVector(AT * u);
-				VectorXd e =
-					selectExtremePointByDirection(simplexVertices, direction);
+				VectorXd e = selectExtremePointByDirection(simplexVertices, direction);
 
 				double diff = e.dot(direction) - y;
 				error += diff * diff;
@@ -206,14 +196,12 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 
 			if (verboseLevel_ > 1)
 			{
-				std::cout << "  Outer " << iOuter << " inner " << iInner
-						  << ", error: " << error << std::endl;
+				std::cout << "  Outer " << iOuter << " inner " << iInner << ", error: " << error << std::endl;
 			}
 
 			if (error > 1000. * errorInitial)
 			{
-				std::cout << "Early stop, algorithm doesn't coverge"
-						  << std::endl;
+				std::cout << "Early stop, algorithm doesn't coverge" << std::endl;
 				break;
 			}
 			errorLast = error;
@@ -224,8 +212,8 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 			Abest = A;
 			errorBest = errorLast;
 		}
-		std::cout << "Error on iteration #" << iOuter << ": " << errorBest
-				  << " (current is " << error << ")" << std::endl;
+		std::cout << "Error on iteration #" << iOuter << ": " << errorBest << " (current is " << error << ")"
+				  << std::endl;
 	}
 	std::vector<Point_3> points;
 	for (unsigned i = 0; i < numLiftingDimensions; ++i)
@@ -233,8 +221,7 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 		points.push_back(toCGALPoint(Abest.col(i)));
 	}
 
-	std::cout << "Making a hull from " << points.size()
-			  << " points:" << std::endl;
+	std::cout << "Making a hull from " << points.size() << " points:" << std::endl;
 	for (auto point : points)
 	{
 		std::cout << "  " << point << std::endl;

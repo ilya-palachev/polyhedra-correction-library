@@ -45,8 +45,7 @@ SpherePoint::SpherePoint(const Vector3d &vector_orig)
 	DEBUG_END;
 }
 
-SpherePoint::SpherePoint(const Vector3d &vector_orig, const double phi_orig,
-						 const double psi_orig) :
+SpherePoint::SpherePoint(const Vector3d &vector_orig, const double phi_orig, const double psi_orig) :
 	vector(vector_orig), phi(phi_orig), psi(psi_orig)
 {
 	DEBUG_START;
@@ -63,8 +62,7 @@ SpherePoint::SpherePoint(const double phi_orig, const double psi_orig)
 	DEBUG_END;
 }
 
-SpherePoint::SpherePoint(const SpherePoint &orig) :
-	vector(orig.vector), phi(orig.phi), psi(orig.psi)
+SpherePoint::SpherePoint(const SpherePoint &orig) : vector(orig.vector), phi(orig.phi), psi(orig.psi)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -90,8 +88,7 @@ double distSpherePoint(SpherePoint &point0, SpherePoint &point1)
 {
 	DEBUG_START;
 	double sinus = sqrt(qmod(point0.vector % point1.vector));
-	double cosinus = (point0.vector * point1.vector) /
-					 (sqrt(qmod(point0.vector)) * sqrt(qmod(point1.vector)));
+	double cosinus = (point0.vector * point1.vector) / (sqrt(qmod(point0.vector)) * sqrt(qmod(point1.vector)));
 	DEBUG_END;
 	return atan2(sinus, cosinus);
 }

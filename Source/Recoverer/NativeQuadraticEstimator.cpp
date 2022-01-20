@@ -39,12 +39,9 @@ struct TangientVertex
 	std::set<unsigned> associations;
 };
 
-typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned, Kernel>
-	TVertexBase;
-typedef CGAL::Triangulation_cell_base_with_info_3<TangientVertex, Kernel>
-	TCellBase;
-typedef CGAL::Triangulation_data_structure_3<TVertexBase, TCellBase>
-	TDataStructure;
+typedef CGAL::Triangulation_vertex_base_with_info_3<unsigned, Kernel> TVertexBase;
+typedef CGAL::Triangulation_cell_base_with_info_3<TangientVertex, Kernel> TCellBase;
+typedef CGAL::Triangulation_data_structure_3<TVertexBase, TCellBase> TDataStructure;
 typedef CGAL::Delaunay_triangulation_3<Kernel, TDataStructure> TDelaunay_3;
 typedef TDelaunay_3::Vertex_handle Vertex_handle;
 typedef TDelaunay_3::Cell_handle Cell_handle;
@@ -66,12 +63,9 @@ private:
 	bool isOuterVertex(const Vertex_handle &vertex) const;
 	void associateVertex(const Vertex_handle &vertex);
 	void verify() const;
-	void partiallyMove(const Vector_3 &xOld, const Vector_3 &xNew,
-					   const std::vector<Vertex_handle> &vertices,
-					   const Vertex_handle &dominator, double alpha,
-					   double alpha2);
-	bool fullyMove(const std::vector<Vertex_handle> &vertices,
-				   const Vector_3 &xNew,
+	void partiallyMove(const Vector_3 &xOld, const Vector_3 &xNew, const std::vector<Vertex_handle> &vertices,
+					   const Vertex_handle &dominator, double alpha, double alpha2);
+	bool fullyMove(const std::vector<Vertex_handle> &vertices, const Vector_3 &xNew,
 				   const std::vector<unsigned> &activeGroup);
 	bool lift(Cell_handle cell, unsigned iNearest);
 	unsigned countResolvedItems() const;
@@ -80,9 +74,8 @@ private:
 public:
 	typedef std::pair<Point_3, unsigned> PointIndexed_3;
 
-	DualPolyhedron_3(const std::vector<Vector_3> &directions,
-					 const VectorXd &values, const std::vector<Plane_3> &planes,
-					 const std::vector<PointIndexed_3>::iterator &begin,
+	DualPolyhedron_3(const std::vector<Vector_3> &directions, const VectorXd &values,
+					 const std::vector<Plane_3> &planes, const std::vector<PointIndexed_3>::iterator &begin,
 					 const std::vector<PointIndexed_3>::iterator &end) :
 		TDelaunay_3(begin, end)
 	{
@@ -110,8 +103,7 @@ public:
 	void makeConsistent();
 };
 
-NativeQuadraticEstimator::NativeQuadraticEstimator(
-	SupportFunctionEstimationDataPtr data) :
+NativeQuadraticEstimator::NativeQuadraticEstimator(SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
@@ -126,8 +118,7 @@ NativeQuadraticEstimator::~NativeQuadraticEstimator()
 
 const int NUM_CELL_VERTICES = 4;
 const int NUM_FACET_VERTICES = 3;
-Plane_3 getOppositeFacetPlane(const TDelaunay_3::Cell_handle &cell,
-							  const TDelaunay_3::Vertex_handle &vertex)
+Plane_3 getOppositeFacetPlane(const TDelaunay_3::Cell_handle &cell, const TDelaunay_3::Vertex_handle &vertex)
 {
 	DEBUG_START;
 	std::vector<Point_3> points;
@@ -146,15 +137,12 @@ bool DualPolyhedron_3::isOuterVertex(const Vertex_handle &vertex) const
 	DEBUG_START;
 	Cell_handle unusedCell;
 	int unusedIndex0, unusedIndex1;
-	bool result = is_edge(vertex, infinite_vertex(), unusedCell, unusedIndex0,
-						  unusedIndex1);
+	bool result = is_edge(vertex, infinite_vertex(), unusedCell, unusedIndex0, unusedIndex1);
 	DEBUG_END;
 	return result;
 }
 
-static double calculateProduct(const Vector_3 &direction,
-							   const Cell_handle &cell,
-							   const Vertex_handle &infinity)
+static double calculateProduct(const Vector_3 &direction, const Cell_handle &cell, const Vertex_handle &infinity)
 {
 	DEBUG_START;
 	Plane_3 plane = getOppositeFacetPlane(cell, infinity);
@@ -164,8 +152,7 @@ static double calculateProduct(const Vector_3 &direction,
 	return product;
 }
 
-static Cell_handle findBestCell(const Vector_3 &direction,
-								const Vertex_handle &infinity,
+static Cell_handle findBestCell(const Vector_3 &direction, const Vertex_handle &infinity,
 								const Cell_handle &startingCell)
 {
 	DEBUG_START;
@@ -207,8 +194,7 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 	{
 		Cell_handle cell;
 		int iVertex, iInfinity;
-		bool result =
-			is_edge(vertex, infinite_vertex(), cell, iVertex, iInfinity);
+		bool result = is_edge(vertex, infinite_vertex(), cell, iVertex, iInfinity);
 		ASSERT(result && "Wrong set");
 
 		TDelaunay_3::Edge edge(cell, iVertex, iInfinity);
@@ -228,8 +214,7 @@ void DualPolyhedron_3::associateVertex(const Vertex_handle &vertex)
 	else
 	{
 		Vector_3 direction = items[iPlane].direction;
-		Cell_handle bestCell =
-			findBestCell(direction, infinite_vertex(), infinite_cell());
+		Cell_handle bestCell = findBestCell(direction, infinite_vertex(), infinite_cell());
 		bestCell->info().associations.insert(iPlane);
 		/* FIXME: Maybe the association for a plane is singular? */
 		items[iPlane].associations.insert(bestCell);
@@ -247,8 +232,7 @@ void DualPolyhedron_3::verify() const
 	for (const SupportItem &item : items)
 		planes.push_back(item.plane);
 	Polyhedron_3 intersection(planes);
-	ASSERT(intersection.size_of_vertices() == outerCells.size() &&
-		   "Two methods must produce the same topology");
+	ASSERT(intersection.size_of_vertices() == outerCells.size() && "Two methods must produce the same topology");
 
 	unsigned numEmptyCells = 0;
 	for (Cell_handle cell : outerCells)
@@ -275,8 +259,7 @@ void DualPolyhedron_3::initialize()
 	for (auto I = cells_begin(), E = cells_end(); I != E; ++I)
 		I->info().associations.clear();
 
-	for (auto I = finite_vertices_begin(), E = finite_vertices_end(); I != E;
-		 ++I)
+	for (auto I = finite_vertices_begin(), E = finite_vertices_end(); I != E; ++I)
 		associateVertex(I);
 
 	if (getenv("INTERNAL_CHECK"))
@@ -295,8 +278,7 @@ double DualPolyhedron_3::calculateFunctional() const
 		std::vector<double> products;
 		for (const Cell_handle &cell : item.associations)
 		{
-			double product =
-				calculateProduct(item.direction, cell, infinite_vertex());
+			double product = calculateProduct(item.direction, cell, infinite_vertex());
 			products.push_back(product);
 		}
 		double productMin = products[0];
@@ -323,8 +305,7 @@ double DualPolyhedron_3::calculateFunctional() const
 	return functional;
 }
 
-static unsigned getNearestOuterItemID(const Cell_handle &cell,
-									  const std::vector<SupportItem> &items,
+static unsigned getNearestOuterItemID(const Cell_handle &cell, const std::vector<SupportItem> &items,
 									  const Vertex_handle &infinity)
 {
 	DEBUG_START;
@@ -377,8 +358,7 @@ struct Step
 	unsigned iNearest;
 	double distance;
 
-	Step(Cell_handle cell, unsigned iNearest, double distance) :
-		cell(cell), iNearest(iNearest), distance(distance)
+	Step(Cell_handle cell, unsigned iNearest, double distance) : cell(cell), iNearest(iNearest), distance(distance)
 	{
 	}
 
@@ -388,8 +368,7 @@ struct Step
 	}
 };
 
-static std::set<Step> iterate(const std::vector<Cell_handle> &cells,
-							  const std::vector<SupportItem> &items,
+static std::set<Step> iterate(const std::vector<Cell_handle> &cells, const std::vector<SupportItem> &items,
 							  const Vertex_handle &infinity)
 {
 	DEBUG_START;
@@ -411,9 +390,8 @@ static std::set<Step> iterate(const std::vector<Cell_handle> &cells,
 	return steps;
 }
 
-static std::vector<unsigned>
-calculateActiveGroup(const Cell_handle &cell, unsigned iNearest,
-					 const std::vector<SupportItem> &items)
+static std::vector<unsigned> calculateActiveGroup(const Cell_handle &cell, unsigned iNearest,
+												  const std::vector<SupportItem> &items)
 {
 	DEBUG_START;
 	Vector_3 xOld = cell->info().point - CGAL::Origin();
@@ -424,8 +402,7 @@ calculateActiveGroup(const Cell_handle &cell, unsigned iNearest,
 	{
 		const SupportItem &item = items[iPlane];
 		double delta = item.direction * xOld - item.value;
-		std::cout << "  delta for plane #" << iPlane << "= " << delta
-				  << "; resolved: " << item.resolved << std::endl;
+		std::cout << "  delta for plane #" << iPlane << "= " << delta << "; resolved: " << item.resolved << std::endl;
 		if (!item.resolved)
 		{
 			++numUnresolvedCurrent;
@@ -438,8 +415,7 @@ calculateActiveGroup(const Cell_handle &cell, unsigned iNearest,
 		else
 			activeGroup.push_back(iPlane);
 	}
-	std::cout << "  Number of current unresolved items: "
-			  << numUnresolvedCurrent << std::endl;
+	std::cout << "  Number of current unresolved items: " << numUnresolvedCurrent << std::endl;
 	if (numUnresolvedCurrent == 0)
 	{
 		DEBUG_END;
@@ -454,8 +430,7 @@ calculateActiveGroup(const Cell_handle &cell, unsigned iNearest,
 	return activeGroup;
 }
 
-static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup,
-								  const std::vector<SupportItem> &items)
+static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup, const std::vector<SupportItem> &items)
 {
 	DEBUG_START;
 	Eigen::Matrix3d matrix;
@@ -467,15 +442,13 @@ static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup,
 			matrix(i, j) = 0.;
 	}
 
-	std::cout << "Calculating least squares points for the following items"
-			  << std::endl;
+	std::cout << "Calculating least squares points for the following items" << std::endl;
 	for (unsigned iPlane : activeGroup)
 	{
 		SupportItem item = items[iPlane];
 		Vector_3 u = item.direction;
 		double value = item.value;
-		std::cout << "  Item #" << iPlane << ": u = " << u << "; h = " << value
-				  << std::endl;
+		std::cout << "  Item #" << iPlane << ": u = " << u << "; h = " << value << std::endl;
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			for (unsigned j = 0; j < 3; ++j)
@@ -497,9 +470,7 @@ static Vector_3 leastSquaresPoint(const std::vector<unsigned> activeGroup,
 	return result;
 }
 
-static std::pair<bool, double> calculateAlpha(const Vector_3 &xOld,
-											  const Vector_3 &xNew,
-											  const Plane_3 &planeOuter)
+static std::pair<bool, double> calculateAlpha(const Vector_3 &xOld, const Vector_3 &xNew, const Plane_3 &planeOuter)
 {
 	DEBUG_START;
 	std::cout << "Calculating alpha for plane " << planeOuter << std::endl;
@@ -538,8 +509,7 @@ static std::pair<bool, double> calculateAlpha(const Vector_3 &xOld,
 	return std::make_pair(true, alpha);
 }
 
-bool isPositivelyDecomposable(const Vector_3 &a, const Vector_3 &b,
-							  const Vector_3 &c, const Vector_3 &decomposed)
+bool isPositivelyDecomposable(const Vector_3 &a, const Vector_3 &b, const Vector_3 &c, const Vector_3 &decomposed)
 {
 	DEBUG_START;
 	Eigen::Matrix3d matrix;
@@ -547,11 +517,9 @@ bool isPositivelyDecomposable(const Vector_3 &a, const Vector_3 &b,
 	Eigen::Vector3d vector;
 	vector << decomposed.x(), decomposed.y(), decomposed.z();
 	Eigen::Vector3d coefficients = matrix.inverse() * vector;
-	std::cout << "Tried to decompose vector, result: " << std::endl
-			  << coefficients << std::endl;
+	std::cout << "Tried to decompose vector, result: " << std::endl << coefficients << std::endl;
 	DEBUG_END;
-	return coefficients(0) >= 0. && coefficients(1) >= 0. &&
-		   coefficients(2) >= 0.;
+	return coefficients(0) >= 0. && coefficients(1) >= 0. && coefficients(2) >= 0.;
 }
 
 Point_3 calculateMove(const Vertex_handle &vertex, const Vector_3 &tangient)
@@ -575,8 +543,7 @@ static inline unsigned indexModulo(unsigned i, unsigned mod)
 
 const double INNER_RESOLVED_POINT_FACTOR = 1e-6;
 void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld, const Vector_3 &xNew,
-									 const std::vector<Vertex_handle> &vertices,
-									 const Vertex_handle &dominator,
+									 const std::vector<Vertex_handle> &vertices, const Vertex_handle &dominator,
 									 double alpha, double alpha2)
 {
 	DEBUG_START;
@@ -607,8 +574,7 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld, const Vector_3 &xNew,
 			++numSpecial;
 		}
 	}
-	std::cout << "Number of positively decomposable vectors: " << numDeletable
-			  << std::endl;
+	std::cout << "Number of positively decomposable vectors: " << numDeletable << std::endl;
 	ASSERT(numDeletable <= 1 && "Wrong topological configuration");
 	if (numDeletable == 0)
 		ASSERT(numSpecial == 1 && "This case not handled yet");
@@ -645,8 +611,7 @@ void DualPolyhedron_3::partiallyMove(const Vector_3 &xOld, const Vector_3 &xNew,
 	DEBUG_END;
 }
 
-bool DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
-								 const Vector_3 &xNew,
+bool DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices, const Vector_3 &xNew,
 								 const std::vector<unsigned> &activeGroup)
 {
 	DEBUG_START;
@@ -662,10 +627,8 @@ bool DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 	{
 		Vertex_handle vertex = vertices[i];
 		Point_3 point = calculateMove(vertex, xNew);
-		std::cout << "Moving dual point #" << vertex->info() << ": "
-				  << std::endl
-				  << std::setprecision(16) << vertex->point() << " -> "
-				  << std::endl
+		std::cout << "Moving dual point #" << vertex->info() << ": " << std::endl
+				  << std::setprecision(16) << vertex->point() << " -> " << std::endl
 				  << point << std::endl;
 		unsigned numOld = number_of_vertices();
 		Vertex_handle vertexNew = move(vertex, point);
@@ -677,8 +640,8 @@ bool DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 	{
 		if (!isOuterVertex(vertex))
 		{
-			std::cout << "Vertex #" << vertex->info() << ", i.e. "
-					  << vertex->point() << " became non-outer" << std::endl;
+			std::cout << "Vertex #" << vertex->info() << ", i.e. " << vertex->point() << " became non-outer"
+					  << std::endl;
 			succeeded = false;
 		}
 	}
@@ -700,14 +663,12 @@ bool DualPolyhedron_3::fullyMove(const std::vector<Vertex_handle> &vertices,
 	{
 		if (!items[iPlane].resolved)
 		{
-			std::cout << "  Marking item #" << iPlane << " as resolved"
-					  << std::endl;
+			std::cout << "  Marking item #" << iPlane << " as resolved" << std::endl;
 			items[iPlane].resolved = true;
 			++numNewlyResolved;
 		}
 		else
-			std::cout << "  Item #" << iPlane << " is already resolved"
-					  << std::endl;
+			std::cout << "  Item #" << iPlane << " is already resolved" << std::endl;
 	}
 	ASSERT(numNewlyResolved > 0 && "Nothing has been resolved");
 	DEBUG_END;
@@ -764,8 +725,7 @@ bool DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 	ASSERT(alphaMax < 1. && "What to do then?");
 	if (alphaMax > 0.)
 	{
-		std::cout << "Full move is impossible, performing partial move"
-				  << std::endl;
+		std::cout << "Full move is impossible, performing partial move" << std::endl;
 		partiallyMove(xOld, xNew, vertices, dominator, alphaMax, alphaMax2);
 	}
 	else
@@ -803,10 +763,8 @@ std::vector<Cell_handle> DualPolyhedron_3::getOuterCells() const
 		if (I->has_vertex(infinite_vertex()))
 			outerCellsAnother.push_back(I);
 
-	std::cout << "  One way to calculate outer cells gives number "
-			  << outerCells.size() << std::endl;
-	std::cout << "  Another one gives number " << outerCellsAnother.size()
-			  << std::endl;
+	std::cout << "  One way to calculate outer cells gives number " << outerCells.size() << std::endl;
+	std::cout << "  Another one gives number " << outerCellsAnother.size() << std::endl;
 	ASSERT(outerCells.size() == outerCells.size() && "How to calculate it?");
 	DEBUG_END;
 	return outerCells;
@@ -822,8 +780,7 @@ void DualPolyhedron_3::makeConsistent()
 	while (numResolved < items.size())
 	{
 		std::cout << "===== Iteration #" << iIteration << " =====" << std::endl;
-		std::cout << "  Resolved " << numResolved << " items from "
-				  << items.size() << std::endl;
+		std::cout << "  Resolved " << numResolved << " items from " << items.size() << std::endl;
 
 		const auto &outerCells = getOuterCells();
 		auto steps = iterate(outerCells, items, infinite_vertex());
@@ -831,8 +788,7 @@ void DualPolyhedron_3::makeConsistent()
 
 		do
 		{
-			while (touched.find(std::make_pair(it->cell, it->iNearest)) !=
-				   touched.end())
+			while (touched.find(std::make_pair(it->cell, it->iNearest)) != touched.end())
 				++it;
 
 			ASSERT(it != steps.end() && "No possible step has been found.");
@@ -847,8 +803,7 @@ void DualPolyhedron_3::makeConsistent()
 		initialize();
 		unsigned numResolvedPrev = numResolved;
 		numResolved = countResolvedItems();
-		std::cout << "  Change in the number of resolved items: "
-				  << numResolved - numResolvedPrev << std::endl;
+		std::cout << "  Change in the number of resolved items: " << numResolved - numResolvedPrev << std::endl;
 		ASSERT(numResolved >= numResolvedPrev && "Degradation happened");
 		++iIteration;
 	}
@@ -867,14 +822,11 @@ static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
 	for (unsigned i = 0; i < planes.size(); ++i)
 		points.push_back(std::make_pair(dual(planes[i]), i));
 
-	DualPolyhedron_3 dualP(directions, values, planes, points.begin(),
-						   points.end());
+	DualPolyhedron_3 dualP(directions, values, planes, points.begin(), points.end());
 	dualP.initialize();
 	double startingFunctional = dualP.calculateFunctional();
-	std::cout << "Starting value of functional: " << startingFunctional
-			  << std::endl;
-	std::cout << "And square root of it: " << sqrt(startingFunctional)
-			  << std::endl;
+	std::cout << "Starting value of functional: " << startingFunctional << std::endl;
+	std::cout << "And square root of it: " << sqrt(startingFunctional) << std::endl;
 
 	dualP.makeConsistent();
 	auto solution = calculateSolution(data, values);

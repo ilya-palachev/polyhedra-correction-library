@@ -223,8 +223,7 @@ void get_statistics_deform_linear_test(const char *name, int type)
 		{
 			printf("\\hline\n%d &\t(%.2le, %.2le, %.2le) &\t%d &\t%le &\t%d "
 				   "&\t%le \\\\\n",
-				   i_vertex, delta.x, delta.y, delta.z, num_steps0, norm_sum0,
-				   num_steps1, norm_sum1);
+				   i_vertex, delta.x, delta.y, delta.z, num_steps0, norm_sum0, num_steps1, norm_sum1);
 		}
 	}
 	DEBUG_END;

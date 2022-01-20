@@ -54,12 +54,10 @@ int main(int argc, char **argv)
 		DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 
 		ShadowContourDataPtr contourDataOriginal(new ShadowContourData(cube));
-		bool ifScanSucceeded =
-			contourDataOriginal->fscanDefault(nameFileOriginal);
+		bool ifScanSucceeded = contourDataOriginal->fscanDefault(nameFileOriginal);
 		if (!ifScanSucceeded)
 		{
-			ERROR_PRINT("Failed to scan contour data from file %s",
-						nameFileOriginal);
+			ERROR_PRINT("Failed to scan contour data from file %s", nameFileOriginal);
 			DEBUG_PRINT("polyhedron use count: %ld", cube.use_count());
 			DEBUG_END;
 			return EXIT_FAILURE;

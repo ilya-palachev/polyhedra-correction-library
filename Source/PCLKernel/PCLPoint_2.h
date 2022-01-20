@@ -80,8 +80,7 @@ public:
 
 	bool operator==(const PCLPoint_2 &p) const
 	{
-		return (vec_[0] == p.vec_[0]) && (vec_[1] == p.vec_[1]) &&
-			   (id_ == p.id_);
+		return (vec_[0] == p.vec_[0]) && (vec_[1] == p.vec_[1]) && (id_ == p.id_);
 	}
 
 	bool operator!=(const PCLPoint_2 &p) const

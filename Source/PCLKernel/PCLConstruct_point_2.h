@@ -56,8 +56,7 @@ public:
 	}
 
 	Rep /* Point_2 */
-	operator()(CGAL::Return_base_tag, const RT &x, const RT &y,
-			   const RT &w) const
+	operator()(CGAL::Return_base_tag, const RT &x, const RT &y, const RT &w) const
 	{
 		return Rep(x, y, w);
 	}

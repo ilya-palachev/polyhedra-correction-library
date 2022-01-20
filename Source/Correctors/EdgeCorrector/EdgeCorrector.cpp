@@ -26,8 +26,7 @@
 #include "DebugAssert.h"
 #include "Correctors/EdgeCorrector/EdgeCorrector.h"
 
-bool EdgeCorrector::get_nlp_info(Index &n, Index &m, Index &nnz_jac_g,
-								 Index &nnz_h_lag, IndexStyleEnum &index_style)
+bool EdgeCorrector::get_nlp_info(Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag, IndexStyleEnum &index_style)
 {
 	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
@@ -38,16 +37,13 @@ bool EdgeCorrector::get_nlp_info(Index &n, Index &m, Index &nnz_jac_g,
 
 	n = 6 * N + 4 * K; /* 6 = 3 (coordinates) * 2 (ends of edge) */
 					   /* 4 = 4 (coefficients of plane equation) */
-	std::cout << "    Number of variables: " << n
-			  << ", including:" << std::endl;
+	std::cout << "    Number of variables: " << n << ", including:" << std::endl;
 	std::cout << "        Coordinates of edges ends: " << 3 * N << std::endl;
-	std::cout << "        Coordinates of planes coefficients: " << 4 * K
-			  << std::endl;
+	std::cout << "        Coordinates of planes coefficients: " << 4 * K << std::endl;
 
 	m = 6 * N + K; /* = 4 * N (planarity) + K (normality) + */
 				   /*   + 2 * N (fixed planes)*/
-	std::cout << "    Number of constraints: " << m
-			  << ", including:" << std::endl;
+	std::cout << "    Number of constraints: " << m << ", including:" << std::endl;
 	std::cout << "        Planarity constraints: " << 4 * N << std::endl;
 	std::cout << "        Normality constraints: " << K << std::endl;
 	std::cout << "        Fixed planes contraints: " << 2 * N << std::endl;
@@ -76,8 +72,7 @@ bool EdgeCorrector::get_nlp_info(Index &n, Index &m, Index &nnz_jac_g,
 	return true;
 }
 
-bool EdgeCorrector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
-									Number *g_l, Number *g_u)
+bool EdgeCorrector::get_bounds_info(Index n, Number *x_l, Number *x_u, Index m, Number *g_l, Number *g_u)
 {
 	DEBUG_START;
 	const Number TNLP_INFINITY = 2e19;
@@ -128,10 +123,8 @@ double getCoordinate(const Plane_3 &plane, int i)
 	}
 }
 
-bool EdgeCorrector::get_starting_point(Index n, bool init_x, Number *x,
-									   bool init_z, Number *z_L, Number *z_U,
-									   Index m, bool init_lambda,
-									   Number *lambda)
+bool EdgeCorrector::get_starting_point(Index n, bool init_x, Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
+									   bool init_lambda, Number *lambda)
 {
 	DEBUG_START;
 	ASSERT(x && init_x && !init_z && !init_lambda);
@@ -170,8 +163,7 @@ static std::vector<Segment_3> getSegments(int N, const Number *x)
 	if (!x)
 	{
 		for (int i = 0; i < N; ++i)
-			segments.push_back(
-				Segment_3(Point_3(0., 0., 0.), Point_3(0., 0., 0.)));
+			segments.push_back(Segment_3(Point_3(0., 0., 0.), Point_3(0., 0., 0.)));
 		return segments;
 	}
 
@@ -209,12 +201,10 @@ static std::vector<Plane_3> getPlanes(int N, int K, const Number *x)
 
 double signedDistance(const Plane_3 &plane, const Point_3 &point)
 {
-	return plane.a() * point.x() + plane.b() * point.y() +
-		   plane.c() * point.z() + plane.d();
+	return plane.a() * point.x() + plane.b() * point.y() + plane.c() * point.z() + plane.d();
 }
 
-bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
-						   Number &obj_value)
+bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x, Number &obj_value)
 {
 	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
@@ -247,8 +237,7 @@ bool EdgeCorrector::eval_f(Index n, const Number *x, bool new_x,
 	return true;
 }
 
-bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x,
-								Number *grad_f)
+bool EdgeCorrector::eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f)
 {
 	DEBUG_START;
 	Index N = edges.size(); /* Number of edges */
@@ -298,8 +287,7 @@ static int getFacetID(const EdgeInfo &info, int iFacet)
 	return facetID;
 }
 
-bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m,
-						   Number *g)
+bool EdgeCorrector::eval_g(Index n, const Number *x, bool new_x, Index m, Number *g)
 {
 	DEBUG_START;
 	Index N = edges.size();	 /* Number of edges */
@@ -351,10 +339,8 @@ struct MyTriplet
 	Number value;
 };
 
-static MyTriplet getPlanarityTriplet(int N, int i,
-									 const std::vector<EdgeInfo> &edges,
-									 const std::vector<Segment_3> &segments,
-									 const std::vector<Plane_3> &planes)
+static MyTriplet getPlanarityTriplet(int N, int i, const std::vector<EdgeInfo> &edges,
+									 const std::vector<Segment_3> &segments, const std::vector<Plane_3> &planes)
 {
 	MyTriplet triplet;
 	triplet.row = i / 7;
@@ -411,8 +397,7 @@ static MyTriplet getPlanarityTriplet(int N, int i,
 	return triplet;
 }
 
-static MyTriplet getNormalityTriplet(int N, int i,
-									 const std::vector<Plane_3> &planes)
+static MyTriplet getNormalityTriplet(int N, int i, const std::vector<Plane_3> &planes)
 {
 	MyTriplet triplet;
 	int iPlane = i / 3;
@@ -443,8 +428,7 @@ static MyTriplet getNormalityTriplet(int N, int i,
 	return triplet;
 }
 
-static MyTriplet getFixedPlanesTriplet(int N, int K, int i,
-									   const std::vector<EdgeInfo> &edges)
+static MyTriplet getFixedPlanesTriplet(int N, int K, int i, const std::vector<EdgeInfo> &edges)
 {
 	MyTriplet triplet;
 	int iEdge = i / 6;
@@ -460,13 +444,11 @@ static MyTriplet getFixedPlanesTriplet(int N, int K, int i,
 	return triplet;
 }
 
-bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
-							   Index nnz_jac_g, Index *iRow, Index *jCol,
+bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m, Index nnz_jac_g, Index *iRow, Index *jCol,
 							   Number *jacValues)
 {
 	DEBUG_START;
-	ASSERT((iRow && jCol && !jacValues && !x) ||
-		   (!iRow && !jCol && jacValues && x));
+	ASSERT((iRow && jCol && !jacValues && !x) || (!iRow && !jCol && jacValues && x));
 	Index N = edges.size();	 /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 	auto segments = getSegments(N, x);
@@ -514,8 +496,7 @@ bool EdgeCorrector::eval_jac_g(Index n, const Number *x, bool new_x, Index m,
 	return true;
 }
 
-static double getSumForH(bool doEdgeLengthScaling, const EdgeInfo &info, int i,
-						 int j)
+static double getSumForH(bool doEdgeLengthScaling, const EdgeInfo &info, int i, int j)
 {
 	double sum = 0.;
 	for (const EdgePlane_3 &plane : info.planes)
@@ -531,8 +512,7 @@ static double getSumForH(bool doEdgeLengthScaling, const EdgeInfo &info, int i,
 
 typedef std::vector<std::set<int>> IncidenceStructure;
 
-static MyTriplet getHTriplet(bool doEdgeLengthScaling, Number obj_factor,
-							 const Number *lambda,
+static MyTriplet getHTriplet(bool doEdgeLengthScaling, Number obj_factor, const Number *lambda,
 							 const std::vector<EdgeInfo> &edges, int i)
 {
 	Index N = edges.size(); /* Number of edges */
@@ -549,8 +529,7 @@ static MyTriplet getHTriplet(bool doEdgeLengthScaling, Number obj_factor,
 	if (iDeriv < 3) /* functional */
 	{
 		triplet.col = 6 * iEdge + 3 * iEnd + iDeriv;
-		triplet.value = 2. * obj_factor *
-						getSumForH(doEdgeLengthScaling, info, iCoord, iDeriv);
+		triplet.value = 2. * obj_factor * getSumForH(doEdgeLengthScaling, info, iCoord, iDeriv);
 	}
 	else /* upper-right part planarity */
 	{
@@ -563,14 +542,11 @@ static MyTriplet getHTriplet(bool doEdgeLengthScaling, Number obj_factor,
 	return triplet;
 }
 
-bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
-						   Number obj_factor, Index m, const Number *lambda,
-						   bool new_lambda, Index nnz_h_lag, Index *iRow,
-						   Index *jCol, Number *hValues)
+bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x, Number obj_factor, Index m, const Number *lambda,
+						   bool new_lambda, Index nnz_h_lag, Index *iRow, Index *jCol, Number *hValues)
 {
 	DEBUG_START;
-	ASSERT((iRow && jCol && !hValues && !x && !lambda) ||
-		   (!iRow && !jCol && hValues && x && lambda));
+	ASSERT((iRow && jCol && !hValues && !x && !lambda) || (!iRow && !jCol && hValues && x && lambda));
 	Index N = edges.size();	 /* Number of edges */
 	Index K = planes.size(); /* Number of facets */
 
@@ -580,8 +556,7 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 
 		if (i < 30 * N) /* functional and upper-right part planarity */
 		{
-			triplet =
-				getHTriplet(doEdgeLengthScaling, obj_factor, lambda, edges, i);
+			triplet = getHTriplet(doEdgeLengthScaling, obj_factor, lambda, edges, i);
 			ASSERT(triplet.row >= 0 && triplet.row < 6 * N);
 		}
 		else /* normality */
@@ -612,13 +587,9 @@ bool EdgeCorrector::eval_h(Index n, const Number *x, bool new_x,
 	return true;
 }
 
-void EdgeCorrector::finalize_solution(SolverReturn status, Index n,
-									  const Number *x, const Number *z_L,
-									  const Number *z_U, Index m,
-									  const Number *g, const Number *lambda,
-									  Number obj_value,
-									  const IpoptData *ip_data,
-									  IpoptCalculatedQuantities *ip_cq)
+void EdgeCorrector::finalize_solution(SolverReturn status, Index n, const Number *x, const Number *z_L,
+									  const Number *z_U, Index m, const Number *g, const Number *lambda,
+									  Number obj_value, const IpoptData *ip_data, IpoptCalculatedQuantities *ip_cq)
 {
 	DEBUG_START;
 	Index N = edges.size();	 /* Number of edges */

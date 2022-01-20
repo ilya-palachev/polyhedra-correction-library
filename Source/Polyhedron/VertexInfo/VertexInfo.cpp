@@ -26,13 +26,9 @@ VertexInfo::VertexInfo() : id(-1), numFacets(0), indFacets(NULL)
 {
 }
 
-VertexInfo::VertexInfo(const int id_orig, const int nf_orig,
-					   const Vector3d vector_orig, const int *index_orig,
+VertexInfo::VertexInfo(const int id_orig, const int nf_orig, const Vector3d vector_orig, const int *index_orig,
 					   PolyhedronPtr poly_orig) :
-	id(id_orig),
-	numFacets(nf_orig),
-	vector(vector_orig),
-	parentPolyhedron(poly_orig)
+	id(id_orig), numFacets(nf_orig), vector(vector_orig), parentPolyhedron(poly_orig)
 {
 
 	if (!index_orig)
@@ -48,13 +44,8 @@ VertexInfo::VertexInfo(const int id_orig, const int nf_orig,
 		indFacets[i] = index_orig[i];
 }
 
-VertexInfo::VertexInfo(const int id_orig, const Vector3d vector_orig,
-					   PolyhedronPtr poly_orig) :
-	id(id_orig),
-	numFacets(0),
-	vector(vector_orig),
-	indFacets(NULL),
-	parentPolyhedron(poly_orig)
+VertexInfo::VertexInfo(const int id_orig, const Vector3d vector_orig, PolyhedronPtr poly_orig) :
+	id(id_orig), numFacets(0), vector(vector_orig), indFacets(NULL), parentPolyhedron(poly_orig)
 {
 }
 

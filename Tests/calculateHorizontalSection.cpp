@@ -52,16 +52,14 @@ int main(int argc, char **argv)
 	Polyhedron_3 polyhedron(p);
 
 	unsigned id = 0;
-	for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
-		 I != E; ++I)
+	for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end(); I != E; ++I)
 	{
 		I->id = id++;
 	}
 
 	std::set<unsigned> visited;
 	std::vector<std::tuple<double, double, double>> corners;
-	for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end();
-		 I != E; ++I)
+	for (auto I = polyhedron.halfedges_begin(), E = polyhedron.halfedges_end(); I != E; ++I)
 	{
 		if (visited.find(I->id) != visited.end())
 			continue;
@@ -84,8 +82,7 @@ int main(int argc, char **argv)
 		double theta = atan2(y, x);
 		corners.push_back(std::make_tuple(theta, x, y));
 	}
-	fprintf(stdout, "Number of corners in 3rd party model: %lu\n",
-			corners.size());
+	fprintf(stdout, "Number of corners in 3rd party model: %lu\n", corners.size());
 	std::sort(corners.begin(), corners.end());
 
 	for (const auto &corner : corners)

@@ -49,8 +49,7 @@ public:
 	 */
 	Ptr shared_from_This()
 	{
-		return static_pointer_cast<Derived>(
-			static_cast<Derived *>(this)->shared_from_this());
+		return static_pointer_cast<Derived>(static_cast<Derived *>(this)->shared_from_this());
 	}
 
 	/**
@@ -58,8 +57,7 @@ public:
 	 */
 	Ptr shared_from_This() const
 	{
-		return static_pointer_cast<Derived>(
-			static_cast<Derived *>(this)->shared_from_this());
+		return static_pointer_cast<Derived>(static_cast<Derived *>(this)->shared_from_this());
 	}
 };
 

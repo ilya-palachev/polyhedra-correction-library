@@ -106,8 +106,7 @@ public:
 	 * @param Jyz	Output reference to the (2, 3) element of the matrix.
 	 * @param Jxz	Output reference to the (1, 3) element of the matrix.
 	 */
-	void J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz,
-		   double &Jxz);
+	void J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz, double &Jxz);
 
 	/**
 	 * Calculates the mass center of the polyhedron.
@@ -131,8 +130,7 @@ public:
 	 *
 	 * NOTE: (As well as i remember) They are sorted so that l0 >= l1 => l2
 	 */
-	void inertia(double &l0, double &l1, double &l2, Vector3d &v0, Vector3d &v1,
-				 Vector3d &v2);
+	void inertia(double &l0, double &l1, double &l2, Vector3d &v0, Vector3d &v1, Vector3d &v2);
 
 	/**
 	 * Prints the std::list of facets sorted by their areas.

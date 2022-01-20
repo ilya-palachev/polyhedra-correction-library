@@ -39,8 +39,7 @@ public:
 	 *
 	 * @param data	Support function data
 	 */
-	NativeSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr supportFunctionData);
+	NativeSupportFunctionEstimator(SupportFunctionEstimationDataPtr supportFunctionData);
 
 	/** Default destructor. */
 	~NativeSupportFunctionEstimator();

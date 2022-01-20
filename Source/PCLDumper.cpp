@@ -32,11 +32,7 @@
 PCLDumper globalPCLDumper;
 
 PCLDumper::PCLDumper() :
-	ifVerbose_(false),
-	iCurrentDumpCount_(0),
-	level_(PCL_DUMPER_LEVEL_ZERO),
-	nameBase_(),
-	nameSuffix_()
+	ifVerbose_(false), iCurrentDumpCount_(0), level_(PCL_DUMPER_LEVEL_ZERO), nameBase_(), nameSuffix_()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -48,8 +44,7 @@ PCLDumper::~PCLDumper()
 	DEBUG_END;
 }
 
-PCLDumper &PCLDumper::operator()(PCLDumperLevel level,
-								 const std::string nameSuffix)
+PCLDumper &PCLDumper::operator()(PCLDumperLevel level, const std::string nameSuffix)
 {
 	DEBUG_START;
 	level_ = level;

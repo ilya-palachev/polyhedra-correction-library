@@ -36,10 +36,8 @@ private:
 	EdgesWorkingSets edgesWS;
 
 	int countInnerConsections();
-	int countInnerConsectionsFacet(int fid, double *A, double *b,
-								   Vector3d *vertex_old);
-	int countInnerConsectionsPair(int fid, int id0, int id1, int id2, int id3,
-								  double *A, double *b);
+	int countInnerConsectionsFacet(int fid, double *A, double *b, Vector3d *vertex_old);
+	int countInnerConsectionsPair(int fid, int id0, int id1, int id2, int id3, double *A, double *b);
 	int countOuterConsections();
 	int countOuterConsectionsFacet(int fid);
 	int countOuterConsectionsEdge(int id0, int id1);

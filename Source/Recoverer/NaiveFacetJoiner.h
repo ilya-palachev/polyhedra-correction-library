@@ -104,8 +104,7 @@ private:
 	 * @param indicesBigFacets	Big facets' IDs.
 	 * @return			Cluster candidates.
 	 */
-	std::vector<std::pair<std::set<int>, double>>
-	findFirstClusterCandidates(std::set<int> indicesBigFacets);
+	std::vector<std::pair<std::set<int>, double>> findFirstClusterCandidates(std::set<int> indicesBigFacets);
 
 	/**
 	 * Builds first clusters from cluster candidates depending on whether
@@ -114,8 +113,7 @@ private:
 	 * @param clusterCandidates	The information about caluster
 	 * 				candidates.
 	 */
-	void buildFirstClusters(
-		std::vector<std::pair<std::set<int>, double>> clusterCandidates);
+	void buildFirstClusters(std::vector<std::pair<std::set<int>, double>> clusterCandidates);
 
 	/**
 	 * Merges two clusters if it is possible (i. e. when the error of sum

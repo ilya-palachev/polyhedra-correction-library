@@ -31,8 +31,7 @@
 #include "Recoverer/CPLEXSupportFunctionEstimator.h"
 #include "Recoverer/GlpkSFELinearProgramBuilder.h"
 
-CPLEXSupportFunctionEstimator::CPLEXSupportFunctionEstimator(
-	SupportFunctionEstimationDataPtr data) :
+CPLEXSupportFunctionEstimator::CPLEXSupportFunctionEstimator(SupportFunctionEstimationDataPtr data) :
 	SupportFunctionEstimator(data)
 {
 	DEBUG_START;
@@ -63,9 +62,7 @@ static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 	std::vector<double> values;
 	for (int k = 0; k < matrix.outerSize(); ++k)
 	{
-		for (Eigen::SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(
-				 matrix, k);
-			 it; ++it)
+		for (Eigen::SparseMatrix<double, Eigen::RowMajor>::InnerIterator it(matrix, k); it; ++it)
 		{
 			rows.push_back(it.row());
 			cols.push_back(it.col());
@@ -97,8 +94,7 @@ static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 				++itCol;
 				++itRow;
 				++itValue;
-				DEBUG_PRINT("*itRow = %d, *itCol = %d, *itValue = %lf", *itRow,
-							*itCol, *itValue);
+				DEBUG_PRINT("*itRow = %d, *itCol = %d, *itValue = %lf", *itRow, *itCol, *itValue);
 				if (itValue == values.end())
 					break;
 			}
@@ -109,8 +105,8 @@ static void printConsistencyConstraints(SparseMatrix matrixInput, FILE *file)
 	DEBUG_END;
 }
 
-void printLocalityConstraint(FILE *file, const char *name, Vector3d direction,
-							 int iVariable, double bound, bool ifLinfProblem)
+void printLocalityConstraint(FILE *file, const char *name, Vector3d direction, int iVariable, double bound,
+							 bool ifLinfProblem)
 {
 	fprintf(file, " %s%i: ", name, iVariable);
 	printSignedValue(direction.x, file);
@@ -125,8 +121,7 @@ void printLocalityConstraint(FILE *file, const char *name, Vector3d direction,
 	fprintf(file, " >= %.16lf\n", bound);
 }
 
-void printLinfLocalityConstraints(std::vector<Vector3d> directions, VectorXd h,
-								  FILE *file)
+void printLinfLocalityConstraints(std::vector<Vector3d> directions, VectorXd h, FILE *file)
 {
 	DEBUG_START;
 	int numDirections = directions.size();
@@ -139,8 +134,7 @@ void printLinfLocalityConstraints(std::vector<Vector3d> directions, VectorXd h,
 	DEBUG_END;
 }
 
-void printL1L2LocalityConstraints(std::vector<Vector3d> directions, VectorXd h,
-								  FILE *file)
+void printL1L2LocalityConstraints(std::vector<Vector3d> directions, VectorXd h, FILE *file)
 {
 	DEBUG_START;
 	int numDirections = directions.size();
@@ -164,8 +158,7 @@ static void printVariableBounds(int numDirections, FILE *file)
 	DEBUG_END;
 }
 
-static void printLinfProblem(SupportFunctionEstimationDataPtr data,
-							 char *file_name)
+static void printLinfProblem(SupportFunctionEstimationDataPtr data, char *file_name)
 {
 	DEBUG_START;
 	FILE *file = (FILE *)fopen(file_name, "w");
@@ -174,8 +167,7 @@ static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, " obj: v\n");
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
-	printLinfLocalityConstraints(data->supportDirections(),
-								 data->supportVector(), file);
+	printLinfLocalityConstraints(data->supportDirections(), data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	printVariableBounds(data->numValues() / 3, file);
 	fprintf(file, " 0 <= v <= %.16lf\n", data->startingEpsilon());
@@ -184,8 +176,7 @@ static void printLinfProblem(SupportFunctionEstimationDataPtr data,
 	DEBUG_END;
 }
 
-static void printL1L2EpsilonBounds(double epsilon, int numDirections,
-								   FILE *file)
+static void printL1L2EpsilonBounds(double epsilon, int numDirections, FILE *file)
 {
 	DEBUG_START;
 	for (int i = 0; i < numDirections; ++i)
@@ -195,8 +186,7 @@ static void printL1L2EpsilonBounds(double epsilon, int numDirections,
 	DEBUG_END;
 }
 
-static void printL1Problem(SupportFunctionEstimationDataPtr data,
-						   char *file_name)
+static void printL1Problem(SupportFunctionEstimationDataPtr data, char *file_name)
 {
 	DEBUG_START;
 	FILE *file = (FILE *)fopen(file_name, "w");
@@ -211,8 +201,7 @@ static void printL1Problem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "\n");
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
-	printL1L2LocalityConstraints(data->supportDirections(),
-								 data->supportVector(), file);
+	printL1L2LocalityConstraints(data->supportDirections(), data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	printVariableBounds(numDirections, file);
 	printL1L2EpsilonBounds(data->startingEpsilon(), numDirections, file);
@@ -221,8 +210,7 @@ static void printL1Problem(SupportFunctionEstimationDataPtr data,
 	DEBUG_END;
 }
 
-static void printL2Problem(SupportFunctionEstimationDataPtr data,
-						   char *file_name)
+static void printL2Problem(SupportFunctionEstimationDataPtr data, char *file_name)
 {
 	DEBUG_START;
 	FILE *file = (FILE *)fopen(file_name, "w");
@@ -237,8 +225,7 @@ static void printL2Problem(SupportFunctionEstimationDataPtr data,
 	fprintf(file, "] / 2\n");
 	fprintf(file, "Subject To\n");
 	printConsistencyConstraints(data->supportMatrix(), file);
-	printL1L2LocalityConstraints(data->supportDirections(),
-								 data->supportVector(), file);
+	printL1L2LocalityConstraints(data->supportDirections(), data->supportVector(), file);
 	fprintf(file, "Bounds\n");
 	printVariableBounds(numDirections, file);
 	printL1L2EpsilonBounds(data->startingEpsilon(), numDirections, file);
@@ -274,8 +261,8 @@ VectorXd CPLEXSupportFunctionEstimator::run(void)
 	char *solution_file_name = strdup("/tmp/solution.txt");
 	unlink(solution_file_name);
 	unlink("/tmp/solution.xml");
-	sprintf(command, "%s/Scripts/run_cplex_solver.sh %s %s %s", SOURCE_DIR,
-			problem_file_name, "/tmp/solution.xml", solution_file_name);
+	sprintf(command, "%s/Scripts/run_cplex_solver.sh %s %s %s", SOURCE_DIR, problem_file_name, "/tmp/solution.xml",
+			solution_file_name);
 	int result = system(command);
 	std::cerr << "CPLEX solver wrapper script returned " << result << std::endl;
 

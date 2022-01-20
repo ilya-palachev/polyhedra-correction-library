@@ -32,24 +32,20 @@
 
 /** A vertex type with an ID member variable. */
 template <class Refs, class Point>
-class VertexIndexed
-	: public CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>
+class VertexIndexed : public CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>
 {
 public:
 	long int id;
 
-	VertexIndexed() :
-		CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(), id(-1)
+	VertexIndexed() : CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(), id(-1)
 	{
 	}
 
-	VertexIndexed(const Point_3 &point) :
-		CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(point), id(-1)
+	VertexIndexed(const Point_3 &point) : CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(point), id(-1)
 	{
 	}
 
-	VertexIndexed(Kernel::Point_3 point) :
-		CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(point), id(-1)
+	VertexIndexed(Kernel::Point_3 point) : CGAL::HalfedgeDS_vertex_base<Refs, CGAL::Tag_true, Point>(point), id(-1)
 	{
 	}
 };

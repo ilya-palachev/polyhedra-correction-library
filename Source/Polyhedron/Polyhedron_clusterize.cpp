@@ -52,8 +52,7 @@ TreeClusterNorm &Polyhedron::build_TreeClusterNorm()
 	return ret;
 }
 
-void Polyhedron::giveClusterNodeArray(TreeClusterNormNode *nodeArray,
-									  MatrixDistNorm &matrix)
+void Polyhedron::giveClusterNodeArray(TreeClusterNormNode *nodeArray, MatrixDistNorm &matrix)
 {
 	DEBUG_START;
 	Clusterizer *clusterizer = new Clusterizer(get_ptr());
@@ -61,15 +60,12 @@ void Polyhedron::giveClusterNodeArray(TreeClusterNormNode *nodeArray,
 	delete clusterizer;
 	DEBUG_END;
 }
-void Polyhedron::reClusterNodeArray(TreeClusterNormNode *nodeArray_in,
-									MatrixDistNorm &matrix_in,
-									TreeClusterNormNode *nodeArray_out,
-									MatrixDistNorm &matrix_out)
+void Polyhedron::reClusterNodeArray(TreeClusterNormNode *nodeArray_in, MatrixDistNorm &matrix_in,
+									TreeClusterNormNode *nodeArray_out, MatrixDistNorm &matrix_out)
 {
 	DEBUG_START;
 	Clusterizer *clusterizer = new Clusterizer(get_ptr());
-	clusterizer->reClusterNodeArray(nodeArray_in, matrix_in, nodeArray_out,
-									matrix_out);
+	clusterizer->reClusterNodeArray(nodeArray_in, matrix_in, nodeArray_out, matrix_out);
 	delete clusterizer;
 	DEBUG_END;
 }

@@ -24,8 +24,7 @@
 #include "DebugAssert.h"
 #include "Dumpers/GraphDumperGEXF/GraphDumperGEXF.h"
 
-GraphDumperGEXF::GraphDumperGEXF() :
-	gexf(new libgexf::GEXF()), graph(&gexf->getUndirectedGraph())
+GraphDumperGEXF::GraphDumperGEXF() : gexf(new libgexf::GEXF()), graph(&gexf->getUndirectedGraph())
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -73,14 +72,12 @@ void GraphDumperGEXF::addEdge(Edge *edge)
 			data.setNodeLabel(v1, v1);
 		}
 
-		DEBUG_PRINT("Adding edge [%d, %d] with id = %d to the gexf graph.",
-					edge->v0, edge->v1, graph->getNodeCount());
+		DEBUG_PRINT("Adding edge [%d, %d] with id = %d to the gexf graph.", edge->v0, edge->v1, graph->getNodeCount());
 		graph->addEdge(id, v0, v1);
 	}
 	else
 	{
-		DEBUG_PRINT("Edge [%d, %d] already presents in to the gexf graph.",
-					edge->v0, edge->v1);
+		DEBUG_PRINT("Edge [%d, %d] already presents in to the gexf graph.", edge->v0, edge->v1);
 	}
 
 	DEBUG_END;

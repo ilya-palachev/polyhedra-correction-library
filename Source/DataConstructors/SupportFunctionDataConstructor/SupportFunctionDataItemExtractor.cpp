@@ -40,8 +40,7 @@ SupportFunctionDataItemExtractor::~SupportFunctionDataItemExtractor()
 	DEBUG_END;
 }
 
-SupportFunctionDataItem
-SupportFunctionDataItemExtractor::run(SideOfContour *side)
+SupportFunctionDataItem SupportFunctionDataItemExtractor::run(SideOfContour *side)
 {
 	DEBUG_START;
 	ASSERT(0 && "Called empty extractor instead of implemented one");

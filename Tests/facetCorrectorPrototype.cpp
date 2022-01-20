@@ -26,8 +26,7 @@ public:
 	{
 		// Postcondition: hds is a valid polyhedral surface.
 		CGAL::Polyhedron_incremental_builder_3<HDS> B(hds, true);
-		B.begin_surface(numSideFacets_ + 1, numSideFacets_ + 1,
-						4 * numSideFacets_);
+		B.begin_surface(numSideFacets_ + 1, numSideFacets_ + 1, 4 * numSideFacets_);
 		for (int i = 0; i < numSideFacets_; ++i)
 		{
 			double angle = 2. * M_PI * i / numSideFacets_;
@@ -103,8 +102,7 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 	std::vector<Plane_3> planes(pyramid.size_of_facets() + 1);
 	int iPlane = 0;
-	for (auto facet = pyramid.facets_begin(); facet != pyramid.facets_end();
-		 ++facet)
+	for (auto facet = pyramid.facets_begin(); facet != pyramid.facets_end(); ++facet)
 	{
 		planes[iPlane++] = facet->plane();
 	}
@@ -113,8 +111,7 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 
 	int iPlaneCutting = intersection.size_of_facets();
 	iPlane = 0;
-	for (auto facet = intersection.facets_begin();
-		 facet != intersection.facets_end(); ++facet)
+	for (auto facet = intersection.facets_begin(); facet != intersection.facets_end(); ++facet)
 	{
 		if (facet->plane() == planeCutting)
 		{
@@ -124,11 +121,9 @@ std::pair<Polyhedron_3, int> cutPyramid(Polyhedron_3 pyramid)
 		++iPlane;
 	}
 	if (iPlaneCutting == (int)intersection.size_of_facets())
-		std::cerr << "Failed to find cutting plane in intersection"
-				  << std::endl;
+		std::cerr << "Failed to find cutting plane in intersection" << std::endl;
 	else
-		std::cout << "Found cutting plane as the " << iPlaneCutting
-				  << "-th plane in the intersection." << std::endl;
+		std::cout << "Found cutting plane as the " << iPlaneCutting << "-th plane in the intersection." << std::endl;
 
 	return std::make_pair(intersection, iPlaneCutting);
 }
@@ -160,8 +155,7 @@ struct ProblemPointDescription
 	Point_3 initialPosition;
 };
 
-static std::set<int> buildFacetIndices(Polyhedron_3 polyhedron,
-									   int iFacetCutting)
+static std::set<int> buildFacetIndices(Polyhedron_3 polyhedron, int iFacetCutting)
 {
 	polyhedron.initialize_indices();
 	auto facet = polyhedron.facets_begin();
@@ -174,17 +168,15 @@ static std::set<int> buildFacetIndices(Polyhedron_3 polyhedron,
 		indicesCutting.insert(circulator->vertex()->id);
 		++circulator;
 	} while (circulator != facet->facet_begin());
-	std::cout << "Cutting facet contains " << facet->facet_degree()
-			  << " vertices:";
+	std::cout << "Cutting facet contains " << facet->facet_degree() << " vertices:";
 	for (int i : indicesCutting)
 		std::cout << " " << i;
 	std::cout << std::endl;
 	return indicesCutting;
 }
 
-static std::vector<ProblemPointDescription>
-buildPlanesDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
-						std::set<int> indicesCutting)
+static std::vector<ProblemPointDescription> buildPlanesDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
+																	std::set<int> indicesCutting)
 {
 	std::vector<ProblemPointDescription> descriptions;
 
@@ -203,19 +195,16 @@ buildPlanesDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
 		{
 			auto facet = circulator->facet();
 			int iFacet = facet->id;
-			std::cout << "Vertex " << iVertex << " is incident to facet "
-					  << iFacet << std::endl;
+			std::cout << "Vertex " << iVertex << " is incident to facet " << iFacet << std::endl;
 			Plane_3 plane = facet->plane();
-			double distance =
-				CGAL::squared_distance<Kernel>(plane, vertex->point());
+			double distance = CGAL::squared_distance<Kernel>(plane, vertex->point());
 			if (iFacet != iFacetCutting)
 			{
 				description.planes.push_back(plane);
 				std::cout << "Plane: " << plane << std::endl;
 				std::cout << "Distance: " << distance << std::endl;
 				std::cout << "Adding it to vector, so now it "
-						  << "contains " << description.planes.size()
-						  << " planes." << std::endl;
+						  << "contains " << description.planes.size() << " planes." << std::endl;
 			}
 			else
 				ifVertexCorrect = true;
@@ -223,8 +212,7 @@ buildPlanesDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
 		} while (circulator != vertex->vertex_begin());
 		if (!ifVertexCorrect)
 		{
-			std::cerr << "Vertex #" << iVertex
-					  << " is incorrect, doesn't belong to cutting "
+			std::cerr << "Vertex #" << iVertex << " is incorrect, doesn't belong to cutting "
 					  << "facet!" << std::endl;
 			exit(EXIT_FAILURE);
 		}
@@ -233,13 +221,11 @@ buildPlanesDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
 	return descriptions;
 }
 
-static std::vector<ProblemPointDescription>
-buildProblemPointDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
-							  int numContours)
+static std::vector<ProblemPointDescription> buildProblemPointDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
+																		  int numContours)
 {
 	auto indicesCutting = buildFacetIndices(polyhedron, iFacetCutting);
-	auto descriptions =
-		buildPlanesDescriptions(polyhedron, iFacetCutting, indicesCutting);
+	auto descriptions = buildPlanesDescriptions(polyhedron, iFacetCutting, indicesCutting);
 
 	double angleFirst = genRandomDouble(0.1);
 	/* Generate contours and build lines description by them. */
@@ -279,8 +265,7 @@ buildProblemPointDescriptions(Polyhedron_3 polyhedron, int iFacetCutting,
 
 void dumpBody(Polyhedron_3 body, const char *comment)
 {
-	std::string output_name =
-		"polyhedron." + std::to_string(getpid()) + "." + comment + ".ply";
+	std::string output_name = "polyhedron." + std::to_string(getpid()) + "." + comment + ".ply";
 	std::cout << "Dumping to file " << output_name << "... ";
 	std::ofstream output;
 	output.open(output_name, std::ostream::out);
@@ -297,14 +282,11 @@ void dumpDescriptions(std::vector<ProblemPointDescription> descriptions)
 		std::cout << "Target lines for vertex #" << iVertex << ":" << std::endl;
 		for (Line_3 line : description.lines)
 			std::cout << "    " << line << std::endl;
-		std::cout << "    " << description.lines.size() << " in total"
-				  << std::endl;
-		std::cout << "Target planes for vertex #" << iVertex << ":"
-				  << std::endl;
+		std::cout << "    " << description.lines.size() << " in total" << std::endl;
+		std::cout << "Target planes for vertex #" << iVertex << ":" << std::endl;
 		for (Plane_3 plane : description.planes)
 			std::cout << "        " << plane << std::endl;
-		std::cout << "         " << description.planes.size() << " in total"
-				  << std::endl;
+		std::cout << "         " << description.planes.size() << " in total" << std::endl;
 	}
 }
 
@@ -322,8 +304,7 @@ private:
 
 public:
 	/** default constructor */
-	FacetCorrectionNLP(std::vector<ProblemPointDescription> descriptions,
-					   Plane_3 planeInitial) :
+	FacetCorrectionNLP(std::vector<ProblemPointDescription> descriptions, Plane_3 planeInitial) :
 		descriptions_(descriptions), planeInitial_(planeInitial)
 	{
 	}
@@ -336,8 +317,7 @@ public:
 	/**@name Overloaded from TNLP */
 	//@{
 	/** Method to return some info about the nlp */
-	virtual bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g,
-							  Index &nnz_h_lag, IndexStyleEnum &index_style)
+	virtual bool get_nlp_info(Index &n, Index &m, Index &nnz_jac_g, Index &nnz_h_lag, IndexStyleEnum &index_style)
 	{
 		n = 4 +						  /* u, h */
 			3 * descriptions_.size(); /* A_i */
@@ -361,8 +341,7 @@ public:
 
 #define IPOPT_INFINITY 2e19
 	/** Method to return the bounds for my problem */
-	virtual bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m,
-								 Number *g_l, Number *g_u)
+	virtual bool get_bounds_info(Index n, Number *x_l, Number *x_u, Index m, Number *g_l, Number *g_u)
 	{
 		for (Index i = 0; i < n; ++i)
 		{
@@ -379,9 +358,8 @@ public:
 	}
 
 	/** Method to return the starting point for the algorithm */
-	virtual bool get_starting_point(Index n, bool init_x, Number *x,
-									bool init_z, Number *z_L, Number *z_U,
-									Index m, bool init_lambda, Number *lambda)
+	virtual bool get_starting_point(Index n, bool init_x, Number *x, bool init_z, Number *z_L, Number *z_U, Index m,
+									bool init_lambda, Number *lambda)
 	{
 		assert(init_x == true);
 		assert(init_z == false);
@@ -417,8 +395,7 @@ public:
 	}
 
 	/** Method to return the gradient of the objective */
-	virtual bool eval_grad_f(Index n, const Number *x, bool new_x,
-							 Number *grad_f)
+	virtual bool eval_grad_f(Index n, const Number *x, bool new_x, Number *grad_f)
 	{
 		for (Index i = 0; i < n; ++i)
 			grad_f[i] = 0.;
@@ -430,24 +407,15 @@ public:
 			{
 				Vector_3 direction = line.to_vector();
 				Point_3 projection = line.projection(point);
-				grad_f[i + 0] += (projection.x() - point.x()) *
-								 (direction.x() * direction.x() - 1.);
-				grad_f[i + 0] += (projection.y() - point.y()) *
-								 (direction.y() * direction.x());
-				grad_f[i + 0] += (projection.z() - point.z()) *
-								 (direction.z() * direction.x());
-				grad_f[i + 1] += (projection.x() - point.x()) *
-								 (direction.x() * direction.y());
-				grad_f[i + 1] += (projection.y() - point.y()) *
-								 (direction.y() * direction.y() - 1.);
-				grad_f[i + 1] += (projection.z() - point.z()) *
-								 (direction.z() * direction.y());
-				grad_f[i + 2] += (projection.x() - point.x()) *
-								 (direction.x() * direction.z());
-				grad_f[i + 2] += (projection.y() - point.y()) *
-								 (direction.y() * direction.z());
-				grad_f[i + 2] += (projection.z() - point.z()) *
-								 (direction.z() * direction.z() - 1.);
+				grad_f[i + 0] += (projection.x() - point.x()) * (direction.x() * direction.x() - 1.);
+				grad_f[i + 0] += (projection.y() - point.y()) * (direction.y() * direction.x());
+				grad_f[i + 0] += (projection.z() - point.z()) * (direction.z() * direction.x());
+				grad_f[i + 1] += (projection.x() - point.x()) * (direction.x() * direction.y());
+				grad_f[i + 1] += (projection.y() - point.y()) * (direction.y() * direction.y() - 1.);
+				grad_f[i + 1] += (projection.z() - point.z()) * (direction.z() * direction.y());
+				grad_f[i + 2] += (projection.x() - point.x()) * (direction.x() * direction.z());
+				grad_f[i + 2] += (projection.y() - point.y()) * (direction.y() * direction.z());
+				grad_f[i + 2] += (projection.z() - point.z()) * (direction.z() * direction.z() - 1.);
 			}
 			grad_f[i + 0] *= 2.;
 			grad_f[i + 1] *= 2.;
@@ -458,8 +426,7 @@ public:
 	}
 
 	/** Method to return the constraint residuals */
-	virtual bool eval_g(Index n, const Number *x, bool new_x, Index m,
-						Number *g)
+	virtual bool eval_g(Index n, const Number *x, bool new_x, Index m, Number *g)
 	{
 		Vector_3 normalMoved(x[0], x[1], x[2]);
 		Plane_3 planeMoved(x[0], x[1], x[2], x[3]);
@@ -488,8 +455,7 @@ public:
 	 *   1) The structure of the jacobian (if "values" is NULL)
 	 *   2) The values of the jacobian (if "values" is not NULL)
 	 */
-	virtual bool eval_jac_g(Index n, const Number *x, bool new_x, Index m,
-							Index nele_jac, Index *iRow, Index *jCol,
+	virtual bool eval_jac_g(Index n, const Number *x, bool new_x, Index m, Index nele_jac, Index *iRow, Index *jCol,
 							Number *values)
 	{
 		Index *iRow_ = new Index[nele_jac];
@@ -555,8 +521,7 @@ public:
 				planeFixed[2] = plane.c();
 				planeFixed[3] = plane.d();
 				Index iVariableFirst = 4 + 3 * iPoint;
-				for (Index iVariable = iVariableFirst;
-					 iVariable < iVariableFirst + 3; ++iVariable)
+				for (Index iVariable = iVariableFirst; iVariable < iVariableFirst + 3; ++iVariable)
 				{
 					iRow_[iNonzero] = iConstraint;
 					jCol_[iNonzero] = iVariable;
@@ -593,10 +558,8 @@ public:
 	 *   2) The values of the hessian of the lagrangian (if "values" is not
 	 * NULL)
 	 */
-	virtual bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor,
-						Index m, const Number *lambda, bool new_lambda,
-						Index nele_hess, Index *iRow, Index *jCol,
-						Number *values)
+	virtual bool eval_h(Index n, const Number *x, bool new_x, Number obj_factor, Index m, const Number *lambda,
+						bool new_lambda, Index nele_hess, Index *iRow, Index *jCol, Number *values)
 	{
 		Index *iRow_ = new Index[nele_hess];
 		Index *jCol_ = new Index[nele_hess];
@@ -701,12 +664,9 @@ public:
 	//@{
 	/** This method is called when the algorithm is complete so the TNLP can
 	 * store/write the solution */
-	virtual void finalize_solution(SolverReturn status, Index n,
-								   const Number *x, const Number *z_L,
-								   const Number *z_U, Index m, const Number *g,
-								   const Number *lambda, Number obj_value,
-								   const IpoptData *ip_data,
-								   IpoptCalculatedQuantities *ip_cq)
+	virtual void finalize_solution(SolverReturn status, Index n, const Number *x, const Number *z_L, const Number *z_U,
+								   Index m, const Number *g, const Number *lambda, Number obj_value,
+								   const IpoptData *ip_data, IpoptCalculatedQuantities *ip_cq)
 	{
 		planeFinal_ = Plane_3(x[0], x[1], x[2], x[3]);
 	}
@@ -734,15 +694,12 @@ int main(int argc, char **argv)
 {
 	if (argc != 3)
 	{
-		std::cerr << "Usage: " << argv[0]
-				  << " <pyramid sides number> <shadow contours number>"
-				  << std::endl;
+		std::cerr << "Usage: " << argv[0] << " <pyramid sides number> <shadow contours number>" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	int numSidesPyramid = atoi(argv[1]);
 	int numShadowContours = atoi(argv[2]);
-	std::cout << "We will build " << numShadowContours << " shadow contours."
-			  << std::endl;
+	std::cout << "We will build " << numShadowContours << " shadow contours." << std::endl;
 
 	Polyhedron_3 pyramid;
 	BuildPyramid<HalfedgeDS> pyramidBuilder(numSidesPyramid);
@@ -752,8 +709,7 @@ int main(int argc, char **argv)
 	int iFacetCutting = result.second;
 	dumpBody(pyramidCut, "initial");
 
-	auto descriptions = buildProblemPointDescriptions(pyramidCut, iFacetCutting,
-													  numShadowContours);
+	auto descriptions = buildProblemPointDescriptions(pyramidCut, iFacetCutting, numShadowContours);
 	dumpDescriptions(descriptions);
 
 	auto it = pyramidCut.facets_begin();
@@ -793,9 +749,7 @@ int main(int argc, char **argv)
 	status = app->Initialize();
 	if (status != Solve_Succeeded)
 	{
-		std::cout << std::endl
-				  << std::endl
-				  << "*** Error during initialization!" << std::endl;
+		std::cout << std::endl << std::endl << "*** Error during initialization!" << std::endl;
 		return (int)status;
 	}
 	clock_t begin, end;
@@ -806,17 +760,13 @@ int main(int argc, char **argv)
 	std::cout << "Time spent: " << time_spent << std::endl;
 	if (status == Solve_Succeeded)
 	{
-		std::cout << std::endl
-				  << std::endl
-				  << "*** The problem solved!" << std::endl;
+		std::cout << std::endl << std::endl << "*** The problem solved!" << std::endl;
 		std::cout << "True    plane: " << planeTrue << std::endl;
-		std::cout << "Initial plane: " << plane << "(maybe shifted)"
-				  << std::endl;
+		std::cout << "Initial plane: " << plane << "(maybe shifted)" << std::endl;
 		std::cout << "Final   plane: " << planeFinal_ << std::endl;
 		std::vector<Plane_3> planes;
 		int iFacet = 0;
-		for (auto facet = pyramidCut.facets_begin();
-			 facet != pyramidCut.facets_end(); ++facet)
+		for (auto facet = pyramidCut.facets_begin(); facet != pyramidCut.facets_end(); ++facet)
 		{
 			if (iFacet == iFacetCutting)
 				planes.push_back(planeFinal_);
@@ -828,9 +778,7 @@ int main(int argc, char **argv)
 		dumpBody(pyramidFinal, "final");
 	}
 	else
-		std::cout << std::endl
-				  << std::endl
-				  << "*** The problem FAILED!" << std::endl;
+		std::cout << std::endl << std::endl << "*** The problem FAILED!" << std::endl;
 
 	return (int)status;
 }

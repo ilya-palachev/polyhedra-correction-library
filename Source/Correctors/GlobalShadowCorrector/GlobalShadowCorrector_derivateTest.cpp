@@ -42,13 +42,12 @@ void GlobalShadowCorrector::derivativeTest_all()
 void GlobalShadowCorrector::derivativeTest_1()
 {
 	DEBUG_START;
-	std::list<int>::iterator iIteratorNotAssociated =
-		facetsNotAssociated.begin();
+	std::list<int>::iterator iIteratorNotAssociated = facetsNotAssociated.begin();
 	int iCountNotAssociated = 0;
 
 	int iFacetLocal = 0;
-	for (std::list<int>::iterator itFacet = facetsCorrected.begin();
-		 itFacet != facetsCorrected.end(); ++itFacet, ++iFacetLocal)
+	for (std::list<int>::iterator itFacet = facetsCorrected.begin(); itFacet != facetsCorrected.end();
+		 ++itFacet, ++iFacetLocal)
 	{
 		int iFacet = *itFacet;
 
@@ -62,24 +61,19 @@ void GlobalShadowCorrector::derivativeTest_1()
 
 		for (int iCoefficient = 0; iCoefficient < 4; ++iCoefficient)
 		{
-			double valueFromDerTest =
-				calculateFunctionalDerivative_1(iFacet, iCoefficient);
-			double valueFromGradient =
-				gradient[4 * iFacetShifted + iCoefficient];
+			double valueFromDerTest = calculateFunctionalDerivative_1(iFacet, iCoefficient);
+			double valueFromGradient = gradient[4 * iFacetShifted + iCoefficient];
 
 			DEBUG_VARIABLE bool makeAssertion = false;
 
-			DEBUG_PRINT(
-				"value from derivative test: %le, value from gradient: %le",
-				valueFromDerTest, valueFromGradient);
+			DEBUG_PRINT("value from derivative test: %le, value from gradient: %le", valueFromDerTest,
+						valueFromGradient);
 
 			double errorAbsolute = fabs(valueFromDerTest - valueFromGradient);
-			if (errorAbsolute >
-				EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE)
+			if (errorAbsolute > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_ABSOLUTE)
 			{
 				ERROR_PRINT("!!! Too big absolute error: %le", errorAbsolute);
-				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
-							iCoefficient);
+				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet, iCoefficient);
 				makeAssertion = true;
 			}
 
@@ -90,12 +84,10 @@ void GlobalShadowCorrector::derivativeTest_1()
 
 			double errorRelative = errorAbsolute / absValue;
 			if (errorAbsolute >= MINIMAL_TRUSTED_ERROR &&
-				errorRelative >
-					EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE)
+				errorRelative > EPSILON_FOR_WARNING_IN_DERIVATIVE_TESTING_RELATIVE)
 			{
 				ERROR_PRINT("!!! Too big relative error: %lf", errorRelative);
-				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet,
-							iCoefficient);
+				ERROR_PRINT(" iFacet = %d, iCoefficient = %d", iFacet, iCoefficient);
 				makeAssertion = true;
 			}
 			ASSERT(!makeAssertion);
@@ -104,8 +96,7 @@ void GlobalShadowCorrector::derivativeTest_1()
 	DEBUG_END;
 }
 
-double GlobalShadowCorrector::calculateFunctionalDerivative_1(int iFacet,
-															  int iCoefficient)
+double GlobalShadowCorrector::calculateFunctionalDerivative_1(int iFacet, int iCoefficient)
 {
 	DEBUG_START;
 	if (iFacet < 0 || iFacet >= polyhedron->numFacets)
@@ -148,6 +139,5 @@ double GlobalShadowCorrector::calculateFunctionalDerivative_1(int iFacet,
 	*changedValue = changedValuePrev;
 
 	DEBUG_END;
-	return 0.5 * DEFAULT_DERIVATIVE_STEP_RECIPROCAL *
-		   (funcValueRight - funcValueLeft);
+	return 0.5 * DEFAULT_DERIVATIVE_STEP_RECIPROCAL * (funcValueRight - funcValueLeft);
 }

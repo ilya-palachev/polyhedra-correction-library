@@ -35,8 +35,7 @@ SupportMatrix::SupportMatrix() : SparseMatrix(1, 1)
 	DEBUG_END;
 }
 
-SupportMatrix::SupportMatrix(long int numRows, long int numColumns) :
-	SparseMatrix(numRows, numColumns)
+SupportMatrix::SupportMatrix(long int numRows, long int numColumns) : SparseMatrix(numRows, numColumns)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -57,8 +56,7 @@ Polyhedron_3 buildDirectionsHull(std::vector<Point_3> directions)
 	ASSERT(hull.size_of_vertices() == directions.size());
 
 	/* Find correpondance between directions and vertices of polyhedron. */
-	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
-		 ++vertex)
+	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end(); ++vertex)
 	{
 		auto point = vertex->point();
 		/* Find the direction that is nearest to the point. */
@@ -88,11 +86,9 @@ bool checkDirectionsHull(Polyhedron_3 hull)
 {
 	DEBUG_START;
 	/* Check that all vertices have different IDs. */
-	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end();
-		 ++vertex)
+	for (auto vertex = hull.vertices_begin(); vertex != hull.vertices_end(); ++vertex)
 	{
-		for (auto vertexPrev = hull.vertices_begin(); vertexPrev != vertex;
-			 ++vertexPrev)
+		for (auto vertexPrev = hull.vertices_begin(); vertexPrev != vertex; ++vertexPrev)
 			if (vertexPrev->id == vertex->id)
 			{
 				DEBUG_END;

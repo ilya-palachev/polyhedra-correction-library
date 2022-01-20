@@ -40,10 +40,8 @@ public:
 	ClusterNorm &operator=(const ClusterNorm &orig);
 
 	ClusterNorm();
-	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-				PolyhedronPtr poly_orig);
-	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig,
-				int *indexFacet_orig, PolyhedronPtr poly_orig);
+	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig, PolyhedronPtr poly_orig);
+	ClusterNorm(int num_orig, int numMax_orig, SpherePoint P_orig, int *indexFacet_orig, PolyhedronPtr poly_orig);
 	ClusterNorm(const ClusterNorm &orig);
 
 	double area();

@@ -34,8 +34,7 @@
 
 #define MAX_STEPS 1e4
 
-PointShifterLinear::PointShifterLinear() :
-	PCorrector(), id(), x(), y(), z(), xold(), yold(), zold(), A(), B(), K()
+PointShifterLinear::PointShifterLinear() : PCorrector(), id(), x(), y(), z(), xold(), yold(), zold(), A(), B(), K()
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -194,10 +193,8 @@ void PointShifterLinear::runGlobal(int id, Vector3d delta)
 		norm = calculateDeform();
 		if (step % 100 == 0 || step >= 2059)
 		{
-			DEBUG_PRINT("\\hline\n %d & %le & %le & %lf\\\\\n", step, err, norm,
-						K);
-			DEBUG_PRINT("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++,
-						err, norm, K);
+			DEBUG_PRINT("\\hline\n %d & %le & %le & %lf\\\\\n", step, err, norm, K);
+			DEBUG_PRINT("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++, err, norm, K);
 		}
 		++step;
 		if (step > MAX_STEPS)
@@ -462,14 +459,12 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 		//        if (step % 100 == 0 || step >= 2059) {
 		if (ifPrint)
 		{
-			DEBUG_PRINT("\\hline\n %d & %le & %le & %lf & %d\\\\\n", step, err,
-						norm, K, ncons_curr);
+			DEBUG_PRINT("\\hline\n %d & %le & %le & %lf & %d\\\\\n", step, err, norm, K, ncons_curr);
 			sprintf(fname, "../poly-data-out/Consections - %d.ply", ncons_curr);
 			fprint_ply_scale(1000., fname, "generated-in-deform-linear");
 			ifPrint = false;
 
-			DEBUG_PRINT("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++,
-						err, norm, K);
+			DEBUG_PRINT("%d\t%d\terr = %le\tnorm = %le\tK = %lf\n", i, step++, err, norm, K);
 		}
 		++step;
 		if (step > MAX_STEPS)
@@ -545,12 +540,9 @@ void PointShifterLinear::moveVerticesLocal()
 		B[1] = -K * Mbd + polyhedron->vertices[i].y;
 		B[2] = -K * Mcd + polyhedron->vertices[i].z;
 		Gauss_string(3, A, B);
-		norm += (B[0] - polyhedron->vertices[i].x) *
-				(B[0] - polyhedron->vertices[i].x);
-		norm += (B[1] - polyhedron->vertices[i].y) *
-				(B[1] - polyhedron->vertices[i].y);
-		norm += (B[2] - polyhedron->vertices[i].z) *
-				(B[2] - polyhedron->vertices[i].z);
+		norm += (B[0] - polyhedron->vertices[i].x) * (B[0] - polyhedron->vertices[i].x);
+		norm += (B[1] - polyhedron->vertices[i].y) * (B[1] - polyhedron->vertices[i].y);
+		norm += (B[2] - polyhedron->vertices[i].z) * (B[2] - polyhedron->vertices[i].z);
 		polyhedron->vertices[i].x = B[0];
 		polyhedron->vertices[i].y = B[1];
 		polyhedron->vertices[i].z = B[2];
@@ -559,8 +551,7 @@ void PointShifterLinear::moveVerticesLocal()
 	DEBUG_END;
 }
 
-void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
-								 int &num_steps, double &norm_sum)
+void PointShifterLinear::runTest(int id, Vector3d delta, int mode, int &num_steps, double &norm_sum)
 {
 	DEBUG_START;
 
@@ -570,8 +561,7 @@ void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
 
 	polyhedron->vertices[id] += delta;
 
-	DEBUG_PRINT("vertex[%d] = (%lf, %lf, %lf)\n", id,
-				polyhedron->vertices[id].x, polyhedron->vertices[id].y,
+	DEBUG_PRINT("vertex[%d] = (%lf, %lf, %lf)\n", id, polyhedron->vertices[id].x, polyhedron->vertices[id].y,
 				polyhedron->vertices[id].z);
 
 	for (i = 0; i < polyhedron->numVertices; ++i)
@@ -641,8 +631,7 @@ void PointShifterLinear::runTest(int id, Vector3d delta, int mode,
 		break;
 	}
 
-	DEBUG_PRINT("vertex[%d] = (%lf, %lf, %lf)\n", id,
-				polyhedron->vertices[id].x, polyhedron->vertices[id].y,
+	DEBUG_PRINT("vertex[%d] = (%lf, %lf, %lf)\n", id, polyhedron->vertices[id].x, polyhedron->vertices[id].y,
 				polyhedron->vertices[id].z);
 	DEBUG_END;
 }

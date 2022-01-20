@@ -50,9 +50,7 @@ class Polyhedron;
  * Usually this data is obtained from experimental measurements or from
  * synthetic generation from simple models.
  */
-class ShadowContourData
-	: public std::enable_shared_from_this<ShadowContourData>,
-	  public PData
+class ShadowContourData : public std::enable_shared_from_this<ShadowContourData>, public PData
 {
 public:
 	/**
@@ -150,8 +148,7 @@ public:
 	 *
 	 * @return		The stream ready for further outputs.
 	 */
-	friend std::ostream &operator<<(std::ostream &stream,
-									ShadowContourData &data);
+	friend std::ostream &operator<<(std::ostream &stream, ShadowContourData &data);
 
 	/**
 	 * Overloaded operator "==" for comparing of shadow contour data.

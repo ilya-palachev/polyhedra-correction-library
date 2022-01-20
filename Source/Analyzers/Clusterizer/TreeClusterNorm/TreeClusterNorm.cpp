@@ -36,8 +36,7 @@ TreeClusterNorm::TreeClusterNorm(const TreeClusterNorm &orig) : root(orig.root)
 	DEBUG_END;
 }
 
-TreeClusterNorm::TreeClusterNorm(TreeClusterNormNode *root_orig) :
-	root(root_orig)
+TreeClusterNorm::TreeClusterNorm(TreeClusterNormNode *root_orig) : root(root_orig)
 {
 	DEBUG_START;
 	DEBUG_END;

@@ -30,23 +30,19 @@
 #include <algorithm>
 
 template <class RangeT, class VectorT>
-VectorT selectExtremePointByDirection(const RangeT &vertices,
-									  const VectorT &direction)
+VectorT selectExtremePointByDirection(const RangeT &vertices, const VectorT &direction)
 {
 	VectorT extremeVertex =
 		*std::max_element(std::begin(vertices), std::end(vertices),
-						  [&direction = std::as_const(direction)](
-							  const auto &lhs, const auto &rhs) {
+						  [&direction = std::as_const(direction)](const auto &lhs, const auto &rhs) {
 							  return lhs.dot(direction) < rhs.dot(direction);
 						  });
 	return extremeVertex;
 }
 
-template <class RangeT, class VectorT>
-double calculateSupportFunction(const RangeT &vertices,
-								const VectorT &direction)
+template <class RangeT, class VectorT> double calculateSupportFunction(const RangeT &vertices, const VectorT &direction)
 {
-    ASSERT(std::begin(vertices) != std::end(vertices));
+	ASSERT(std::begin(vertices) != std::end(vertices));
 	return selectExtremePointByDirection(vertices, direction).dot(direction);
 }
 

@@ -42,8 +42,7 @@
  * @param data	Shadow contour data
  * @return	Balanced shadow contour data
  */
-static std::pair<ShadowContourDataPtr, Vector3d>
-balanceShadowContourData(ShadowContourDataPtr data);
+static std::pair<ShadowContourDataPtr, Vector3d> balanceShadowContourData(ShadowContourDataPtr data);
 
 /**
  * Creates shadow contours from given shadow contours and shift them all to the
@@ -52,8 +51,7 @@ balanceShadowContourData(ShadowContourDataPtr data);
  * @param data	Shadow contour data
  * @return	Shifted shadow contour data
  */
-static ShadowContourDataPtr shiftShadowContourData(ShadowContourDataPtr data,
-												   const Vector3d shift);
+static ShadowContourDataPtr shiftShadowContourData(ShadowContourDataPtr data, const Vector3d shift);
 
 /**
  * Creates shadow contours from given shadow contours and convexifies
@@ -62,8 +60,7 @@ static ShadowContourDataPtr shiftShadowContourData(ShadowContourDataPtr data,
  * @param data	Shadow contour data
  * @return	Convexified shadow contour data
  */
-static ShadowContourDataPtr
-convexifyShadowContourData(ShadowContourDataPtr data);
+static ShadowContourDataPtr convexifyShadowContourData(ShadowContourDataPtr data);
 
 /**
  * Extracts support function data items from given shadow contours.
@@ -75,9 +72,7 @@ convexifyShadowContourData(ShadowContourDataPtr data);
  * @return				Support fucntion data items
  */
 static std::vector<SupportFunctionDataItem>
-extractSupportFunctionDataItems(ShadowContourDataPtr data,
-								bool ifExtractItemsByPoints_,
-								int numMaxContours);
+extractSupportFunctionDataItems(ShadowContourDataPtr data, bool ifExtractItemsByPoints_, int numMaxContours);
 
 /**
  * Extracts support function data items from given shadow contour.
@@ -88,8 +83,7 @@ extractSupportFunctionDataItems(ShadowContourDataPtr data,
  * @return			Support fucntion data items.
  */
 static std::vector<SupportFunctionDataItem>
-extractSupportFunctionDataItems(SContour *contour,
-								SupportFunctionDataItemExtractor *extractor);
+extractSupportFunctionDataItems(SContour *contour, SupportFunctionDataItemExtractor *extractor);
 
 /**
  * Checks whether the support function data in are all pairwise unequal.
@@ -97,8 +91,7 @@ extractSupportFunctionDataItems(SContour *contour,
  * @param items	Support function data items
  * @return True if there is no equalities.
  */
-bool checkSupportFunctionDataItemsInequality(
-	std::vector<SupportFunctionDataItem> items);
+bool checkSupportFunctionDataItemsInequality(std::vector<SupportFunctionDataItem> items);
 
 SupportFunctionDataConstructor::SupportFunctionDataConstructor() :
 	ifBalanceShadowContours_(false),
@@ -138,9 +131,7 @@ void SupportFunctionDataConstructor::enableExtractItemsByPoints()
 	DEBUG_END;
 }
 
-SupportFunctionDataPtr
-SupportFunctionDataConstructor::run(ShadowContourDataPtr data,
-									int numMaxContours)
+SupportFunctionDataPtr SupportFunctionDataConstructor::run(ShadowContourDataPtr data, int numMaxContours)
 {
 	DEBUG_START;
 	ASSERT(data);
@@ -148,8 +139,7 @@ SupportFunctionDataConstructor::run(ShadowContourDataPtr data,
 	ASSERT(!data->empty());
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "initial-contours.dat") << *data;
-	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "initial-contours.ply")
-		<< Polyhedron(data);
+	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "initial-contours.ply") << Polyhedron(data);
 	/* Balance shadow contour data if demanded. */
 	if (ifBalanceShadowContours_)
 	{
@@ -157,10 +147,8 @@ SupportFunctionDataConstructor::run(ShadowContourDataPtr data,
 		auto dataBalanced = pair.first;
 		balancingVector_ = pair.second;
 		data = dataBalanced;
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "balanced-contours.dat")
-			<< *data;
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "balanced-contours.ply")
-			<< Polyhedron(data);
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "balanced-contours.dat") << *data;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "balanced-contours.ply") << Polyhedron(data);
 	}
 
 	/* Convexify shadow contour data if demanded. */
@@ -168,15 +156,12 @@ SupportFunctionDataConstructor::run(ShadowContourDataPtr data,
 	{
 		auto dataConvexified = convexifyShadowContourData(data);
 		data = dataConvexified;
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "convexified-contours.dat")
-			<< *data;
-		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "convexified-contours.ply")
-			<< Polyhedron(data);
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "convexified-contours.dat") << *data;
+		globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "convexified-contours.ply") << Polyhedron(data);
 	}
 
 	/* Iterate through the array of contours and get data from each. */
-	auto items = extractSupportFunctionDataItems(data, ifExtractItemsByPoints_,
-												 numMaxContours);
+	auto items = extractSupportFunctionDataItems(data, ifExtractItemsByPoints_, numMaxContours);
 
 	SupportFunctionDataPtr supportFunctionData(new SupportFunctionData(items));
 
@@ -184,8 +169,7 @@ SupportFunctionDataConstructor::run(ShadowContourDataPtr data,
 	return supportFunctionData;
 }
 
-static std::pair<ShadowContourDataPtr, Vector3d>
-balanceShadowContourData(ShadowContourDataPtr data)
+static std::pair<ShadowContourDataPtr, Vector3d> balanceShadowContourData(ShadowContourDataPtr data)
 {
 	DEBUG_START;
 	/* Construct polyhedron which facets are the contours. */
@@ -195,8 +179,7 @@ balanceShadowContourData(ShadowContourDataPtr data)
 	/* Calculate the mass center of contours. */
 	SizeCalculator *sizeCalculator = new SizeCalculator(p);
 	Vector3d center = sizeCalculator->calculateSurfaceCenter();
-	DEBUG_PRINT("Center of contours = (%lf, %lf, %lf)", center.x, center.y,
-				center.z);
+	DEBUG_PRINT("Center of contours = (%lf, %lf, %lf)", center.x, center.y, center.z);
 
 	/*
 	 * Shift all contours on z component of the std::vector of mass center.
@@ -205,12 +188,10 @@ balanceShadowContourData(ShadowContourDataPtr data)
 	Vector3d shiftingVector = -(ez * center) * ez;
 	auto dataShifted = shiftShadowContourData(data, shiftingVector);
 	DEBUG_END;
-	return std::pair<ShadowContourDataPtr, Vector3d>(dataShifted,
-													 shiftingVector);
+	return std::pair<ShadowContourDataPtr, Vector3d>(dataShifted, shiftingVector);
 }
 
-static ShadowContourDataPtr shiftShadowContourData(ShadowContourDataPtr data,
-												   const Vector3d shift)
+static ShadowContourDataPtr shiftShadowContourData(ShadowContourDataPtr data, const Vector3d shift)
 {
 	DEBUG_START;
 
@@ -250,8 +231,7 @@ static ShadowContourDataPtr shiftShadowContourData(ShadowContourDataPtr data,
 	return dataShifted;
 }
 
-static ShadowContourDataPtr
-convexifyShadowContourData(ShadowContourDataPtr data)
+static ShadowContourDataPtr convexifyShadowContourData(ShadowContourDataPtr data)
 {
 	DEBUG_START;
 
@@ -270,8 +250,8 @@ convexifyShadowContourData(ShadowContourDataPtr data)
 	return dataConvexified;
 }
 
-static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
-	ShadowContourDataPtr data, bool ifExtractItemsByPoints_, int numMaxContours)
+static std::vector<SupportFunctionDataItem>
+extractSupportFunctionDataItems(ShadowContourDataPtr data, bool ifExtractItemsByPoints_, int numMaxContours)
 {
 	DEBUG_START;
 	ASSERT(data);
@@ -283,8 +263,7 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 	int numContoursAnalyzed = 0;
 	for (int iContour = 0; iContour < data->numContours; ++iContour)
 	{
-		if (numMaxContours != IF_ANALYZE_ALL_CONTOURS &&
-			numMaxContours < data->numContours &&
+		if (numMaxContours != IF_ANALYZE_ALL_CONTOURS && numMaxContours < data->numContours &&
 			iContour != (int)floor(factor * numContoursAnalyzed))
 		{
 			continue;
@@ -295,23 +274,18 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 		SupportFunctionDataItemExtractor *extractor = NULL;
 		if (ifExtractItemsByPoints_)
 		{
-			extractor = static_cast<SupportFunctionDataItemExtractor *>(
-				new SupportFunctionDataItemExtractorByPoints());
+			extractor = static_cast<SupportFunctionDataItemExtractor *>(new SupportFunctionDataItemExtractorByPoints());
 		}
 		else
 		{
-			auto extractorByPlane =
-				new SupportFunctionDataItemExtractorByPlane();
+			auto extractorByPlane = new SupportFunctionDataItemExtractorByPlane();
 			extractorByPlane->setPlane(contour->plane);
-			extractor = static_cast<SupportFunctionDataItemExtractor *>(
-				extractorByPlane);
+			extractor = static_cast<SupportFunctionDataItemExtractor *>(extractorByPlane);
 		}
 		auto itemsPortion = extractSupportFunctionDataItems(contour, extractor);
-		items.insert(items.end(), itemsPortion.begin(),
-					 itemsPortion.end()); /* Collect items. */
+		items.insert(items.end(), itemsPortion.begin(), itemsPortion.end()); /* Collect items. */
 	}
-	ALWAYS_PRINT(stdout, "We are analyzing only %d contours.\n",
-				 numContoursAnalyzed - 1);
+	ALWAYS_PRINT(stdout, "We are analyzing only %d contours.\n", numContoursAnalyzed - 1);
 
 	int iPrevZero = INT_NOT_INITIALIZED;
 	int iCurr = 0;
@@ -323,9 +297,7 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 		ASSERT(item.info->iNext == INT_NOT_INITIALIZED);
 		if (item.info->iSide == 0)
 			iPrevZero = iCurr;
-		item.info->iNext = item.info->iSide < item.info->numSidesContour - 1
-							   ? iCurr + 1
-							   : iPrevZero;
+		item.info->iNext = item.info->iSide < item.info->numSidesContour - 1 ? iCurr + 1 : iPrevZero;
 		++iCurr;
 	}
 
@@ -335,9 +307,8 @@ static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(
 	return items;
 }
 
-static std::vector<SupportFunctionDataItem>
-extractSupportFunctionDataItems(SContour *contour,
-								SupportFunctionDataItemExtractor *extractor)
+static std::vector<SupportFunctionDataItem> extractSupportFunctionDataItems(SContour *contour,
+																			SupportFunctionDataItemExtractor *extractor)
 {
 	/* Check that the input contour is correct. */
 	ASSERT(contour);
@@ -354,8 +325,7 @@ extractSupportFunctionDataItems(SContour *contour,
 		SideOfContour *side = &contour->sides[iSide];
 
 		SupportFunctionDataItem item = extractor->run(side);
-		item.info =
-			SupportFunctionDataItemInfoPtr(new SupportFunctionDataItemInfo());
+		item.info = SupportFunctionDataItemInfoPtr(new SupportFunctionDataItemInfo());
 		item.info->iContour = contour->id;
 		item.info->numSidesContour = contour->ns;
 		item.info->iSide = iSide;
@@ -369,8 +339,7 @@ extractSupportFunctionDataItems(SContour *contour,
 
 #define EPS_DATA_ITEMS_EQUAL 1e-15
 
-bool checkSupportFunctionDataItemsInequality(
-	std::vector<SupportFunctionDataItem> items)
+bool checkSupportFunctionDataItemsInequality(std::vector<SupportFunctionDataItem> items)
 {
 	DEBUG_START;
 	for (auto item = items.begin(); item != items.end(); ++item)
@@ -378,8 +347,7 @@ bool checkSupportFunctionDataItemsInequality(
 		for (auto itemPrev = items.begin(); itemPrev != item; ++itemPrev)
 		{
 			if (equal(item->value, itemPrev->value, EPS_DATA_ITEMS_EQUAL) &&
-				equal(item->direction, itemPrev->direction,
-					  EPS_DATA_ITEMS_EQUAL))
+				equal(item->direction, itemPrev->direction, EPS_DATA_ITEMS_EQUAL))
 			{
 				return false;
 			}
@@ -389,9 +357,7 @@ bool checkSupportFunctionDataItemsInequality(
 	return true;
 }
 
-SupportFunctionDataPtr
-SupportFunctionDataConstructor::run(std::vector<Point_3> directions,
-									Polyhedron_3 polyhedron)
+SupportFunctionDataPtr SupportFunctionDataConstructor::run(std::vector<Point_3> directions, Polyhedron_3 polyhedron)
 {
 	DEBUG_START;
 	std::vector<Vector_3> vertices = polyhedron.getVertices();
@@ -429,17 +395,14 @@ SupportFunctionDataConstructor::run(std::vector<Point_3> directions,
 			++numNegative;
 		}
 		// ASSERT(scalarProductMax > 0.);
-		SupportFunctionDataItem item(Vector3d::fromCGAL(direction),
-									 scalarProductMax);
-		item.info =
-			SupportFunctionDataItemInfoPtr(new SupportFunctionDataItemInfo());
+		SupportFunctionDataItem item(Vector3d::fromCGAL(direction), scalarProductMax);
+		item.info = SupportFunctionDataItemInfoPtr(new SupportFunctionDataItemInfo());
 		item.info->point = Vector3d::fromCGAL(supportPoint);
 		items.push_back(item);
 		++iDirection;
 	}
 	if (numNegative > 0)
-		ERROR_PRINT("Number of negative: %d, total: %lu", numNegative,
-					directions.size());
+		ERROR_PRINT("Number of negative: %d, total: %lu", numNegative, directions.size());
 
 	DEBUG_END;
 	return SupportFunctionDataPtr(new SupportFunctionData(items));

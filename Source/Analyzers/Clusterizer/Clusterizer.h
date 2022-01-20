@@ -45,12 +45,9 @@ public:
 	int clusterize(double p);
 	void clusterize2(double p);
 	TreeClusterNorm &build_TreeClusterNorm();
-	void giveClusterNodeArray(TreeClusterNormNode *nodeArray,
-							  MatrixDistNorm &matrix);
-	void reClusterNodeArray(TreeClusterNormNode *nodeArray_in,
-							MatrixDistNorm &matrix_in,
-							TreeClusterNormNode *nodeArray_out,
-							MatrixDistNorm &matrix_out);
+	void giveClusterNodeArray(TreeClusterNormNode *nodeArray, MatrixDistNorm &matrix);
+	void reClusterNodeArray(TreeClusterNormNode *nodeArray_in, MatrixDistNorm &matrix_in,
+							TreeClusterNormNode *nodeArray_out, MatrixDistNorm &matrix_out);
 };
 
 #endif /* CLUSTERIZER_H_ */

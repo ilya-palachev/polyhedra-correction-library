@@ -58,8 +58,7 @@ typedef enum
 } SupportMatrixType;
 
 /** Support matrix type that is used by default. */
-const SupportMatrixType DEFAULT_SUPPORT_MATRIX_TYPE =
-	SUPPORT_MATRIX_TYPE_GK_OPT;
+const SupportMatrixType DEFAULT_SUPPORT_MATRIX_TYPE = SUPPORT_MATRIX_TYPE_GK_OPT;
 
 /** Type of the optimization problem. */
 typedef enum
@@ -75,8 +74,7 @@ typedef enum
 } EstimationProblemNorm;
 
 /** Type of the optimization problem that is used by default. */
-const EstimationProblemNorm DEFAULT_ESTIMATION_PROBLEM_NORM =
-	ESTIMATION_PROBLEM_NORM_L_INF;
+const EstimationProblemNorm DEFAULT_ESTIMATION_PROBLEM_NORM = ESTIMATION_PROBLEM_NORM_L_INF;
 
 /**
  * Structure that represents the input data for support function estimation
@@ -142,13 +140,9 @@ public:
 	 * @param startingEpsilon	Starting epsilon for native estimator.
 	 * @param supportData		The original support function data.
 	 */
-	SupportFunctionEstimationData(SupportMatrix supportMatrix,
-								  VectorXd supportVector,
-								  VectorXd startingVector,
-								  std::vector<Vector3d> supportDirections,
-								  double epsilon,
-								  SupportFunctionDataPtr supportData,
-								  bool ifShadowHeuristics);
+	SupportFunctionEstimationData(SupportMatrix supportMatrix, VectorXd supportVector, VectorXd startingVector,
+								  std::vector<Vector3d> supportDirections, double epsilon,
+								  SupportFunctionDataPtr supportData, bool ifShadowHeuristics);
 
 	/** Default destructor. */
 	virtual ~SupportFunctionEstimationData();
@@ -179,7 +173,6 @@ public:
 };
 
 /** Shared pointer for support function estimation data. */
-typedef std::shared_ptr<SupportFunctionEstimationData>
-	SupportFunctionEstimationDataPtr;
+typedef std::shared_ptr<SupportFunctionEstimationData> SupportFunctionEstimationDataPtr;
 
 #endif /* SUPPORTFUNCTIONESTIMATIONDATA_H_ */

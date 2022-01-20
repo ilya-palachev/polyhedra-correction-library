@@ -56,9 +56,8 @@ static int findBestPlaneID(Plane_3 plane, std::vector<Plane_3> planes)
 	return iPlaneMinimal;
 }
 
-static std::vector<std::vector<int>>
-getClustersFacetsIndices(PolyhedronPtr polyhedron, std::vector<Plane_3> planes,
-						 std::vector<std::vector<int>> clustersIndices)
+static std::vector<std::vector<int>> getClustersFacetsIndices(PolyhedronPtr polyhedron, std::vector<Plane_3> planes,
+															  std::vector<std::vector<int>> clustersIndices)
 {
 	DEBUG_START;
 	std::vector<std::vector<int>> clustersFacetsIDs(clustersIndices.size());
@@ -91,15 +90,13 @@ getClustersFacetsIndices(PolyhedronPtr polyhedron, std::vector<Plane_3> planes,
 	return clustersFacetsIDs;
 }
 
-void printColouredIntersection(std::vector<Plane_3> planes,
-							   std::vector<std::vector<int>> clustersIndices,
+void printColouredIntersection(std::vector<Plane_3> planes, std::vector<std::vector<int>> clustersIndices,
 							   const char *suffix)
 {
 	DEBUG_START;
 	Polyhedron_3 intersection(planes);
 	PolyhedronPtr polyhedron(new Polyhedron(intersection));
-	auto clustersFacetsIDs =
-		getClustersFacetsIndices(polyhedron, planes, clustersIndices);
+	auto clustersFacetsIDs = getClustersFacetsIndices(polyhedron, planes, clustersIndices);
 	srand(time(NULL));
 	for (auto clusterFacetsIDs : clustersFacetsIDs)
 	{
@@ -116,8 +113,7 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 	DEBUG_END;
 }
 
-void printColouredIntersection(std::vector<Plane_3> planes,
-							   std::vector<std::set<int>> clustersIndices,
+void printColouredIntersection(std::vector<Plane_3> planes, std::vector<std::set<int>> clustersIndices,
 							   const char *suffix)
 {
 	DEBUG_START;
@@ -140,9 +136,7 @@ void printColouredIntersection(std::vector<Plane_3> planes,
 	DEBUG_END;
 }
 
-void printColouredPolyhedron(Polyhedron_3 polyhedron,
-							 std::vector<std::set<int>> clustersIndices,
-							 const char *suffix)
+void printColouredPolyhedron(Polyhedron_3 polyhedron, std::vector<std::set<int>> clustersIndices, const char *suffix)
 {
 	DEBUG_START;
 	PolyhedronPtr polyhedronPCL(new Polyhedron(polyhedron));
@@ -163,8 +157,7 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
 	DEBUG_END;
 }
 
-void printColouredPolyhedron(Polyhedron_3 polyhedron,
-							 std::set<int> clusterIndices, const char *suffix)
+void printColouredPolyhedron(Polyhedron_3 polyhedron, std::set<int> clusterIndices, const char *suffix)
 {
 	DEBUG_START;
 	std::vector<std::set<int>> cluster;
@@ -173,8 +166,7 @@ void printColouredPolyhedron(Polyhedron_3 polyhedron,
 	DEBUG_END;
 }
 
-void printColouredPolyhedronAndLoadParaview(
-	Polyhedron_3 polyhedron, std::vector<std::set<int>> clustersIndices)
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron, std::vector<std::set<int>> clustersIndices)
 {
 	DEBUG_START;
 	PolyhedronPtr polyhedronPCL(new Polyhedron(polyhedron));
@@ -208,8 +200,7 @@ void printColouredPolyhedronAndLoadParaview(
 	DEBUG_END;
 }
 
-void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron,
-											std::set<int> clusterIndices)
+void printColouredPolyhedronAndLoadParaview(Polyhedron_3 polyhedron, std::set<int> clusterIndices)
 {
 	DEBUG_START;
 	std::vector<std::set<int>> cluster;

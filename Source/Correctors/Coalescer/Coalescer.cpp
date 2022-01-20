@@ -96,8 +96,7 @@ void Coalescer::run(int fid0, int fid1)
 	polyhedron->countConsections(true);
 
 	DEBUG_PRINT("=====================================================");
-	DEBUG_PRINT("=========    Грани %d и %d объединены !!!   =========", fid0,
-				fid1);
+	DEBUG_PRINT("=========    Грани %d и %d объединены !!!   =========", fid0, fid1);
 	DEBUG_PRINT("=====================================================");
 
 	DEBUG_END;
@@ -180,9 +179,7 @@ int Coalescer::buildIndex(int fid0, int fid1)
 			break;
 	if (i == nv1)
 	{
-		ERROR_PRINT(
-			"join_facets : Error. Facets %d and %d have no common vertexes",
-			fid0, fid1);
+		ERROR_PRINT("join_facets : Error. Facets %d and %d have no common vertexes", fid0, fid1);
 		nv = -1;
 
 		DEBUG_END;
@@ -308,8 +305,7 @@ int Coalescer::buildIndex(int n, int *fid)
 		}
 		for (j = 0; j < nnv; ++j)
 		{
-			DEBUG_PRINT("\t%d",
-						nfind[polyhedron->facets[fid[i]].indVertices[j]]);
+			DEBUG_PRINT("\t%d", nfind[polyhedron->facets[fid[i]].indVertices[j]]);
 		}
 		polyhedron->facets[fid[i]].my_fprint_all(stdout);
 	}
@@ -352,14 +348,12 @@ int Coalescer::buildIndex(int n, int *fid)
 		for (i = 0; i < n; ++i)
 		{
 			j = polyhedron->facets[fid[i]].find_vertex(v);
-			DEBUG_PRINT("\tVertex %d was found in facet %d at position %d", v,
-						fid[i], j);
+			DEBUG_PRINT("\tVertex %d was found in facet %d at position %d", v, fid[i], j);
 			if (j != -1)
 			{
 				nnv = polyhedron->facets[fid[i]].numVertices;
 				j = (nnv + j + 1) % nnv;
-				DEBUG_PRINT("\tnfind[%d] = %d",
-							polyhedron->facets[fid[i]].indVertices[j],
+				DEBUG_PRINT("\tnfind[%d] = %d", polyhedron->facets[fid[i]].indVertices[j],
 							nfind[polyhedron->facets[fid[i]].indVertices[j]]);
 				if (nfind[polyhedron->facets[fid[i]].indVertices[j]] == 1)
 				{
@@ -373,8 +367,7 @@ int Coalescer::buildIndex(int n, int *fid)
 	} while (v != v_first);
 	--nv;
 
-	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index,
-						   polyhedron, true);
+	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index, polyhedron, true);
 
 	polyhedron->facets[fid[0]] = coalescedFacet;
 	for (i = 1; i < n; ++i)
@@ -431,14 +424,13 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 	leastSquaresMethod(nv, index, &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
-	if (plane.norm * polyhedron->facets[fid0].plane.norm < 0 &&
-		plane.norm * polyhedron->facets[fid1].plane.norm < 0)
+	if (plane.norm * polyhedron->facets[fid0].plane.norm < 0 && plane.norm * polyhedron->facets[fid1].plane.norm < 0)
 	{
 		plane.norm *= -1.;
 		plane.dist *= -1.;
 	}
-	DEBUG_PRINT("Calculated plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0",
-				plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	DEBUG_PRINT("Calculated plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0", plane.norm.x, plane.norm.y,
+				plane.norm.z, plane.dist);
 
 	DEBUG_END;
 }
@@ -490,8 +482,8 @@ void Coalescer::calculatePlane(int n, int *fid)
 	DEBUG_PRINT("Privious planes:");
 	for (i = 0; i < n; ++i)
 	{
-		DEBUG_PRINT("\t(%.16lf)x  +  (%.16lf)y  + (%.16lf)z  +  (%.16lf)  =  0",
-					plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+		DEBUG_PRINT("\t(%.16lf)x  +  (%.16lf)y  + (%.16lf)z  +  (%.16lf)  =  0", plane.norm.x, plane.norm.y,
+					plane.norm.z, plane.dist);
 	}
 
 	DEBUG_END;
@@ -517,9 +509,8 @@ void Coalescer::rise(int fid0)
 	nv = polyhedron->facets[fid0].numVertices;
 	index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
-	DEBUG_PRINT(
-		"Поднимаем до плоскости: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0",
-		plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+	DEBUG_PRINT("Поднимаем до плоскости: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0", plane.norm.x, plane.norm.y,
+				plane.norm.z, plane.dist);
 
 	// 1 ). Посчитаем знаки вершин контура и количество вершин ниже грани
 	sign_vertex = new int[nv];
@@ -527,8 +518,7 @@ void Coalescer::rise(int fid0)
 	for (i = 0; i < nv; ++i)
 	{
 		sign = polyhedron->signum(polyhedron->vertices[index[i]], plane);
-		DEBUG_PRINT("\tsignum[%d] = %d, (%.16lf)", index[i], sign,
-					plane % polyhedron->vertices[index[i]]);
+		DEBUG_PRINT("\tsignum[%d] = %d, (%.16lf)", index[i], sign, plane % polyhedron->vertices[index[i]]);
 		sign_vertex[i] = sign;
 		if (sign_vertex[i] == -1)
 			++ndown;
@@ -547,18 +537,13 @@ void Coalescer::rise(int fid0)
 	step = 0;
 	while (ndown > 0)
 	{
-		DEBUG_PRINT(
-			"-------------------------------------------------------------");
-		DEBUG_PRINT(
-			"-----------------     Шаг  %d         -----------------------",
-			step);
-		DEBUG_PRINT(
-			"-------------------------------------------------------------");
+		DEBUG_PRINT("-------------------------------------------------------------");
+		DEBUG_PRINT("-----------------     Шаг  %d         -----------------------", step);
+		DEBUG_PRINT("-------------------------------------------------------------");
 		DEBUG_PRINT("ndown = %d", ndown);
 		polyhedron->facets[fid0].my_fprint_all(stdout);
 
-		sprintf(file_name_out, "../poly-data-out/multijoin-facets-%d.ply",
-				step);
+		sprintf(file_name_out, "../poly-data-out/multijoin-facets-%d.ply", step);
 		polyhedron->fprint_ply_scale(1000., file_name_out, "join-facets-rise");
 		// 2. 1). Находим, по какой вершине нужно шагать, и минимальное
 		// расстояние
@@ -593,13 +578,12 @@ void Coalescer::rise(int fid0)
 		for (i = 0; i < nv; ++i)
 		{
 			sign = polyhedron->signum(polyhedron->vertices[index[i]], plane);
-			DEBUG_PRINT("\tsignum[%d] = %d, (%.16lf)", index[i], sign,
-						plane % polyhedron->vertices[index[i]]);
+			DEBUG_PRINT("\tsignum[%d] = %d, (%.16lf)", index[i], sign, plane % polyhedron->vertices[index[i]]);
 			if (sign == -1)
 				++ndown;
 		}
-		DEBUG_PRINT("Used plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0",
-					plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
+		DEBUG_PRINT("Used plane: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0", plane.norm.x, plane.norm.y, plane.norm.z,
+					plane.dist);
 
 		polyhedron->preprocessAdjacency();
 	}
@@ -640,8 +624,7 @@ int Coalescer::riseFind(int fid0)
 	DEBUG_PRINT("Предварительный анализ вершин: ");
 	for (i = 0; i < nv; ++i)
 	{
-		DEBUG_PRINT("\t\t2. 1. %d ). Предварительный анализ %d-й вершины : ", i,
-					index[i]);
+		DEBUG_PRINT("\t\t2. 1. %d ). Предварительный анализ %d-й вершины : ", i, index[i]);
 		if (polyhedron->signum(polyhedron->vertices[index[i]], plane) != -1)
 		{
 			DEBUG_PRINT("выше плоскости или на плоскости");
@@ -664,9 +647,8 @@ int Coalescer::riseFind(int fid0)
 			pos = index[2 * nv + 1 + i];
 			pos = (pos + 1) % 3;
 			tmp = index[i];
-			DEBUG_PRINT(
-				" - Вместо вершины %d  в главной грани пишем вершину %d",
-				index[i], polyhedron->facets[fr1].indVertices[pos]);
+			DEBUG_PRINT(" - Вместо вершины %d  в главной грани пишем вершину %d", index[i],
+						polyhedron->facets[fr1].indVertices[pos]);
 			index[i] = polyhedron->facets[fr1].indVertices[pos];
 			deleteVertexInPolyhedron(tmp);
 			polyhedron->facets[fr1] = Facet();
@@ -842,20 +824,17 @@ void Coalescer::risePoint(int fid0, int imin)
 	fr2 = index[nv + 1 + (nv + imin + 1) % nv];
 
 	DEBUG_PRINT("\t\tПоднимаем %d-ю вершину", index[imin]);
-	DEBUG_PRINT("\t\t\tКартина такая: ---%d---%d---%d---",
-				index[(nv + imin - 1) % nv], index[imin],
+	DEBUG_PRINT("\t\t\tКартина такая: ---%d---%d---%d---", index[(nv + imin - 1) % nv], index[imin],
 				index[(nv + imin + 1) % nv]);
 	DEBUG_PRINT("\t\t\t                   |     |     |     ");
-	DEBUG_PRINT("\t\t\t               %d  | %d  | %d  | %d  ", fl2, fl1, fr1,
-				fr2);
+	DEBUG_PRINT("\t\t\t               %d  | %d  | %d  | %d  ", fl2, fl1, fr1, fr2);
 
 	pl2 = polyhedron->facets[fl2].plane;
 	pl1 = polyhedron->facets[fl1].plane;
 	pr1 = polyhedron->facets[fr1].plane;
 	pr2 = polyhedron->facets[fr2].plane;
 
-	ifjoin =
-		false; // Эта константа отвечает за то, сливаются ли 2 точки или нет
+	ifjoin = false; // Эта константа отвечает за то, сливаются ли 2 точки или нет
 
 	// Найдем точку пересечения первой тройки граней
 
@@ -942,8 +921,7 @@ void Coalescer::risePoint(int fid0, int imin)
 				pos = (nnv + pos - 1) % nnv;
 				polyhedron->facets[fl2].indVertices[nnv + 1 + pos] = fl1;
 
-				polyhedron->facets[fl2]
-					.indVertices[polyhedron->facets[fl2].numVertices] =
+				polyhedron->facets[fl2].indVertices[polyhedron->facets[fl2].numVertices] =
 					polyhedron->facets[fl2].indVertices[0];
 
 				//Добавить v1 в грань fl1 с информацией
@@ -967,8 +945,7 @@ void Coalescer::risePoint(int fid0, int imin)
 				//                DEBUG_PRINT("===Trying to add %d at position
 				//                %d in facet %d===", fr1, nnv + 1 + pos, )
 
-				polyhedron->facets[fl1]
-					.indVertices[polyhedron->facets[fl1].numVertices] =
+				polyhedron->facets[fl1].indVertices[polyhedron->facets[fl1].numVertices] =
 					polyhedron->facets[fl1].indVertices[0];
 
 				//Добавить v1 в грань fr1 с информацией
@@ -986,8 +963,7 @@ void Coalescer::risePoint(int fid0, int imin)
 				pos += nnv;
 				polyhedron->facets[fr1].add(what, pos);
 
-				polyhedron->facets[fr1]
-					.indVertices[polyhedron->facets[fr1].numVertices] =
+				polyhedron->facets[fr1].indVertices[polyhedron->facets[fr1].numVertices] =
 					polyhedron->facets[fr1].indVertices[0];
 
 				//Заменить irep в грани fid0 на ind_new
@@ -1020,8 +996,7 @@ void Coalescer::risePoint(int fid0, int imin)
 				pos += nnv;
 				polyhedron->facets[fr1].add(what, pos);
 
-				polyhedron->facets[fr1]
-					.indVertices[polyhedron->facets[fr1].numVertices] =
+				polyhedron->facets[fr1].indVertices[polyhedron->facets[fr1].numVertices] =
 					polyhedron->facets[fr1].indVertices[0];
 
 				//Исправить грань fl1
@@ -1061,8 +1036,7 @@ void Coalescer::risePoint(int fid0, int imin)
 				pos = (nnv + pos - 1) % nnv;
 				polyhedron->facets[fl2].indVertices[nnv + 1 + pos] = fl1;
 
-				polyhedron->facets[fl2]
-					.indVertices[polyhedron->facets[fl2].numVertices] =
+				polyhedron->facets[fl2].indVertices[polyhedron->facets[fl2].numVertices] =
 					polyhedron->facets[fl2].indVertices[0];
 
 				//Исправить грань fl1
@@ -1360,8 +1334,7 @@ void Coalescer::leastSquaresMethod(int nv, int *vertex_list, Plane *plane)
 	DEBUG_END;
 }
 
-void Coalescer::leastSquaresMethodWeighted(int nv, int *vertex_list,
-										   Plane *plane)
+void Coalescer::leastSquaresMethodWeighted(int nv, int *vertex_list, Plane *plane)
 {
 	DEBUG_START;
 
@@ -1380,8 +1353,7 @@ void Coalescer::leastSquaresMethodWeighted(int nv, int *vertex_list,
 		i_next = (i + 1) % nv;
 		id0 = vertex_list[i];
 		id1 = vertex_list[i_next];
-		l[i] =
-			sqrt(qmod(polyhedron->vertices[id0] - polyhedron->vertices[id1]));
+		l[i] = sqrt(qmod(polyhedron->vertices[id0] - polyhedron->vertices[id1]));
 	}
 
 	for (i = 0; i < nv; ++i)

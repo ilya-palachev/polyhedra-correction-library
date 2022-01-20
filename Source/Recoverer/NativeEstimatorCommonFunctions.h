@@ -30,8 +30,7 @@
 
 std::vector<int> collectInnerPointsIDs(std::vector<Point_3> points);
 
-std::set<int> findTangientPointPlanesIDs(Polyhedron_3 *polyhedron,
-										 Polyhedron_3::Vertex_iterator vertex,
+std::set<int> findTangientPointPlanesIDs(Polyhedron_3 *polyhedron, Polyhedron_3::Vertex_iterator vertex,
 										 std::vector<int> index);
 
 VectorXd calculateSolution(SupportFunctionDataPtr data, VectorXd values);

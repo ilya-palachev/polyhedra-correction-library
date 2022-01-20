@@ -39,8 +39,7 @@ ShadowContourClusterizer::ShadowContourClusterizer() : PAnalyzer()
 	DEBUG_END;
 }
 
-ShadowContourClusterizer::ShadowContourClusterizer(PolyhedronPtr p) :
-	PAnalyzer(p)
+ShadowContourClusterizer::ShadowContourClusterizer(PolyhedronPtr p) : PAnalyzer(p)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -67,8 +66,7 @@ static double angleModulo2PI(double angle)
 	return angle;
 }
 
-void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData,
-										 const char *fileNamePlot)
+void ShadowContourClusterizer::buildPlot(ShadowContourDataPtr contourData, const char *fileNamePlot)
 {
 	DEBUG_START;
 

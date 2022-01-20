@@ -61,14 +61,12 @@ public:
 	SupportFunctionDataItemInfo();
 
 	/** Assignment operator. */
-	SupportFunctionDataItemInfo &
-	operator=(const SupportFunctionDataItemInfo &i);
+	SupportFunctionDataItemInfo &operator=(const SupportFunctionDataItemInfo &i);
 
 	/** Virtual destructor. */
 	virtual ~SupportFunctionDataItemInfo();
 };
 
-typedef std::shared_ptr<SupportFunctionDataItemInfo>
-	SupportFunctionDataItemInfoPtr;
+typedef std::shared_ptr<SupportFunctionDataItemInfo> SupportFunctionDataItemInfoPtr;
 
 #endif /* SUPPORT_FUNCTION_DATA_ITEM_INFO_H */

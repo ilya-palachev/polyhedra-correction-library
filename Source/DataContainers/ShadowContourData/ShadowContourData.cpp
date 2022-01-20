@@ -34,8 +34,7 @@ ShadowContourData::ShadowContourData() : PData(), numContours(0), contours(NULL)
 	DEBUG_END;
 }
 
-ShadowContourData::ShadowContourData(PolyhedronPtr p) :
-	PData(p), numContours(0), contours(NULL)
+ShadowContourData::ShadowContourData(PolyhedronPtr p) : PData(p), numContours(0), contours(NULL)
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -66,9 +65,7 @@ ShadowContourData::ShadowContourData(const ShadowContourDataPtr data) :
 }
 
 ShadowContourData::ShadowContourData(const int numContoursNeeded) :
-	PData(),
-	numContours(numContoursNeeded),
-	contours(new SContour[numContoursNeeded])
+	PData(), numContours(numContoursNeeded), contours(new SContour[numContoursNeeded])
 {
 	DEBUG_START;
 	DEBUG_END;
@@ -150,14 +147,12 @@ bool ShadowContourData::fscanDefault(FILE *fd)
 
 		if (fscanf(fd, "%d", &currContour->ns) != 1)
 		{
-			ERROR_PRINT("Wrong file format, number of sides for contour #%d",
-						iContour);
+			ERROR_PRINT("Wrong file format, number of sides for contour #%d", iContour);
 			DEBUG_END;
 			return false;
 		}
 
-		if (fscanf(fd, "%lf", &currContour->plane.norm.x) != 1 ||
-			fscanf(fd, "%lf", &currContour->plane.norm.y) != 1 ||
+		if (fscanf(fd, "%lf", &currContour->plane.norm.x) != 1 || fscanf(fd, "%lf", &currContour->plane.norm.y) != 1 ||
 			fscanf(fd, "%lf", &currContour->plane.norm.z) != 1)
 		{
 			ERROR_PRINT("Wrong file format, "
@@ -193,8 +188,7 @@ bool ShadowContourData::fscanDefault(FILE *fd)
 				return false;
 			}
 
-			if (fscanf(fd, "%lf", &currSide->A1.x) != 1 ||
-				fscanf(fd, "%lf", &currSide->A1.y) != 1 ||
+			if (fscanf(fd, "%lf", &currSide->A1.x) != 1 || fscanf(fd, "%lf", &currSide->A1.y) != 1 ||
 				fscanf(fd, "%lf", &currSide->A1.z) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
@@ -204,8 +198,7 @@ bool ShadowContourData::fscanDefault(FILE *fd)
 				return false;
 			}
 
-			if (fscanf(fd, "%lf", &currSide->A2.x) != 1 ||
-				fscanf(fd, "%lf", &currSide->A2.y) != 1 ||
+			if (fscanf(fd, "%lf", &currSide->A2.x) != 1 || fscanf(fd, "%lf", &currSide->A2.y) != 1 ||
 				fscanf(fd, "%lf", &currSide->A2.z) != 1)
 			{
 				ERROR_PRINT("Wrong file format,"
@@ -234,8 +227,7 @@ bool ShadowContourData::fscanDefault(FILE *fd)
 void ShadowContourData::fprint(FILE *file)
 {
 	DEBUG_START;
-	REGULAR_PRINT(file, "Dumping shadow contour data. Number of contours: %d\n",
-				  numContours);
+	REGULAR_PRINT(file, "Dumping shadow contour data. Number of contours: %d\n", numContours);
 	for (int iContour = 0; iContour < numContours; ++iContour)
 	{
 		contours[iContour].my_fprint(file);
@@ -250,12 +242,8 @@ void ShadowContourData::fprintDefault(FILE *file)
 	ALWAYS_PRINT(file, "%d\n", numContours);
 	ALWAYS_PRINT(file, "# contour:  num_sides   normal_to_plane\n");
 	ALWAYS_PRINT(file, "#           confidence   type\n");
-	ALWAYS_PRINT(
-		file,
-		"#           x y z coordinates of point 1 in plane of projection\n");
-	ALWAYS_PRINT(
-		file,
-		"#           x y z coordinates of point 2 in plane of projection\n");
+	ALWAYS_PRINT(file, "#           x y z coordinates of point 1 in plane of projection\n");
+	ALWAYS_PRINT(file, "#           x y z coordinates of point 2 in plane of projection\n");
 
 	for (int i = 0; i < numContours; ++i)
 	{
@@ -328,8 +316,7 @@ SupportFunctionDataPtr ShadowContourData::calculateSupportData()
 {
 	DEBUG_START;
 	SupportFunctionDataConstructor constructor;
-	auto data =
-		constructor.run(this->shared_from_this(), IF_ANALYZE_ALL_CONTOURS);
+	auto data = constructor.run(this->shared_from_this(), IF_ANALYZE_ALL_CONTOURS);
 	DEBUG_END;
 	return data;
 }
@@ -400,13 +387,10 @@ void ShadowContourData::shiftRandomly(double maxDelta)
 		{
 			SideOfContour *side = &contour->sides[iSide];
 			Vector3d A1_backup DEBUG_VARIABLE = side->A1;
-			side->A1 +=
-				Vector3d(genRandomDouble(maxDelta), genRandomDouble(maxDelta),
-						 genRandomDouble(maxDelta));
+			side->A1 += Vector3d(genRandomDouble(maxDelta), genRandomDouble(maxDelta), genRandomDouble(maxDelta));
 			DEBUG_PRINT("shift: (%lf, %lf, %lf) -> "
 						"(%lf, %lf, %lf)",
-						A1_backup.x, A1_backup.y, A1_backup.z, side->A1.x,
-						side->A1.y, side->A1.z);
+						A1_backup.x, A1_backup.y, A1_backup.z, side->A1.x, side->A1.y, side->A1.z);
 			side->A1 = contour->plane.project(side->A1);
 		}
 		for (int iSide = 0; iSide < contour->ns - 1; ++iSide)

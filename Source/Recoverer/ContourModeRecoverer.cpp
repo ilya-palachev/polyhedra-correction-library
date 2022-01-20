@@ -45,8 +45,7 @@ static unsigned getContoursNumber(SupportFunctionDataPtr data)
 		int iContour = item.info->iContour;
 		contourIDs.insert(iContour);
 	}
-	std::cout << "Number of shadow contours: " << contourIDs.size()
-			  << std::endl;
+	std::cout << "Number of shadow contours: " << contourIDs.size() << std::endl;
 	for (int iContour : contourIDs)
 		ASSERT(iContour < int(contourIDs.size()) && "Wrong numeration");
 	DEBUG_END;
@@ -56,23 +55,20 @@ static unsigned getContoursNumber(SupportFunctionDataPtr data)
 typedef std::vector<std::vector<SupportFunctionDataItem>> ContourVectorTy;
 typedef std::vector<std::vector<unsigned>> SideIDsTy;
 
-SideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
-						  double edgeLengthLimit)
+SideIDsTy getLongSidesIDs(const ContourVectorTy &contours, double edgeLengthLimit)
 {
 	DEBUG_START;
 	SideIDsTy longSideIDs(contours.size());
 	unsigned maxSidesNumberLocal = 0;
 	for (auto &contour : contours)
 	{
-		maxSidesNumberLocal =
-			std::max(maxSidesNumberLocal, unsigned(contour.size()));
+		maxSidesNumberLocal = std::max(maxSidesNumberLocal, unsigned(contour.size()));
 		for (unsigned i = 0; i < contour.size(); ++i)
 		{
 			ASSERT(contour[i].info->iSide == int(i) && "Wrong numeration");
 		}
 	}
-	std::cout << "Maximal sides number per contour: " << maxSidesNumberLocal
-			  << std::endl;
+	std::cout << "Maximal sides number per contour: " << maxSidesNumberLocal << std::endl;
 
 	std::vector<unsigned> numLongSidesLocal(maxSidesNumberLocal);
 	for (unsigned i = 0; i < maxSidesNumberLocal; ++i)
@@ -109,8 +105,7 @@ SideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
 	for (unsigned i = 0; i < maxSidesNumberLocal; ++i)
 	{
 		if (numLongSidesLocal[i] > 0)
-			std::cout << "    Number of contours with " << i
-					  << " long sides: " << numLongSidesLocal[i] << std::endl;
+			std::cout << "    Number of contours with " << i << " long sides: " << numLongSidesLocal[i] << std::endl;
 	}
 	DEBUG_END;
 	return longSideIDs;
@@ -118,8 +113,7 @@ SideIDsTy getLongSidesIDs(const ContourVectorTy &contours,
 
 typedef std::vector<std::vector<double>> AnglesTy;
 
-static AnglesTy calculateAngles(const ContourVectorTy &contours,
-								const SideIDsTy &longSideIDs)
+static AnglesTy calculateAngles(const ContourVectorTy &contours, const SideIDsTy &longSideIDs)
 {
 	DEBUG_START;
 	Vector_3 ez(0., 0., 1.);
@@ -128,10 +122,8 @@ static AnglesTy calculateAngles(const ContourVectorTy &contours,
 	for (unsigned iContour = 0; iContour < contours.size(); ++iContour)
 	{
 		if (fullLog)
-			std::cout << "Angles for contour #" << iContour << ", which has "
-					  << longSideIDs[iContour].size()
-					  << " long sides from total " << contours[iContour].size()
-					  << " sides:" << std::endl;
+			std::cout << "Angles for contour #" << iContour << ", which has " << longSideIDs[iContour].size()
+					  << " long sides from total " << contours[iContour].size() << " sides:" << std::endl;
 		unsigned iLong = 0;
 		for (unsigned iSide = 0; iSide < contours[iContour].size(); ++iSide)
 		{
@@ -166,8 +158,7 @@ static AnglesTy calculateAngles(const ContourVectorTy &contours,
 
 typedef std::vector<std::vector<std::pair<unsigned, unsigned>>> NeighborsTy;
 
-NeighborsTy detectNeighbors(ContourVectorTy contours, SideIDsTy longSideIDs,
-							AnglesTy angles)
+NeighborsTy detectNeighbors(ContourVectorTy contours, SideIDsTy longSideIDs, AnglesTy angles)
 {
 	DEBUG_START;
 	double angleDiffLimit = 0.;
@@ -221,8 +212,7 @@ void printPair(const std::pair<unsigned, unsigned> pair)
 	std::cout << "(" << pair.first << ", " << pair.second << ")";
 }
 
-ClusterTy getPossibleCluster(const ContourVectorTy &contours,
-							 const NeighborsTy &neighbors, unsigned iContour,
+ClusterTy getPossibleCluster(const ContourVectorTy &contours, const NeighborsTy &neighbors, unsigned iContour,
 							 unsigned iSide)
 {
 	DEBUG_START;
@@ -232,8 +222,7 @@ ClusterTy getPossibleCluster(const ContourVectorTy &contours,
 	do
 	{
 		cluster.push_back(std::make_pair(iContourCurr, iSideCurr));
-		unsigned iContourNext =
-			(contours.size() + iContourCurr + 1) % contours.size();
+		unsigned iContourNext = (contours.size() + iContourCurr + 1) % contours.size();
 		unsigned iSideNext = 0;
 		unsigned numPairs = 0;
 		for (const auto &pair : neighbors[iContourCurr])
@@ -315,8 +304,7 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 	ASSERT(fabs(std::imag(compVector(0))) < 1e-16);
 	ASSERT(fabs(std::imag(compVector(1))) < 1e-16);
 	ASSERT(fabs(std::imag(compVector(2))) < 1e-16);
-	Vector_3 vector(std::real(compVector(0)), std::real(compVector(1)),
-					std::real(compVector(2)));
+	Vector_3 vector(std::real(compVector(0)), std::real(compVector(1)), std::real(compVector(2)));
 
 	double error = 0.;
 	for (const auto &point : points)
@@ -330,8 +318,7 @@ double calculateError(const ContourVectorTy &contours, const ClusterTy &cluster)
 	return error;
 }
 
-double calculateLengthError(const ContourVectorTy &contours,
-							const ClusterTy &cluster)
+double calculateLengthError(const ContourVectorTy &contours, const ClusterTy &cluster)
 {
 	DEBUG_START;
 	std::vector<double> lengths;
@@ -359,14 +346,11 @@ double calculateLengthError(const ContourVectorTy &contours,
 	return error;
 }
 
-ClusterTy clusterizeOne(const ContourVectorTy &contours,
-						const NeighborsTy &neighbors, unsigned iContour,
-						unsigned iSide, double maxClusterError,
-						double maxLengthError)
+ClusterTy clusterizeOne(const ContourVectorTy &contours, const NeighborsTy &neighbors, unsigned iContour,
+						unsigned iSide, double maxClusterError, double maxLengthError)
 {
 	DEBUG_START;
-	ClusterTy possibleCluster =
-		getPossibleCluster(contours, neighbors, iContour, iSide);
+	ClusterTy possibleCluster = getPossibleCluster(contours, neighbors, iContour, iSide);
 	if (possibleCluster.empty())
 	{
 		std::cout << "  Stopping, possible cluster is empty..." << std::endl;
@@ -390,16 +374,14 @@ ClusterTy clusterizeOne(const ContourVectorTy &contours,
 		double clusterError = calculateError(contours, clusterNew);
 		if (clusterError > maxClusterError)
 		{
-			std::cout << "    Cluster error: " << clusterError
-					  << ", while limit is " << maxClusterError << std::endl;
+			std::cout << "    Cluster error: " << clusterError << ", while limit is " << maxClusterError << std::endl;
 			break;
 		}
 
 		double lengthError = calculateLengthError(contours, clusterNew);
 		if (lengthError > maxLengthError)
 		{
-			std::cout << "    Length  error: " << lengthError
-					  << ", while limit is " << maxLengthError << std::endl;
+			std::cout << "    Length  error: " << lengthError << ", while limit is " << maxLengthError << std::endl;
 			break;
 		}
 
@@ -420,14 +402,11 @@ unsigned countContained(const ClusterTy &a, const ClusterTy &b)
 	return numContained;
 }
 
-ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours,
-								   ClusterVectorTy allClusters)
+ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours, ClusterVectorTy allClusters)
 {
 	DEBUG_START;
 	std::sort(allClusters.begin(), allClusters.end(),
-			  [](const ClusterTy &a, const ClusterTy &b) -> bool {
-				  return a.size() > b.size();
-			  });
+			  [](const ClusterTy &a, const ClusterTy &b) -> bool { return a.size() > b.size(); });
 
 	ClusterVectorTy clusters;
 	for (unsigned iCluster = 0; iCluster < allClusters.size(); ++iCluster)
@@ -456,12 +435,10 @@ ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours,
 			}
 		}
 
-		if (numContainedMax > cluster.size() / 2 &&
-			cluster.size() < numContainerItems)
+		if (numContainedMax > cluster.size() / 2 && cluster.size() < numContainerItems)
 			continue;
 		else if (cluster.size() == numContainerItems &&
-				 calculateError(contours, cluster) >=
-					 calculateError(contours, clusters[iBestCluster]))
+				 calculateError(contours, cluster) >= calculateError(contours, clusters[iBestCluster]))
 		{
 			clusters[iBestCluster] = cluster;
 			continue;
@@ -474,8 +451,7 @@ ClusterVectorTy chooseBestClusters(const ContourVectorTy &contours,
 	return clusters;
 }
 
-ClusterVectorTy clusterize(const ContourVectorTy &contours,
-						   const NeighborsTy &neighbors, double maxClusterError,
+ClusterVectorTy clusterize(const ContourVectorTy &contours, const NeighborsTy &neighbors, double maxClusterError,
 						   double maxLengthError)
 {
 	DEBUG_START;
@@ -489,12 +465,9 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 			 * FIXME: !!! Without this line the program doesn't
 			 * work!
 			 */
-			std::cout << "Clusterizing contour #" << iContour << ", side #"
-					  << iSide << std::endl;
+			std::cout << "Clusterizing contour #" << iContour << ", side #" << iSide << std::endl;
 			;
-			ClusterTy cluster =
-				clusterizeOne(contours, neighbors, iContour, iSide,
-							  maxClusterError, maxLengthError);
+			ClusterTy cluster = clusterizeOne(contours, neighbors, iContour, iSide, maxClusterError, maxLengthError);
 			if (!cluster.empty() && cluster.size() > 1)
 			{
 #if 0
@@ -508,8 +481,7 @@ ClusterVectorTy clusterize(const ContourVectorTy &contours,
 		}
 	}
 
-	std::cout << "The number of clusters before post-processing: "
-			  << allClusters.size() << std::endl;
+	std::cout << "The number of clusters before post-processing: " << allClusters.size() << std::endl;
 	auto clusters = chooseBestClusters(contours, allClusters);
 #if 0
 	std::cout << "Found clusters:" << std::endl;
@@ -547,11 +519,9 @@ void printClustersStatistics(const ClusterVectorTy &clusters)
 	unsigned numMaxClusters = 0;
 	for (const auto &pair : map)
 		numMaxClusters = std::max(numMaxClusters, pair.second);
-	std::cout << "Maximal number of clusters per item: " << numMaxClusters
-			  << std::endl;
+	std::cout << "Maximal number of clusters per item: " << numMaxClusters << std::endl;
 
-	std::vector<std::vector<std::pair<unsigned, unsigned>>> mapSorted(
-		numMaxClusters + 1);
+	std::vector<std::vector<std::pair<unsigned, unsigned>>> mapSorted(numMaxClusters + 1);
 	for (const auto &pair : map)
 	{
 		ASSERT(pair.second <= numMaxClusters);
@@ -562,8 +532,7 @@ void printClustersStatistics(const ClusterVectorTy &clusters)
 	for (unsigned n = 0; n < mapSorted.size(); ++n)
 		if (!mapSorted[n].empty())
 		{
-			std::cout << "There are " << mapSorted[n].size()
-					  << " items, which have " << n << " clusters: ";
+			std::cout << "There are " << mapSorted[n].size() << " items, which have " << n << " clusters: ";
 #if 0
 			for (const auto &pair : mapSorted[n])
 			{
@@ -576,17 +545,14 @@ void printClustersStatistics(const ClusterVectorTy &clusters)
 	DEBUG_END;
 }
 
-template <class HDS>
-class ClusterPolyhedronBuilder : public CGAL::Modifier_base<HDS>
+template <class HDS> class ClusterPolyhedronBuilder : public CGAL::Modifier_base<HDS>
 {
 	Vector_3 center;
 	ContourVectorTy contours;
 	ClusterTy cluster;
 
 public:
-	ClusterPolyhedronBuilder(const Vector_3 &center,
-							 const ContourVectorTy &contours,
-							 const ClusterTy &cluster) :
+	ClusterPolyhedronBuilder(const Vector_3 &center, const ContourVectorTy &contours, const ClusterTy &cluster) :
 		center(center), contours(contours), cluster(cluster)
 	{
 		DEBUG_START;
@@ -602,10 +568,8 @@ public:
 		unsigned numVertices = 2 * cluster.size() + 1;
 		unsigned numFacets = cluster.size();
 		unsigned numHalfedges = 6 * cluster.size();
-		std::cout << "For cluster with " << cluster.size()
-				  << " items we create polyhedron with " << numVertices
-				  << " vertices, " << numFacets << " facets, " << numHalfedges
-				  << " halfedges" << std::endl;
+		std::cout << "For cluster with " << cluster.size() << " items we create polyhedron with " << numVertices
+				  << " vertices, " << numFacets << " facets, " << numHalfedges << " halfedges" << std::endl;
 		builder.begin_surface(numVertices, numFacets, numHalfedges);
 
 		builder.add_vertex(CGAL::Origin() + center);
@@ -679,10 +643,8 @@ void ContourModeRecoverer::run()
 	if (tryGetenvDouble("MAX_LENGTH_ERROR", maxLengthError))
 		std::cout << "Checking length error is enabled..." << std::endl;
 
-	ClusterVectorTy clusters =
-		clusterize(contours, neighbors, maxClusterError, maxLengthError);
-	std::cout << "The number of found clusters: " << clusters.size()
-			  << std::endl;
+	ClusterVectorTy clusters = clusterize(contours, neighbors, maxClusterError, maxLengthError);
+	std::cout << "The number of found clusters: " << clusters.size() << std::endl;
 	printClustersStatistics(clusters);
 
 	for (unsigned iCluster = 0; iCluster < clusters.size(); ++iCluster)
@@ -692,8 +654,7 @@ void ContourModeRecoverer::run()
 		ClusterTy cluster = clusters[iCluster];
 		double error = calculateError(contours, cluster);
 		std::cout << "        error: " << error << std::endl;
-		ClusterPolyhedronBuilder<Polyhedron_3::HalfedgeDS> builder(
-			center, contours, cluster);
+		ClusterPolyhedronBuilder<Polyhedron_3::HalfedgeDS> builder(center, contours, cluster);
 		clusterP.delegate(builder);
 		std::string suffix("cluster-");
 		suffix += std::to_string(iCluster);

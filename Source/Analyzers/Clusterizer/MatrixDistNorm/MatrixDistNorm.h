@@ -48,8 +48,7 @@ public:
 
 	void fprint_clusters(FILE *file, TreeClusterNormNode *nodeArray);
 	void fprint_clusters2(FILE *file, TreeClusterNormNode *nodeArray);
-	double sqNorm(TreeClusterNormNode *nodeArray1,
-				  TreeClusterNormNode *nodeArray2);
+	double sqNorm(TreeClusterNormNode *nodeArray1, TreeClusterNormNode *nodeArray2);
 	void setColors(TreeClusterNormNode *nodeArray);
 	void setColors2(TreeClusterNormNode *nodeArray);
 };

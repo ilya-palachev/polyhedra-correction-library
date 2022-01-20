@@ -43,19 +43,16 @@ using Eigen::MatrixXd;
 class AlternatingMinimization
 {
 public:
-	AlternatingMinimization() :
-		useStartingBody_(false), startingBody_(emptyFakeStartingBody)
+	AlternatingMinimization() : useStartingBody_(false), startingBody_(emptyFakeStartingBody)
 	{
 	}
 
-	explicit AlternatingMinimization(
-		const std::vector<Vector3d> &startingBody) :
+	explicit AlternatingMinimization(const std::vector<Vector3d> &startingBody) :
 		useStartingBody_(true), startingBody_(startingBody)
 	{
 	}
 
-	Polyhedron_3 run(SupportFunctionDataPtr data,
-					 unsigned numLiftingDimensions) const;
+	Polyhedron_3 run(SupportFunctionDataPtr data, unsigned numLiftingDimensions) const;
 
 private:
 	inline static std::vector<Vector3d> emptyFakeStartingBody = {};

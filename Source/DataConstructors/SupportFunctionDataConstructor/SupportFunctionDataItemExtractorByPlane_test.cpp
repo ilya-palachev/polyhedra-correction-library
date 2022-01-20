@@ -83,8 +83,7 @@ TEST_F(SupportFunctionDataItemExtractorByPlaneTest, CrashesIfPointNotInPlane)
 	EXPECT_DEATH(
 		{
 			extractor->setPlane(Plane(Vector3d(1., 0., 0.), 0.));
-			side->A1 =
-				Vector3d(EPS_SHADOW_CONTOUR_PLANARITY_LIMIT + 1e-1, 0., 0.);
+			side->A1 = Vector3d(EPS_SHADOW_CONTOUR_PLANARITY_LIMIT + 1e-1, 0., 0.);
 			side->A2 = side->A1 + Vector3d(1e-16, 0., 0.);
 			extractor->run(side);
 		},
@@ -103,14 +102,11 @@ TEST_F(SupportFunctionDataItemExtractorByPlaneTest, Adequate)
 	SupportFunctionDataItem item = extractor->run(side);
 
 	Vector3d directionExpected(0., sqrt(0.5), sqrt(0.5));
-	EXPECT_TRUE(equal(directionExpected, item.direction,
-					  EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
-		<< "Result of extracting is support direction " << item.direction
-		<< ", while expected is " << directionExpected;
+	EXPECT_TRUE(equal(directionExpected, item.direction, EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
+		<< "Result of extracting is support direction " << item.direction << ", while expected is "
+		<< directionExpected;
 
 	double valueExpected = sqrt(0.5);
-	EXPECT_TRUE(equal(valueExpected, item.value,
-					  EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
-		<< "Result of extracting is support value " << item.value
-		<< ", while expected is " << valueExpected;
+	EXPECT_TRUE(equal(valueExpected, item.value, EXTRACTOR_BY_PLANE_GUARANTEED_PRECISION))
+		<< "Result of extracting is support value " << item.value << ", while expected is " << valueExpected;
 }

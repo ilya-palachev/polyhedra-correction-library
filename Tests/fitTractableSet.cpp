@@ -228,8 +228,8 @@ static std::vector<Vector3d> makeInitialBody(std::vector<Vector3d> &directions, 
 	return pointsWithoutRepeats;
 }
 
-SupportFunctionDataPtr calculateProvisionalEstimate(const std::vector<Vector3d> &directions, SupportFunctionDataPtr noisyData,
-													const char *linearSolver)
+SupportFunctionDataPtr calculateProvisionalEstimate(const std::vector<Vector3d> &directions,
+													SupportFunctionDataPtr noisyData, const char *linearSolver)
 {
 	// Gardner & Kiderlen LSE algorithm for noisy primal data
 
@@ -604,7 +604,7 @@ std::map<std::string, std::string> splitParams(const std::vector<std::string> &d
 											   const std::string &executable)
 {
 	std::map<std::string, std::string> params;
-	for (const auto& word : description)
+	for (const auto &word : description)
 	{
 		auto pair = split(word, '=');
 		if (pair.size() != 2)
@@ -627,7 +627,7 @@ SupportFunctionDataPtr getSupportFunctionDataFromContours(ShadowContourDataPtr S
 									   ? std::stoi(measurementParams.at("even_data_from_contours"))
 									   : true;
 
-    SupportFunctionDataPtr data;
+	SupportFunctionDataPtr data;
 	if (even_data_from_contours)
 	{
 		// Generate EVEN support function measurements from the shadow contours
@@ -646,7 +646,7 @@ SupportFunctionDataPtr getSupportFunctionDataFromContours(ShadowContourDataPtr S
 		// FIXME: Shift the body back by this vector:
 		std::cout << "Balancing vector: " << balancingVector << std::endl;
 	}
-    return data;
+	return data;
 }
 
 int main(int argc, char **argv)
@@ -662,12 +662,12 @@ int main(int argc, char **argv)
 	std::string inputPath = argv[2];
 	auto measurementDescription = split(argv[3], ':');
 	auto measurementMode = measurementDescription[0];
-    measurementDescription.erase(measurementDescription.begin());
+	measurementDescription.erase(measurementDescription.begin());
 
 	auto measurementParams = splitParams(measurementDescription, executable);
 
-    std::string inputName = inputPath;
-    std::replace(inputName.begin(), inputName.end(), '/', '_');
+	std::string inputName = inputPath;
+	std::replace(inputName.begin(), inputName.end(), '/', '_');
 	globalPCLDumper.setNameBase("fit-tractable-set-" + inputName);
 	globalPCLDumper.enableVerboseMode();
 
@@ -710,7 +710,7 @@ int main(int argc, char **argv)
 			SCData->shiftRandomly(noise_variance);
 			ASSERT(!SCData->empty());
 
-            data = getSupportFunctionDataFromContours(SCData, measurementParams);
+			data = getSupportFunctionDataFromContours(SCData, measurementParams);
 		}
 		else
 		{
@@ -726,7 +726,7 @@ int main(int argc, char **argv)
 
 		if (measurementMode == "probe-contours")
 		{
-            data = getSupportFunctionDataFromContours(SCData, measurementParams);
+			data = getSupportFunctionDataFromContours(SCData, measurementParams);
 		}
 		else
 		{
@@ -742,26 +742,29 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-    std::cout << "Completed measurement data collection." << std::endl;
-    
+	std::cout << "Completed measurement data collection." << std::endl;
+
 	auto estimationParams = splitParams(split(argv[4], ':'), executable);
 
-    auto provisional_estimate = estimationParams.count("provisional_estimate") ? estimationParams.at("provisional_estimate") : "am";
+	auto provisional_estimate =
+		estimationParams.count("provisional_estimate") ? estimationParams.at("provisional_estimate") : "am";
 
-    Polyhedron_3 provisionalPolyhedron;
+	Polyhedron_3 provisionalPolyhedron;
 	if (provisional_estimate == "am")
 	{
 		auto directions = data->supportDirections<Vector3d>();
-        // TODO: Make proper selection of lifting dimension (instead of `p->numVertices` which is improper in general case)
+		// TODO: Make proper selection of lifting dimension (instead of `p->numVertices` which is improper in general
+		// case)
 		auto provisional_dimension = estimationParams.count("provisional_dimension")
 										 ? std::stoi(estimationParams.at("provisional_dimension"))
 										 : p->numVertices;
-		std::cout << "Running AM algorithm for provisional estimate with lifting dimensions " << provisional_dimension << std::endl;
+		std::cout << "Running AM algorithm for provisional estimate with lifting dimensions " << provisional_dimension
+				  << std::endl;
 		provisionalPolyhedron = AlternatingMinimization().run(data, provisional_dimension);
 	}
 	else if (provisional_estimate == "lse")
 	{
-        std::cout << "Running LSE algorithm for provisional estimate" << std::endl;
+		std::cout << "Running LSE algorithm for provisional estimate" << std::endl;
 		RecovererPtr recoverer(new Recoverer());
 		recoverer->setEstimatorType(IPOPT_ESTIMATOR);
 		recoverer->setProblemType(ESTIMATION_PROBLEM_NORM_L_2);
@@ -769,7 +772,7 @@ int main(int argc, char **argv)
 		recoverer->enableMatrixScaling();
 		recoverer->enableBalancing();
 
-        auto linear_solver = estimationParams.count("linear_solver") ? estimationParams.at("linear_solver") : "ma57";
+		auto linear_solver = estimationParams.count("linear_solver") ? estimationParams.at("linear_solver") : "ma57";
 		std::cout << "Using linear solver " << linear_solver << std::endl;
 		recoverer->setLinearSolver(linear_solver.c_str());
 
@@ -784,10 +787,11 @@ int main(int argc, char **argv)
 
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "provisional-polyhedron.ply") << provisionalPolyhedron;
 
-	auto dual_directions_mode = estimationParams.count("dual_directions_mode") ? estimationParams.at("dual_directions_mode") : "other";
+	auto dual_directions_mode =
+		estimationParams.count("dual_directions_mode") ? estimationParams.at("dual_directions_mode") : "other";
 	// NOTA BENE: These are new directions!!! It is very crucial for the quality of results produced by the AM algorithm
 	auto otherDirections = generateDirections<Point_3>(data->size());
-    auto provisionalPolyhedronDual = dual(provisionalPolyhedron);
+	auto provisionalPolyhedronDual = dual(provisionalPolyhedron);
 	auto dualData = provisionalPolyhedronDual.calculateSupportData(
 		dual_directions_mode == "other" ? otherDirections : data->supportDirections<Point_3>());
 	globalPCLDumper(PCL_DUMPER_LEVEL_OUTPUT, "provisional-polyhedron-dual.ply") << provisionalPolyhedronDual;
@@ -810,7 +814,8 @@ int main(int argc, char **argv)
 		return EXIT_SUCCESS;
 
 	auto Pcurrent = topologicalPolyhedron;
-	auto refinement_steps = estimationParams.count("refinement_steps") ? std::stoi(estimationParams.at("refinement_steps")) : 2;
+	auto refinement_steps =
+		estimationParams.count("refinement_steps") ? std::stoi(estimationParams.at("refinement_steps")) : 2;
 	for (int i = 0; i < refinement_steps; ++i)
 	{
 		for (auto I = Pcurrent.facets_begin(), E = Pcurrent.facets_end(); I != E; ++I)

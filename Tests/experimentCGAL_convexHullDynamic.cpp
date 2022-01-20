@@ -106,8 +106,7 @@ int main(int argc, char **argv)
 	Surface_mesh chull0;
 	CGAL::convex_hull_3_to_face_graph(T, chull0);
 
-	std::cout << "The convex hull contains " << num_vertices(chull0)
-			  << " vertices" << std::endl;
+	std::cout << "The convex hull contains " << num_vertices(chull0) << " vertices" << std::endl;
 
 	/* end time measurement */
 	double timeFirst = timer.popTimer();
@@ -117,8 +116,7 @@ int main(int argc, char **argv)
 	timer.pushTimer();
 
 	/* Remove 90% of points. */
-	float nReduced =
-		(1. - 1. / (float)FACTOR_OF_VERTICES_REDUCTION) * num_vertices(chull0);
+	float nReduced = (1. - 1. / (float)FACTOR_OF_VERTICES_REDUCTION) * num_vertices(chull0);
 
 	std::list<Vertex_handle>::iterator v_set_it = vertices.begin();
 	for (int i = 0; i < nReduced; i++)
@@ -138,8 +136,7 @@ int main(int argc, char **argv)
 	double timeSecond = timer.popTimer();
 	printf("Time for recalculating of convex hull: %lf\n", timeSecond);
 
-	std::cout << "The convex hull contains " << num_vertices(chull)
-			  << " vertices" << std::endl;
+	std::cout << "The convex hull contains " << num_vertices(chull) << " vertices" << std::endl;
 
 	DEBUG_END;
 	return 0;

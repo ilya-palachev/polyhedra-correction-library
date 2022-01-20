@@ -87,8 +87,7 @@ void GSAssociator::preinit()
 	int numSidesMax = 0;
 	for (int iContour = 0; iContour < contourData->numContours; ++iContour)
 	{
-		DEBUG_PRINT("contourData->contours[%d].ns = %d", iContour,
-					contourData->contours[iContour].ns);
+		DEBUG_PRINT("contourData->contours[%d].ns = %d", iContour, contourData->contours[iContour].ns);
 		int numSidesCurr = contourData->contours[iContour].ns;
 		if (numSidesCurr > numSidesMax)
 			numSidesMax = numSidesCurr;
@@ -117,8 +116,7 @@ void GSAssociator::run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn)
 	iEdge = edgeIn->id;
 	edge = edgeIn;
 
-	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour,
-				iFacet, iEdge);
+	DEBUG_PRINT("processing contour # %d, facet # %d, edge # %d", iContour, iFacet, iEdge);
 
 #ifndef NDEBUG
 	DEBUG_PRINT("\t Current edge:");
@@ -140,8 +138,7 @@ void GSAssociator::run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn)
 	double edgeProjectionLength = sqrt(qmod(v0_projected - v1_projected));
 	if (distMin0 + distMin1 > edgeProjectionLength)
 	{
-		DEBUG_PRINT("Edge is too far from contour's border: %lf + %lf > %lf",
-					distMin0, distMin1, edgeProjectionLength);
+		DEBUG_PRINT("Edge is too far from contour's border: %lf + %lf > %lf", distMin0, distMin1, edgeProjectionLength);
 		DEBUG_END;
 		return;
 	}
@@ -150,8 +147,7 @@ void GSAssociator::run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn)
 	double areaRight = calculateArea(ORIENTATION_RIGHT);
 	double areaTotal = areaLeft + areaRight;
 
-	DEBUG_PRINT("areaLeft = %lf, areaRight = %lf, areaTotal = %lf", areaLeft,
-				areaRight, areaTotal);
+	DEBUG_PRINT("areaLeft = %lf, areaRight = %lf, areaTotal = %lf", areaLeft, areaRight, areaTotal);
 
 	if (areaTotal < EPSILON_FOR_DIVISION)
 	{
@@ -160,19 +156,15 @@ void GSAssociator::run(int iContourIn, int iFacetIn, EdgeSetIterator edgeIn)
 		return;
 	}
 
-	bool criteriaLeft = (areaLeft < EPSILON_MIN_AREA_ABS) ||
-						(areaLeft / areaTotal < EPSILON_MIN_AREA_REL);
+	bool criteriaLeft = (areaLeft < EPSILON_MIN_AREA_ABS) || (areaLeft / areaTotal < EPSILON_MIN_AREA_REL);
 
-	bool criteriaRight = (areaRight < EPSILON_MIN_AREA_ABS) ||
-						 (areaRight / areaTotal < EPSILON_MIN_AREA_REL);
+	bool criteriaRight = (areaRight < EPSILON_MIN_AREA_ABS) || (areaRight / areaTotal < EPSILON_MIN_AREA_REL);
 
-	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft,
-				criteriaRight);
+	DEBUG_PRINT("criteriaLeft = %d, criteriaRight = %d", criteriaLeft, criteriaRight);
 
 	if ((criteriaLeft && !criteriaRight) || (!criteriaLeft && criteriaRight))
 	{
-		Orientation orientation =
-			criteriaLeft ? ORIENTATION_LEFT : ORIENTATION_RIGHT;
+		Orientation orientation = criteriaLeft ? ORIENTATION_LEFT : ORIENTATION_RIGHT;
 		add(orientation);
 	}
 
@@ -206,10 +198,8 @@ int GSAssociator::init()
 	int numVerticesAdded = 0;
 	for (int iSide = 0; iSide < numSides; ++iSide)
 	{
-		polyhedronTmp->vertices[numVerticesAdded++] =
-			contourData->contours[iContour].sides[iSide].A1;
-		polyhedronTmp->vertices[numVerticesAdded++] =
-			contourData->contours[iContour].sides[iSide].A2;
+		polyhedronTmp->vertices[numVerticesAdded++] = contourData->contours[iContour].sides[iSide].A1;
+		polyhedronTmp->vertices[numVerticesAdded++] = contourData->contours[iContour].sides[iSide].A2;
 	}
 	polyhedronTmp->numVertices = numVerticesAdded;
 #ifndef NDEBUG
@@ -303,12 +293,10 @@ int GSAssociator::checkAlreadyAdded()
 	}
 	EdgeContourAssociation lastCont = edge->assocList.back();
 	int iContourLastInList = lastCont.indContour;
-	DEBUG_PRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d",
-				iContourLastInList, numAlreadyPushedAssocs);
+	DEBUG_PRINT("iContourLastInList = %d, numAlreadyPushedAssocs = %d", iContourLastInList, numAlreadyPushedAssocs);
 	if (iContourLastInList == iContour)
 	{
-		DEBUG_PRINT("Edge %d already has association with contour # %d", iEdge,
-					iContour);
+		DEBUG_PRINT("Edge %d already has association with contour # %d", iEdge, iContour);
 		DEBUG_END;
 		return EXIT_FAILURE;
 	}
@@ -323,8 +311,7 @@ int GSAssociator::checkExtinction()
 	DEBUG_VARIABLE int iVertex1 = edge->v1;
 	if (qmod(v0_projected - v1_projected) < EPS_SAME_POINTS)
 	{
-		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting",
-					iEdge, iVertex0, iVertex1);
+		DEBUG_PRINT("Edge # %d (%d, %d) is reduced into point when projecting", iEdge, iVertex0, iVertex1);
 		DEBUG_PRINT("on the plane of projection of contour # %d", iContour);
 		DEBUG_END;
 		return EXIT_FAILURE;
@@ -345,15 +332,12 @@ void GSAssociator::projectEdge()
 	DEBUG_PRINT("v1 before projection: (%lf, %lf, %lf)", v1.x, v1.y, v1.z);
 	v0_projected = planeOfProjection.project(v0);
 	v1_projected = planeOfProjection.project(v1);
-	DEBUG_PRINT("v0 after projection: (%lf, %lf, %lf)", v0_projected.x,
-				v0_projected.y, v0_projected.z);
-	DEBUG_PRINT("v1 after projection: (%lf, %lf, %lf)", v1_projected.x,
-				v1_projected.y, v1_projected.z);
+	DEBUG_PRINT("v0 after projection: (%lf, %lf, %lf)", v0_projected.x, v0_projected.y, v0_projected.z);
+	DEBUG_PRINT("v1 after projection: (%lf, %lf, %lf)", v1_projected.x, v1_projected.y, v1_projected.z);
 	DEBUG_END;
 }
 
-int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d &v_nearest,
-								   double &distMin)
+int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d &v_nearest, double &distMin)
 {
 	DEBUG_START;
 	SideOfContour *sides = contourData->contours[iContour].sides;
@@ -365,10 +349,8 @@ int GSAssociator::findNearestPoint(Vector3d v_projected, Vector3d &v_nearest,
 	{
 		Vector3d v0 = sides[iSide].A1;
 		Vector3d v1 = sides[iSide].A2;
-		DEBUG_PRINT("finding dist from (%lf, %lf, %lf) to edge", v_projected.x,
-					v_projected.y, v_projected.z);
-		DEBUG_PRINT("  [ (%lf, %lf, %lf) (%lf, %lf, %lf)]", v0.x, v0.y, v0.z,
-					v1.x, v1.y, v1.z);
+		DEBUG_PRINT("finding dist from (%lf, %lf, %lf) to edge", v_projected.x, v_projected.y, v_projected.z);
+		DEBUG_PRINT("  [ (%lf, %lf, %lf) (%lf, %lf, %lf)]", v0.x, v0.y, v0.z, v1.x, v1.y, v1.z);
 		double distCurr = distVertexEdge(v_projected, v0, v1, v_nearestCurr);
 		DEBUG_PRINT("dist to side %d  = %lf", iSide, distCurr);
 		if (iSide == 0 || distCurr < distMin)
@@ -477,9 +459,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 
 	numVerticesFacet = 2 * numPairsToBeAdded;
 	DEBUG_PRINT("numVerticesFacet = %d", numVerticesFacet);
-	polyhedronTmp->facets[fPart] =
-		Facet(fPart, numVerticesFacet, contourData->contours[iContour].plane,
-			  polyhedronTmp);
+	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet, contourData->contours[iContour].plane, polyhedronTmp);
 
 	polyhedronTmp->facets[fPart].set_ind_vertex(0, iNearest0);
 	polyhedronTmp->facets[fPart].set_ind_vertex(1, iNearest1);
@@ -517,8 +497,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 		iAdded1 = (numVerticesTmp + iAdded1) % numVerticesTmp;
 
 		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded, iAdded0);
-		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded + 1,
-													iAdded1);
+		polyhedronTmp->facets[fPart].set_ind_vertex(2 * iPairsAdded + 1, iAdded1);
 		iSide = (numSides + iSide + iStep) % numSides;
 	}
 
@@ -556,23 +535,19 @@ void GSAssociator::add(Orientation orientation)
 
 	int iVertex0 = edge->v0;
 	int iVertex1 = edge->v1;
-	Vector3d edgeVector =
-		polyhedron->vertices[iVertex1] - polyhedron->vertices[iVertex0];
+	Vector3d edgeVector = polyhedron->vertices[iVertex1] - polyhedron->vertices[iVertex0];
 	double weight = calculateWeight();
 
 	DEBUG_PRINT("Starting addition");
-	for (int iSide = iBeginToBeAdded; iSide != iEndToBeAdded;
-		 iSide = (numSides + iSide + iStep) % numSides)
+	for (int iSide = iBeginToBeAdded; iSide != iEndToBeAdded; iSide = (numSides + iSide + iStep) % numSides)
 	{
 		Vector3d side = sides[iSide].A2 - sides[iSide].A1;
 		bool ifDirectionIsProper = edgeVector * side > 0;
-		DEBUG_PRINT(
-			"Adding contour # %d to the assoc std::list of edgeVector %d",
-			iContour, iEdge);
+		DEBUG_PRINT("Adding contour # %d to the assoc std::list of edgeVector %d", iContour, iEdge);
 		DEBUG_PRINT("\tadding side # %d", iSide);
 		// Create new association
-		EdgeContourAssociation assocForCurrentEdge = EdgeContourAssociation(
-			iContour, iSide, ifDirectionIsProper, weight);
+		EdgeContourAssociation assocForCurrentEdge =
+			EdgeContourAssociation(iContour, iSide, ifDirectionIsProper, weight);
 		// Push it to the std::list
 		edge->assocList.push_back(assocForCurrentEdge);
 	}
@@ -580,8 +555,7 @@ void GSAssociator::add(Orientation orientation)
 	DEBUG_END;
 }
 
-void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
-							  int &iResultEnd)
+void GSAssociator::findBounds(Orientation orientation, int &iResultBegin, int &iResultEnd)
 {
 	DEBUG_START;
 	int numSides = contourData->contours[iContour].ns;
@@ -593,14 +567,12 @@ void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
 	{
 	case ORIENTATION_LEFT:
 		iStep = -1;
-		numSidesProcessed =
-			(numSides + iSideDistMin1 - iSideDistMin0) % numSides;
+		numSidesProcessed = (numSides + iSideDistMin1 - iSideDistMin0) % numSides;
 		DEBUG_PRINT("ORIENTATION_LEFT");
 		break;
 	case ORIENTATION_RIGHT:
 		iStep = 1;
-		numSidesProcessed =
-			(numSides + iSideDistMin0 - iSideDistMin1) % numSides;
+		numSidesProcessed = (numSides + iSideDistMin0 - iSideDistMin1) % numSides;
 		DEBUG_PRINT("ORIENTATION_RIGHT");
 		break;
 	default:
@@ -625,8 +597,7 @@ void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
 	DEBUG_PRINT("Starting calculating length of chain");
 	double lengthChain = 0.;
 	int iLengthSide = 0;
-	for (int iSide = iBegin; iSide != iEnd;
-		 iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
+	for (int iSide = iBegin; iSide != iEnd; iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
 	{
 		DEBUG_PRINT("iLengthSide = %d", iLengthSide);
 		Vector3d A1 = sides[iSide].A1;
@@ -639,13 +610,11 @@ void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
 			{
 			case ORIENTATION_LEFT:
 				A2 = v1_nearest;
-				DEBUG_PRINT("A2 --> v0_nearest = (%lf, %lf, %lf)", A2.x, A2.y,
-							A2.z);
+				DEBUG_PRINT("A2 --> v0_nearest = (%lf, %lf, %lf)", A2.x, A2.y, A2.z);
 				break;
 			case ORIENTATION_RIGHT:
 				A1 = v1_nearest;
-				DEBUG_PRINT("A1 --> v0_nearest = (%lf, %lf, %lf)", A1.x, A1.y,
-							A1.z);
+				DEBUG_PRINT("A1 --> v0_nearest = (%lf, %lf, %lf)", A1.x, A1.y, A1.z);
 				break;
 			}
 		}
@@ -655,13 +624,11 @@ void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
 			{
 			case ORIENTATION_LEFT:
 				A1 = v0_nearest;
-				DEBUG_PRINT("A1 --> v1_nearest = (%lf, %lf, %lf)", A1.x, A1.y,
-							A1.z);
+				DEBUG_PRINT("A1 --> v1_nearest = (%lf, %lf, %lf)", A1.x, A1.y, A1.z);
 				break;
 			case ORIENTATION_RIGHT:
 				A2 = v0_nearest;
-				DEBUG_PRINT("A2 --> v1_nearest = (%lf, %lf, %lf)", A2.x, A2.y,
-							A2.z);
+				DEBUG_PRINT("A2 --> v1_nearest = (%lf, %lf, %lf)", A2.x, A2.y, A2.z);
 				break;
 			}
 		}
@@ -676,8 +643,7 @@ void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
 	DEBUG_PRINT("Starting calculating iBeginToBeAdded");
 	int iBeginToBeAdded = INT_NOT_INITIALIZED;
 	iLengthSide = 0;
-	for (int iSide = iBegin;;
-		 iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
+	for (int iSide = iBegin;; iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
 	{
 		DEBUG_PRINT("iLengthSide = %d", iLengthSide);
 		double lengthSideCurr = lengthSide[iLengthSide];
@@ -694,8 +660,7 @@ void GSAssociator::findBounds(Orientation orientation, int &iResultBegin,
 	DEBUG_PRINT("Starting calculating iEndToBeAdded");
 	double lengthVisited = 0.;
 	int iEndToBeAdded = (numSides + iBeginToBeAdded + iStep) % numSides;
-	for (int iSide = iBeginToBeAdded; iSide != iEnd;
-		 iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
+	for (int iSide = iBeginToBeAdded; iSide != iEnd; iSide = (numSides + iSide + iStep) % numSides, ++iLengthSide)
 	{
 		DEBUG_PRINT("iLengthSide = %d", iLengthSide);
 		double lengthSideCurr = lengthSide[iLengthSide];

@@ -88,12 +88,10 @@ typedef std::shared_ptr<SupportFunctionDataItem> SupportFunctionDataItemPtr;
  * @param right	The right side of equality.
  * @return True, if they are equal.
  */
-inline bool operator==(const SupportFunctionDataItem &left,
-					   const SupportFunctionDataItem &right)
+inline bool operator==(const SupportFunctionDataItem &left, const SupportFunctionDataItem &right)
 {
 	DEBUG_START;
-	bool ifEqual =
-		left.direction == right.direction && equal(left.value, right.value);
+	bool ifEqual = left.direction == right.direction && equal(left.value, right.value);
 	DEBUG_END;
 	return ifEqual;
 }
@@ -105,8 +103,7 @@ inline bool operator==(const SupportFunctionDataItem &left,
  * @param right	The right side of inequality.
  * @return True, if they are inequal.
  */
-inline bool operator!=(const SupportFunctionDataItem &left,
-					   const SupportFunctionDataItem &right)
+inline bool operator!=(const SupportFunctionDataItem &left, const SupportFunctionDataItem &right)
 {
 	DEBUG_START;
 	bool ifInequal = !(left == right);

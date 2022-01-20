@@ -67,8 +67,7 @@ public:
  *
  * @return	Gardner-Kiderlen support matrix.
  */
-GardnerKiderlenSupportMatrix *
-constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data);
+GardnerKiderlenSupportMatrix *constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data);
 
 /**
  * Constructs reduced Gardner-Kiderlen support matrix (i. e. in which redundant
@@ -79,7 +78,7 @@ constructGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data);
  *
  * @return	Reduced Gardner-Kiderlen support matrix.
  */
-GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(
-	SupportFunctionDataPtr data, double epsilon, bool ifShadowHeuristics);
+GardnerKiderlenSupportMatrix *constructReducedGardnerKiderlenSupportMatrix(SupportFunctionDataPtr data, double epsilon,
+																		   bool ifShadowHeuristics);
 
 #endif /* GARDNER_KIDERLEN_SUPPORT_MATRIX_H */

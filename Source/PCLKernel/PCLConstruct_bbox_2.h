@@ -27,8 +27,7 @@
 #ifndef PCLCONSTRUCT_BBOX_2
 #define PCLCONSTRUCT_BBOX_2
 
-template <class ConstructBbox_2>
-class PCLConstruct_bbox_2 : public ConstructBbox_2
+template <class ConstructBbox_2> class PCLConstruct_bbox_2 : public ConstructBbox_2
 {
 public:
 	using ConstructBbox_2::operator();

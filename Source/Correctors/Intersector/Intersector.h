@@ -35,8 +35,7 @@ protected:
 
 private:
 	void set_isUsed(int v0, int v1, bool val);
-	bool intersectFacet(Facet *facet, Plane iplane, FutureFacet &ff,
-						int &n_components);
+	bool intersectFacet(Facet *facet, Plane iplane, FutureFacet &ff, int &n_components);
 	int prepareEdgeList(Facet *facet, Plane iplane);
 
 public:

@@ -29,25 +29,20 @@
 #include "DebugAssert.h"
 #include "DataConstructors/SupportFunctionDataConstructor/SupportFunctionDataItemExtractorByPlane.h"
 
-SupportFunctionDataItemExtractorByPlane::
-	SupportFunctionDataItemExtractorByPlane() :
-	SupportFunctionDataItemExtractor(),
-	plane(Plane()),
-	ifPlaneInitialized(false)
+SupportFunctionDataItemExtractorByPlane::SupportFunctionDataItemExtractorByPlane() :
+	SupportFunctionDataItemExtractor(), plane(Plane()), ifPlaneInitialized(false)
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SupportFunctionDataItemExtractorByPlane::
-	~SupportFunctionDataItemExtractorByPlane()
+SupportFunctionDataItemExtractorByPlane::~SupportFunctionDataItemExtractorByPlane()
 {
 	DEBUG_START;
 	DEBUG_END;
 }
 
-SupportFunctionDataItem
-SupportFunctionDataItemExtractorByPlane::run(SideOfContour *side)
+SupportFunctionDataItem SupportFunctionDataItemExtractorByPlane::run(SideOfContour *side)
 {
 	DEBUG_START;
 	ASSERT(ifPlaneInitialized);

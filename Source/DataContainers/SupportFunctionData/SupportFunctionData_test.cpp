@@ -151,15 +151,12 @@ TEST_F(SupportFunctionDataTest, FunctionRemoveEqualWorks)
 	Vector3d v(1., 0., 0.);
 	itemsWithEqualities.push_back(SupportFunctionDataItem(v, 1.));
 	itemsWithEqualities.push_back(SupportFunctionDataItem(v, 2.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(EPS_SUPPORT_DIRECTION_EQUALITY, 0., 0.), 1.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(0., EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(0., 0., EPS_SUPPORT_DIRECTION_EQUALITY), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v + Vector3d(EPS_SUPPORT_DIRECTION_EQUALITY, 0., 0.), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v + Vector3d(0., EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
+	itemsWithEqualities.push_back(SupportFunctionDataItem(v + Vector3d(0., 0., EPS_SUPPORT_DIRECTION_EQUALITY), 1.));
 	itemsWithEqualities.push_back(SupportFunctionDataItem(2. * v, 1.));
-	itemsWithEqualities.push_back(SupportFunctionDataItem(
-		v + Vector3d(0., 2. * EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
+	itemsWithEqualities.push_back(
+		SupportFunctionDataItem(v + Vector3d(0., 2. * EPS_SUPPORT_DIRECTION_EQUALITY, 0.), 1.));
 
 	/* Create vector of inequal items of previous vector. */
 	std::vector<SupportFunctionDataItem> itemsWithoutEqualities;

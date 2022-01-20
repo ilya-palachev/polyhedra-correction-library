@@ -49,8 +49,7 @@ public:
 	 * @param data			Support function estimation data (input)
 	 * @param ifCommandlineMode	Whether to run through the command line
 	 */
-	ClpSupportFunctionEstimator(SupportFunctionEstimationDataPtr data,
-								bool ifCommandlineMode = false);
+	ClpSupportFunctionEstimator(SupportFunctionEstimationDataPtr data, bool ifCommandlineMode = false);
 
 	/** Default destructor. */
 	~ClpSupportFunctionEstimator();
@@ -64,8 +63,7 @@ public:
 };
 
 /** The same as above, but CLP is run through the command line. */
-class ClpCommandLineSupportFunctionEstimator
-	: public ClpSupportFunctionEstimator
+class ClpCommandLineSupportFunctionEstimator : public ClpSupportFunctionEstimator
 {
 public:
 	/**
@@ -73,8 +71,7 @@ public:
 	 *
 	 * @param data			Support function estimation data (input)
 	 */
-	ClpCommandLineSupportFunctionEstimator(
-		SupportFunctionEstimationDataPtr data);
+	ClpCommandLineSupportFunctionEstimator(SupportFunctionEstimationDataPtr data);
 };
 
 #endif /* CLPSUPPORTFUNCTIONESTIMATOR_H_ */

@@ -78,8 +78,7 @@ static ItemsVector getItems(char *path, double z)
 
 	if (numContoursIntersecting < SCData->numContours)
 	{
-		fprintf(stderr, "Error: Not all contours intersect plane {z = %lf}\n",
-				z);
+		fprintf(stderr, "Error: Not all contours intersect plane {z = %lf}\n", z);
 		exit(EXIT_FAILURE);
 	}
 
@@ -140,8 +139,7 @@ int main(int argc, char **argv)
 	}
 
 	auto items = getItems(path, zParameter);
-	auto corners = estimateCorners(items, mParameter, tParameter, lParameter,
-								   qParameter, sParameter, false);
+	auto corners = estimateCorners(items, mParameter, tParameter, lParameter, qParameter, sParameter, false);
 	fprintf(stdout, "%lu corners have been detected.\n", corners.size());
 	DEBUG_END;
 	return EXIT_SUCCESS;

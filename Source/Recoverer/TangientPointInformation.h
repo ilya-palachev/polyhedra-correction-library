@@ -112,8 +112,7 @@ struct TangientPointInformation
 	 * @param direction	The direction.
 	 * @param vertex	The vertex iterator pointing to the vertex.
 	 */
-	TangientPointInformation(int iDirection, Vector_3 direction,
-							 Polyhedron_3::Vertex_iterator vertex);
+	TangientPointInformation(int iDirection, Vector_3 direction, Polyhedron_3::Vertex_iterator vertex);
 
 	/**
 	 * Prints the information to the stream.
@@ -123,8 +122,7 @@ struct TangientPointInformation
 	 *
 	 * @return		The srteam ready for further printing.
 	 */
-	friend std::ostream &operator<<(std::ostream &stream,
-									TangientPointInformation &info);
+	friend std::ostream &operator<<(std::ostream &stream, TangientPointInformation &info);
 
 	/**
 	 * Calculates 3 slices (consecutive qeuadruples of the gradient

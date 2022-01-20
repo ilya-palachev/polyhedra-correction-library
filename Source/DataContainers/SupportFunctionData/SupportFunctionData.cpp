@@ -42,32 +42,28 @@ SupportFunctionData::SupportFunctionData() : items()
 	DEBUG_END;
 }
 
-SupportFunctionData::SupportFunctionData(const SupportFunctionData &data) :
-	items()
+SupportFunctionData::SupportFunctionData(const SupportFunctionData &data) : items()
 {
 	DEBUG_START;
 	items = data.items;
 	DEBUG_END;
 }
 
-SupportFunctionData::SupportFunctionData(const SupportFunctionData *data) :
-	items()
+SupportFunctionData::SupportFunctionData(const SupportFunctionData *data) : items()
 {
 	DEBUG_START;
 	items = data->items;
 	DEBUG_END;
 }
 
-SupportFunctionData::SupportFunctionData(const SupportFunctionDataPtr data) :
-	items()
+SupportFunctionData::SupportFunctionData(const SupportFunctionDataPtr data) : items()
 {
 	DEBUG_START;
 	items = data->items;
 	DEBUG_END;
 }
 
-SupportFunctionData::SupportFunctionData(
-	const std::vector<SupportFunctionDataItem> itemsGiven)
+SupportFunctionData::SupportFunctionData(const std::vector<SupportFunctionDataItem> itemsGiven)
 {
 	DEBUG_START;
 	items = itemsGiven;
@@ -93,8 +89,7 @@ SupportFunctionData::~SupportFunctionData()
 	DEBUG_END;
 }
 
-SupportFunctionData &
-SupportFunctionData::operator=(const SupportFunctionData &data)
+SupportFunctionData &SupportFunctionData::operator=(const SupportFunctionData &data)
 {
 	DEBUG_START;
 	items = data.items;
@@ -135,11 +130,9 @@ SupportFunctionDataPtr SupportFunctionData::removeEqual()
 		itemOrig.direction.norm(1.);
 
 		bool ifEqual = false;
-		for (auto itemPrev = itemsUnequal.begin();
-			 itemPrev != itemsUnequal.end(); ++itemPrev)
+		for (auto itemPrev = itemsUnequal.begin(); itemPrev != itemsUnequal.end(); ++itemPrev)
 		{
-			if (equal(itemOrig.direction, itemPrev->direction,
-					  EPS_SUPPORT_DIRECTION_EQUALITY))
+			if (equal(itemOrig.direction, itemPrev->direction, EPS_SUPPORT_DIRECTION_EQUALITY))
 			{
 				std::cout << "Found equal items!" << std::endl;
 				ifEqual = true;
@@ -176,8 +169,7 @@ std::vector<Plane_3> SupportFunctionData::supportPlanes()
 	for (auto item = items.begin(); item != items.end(); ++item)
 	{
 		ASSERT(item->value > 0);
-		Plane_3 plane(item->direction.x, item->direction.y, item->direction.z,
-					  -item->value);
+		Plane_3 plane(item->direction.x, item->direction.y, item->direction.z, -item->value);
 		ASSERT(equal(plane.a(), item->direction.x));
 		ASSERT(equal(plane.b(), item->direction.y));
 		ASSERT(equal(plane.c(), item->direction.z));
@@ -264,8 +256,7 @@ std::vector<Point> SupportFunctionData::getShiftedDualPoints(double epsilon)
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = items[i];
-		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z,
-					  -item.value - epsilon);
+		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z, -item.value - epsilon);
 		Point_3 point = dual(plane);
 		points.push_back(Point(point.x(), point.y(), point.z()));
 	}
@@ -281,8 +272,7 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = items[i];
-		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z,
-					  -item.value - epsilon);
+		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z, -item.value - epsilon);
 		Point_3 point = dual(plane);
 		points.push_back(point);
 	}
@@ -290,8 +280,7 @@ std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(double epsilon)
 	return points;
 }
 
-std::vector<Point_3>
-SupportFunctionData::getShiftedDualPoints_3(std::vector<double> epsilons)
+std::vector<Point_3> SupportFunctionData::getShiftedDualPoints_3(std::vector<double> epsilons)
 {
 	DEBUG_START;
 	ASSERT((int)epsilons.size() == size());
@@ -300,8 +289,7 @@ SupportFunctionData::getShiftedDualPoints_3(std::vector<double> epsilons)
 	for (int i = 0; i < numDirections; ++i)
 	{
 		auto item = items[i];
-		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z,
-					  -item.value - epsilons[i]);
+		Plane_3 plane(item.direction.x, item.direction.y, item.direction.z, -item.value - epsilons[i]);
 		Point_3 point = dual(plane);
 		points.push_back(point);
 	}
@@ -309,8 +297,7 @@ SupportFunctionData::getShiftedDualPoints_3(std::vector<double> epsilons)
 	return points;
 }
 
-std::vector<std::vector<int>>
-getContoursIndices(std::vector<SupportFunctionDataItem> items)
+std::vector<std::vector<int>> getContoursIndices(std::vector<SupportFunctionDataItem> items)
 {
 	DEBUG_START;
 	/* Find the number of contours. */
@@ -540,8 +527,7 @@ std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 	double scale = 1e+6;
 	for (Point_3 point : points)
 	{
-		stream << (int)std::floor(scale * point.x()) << " "
-			   << (int)std::floor(scale * point.y()) << " "
+		stream << (int)std::floor(scale * point.x()) << " " << (int)std::floor(scale * point.y()) << " "
 			   << (int)std::floor(scale * point.z()) << std::endl;
 	}
 	for (int i = 0; i < (int)data->size(); ++i)
@@ -550,8 +536,7 @@ std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 		Colour colour = colours[i];
 		for (int j = 0; j < 4; ++j)
 			stream << " " << 4 * i + j;
-		stream << " " << static_cast<int>(colour.red) << " "
-			   << static_cast<int>(colour.green) << " "
+		stream << " " << static_cast<int>(colour.red) << " " << static_cast<int>(colour.green) << " "
 			   << static_cast<int>(colour.blue) << std::endl;
 	}
 	DEBUG_END;
