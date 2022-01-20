@@ -578,13 +578,13 @@ void printUsage(const std::string &executable)
 	std::cerr << "Usage: " << executable << " INPUT_TYPE MEASUREMENT_PARAMS ESTIMATION_PARAMS" << std::endl;
 	std::cerr << "  where INPUT_TYPE is one of: body, contours" << std::endl;
 	std::cerr << "  where MEASUREMENT_PARAMS looks like: "
-				 "MEASUREMENT_MODE;param1=value1;...;paramN=valueN"
+				 "MEASUREMENT_MODE:param1=value1:...:paramN=valueN"
 			  << std::endl;
 	std::cerr << "    where MEASUREMENT_MODE is one of: probe-body, "
 				 "probe-contours, generate-and-probe-contours"
 			  << std::endl;
 	std::cerr << "  where ESTIMATION_PARAMS looks like: "
-				 "param1=value1;...;paramN=valueN"
+				 "param1=value1:...:paramN=valueN"
 			  << std::endl;
 }
 
@@ -660,7 +660,7 @@ int main(int argc, char **argv)
 
 	std::string inputType = argv[1];
 	std::string inputPath = argv[2];
-	auto measurementDescription = split(argv[3], ';');
+	auto measurementDescription = split(argv[3], ':');
 	auto measurementMode = measurementDescription[0];
     measurementDescription.erase(measurementDescription.begin());
 
@@ -744,7 +744,7 @@ int main(int argc, char **argv)
 
     std::cout << "Completed measurement data collection." << std::endl;
     
-	auto estimationParams = splitParams(split(argv[4], ';'), executable);
+	auto estimationParams = splitParams(split(argv[4], ':'), executable);
 
     auto provisional_estimate = estimationParams.count("provisional_estimate") ? estimationParams.at("provisional_estimate") : "am";
 
@@ -757,7 +757,7 @@ int main(int argc, char **argv)
 										 ? std::stoi(estimationParams.at("provisional_dimension"))
 										 : p->numVertices;
 		std::cout << "Running AM algorithm for provisional estimate with lifting dimensions " << provisional_dimension << std::endl;
-		provisionalPolyhedron = AlternatingMinimization().run(data, p->numVertices);
+		provisionalPolyhedron = AlternatingMinimization().run(data, provisional_dimension);
 	}
 	else if (provisional_estimate == "lse")
 	{
@@ -810,7 +810,8 @@ int main(int argc, char **argv)
 		return EXIT_SUCCESS;
 
 	auto Pcurrent = topologicalPolyhedron;
-	for (int i = 0; i < 2; ++i)
+	auto refinement_steps = estimationParams.count("refinement_steps") ? std::stoi(estimationParams.at("refinement_steps")) : 2;
+	for (int i = 0; i < refinement_steps; ++i)
 	{
 		for (auto I = Pcurrent.facets_begin(), E = Pcurrent.facets_end(); I != E; ++I)
 		{

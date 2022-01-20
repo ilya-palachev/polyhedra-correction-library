@@ -46,6 +46,7 @@ template <class RangeT, class VectorT>
 double calculateSupportFunction(const RangeT &vertices,
 								const VectorT &direction)
 {
+    ASSERT(std::begin(vertices) != std::end(vertices));
 	return selectExtremePointByDirection(vertices, direction).dot(direction);
 }
 

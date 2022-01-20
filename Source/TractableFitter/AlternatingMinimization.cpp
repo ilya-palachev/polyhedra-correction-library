@@ -64,6 +64,7 @@ double evaluateFit(Eigen::MatrixXd &A, SupportFunctionDataPtr data,
 				   const std::vector<VectorXd> &simplexVertices)
 {
 	double error = 0.;
+    ASSERT(!simplexVertices.empty());
 	Eigen::MatrixXd AT = A.transpose();
 	for (unsigned i = 0; i < data->size(); ++i)
 	{
@@ -149,7 +150,9 @@ Polyhedron_3 AlternatingMinimization::run(SupportFunctionDataPtr data,
 	double errorBest = -1.;
 	MatrixXd Abest;
 
+    ASSERT(numLiftingDimensions > 0);
 	auto simplexVertices = generateSimplex(numLiftingDimensions);
+    ASSERT(!simplexVertices.empty());
 
 	for (unsigned iOuter = 0;
 		 iOuter < (useStartingBody_ ? 1 : numOuterIterations_); ++iOuter)
