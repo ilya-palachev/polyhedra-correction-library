@@ -600,6 +600,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 void Polyhedron::fscan_ply(const char *filename)
 {
 	DEBUG_START;
+    std::cout << "Reading PLY file " << filename << std::endl;
 	std::ifstream infile(filename);
 
 	std::string line;
@@ -674,6 +675,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		facets[i] = Facet(i, number, plane, index, get_ptr(), false);
 		delete[] index;
 	}
+    std::cout << "Completed reading PLY file " << filename << std::endl;
 	DEBUG_END;
 }
 
