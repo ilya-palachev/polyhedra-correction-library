@@ -798,7 +798,7 @@ int main(int argc, char **argv)
 
 	auto minimization = AlternatingMinimization(); // TODO: Add an option to run minimization with some initial body
 	auto dimension = estimationParams.count("dimension") ? std::stoi(estimationParams.at("dimension")) : p->numFacets;
-	std::cout << "Running AM algorithm for with lifting dimensions " << dimension << std::endl;
+	std::cout << "Running AM algorithm with lifting dimensions " << dimension << std::endl;
 
 	auto topologicalPolyhedronDual = minimization.run(dualData, dimension);
 	std::cout << "Dual topological polyhedron has " << topologicalPolyhedronDual.size_of_vertices() << " vertices"
