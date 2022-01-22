@@ -800,6 +800,16 @@ int main(int argc, char **argv)
 	auto dimension = estimationParams.count("dimension") ? std::stoi(estimationParams.at("dimension")) : p->numFacets;
 	std::cout << "Running AM algorithm with lifting dimensions " << dimension << std::endl;
 
+    if (estimationParams.count("num_inner_iterations"))
+    {
+        minimization.setNumInnerIterations(std::stoi(estimationParams.at("num_inner_iterations")));
+    }
+
+    if (estimationParams.count("num_outer_iterations"))
+    {
+        minimization.setNumOuterIterations(std::stoi(estimationParams.at("num_outer_iterations")));
+    }
+
 	auto topologicalPolyhedronDual = minimization.run(dualData, dimension);
 	std::cout << "Dual topological polyhedron has " << topologicalPolyhedronDual.size_of_vertices() << " vertices"
 			  << std::endl;
