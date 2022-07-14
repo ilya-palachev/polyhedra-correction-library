@@ -144,7 +144,7 @@ public:
 	 */
 	SupportFunctionDataPtr removeEqual();
 
-	std::vector<SupportFunctionDataItem> getItems()
+	const std::vector<SupportFunctionDataItem> &getItems() const
 	{
 		return items;
 	}
