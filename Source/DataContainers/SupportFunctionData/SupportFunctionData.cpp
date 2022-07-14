@@ -489,6 +489,8 @@ void SupportFunctionData::searchTrustedEdges(double threshold)
 }
 #endif
 
+// TODO: (SRP) Move this printer to the separate class.
+// The operator<< should just print the list of support function data items (i.e. 4D vectors)
 std::ostream &operator<<(std::ostream &stream, SupportFunctionDataPtr data)
 {
 	DEBUG_START;
