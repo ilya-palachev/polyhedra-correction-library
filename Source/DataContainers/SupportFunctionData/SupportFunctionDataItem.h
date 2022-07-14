@@ -111,7 +111,8 @@ inline bool operator!=(const SupportFunctionDataItem &left, const SupportFunctio
 	return ifInequal;
 }
 
-static inline std::ostream &operator<<(std::ostream &stream, const SupportFunctionDataItem &item) {
+static inline std::ostream &operator<<(std::ostream &stream, const SupportFunctionDataItem &item)
+{
 	stream << "Direction: [" << item.direction << "]; support function value: " << item.value << std::endl;
 	return stream;
 }

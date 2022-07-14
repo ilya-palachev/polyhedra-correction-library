@@ -83,11 +83,10 @@ SupportFunctionDataPtr generateSupportData(std::vector<Vector3d> &directions, st
 	return data;
 }
 
-
 void printUsage(const std::string &executable)
 {
 	std::cerr << "Usage: " << executable << " INPUT_PATH MEASUREMENT_PARAMS" << std::endl;
-    std::cerr << "  where INPUT_PATH is a path the file with body in PLY format" << std::endl;
+	std::cerr << "  where INPUT_PATH is a path the file with body in PLY format" << std::endl;
 	std::cerr << "  where MEASUREMENT_PARAMS looks like: "
 				 "MEASUREMENT_MODE:param1=value1:...:paramN=valueN"
 			  << std::endl;
@@ -140,28 +139,29 @@ int main(int argc, char **argv)
 
 	// Parsing functions require some fake polyhedron as a container. It will not be used further, just a legacy.
 	PolyhedronPtr p(new Polyhedron());
-    std::string inputPath = argv[1];
+	std::string inputPath = argv[1];
 	std::cout << "Scanning PLY file format..." << std::endl;
-    p->fscan_ply(inputPath.c_str());
+	p->fscan_ply(inputPath.c_str());
 	std::cout << "Scanning PLY file format... done" << std::endl;
 
 	if (p->numVertices == 0)
 	{
+		std::cerr << "Failed to parse the file " << inputPath << "; the parsed body has 0 vertices." << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	SupportFunctionDataPtr data;
 
-    auto num_measurements =
-        measurementParams.count("num_measurements") ? std::stoi(measurementParams["num_measurements"]) : 100;
-    auto directions = generateDirections<Vector3d>(num_measurements);
+	auto num_measurements =
+		measurementParams.count("num_measurements") ? std::stoi(measurementParams["num_measurements"]) : 100;
+	auto directions = generateDirections<Vector3d>(num_measurements);
 
-    double noise_variance =
-        measurementParams.count("noise_variance") ? std::stod(measurementParams["noise_variance"]) : 0.01;
+	double noise_variance =
+		measurementParams.count("noise_variance") ? std::stod(measurementParams["noise_variance"]) : 0.01;
 
-    std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
-    data = generateSupportData(directions, vertices, noise_variance);
+	std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
+	SupportFunctionDataPtr data = generateSupportData(directions, vertices, noise_variance);
 
-	std::cout << "Completed measurement data collection. Number of collected measurements: " << data->size() << std::endl;
+	std::cout << "Completed measurement data collection. Number of collected measurements: " << data->size()
+			  << std::endl;
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
