@@ -31,6 +31,7 @@
 #include "Polyhedron/Polyhedron.h"
 #include "Polyhedron/Facet/Facet.h"
 
+#include "KernelCGAL/dual.h"
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 
 /**
@@ -528,3 +529,54 @@ template std::pair<int, PCLPlane_3> findBestPlaneOriginal<PlaneListIterator>(Pol
 																			 PlaneListIterator planesEnd);
 template void Polyhedron_3::initialize_indices<PlaneListIterator>(PlaneListIterator planesBegin,
 																  PlaneListIterator planesEnd);
+
+template <class HDS> class DualPolyhedronBuilder: public CGAL::Modifier_base<HDS>
+{
+	const Polyhedron_3 &p;
+public:
+
+	DualPolyhedronBuilder(const Polyhedron_3 &p) : p(p)
+	{
+	}
+
+	void operator()(HDS &hds)
+	{
+		DEBUG_START;
+		CGAL::Polyhedron_incremental_builder_3<HDS> builder(hds, true);
+
+		builder.begin_surface(p.size_of_facets(), p.size_of_vertices(), p.size_of_halfedges());
+
+		for (auto I = p.facets_begin(), E = p.facets_end(); I != E; ++I)
+		{
+			builder.add_vertex(dualPoint(I->plane()));
+		}
+
+		for (auto I = p.vertices_begin(), E = p.vertices_end(); I != E; ++I)
+		{
+			builder.begin_facet();
+			auto circulatorFirst = I->vertex_begin();
+			auto circulator = circulatorFirst;
+            do
+			{
+				builder.add_vertex_to_facet(circulator->facet()->id);
+            } while (circulator != circulatorFirst);
+			builder.end_facet();
+		}
+
+		builder.end_surface();
+		DEBUG_END;
+	}
+};
+
+template <>
+BasePolyhedron_3<Kernel, ItemsIndexed> BasePolyhedron_3<Kernel, ItemsIndexed>::dual(const BasePolyhedron_3 &p)
+{
+    BasePolyhedron_3 dual_p;
+	DualPolyhedronBuilder<HalfedgeDS> builder(p);
+	dual_p.delegate(builder);
+	std::transform(p.vertices_begin(), p.vertices_end(), dual_p.planes_begin(), [](const HalfedgeDS::Vertex &v) {
+		Plane_3 plane = dualPlane(v.point());
+		return plane;
+	});
+	return dual_p;
+}
