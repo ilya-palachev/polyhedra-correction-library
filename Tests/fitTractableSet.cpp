@@ -166,7 +166,7 @@ static Polyhedron_3 dual(Polyhedron_3 p)
 	for (auto it = p.vertices_begin(); it != p.vertices_end(); ++it)
 	{
 		auto point = it->point();
-		planes.push_back(dual(point));
+		planes.push_back(dualPlane(point));
 	}
 	Polyhedron_3 intersection(planes.begin(), planes.end());
 	return intersection;

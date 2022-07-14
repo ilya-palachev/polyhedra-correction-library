@@ -146,7 +146,7 @@ static double calculateProduct(const Vector_3 &direction, const Cell_handle &cel
 {
 	DEBUG_START;
 	Plane_3 plane = getOppositeFacetPlane(cell, infinity);
-	Point_3 point = ::dual(plane);
+	Point_3 point = dualPoint(plane);
 	double product = direction * (point - CGAL::Origin());
 	DEBUG_END;
 	return product;
@@ -310,7 +310,7 @@ static unsigned getNearestOuterItemID(const Cell_handle &cell, const std::vector
 {
 	DEBUG_START;
 	Plane_3 plane = getOppositeFacetPlane(cell, infinity);
-	Point_3 point = dual(plane);
+	Point_3 point = dualPoint(plane);
 	cell->info().point = point;
 
 	double distanceMin = MINIMIZATION_STARTING_VALUE;
@@ -525,13 +525,13 @@ bool isPositivelyDecomposable(const Vector_3 &a, const Vector_3 &b, const Vector
 Point_3 calculateMove(const Vertex_handle &vertex, const Vector_3 &tangient)
 {
 	DEBUG_START;
-	Plane_3 plane = dual(vertex->point());
+	Plane_3 plane = dualPlane(vertex->point());
 	Vector_3 u(plane.a(), plane.b(), plane.c());
 	if (plane.d() > 0.)
 		u = -u;
 	double value = tangient * u;
 	Plane_3 planeNew(u.x(), u.y(), u.z(), -value);
-	Point_3 point = dual(planeNew);
+	Point_3 point = dualPoint(planeNew);
 	DEBUG_END;
 	return point;
 }
@@ -704,7 +704,7 @@ bool DualPolyhedron_3::lift(Cell_handle cell, unsigned iNearest)
 		vertices.push_back(cell->vertex(i));
 
 		Vertex_handle vertex = mirror_vertex(cell, i);
-		Plane_3 plane = ::dual(vertex->point());
+		Plane_3 plane = dualPlane(vertex->point());
 		double alpha;
 		bool succeeded;
 		std::tie(succeeded, alpha) = calculateAlpha(xOld, xNew, plane);
@@ -820,7 +820,7 @@ static VectorXd runL2Estimation(SupportFunctionEstimationDataPtr SFEData)
 
 	std::vector<DualPolyhedron_3::PointIndexed_3> points;
 	for (unsigned i = 0; i < planes.size(); ++i)
-		points.push_back(std::make_pair(dual(planes[i]), i));
+		points.push_back(std::make_pair(dualPoint(planes[i]), i));
 
 	DualPolyhedron_3 dualP(directions, values, planes, points.begin(), points.end());
 	dualP.initialize();
