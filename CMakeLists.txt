@@ -165,6 +165,7 @@ set (SOURCE_tests
 	Tests/moveVertexLinear2.cpp
 	Tests/moveVertexW.cpp
 	Tests/printTemplatePolyhedrons.cpp
+	Tests/probeBody.cpp
 	Tests/Recoverer_test.cpp
 	Tests/ShadowContourCluterizer_test.cpp
 	Tests/shadowContoursConstruction.cpp
