@@ -23,6 +23,7 @@
  * @brief Probe a given 3D body to get measurements of its support or gauge function.
  */
 
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <random>
@@ -85,8 +86,9 @@ SupportFunctionDataPtr generateSupportData(std::vector<Vector3d> &directions, st
 
 void printUsage(const std::string &executable)
 {
-	std::cerr << "Usage: " << executable << " INPUT_PATH MEASUREMENT_PARAMS" << std::endl;
-	std::cerr << "  where INPUT_PATH is a path the file with body in PLY format" << std::endl;
+	std::cerr << "Usage: " << executable << " INPUT_PATH OUTPUT_PATH MEASUREMENT_PARAMS" << std::endl;
+	std::cerr << "  where INPUT_PATH is a path to the file with body in PLY format" << std::endl;
+	std::cerr << "  where OUTPUT_PATH is a path to the file where measurements should be stored" << std::endl;
 	std::cerr << "  where MEASUREMENT_PARAMS looks like: "
 				 "MEASUREMENT_MODE:param1=value1:...:paramN=valueN"
 			  << std::endl;
@@ -127,13 +129,13 @@ std::map<std::string, std::string> splitParams(const std::vector<std::string> &d
 int main(int argc, char **argv)
 {
 	std::string executable = argv[0];
-	if (argc != 3)
+	if (argc != 4)
 	{
 		printUsage(executable);
 		return EXIT_FAILURE;
 	}
 
-	auto measurementDescription = split(argv[2], ':');
+	auto measurementDescription = split(argv[3], ':');
 
 	auto measurementParams = splitParams(measurementDescription, executable);
 
@@ -163,5 +165,12 @@ int main(int argc, char **argv)
 	std::cout << "Completed measurement data collection. Number of collected measurements: " << data->size()
 			  << std::endl;
 
+	std::ofstream outputFile;
+	outputFile.open(argv[2]);
+	for (const auto &item : data->getItems())
+	{
+		outputFile << item;
+	}
+	outputFile.close();
 	return EXIT_SUCCESS;
 }
