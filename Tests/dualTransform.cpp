@@ -60,7 +60,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-    Polyhedron_3 dualP = Polyhedron_3::dual(*p);
+    Polyhedron_3 p_3(*p);
+    p_3.initialize_indices();
+    Polyhedron_3 dualP = Polyhedron_3::dual(p_3);
 
 	std::ofstream outputFile;
 	outputFile.open(argv[2]);

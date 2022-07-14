@@ -558,6 +558,8 @@ public:
 			auto circulator = circulatorFirst;
             do
 			{
+                auto facetId = circulator->facet()->id;
+                ASSERT(facetId >= 0 && facetId < p.size_of_facets() && "Incorrect facet Id");
 				builder.add_vertex_to_facet(circulator->facet()->id);
             } while (circulator != circulatorFirst);
 			builder.end_facet();
