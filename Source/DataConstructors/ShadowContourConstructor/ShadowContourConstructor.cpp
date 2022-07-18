@@ -305,7 +305,7 @@ bool ShadowContourConstructor::collinearVisibility(int v0processed, int v1proces
 	DEBUG_START;
 	polyhedron->facets[ifacet].my_fprint(stdout);
 	int nv = polyhedron->facets[ifacet].numVertices;
-	auto index = polyhedron->facets[ifacet].indVertices;
+	auto &index = polyhedron->facets[ifacet].indVertices;
 	Vector3d nu = planeOfProjection.norm;
 
 	// 1. Find the closest vertices to the plane of projection.

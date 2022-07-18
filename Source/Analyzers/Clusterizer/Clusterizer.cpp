@@ -90,7 +90,7 @@ int Clusterizer::clusterize(double p)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 		nv = polyhedron->facets[i].numVertices;
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		n0 = polyhedron->facets[i].plane.norm;
 		for (j = 0; j < nv; ++j)
 		{
@@ -175,7 +175,7 @@ void Clusterizer::clusterize2(double p)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 		nv = polyhedron->facets[i].numVertices;
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		n0 = polyhedron->facets[i].plane.norm;
 		for (j = 0; j < nv; ++j)
 		{

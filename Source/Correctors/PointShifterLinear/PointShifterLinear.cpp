@@ -219,7 +219,7 @@ double PointShifterLinear::calculateError()
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		nv = polyhedron->facets[j].numVertices;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		a = polyhedron->facets[j].plane.norm.x;
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
@@ -272,7 +272,7 @@ void PointShifterLinear::moveFacets()
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		nv = polyhedron->facets[j].numVertices;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		for (i = 0; i < nv; ++i)
 		{
 			x[i] = polyhedron->vertices[index[i]].x;
@@ -322,7 +322,7 @@ void PointShifterLinear::moveVerticesGlobal()
 		Mcc = 0.;
 		Mcd = 0.;
 		nf = polyhedron->vertexInfos[i].numFacets;
-		auto index = polyhedron->vertexInfos[i].indFacets;
+		auto &index = polyhedron->vertexInfos[i].indFacets;
 		for (j = 0; j < nf; ++j)
 		{
 			pl = polyhedron->facets[index[j]].plane;
@@ -509,7 +509,7 @@ void PointShifterLinear::moveVerticesLocal()
 			DEBUG_PRINT("Vertex %d cannot be found in any facet...\n", i);
 			continue;
 		}
-		auto index = polyhedron->vertexInfos[i].indFacets;
+		auto &index = polyhedron->vertexInfos[i].indFacets;
 		for (j = 0; j < nf; ++j)
 		{
 			pl = polyhedron->facets[index[j]].plane;

@@ -169,8 +169,8 @@ int Coalescer::buildIndex(int fid0, int fid1)
 	nv1 = polyhedron->facets[fid1].numVertices;
 	nv = nv0 + nv1;
 	std::vector<int> index(3 * nv + 1);
-	auto index0 = polyhedron->facets[fid0].indVertices;
-	auto index1 = polyhedron->facets[fid1].indVertices;
+	auto &index0 = polyhedron->facets[fid0].indVertices;
+	auto &index1 = polyhedron->facets[fid1].indVertices;
 
 	// 1. Найдем общую вершину граней
 	for (i = 0; i < nv1; ++i)
@@ -406,7 +406,7 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 
 	coalescedFacet.my_fprint_all(stdout, *polyhedron.get());
 
-	auto index = coalescedFacet.indVertices;
+	auto &index = coalescedFacet.indVertices;
 	nv = coalescedFacet.numVertices;
 
 	leastSquaresMethod(nv, index.data(), &plane);
@@ -492,7 +492,7 @@ void Coalescer::rise(int fid0)
 	file_name_out = new char[255];
 
 	nv = polyhedron->facets[fid0].numVertices;
-	auto index = polyhedron->facets[fid0].indVertices;
+	auto &index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 	DEBUG_PRINT("Поднимаем до плоскости: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0", plane.norm.x, plane.norm.y,
 				plane.norm.z, plane.dist);
@@ -558,7 +558,7 @@ void Coalescer::rise(int fid0)
 
 		++step;
 		nv = polyhedron->facets[fid0].numVertices;
-		auto index = polyhedron->facets[fid0].indVertices;
+		auto &index = polyhedron->facets[fid0].indVertices;
 		ndown = 0;
 		for (i = 0; i < nv; ++i)
 		{
@@ -603,7 +603,7 @@ int Coalescer::riseFind(int fid0)
 	Plane plane;
 
 	nv = polyhedron->facets[fid0].numVertices;
-	auto index = polyhedron->facets[fid0].indVertices;
+	auto &index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 
 	DEBUG_PRINT("Предварительный анализ вершин: ");
@@ -697,7 +697,7 @@ double Coalescer::riseFindStep(int fid0, int i)
 	Vector3d v1, v2;
 
 	nv = polyhedron->facets[fid0].numVertices;
-	auto index = polyhedron->facets[fid0].indVertices;
+	auto &index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 
 	// Номера соседних с контуром граней вблизи рассматриваемой точки:
@@ -799,7 +799,7 @@ void Coalescer::risePoint(int fid0, int imin)
 	int nnv;
 
 	nv = polyhedron->facets[fid0].numVertices;
-	auto index = polyhedron->facets[fid0].indVertices;
+	auto &index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 
 	// Номера соседних с контуром граней вблизи рассматриваемой точки:

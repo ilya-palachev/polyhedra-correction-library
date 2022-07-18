@@ -119,7 +119,7 @@ int VertexGrouper::groupInnerFacet(int fid, double *A, double *b, Vector3d *vert
 	//    DEBUG_PRINT("\tBegin join_points_inner_facet(%d)\n", fid);
 
 	nv = polyhedron->facets[fid].numVertices;
-	auto index = polyhedron->facets[fid].indVertices;
+	auto &index = polyhedron->facets[fid].indVertices;
 	plane = polyhedron->facets[fid].plane;
 	//    vertex_old = new Vector3d[nv];
 

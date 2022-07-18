@@ -162,7 +162,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		nv = polyhedron->facets[j].numVertices;
 		for (int i = 0; i < nv; ++i)
 		{
@@ -254,7 +254,7 @@ void PointShifterWeighted::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		nv = polyhedron->facets[j].numVertices;
 		for (int i = 0; i < nv; ++i)
 		{

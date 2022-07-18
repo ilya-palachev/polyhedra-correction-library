@@ -125,7 +125,7 @@ double SizeCalculator::volume()
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
@@ -157,7 +157,7 @@ double SizeCalculator::areaOfSurface()
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		normal = polyhedron->facets[i].plane.norm;
@@ -220,7 +220,7 @@ void SizeCalculator::J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, doubl
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
@@ -358,7 +358,7 @@ void SizeCalculator::get_center(double &xc, double &yc, double &zc)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;

@@ -398,7 +398,7 @@ VectorXd runL2Estimation(SupportFunctionEstimationDataPtr data)
 
 	Polyhedron_3 intersection(planes);
 	intersection.initialize_indices(planes);
-	auto index = intersection.indexPlanes_;
+	auto &index = intersection.indexPlanes_;
 	std::cerr << "Intersection contains " << intersection.size_of_facets() << " of " << planes.size() << " planes."
 			  << std::endl;
 

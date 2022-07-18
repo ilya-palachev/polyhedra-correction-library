@@ -45,7 +45,7 @@ void EdgeConstructor::run(EdgeDataPtr edgeData)
 	for (int i = 0; i < polyhedron->numFacets; ++i)
 	{
 		int numVerticesInFacet = polyhedron->facets[i].numVertices;
-		auto index = polyhedron->facets[i].indVertices;
+		auto &index = polyhedron->facets[i].indVertices;
 		for (int iVertex = 0; iVertex < numVerticesInFacet; ++iVertex)
 		{
 			edgeData->addEdge(index[iVertex],							// First vertices

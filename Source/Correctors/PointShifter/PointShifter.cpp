@@ -179,7 +179,7 @@ void PointShifter::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		int nv = polyhedron->facets[j].numVertices;
 		for (int i = 0; i < nv; ++i)
 		{
@@ -266,7 +266,7 @@ void PointShifter::run(int id, Vector3d delta)
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
 		d = polyhedron->facets[j].plane.dist;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		int nv = polyhedron->facets[j].numVertices;
 		for (int i = 0; i < nv; ++i)
 		{
@@ -385,7 +385,7 @@ void PointShifter::calculateFunctional()
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		nv = polyhedron->facets[j].numVertices;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		plane = polyhedron->facets[j].plane;
 		for (i = 0; i < nv; ++i)
 		{
@@ -419,7 +419,7 @@ void PointShifter::calculateFunctional()
 
 		nf = polyhedron->vertexInfos[i].numFacets;
 		;
-		auto index = polyhedron->vertexInfos[i].indFacets;
+		auto &index = polyhedron->vertexInfos[i].indFacets;
 		for (j = 0; j < nf; ++j)
 		{
 			p = index[j];
@@ -439,7 +439,7 @@ void PointShifter::calculateFunctional()
 		fx[k + 3] = 2 * d(j);
 
 		nv = polyhedron->facets[j].numVertices;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		plane = polyhedron->facets[j].plane;
 
 		for (i = 0; i < nv; ++i)
@@ -481,7 +481,7 @@ void PointShifter::calculateFunctionalDerivative()
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		nv = polyhedron->facets[j].numVertices;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		plane = polyhedron->facets[j].plane;
 		for (i = 0; i < nv; ++i)
 		{
@@ -521,7 +521,7 @@ void PointShifter::calculateFunctionalDerivative()
 
 		nf = polyhedron->vertexInfos[i].numFacets;
 		;
-		auto index = polyhedron->vertexInfos[i].indFacets;
+		auto &index = polyhedron->vertexInfos[i].indFacets;
 		for (j = 0; j < nf; ++j)
 		{
 			p = index[j];
@@ -545,7 +545,7 @@ void PointShifter::calculateFunctionalDerivative()
 		A[(k + 3) * n + nd(j)] = 2.;
 
 		nv = polyhedron->facets[j].numVertices;
-		auto index = polyhedron->facets[j].indVertices;
+		auto &index = polyhedron->facets[j].indVertices;
 		plane = polyhedron->facets[j].plane;
 
 		for (i = 0; i < nv; ++i)
