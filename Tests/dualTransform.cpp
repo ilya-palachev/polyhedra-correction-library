@@ -30,7 +30,6 @@
 #include "Common.h"
 #include "PolyhedraCorrectionLibrary.h"
 
-
 void printUsage(const std::string &executable)
 {
 	std::cerr << "Usage: " << executable << " INPUT_PATH OUTPUT_PATH" << std::endl;
@@ -60,13 +59,14 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-    Polyhedron_3 p_3(*p);
-    p_3.initialize_indices();
-    Polyhedron_3 dualP = Polyhedron_3::dual(p_3);
+	Polyhedron_3 p_3(*p);
+	std::cout << p_3;
+	p_3.initialize_indices();
+	Polyhedron_3 dualP = Polyhedron_3::dual(p_3);
 
 	std::ofstream outputFile;
 	outputFile.open(argv[2]);
-    outputFile << dualP;
+	outputFile << dualP;
 	outputFile.close();
 	return EXIT_SUCCESS;
 }

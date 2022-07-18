@@ -126,7 +126,7 @@ bool EdgeReducer::updateFacets()
 		Facet *facetCurr = &polyhedron->facets[iFacetCurrent];
 
 		DEBUG_PRINT("\t before:");
-		facetCurr->my_fprint_all(stderr);
+		facetCurr->my_fprint_all(stderr, *polyhedron.get());
 
 		DEBUG_PRINT("facetCurr->indVertices[iPositionReduced = %d] = %d", iPositionReduced,
 					facetCurr->indVertices[iPositionReduced]);
@@ -257,7 +257,7 @@ bool EdgeReducer::updateFacets()
 		facetCurr->indVertices[facetCurr->numVertices] = facetCurr->indVertices[0];
 
 		DEBUG_PRINT("\t after:");
-		facetCurr->my_fprint_all(stderr);
+		facetCurr->my_fprint_all(stderr, *polyhedron.get());
 	}
 
 	/* If after the updating the number of vertices incident to current
@@ -306,7 +306,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	DEBUG_START;
 	DEBUG_PRINT("Cutting facet #%d", iFacet);
 	Facet *facet = &polyhedron->facets[iFacet];
-	facet->my_fprint_all(stderr);
+	facet->my_fprint_all(stderr, *polyhedron.get());
 
 	/* Assume that we remove vertices one-by-one. This will provide this
 	 * statement. */
@@ -314,7 +314,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 
 	/* Workaround: we need to re-prepocess current facet here, since the
 	 * information about inicidence srtucture can be obsoloete at this time. */
-	facet->preprocess();
+	facet->preprocess(*polyhedron.get());
 
 	int iVertex0 = facet->indVertices[0];
 	int iVertex1 = facet->indVertices[1];
@@ -332,7 +332,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	if (facet0->indVertices[iPosition0] != iVertex0)
 	{
 		ERROR_PRINT("facet0->indVertices[%d] = %d != %d", iPosition0, facet0->indVertices[iPosition0], iVertex0);
-		facet0->my_fprint_all(stderr);
+		facet0->my_fprint_all(stderr, *polyhedron.get());
 		ASSERT(0);
 		DEBUG_END;
 		return;
@@ -341,7 +341,7 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 	if (facet1->indVertices[iPosition1] != iVertex1)
 	{
 		ERROR_PRINT("facet1->indVertices[%d] = %d != %d", iPosition1, facet1->indVertices[iPosition1], iVertex1);
-		facet1->my_fprint_all(stderr);
+		facet1->my_fprint_all(stderr, *polyhedron.get());
 		ASSERT(0);
 		DEBUG_END;
 		return;
@@ -372,9 +372,6 @@ void EdgeReducer::cutDegeneratedFacet(int iFacet)
 				2 * facet1->numVertices + 1 + iPositionChanged1,
 				facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1], iPosition0);
 	facet1->indVertices[2 * facet1->numVertices + 1 + iPositionChanged1] = iPosition0;
-
-	/* Clear current facet. */
-	facet->clear();
 
 	/* Update information about incident facets in edge
 	 * [iVertex0, iVertex1]. */
@@ -440,7 +437,7 @@ bool EdgeReducer::rePreprocessFacets()
 		DEBUG_PRINT("polyhedron->facets[%d].id = %d", *itFacet, polyhedron->facets[*itFacet].id);
 		ASSERT(polyhedron->facets[*itFacet].id == *itFacet);
 
-		polyhedron->facets[*itFacet].preprocess();
+		polyhedron->facets[*itFacet].preprocess(*polyhedron.get());
 	}
 
 #ifndef NDEBUG
@@ -455,10 +452,10 @@ bool EdgeReducer::rePreprocessFacets()
 	{
 		Facet *facetCurr = &polyhedron->facets[*itFacet];
 		DEBUG_PRINT("Dumping facet #%d", facetCurr->id);
-		facetCurr->my_fprint_all(stderr);
+		facetCurr->my_fprint_all(stderr, *polyhedron.get());
 
 		/* Verify the information about incidence structure after removals. */
-		ASSERT(facetCurr->verifyIncidenceStructure());
+		ASSERT(facetCurr->verifyIncidenceStructure(*polyhedron.get()));
 
 #ifdef USE_GRAPH_DUMPER
 		graphDumper->collect(facetCurr);
@@ -617,7 +614,7 @@ bool EdgeReducer::updateVertexInfos()
 			DEBUG_PRINT("\tBefore:");
 			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
 
-			polyhedron->vertexInfos[iVertexCurrent].preprocess();
+			polyhedron->vertexInfos[iVertexCurrent].preprocess(*polyhedron.get());
 
 			DEBUG_PRINT("\tAfter:");
 			polyhedron->vertexInfos[iVertexCurrent].my_fprint_all(stdout);
@@ -674,8 +671,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, std::queue<int> &facetsQueue
 	Facet *facet0 = &polyhedron->facets[iFacet0];
 	Facet *facet1 = &polyhedron->facets[iFacet1];
 
-	facet0->my_fprint_all(stderr);
-	facet1->my_fprint_all(stderr);
+	facet0->my_fprint_all(stderr, *polyhedron.get());
+	facet1->my_fprint_all(stderr, *polyhedron.get());
 
 	/* 1). Remove cut vertex out from both facets. */
 	DEBUG_PRINT("iPosition0 = %d", iPosition0);
@@ -685,8 +682,8 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, std::queue<int> &facetsQueue
 	DEBUG_PRINT("iVertex1 = %d", iVertex1);
 	DEBUG_PRINT("facet1->indVertices[%d] = %d", iPosition1, facet1->indVertices[iPosition1]);
 
-	ASSERT(facet0->verifyIncidenceStructure());
-	ASSERT(facet1->verifyIncidenceStructure());
+	ASSERT(facet0->verifyIncidenceStructure(*polyhedron.get()));
+	ASSERT(facet1->verifyIncidenceStructure(*polyhedron.get()));
 
 	ASSERT(facet0->indVertices[iPosition0] == iVertex);
 	facet0->remove(iPosition0);
@@ -732,14 +729,14 @@ void EdgeReducer::cutDegeneratedVertex(int iVertex, std::queue<int> &facetsQueue
 	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin(); itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
 		DEBUG_PRINT("Re-preprocessing facet #%d", *itFacet);
-		polyhedron->facets[*itFacet].my_fprint_all(stderr);
-		polyhedron->facets[*itFacet].preprocess();
+		polyhedron->facets[*itFacet].my_fprint_all(stderr, *polyhedron.get());
+		polyhedron->facets[*itFacet].preprocess(*polyhedron.get());
 	}
 
 	/* Verify incidence structure after removal. */
 	for (std::set<int>::iterator itFacet = facetsPreprocessed.begin(); itFacet != facetsPreprocessed.end(); ++itFacet)
 	{
-		ASSERT(polyhedron->facets[*itFacet].verifyIncidenceStructure());
+		ASSERT(polyhedron->facets[*itFacet].verifyIncidenceStructure(*polyhedron.get()));
 	}
 
 	/* 4). Remove 2 corresponding edges from the edge set and add one proper
@@ -821,7 +818,7 @@ bool EdgeReducer::verifyEdgeData()
 			if (edgeFound == edgeData->edges.end())
 			{
 				ERROR_PRINT("Failed to find edge [%d, %d] in edge data", v0, v1);
-				facet->my_fprint_all(stderr);
+				facet->my_fprint_all(stderr, *polyhedron.get());
 				ASSERT(0);
 				return false;
 			}

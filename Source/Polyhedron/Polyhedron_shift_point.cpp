@@ -101,7 +101,7 @@ double Polyhedron::distToNearestNeighbour(int id)
 	double min_dist = RAND_MAX;
 
 	int nf = vertexInfos[id].numFacets;
-	int *index = vertexInfos[id].indFacets;
+	auto &index = vertexInfos[id].indFacets;
 	for (int i = 0; i < nf; ++i)
 	{
 		dist = qmod(vertices[id] - vertices[index[nf + 1 + i]]);

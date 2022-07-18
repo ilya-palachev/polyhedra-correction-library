@@ -126,7 +126,7 @@ void Coalescer::run(int n, int *fid)
 	// III ). Дополнительная предобработка многогранника
 	DEBUG_PRINT("III ). Дополнительная предобработка многогранника");
 	polyhedron->preprocessAdjacency();
-	polyhedron->facets[fid[0]].my_fprint_all(stdout);
+	polyhedron->facets[fid[0]].my_fprint_all(stdout, *polyhedron.get());
 
 	// IV ). Алгортм поднятия вершин, лежащих ниже плоскости
 	DEBUG_PRINT("IV ). Алгортм поднятия вершин, лежащих ниже плоскости");
@@ -163,15 +163,14 @@ int Coalescer::buildIndex(int fid0, int fid1)
 	int nv;
 
 	int i, j;
-	int *index, *index0, *index1, nv0, nv1;
-	bool *is, *del;
+	int nv0, nv1;
 
 	nv0 = polyhedron->facets[fid0].numVertices;
 	nv1 = polyhedron->facets[fid1].numVertices;
 	nv = nv0 + nv1;
-	index = new int[3 * nv + 1];
-	index0 = polyhedron->facets[fid0].indVertices;
-	index1 = polyhedron->facets[fid1].indVertices;
+	std::vector<int> index(3 * nv + 1);
+	auto index0 = polyhedron->facets[fid0].indVertices;
+	auto index1 = polyhedron->facets[fid1].indVertices;
 
 	// 1. Найдем общую вершину граней
 	for (i = 0; i < nv1; ++i)
@@ -227,8 +226,8 @@ int Coalescer::buildIndex(int fid0, int fid1)
 
 	// 7. Общие и висячие вершины объединяемых граней удаляются из
 	//    многогранника
-	is = new bool[polyhedron->numVertices];
-	del = new bool[polyhedron->numVertices];
+	std::vector<bool> is(polyhedron->numVertices);
+	std::vector<bool> del(polyhedron->numVertices);
 	for (i = 0; i < polyhedron->numVertices; ++i)
 	{
 		is[i] = false;
@@ -252,14 +251,7 @@ int Coalescer::buildIndex(int fid0, int fid1)
 			deleteVertexInPolyhedron(i);
 
 	// 8. По построенному списку создается грань
-	coalescedFacet = Facet(fid0, nv, plane, index, polyhedron, true);
-
-	if (is != NULL)
-		delete[] is;
-	if (del != NULL)
-		delete[] del;
-	if (index != NULL)
-		delete[] index;
+	coalescedFacet = Facet(fid0, nv, plane, index, true);
 
 	DEBUG_END;
 	return nv;
@@ -271,18 +263,17 @@ int Coalescer::buildIndex(int n, int *fid)
 
 	int nv;
 
-	int i, j, *index, *nfind, nnv, nv_safe;
+	int i, j, nnv, nv_safe;
 	int v_first, v;
 	int i_next;
-	bool *del;
 
 	nv_safe = 0;
 	for (i = 0; i < n; ++i)
 	{
 		nv_safe += polyhedron->facets[fid[i]].numVertices;
 	}
-	index = new int[3 * nv_safe + 1];
-	nfind = new int[polyhedron->numVertices];
+	std::vector<int> index(3 * nv_safe + 1);
+	std::vector<int> nfind(polyhedron->numVertices);
 	for (i = 0; i < polyhedron->numVertices; ++i)
 	{
 		nfind[i] = 0;
@@ -307,7 +298,7 @@ int Coalescer::buildIndex(int n, int *fid)
 		{
 			DEBUG_PRINT("\t%d", nfind[polyhedron->facets[fid[i]].indVertices[j]]);
 		}
-		polyhedron->facets[fid[i]].my_fprint_all(stdout);
+		polyhedron->facets[fid[i]].my_fprint_all(stdout, *polyhedron.get());
 	}
 
 	nv = 0;
@@ -367,7 +358,7 @@ int Coalescer::buildIndex(int n, int *fid)
 	} while (v != v_first);
 	--nv;
 
-	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index, polyhedron, true);
+	coalescedFacet = Facet(fid[0], nv, polyhedron->facets[fid[0]].plane, index, true);
 
 	polyhedron->facets[fid[0]] = coalescedFacet;
 	for (i = 1; i < n; ++i)
@@ -375,12 +366,12 @@ int Coalescer::buildIndex(int n, int *fid)
 		polyhedron->facets[fid[i]].numVertices = 0;
 		DEBUG_PRINT("Внимание! Грань %d пуста", fid[i]);
 	}
-	polyhedron->facets[fid[0]].my_fprint_all(stdout);
+	polyhedron->facets[fid[0]].my_fprint_all(stdout, *polyhedron);
 
 	polyhedron->preprocessAdjacency();
 	DEBUG_PRINT("------End of preprocess_polyhedron...------");
 	index = polyhedron->facets[fid[0]].indVertices;
-	del = new bool[polyhedron->numVertices];
+	std::vector<bool> del(polyhedron->numVertices);
 
 	for (i = 0; i < polyhedron->numVertices; ++i)
 	{
@@ -403,9 +394,6 @@ int Coalescer::buildIndex(int n, int *fid)
 		}
 	}
 
-	if (del != NULL)
-		delete[] del;
-
 	DEBUG_END;
 	return nv;
 }
@@ -414,14 +402,14 @@ void Coalescer::calculatePlane(int fid0, int fid1)
 {
 	DEBUG_START;
 
-	int *index, nv;
+	int nv;
 
-	coalescedFacet.my_fprint_all(stdout);
+	coalescedFacet.my_fprint_all(stdout, *polyhedron.get());
 
-	index = coalescedFacet.indVertices;
+	auto index = coalescedFacet.indVertices;
 	nv = coalescedFacet.numVertices;
 
-	leastSquaresMethod(nv, index, &plane);
+	leastSquaresMethod(nv, index.data(), &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
 	if (plane.norm * polyhedron->facets[fid0].plane.norm < 0 && plane.norm * polyhedron->facets[fid1].plane.norm < 0)
@@ -439,20 +427,17 @@ void Coalescer::calculatePlane(int n, int *fid)
 {
 	DEBUG_START;
 
-	int *index, nv;
-	int ninvert, i;
+	coalescedFacet.my_fprint_all(stdout, *polyhedron.get());
 
-	coalescedFacet.my_fprint_all(stdout);
+	std::vector<int> index = coalescedFacet.indVertices;
+	int nv = coalescedFacet.numVertices;
 
-	index = coalescedFacet.indVertices;
-	nv = coalescedFacet.numVertices;
-
-	leastSquaresMethod(nv, index, &plane);
+	leastSquaresMethod(nv, index.data(), &plane);
 
 	//Проверка, что нормаль построенной плокости направлена извне многогранника
 
-	ninvert = 0;
-	for (i = 0; i < n; ++i)
+	int ninvert = 0;
+	for (int i = 0; i < n; ++i)
 	{
 		ninvert += (plane.norm * polyhedron->facets[fid[i]].plane.norm < 0);
 	}
@@ -480,7 +465,7 @@ void Coalescer::calculatePlane(int n, int *fid)
 				"(%.16lf)  =  0",
 				plane.norm.x, plane.norm.y, plane.norm.z, plane.dist);
 	DEBUG_PRINT("Privious planes:");
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		DEBUG_PRINT("\t(%.16lf)x  +  (%.16lf)y  + (%.16lf)z  +  (%.16lf)  =  0", plane.norm.x, plane.norm.y,
 					plane.norm.z, plane.dist);
@@ -494,7 +479,7 @@ void Coalescer::rise(int fid0)
 	DEBUG_START;
 
 	int i;
-	int nv, *index, *sign_vertex;
+	int nv, *sign_vertex;
 	int ndown;
 	int step;
 	int imin;
@@ -507,7 +492,7 @@ void Coalescer::rise(int fid0)
 	file_name_out = new char[255];
 
 	nv = polyhedron->facets[fid0].numVertices;
-	index = polyhedron->facets[fid0].indVertices;
+	auto index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 	DEBUG_PRINT("Поднимаем до плоскости: (%lf)x  +  (%lf)y  + (%lf)z  +  (%lf)  =  0", plane.norm.x, plane.norm.y,
 				plane.norm.z, plane.dist);
@@ -541,7 +526,7 @@ void Coalescer::rise(int fid0)
 		DEBUG_PRINT("-----------------     Шаг  %d         -----------------------", step);
 		DEBUG_PRINT("-------------------------------------------------------------");
 		DEBUG_PRINT("ndown = %d", ndown);
-		polyhedron->facets[fid0].my_fprint_all(stdout);
+		polyhedron->facets[fid0].my_fprint_all(stdout, *polyhedron.get());
 
 		sprintf(file_name_out, "../poly-data-out/multijoin-facets-%d.ply", step);
 		polyhedron->fprint_ply_scale(1000., file_name_out, "join-facets-rise");
@@ -561,7 +546,7 @@ void Coalescer::rise(int fid0)
 
 		// 2. 2). Шагаем по выбранной вершине
 		DEBUG_PRINT("\t2. 2). Шагаем по выбранной вершине");
-		polyhedron->facets[fid0].my_fprint_all(stdout);
+		polyhedron->facets[fid0].my_fprint_all(stdout, *polyhedron.get());
 		risePoint(fid0, imin);
 
 		if (polyhedron->test_structure() > 0)
@@ -573,7 +558,7 @@ void Coalescer::rise(int fid0)
 
 		++step;
 		nv = polyhedron->facets[fid0].numVertices;
-		index = polyhedron->facets[fid0].indVertices;
+		auto index = polyhedron->facets[fid0].indVertices;
 		ndown = 0;
 		for (i = 0; i < nv; ++i)
 		{
@@ -593,7 +578,7 @@ void Coalescer::rise(int fid0)
 	DEBUG_PRINT("!!!!!!!!     ВЕРШИНЫ ПОДНЯТЫ          !!!!!!!!!!");
 	DEBUG_PRINT("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	DEBUG_PRINT("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-	polyhedron->facets[fid0].my_fprint_all(stdout);
+	polyhedron->facets[fid0].my_fprint_all(stdout, *polyhedron.get());
 
 	if (sign_vertex != NULL)
 		delete[] sign_vertex;
@@ -609,7 +594,7 @@ int Coalescer::riseFind(int fid0)
 	int imin;
 
 	int i;
-	int nv, *index;
+	int nv;
 	int fr1, fr2;
 
 	double d = 0., dmin = 0.;
@@ -618,7 +603,7 @@ int Coalescer::riseFind(int fid0)
 	Plane plane;
 
 	nv = polyhedron->facets[fid0].numVertices;
-	index = polyhedron->facets[fid0].indVertices;
+	auto index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 
 	DEBUG_PRINT("Предварительный анализ вершин: ");
@@ -658,8 +643,8 @@ int Coalescer::riseFind(int fid0)
 			}
 			polyhedron->preprocessAdjacency();
 			--i;
-			polyhedron->facets[fid0].my_fprint_all(stdout);
-			polyhedron->facets[fr2].my_fprint_all(stdout);
+			polyhedron->facets[fid0].my_fprint_all(stdout, *polyhedron.get());
+			polyhedron->facets[fr2].my_fprint_all(stdout, *polyhedron.get());
 			//            continue;
 		}
 		//конец написанного 2012-03-31
@@ -702,7 +687,7 @@ double Coalescer::riseFindStep(int fid0, int i)
 
 	double d;
 
-	int nv, *index;
+	int nv;
 	int fl2, fl1, fr1, fr2;
 
 	double d1, d2;
@@ -712,7 +697,7 @@ double Coalescer::riseFindStep(int fid0, int i)
 	Vector3d v1, v2;
 
 	nv = polyhedron->facets[fid0].numVertices;
-	index = polyhedron->facets[fid0].indVertices;
+	auto index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 
 	// Номера соседних с контуром граней вблизи рассматриваемой точки:
@@ -783,8 +768,8 @@ double Coalescer::riseFindStep(int fid0, int i)
 	if (d < 0)
 	{
 		DEBUG_PRINT("For vertex %d:", i);
-		polyhedron->facets[fl1].my_fprint_all(stdout);
-		polyhedron->facets[fr1].my_fprint_all(stdout);
+		polyhedron->facets[fl1].my_fprint_all(stdout, *polyhedron.get());
+		polyhedron->facets[fr1].my_fprint_all(stdout, *polyhedron.get());
 	}
 
 	DEBUG_END;
@@ -795,7 +780,7 @@ void Coalescer::risePoint(int fid0, int imin)
 {
 	DEBUG_START;
 
-	int nv, *index;
+	int nv;
 	int fl2, fl1, fr1, fr2;
 	int irep;
 	int ind_new;
@@ -814,7 +799,7 @@ void Coalescer::risePoint(int fid0, int imin)
 	int nnv;
 
 	nv = polyhedron->facets[fid0].numVertices;
-	index = polyhedron->facets[fid0].indVertices;
+	auto index = polyhedron->facets[fid0].indVertices;
 	plane = polyhedron->facets[fid0].plane;
 
 	// Номера соседних с контуром граней вблизи рассматриваемой точки:
@@ -972,10 +957,10 @@ void Coalescer::risePoint(int fid0, int imin)
 				// Удалить вершину imin из главной грани (fid0) и исправим грань
 				polyhedron->facets[fid0].remove(imin); // с информацией!!!
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fl2].update_info();
-				polyhedron->facets[fl1].update_info();
-				polyhedron->facets[fr1].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fl2].update_info(*polyhedron);
+				polyhedron->facets[fl1].update_info(*polyhedron);
+				polyhedron->facets[fr1].update_info(*polyhedron);
 			}
 			else if (deg_imin_big && !deg_irep_big)
 			{
@@ -1009,8 +994,8 @@ void Coalescer::risePoint(int fid0, int imin)
 				index[irep + nv + 1] = fr1;
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fr1].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fr1].update_info(*polyhedron);
 			}
 			else if (!deg_imin_big && deg_irep_big)
 			{
@@ -1050,8 +1035,8 @@ void Coalescer::risePoint(int fid0, int imin)
 				index[irep + nv + 1] = fr1;
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fl2].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fl2].update_info(*polyhedron);
 			}
 			else if (!deg_imin_big && !deg_irep_big)
 			{
@@ -1073,8 +1058,8 @@ void Coalescer::risePoint(int fid0, int imin)
 				index[irep + nv + 1] = fr1;
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fl1].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fl1].update_info(*polyhedron);
 			}
 		}
 		else
@@ -1161,10 +1146,10 @@ void Coalescer::risePoint(int fid0, int imin)
 				index[irep] = ind_new;
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fl1].update_info();
-				polyhedron->facets[fr1].update_info();
-				polyhedron->facets[fr2].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fl1].update_info(*polyhedron);
+				polyhedron->facets[fr1].update_info(*polyhedron);
+				polyhedron->facets[fr2].update_info(*polyhedron);
 			}
 			else if (deg_imin_big && !deg_irep_big)
 			{
@@ -1198,8 +1183,8 @@ void Coalescer::risePoint(int fid0, int imin)
 				// Удалить вршину imin из главной грани fid0 и исправить грань
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fl1].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fl1].update_info(*polyhedron);
 			}
 			else if (!deg_imin_big && deg_irep_big)
 			{
@@ -1230,8 +1215,8 @@ void Coalescer::risePoint(int fid0, int imin)
 				index[irep] = index[imin];
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fr2].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fr2].update_info(*polyhedron);
 			}
 			else if (!deg_imin_big && !deg_irep_big)
 			{
@@ -1256,8 +1241,8 @@ void Coalescer::risePoint(int fid0, int imin)
 				//Удалить вершину imin из главной грани fid0 и исправить грань
 				polyhedron->facets[fid0].remove(imin);
 
-				polyhedron->facets[fid0].update_info();
-				polyhedron->facets[fr1].update_info();
+				polyhedron->facets[fid0].update_info(*polyhedron);
+				polyhedron->facets[fr1].update_info(*polyhedron);
 			}
 		}
 		else
@@ -1284,15 +1269,8 @@ int Coalescer::appendVertex(Vector3d &vec)
 {
 	DEBUG_START;
 
-	Vector3d *vertex1;
-	vertex1 = new Vector3d[polyhedron->numVertices + 1];
-	for (int i = 0; i < polyhedron->numVertices; ++i)
-		vertex1[i] = polyhedron->vertices[i];
-	vertex1[polyhedron->numVertices] = vec;
-	if (polyhedron->vertices != NULL)
-		delete[] polyhedron->vertices;
-	polyhedron->vertices = vertex1;
-	++polyhedron->numVertices;
+	polyhedron->vertices.push_back(vec);
+	polyhedron->numVertices += 1;
 
 	DEBUG_END;
 	return polyhedron->numVertices - 1;

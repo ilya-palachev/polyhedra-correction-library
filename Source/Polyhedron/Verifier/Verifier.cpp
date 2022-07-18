@@ -130,7 +130,7 @@ int Verifier::countInnerConsectionsFacet(int fid, double *A, double *b, Vector3d
 
 	DEBUG_START;
 
-	int i, j, nv, *index, count;
+	int i, j, nv, count;
 	Vector3d v;
 	Plane plane;
 	//Написано для случая, когда немного нарушена плоскостность грани
@@ -139,7 +139,7 @@ int Verifier::countInnerConsectionsFacet(int fid, double *A, double *b, Vector3d
 	//    DEBUG_PRINT("\tBegin test_inner_consections_facet(%d)\n", fid);
 
 	nv = polyhedron->facets[fid].numVertices;
-	index = polyhedron->facets[fid].indVertices;
+	auto &index = polyhedron->facets[fid].indVertices;
 	plane = polyhedron->facets[fid].plane;
 	//    vertex_old = new Vector3d[nv];
 
@@ -362,10 +362,10 @@ int Verifier::countOuterConsections()
 int Verifier::countOuterConsectionsFacet(int fid)
 {
 	DEBUG_START;
-	int i, nv, *index, count;
+	int i, nv, count;
 
 	nv = polyhedron->facets[fid].numVertices;
-	index = polyhedron->facets[fid].indVertices;
+	auto &index = polyhedron->facets[fid].indVertices;
 
 	count = 0;
 	for (i = 0; i < nv; ++i)
@@ -406,7 +406,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
 {
 	DEBUG_START;
 
-	int i, nv, *index;
+	int i, nv;
 	double AA, b, u, delta, alpha, sum;
 	Vector3d A, A0, A1, normal;
 
@@ -442,7 +442,7 @@ int Verifier::countOuterConsectionsPair(int id0, int id1, int fid)
 	DEBUG_PRINT("\t\tA = (%.2lf, %.2lf, %.2lf)\n", A.x, A.y, A.z);
 
 	nv = polyhedron->facets[fid].numVertices;
-	index = polyhedron->facets[fid].indVertices;
+	auto &index = polyhedron->facets[fid].indVertices;
 	normal = polyhedron->facets[fid].plane.norm;
 	normal.norm(1.);
 	DEBUG_PRINT("\t\t|n| = %lf,  ", sqrt(qmod(normal)));
@@ -567,7 +567,7 @@ bool Verifier::checkOneEdge(EdgeSetIterator edge, EdgeDataPtr edgeData)
 	 * std::list of facets incident to the vertex edge->v0. */
 	DEBUG_PRINT("Searching for facet f2.");
 	int numIncidentFacets = polyhedron->vertexInfos[edge->v0].numFacets;
-	int *incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
+	auto &incidentFacets = polyhedron->vertexInfos[edge->v0].indFacets;
 	int f2 = INT_NOT_INITIALIZED;
 	int iFacetIteration = 0;
 	for (int iFacet = 0; iFacet < numIncidentFacets;)

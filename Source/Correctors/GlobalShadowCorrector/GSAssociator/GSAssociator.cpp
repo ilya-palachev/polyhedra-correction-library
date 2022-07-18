@@ -459,7 +459,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 
 	numVerticesFacet = 2 * numPairsToBeAdded;
 	DEBUG_PRINT("numVerticesFacet = %d", numVerticesFacet);
-	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet, contourData->contours[iContour].plane, polyhedronTmp);
+	polyhedronTmp->facets[fPart] = Facet(fPart, numVerticesFacet, contourData->contours[iContour].plane);
 
 	polyhedronTmp->facets[fPart].set_ind_vertex(0, iNearest0);
 	polyhedronTmp->facets[fPart].set_ind_vertex(1, iNearest1);
@@ -502,7 +502,7 @@ double GSAssociator::calculateArea(Orientation orientation)
 	}
 
 	polyhedronTmp->numVertices += 2;
-	double area = fabs(polyhedronTmp->facets[fPart].area());
+	double area = fabs(polyhedronTmp->facets[fPart].area(*polyhedronTmp));
 
 	DEBUG_END;
 	return area;

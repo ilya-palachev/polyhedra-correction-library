@@ -27,9 +27,8 @@ void FutureFacet::generate_facet(Facet &facet, int fid, Plane &iplane, int numv,
 {
 	DEBUG_START;
 	int i, v0, v1, res_id;
-	int *index;
 
-	index = new int[nv];
+	std::vector<int> index(nv);
 
 	for (i = 0; i < nv; ++i)
 	{
@@ -52,8 +51,6 @@ void FutureFacet::generate_facet(Facet &facet, int fid, Plane &iplane, int numv,
 			index[i] = res_id;
 		}
 	}
-	facet = Facet(fid, nv, iplane, index, NULL, false);
-	if (index != NULL)
-		delete[] index;
+	facet = Facet(fid, nv, iplane, index, false);
 	DEBUG_END;
 }

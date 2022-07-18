@@ -174,7 +174,6 @@ static std::pair<ShadowContourDataPtr, Vector3d> balanceShadowContourData(Shadow
 	DEBUG_START;
 	/* Construct polyhedron which facets are the contours. */
 	PolyhedronPtr p(new Polyhedron(data));
-	p->set_parent_polyhedron_in_facets();
 
 	/* Calculate the mass center of contours. */
 	SizeCalculator *sizeCalculator = new SizeCalculator(p);

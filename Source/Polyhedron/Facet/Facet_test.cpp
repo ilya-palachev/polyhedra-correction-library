@@ -21,27 +21,16 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
-bool Facet::test_self_intersection()
+bool Facet::test_self_intersection(Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	int i, j;
 	double s;
 	Vector3d vi0, vi1, vj0, vj1, tmp0, tmp1;
 
-	Vector3d *vertices = NULL;
-
-	if (auto polyhedron = parentPolyhedron.lock())
-	{
-		vertices = polyhedron->vertices;
-	}
-	else
-	{
-		ERROR_PRINT("parentPolyhedron expired");
-		ASSERT(0 && "parentPolyhedron expired");
-		DEBUG_END;
-		return false;
-	}
+	auto &vertices = polyhedron.vertices;
 
 	for (i = 0; i < numVertices; ++i)
 	{

@@ -63,8 +63,6 @@ int main(int argc, char **argv)
 
 	PolyhedronPtr polyhedron(makePolyhedron(parameters.figure));
 
-	polyhedron->set_parent_polyhedron_in_facets();
-
 	polyhedron->fprint_ply_scale(1000., "poly-data-out/globalCorrection-before.ply", "globalCorrection");
 
 	polyhedron->printSortedByAreaFacets();

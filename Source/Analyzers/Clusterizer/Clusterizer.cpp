@@ -77,7 +77,7 @@ Clusterizer::~Clusterizer()
 int Clusterizer::clusterize(double p)
 {
 	DEBUG_START;
-	int i, j, nv, *index, fid;
+	int i, j, nv, fid;
 	double sin_alpha, alpha;
 
 	int ncluster;
@@ -90,7 +90,7 @@ int Clusterizer::clusterize(double p)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 		nv = polyhedron->facets[i].numVertices;
-		index = polyhedron->facets[i].indVertices;
+		auto index = polyhedron->facets[i].indVertices;
 		n0 = polyhedron->facets[i].plane.norm;
 		for (j = 0; j < nv; ++j)
 		{
@@ -161,7 +161,7 @@ void Clusterizer::clusterize2(double p)
 {
 	DEBUG_START;
 
-	int i, j, nv, *index, fid;
+	int i, j, nv, fid;
 	double sin_alpha, alpha;
 
 	Vector3d n0, n1;
@@ -175,7 +175,7 @@ void Clusterizer::clusterize2(double p)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 		nv = polyhedron->facets[i].numVertices;
-		index = polyhedron->facets[i].indVertices;
+		auto index = polyhedron->facets[i].indVertices;
 		n0 = polyhedron->facets[i].plane.norm;
 		for (j = 0; j < nv; ++j)
 		{

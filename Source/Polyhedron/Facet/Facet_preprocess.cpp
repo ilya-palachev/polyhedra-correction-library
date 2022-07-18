@@ -21,6 +21,7 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
 void Facet::preprocess_free()
 {
@@ -31,9 +32,9 @@ void Facet::preprocess_free()
 		DEBUG_END;
 		return;
 	}
-	if (indVertices == NULL)
+	if (indVertices.empty())
 	{
-		ERROR_PRINT("\tError. index == NULL\n");
+		ERROR_PRINT("\tError. indVertices is empty\n");
 		DEBUG_END;
 		return;
 	}
@@ -46,7 +47,7 @@ void Facet::preprocess_free()
 	DEBUG_END;
 }
 
-void Facet::preprocess()
+void Facet::preprocess(Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	int i, v0, v1;
@@ -55,33 +56,23 @@ void Facet::preprocess()
 	{
 		v0 = indVertices[i];
 		v1 = indVertices[i + 1];
-		preprocess_edge(v0, v1, i);
+		preprocess_edge(v0, v1, i, polyhedron);
 	}
 	DEBUG_END;
 }
 
-void Facet::preprocess_edge(int v0, int v1, int v0_id)
+void Facet::preprocess_edge(int v0, int v1, int v0_id, Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	int pos = -1;
 	int numFacets = 0;
-	Facet *facets = NULL;
-	if (auto polyhedron = parentPolyhedron.lock())
-	{
-		numFacets = polyhedron->numFacets;
-		facets = polyhedron->facets;
-	}
-	else
-	{
-		ERROR_PRINT("parentPolyhedron expired.");
-		ASSERT(0);
-	}
+	numFacets = polyhedron.numFacets;
 
 	for (int i = 0; i < numFacets; ++i)
 	{
 		if (i == id)
 			continue;
-		pos = facets[i].preprocess_search_edge(v1, v0);
+		pos = polyhedron.facets[i].preprocess_search_edge(v1, v0);
 		if (pos != -1)
 		{
 			indVertices[v0_id + numVertices + 1] = i;

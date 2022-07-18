@@ -22,12 +22,13 @@
 #include "DebugAssert.h"
 #include "Constants.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
-double Facet::calculateAreaAndMaybeCenter(bool ifCalculateCenter, Vector3d &center)
+double Facet::calculateAreaAndMaybeCenter(bool ifCalculateCenter, Vector3d &center, Polyhedron &polyhedron)
 {
 	DEBUG_START;
 #ifndef NDEBUG
-	my_fprint_all(stderr);
+	my_fprint_all(stderr, polyhedron);
 #endif /* NDEBUG */
 
 	bool ifInitialized = test_initialization();
@@ -43,52 +44,49 @@ double Facet::calculateAreaAndMaybeCenter(bool ifCalculateCenter, Vector3d &cent
 	double areaFacet = 0.;
 	center = Vector3d(0., 0., 0.);
 	Vector3d centerLocal(0., 0., 0.);
-	if (auto polyhedron = parentPolyhedron.lock())
+	if (polyhedron.numVertices <= 0)
 	{
-		if (polyhedron->numVertices <= 0)
+		ERROR_PRINT("The polyhedron is empty!");
+		DEBUG_END;
+		return 0.;
+	}
+
+	/* The vertex of observation is chosen as the 0th vertex. */
+	Vector3d A0 = polyhedron.vertices[indVertices[0]];
+
+	DEBUG_PRINT("  in parent polyhedron there are %d vertices", polyhedron.numVertices);
+
+	for (int iVertex = 1; iVertex < numVertices - 1; ++iVertex)
+	{
+		int v0 = indVertices[iVertex];
+		int v1 = indVertices[iVertex + 1];
+		if (v0 >= polyhedron.numVertices || v0 < 0 || v1 >= polyhedron.numVertices || v1 < 0)
 		{
-			ERROR_PRINT("The polyhedron is empty!");
+			ERROR_PRINT("Invalid data in facet indices:");
+			ERROR_PRINT("  indVertices[%d] = %d", iVertex, v0);
+			ERROR_PRINT("  indVertices[%d] = %d", iVertex + 1, v1);
+			polyhedron.my_fprint(stderr);
+			ASSERT(0);
 			DEBUG_END;
-			return 0.;
+			return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
 		}
+		Vector3d A1 = polyhedron.vertices[v0] - A0;
+		Vector3d A2 = polyhedron.vertices[v1] - A0;
+		double areaTriangle = (A1 % A2) * plane.norm * 0.5;
+		DEBUG_PRINT("\tarea of triangle # %d = %lf", iVertex - 1, areaTriangle);
 
-		/* The vertex of observation is chosen as the 0th vertex. */
-		Vector3d A0 = polyhedron->vertices[indVertices[0]];
-
-		DEBUG_PRINT("  in parent polyhedron there are %d vertices", polyhedron->numVertices);
-
-		for (int iVertex = 1; iVertex < numVertices - 1; ++iVertex)
+		/*
+		 * Here the calculation of center is done. We hope that loop
+		 * unswitching optimization in compiler will avoid run-time
+		 * condition checking in this loops and will move it outside the
+		 * loop.
+		 */
+		if (ifCalculateCenter)
 		{
-			int v0 = indVertices[iVertex];
-			int v1 = indVertices[iVertex + 1];
-			if (v0 >= polyhedron->numVertices || v0 < 0 || v1 >= polyhedron->numVertices || v1 < 0)
-			{
-				ERROR_PRINT("Invalid data in facet indices:");
-				ERROR_PRINT("  indVertices[%d] = %d", iVertex, v0);
-				ERROR_PRINT("  indVertices[%d] = %d", iVertex + 1, v1);
-				polyhedron->my_fprint(stderr);
-				ASSERT(0);
-				DEBUG_END;
-				return DEFAULT_ERROR_FOR_DOUBLE_FUNCTIONS;
-			}
-			Vector3d A1 = polyhedron->vertices[v0] - A0;
-			Vector3d A2 = polyhedron->vertices[v1] - A0;
-			double areaTriangle = (A1 % A2) * plane.norm * 0.5;
-			DEBUG_PRINT("\tarea of triangle # %d = %lf", iVertex - 1, areaTriangle);
-
-			/*
-			 * Here the calculation of center is done. We hope that loop
-			 * unswitching optimization in compiler will avoid run-time
-			 * condition checking in this loops and will move it outside the
-			 * loop.
-			 */
-			if (ifCalculateCenter)
-			{
-				centerLocal = (A0 + polyhedron->vertices[v0] + polyhedron->vertices[v1]) / 3.;
-				center += centerLocal * areaTriangle;
-			}
-			areaFacet += areaTriangle;
+			centerLocal = (A0 + polyhedron.vertices[v0] + polyhedron.vertices[v1]) / 3.;
+			center += centerLocal * areaTriangle;
 		}
+		areaFacet += areaTriangle;
 	}
 
 	if (ifCalculateCenter)
@@ -100,17 +98,17 @@ double Facet::calculateAreaAndMaybeCenter(bool ifCalculateCenter, Vector3d &cent
 	return areaFacet;
 }
 
-double Facet::area(void)
+double Facet::area(Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	Vector3d centerFake;
 	DEBUG_END;
-	return calculateAreaAndMaybeCenter(false, centerFake);
+	return calculateAreaAndMaybeCenter(false, centerFake, polyhedron);
 }
 
-double Facet::calculateAreaAndCenter(Vector3d &center)
+double Facet::calculateAreaAndCenter(Vector3d &center, Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return calculateAreaAndMaybeCenter(true, center);
+	return calculateAreaAndMaybeCenter(true, center, polyhedron);
 }

@@ -24,6 +24,7 @@
 #include "DebugAssert.h"
 #include "Constants.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
 void Facet::test_pair_neighbours()
 {
@@ -56,68 +57,65 @@ void Facet::test_pair_neighbours()
  * After refactoring this change has been removed. Thus, the routines that used
  * this function are now buggy (see somewhere in Coalescer).
  * */
-bool Facet::verifyIncidenceStructure()
+bool Facet::verifyIncidenceStructure(Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	DEBUG_PRINT("Verifying information about incidence structure contained in "
 				"facet #%d",
 				id);
 
-	if (auto polyhedron = parentPolyhedron.lock())
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
-		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+		int iVertexShared = indVertices[iVertex];
+		if (iVertexShared == INT_NOT_INITIALIZED)
 		{
-			int iVertexShared = indVertices[iVertex];
-			if (iVertexShared == INT_NOT_INITIALIZED)
-			{
-				DEBUG_PRINT("Vertex at position %d is not initialized.", iVertex);
-				DEBUG_END;
-				return true;
-			}
+			DEBUG_PRINT("Vertex at position %d is not initialized.", iVertex);
+			DEBUG_END;
+			return true;
+		}
 
-			int iFacetNeighbor = indVertices[numVertices + 1 + iVertex];
-			if (iFacetNeighbor == INT_NOT_INITIALIZED)
-			{
-				DEBUG_PRINT("Info about neighbor facet at position %d is not "
-							"initialized.",
-							iVertex);
-				DEBUG_END;
-				return true;
-			}
+		int iFacetNeighbor = indVertices[numVertices + 1 + iVertex];
+		if (iFacetNeighbor == INT_NOT_INITIALIZED)
+		{
+			DEBUG_PRINT("Info about neighbor facet at position %d is not "
+						"initialized.",
+						iVertex);
+			DEBUG_END;
+			return true;
+		}
 
-			int iPosition = indVertices[2 * numVertices + 1 + iVertex];
-			if (iFacetNeighbor == INT_NOT_INITIALIZED)
-			{
-				DEBUG_PRINT("Info about shared vertex position at position %d is "
-							"not initialized.",
-							iVertex);
-				DEBUG_END;
-				return true;
-			}
+		int iPosition = indVertices[2 * numVertices + 1 + iVertex];
+		if (iFacetNeighbor == INT_NOT_INITIALIZED)
+		{
+			DEBUG_PRINT("Info about shared vertex position at position %d is "
+						"not initialized.",
+						iVertex);
+			DEBUG_END;
+			return true;
+		}
 
-			Facet *facetNeighbor = &polyhedron->facets[iFacetNeighbor];
+		Facet *facetNeighbor = &polyhedron.facets[iFacetNeighbor];
 
-			if (iPosition < 0 || iPosition >= facetNeighbor->numVertices)
-			{
-				ERROR_PRINT("Info about shared vertex #%d position is out of "
-							"bounds in facet #%d (facet #%d says that it's in "
-							"position %d)",
-							iVertexShared, iFacetNeighbor, id, iPosition);
-				ASSERT(0);
-				DEBUG_END;
-				return false;
-			}
+		if (iPosition < 0 || iPosition >= facetNeighbor->numVertices)
+		{
+			ERROR_PRINT("Info about shared vertex #%d position is out of "
+						"bounds in facet #%d (facet #%d says that it's in "
+						"position %d)",
+						iVertexShared, iFacetNeighbor, id, iPosition);
+			ASSERT(0);
+			DEBUG_END;
+			return false;
+		}
 
-			if (facetNeighbor->indVertices[iPosition] != iVertexShared)
-			{
-				ERROR_PRINT("Info about shared vertex #%d position is wrong. "
-							"Facet #%d thinks that it at position %d in facet #%d,"
-							"but actually there is a vertex %d at that position.",
-							iVertexShared, id, iPosition, iFacetNeighbor, facetNeighbor->indVertices[iPosition]);
-				ASSERT(0);
-				DEBUG_END;
-				return false;
-			}
+		if (facetNeighbor->indVertices[iPosition] != iVertexShared)
+		{
+			ERROR_PRINT("Info about shared vertex #%d position is wrong. "
+						"Facet #%d thinks that it at position %d in facet #%d,"
+						"but actually there is a vertex %d at that position.",
+						iVertexShared, id, iPosition, iFacetNeighbor, facetNeighbor->indVertices[iPosition]);
+			ASSERT(0);
+			DEBUG_END;
+			return false;
 		}
 	}
 	DEBUG_END;

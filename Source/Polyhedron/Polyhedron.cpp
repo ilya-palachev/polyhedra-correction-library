@@ -31,7 +31,7 @@
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "DataContainers/ShadowContourData/SContour/SContour.h"
 
-Polyhedron::Polyhedron() : numVertices(0), numFacets(0), vertices(NULL), facets(NULL), vertexInfos(NULL)
+Polyhedron::Polyhedron() : numVertices(0), numFacets(0), vertices(), facets(), vertexInfos()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Creating empty polyhedron...\n");
@@ -39,48 +39,22 @@ Polyhedron::Polyhedron() : numVertices(0), numFacets(0), vertices(NULL), facets(
 }
 
 Polyhedron::Polyhedron(int numv_orig, int numf_orig) :
-	numVertices(numv_orig), numFacets(numf_orig), vertices(), facets(), vertexInfos(NULL)
+	numVertices(numv_orig), numFacets(numf_orig), vertices(), facets(), vertexInfos()
 {
 	DEBUG_START;
 
-	if (vertices != NULL)
-	{
-		delete[] vertices;
-	}
-	vertices = new Vector3d[numv_orig];
-
-	if (facets != NULL)
-	{
-		delete[] facets;
-	}
-	facets = new Facet[numf_orig];
+	vertices.reserve(numv_orig);
+	facets.reserve(numf_orig);
 
 	DEBUG_PRINT("Creating polyhedron with numv = %d, numf = %d...\n", numVertices, numFacets);
 	DEBUG_END;
 }
 
-Polyhedron::Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig, Facet *facet_orig) :
-	numVertices(numv_orig), numFacets(numf_orig), vertices(), facets(), vertexInfos(NULL)
+Polyhedron::Polyhedron(int numv_orig, int numf_orig, const std::vector<Vector3d> &vertex_orig,
+					   const std::vector<Facet> &facet_orig) :
+	numVertices(numv_orig), numFacets(numf_orig), vertices(vertex_orig), facets(facet_orig), vertexInfos()
 {
 	DEBUG_START;
-	DEBUG_PRINT("Creating polyhedron by coping...\n");
-
-	if (vertices != NULL)
-	{
-		delete[] vertices;
-	}
-	vertices = new Vector3d[numv_orig];
-
-	if (facets != NULL)
-	{
-		delete[] facets;
-	}
-	facets = new Facet[numf_orig];
-
-	for (int i = 0; i < numVertices; ++i)
-		vertices[i] = vertex_orig[i];
-	for (int i = 0; i < numFacets; ++i)
-		facets[i] = facet_orig[i];
 	DEBUG_END;
 }
 
@@ -96,9 +70,8 @@ template <class KernelT, class ItemsIndexedT> Polyhedron::Polyhedron(CGAL::Polyh
 	numFacets = p.size_of_facets();
 
 	/* Allocate memory for arrays. */
-	vertices = new Vector3d[numVertices];
-	facets = new Facet[numFacets];
-	vertexInfos = NULL;
+	vertices.reserve(numVertices);
+	facets.reserve(numFacets);
 
 	/* Transform vertexes. */
 	int iVertex = 0;
@@ -129,7 +102,7 @@ template <class KernelT, class ItemsIndexedT> Polyhedron::Polyhedron(CGAL::Polyh
 		CGAL_assertion(CGAL::circulator_size(halfedge) >= 3);
 
 		facets[iFacet].numVertices = CGAL::circulator_size(halfedge);
-		facets[iFacet].indVertices = new int[3 * facets[iFacet].numVertices + 1];
+		facets[iFacet].indVertices.reserve(3 * facets[iFacet].numVertices + 1);
 		/*
 		 * TODO: It's too unsafe architecture if we do such things as setting
 		 * the size of internal array outside the API functions. Moreover, it
@@ -217,7 +190,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 	ASSERT(data->numContours > 0);
 	ASSERT(!data->empty());
 	numFacets = data->numContours;
-	facets = new Facet[numFacets];
+	facets.reserve(numFacets);
 
 	/* Get vertices from contours. */
 	std::vector<Vector3d> verticesAll;
@@ -233,7 +206,7 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 		facet->id = iContour;
 		facet->numVertices = verticesPortion.size();
 		facet->plane = contour->plane;
-		facet->indVertices = new int[3 * facet->numVertices + 1];
+		facet->indVertices.reserve(3 * facet->numVertices + 1);
 		for (int iVertexLocal = 0; (unsigned)iVertexLocal < verticesPortion.size(); ++iVertexLocal)
 		{
 			facet->indVertices[iVertexLocal] = iVertex++;
@@ -246,29 +219,27 @@ Polyhedron::Polyhedron(ShadowContourDataPtr data)
 		verticesAll.insert(verticesAll.end(), verticesPortion.begin(), verticesPortion.end());
 	}
 
-	vertices = new Vector3d[numVertices];
+	vertices.reserve(numVertices);
 	iVertex = 0;
 	for (auto &vertex : verticesAll)
 	{
 		vertices[iVertex++] = vertex;
 	}
-	vertexInfos = new VertexInfo[numVertices];
+	vertexInfos.reserve(numVertices);
 
 	ASSERT(numVertices > 0);
 	DEBUG_END;
 }
 
 Polyhedron::Polyhedron(PolyhedronPtr p) :
-	numVertices(p->numVertices), numFacets(p->numFacets), vertices(NULL), facets(NULL), vertexInfos(NULL)
+	numVertices(p->numVertices),
+	numFacets(p->numFacets),
+	vertices(p->vertices),
+	facets(p->facets),
+	vertexInfos(p->vertexInfos)
 
 {
 	DEBUG_START;
-	vertices = new Vector3d[numVertices];
-	for (int i = 0; i < numVertices; ++i)
-		vertices[i] = p->vertices[i];
-	facets = new Facet[numFacets];
-	for (int i = 0; i < numFacets; ++i)
-		facets[i] = p->facets[i];
 	DEBUG_END;
 }
 
@@ -276,21 +247,6 @@ Polyhedron::~Polyhedron()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Deleting Polyhedron...");
-	if (vertices)
-	{
-		delete[] vertices;
-		vertices = NULL;
-	}
-	if (facets)
-	{
-		delete[] facets;
-		facets = NULL;
-	}
-	if (vertexInfos)
-	{
-		delete[] vertexInfos;
-		vertexInfos = NULL;
-	}
 	DEBUG_END;
 }
 
@@ -368,19 +324,6 @@ void Polyhedron::delete_empty_facets()
 
 			--numFacets;
 		}
-	}
-	DEBUG_END;
-}
-
-void Polyhedron::set_parent_polyhedron_in_facets()
-{
-	DEBUG_START;
-	for (int iFacet = 0; iFacet < numFacets; ++iFacet)
-	{
-		DEBUG_PRINT("Setting parent polyhedron in facet #%d", iFacet);
-		PolyhedronPtr this_shared = shared_from_this();
-		DEBUG_PRINT("Polyhedron use count = %ld", this_shared.use_count());
-		facets[iFacet].set_poly(this_shared);
 	}
 	DEBUG_END;
 }

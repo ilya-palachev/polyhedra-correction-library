@@ -395,7 +395,7 @@ void GlobalShadowCorrector::findNotAssociatedFacets()
 	DEBUG_START;
 	for (std::list<int>::iterator itFacet = facetsCorrected.begin(); itFacet != facetsCorrected.end(); ++itFacet)
 	{
-		int *indVertices = polyhedron->facets[*itFacet].indVertices;
+		std::vector<int> indVertices = polyhedron->facets[*itFacet].indVertices;
 		int numVerticesFacet = polyhedron->facets[*itFacet].numVertices;
 		int numAssociations = 0;
 		for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
@@ -711,7 +711,7 @@ void GlobalShadowCorrector::calculateGradient()
 		int iFacetShifted = iFacetLocal - countNotAssociated;
 
 		int nv = polyhedron->facets[iFacet].numVertices;
-		int *index = polyhedron->facets[iFacet].indVertices;
+		std::vector<int> index = polyhedron->facets[iFacet].indVertices;
 
 		Plane planePrevThis = prevPlanes[iFacet];
 
@@ -745,7 +745,7 @@ void GlobalShadowCorrector::calculateGradient()
 
 			DEBUG_PRINT("iEdge = %d, v0 = %d, v1 = %d", iEdge, v0, v1);
 
-			polyhedron->facets[iFacetLocal].my_fprint_all(stderr);
+			polyhedron->facets[iFacetLocal].my_fprint_all(stderr, *polyhedron.get());
 
 			ASSERT(iFacetNeighbour != iFacet);
 

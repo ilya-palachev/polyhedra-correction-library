@@ -688,7 +688,7 @@ int main(int argc, char **argv)
 			double noise_variance =
 				measurementParams.count("noise_variance") ? std::stod(measurementParams["noise_variance"]) : 0.01;
 
-			std::vector<Vector3d> vertices(p->vertices, p->vertices + p->numVertices);
+			std::vector<Vector3d> vertices = p->vertices;
 			data = generateSupportData(directions, vertices, noise_variance);
 		}
 		else if (measurementMode == "generate-and-probe-contours")

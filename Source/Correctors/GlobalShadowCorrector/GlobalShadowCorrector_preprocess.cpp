@@ -50,7 +50,7 @@ void GlobalShadowCorrector::preprocessAssociations()
 		{
 			int iFacet = *itFacet;
 			int numVerticesFacet = polyhedron->facets[iFacet].numVertices;
-			int *indVertices = polyhedron->facets[iFacet].indVertices;
+			auto indVertices = polyhedron->facets[iFacet].indVertices;
 			for (int iVertex = 0; iVertex < numVerticesFacet; ++iVertex)
 			{
 				EdgeSetIterator edge = edgeData->findEdge(indVertices[iVertex], indVertices[iVertex + 1]);

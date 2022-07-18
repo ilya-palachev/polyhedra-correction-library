@@ -97,7 +97,7 @@ double SizeCalculator::consection_x(double y, double z)
 	for (i = 0; i < polyhedron->numVertices; ++i)
 	{
 
-		ifConsect = polyhedron->facets[i].consect_x(y, z, x);
+		ifConsect = polyhedron->facets[i].consect_x(y, z, x, *polyhedron);
 		if (ifConsect == true)
 		{
 			DEBUG_PRINT("SD.add(%lf) y = %lf, z = %lf\n", x, y, z);
@@ -113,7 +113,7 @@ double SizeCalculator::volume()
 {
 	DEBUG_START;
 
-	int i, j, *index, nv;
+	int i, j, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 	double sum, loc;
@@ -125,7 +125,7 @@ double SizeCalculator::volume()
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = polyhedron->facets[i].indVertices;
+		auto index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
@@ -148,7 +148,7 @@ double SizeCalculator::areaOfSurface()
 {
 	DEBUG_START;
 
-	int i, j, *index, nv;
+	int i, j, nv;
 	Vector3d A0, A1, A2;
 	double sum_poly = 0, loc, sum_facet;
 
@@ -157,7 +157,7 @@ double SizeCalculator::areaOfSurface()
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = polyhedron->facets[i].indVertices;
+		auto index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		normal = polyhedron->facets[i].plane.norm;
@@ -184,13 +184,13 @@ double SizeCalculator::areaOfFacet(int iFacet)
 {
 	DEBUG_START;
 	DEBUG_END;
-	return polyhedron->facets[iFacet].area();
+	return polyhedron->facets[iFacet].area(*polyhedron);
 }
 
 void SizeCalculator::J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, double &Jyz, double &Jxz)
 {
 	DEBUG_START;
-	int i, j, *index, nv;
+	int i, j, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 
@@ -220,7 +220,7 @@ void SizeCalculator::J(double &Jxx, double &Jyy, double &Jzz, double &Jxy, doubl
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = polyhedron->facets[i].indVertices;
+		auto index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
@@ -331,7 +331,7 @@ void SizeCalculator::get_center(double &xc, double &yc, double &zc)
 {
 	DEBUG_START;
 
-	int i, j, *index, nv;
+	int i, j, nv;
 	Vector3d B, A0, A1, A2;
 	double xmin, xmax, ymin, ymax, zmin, zmax;
 
@@ -358,7 +358,7 @@ void SizeCalculator::get_center(double &xc, double &yc, double &zc)
 	for (i = 0; i < polyhedron->numFacets; ++i)
 	{
 
-		index = polyhedron->facets[i].indVertices;
+		auto index = polyhedron->facets[i].indVertices;
 		nv = polyhedron->facets[i].numVertices;
 		A0 = polyhedron->vertices[index[0]];
 		A0 -= B;
@@ -498,7 +498,7 @@ Vector3d SizeCalculator::calculateFacetCenter(int iFacet)
 {
 	DEBUG_START;
 	Vector3d center;
-	DEBUG_VARIABLE double area = polyhedron->facets[iFacet].calculateAreaAndCenter(center);
+	DEBUG_VARIABLE double area = polyhedron->facets[iFacet].calculateAreaAndCenter(center, *polyhedron);
 	DEBUG_END;
 	return center;
 }
@@ -513,7 +513,7 @@ Vector3d SizeCalculator::calculateSurfaceCenter(void)
 
 	for (int iFacet = 0; iFacet < polyhedron->numFacets; ++iFacet)
 	{
-		areaFacet = polyhedron->facets[iFacet].calculateAreaAndCenter(centerFacet);
+		areaFacet = polyhedron->facets[iFacet].calculateAreaAndCenter(centerFacet, *polyhedron);
 		areaFacet = fabs(areaFacet);
 		centerSurface += areaFacet * centerFacet;
 		areaSurface += areaFacet;

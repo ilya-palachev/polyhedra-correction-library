@@ -51,7 +51,6 @@ public:
 	// EdgeList.cpp
 	EdgeList();
 	EdgeList(int id_orig, int len_orig, PolyhedronPtr poly_orig);
-	EdgeList(const EdgeList &orig);
 	~EdgeList();
 	EdgeList &operator=(const EdgeList &orig);
 	int get_num();

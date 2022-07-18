@@ -22,10 +22,11 @@
 #include "DebugAssert.h"
 #include "Constants.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
 #define DEFAULT_NV 1000
 
-Facet::Facet() : id(-1), numVertices(0), plane(), indVertices(NULL)
+Facet::Facet() : id(-1), numVertices(0), plane(), indVertices()
 {
 	DEBUG_START;
 	rgb[0] = 100;
@@ -34,17 +35,17 @@ Facet::Facet() : id(-1), numVertices(0), plane(), indVertices(NULL)
 	DEBUG_END;
 }
 
-Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig, const int *index_orig,
-			 PolyhedronPtr poly_orig = NULL, const bool ifLong = false) :
+Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig, const std::vector<int> &index_orig,
+			 const bool ifLong = false) :
 
-	id(id_orig), numVertices(nv_orig), plane(plane_orig), parentPolyhedron(poly_orig)
+	id(id_orig), numVertices(nv_orig), plane(plane_orig)
 {
 	DEBUG_START;
 	init_full(index_orig, ifLong);
 	DEBUG_END;
 }
 
-void Facet::init_full(const int *index_orig, const bool ifLong)
+void Facet::init_full(const std::vector<int> &index_orig, const bool ifLong)
 {
 	DEBUG_START;
 
@@ -52,15 +53,15 @@ void Facet::init_full(const int *index_orig, const bool ifLong)
 	rgb[1] = 100;
 	rgb[2] = 100;
 
-	if (!index_orig)
+	if (index_orig.size() < size_t(numVertices))
 	{
-		ERROR_PRINT("Error. index_orig = NULL");
+		ERROR_PRINT("Error. index_orig is too small");
 	}
 	if (numVertices < 3)
 	{
 		ERROR_PRINT("Error. nv_orig < 3");
 	}
-	indVertices = new int[3 * numVertices + 1];
+	indVertices.reserve(3 * numVertices + 1);
 	if (ifLong)
 	{
 		for (int i = 0; i < 3 * numVertices + 1; ++i)
@@ -76,8 +77,7 @@ void Facet::init_full(const int *index_orig, const bool ifLong)
 	DEBUG_END;
 }
 
-Facet::Facet(int id_orig, int nv_orig, Plane plane_orig, PolyhedronPtr poly_orig) :
-	id(id_orig), numVertices(nv_orig), plane(plane_orig), parentPolyhedron(poly_orig)
+Facet::Facet(int id_orig, int nv_orig, Plane plane_orig) : id(id_orig), numVertices(nv_orig), plane(plane_orig)
 {
 	DEBUG_START;
 	init_empty();
@@ -88,7 +88,6 @@ void Facet::init_empty()
 {
 	DEBUG_START;
 	rgb[0] = rgb[1] = rgb[2] = 255;
-	indVertices = new int[3 * numVertices + 1];
 	for (int iVertex = 0; iVertex < 3 * numVertices + 1; ++iVertex)
 	{
 		indVertices[iVertex] = INT_NOT_INITIALIZED;
@@ -99,21 +98,11 @@ void Facet::init_empty()
 Facet &Facet::operator=(const Facet &facet1)
 {
 	DEBUG_START;
-	int i;
-
 	id = facet1.id;
 	numVertices = facet1.numVertices;
 	plane = facet1.plane;
 
-	if (indVertices != NULL)
-	{
-		delete[] indVertices;
-	}
-	indVertices = new int[3 * numVertices + 1];
-	for (i = 0; i < 3 * numVertices + 1; ++i)
-		indVertices[i] = facet1.indVertices[i];
-
-	parentPolyhedron = facet1.parentPolyhedron;
+	indVertices = facet1.indVertices;
 
 	rgb[0] = facet1.rgb[0];
 	rgb[1] = facet1.rgb[1];
@@ -127,20 +116,6 @@ Facet::~Facet()
 {
 	DEBUG_START;
 	DEBUG_PRINT("Deleting facet[%d]", id);
-	clear();
-	DEBUG_PRINT("parent polyhedron count = %ld", parentPolyhedron.use_count());
-	DEBUG_END;
-}
-
-void Facet::clear()
-{
-	DEBUG_START;
-	if (indVertices != NULL)
-	{
-		delete[] indVertices;
-		indVertices = NULL;
-	}
-	numVertices = 0;
 	DEBUG_END;
 }
 
@@ -201,13 +176,6 @@ void Facet::set_id(int id1)
 	DEBUG_END;
 }
 
-void Facet::set_poly(PolyhedronPtr poly_new)
-{
-	DEBUG_START;
-	parentPolyhedron = poly_new;
-	DEBUG_END;
-}
-
 void Facet::set_rgb(unsigned char red, unsigned char gray, unsigned char blue)
 {
 	DEBUG_START;
@@ -241,23 +209,6 @@ void Facet::get_next_facet(int pos_curr, int &pos_next, int &fid_next, int &v_cu
 	pos_next = indVertices[pos_curr + 2 * numVertices + 1];
 	v_curr = indVertices[pos_curr + 1];
 	DEBUG_END;
-}
-
-int Facet::signum(int i, Plane plane)
-{
-	DEBUG_START;
-	if (auto polyhedron = parentPolyhedron.lock())
-	{
-		DEBUG_END;
-		return polyhedron->signum(polyhedron->vertices[indVertices[i]], plane);
-	}
-	else
-	{
-		ERROR_PRINT("parentPolyhedron expired.");
-		ASSERT(0);
-		DEBUG_END;
-		return -RAND_MAX;
-	}
 }
 
 void Facet::find_and_replace_vertex(int from, int to)
@@ -345,44 +296,14 @@ void Facet::add(int what, int pos)
 {
 	DEBUG_START;
 
-	int i, *index_new;
 	DEBUG_PRINT("add %d at position %d in facet %d", what, pos, id);
 	DEBUG_PRINT("{{{");
-	this->my_fprint_all(stdout);
 
-	if (pos < numVertices)
-	{
-		index_new = new int[3 * numVertices + 4];
+	indVertices.insert(indVertices.begin() + 2 * (numVertices + 1) + 1 + pos, -1);
+	indVertices.insert(indVertices.begin() + 1 * (numVertices + 1) + 1 + pos, -1);
+	indVertices.insert(indVertices.begin() + pos, what);
 
-		for (i = 3 * numVertices + 3; i > 2 * (numVertices + 1) + 1 + pos; --i)
-		{
-			index_new[i] = indVertices[i - 3];
-		}
-		index_new[2 * (numVertices + 1) + 1 + pos] = -1;
-		for (i = 2 * (numVertices + 1) + pos; i > numVertices + 1 + 1 + pos; --i)
-		{
-			index_new[i] = indVertices[i - 2];
-		}
-		index_new[numVertices + 1 + 1 + pos] = -1;
-		for (i = numVertices + 1 + pos; i > pos; --i)
-		{
-			index_new[i] = indVertices[i - 1];
-		}
-		index_new[pos] = what;
-		for (i = pos - 1; i >= 0; --i)
-		{
-			index_new[i] = indVertices[i];
-		}
-		if (indVertices != NULL)
-			delete[] indVertices;
-		indVertices = index_new;
-		++numVertices;
-	}
-	else
-	{
-		indVertices[pos] = what;
-	}
-	this->my_fprint_all(stdout);
+	indVertices[numVertices] = indVertices[0];
 	test_pair_neighbours();
 	DEBUG_PRINT("}}}");
 	DEBUG_END;
@@ -391,109 +312,74 @@ void Facet::add(int what, int pos)
 void Facet::remove(int pos)
 {
 	DEBUG_START;
-	int i;
 	DEBUG_PRINT("remove position %d (vertex %d) in facet %d", pos, indVertices[pos], id);
 	DEBUG_PRINT("{{{");
-	this->my_fprint_all(stdout);
 
-	for (i = pos; i < numVertices + pos; ++i)
-	{
-		indVertices[i] = indVertices[i + 1];
-	}
-	for (i = numVertices + pos; i < pos + 2 * numVertices - 1; ++i)
-	{
-		indVertices[i] = indVertices[i + 2];
-	}
-	for (i = pos + 2 * numVertices - 1; i < 3 * numVertices - 2; ++i)
-	{
-		indVertices[i] = indVertices[i + 3];
-	}
+	indVertices.erase(indVertices.begin() + 2 * (numVertices + 1) + 1 + pos);
+	indVertices.erase(indVertices.begin() + 1 * (numVertices + 1) + 1 + pos);
+	indVertices.erase(indVertices.begin() + pos);
 	--numVertices;
 
 	indVertices[numVertices] = indVertices[0];
 
-	this->my_fprint_all(stdout);
 	test_pair_neighbours();
 	DEBUG_PRINT("}}}");
 	DEBUG_END;
 }
 
-void Facet::update_info()
+void Facet::update_info(Polyhedron &polyhedron)
 {
 	DEBUG_START;
 
 	DEBUG_PRINT("update info in facet %d", id);
 	DEBUG_PRINT("{{{");
-	this->my_fprint_all(stdout);
+	this->my_fprint_all(stdout, polyhedron);
 
-	if (auto polyhedron = parentPolyhedron.lock())
+	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
-
-		for (int iVertex = 0; iVertex < numVertices; ++iVertex)
+		int iFacet = indVertices[numVertices + 1 + iVertex];
+		int pos = polyhedron.facets[iFacet].find_vertex(indVertices[iVertex]);
+		if (pos == -1)
 		{
-			int iFacet = indVertices[numVertices + 1 + iVertex];
-			int pos = polyhedron->facets[iFacet].find_vertex(indVertices[iVertex]);
-			if (pos == -1)
-			{
-				ERROR_PRINT("=======update_info: Error. Cannot find vertex %d "
-							"in facet %d",
-							indVertices[iVertex], iFacet);
-				polyhedron->facets[iFacet].my_fprint_all(stdout);
-				this->my_fprint_all(stdout);
-				DEBUG_END;
-				return;
-			}
-			indVertices[2 * numVertices + 1] = pos;
-			int nnv = polyhedron->facets[iFacet].numVertices;
-			pos = (pos + nnv - 1) % nnv;
-			if (polyhedron->facets[iFacet].indVertices[nnv + 1 + pos] != id)
-			{
-				ERROR_PRINT("=======update_info: Error. Wrong neighbor facet for vertex"
-							" %d in facet %d",
-							indVertices[iVertex], iFacet);
-				polyhedron->facets[iFacet].my_fprint_all(stdout);
-				this->my_fprint_all(stdout);
-				DEBUG_END;
-				return;
-			}
-			polyhedron->facets[iFacet].indVertices[2 * nnv + 1 + pos] = iVertex;
+			ERROR_PRINT("=======update_info: Error. Cannot find vertex %d "
+						"in facet %d",
+						indVertices[iVertex], iFacet);
+			polyhedron.facets[iFacet].my_fprint_all(stdout, polyhedron);
+			this->my_fprint_all(stdout, polyhedron);
+			DEBUG_END;
+			return;
 		}
+		indVertices[2 * numVertices + 1] = pos;
+		int nnv = polyhedron.facets[iFacet].numVertices;
+		pos = (pos + nnv - 1) % nnv;
+		if (polyhedron.facets[iFacet].indVertices[nnv + 1 + pos] != id)
+		{
+			ERROR_PRINT("=======update_info: Error. Wrong neighbor facet for vertex"
+						" %d in facet %d",
+						indVertices[iVertex], iFacet);
+			polyhedron.facets[iFacet].my_fprint_all(stdout, polyhedron);
+			this->my_fprint_all(stdout, polyhedron);
+			DEBUG_END;
+			return;
+		}
+		polyhedron.facets[iFacet].indVertices[2 * nnv + 1 + pos] = iVertex;
 	}
-	this->my_fprint_all(stdout);
+	this->my_fprint_all(stdout, polyhedron);
 	test_pair_neighbours();
 	DEBUG_PRINT("}}}");
 	DEBUG_END;
 }
 
-Vector3d &Facet::find_mass_centre()
+Vector3d Facet::find_mass_centre(Polyhedron &polyhedron)
 {
 	DEBUG_START;
-	int i;
-	double c = 1. / (double)numVertices;
-	Vector3d *v = new Vector3d(0., 0., 0.);
-	Vector3d a;
+	Vector3d v(0., 0., 0.);
 
-	Vector3d *vertices = NULL;
-
-	if (auto polyhedron = parentPolyhedron.lock())
+	for (int i = 0; i < numVertices; ++i)
 	{
-		vertices = polyhedron->vertices;
+		v += polyhedron.vertices[indVertices[i]];
 	}
-	else
-	{
-		ERROR_PRINT("parentPolyhedron expired");
-		ASSERT(0 && "parentPolyhedron expired");
-		DEBUG_END;
-		return *v;
-	}
-
-	for (i = 0; i < numVertices; ++i)
-	{
-		a = vertices[indVertices[i]];
-		*v += a;
-		DEBUG_PRINT("facet[%d].index[%d] = (%lf, %lf, %lf)", id, i, a.x, a.y, a.z);
-	}
-	*v *= c;
+	v *= (1. / (double)numVertices);
 	DEBUG_END;
-	return *v;
+	return v;
 }

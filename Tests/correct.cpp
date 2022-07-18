@@ -207,8 +207,8 @@ static std::shared_ptr<Polyhedron> convertWithAssociation(Polyhedron_3 p, const 
 	int numFacets = p.size_of_facets();
 
 	/* Allocate memory for arrays. */
-	Vector3d *vertices = new Vector3d[numVertices];
-	Facet *facets = new Facet[numFacets];
+	std::vector<Vector3d> vertices(numVertices);
+	std::vector<Facet> facets(numFacets);
 
 	/* Transform vertexes. */
 	int iVertex = 0;
@@ -248,7 +248,7 @@ static std::shared_ptr<Polyhedron> convertWithAssociation(Polyhedron_3 p, const 
 		CGAL_assertion(CGAL::circulator_size(halfedge) >= 3);
 
 		facets[id].numVertices = CGAL::circulator_size(halfedge);
-		facets[id].indVertices = new int[3 * facets[id].numVertices + 1];
+		facets[id].indVertices.reserve(3 * facets[id].numVertices + 1);
 		/*
 		 * TODO: It's too unsafe architecture if we do such things as setting
 		 * the size of internal array outside the API functions. Moreover, it

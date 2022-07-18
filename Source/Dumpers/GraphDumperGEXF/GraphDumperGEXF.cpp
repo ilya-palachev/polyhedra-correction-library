@@ -88,8 +88,6 @@ void GraphDumperGEXF::collect(Facet *facet)
 	DEBUG_START;
 	DEBUG_PRINT("Collecting facet #%d to gexf graph.", facet->id);
 
-	facet->my_fprint_all(stderr);
-
 	for (int iVertex = 0; iVertex < facet->numVertices; ++iVertex)
 	{
 		int v0 = facet->indVertices[iVertex];

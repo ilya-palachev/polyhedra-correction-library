@@ -66,8 +66,8 @@ void Cube::init()
 	numFacets = 6;
 	numVertices = 8;
 
-	vertices = new Vector3d[numVertices];
-	facets = new Facet[numFacets];
+	std::vector<Vector3d> vertices(numVertices);
+	std::vector<Facet> facets(numFacets);
 
 	double halfHeight = height;
 
@@ -84,7 +84,7 @@ void Cube::init()
 	{
 		int nv = 4;
 		facets[ifacet].numVertices = nv;
-		facets[ifacet].indVertices = new int[3 * nv + 1];
+		facets[ifacet].indVertices.reserve(3 * nv + 1);
 		facets[ifacet].id = ifacet;
 	}
 

@@ -22,60 +22,41 @@
 #include "DebugAssert.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 
-VertexInfo::VertexInfo() : id(-1), numFacets(0), indFacets(NULL)
+VertexInfo::VertexInfo() : id(-1), numFacets(0), indFacets()
 {
 }
 
-VertexInfo::VertexInfo(const int id_orig, const int nf_orig, const Vector3d vector_orig, const int *index_orig,
-					   PolyhedronPtr poly_orig) :
-	id(id_orig), numFacets(nf_orig), vector(vector_orig), parentPolyhedron(poly_orig)
+VertexInfo::VertexInfo(const int id_orig, const int nf_orig, const Vector3d vector_orig,
+					   const std::vector<int> &index_orig) :
+	id(id_orig), numFacets(nf_orig), vector(vector_orig), indFacets(index_orig)
 {
-
-	if (!index_orig)
+	if (index_orig.empty())
 	{
-		ERROR_PRINT("Error. index1 = NULL\n");
+		ERROR_PRINT("Error. index_orig is empty\n");
 	}
 	if (nf_orig < 3)
 	{
 		ERROR_PRINT("Error. nf1 < 3\n");
 	}
-	indFacets = new int[3 * numFacets + 1];
-	for (int i = 0; i < 3 * numFacets + 1; ++i)
-		indFacets[i] = index_orig[i];
 }
 
-VertexInfo::VertexInfo(const int id_orig, const Vector3d vector_orig, PolyhedronPtr poly_orig) :
-	id(id_orig), numFacets(0), vector(vector_orig), indFacets(NULL), parentPolyhedron(poly_orig)
+VertexInfo::VertexInfo(const int id_orig, const Vector3d vector_orig) : id(id_orig), numFacets(0), vector(vector_orig)
 {
 }
 
 VertexInfo::~VertexInfo()
 {
-
-	if (indFacets != NULL && numFacets != 0)
-	{
-		delete[] indFacets;
-	}
-	indFacets = NULL;
-	numFacets = 0;
 }
 
 VertexInfo &VertexInfo::operator=(const VertexInfo &orig)
 {
-	int i;
-
-	this->id = orig.id;
-	this->vector = orig.vector;
-	this->parentPolyhedron = orig.parentPolyhedron;
-	this->numFacets = orig.numFacets;
+	id = orig.id;
+	vector = orig.vector;
+	numFacets = orig.numFacets;
 
 	if (numFacets > 0)
 	{
-		if (indFacets)
-			delete[] indFacets;
-		indFacets = new int[3 * numFacets + 1];
-		for (i = 0; i < 3 * numFacets + 1; ++i)
-			indFacets[i] = orig.indFacets[i];
+		indFacets = orig.indFacets;
 	}
 	return *this;
 }

@@ -31,7 +31,7 @@ class FacetIntersector : public Intersector
 private:
 	Facet *facet;
 
-	int signum(int i, Plane plane);
+	int signum(int i, Plane plane, Polyhedron &polyhedron);
 
 public:
 	FacetIntersector();
@@ -39,7 +39,7 @@ public:
 	FacetIntersector(Intersector *i, Facet *f);
 	~FacetIntersector();
 
-	bool run(Plane iplane, FutureFacet &ff, int &n_components);
+	bool run(Plane iplane, FutureFacet &ff, int &n_components, Polyhedron &polyhedron);
 };
 
 #endif /* FACETINTERSECTOR_H_ */

@@ -49,21 +49,19 @@ void Polyhedron::my_fprint(const char *filename)
 void Polyhedron::my_fprint(FILE *file)
 {
 	DEBUG_START;
-	int i;
 	REGULAR_PRINT(file, "Polyhedron:\n");
 	REGULAR_PRINT(file, "numv = %d\nnumf = %d\n", numVertices, numFacets);
-	for (i = 0; i < numVertices; ++i)
+	for (int i = 0; i < numVertices; ++i)
 	{
 		REGULAR_PRINT(file, "   vertex[%d] = (%f, %f, %f)\n", i, vertices[i].x, vertices[i].y, vertices[i].z);
 	}
-	for (i = 0; i < numFacets; ++i)
+	for (int i = 0; i < numFacets; ++i)
 	{
-		facets[i].my_fprint_all(file);
+		facets[i].my_fprint_all(file, *this);
 	}
-	if (vertexInfos != NULL)
+	for (size_t i = 0; i < vertexInfos.size(); ++i)
 	{
-		for (i = 0; i < numVertices; ++i)
-			vertexInfos[i].my_fprint_all(file);
+		vertexInfos[i].my_fprint_all(file);
 	}
 	DEBUG_END;
 }
@@ -82,7 +80,7 @@ void Polyhedron::my_fprint(FILE *file)
 void Polyhedron::fscan_default_0(const char *filename)
 {
 	DEBUG_START;
-	int i, j, nv, *index;
+	int i, j, nv;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
 
@@ -105,8 +103,8 @@ void Polyhedron::fscan_default_0(const char *filename)
 
 	numVertices = i;
 	numFacets = j;
-	vertices = new Vector3d[10 * numFacets]; // MORE MEMORY!!!
-	facets = new Facet[10 * numFacets];
+	vertices.reserve(10 * numFacets); // MORE MEMORY!!!
+	facets.reserve(10 * numFacets);
 
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -133,20 +131,18 @@ void Polyhedron::fscan_default_0(const char *filename)
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
-		index = new int[3 * nv + 1];
+		std::vector<int> index(3 * nv + 1);
 		for (j = 0; j < nv; ++j)
 		{
-			if (fscanf(file, "%d", index + j) != 1)
+			if (fscanf(file, "%d", &index[j]) != 1)
 			{
 				ERROR_PRINT("Error. Invalid file. f%d v%d\n", i, j);
 				fclose(file);
-				delete[] index;
 				DEBUG_END;
 				return;
 			}
 		}
-		facets[i] = Facet(i, nv, plane, index, get_ptr(), false);
-		delete[] index;
+		facets[i] = Facet(i, nv, plane, index, false);
 	}
 	fclose(file);
 	DEBUG_END;
@@ -166,7 +162,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 void Polyhedron::fscan_default_1(const char *filename)
 {
 	DEBUG_START;
-	int i, j, nv, *index, ii;
+	int i, j, nv, ii;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
 
@@ -189,8 +185,8 @@ void Polyhedron::fscan_default_1(const char *filename)
 
 	numVertices = i;
 	numFacets = j;
-	vertices = new Vector3d[2 * numFacets]; // MORE MEMORY!!!
-	facets = new Facet[numFacets];
+	vertices.reserve(2 * numFacets); // MORE MEMORY!!!
+	facets.reserve(numFacets);
 
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -217,20 +213,18 @@ void Polyhedron::fscan_default_1(const char *filename)
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
-		index = new int[3 * nv + 1];
+		std::vector<int> index(3 * nv + 1);
 		for (j = 0; j < nv; ++j)
 		{
-			if (fscanf(file, "%d", index + j) != 1)
+			if (fscanf(file, "%d", &index[j]) != 1)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
-				delete[] index;
 				DEBUG_END;
 				return;
 			}
 		}
-		facets[ii] = Facet(ii, nv, plane, index, get_ptr(), false);
-		delete[] index;
+		facets[ii] = Facet(ii, nv, plane, index, false);
 	}
 	fclose(file);
 	DEBUG_END;
@@ -255,7 +249,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 void Polyhedron::fscan_default_1_1(const char *filename)
 {
 	DEBUG_START;
-	int i, j, nv, *index, ii;
+	int i, j, nv, ii;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
 	char *tmp;
@@ -300,8 +294,8 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 
 	numVertices = i;
 	numFacets = j;
-	vertices = new Vector3d[10 * numFacets]; // MORE MEMORY!!!
-	facets = new Facet[10 * numFacets];
+	vertices.reserve(10 * numFacets); // MORE MEMORY!!!
+	facets.reserve(10 * numFacets);
 
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -340,21 +334,19 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
-		index = new int[3 * nv + 1];
+		std::vector<int> index(3 * nv + 1);
 		for (j = 0; j < nv; ++j)
 		{
-			if (fscanf(file, "%d", index + j) != 1)
+			if (fscanf(file, "%d", &index[j]) != 1)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
 				delete[] tmp;
-				delete[] index;
 				DEBUG_END;
 				return;
 			}
 		}
-		facets[ii] = Facet(ii, nv, plane, index, get_ptr(), false);
-		delete[] index;
+		facets[ii] = Facet(ii, nv, plane, index, false);
 	}
 	fclose(file);
 	delete[] tmp;
@@ -404,8 +396,8 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 		return false;
 	}
 
-	vertices = new Vector3d[numVertices];
-	facets = new Facet[numFacets];
+	vertices.reserve(numVertices);
+	facets.reserve(numFacets);
 
 	for (int iVertex = 0; iVertex < numVertices; ++iVertex)
 	{
@@ -434,7 +426,7 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 			ERROR_PRINT("Wrong format, in facet #%d", iFacet);
 			return false;
 		}
-		int *index = new int[3 * (numIncVertices + 1)];
+		std::vector<int> index(3 * (numIncVertices + 1));
 		line = scaner.getline();
 		for (int i = 0; i < numIncVertices; ++i)
 		{
@@ -449,7 +441,7 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 			}
 			index[i] = int(iVertex);
 		}
-		facets[iFacet] = Facet(iFacet, numIncVertices, plane, index, get_ptr(), false);
+		facets[iFacet] = Facet(iFacet, numIncVertices, plane, index, false);
 	}
 	return true;
 }
@@ -470,7 +462,7 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 void Polyhedron::fscan_my_format(const char *filename)
 {
 	DEBUG_START;
-	int i, j, nv, nf, *index;
+	int i, j, nv, nf;
 	double xx, yy, zz, a, b, c, d;
 	Plane plane;
 
@@ -493,8 +485,8 @@ void Polyhedron::fscan_my_format(const char *filename)
 
 	numVertices = i;
 	numFacets = j;
-	vertices = new Vector3d[2 * numFacets]; // MORE MEMORY!!!
-	facets = new Facet[numFacets];
+	vertices.reserve(2 * numFacets); // MORE MEMORY!!!
+	facets.reserve(numFacets);
 
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -520,20 +512,18 @@ void Polyhedron::fscan_my_format(const char *filename)
 			return;
 		}
 		plane = Plane(Vector3d(a, b, c), d);
-		index = new int[3 * nv + 1];
+		std::vector<int> index(3 * nv + 1);
 		for (j = 0; j < 3 * nv + 1; ++j)
 		{
-			if (fscanf(file, "%d", index + j) != 1)
+			if (fscanf(file, "%d", &index[j]) != 1)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
-				delete[] index;
 				DEBUG_END;
 				return;
 			}
 		}
-		facets[i] = Facet(i, nv, plane, index, get_ptr(), false);
-		delete[] index;
+		facets[i] = Facet(i, nv, plane, index, false);
 	}
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -544,20 +534,18 @@ void Polyhedron::fscan_my_format(const char *filename)
 			DEBUG_END;
 			return;
 		}
-		index = new int[2 * nf + 1];
+		std::vector<int> index(2 * nf + 1);
 		for (j = 0; j < 2 * nf + 1; ++j)
 		{
-			if (fscanf(file, "%d", index + j) != 1)
+			if (fscanf(file, "%d", &index[j]) != 1)
 			{
 				ERROR_PRINT("Error. Invalid file\n");
 				fclose(file);
-				delete[] index;
 				DEBUG_END;
 				return;
 			}
 		}
-		vertexInfos[i] = VertexInfo(i, nf, vertices[i], index, get_ptr());
-		delete[] index;
+		vertexInfos[i] = VertexInfo(i, nf, vertices[i], index);
 	}
 	fclose(file);
 	DEBUG_END;
@@ -627,8 +615,8 @@ void Polyhedron::fscan_ply(const char *filename)
 		if (keyword == "end_header")
 			break;
 	}
-	vertices = new Vector3d[numVertices];
-	facets = new Facet[numFacets];
+	vertices.reserve(numVertices);
+	facets.reserve(numFacets);
 
 	for (int i = 0; i < numVertices; ++i)
 	{
@@ -649,7 +637,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		stream >> number;
 		ASSERT(number >= 3);
 
-		int *index = new int[3 * number + 1];
+		std::vector<int> index(3 * number + 1);
 		for (int j = 0; j < number; ++j)
 		{
 			stream >> index[j];
@@ -657,8 +645,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		index[number] = index[0];
 		// TODO: Read color if any
 		Plane plane = Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
-		facets[i] = Facet(i, number, plane, index, get_ptr(), false);
-		delete[] index;
+		facets[i] = Facet(i, number, plane, index, false);
 	}
 	std::cout << "Completed reading PLY file " << filename << std::endl;
 	DEBUG_END;
@@ -763,60 +750,6 @@ void Polyhedron::fprint_my_format(const char *filename)
 		vertexInfos[i].fprint_my_format(file);
 
 	fclose(file);
-	DEBUG_END;
-}
-
-void Polyhedron::fprint_ply(const char *filename, const char *comment = NULL)
-// comment must have 1 word
-{
-	DEBUG_START;
-	char *comment_w;
-
-	FILE *file = (FILE *)fopen(filename, "w");
-	if (!file)
-	{
-		ERROR_PRINT("Error. Cannot open file %s\n", filename);
-		DEBUG_END;
-		return;
-	}
-
-	comment_w = new char[255];
-	if (!comment)
-		sprintf(comment_w, "unknown");
-	else
-		sprintf(comment_w, "%s", comment);
-
-	int numv_new = 0;
-	for (int i = 0; i < numFacets; ++i)
-		numv_new += facets[i].get_nv();
-
-	ALWAYS_PRINT(file, "ply\n");
-	ALWAYS_PRINT(file, "format ascii 1.0\n");
-	ALWAYS_PRINT(file, "comment converted from %s\n", comment_w);
-	ALWAYS_PRINT(file, "element vertex %d\n", numv_new);
-	ALWAYS_PRINT(file, "property float x\n");
-	ALWAYS_PRINT(file, "property float y\n");
-	ALWAYS_PRINT(file, "property float z\n");
-	ALWAYS_PRINT(file, "property float nx\n");
-	ALWAYS_PRINT(file, "property float ny\n");
-	ALWAYS_PRINT(file, "property float nz\n");
-	ALWAYS_PRINT(file, "element face %d\n", numFacets);
-	ALWAYS_PRINT(file, "property list uchar uint vertex_indices\n");
-	ALWAYS_PRINT(file, "end_header\n");
-
-	for (int i = 0; i < numFacets; ++i)
-		facets[i].fprint_ply_vertex(file);
-
-	for (int i = 0; i < numFacets; ++i)
-		facets[i].fprint_ply_vertex(file);
-	fclose(file);
-
-	if (comment_w != NULL)
-	{
-		delete[] comment_w;
-		comment_w = NULL;
-	}
-
 	DEBUG_END;
 }
 

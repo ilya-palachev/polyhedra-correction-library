@@ -42,6 +42,9 @@ typedef std::shared_ptr<Polyhedron> PolyhedronPtr;
 #include "KernelCGAL/KernelCGAL.h"
 #include "DataContainers/ShadowContourData/ShadowContourData.h"
 
+#include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "Polyhedron/Facet/Facet.h"
+
 /*
  * Forward declarations
  *
@@ -49,8 +52,6 @@ typedef std::shared_ptr<Polyhedron> PolyhedronPtr;
  */
 class Vector3d;
 class Plane;
-class Facet;
-class VertexInfo;
 class TreeClusterNorm;
 class TreeClusterNormNode;
 class MatrixDistNorm;
@@ -87,18 +88,18 @@ public:
 	/**
 	 * Array of vertices
 	 */
-	Vector3d *vertices;
+	std::vector<Vector3d> vertices;
 
 	/**
 	 * Array of facets
 	 */
-	Facet *facets;
+	std::vector<Facet> facets;
 
 	/**
 	 * Array of vertexinfos. Vertexinfo saves information about which facets
 	 * the vertex is contained in.
 	 */
-	VertexInfo *vertexInfos;
+	std::vector<VertexInfo> vertexInfos;
 
 protected:
 	/**
@@ -148,7 +149,8 @@ public:
 	 * @param vertex_orig	The array of vertices
 	 * @param facet_orig	The array of facets
 	 */
-	Polyhedron(int numv_orig, int numf_orig, Vector3d *vertex_orig, Facet *facet_orig);
+	Polyhedron(int numv_orig, int numf_orig, const std::vector<Vector3d> &vertices,
+			   const std::vector<Facet> &facet_orig);
 
 	/**
 	 * Converts standard CGAL polyhedron to PCL polyhedron.
@@ -201,12 +203,6 @@ public:
 	 * @param plane	The plane
 	 */
 	int signum(Vector3d point, Plane plane);
-
-	/**
-	 * Sets the shared pointer to the parent polyhedron in all facetsof the
-	 * polyhedron.
-	 */
-	void set_parent_polyhedron_in_facets();
 
 	/*
 	 * I/O operations
@@ -388,22 +384,6 @@ public:
 	 * also written to the file.
 	 */
 	void fprint_my_format(const char *filename);
-
-	/**
-	 * Writes the polyhedron to the file in Stanford PLY format.
-	 *
-	 * @param filename	The name of file
-	 * @param comment	The comment to be written to the file. It must contain
-	 * only one word.
-	 *
-	 * The specification of PLY format can be found at:
-	 * http://en.wikipedia.org/wiki/PLY_%28file_format%29
-	 * http://paulbourke.net/dataformats/ply/
-	 *
-	 * TODO: It will be much better to use some open-source library to parse
-	 * general PLY files (maybe RPLY).
-	 */
-	void fprint_ply(const char *filename, const char *comment);
 
 	/**
 	 * Writes the polyhedron to the file in Stanford PLY format.

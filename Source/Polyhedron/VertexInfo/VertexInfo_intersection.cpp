@@ -21,32 +21,25 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
+#include "Polyhedron/Polyhedron.h"
 
-int VertexInfo::intersection_find_next_facet(Plane iplane, int facet_id)
+int VertexInfo::intersection_find_next_facet(Plane iplane, int facet_id, Polyhedron &polyhedron)
 {
 	DEBUG_START;
 
-	if (auto polyhedron = parentPolyhedron.lock())
+	int sgn_curr = polyhedron.signum(polyhedron.vertices[indFacets[2 * numFacets]], iplane);
+	for (int i = 0; i < numFacets; ++i)
 	{
-		int sgn_curr = polyhedron->signum(polyhedron->vertices[indFacets[2 * numFacets]], iplane);
-		for (int i = 0; i < numFacets; ++i)
+		int sgn_prev = sgn_curr;
+		sgn_curr = polyhedron.signum(polyhedron.vertices[indFacets[i + numFacets + 1]], iplane);
+		if (sgn_curr != sgn_prev)
 		{
-			int sgn_prev = sgn_curr;
-			sgn_curr = polyhedron->signum(polyhedron->vertices[indFacets[i + numFacets + 1]], iplane);
-			if (sgn_curr != sgn_prev)
+			if (indFacets[i] != facet_id)
 			{
-				if (indFacets[i] != facet_id)
-				{
-					DEBUG_END;
-					return indFacets[i];
-				}
+				DEBUG_END;
+				return indFacets[i];
 			}
 		}
-	}
-	else
-	{
-		ASSERT_PRINT(0, "parentPolyhedron expired!");
-		DEBUG_END;
 	}
 	return -1;
 }

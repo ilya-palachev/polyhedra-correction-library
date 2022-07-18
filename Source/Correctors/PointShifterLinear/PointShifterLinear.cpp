@@ -212,14 +212,14 @@ void PointShifterLinear::runGlobal(int id, Vector3d delta)
 double PointShifterLinear::calculateError()
 {
 	DEBUG_START;
-	int i, j, nv, *index;
+	int i, j, nv;
 	double err, a, b, c, d, x, y, z, locerr;
 	err = 0.;
 
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		nv = polyhedron->facets[j].numVertices;
-		index = polyhedron->facets[j].indVertices;
+		auto index = polyhedron->facets[j].indVertices;
 		a = polyhedron->facets[j].plane.norm.x;
 		b = polyhedron->facets[j].plane.norm.y;
 		c = polyhedron->facets[j].plane.norm.z;
@@ -264,7 +264,7 @@ double PointShifterLinear::calculateDeform()
 void PointShifterLinear::moveFacets()
 {
 	DEBUG_START;
-	int i, j, nv, *index;
+	int i, j, nv;
 	double a0, b0, c0, d0;
 	double a, b, c, d;
 	double lambda;
@@ -272,7 +272,7 @@ void PointShifterLinear::moveFacets()
 	for (j = 0; j < polyhedron->numFacets; ++j)
 	{
 		nv = polyhedron->facets[j].numVertices;
-		index = polyhedron->facets[j].indVertices;
+		auto index = polyhedron->facets[j].indVertices;
 		for (i = 0; i < nv; ++i)
 		{
 			x[i] = polyhedron->vertices[index[i]].x;
@@ -302,7 +302,7 @@ void PointShifterLinear::moveFacets()
 void PointShifterLinear::moveVerticesGlobal()
 {
 	DEBUG_START;
-	int i, j, nf, *index;
+	int i, j, nf;
 	double a, b, c, d;
 	double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
 
@@ -322,7 +322,7 @@ void PointShifterLinear::moveVerticesGlobal()
 		Mcc = 0.;
 		Mcd = 0.;
 		nf = polyhedron->vertexInfos[i].numFacets;
-		index = polyhedron->vertexInfos[i].indFacets;
+		auto index = polyhedron->vertexInfos[i].indFacets;
 		for (j = 0; j < nf; ++j)
 		{
 			pl = polyhedron->facets[index[j]].plane;
@@ -484,7 +484,7 @@ void PointShifterLinear::runLocal(int id, Vector3d delta)
 void PointShifterLinear::moveVerticesLocal()
 {
 	DEBUG_START;
-	int i, j, nf, *index;
+	int i, j, nf;
 	double a, b, c, d;
 	double Maa, Mab, Mac, Mad, Mbb, Mbc, Mbd, Mcc, Mcd;
 	double norm;
@@ -509,7 +509,7 @@ void PointShifterLinear::moveVerticesLocal()
 			DEBUG_PRINT("Vertex %d cannot be found in any facet...\n", i);
 			continue;
 		}
-		index = polyhedron->vertexInfos[i].indFacets;
+		auto index = polyhedron->vertexInfos[i].indFacets;
 		for (j = 0; j < nf; ++j)
 		{
 			pl = polyhedron->facets[index[j]].plane;

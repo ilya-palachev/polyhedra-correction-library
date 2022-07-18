@@ -22,8 +22,9 @@
 #include "DebugAssert.h"
 #include "Polyhedron/VertexInfo/VertexInfo.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
-void VertexInfo::preprocess()
+void VertexInfo::preprocess(Polyhedron &polyhedron)
 {
 	DEBUG_START;
 	int pos_curr = -1;
@@ -33,20 +34,10 @@ void VertexInfo::preprocess()
 	int fid_curr = -1;
 	int fid_next = -1;
 
-	Facet *facets = NULL;
 	int numFacetsTotal = 0;
 
-	if (auto polyhedron = parentPolyhedron.lock())
-	{
-		facets = polyhedron->facets;
-		numFacetsTotal = polyhedron->numFacets;
-	}
-	else
-	{
-		ASSERT_PRINT(0, "parentPolyhedron expired!");
-		DEBUG_END;
-		return;
-	}
+	auto &facets = polyhedron.facets;
+	numFacetsTotal = polyhedron.numFacets;
 
 	DEBUG_PRINT("1. Searching first facet : ");
 	for (int i = 0; i < numFacetsTotal; ++i)
@@ -85,7 +76,7 @@ void VertexInfo::preprocess()
 		DEBUG_PRINT("\t           to facet #%d, position %d (vertex #%d)", fid_next, pos_next, v_curr);
 
 #ifndef NDEBUG
-		facets[fid_curr].my_fprint_all(stderr);
+		facets[fid_curr].my_fprint_all(stderr, polyhedron);
 #endif /* NDEBUG */
 
 		if (pos_next == -1 || fid_next == -1)
@@ -107,12 +98,7 @@ void VertexInfo::preprocess()
 
 	DEBUG_PRINT("Total number of facets is %d\n", numFacets);
 
-	if (indFacets != NULL)
-	{
-		delete[] indFacets;
-	}
-
-	indFacets = new int[3 * numFacets + 1];
+	indFacets.reserve(3 * numFacets + 1);
 
 	DEBUG_PRINT("3. Building the VECTOR :");
 	pos_next = facets[fid_first].preprocess_search_vertex(id, v_curr);

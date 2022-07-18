@@ -1242,8 +1242,6 @@ static ShadowContourDataPtr generateSyntheticSCData(CommandLineOptions *options)
 	ASSERT(p->nonZeroPlanes());
 	Polyhedron *pCopy = new Polyhedron(makeModel(options));
 
-	/* Set the pointer to the parent polyhedron in facets. */
-	p->set_parent_polyhedron_in_facets();
 	globalPCLDumper(PCL_DUMPER_LEVEL_DEBUG, "original-polyhedron.ply") << *pCopy;
 
 	/* Create shadow contour data and associate p with it. */

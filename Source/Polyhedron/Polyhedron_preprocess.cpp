@@ -41,19 +41,16 @@ void Polyhedron::preprocessAdjacency()
 	{
 		if (facets[i].numVertices < 1)
 			continue;
-		facets[i].preprocess();
+		facets[i].preprocess(*this);
 	}
 
 	DEBUG_PRINT("VertexInfos preprocessing");
-	if (vertexInfos != NULL)
-	{
-		delete[] vertexInfos;
-	}
-	vertexInfos = new VertexInfo[numVertices];
+	vertexInfos.clear();
+	vertexInfos.reserve(numVertices);
 	for (i = 0; i < numVertices; ++i)
 	{
-		vertexInfos[i] = VertexInfo(i, vertices[i], get_ptr());
-		vertexInfos[i].preprocess();
+		vertexInfos[i] = VertexInfo(i, vertices[i]);
+		vertexInfos[i].preprocess(*this);
 	}
 	DEBUG_END;
 }

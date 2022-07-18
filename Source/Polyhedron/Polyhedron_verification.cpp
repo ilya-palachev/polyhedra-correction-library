@@ -31,7 +31,7 @@ int Polyhedron::test_structure()
 	res = 0;
 	for (i = 0; i < numFacets; ++i)
 	{
-		if (!facets[i].verifyIncidenceStructure())
+		if (!facets[i].verifyIncidenceStructure(*this))
 		{
 			++res;
 		}

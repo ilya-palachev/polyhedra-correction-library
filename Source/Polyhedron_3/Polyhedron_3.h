@@ -199,7 +199,7 @@ public:
 		initialize_indices(planes.begin(), planes.end());
 	}
 
-    static BasePolyhedron_3 dual(const BasePolyhedron_3 &p);
+	static BasePolyhedron_3 dual(const BasePolyhedron_3 &p);
 };
 
 /**

@@ -50,24 +50,13 @@ FacetIntersector::~FacetIntersector()
 	DEBUG_END;
 }
 
-int FacetIntersector::signum(int i, Plane plane)
+int FacetIntersector::signum(int i, Plane plane, Polyhedron &polyhedron)
 {
 	DEBUG_START;
-	if (auto polyhedron = facet->parentPolyhedron.lock())
-	{
-		DEBUG_END;
-		return polyhedron->signum(polyhedron->vertices[facet->indVertices[i]], plane);
-	}
-	else
-	{
-		ERROR_PRINT("parentPolyhedron expired");
-		ASSERT(0 && "parentPolyhedron expired");
-		DEBUG_END;
-		return -RAND_MAX;
-	}
+	return polyhedron.signum(polyhedron.vertices[facet->indVertices[i]], plane);
 }
 
-bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
+bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components, Polyhedron &polyhedron)
 {
 	DEBUG_START;
 
@@ -104,7 +93,7 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 	}
 
 	EdgeList *el = &(edgeLists[facet->id]);
-	FutureFacet curr_component(2 * polyhedron->numVertices);
+	FutureFacet curr_component(2 * polyhedron.numVertices);
 
 	el->null_isUsed();
 	//	el->my_fprint(stdout);
@@ -114,9 +103,9 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 	if (nintrsct == 0)
 	{
 		n_components = 0;
-		for (i = 0; i < polyhedron->numVertices; ++i)
+		for (i = 0; i < polyhedron.numVertices; ++i)
 		{
-			sign_curr = signum(i, iplane);
+			sign_curr = signum(i, iplane, polyhedron);
 			if (sign_curr != 0)
 				break;
 		}
@@ -154,20 +143,20 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 				--nintrsct;
 				if (i0 != i1)
 					break;
-				i_next = (i0 + 1) % polyhedron->numVertices;
-				i_prev = (polyhedron->numVertices + i0 - 1) % polyhedron->numVertices;
-				sign_next = signum(i_next, iplane);
-				sign_prev = signum(i_prev, iplane);
+				i_next = (i0 + 1) % polyhedron.numVertices;
+				i_prev = (polyhedron.numVertices + i0 - 1) % polyhedron.numVertices;
+				sign_next = signum(i_next, iplane, polyhedron);
+				sign_prev = signum(i_prev, iplane, polyhedron);
 			} while (sign_prev == 0 && sign_next == 0);
 			curr_component.add_edge(v0, v1, facet->id);
 			DEBUG_PRINT("\tДобавлено ребро : %d %d", v0, v1);
 
 			if (i0 == i1)
 			{
-				i_next = (i0 + 1) % polyhedron->numVertices;
-				i_prev = (polyhedron->numVertices + i0 - 1) % polyhedron->numVertices;
-				sign_next = signum(i_next, iplane);
-				sign_prev = signum(i_prev, iplane);
+				i_next = (i0 + 1) % polyhedron.numVertices;
+				i_prev = (polyhedron.numVertices + i0 - 1) % polyhedron.numVertices;
+				sign_next = signum(i_next, iplane, polyhedron);
+				sign_prev = signum(i_prev, iplane, polyhedron);
 				//Утверждение. sign_next != 0 || sign_prev != 0
 				if (sign_next <= 0 && sign_prev <= 0)
 				{
@@ -180,24 +169,24 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 				//Утверждение. sign_next == 1 || sign_prev == 1
 				//Утверждение. sign_next == 1 && sign_prev == 1 не может быть
 				i_step = sign_next == 1 ? 1 : -1;
-				i_curr = (i0 + i_step + polyhedron->numVertices) % polyhedron->numVertices;
-				sign_curr = signum(i_curr, iplane);
+				i_curr = (i0 + i_step + polyhedron.numVertices) % polyhedron.numVertices;
+				sign_curr = signum(i_curr, iplane, polyhedron);
 			}
 			else
 			{
-				sign0 = signum(i0, iplane);
+				sign0 = signum(i0, iplane, polyhedron);
 				//Утверждение. sign0 == 1 || sign1 == 1
 				if (sign0 == 1)
 				{
 					i_curr = i0;
 					sign_curr = sign0;
-					i_step = (i1 + 1) % polyhedron->numVertices == i0 ? 1 : -1;
+					i_step = (i1 + 1) % polyhedron.numVertices == i0 ? 1 : -1;
 				}
 				else
 				{
 					i_curr = i1;
 					sign_curr = sign0;
-					i_step = (i0 + 1) % polyhedron->numVertices == i1 ? 1 : -1;
+					i_step = (i0 + 1) % polyhedron.numVertices == i1 ? 1 : -1;
 				}
 			}
 
@@ -205,15 +194,15 @@ bool FacetIntersector::run(Plane iplane, FutureFacet &ff, int &n_components)
 			{
 				curr_component.add_edge(facet->indVertices[i_curr], facet->indVertices[i_curr], facet->id);
 				DEBUG_PRINT("\tДобавлено ребро : %d %d", facet->indVertices[i_curr], facet->indVertices[i_curr]);
-				i_curr = (i_curr + i_step + polyhedron->numVertices) % polyhedron->numVertices;
-				sign_curr = signum(i_curr, iplane);
+				i_curr = (i_curr + i_step + polyhedron.numVertices) % polyhedron.numVertices;
+				sign_curr = signum(i_curr, iplane, polyhedron);
 			} while (sign_curr == 1);
 			//Утверждение. sign_curr == 0 || sign_curr == -1
 			if (sign_curr == 0)
 				v0 = v1 = facet->indVertices[i_curr];
 			else
 			{
-				v0 = facet->indVertices[(i_curr - i_step + polyhedron->numVertices) % polyhedron->numVertices];
+				v0 = facet->indVertices[(i_curr - i_step + polyhedron.numVertices) % polyhedron.numVertices];
 				v1 = facet->indVertices[i_curr];
 				if (v0 > v1)
 				{

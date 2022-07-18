@@ -31,7 +31,7 @@ class EdgeList;
 class Intersector : public PCorrector
 {
 protected:
-	EdgeList *edgeLists;
+	std::vector<EdgeList> edgeLists;
 
 private:
 	void set_isUsed(int v0, int v1, bool val);

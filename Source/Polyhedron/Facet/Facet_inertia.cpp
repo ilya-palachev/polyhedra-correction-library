@@ -25,8 +25,9 @@
 #include "DebugPrint.h"
 #include "DebugAssert.h"
 #include "Polyhedron/Facet/Facet.h"
+#include "Polyhedron/Polyhedron.h"
 
-bool Facet::consect_x(double y, double z, double &x)
+bool Facet::consect_x(double y, double z, double &x, Polyhedron &polyhedron)
 {
 	DEBUG_START;
 
@@ -35,18 +36,7 @@ bool Facet::consect_x(double y, double z, double &x)
 	Vector3d A, A0, A1, normal;
 	double a, b, c, d;
 
-	Vector3d *vertices = NULL;
-	if (auto polyhedron = parentPolyhedron.lock())
-	{
-		vertices = polyhedron->vertices;
-	}
-	else
-	{
-		ERROR_PRINT("parentPolyhedron expired");
-		ASSERT(0 && "parentPolyhedron expired");
-		DEBUG_END;
-		return false;
-	}
+	auto &vertices = polyhedron.vertices;
 
 	normal = plane.norm;
 	a = normal.x;
