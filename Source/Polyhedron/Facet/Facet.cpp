@@ -38,7 +38,7 @@ Facet::Facet() : id(-1), numVertices(0), plane(), indVertices()
 Facet::Facet(const int id_orig, const int nv_orig, const Plane plane_orig, const std::vector<int> &index_orig,
 			 const bool ifLong = false) :
 
-	id(id_orig), numVertices(nv_orig), plane(plane_orig)
+	id(id_orig), numVertices(nv_orig), plane(plane_orig), indVertices(index_orig)
 {
 	DEBUG_START;
 	init_full(index_orig, ifLong);

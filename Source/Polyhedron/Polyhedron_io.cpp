@@ -116,9 +116,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 			DEBUG_END;
 			return;
 		}
-		vertices[i].x = xx;
-		vertices[i].y = yy;
-		vertices[i].z = zz;
+		vertices.emplace_back(xx, yy, zz);
 	}
 	for (i = 0; i < numFacets; ++i)
 	{
@@ -142,7 +140,7 @@ void Polyhedron::fscan_default_0(const char *filename)
 				return;
 			}
 		}
-		facets[i] = Facet(i, nv, plane, index, false);
+		facets.emplace_back(i, nv, plane, index, false);
 	}
 	fclose(file);
 	DEBUG_END;
@@ -198,9 +196,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 			DEBUG_END;
 			return;
 		}
-		vertices[ii].x = xx;
-		vertices[ii].y = yy;
-		vertices[ii].z = zz;
+		vertices.emplace_back(xx, yy, zz);
 	}
 	for (i = 0; i < numFacets; ++i)
 	{
@@ -224,7 +220,7 @@ void Polyhedron::fscan_default_1(const char *filename)
 				return;
 			}
 		}
-		facets[ii] = Facet(ii, nv, plane, index, false);
+		facets.emplace_back(ii, nv, plane, index, false);
 	}
 	fclose(file);
 	DEBUG_END;
@@ -308,9 +304,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 			DEBUG_END;
 			return;
 		}
-		vertices[ii].x = xx;
-		vertices[ii].y = yy;
-		vertices[ii].z = zz;
+		vertices.emplace_back(xx, yy, zz);
 	}
 
 	if (fscanf(file, "%s", tmp) != 1)
@@ -346,7 +340,7 @@ void Polyhedron::fscan_default_1_1(const char *filename)
 				return;
 			}
 		}
-		facets[ii] = Facet(ii, nv, plane, index, false);
+		facets.emplace_back(ii, nv, plane, index, false);
 	}
 	fclose(file);
 	delete[] tmp;
@@ -441,7 +435,7 @@ bool Polyhedron::fscan_default_1_2(const char *path)
 			}
 			index[i] = int(iVertex);
 		}
-		facets[iFacet] = Facet(iFacet, numIncVertices, plane, index, false);
+		facets.emplace_back(iFacet, numIncVertices, plane, index, false);
 	}
 	return true;
 }
@@ -497,9 +491,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 			DEBUG_END;
 			return;
 		}
-		vertices[i].x = xx;
-		vertices[i].y = yy;
-		vertices[i].z = zz;
+		vertices.emplace_back(xx, yy, zz);
 	}
 	for (i = 0; i < numFacets; ++i)
 	{
@@ -523,7 +515,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 				return;
 			}
 		}
-		facets[i] = Facet(i, nv, plane, index, false);
+		facets.emplace_back(i, nv, plane, index, false);
 	}
 	for (i = 0; i < numVertices; ++i)
 	{
@@ -545,7 +537,7 @@ void Polyhedron::fscan_my_format(const char *filename)
 				return;
 			}
 		}
-		vertexInfos[i] = VertexInfo(i, nf, vertices[i], index);
+		vertexInfos.emplace_back(i, nf, vertices[i], index);
 	}
 	fclose(file);
 	DEBUG_END;
@@ -624,9 +616,7 @@ void Polyhedron::fscan_ply(const char *filename)
 		std::getline(infile, line);
 		std::istringstream stream(line);
 		stream >> xx >> yy >> zz;
-		vertices[i].x = xx;
-		vertices[i].y = yy;
-		vertices[i].z = zz;
+		vertices.emplace_back(xx, yy, zz);
 	}
 
 	for (int i = 0; i < numFacets; ++i)
@@ -638,15 +628,20 @@ void Polyhedron::fscan_ply(const char *filename)
 		ASSERT(number >= 3);
 
 		std::vector<int> index(3 * number + 1);
+		int current = 0;
 		for (int j = 0; j < number; ++j)
 		{
-			stream >> index[j];
+			stream >> current;
+			index[j] = current;
 		}
-		index[number] = index[0];
+		index.emplace_back(index[0]);
 		// TODO: Read color if any
 		Plane plane = Plane(vertices[index[0]], vertices[index[1]], vertices[index[2]]);
-		facets[i] = Facet(i, number, plane, index, false);
+		facets.emplace_back(i, number, plane, index, false);
+		ASSERT(!facets[i].indVertices.empty());
 	}
+	ASSERT(vertices.size() == size_t(numVertices));
+	ASSERT(facets.size() == size_t(numFacets));
 	std::cout << "Completed reading PLY file " << filename << std::endl;
 	DEBUG_END;
 }

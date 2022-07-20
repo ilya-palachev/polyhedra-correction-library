@@ -27,7 +27,7 @@ void Facet::my_fprint(FILE *file)
 {
 	DEBUG_START;
 	int i;
-	REGULAR_PRINT(file, "Facet %d: ", id);
+	MAIN_PRINT("Facet %d: ", id);
 	if (indVertices.empty() && numVertices > 0)
 	{
 		ERROR_PRINT("Incorrect configuration of facet.");
@@ -35,8 +35,8 @@ void Facet::my_fprint(FILE *file)
 		return;
 	}
 	for (i = 0; i < numVertices; ++i)
-		REGULAR_PRINT(file, "%d ", indVertices[i]);
-	REGULAR_PRINT(file, "\n");
+		MAIN_PRINT("%d ", indVertices[i]);
+	MAIN_PRINT("\n");
 	DEBUG_END;
 }
 

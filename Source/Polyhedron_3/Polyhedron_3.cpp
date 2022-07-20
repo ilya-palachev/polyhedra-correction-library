@@ -41,6 +41,7 @@ struct Plane_from_facet
 {
 	Polyhedron_3::Plane_3 operator()(Polyhedron_3::Facet &f)
 	{
+		ASSERT(f.facet_degree() >= 3);
 		Polyhedron_3::Halfedge_handle h = f.halfedge();
 		return Polyhedron_3::Plane_3(h->vertex()->point(), h->next()->vertex()->point(),
 									 h->opposite()->vertex()->point());
@@ -57,14 +58,14 @@ template <class HDS> class BuilderFromPCLPolyhedron : public CGAL::Modifier_base
 {
 public:
 	/** The PCL polyhedron-> */
-	Polyhedron *polyhedron;
+	const Polyhedron &polyhedron;
 
 	/**
 	 * Constructs the builder.
 	 *
 	 * @param p	The PCL polyhedron
 	 */
-	BuilderFromPCLPolyhedron(Polyhedron *p) : polyhedron(p)
+	BuilderFromPCLPolyhedron(const Polyhedron &p) : polyhedron(p)
 	{
 		DEBUG_START;
 		DEBUG_END;
@@ -80,39 +81,43 @@ public:
 		DEBUG_START;
 		CGAL::Polyhedron_incremental_builder_3<HDS> builder(hds, true);
 
-		ASSERT(polyhedron->numVertices > 0);
-		ASSERT(polyhedron->numFacets > 0);
+		ASSERT(polyhedron.numVertices > 0);
+		ASSERT(polyhedron.numFacets > 0);
+		ASSERT(!polyhedron.vertices.empty());
+		ASSERT(!polyhedron.facets.empty());
 
-		/* Count edges of polyhedron-> */
+		ASSERT(size_t(polyhedron.numVertices) == polyhedron.vertices.size());
+		ASSERT(size_t(polyhedron.numFacets) == polyhedron.facets.size());
+
+		/* Count edges of polyhedron. */
 		int numHalfedges = 0;
-		for (int i = 0; i < polyhedron->numFacets; ++i)
-			numHalfedges += polyhedron->facets[i].numVertices;
+		for (int i = 0; i < polyhedron.numFacets; ++i)
+			numHalfedges += polyhedron.facets[i].numVertices;
 		ASSERT(numHalfedges > 0);
 
 		/* TODO: Add assertion of Euler's rule. */
 
-		builder.begin_surface(polyhedron->numVertices, polyhedron->numFacets, numHalfedges);
+		builder.begin_surface(polyhedron.numVertices, polyhedron.numFacets, numHalfedges);
 		typedef typename HDS::Vertex Vertex;
 		typedef typename Vertex::Point Point;
 
-		for (int i = 0; i < polyhedron->numVertices; ++i)
+		for (int i = 0; i < polyhedron.numVertices; ++i)
 		{
-			Vector3d vertice = polyhedron->vertices[i];
+			Vector3d vertice = polyhedron.vertices[i];
 			builder.add_vertex(Point(vertice.x, vertice.y, vertice.z));
 		}
 
-		for (int i = 0; i < polyhedron->numFacets; ++i)
+		for (int i = 0; i < polyhedron.numFacets; ++i)
 		{
-			Facet *facet = &polyhedron->facets[i];
-			DEBUG_PRINT("Constructing facet #%d, number = %d", i, facet->numVertices);
-			if (facet->numVertices <= 0)
-				continue;
+			const Facet &facet = polyhedron.facets.at(i);
+			DEBUG_PRINT("Constructing facet #%d, number = %d", i, facet.numVertices);
 			builder.begin_facet();
-			for (int j = 0; j < facet->numVertices; ++j)
+			ASSERT(size_t(facet.numVertices) <= facet.indVertices.size());
+			for (int j = 0; j < facet.numVertices; ++j)
 			{
-				int ind = facet->indVertices[j];
+				int ind = facet.indVertices[j];
 				ASSERT(ind >= 0);
-				ASSERT(ind < polyhedron->numVertices);
+				ASSERT(ind < polyhedron.numVertices);
 				builder.add_vertex_to_facet(ind);
 			}
 			builder.end_facet();
@@ -123,24 +128,23 @@ public:
 	}
 };
 
-template <> Polyhedron_3::BasePolyhedron_3(Polyhedron p)
+template <> Polyhedron_3::BasePolyhedron_3(const Polyhedron &p)
 {
 	DEBUG_START;
 
-	Polyhedron *copy = new Polyhedron(p);
-	BuilderFromPCLPolyhedron<HalfedgeDS> builder(copy);
+	BuilderFromPCLPolyhedron<HalfedgeDS> builder(p);
 	this->delegate(builder);
 
+	ASSERT(size_of_vertices() > 0);
+	ASSERT(size_of_facets() > 0);
+	ASSERT(size_of_vertices() == (unsigned)p.numVertices);
+	ASSERT(size_of_facets() == (unsigned)p.numFacets);
 	/*
 	 * assign a plane equation to each polyhedron facet using functor
 	 * Plane_from_facet
 	 */
 	std::transform(facets_begin(), facets_end(), planes_begin(), Plane_from_facet());
 
-	ASSERT(size_of_vertices() == (unsigned)p.numVertices);
-	ASSERT(size_of_facets() == (unsigned)p.numFacets);
-	ASSERT(size_of_vertices() > 0);
-	ASSERT(size_of_facets() > 0);
 	DEBUG_END;
 }
 

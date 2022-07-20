@@ -59,8 +59,9 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+	ASSERT(!p->vertices.empty());
+
 	Polyhedron_3 p_3(*p);
-	std::cout << p_3;
 	p_3.initialize_indices();
 	Polyhedron_3 dualP = Polyhedron_3::dual(p_3);
 

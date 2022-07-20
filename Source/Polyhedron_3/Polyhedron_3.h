@@ -80,7 +80,7 @@ public:
 	 *
 	 * @param p	The PCL polyhedron.
 	 */
-	BasePolyhedron_3(Polyhedron p);
+	BasePolyhedron_3(const Polyhedron &p);
 
 	/**
 	 * Constructs CGAL polyhedron as an intersection of halfspaces.
